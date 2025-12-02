@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPERADMIN
+}
+
+enum TournamentFormat {
+  SOLO
+  TEAM
+}
+
+enum FieldType {
+  TEXT
+  NUMBER
+  SELECT
+  CHECKBOX
+  DISCORD_ID
+  RIOT_ID
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Tournament {
+  id                String            @id @default(uuid())
+  title             String
+  slug              String            @unique
+  description       String // Text or RichText
+  startDate         DateTime
+  endDate           DateTime
+  registrationOpen  DateTime
+  registrationClose DateTime
+  maxParticipants   Int? // Optional - can apply to teams or players depending on format
+  format            TournamentFormat
+  teamSize          Int               @default(1)
+  challongeId       String? // Optional - for embedding brackets
+  streamUrl         String? // Optional
+  isArchived        Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  fields            TournamentField[]
+  registrations     Registration[]
+}
+
+model TournamentField {
+  id           String       @id @default(uuid())
+  label        String // e.g., "Rank", "Ubisoft ID"
+  type         FieldType
+  required     Boolean      @default(true)
+  order        Int          @default(0)
+  tournamentId String
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  playerData   PlayerData[]
+}
+
+model Registration {
+  id           String     @id @default(uuid())
+  teamName     String? // Optional - used if format is TEAM
+  contactEmail String
+  status       String     @default("PENDING") // e.g., PENDING, APPROVED, REJECTED
+  createdAt    DateTime   @default(now())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  players      Player[]
+}
+
+model Player {
+  id             String       @id @default(uuid())
+  nickname       String
+  isCaptain      Boolean      @default(false)
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id])
+  data           PlayerData[]
+}
+
+model PlayerData {
+  id                String          @id @default(uuid())
+  value             String
+  playerId          String
+  player            Player          @relation(fields: [playerId], references: [id])
+  tournamentFieldId String
+  tournamentField   TournamentField @relation(fields: [tournamentFieldId], references: [id])
+}
