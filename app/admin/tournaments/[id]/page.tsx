@@ -1,5 +1,3 @@
-import { CsvExportButton } from '@/components/admin/csv-export-button'
-
 /**
  * File: app/admin/tournaments/[id]/page.tsx
  * Description: Tournament manager page for viewing details, managing registrations, and updating settings.
@@ -10,6 +8,7 @@ import { CsvExportButton } from '@/components/admin/csv-export-button'
 
 import { Eye, Trash2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { CsvExportButton } from '@/components/admin/csv-export-button'
 import { Button } from '@/components/ui/button'
 import {
 	Card,

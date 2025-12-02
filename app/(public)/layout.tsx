@@ -1,4 +1,3 @@
-import { Footer } from '@/components/public/footer'
 /**
  * File: app/(public)/layout.tsx
  * Description: Layout for public-facing pages (navbar, footer).
@@ -7,18 +6,22 @@ import { Footer } from '@/components/public/footer'
  * License: MIT
  */
 
+import { Footer } from '@/components/public/footer'
 import { Navbar } from '@/components/public/navbar'
+import { getSiteSettings } from '@/lib/data/settings'
 
-export default function PublicLayout({
+export default async function PublicLayout({
 	children,
 }: {
 	children: React.ReactNode
 }) {
+	const settings = await getSiteSettings()
+
 	return (
 		<div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-50">
-			<Navbar />
+			<Navbar settings={settings} />
 			<main className="flex-1">{children}</main>
-			<Footer />
+			<Footer settings={settings} />
 		</div>
 	)
 }

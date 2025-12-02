@@ -22,6 +22,26 @@ async function getTournament(slug: string) {
 	})
 }
 
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ slug: string }>
+}) {
+	const { slug } = await params
+	const tournament = await getTournament(slug)
+
+	if (!tournament) {
+		return {
+			title: 'Tournament Not Found',
+		}
+	}
+
+	return {
+		title: `Join ${tournament.title} | Belouga Tournament`,
+		description: tournament.description,
+	}
+}
+
 export default async function TournamentPage({
 	params,
 }: {

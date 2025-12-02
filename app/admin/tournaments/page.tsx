@@ -1,14 +1,3 @@
-import { Button } from '@/components/ui/button'
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
-import { deleteTournament } from '@/lib/actions/tournaments'
-
 /**
  * File: app/admin/tournaments/page.tsx
  * Description: List of all tournaments with management actions.
@@ -19,6 +8,16 @@ import { deleteTournament } from '@/lib/actions/tournaments'
 
 import { Edit, Eye, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table'
+import { deleteTournament } from '@/lib/actions/tournaments'
 import { prisma } from '@/lib/prisma'
 
 async function getTournaments() {

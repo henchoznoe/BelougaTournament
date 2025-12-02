@@ -96,3 +96,13 @@ model PlayerData {
   tournamentFieldId String
   tournamentField   TournamentField @relation(fields: [tournamentFieldId], references: [id])
 }
+
+model SiteSettings {
+  id            Int     @id @default(1)
+  siteName      String  @default("Belouga Tournament")
+  heroTitle     String  @default("Next Tournament")
+  logoUrl       String?
+  socialDiscord String?
+  socialTwitch  String?
+  socialTwitter String?
+}

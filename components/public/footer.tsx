@@ -6,13 +6,19 @@
  * License: MIT
  */
 
-export function Footer() {
+interface FooterProps {
+  settings: {
+    siteName: string;
+  };
+}
+
+export function Footer({ settings }: FooterProps) {
   return (
     <footer className="border-t border-zinc-800 bg-zinc-950 py-8 text-zinc-400">
       <div className="container mx-auto px-4 text-center text-sm">
-        <p>&copy; {new Date().getFullYear()} Belouga Tournament. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} {settings.siteName}. All rights reserved.</p>
         <p className="mt-2">
-          Powered by <span className="text-white">Belouga</span>
+          Powered by <span className="text-white">{settings.siteName}</span>
         </p>
       </div>
     </footer>

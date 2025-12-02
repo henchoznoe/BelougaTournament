@@ -1,6 +1,3 @@
-import { Calendar, Trophy, Users } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
 /**
  * File: app/(public)/page.tsx
  * Description: Landing page with hero section and featured tournaments.
@@ -9,6 +6,9 @@ import Link from 'next/link'
  * License: MIT
  */
 
+import { Calendar, Trophy, Users } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
 	Card,
@@ -45,13 +45,13 @@ export default async function LandingPage() {
 						priority
 						src="/assets/Complet_Wall.png"
 					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-zinc-950/30" />
+					<div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-zinc-950/30" />
 				</div>
 
 				<div className="relative z-10 max-w-4xl space-y-8 animate-in fade-in zoom-in duration-1000">
 					<h1 className="text-5xl font-black tracking-tighter text-white sm:text-7xl lg:text-8xl drop-shadow-2xl">
 						BELOUGA{' '}
-						<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
+						<span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600">
 							TOURNAMENT
 						</span>
 					</h1>
