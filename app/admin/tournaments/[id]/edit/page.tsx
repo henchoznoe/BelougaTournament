@@ -6,10 +6,10 @@
  * License: MIT
  */
 
-import { notFound } from 'next/navigation'
 import { TournamentForm } from '@/components/admin/tournament-form'
 import { updateTournament } from '@/lib/actions/tournaments'
 import { prisma } from '@/lib/prisma'
+import { notFound } from 'next/navigation'
 
 async function getTournament(id: string) {
 	return await prisma.tournament.findUnique({
@@ -40,6 +40,7 @@ export default async function EditTournamentPage({
 		maxParticipants: tournament.maxParticipants || undefined,
 		streamUrl: tournament.streamUrl || undefined,
 		fields: tournament.fields.map(f => ({
+			id: f.id,
 			label: f.label,
 			type: f.type,
 			required: f.required,
@@ -55,9 +56,7 @@ export default async function EditTournamentPage({
 			</div>
 			<TournamentForm
 				initialData={initialData}
-				onSubmit={async values => {
-					await updateAction(values)
-				}}
+				onSubmit={updateAction}
 				submitLabel="Update Tournament"
 			/>
 		</div>

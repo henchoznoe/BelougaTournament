@@ -38,6 +38,7 @@ const formSchema = z.object({
   streamUrl: z.string().optional(),
   fields: z.array(
     z.object({
+      id: z.string().optional(),
       label: z.string().min(1, "Label is required"),
       type: z.enum(["TEXT", "NUMBER", "SELECT", "CHECKBOX", "DISCORD_ID", "RIOT_ID"]),
       required: z.boolean().default(true),
@@ -45,13 +46,17 @@ const formSchema = z.object({
   ),
 });
 
+import { useState } from "react";
+// ... imports
+
 type TournamentFormProps = {
   initialData?: z.infer<typeof formSchema>;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: z.infer<typeof formSchema>) => Promise<any>;
   submitLabel?: string;
 };
 
 export function TournamentForm({ initialData, onSubmit, submitLabel = "Create Tournament" }: TournamentFormProps) {
+  const [serverError, setServerError] = useState<string | null>(null);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -69,9 +74,26 @@ export function TournamentForm({ initialData, onSubmit, submitLabel = "Create To
     name: "fields",
   });
 
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    setServerError(null);
+    try {
+      const result = await onSubmit(values);
+      if (result?.message) {
+        setServerError(result.message);
+      }
+    } catch (error) {
+      setServerError("An unexpected error occurred.");
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        {serverError && (
+          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+            {serverError}
+          </div>
+        )}
         <Card className="border-zinc-800 bg-zinc-950">
           <CardHeader>
             <CardTitle>General Information</CardTitle>

@@ -8,16 +8,17 @@
 
 'use server'
 
+import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
 
 const tournamentSchema = z.object({
 	description: z.string().min(10, 'Description must be at least 10 characters'),
 	endDate: z.date(),
 	fields: z.array(
 		z.object({
+			id: z.string().optional(),
 			label: z.string().min(1, 'Label is required'),
 			required: z.boolean().default(true),
 			type: z.enum([
@@ -143,57 +144,85 @@ export async function updateTournament(
 
 	try {
 		await prisma.$transaction(async tx => {
-			// Update basic info
+			// 1. Fetch existing fields to check for deletions and data integrity
+			const existingFields = await tx.tournamentField.findMany({
+				where: { tournamentId: id },
+				include: {
+					_count: {
+						select: { playerData: true },
+					},
+				},
+			})
+
+			const inputFieldIds = new Set(
+				fields.filter(f => f.id).map(f => f.id as string),
+			)
+
+			// 2. Identify fields to delete
+			const fieldsToDelete = existingFields.filter(
+				f => !inputFieldIds.has(f.id),
+			)
+
+			// 3. Check if any field to be deleted has associated data
+			for (const field of fieldsToDelete) {
+				if (field._count.playerData > 0) {
+					throw new Error(
+						`Cannot remove field "${field.label}" as it contains user data.`,
+					)
+				}
+			}
+
+			// 4. Update Tournament Basic Info
 			await tx.tournament.update({
 				where: { id },
 				data: tournamentData,
 			})
 
-			// Handle dynamic fields: Delete all and recreate (simplest for now)
-			// Note: This will lose existing player answers if we are not careful.
-			// BUT, the requirements said "deleteMany existing fields... createMany new fields".
-			// This implies we accept data loss on answers OR we assume structure changes invalidate answers.
-			// For a robust system, we should diff fields, but for this MVP/Task, we follow the "simplest strategy".
-			// However, deleting fields will cascade delete PlayerData if we have onDelete: Cascade in schema?
-			// Let's check schema. If not cascade, this will fail if data exists.
-			// Schema doesn't specify onDelete behavior for PlayerData -> TournamentField relation.
-			// Default is usually restrict.
-			// So we must delete PlayerData first or update schema.
-			// Let's assume for now we just want to update the tournament definition.
-
-			// Better approach for MVP without breaking data:
-			// 1. Delete fields that are not in the new list (by ID? No, we don't have IDs in input)
-			// Since we are doing a full replace strategy as requested:
-
-			// We will delete all fields for this tournament.
-			// If there are existing registrations, this might fail or leave orphaned data depending on DB constraints.
-			// Let's try to delete fields.
-
-			// To be safe and simple as requested:
-			await tx.playerData.deleteMany({
-				where: {
-					tournamentField: {
-						tournamentId: id,
+			// 5. Delete safe fields
+			if (fieldsToDelete.length > 0) {
+				await tx.tournamentField.deleteMany({
+					where: {
+						id: { in: fieldsToDelete.map(f => f.id) },
 					},
-				},
-			})
-
-			await tx.tournamentField.deleteMany({
-				where: { tournamentId: id },
-			})
-
-			if (fields.length > 0) {
-				await tx.tournamentField.createMany({
-					data: fields.map((field, index) => ({
-						...field,
-						tournamentId: id,
-						order: index,
-					})),
 				})
+			}
+
+			// 6. Upsert fields (Update existing, Create new)
+			// We iterate to maintain the order from the form
+			for (let i = 0; i < fields.length; i++) {
+				const field = fields[i]
+
+				if (field.id) {
+					// Update existing field
+					await tx.tournamentField.update({
+						where: { id: field.id },
+						data: {
+							label: field.label,
+							required: field.required,
+							type: field.type,
+							order: i,
+						},
+					})
+				} else {
+					// Create new field
+					await tx.tournamentField.create({
+						data: {
+							label: field.label,
+							required: field.required,
+							type: field.type,
+							order: i,
+							tournamentId: id,
+						},
+					})
+				}
 			}
 		})
 	} catch (error) {
 		console.error('Update Error:', error)
+		// Return specific error message if it was a validation error we threw
+		if (error instanceof Error && error.message.includes('Cannot remove field')) {
+			return { message: error.message }
+		}
 		return { message: 'Failed to update tournament.' }
 	}
 
