@@ -6,7 +6,8 @@
  * License: MIT
  */
 
-import { Eye, Trash2 } from 'lucide-react'
+import { Edit, Eye, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CsvExportButton } from '@/components/admin/csv-export-button'
 import { Button } from '@/components/ui/button'
@@ -87,6 +88,12 @@ export default async function TournamentManagerPage({
 						Manage tournament details and registrations
 					</p>
 				</div>
+				<Button asChild>
+					<Link href={`/admin/tournaments/${tournament.id}/edit`}>
+						<Edit className="mr-2 h-4 w-4" />
+						Edit Tournament
+					</Link>
+				</Button>
 			</div>
 
 			<Tabs defaultValue="overview" className="space-y-4">

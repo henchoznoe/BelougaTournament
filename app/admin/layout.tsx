@@ -6,6 +6,7 @@
  * License: MIT
  */
 
+import { Settings } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -55,6 +56,16 @@ export default async function AdminLayout({
 						variant="ghost"
 					>
 						<Link href="/admin/users">Users</Link>
+					</Button>
+					<Button
+						asChild
+						className="justify-start text-zinc-400 hover:text-white"
+						variant="ghost"
+					>
+						<Link href="/admin/settings">
+							<Settings className="mr-2 h-4 w-4" />
+							Settings
+						</Link>
 					</Button>
 					<div className="mt-auto pt-4 border-t border-zinc-800">
 						<form action={logout}>
