@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/lib/actions/auth'
-import { getSession } from '@/lib/auth'
+import { getSession, UserRole } from '@/lib/auth'
 
 export default async function AdminLayout({
 	children,
@@ -22,7 +22,8 @@ export default async function AdminLayout({
 	if (
 		!session ||
 		!session.user ||
-		(session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN')
+		(session.user.role !== UserRole.ADMIN &&
+			session.user.role !== UserRole.SUPERADMIN)
 	) {
 		redirect('/login')
 	}

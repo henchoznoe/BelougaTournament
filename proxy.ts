@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import { decrypt } from "@/lib/auth";
+import { UserRole, decrypt } from "@/lib/auth-core";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
 
     try {
       const payload = await decrypt(session);
-      if (!payload || (payload.user.role !== "ADMIN" && payload.user.role !== "SUPERADMIN")) {
+      if (!payload || (payload.user.role !== UserRole.ADMIN && payload.user.role !== UserRole.SUPERADMIN)) {
          return NextResponse.redirect(new URL("/login", request.url));
       }
     } catch (error) {

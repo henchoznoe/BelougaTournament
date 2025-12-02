@@ -1,48 +1,45 @@
 /**
  * File: lib/auth.ts
- * Description: JWT encryption and decryption helpers for session management.
+ * Description: Server-side session management using cookies.
  * Author: Noé Henchoz
  * Date: 2025-12-02
  * License: MIT
  */
 
-import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
+import { decrypt, UserRole } from '@/lib/auth-core'
+import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 
-const secretKey = process.env.JWT_SECRET_KEY
-if (!secretKey) {
-	throw new Error('FATAL: JWT_SECRET_KEY is not defined')
-}
-const key = new TextEncoder().encode(secretKey)
-
-export interface SessionPayload extends JWTPayload {
-	user: {
-		id: string
-		email: string
-		role: string
-	}
-}
-
-export async function encrypt(payload: SessionPayload) {
-	return await new SignJWT(payload)
-		.setProtectedHeader({ alg: 'HS256' })
-		.setIssuedAt()
-		.setExpirationTime('24h')
-		.sign(key)
-}
-
-export async function decrypt(input: string): Promise<SessionPayload> {
-	const { payload } = await jwtVerify(input, key, {
-		algorithms: ['HS256'],
-	})
-	return payload as SessionPayload
-}
+export * from '@/lib/auth-core'
 
 export async function getSession() {
 	const session = (await cookies()).get('session')?.value
 	if (!session) return null
 	try {
-		return await decrypt(session)
+		const payload = await decrypt(session)
+
+		// Verify user against database for instant revocation
+		const user = await prisma.user.findUnique({
+			where: { id: payload.user.id },
+			select: { id: true, email: true, role: true },
+		})
+
+		if (!user) return null
+
+		// Ensure user still has admin privileges
+		if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPERADMIN) {
+			return null
+		}
+
+		// Return session with fresh user data
+		return {
+			...payload,
+			user: {
+				id: user.id,
+				email: user.email,
+				role: user.role as UserRole,
+			},
+		}
 	} catch (_error) {
 		return null
 	}

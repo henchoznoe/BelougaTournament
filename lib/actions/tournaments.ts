@@ -8,9 +8,11 @@
 
 'use server'
 
+import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { getSession, UserRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 const tournamentSchema = z.object({
@@ -42,14 +44,34 @@ const tournamentSchema = z.object({
 	title: z.string().min(3, 'Title must be at least 3 characters'),
 })
 
-export type CreateTournamentState = {
+export type ActionState = {
 	errors?: {
 		[key: string]: string[]
 	}
 	message?: string
 }
 
-export async function createTournament(data: z.infer<typeof tournamentSchema>) {
+async function checkAuth() {
+	const session = await getSession()
+	if (
+		!session ||
+		!session.user ||
+		(session.user.role !== UserRole.ADMIN &&
+			session.user.role !== UserRole.SUPERADMIN)
+	) {
+		return { success: false, message: 'Unauthorized: Admin access required.' }
+	}
+	return { success: true }
+}
+
+export async function createTournament(
+	data: z.infer<typeof tournamentSchema>,
+): Promise<ActionState> {
+	const auth = await checkAuth()
+	if (!auth.success) {
+		return { message: auth.message }
+	}
+
 	const validatedFields = tournamentSchema.safeParse(data)
 
 	if (!validatedFields.success) {
@@ -78,13 +100,9 @@ export async function createTournament(data: z.infer<typeof tournamentSchema>) {
 	} catch (error) {
 		console.error('Database Error:', error)
 		if (
-			error &&
-			typeof error === 'object' &&
-			'code' in error &&
+			error instanceof Prisma.PrismaClientKnownRequestError &&
 			error.code === 'P2002' &&
-			'meta' in error &&
-			// biome-ignore lint/suspicious/noExplicitAny: Prisma error typing
-			(error as any).meta?.target?.includes('slug')
+			(error.meta?.target as string[])?.includes('slug')
 		) {
 			return {
 				message:
@@ -100,14 +118,19 @@ export async function createTournament(data: z.infer<typeof tournamentSchema>) {
 	redirect('/admin/tournaments')
 }
 
-export async function deleteTournament(id: string) {
+export async function deleteTournament(id: string): Promise<void> {
+	const auth = await checkAuth()
+	if (!auth.success) {
+		throw new Error(auth.message)
+	}
+
 	try {
 		await prisma.tournament.delete({
 			where: { id },
 		})
 	} catch (error) {
 		console.error('Delete Error:', error)
-		// In a real app, we might want to return an error state
+		throw new Error('Failed to delete tournament.')
 	}
 
 	revalidatePath('/admin/tournaments')
@@ -116,7 +139,12 @@ export async function deleteTournament(id: string) {
 export async function updateTournament(
 	id: string,
 	data: z.infer<typeof tournamentSchema>,
-) {
+): Promise<ActionState> {
+	const auth = await checkAuth()
+	if (!auth.success) {
+		return { message: auth.message }
+	}
+
 	const validatedFields = tournamentSchema.safeParse(data)
 
 	if (!validatedFields.success) {
@@ -179,6 +207,16 @@ export async function updateTournament(
 				const field = fields[i]
 
 				if (field.id) {
+					// Security Check: Ensure field belongs to this tournament
+					const belongsToTournament = existingFields.some(
+						f => f.id === field.id,
+					)
+					if (!belongsToTournament) {
+						throw new Error(
+							`Security Error: Field "${field.id}" does not belong to this tournament.`,
+						)
+					}
+
 					// Update existing field
 					await tx.tournamentField.update({
 						where: { id: field.id },
@@ -210,6 +248,9 @@ export async function updateTournament(
 			error instanceof Error &&
 			error.message.includes('Cannot remove field')
 		) {
+			return { message: error.message }
+		}
+		if (error instanceof Error && error.message.includes('Security Error')) {
 			return { message: error.message }
 		}
 		return { message: 'Failed to update tournament.' }
