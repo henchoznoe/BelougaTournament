@@ -6,10 +6,10 @@
  * License: MIT
  */
 
+import { notFound } from 'next/navigation'
 import { TournamentForm } from '@/components/admin/tournament-form'
 import { updateTournament } from '@/lib/actions/tournaments'
 import { prisma } from '@/lib/prisma'
-import { notFound } from 'next/navigation'
 
 async function getTournament(id: string) {
 	return await prisma.tournament.findUnique({

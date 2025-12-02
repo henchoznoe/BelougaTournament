@@ -8,11 +8,11 @@
 
 'use client'
 
+import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSiteSettings } from '@/lib/actions/settings'
-import { useActionState } from 'react'
 
 interface SettingsFormProps {
 	initialSettings: {
@@ -69,7 +69,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 				<Label htmlFor="logoFile">Logo</Label>
 				<div className="flex items-center gap-4">
 					{initialSettings.logoUrl && (
-						// eslint-disable-next-line @next/next/no-img-element
+						// biome-ignore lint/performance/noImgElement: dynamic logo size
 						<img
 							src={initialSettings.logoUrl}
 							alt="Current Logo"

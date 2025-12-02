@@ -7,14 +7,10 @@
  */
 
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/lib/actions/auth'
-
-// Placeholder for session check
-async function getSession() {
-	// TODO: Implement actual session check
-	return { user: { role: 'ADMIN' } }
-}
+import { getSession } from '@/lib/auth'
 
 export default async function AdminLayout({
 	children,
@@ -23,8 +19,12 @@ export default async function AdminLayout({
 }) {
 	const session = await getSession()
 
-	if (!session || session.user.role !== 'ADMIN') {
-		// redirect("/login"); // Uncomment when login is ready
+	if (
+		!session ||
+		!session.user ||
+		(session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN')
+	) {
+		redirect('/login')
 	}
 
 	return (

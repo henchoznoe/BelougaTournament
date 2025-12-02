@@ -9,7 +9,10 @@
 import { jwtVerify, SignJWT } from 'jose'
 import { cookies } from 'next/headers'
 
-const secretKey = process.env.JWT_SECRET_KEY || 'secret-key-change-me'
+const secretKey = process.env.JWT_SECRET_KEY
+if (!secretKey) {
+	throw new Error('FATAL: JWT_SECRET_KEY is not defined')
+}
 const key = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: any) {
@@ -32,7 +35,7 @@ export async function getSession() {
 	if (!session) return null
 	try {
 		return await decrypt(session)
-	} catch (error) {
+	} catch (_error) {
 		return null
 	}
 }

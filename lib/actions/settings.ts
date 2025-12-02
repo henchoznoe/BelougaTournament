@@ -8,10 +8,10 @@
 
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
 
 const settingsSchema = z.object({
 	siteName: z.string().min(1, 'Site name is required'),

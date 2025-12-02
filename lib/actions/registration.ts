@@ -68,18 +68,7 @@ export async function registerForTournament(
 		return { message: 'Registration is closed.' }
 	}
 
-	// Check max participants (simplified check, ideally needs locking or atomic increment)
-	// For TEAM format, maxParticipants usually means max Teams. For SOLO, max Players.
-	const currentRegistrations = await prisma.registration.count({
-		where: { tournamentId },
-	})
-
-	if (
-		tournament.maxParticipants &&
-		currentRegistrations >= tournament.maxParticipants
-	) {
-		return { message: 'Tournament is full.' }
-	}
+	// Max participants check moved to transaction for atomicity
 
 	// Validate Dynamic Fields for each player
 	for (const player of players) {
@@ -98,6 +87,17 @@ export async function registerForTournament(
 
 	try {
 		await prisma.$transaction(async tx => {
+			// Check max participants inside transaction to prevent race conditions
+			if (tournament.maxParticipants) {
+				const currentRegistrations = await tx.registration.count({
+					where: { tournamentId },
+				})
+
+				if (currentRegistrations >= tournament.maxParticipants) {
+					throw new Error('Tournament is full.')
+				}
+			}
+
 			// Create Registration
 			const registration = await tx.registration.create({
 				data: {
@@ -136,6 +136,9 @@ export async function registerForTournament(
 		})
 	} catch (error) {
 		console.error('Registration Error:', error)
+		if (error instanceof Error && error.message === 'Tournament is full.') {
+			return { message: 'Tournament is full.' }
+		}
 		return { message: 'Failed to process registration. Please try again.' }
 	}
 
