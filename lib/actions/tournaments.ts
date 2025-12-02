@@ -83,6 +83,7 @@ export async function createTournament(data: z.infer<typeof tournamentSchema>) {
 			'code' in error &&
 			error.code === 'P2002' &&
 			'meta' in error &&
+			// biome-ignore lint/suspicious/noExplicitAny: Prisma error typing
 			(error as any).meta?.target?.includes('slug')
 		) {
 			return {

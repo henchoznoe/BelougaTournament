@@ -14,7 +14,7 @@ import { redirect } from 'next/navigation'
 import { encrypt } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function login(prevState: any, formData: FormData) {
+export async function login(_prevState: unknown, formData: FormData) {
 	const email = formData.get('email') as string
 	const password = formData.get('password') as string
 
