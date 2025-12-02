@@ -11,12 +11,12 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
 } from '@/components/ui/card'
 import { prisma } from '@/lib/prisma'
 
@@ -158,6 +158,7 @@ export default async function LandingPage() {
 				<h2 className="mb-8 text-3xl font-bold text-white">Live Stream</h2>
 				<div className="aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
 					<iframe
+						title="Twitch Stream"
 						allowFullScreen
 						className="h-full w-full"
 						height="100%"

@@ -6,14 +6,14 @@
  * License: MIT
  */
 
-const { PrismaClient } = require('@prisma/client');
-const { hash } = require('bcryptjs');
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const email = 'admin@belouga.com';
-  const password = 'admin'; // Change this in production!
+  const password = 'admin';
   const hashedPassword = await hash(password, 12);
 
   const user = await prisma.user.upsert({

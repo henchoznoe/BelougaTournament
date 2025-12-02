@@ -1,4 +1,4 @@
-import { Footer } from '@/components/public/footer';
+import { Footer } from '@/components/public/footer'
 /**
  * File: app/(public)/layout.tsx
  * Description: Layout for public-facing pages (navbar, footer).
@@ -7,7 +7,7 @@ import { Footer } from '@/components/public/footer';
  * License: MIT
  */
 
-import { Navbar } from "@/components/public/navbar";
+import { Navbar } from '@/components/public/navbar'
 
 export default function PublicLayout({
 	children,

@@ -6,56 +6,60 @@
  * License: MIT
  */
 
-import { TournamentForm } from "@/components/admin/tournament-form";
-import { updateTournament } from "@/lib/actions/tournaments";
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation'
+import { TournamentForm } from '@/components/admin/tournament-form'
+import { updateTournament } from '@/lib/actions/tournaments'
+import { prisma } from '@/lib/prisma'
 
 async function getTournament(id: string) {
-  return await prisma.tournament.findUnique({
-    where: { id },
-    include: {
-      fields: {
-        orderBy: { order: "asc" },
-      },
-    },
-  });
+	return await prisma.tournament.findUnique({
+		where: { id },
+		include: {
+			fields: {
+				orderBy: { order: 'asc' },
+			},
+		},
+	})
 }
 
-export default async function EditTournamentPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const tournament = await getTournament(id);
+export default async function EditTournamentPage({
+	params,
+}: {
+	params: Promise<{ id: string }>
+}) {
+	const { id } = await params
+	const tournament = await getTournament(id)
 
-  if (!tournament) {
-    notFound();
-  }
+	if (!tournament) {
+		notFound()
+	}
 
-  // Transform data to match form schema
-  const initialData = {
-    ...tournament,
-    maxParticipants: tournament.maxParticipants || undefined,
-    streamUrl: tournament.streamUrl || undefined,
-    fields: tournament.fields.map(f => ({
-      label: f.label,
-      type: f.type,
-      required: f.required,
-    })),
-  };
+	// Transform data to match form schema
+	const initialData = {
+		...tournament,
+		maxParticipants: tournament.maxParticipants || undefined,
+		streamUrl: tournament.streamUrl || undefined,
+		fields: tournament.fields.map(f => ({
+			label: f.label,
+			type: f.type,
+			required: f.required,
+		})),
+	}
 
-  const updateAction = updateTournament.bind(null, tournament.id);
+	const updateAction = updateTournament.bind(null, tournament.id)
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-3xl text-white">Edit Tournament</h1>
-      </div>
-      <TournamentForm 
-        initialData={initialData} 
-        onSubmit={async (values) => {
-          await updateAction(values);
-        }} 
-        submitLabel="Update Tournament" 
-      />
-    </div>
-  );
+	return (
+		<div className="mx-auto max-w-4xl space-y-8">
+			<div className="flex items-center justify-between">
+				<h1 className="font-bold text-3xl text-white">Edit Tournament</h1>
+			</div>
+			<TournamentForm
+				initialData={initialData}
+				onSubmit={async values => {
+					await updateAction(values)
+				}}
+				submitLabel="Update Tournament"
+			/>
+		</div>
+	)
 }

@@ -8,10 +8,10 @@
 
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
 
 const tournamentSchema = z.object({
 	description: z.string().min(10, 'Description must be at least 10 characters'),
@@ -109,93 +109,95 @@ export async function createTournamentDirect(
 		}
 	}
 
-
 	revalidatePath('/admin/tournaments')
 	redirect('/admin/tournaments')
 }
 
 export async function deleteTournament(id: string) {
-  try {
-    await prisma.tournament.delete({
-      where: { id },
-    });
-  } catch (error) {
-    console.error("Delete Error:", error);
-    // In a real app, we might want to return an error state
-  }
+	try {
+		await prisma.tournament.delete({
+			where: { id },
+		})
+	} catch (error) {
+		console.error('Delete Error:', error)
+		// In a real app, we might want to return an error state
+	}
 
-  revalidatePath("/admin/tournaments");
+	revalidatePath('/admin/tournaments')
 }
 
-export async function updateTournament(id: string, data: z.infer<typeof tournamentSchema>) {
-  const validatedFields = tournamentSchema.safeParse(data);
+export async function updateTournament(
+	id: string,
+	data: z.infer<typeof tournamentSchema>,
+) {
+	const validatedFields = tournamentSchema.safeParse(data)
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Validation Error",
-    };
-  }
+	if (!validatedFields.success) {
+		return {
+			errors: validatedFields.error.flatten().fieldErrors,
+			message: 'Validation Error',
+		}
+	}
 
-  const { fields, ...tournamentData } = validatedFields.data;
+	const { fields, ...tournamentData } = validatedFields.data
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      // Update basic info
-      await tx.tournament.update({
-        where: { id },
-        data: tournamentData,
-      });
+	try {
+		await prisma.$transaction(async tx => {
+			// Update basic info
+			await tx.tournament.update({
+				where: { id },
+				data: tournamentData,
+			})
 
-      // Handle dynamic fields: Delete all and recreate (simplest for now)
-      // Note: This will lose existing player answers if we are not careful.
-      // BUT, the requirements said "deleteMany existing fields... createMany new fields".
-      // This implies we accept data loss on answers OR we assume structure changes invalidate answers.
-      // For a robust system, we should diff fields, but for this MVP/Task, we follow the "simplest strategy".
-      // However, deleting fields will cascade delete PlayerData if we have onDelete: Cascade in schema?
-      // Let's check schema. If not cascade, this will fail if data exists.
-      // Schema doesn't specify onDelete behavior for PlayerData -> TournamentField relation.
-      // Default is usually restrict.
-      // So we must delete PlayerData first or update schema.
-      // Let's assume for now we just want to update the tournament definition.
-      
-      // Better approach for MVP without breaking data:
-      // 1. Delete fields that are not in the new list (by ID? No, we don't have IDs in input)
-      // Since we are doing a full replace strategy as requested:
-      
-      // We will delete all fields for this tournament.
-      // If there are existing registrations, this might fail or leave orphaned data depending on DB constraints.
-      // Let's try to delete fields.
-      
-      // To be safe and simple as requested:
-      await tx.playerData.deleteMany({
-        where: {
-          tournamentField: {
-            tournamentId: id
-          }
-        }
-      });
+			// Handle dynamic fields: Delete all and recreate (simplest for now)
+			// Note: This will lose existing player answers if we are not careful.
+			// BUT, the requirements said "deleteMany existing fields... createMany new fields".
+			// This implies we accept data loss on answers OR we assume structure changes invalidate answers.
+			// For a robust system, we should diff fields, but for this MVP/Task, we follow the "simplest strategy".
+			// However, deleting fields will cascade delete PlayerData if we have onDelete: Cascade in schema?
+			// Let's check schema. If not cascade, this will fail if data exists.
+			// Schema doesn't specify onDelete behavior for PlayerData -> TournamentField relation.
+			// Default is usually restrict.
+			// So we must delete PlayerData first or update schema.
+			// Let's assume for now we just want to update the tournament definition.
 
-      await tx.tournamentField.deleteMany({
-        where: { tournamentId: id },
-      });
+			// Better approach for MVP without breaking data:
+			// 1. Delete fields that are not in the new list (by ID? No, we don't have IDs in input)
+			// Since we are doing a full replace strategy as requested:
 
-      if (fields.length > 0) {
-        await tx.tournamentField.createMany({
-          data: fields.map((field, index) => ({
-            ...field,
-            tournamentId: id,
-            order: index,
-          })),
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Update Error:", error);
-    return { message: "Failed to update tournament." };
-  }
+			// We will delete all fields for this tournament.
+			// If there are existing registrations, this might fail or leave orphaned data depending on DB constraints.
+			// Let's try to delete fields.
 
-  revalidatePath("/admin/tournaments");
-  revalidatePath(`/admin/tournaments/${id}`);
-  redirect("/admin/tournaments");
+			// To be safe and simple as requested:
+			await tx.playerData.deleteMany({
+				where: {
+					tournamentField: {
+						tournamentId: id,
+					},
+				},
+			})
+
+			await tx.tournamentField.deleteMany({
+				where: { tournamentId: id },
+			})
+
+			if (fields.length > 0) {
+				await tx.tournamentField.createMany({
+					data: fields.map((field, index) => ({
+						...field,
+						tournamentId: id,
+						order: index,
+					})),
+				})
+			}
+		})
+	} catch (error) {
+		console.error('Update Error:', error)
+		return { message: 'Failed to update tournament.' }
+	}
+
+	revalidatePath('/admin/tournaments')
+	revalidatePath(`/admin/tournaments/${id}`)
+	redirect('/admin/tournaments')
 }

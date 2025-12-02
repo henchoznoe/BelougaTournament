@@ -1,16 +1,16 @@
-import { decrypt } from "@/lib/auth";
-import type { NextRequest } from "next/server";
 /**
- * File: middleware.ts
+ * File: proxy.ts
  * Description: Middleware for protecting admin routes using JWT authentication.
  * Author: Noé Henchoz
  * Date: 2025-12-02
  * License: MIT
  */
 
+import { decrypt } from "@/lib/auth";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = request.cookies.get("session")?.value;
 
   if (request.nextUrl.pathname.startsWith("/admin")) {

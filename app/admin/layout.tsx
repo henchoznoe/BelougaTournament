@@ -6,9 +6,9 @@
  * License: MIT
  */
 
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/lib/actions/auth'
-import Link from 'next/link'
 
 // Placeholder for session check
 async function getSession() {

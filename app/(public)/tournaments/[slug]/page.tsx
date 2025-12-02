@@ -6,10 +6,10 @@
  * License: MIT
  */
 
-import { RegistrationForm } from "@/components/tournament/registration-form";
-import { prisma } from '@/lib/prisma';
-import { Calendar, Users } from 'lucide-react';
-import { notFound } from 'next/navigation';
+import { Calendar, Users } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { RegistrationForm } from '@/components/tournament/registration-form'
+import { prisma } from '@/lib/prisma'
 
 async function getTournament(slug: string) {
 	return await prisma.tournament.findUnique({
