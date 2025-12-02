@@ -6,8 +6,9 @@
  * License: MIT
  */
 
-import { Edit, Eye, Plus, Trash2 } from 'lucide-react'
+import { Edit, Eye, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { DeleteTournamentButton } from '@/components/admin/delete-tournament-button'
 import { Button } from '@/components/ui/button'
 import {
 	Table,
@@ -17,7 +18,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { deleteTournament } from '@/lib/actions/tournaments'
 import { prisma } from '@/lib/prisma'
 
 async function getTournaments() {
@@ -103,15 +103,7 @@ export default async function TournamentsPage() {
 													<Edit className="h-4 w-4" />
 												</Link>
 											</Button>
-											<form action={deleteTournament.bind(null, tournament.id)}>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-900/20"
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
-											</form>
+											<DeleteTournamentButton id={tournament.id} />
 										</div>
 									</TableCell>
 								</TableRow>

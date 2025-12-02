@@ -8,11 +8,11 @@
 
 'use server'
 
-import { encrypt, UserRole } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
 import { compare } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { encrypt, UserRole } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function login(_prevState: unknown, formData: FormData) {
 	const email = formData.get('email') as string
@@ -30,10 +30,7 @@ export async function login(_prevState: unknown, formData: FormData) {
 		return { message: 'Invalid credentials.' }
 	}
 
-	if (
-		user.role !== UserRole.ADMIN &&
-		user.role !== UserRole.SUPERADMIN
-	) {
+	if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPERADMIN) {
 		return { message: 'Unauthorized access.' }
 	}
 

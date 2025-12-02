@@ -24,27 +24,9 @@ import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
-  slug: z.string().min(3, "Slug must be at least 3 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  startDate: z.date(),
-  endDate: z.date(),
-  registrationOpen: z.date(),
-  registrationClose: z.date(),
-  format: z.enum(["SOLO", "TEAM"]),
-  teamSize: z.coerce.number().min(1),
-  maxParticipants: z.coerce.number().optional(),
-  streamUrl: z.string().optional(),
-  fields: z.array(
-    z.object({
-      id: z.string().optional(),
-      label: z.string().min(1, "Label is required"),
-      type: z.enum(["TEXT", "NUMBER", "SELECT", "CHECKBOX", "DISCORD_ID", "RIOT_ID"]),
-      required: z.boolean().default(true),
-    })
-  ),
-});
+import { tournamentSchema } from "@/lib/schemas/tournament";
+
+const formSchema = tournamentSchema;
 
 import { useState } from "react";
 // ... imports
