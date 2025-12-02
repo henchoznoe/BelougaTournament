@@ -8,9 +8,10 @@
 
 'use server'
 
+import { prisma } from '@/lib/prisma'
+import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
 
 const settingsSchema = z.object({
 	siteName: z.string().min(1, 'Site name is required'),
@@ -25,10 +26,25 @@ export async function updateSiteSettings(
 	_prevState: unknown,
 	formData: FormData,
 ) {
+	let logoUrl = formData.get('logoUrl') as string
+	const logoFile = formData.get('logoFile') as File
+
+	if (logoFile && logoFile.size > 0) {
+		try {
+			const blob = await put(logoFile.name, logoFile, {
+				access: 'public',
+			})
+			logoUrl = blob.url
+		} catch (error) {
+			console.error('Blob upload error:', error)
+			return { message: 'Failed to upload logo' }
+		}
+	}
+
 	const data = {
 		siteName: formData.get('siteName') as string,
 		heroTitle: formData.get('heroTitle') as string,
-		logoUrl: formData.get('logoUrl') as string,
+		logoUrl,
 		socialDiscord: formData.get('socialDiscord') as string,
 		socialTwitch: formData.get('socialTwitch') as string,
 		socialTwitter: formData.get('socialTwitter') as string,

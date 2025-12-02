@@ -8,11 +8,11 @@
 
 'use client'
 
-import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSiteSettings } from '@/lib/actions/settings'
+import { useActionState } from 'react'
 
 interface SettingsFormProps {
 	initialSettings: {
@@ -66,13 +66,26 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="logoUrl">Logo URL</Label>
-				<Input
-					id="logoUrl"
-					name="logoUrl"
-					defaultValue={initialSettings.logoUrl || ''}
-					placeholder="https://example.com/logo.png"
-				/>
+				<Label htmlFor="logoFile">Logo</Label>
+				<div className="flex items-center gap-4">
+					{initialSettings.logoUrl && (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							src={initialSettings.logoUrl}
+							alt="Current Logo"
+							className="h-10 w-auto rounded border border-zinc-200 bg-white p-1"
+						/>
+					)}
+					<Input id="logoFile" name="logoFile" type="file" accept="image/*" />
+					<input
+						type="hidden"
+						name="logoUrl"
+						value={initialSettings.logoUrl || ''}
+					/>
+				</div>
+				<p className="text-xs text-muted-foreground">
+					Upload a new logo to replace the current one.
+				</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
