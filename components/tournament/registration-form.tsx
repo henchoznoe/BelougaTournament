@@ -1,3 +1,11 @@
+/**
+ * File: components/tournament/registration-form.tsx
+ * Description: Form component for registering teams or players to a tournament.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 "use client";
 
 import { Button } from "@/components/ui/button";

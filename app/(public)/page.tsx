@@ -1,14 +1,22 @@
 import { Calendar, Trophy, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+/**
+ * File: app/(public)/page.tsx
+ * Description: Landing page with hero section and featured tournaments.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import { Button } from '@/components/ui/button'
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card'
 import { prisma } from '@/lib/prisma'
 

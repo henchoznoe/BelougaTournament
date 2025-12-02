@@ -1,3 +1,11 @@
+/**
+ * File: components/public/footer.tsx
+ * Description: Footer component for the public website.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 export function Footer() {
   return (
     <footer className="border-t border-zinc-800 bg-zinc-950 py-8 text-zinc-400">

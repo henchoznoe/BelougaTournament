@@ -1,3 +1,11 @@
+/**
+ * File: app/layout.tsx
+ * Description: Root layout for the application.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'

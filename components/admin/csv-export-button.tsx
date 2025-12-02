@@ -1,3 +1,11 @@
+/**
+ * File: components/admin/csv-export-button.tsx
+ * Description: Client component for exporting registration data to CSV.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 "use client";
 
 import { Button } from "@/components/ui/button";

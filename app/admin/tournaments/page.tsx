@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteTournament } from "@/lib/actions/tournaments";
+/**
+ * File: app/admin/tournaments/page.tsx
+ * Description: List of all tournaments with management actions.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import { prisma } from "@/lib/prisma";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";

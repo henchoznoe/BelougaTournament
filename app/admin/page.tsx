@@ -1,3 +1,11 @@
+/**
+ * File: app/admin/page.tsx
+ * Description: Admin dashboard page displaying summary statistics and recent registrations.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { Calendar, Trophy, Users } from "lucide-react";

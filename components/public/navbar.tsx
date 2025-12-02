@@ -1,5 +1,13 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+/**
+ * File: components/public/navbar.tsx
+ * Description: Navigation bar for the public website.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import Link from "next/link";
 
 export function Navbar() {

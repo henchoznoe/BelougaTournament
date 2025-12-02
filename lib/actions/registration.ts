@@ -1,3 +1,11 @@
+/**
+ * File: lib/actions/registration.ts
+ * Description: Server actions for handling tournament registrations.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 'use server'
 
 import { prisma } from '@/lib/prisma'

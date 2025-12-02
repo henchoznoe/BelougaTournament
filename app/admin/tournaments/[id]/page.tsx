@@ -1,4 +1,13 @@
 import { CsvExportButton } from "@/components/admin/csv-export-button";
+
+/**
+ * File: app/admin/tournaments/[id]/page.tsx
+ * Description: Tournament manager page for viewing details, managing registrations, and updating settings.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

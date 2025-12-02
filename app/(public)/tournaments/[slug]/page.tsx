@@ -1,7 +1,15 @@
-import { RegistrationForm } from '@/components/tournament/registration-form'
-import { prisma } from '@/lib/prisma'
-import { Calendar, Users } from 'lucide-react'
-import { notFound } from 'next/navigation'
+/**
+ * File: app/(public)/tournaments/[slug]/page.tsx
+ * Description: Public tournament detail page with registration and bracket view.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
+import { RegistrationForm } from "@/components/tournament/registration-form";
+import { prisma } from '@/lib/prisma';
+import { Calendar, Users } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 async function getTournament(slug: string) {
 	return await prisma.tournament.findUnique({

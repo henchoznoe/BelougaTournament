@@ -1,5 +1,14 @@
-import Link from 'next/link'
+/**
+ * File: app/admin/layout.tsx
+ * Description: Layout for the admin dashboard, including the sidebar navigation.
+ * Author: Noé Henchoz
+ * Date: 2025-12-02
+ * License: MIT
+ */
+
 import { Button } from '@/components/ui/button'
+import { logout } from '@/lib/actions/auth'
+import Link from 'next/link'
 
 // Placeholder for session check
 async function getSession() {
@@ -46,6 +55,16 @@ export default async function AdminLayout({
 					>
 						<Link href="/admin/users">Users</Link>
 					</Button>
+					<div className="mt-auto pt-4 border-t border-zinc-800">
+						<form action={logout}>
+							<Button
+								variant="ghost"
+								className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
+							>
+								Logout
+							</Button>
+						</form>
+					</div>
 				</nav>
 			</aside>
 			<main className="flex-1 bg-zinc-900 p-8">{children}</main>
