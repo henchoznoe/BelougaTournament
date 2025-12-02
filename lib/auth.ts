@@ -15,7 +15,15 @@ if (!secretKey) {
 }
 const key = new TextEncoder().encode(secretKey)
 
-export async function encrypt(payload: JWTPayload) {
+export interface SessionPayload extends JWTPayload {
+	user: {
+		id: string
+		email: string
+		role: string
+	}
+}
+
+export async function encrypt(payload: SessionPayload) {
 	return await new SignJWT(payload)
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
@@ -23,11 +31,11 @@ export async function encrypt(payload: JWTPayload) {
 		.sign(key)
 }
 
-export async function decrypt(input: string): Promise<JWTPayload> {
+export async function decrypt(input: string): Promise<SessionPayload> {
 	const { payload } = await jwtVerify(input, key, {
 		algorithms: ['HS256'],
 	})
-	return payload
+	return payload as SessionPayload
 }
 
 export async function getSession() {

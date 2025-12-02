@@ -9,7 +9,7 @@
 'use client'
 
 import { TournamentForm } from '@/components/admin/tournament-form'
-import { createTournamentDirect } from '@/lib/actions/tournaments'
+import { createTournament } from '@/lib/actions/tournaments'
 
 export default function CreateTournamentPage() {
 	return (
@@ -19,7 +19,7 @@ export default function CreateTournamentPage() {
 			</div>
 			<TournamentForm
 				onSubmit={async values => {
-					await createTournamentDirect(values)
+					await createTournament(values)
 				}}
 			/>
 		</div>
