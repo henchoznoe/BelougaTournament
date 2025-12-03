@@ -64,7 +64,10 @@ export function Navbar({ settings }: NavbarProps) {
 
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
@@ -139,7 +142,10 @@ export function Navbar({ settings }: NavbarProps) {
               </SheetHeader>
               <div className="flex flex-col py-6 px-2 gap-2">
                 {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
+                  const isActive =
+                    link.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(link.href);
                   return (
                     <Link
                       key={link.href}

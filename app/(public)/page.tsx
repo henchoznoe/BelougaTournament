@@ -89,9 +89,7 @@ export default async function LandingPage() {
                             size="lg"
                             variant="outline"
                         >
-                            <Link href="#tournaments">
-                                View All Tournaments
-                            </Link>
+                            <Link href="tournaments">View All Tournaments</Link>
                         </Button>
                     </div>
                 </div>

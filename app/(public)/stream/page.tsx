@@ -30,7 +30,9 @@ export default async function StreamPage() {
                     Stream Twitch
                 </h1>
                 <p className="mt-2 text-zinc-400">
-                    Regardez la compétition en direct sur Twitch, présenté sur l
+                    Regardez la compétition en direct sur Twitch, n'oubliez pas
+                    de vous abonner à la chaîne pour être informé des prochains
+                    tournois.
                 </p>
             </div>
 
