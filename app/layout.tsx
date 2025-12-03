@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Toaster } from '@/components/ui/sonner'
+import { cn } from '@/lib/utils'
 import './globals.css'
 
 const inter = Inter({
@@ -35,7 +36,11 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`${inter.variable} ${paladins.variable} antialiased font-sans`}
+                className={cn(
+                    inter.variable,
+                    paladins.variable,
+                    'antialiased font-sans',
+                )}
             >
                 {children}
                 <Toaster />

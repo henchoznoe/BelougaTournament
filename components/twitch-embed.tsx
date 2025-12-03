@@ -102,7 +102,7 @@ export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbed
       {!isStreamOnline && (
         <div className="flex flex-col items-center justify-center p-12 text-center h-[600px] w-full">
           <div className="mb-4 rounded-full bg-zinc-900 p-6 ring-1 ring-zinc-800">
-            <ScreenShareOff className="h-12 w-12 text-zinc-500" />
+            <ScreenShareOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="mb-2 text-xl font-semibold text-white">
             Le stream est actuellement offline

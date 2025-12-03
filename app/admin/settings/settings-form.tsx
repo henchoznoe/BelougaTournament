@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSiteSettings } from '@/lib/actions/settings'
 
+import { cn } from '@/lib/utils'
+
 interface SettingsFormProps {
     initialSettings: {
         siteName: string
@@ -126,7 +128,12 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
             {state?.message && (
                 <p
-                    className={`text-sm ${state.message.includes('success') ? 'text-green-500' : 'text-red-500'}`}
+                    className={cn(
+                        'text-sm',
+                        state.message.includes('success')
+                            ? 'text-green-500'
+                            : 'text-red-500',
+                    )}
                 >
                     {state.message}
                 </p>

@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   settings: {
@@ -21,8 +22,8 @@ export function Navbar({ settings }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/#tournaments", label: "Tournaments", icon: Trophy },
+    { href: "/", label: "Accueil", icon: Home },
+    { href: "/tournaments", label: "Tournois", icon: Trophy },
     { href: "/stream", label: "Stream", icon: Video },
     { href: "/contact", label: "Contact", icon: Mail },
   ];
@@ -35,7 +36,6 @@ export function Navbar({ settings }: NavbarProps) {
       className="sticky top-0 z-50 w-full border-b border-white/10 bg-zinc-950/80 backdrop-blur-md supports-backdrop-filter:bg-zinc-950/60"
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
-        {/* Logo & Title */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative hidden md:block">
             {settings.logoUrl ? (
@@ -62,7 +62,6 @@ export function Navbar({ settings }: NavbarProps) {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -70,31 +69,50 @@ export function Navbar({ settings }: NavbarProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-300 group ${
+                className={cn(
+                  "relative flex items-center gap-2 text-sm font-medium transition-colors duration-300 group",
                   isActive ? "text-blue-400" : "text-zinc-400 hover:text-white"
-                }`}
+                )}
               >
-                <link.icon className={`w-4 h-4 transition-transform duration-300 group-hover:-translate-y-0.5 ${isActive ? "text-blue-400" : "text-zinc-500 group-hover:text-blue-400"}`} />
+                <link.icon
+                  className={cn(
+                    "size-4 transition-transform duration-300 group-hover:-translate-y-0.5",
+                    isActive
+                      ? "text-blue-400"
+                      : "text-zinc-500 group-hover:text-blue-400"
+                  )}
+                />
                 {link.label}
-                <span className={`absolute -bottom-1 left-0 h-0.5 bg-blue-500 transition-all duration-300 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-blue-500 transition-all duration-300",
+                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                  )}
+                />
               </Link>
             );
           })}
         </nav>
 
-        {/* Mobile Menu Trigger */}
         <div className="md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white hover:bg-white/10">
-                <Menu className="h-6 w-6" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-zinc-400 hover:text-white hover:bg-white/10"
+              >
+                <Menu className="size-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] border-l border-white/10 bg-zinc-950/95 backdrop-blur-xl p-0">
+            <SheetContent
+              side="right"
+              className="w-[300px] border-l border-white/10 bg-zinc-950/95 backdrop-blur-xl p-0"
+            >
               <SheetHeader className="p-6 border-b border-white/10">
                 <div className="flex flex-col items-center gap-4">
-                   <div className="relative">
+                  <div className="relative">
                     {settings.logoUrl ? (
                       <Image
                         src={settings.logoUrl}
@@ -127,15 +145,25 @@ export function Navbar({ settings }: NavbarProps) {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-4 px-4 py-3 text-lg font-medium transition-all duration-300 rounded-lg group ${
+                      className={cn(
+                        "flex items-center gap-4 px-4 py-3 text-lg font-medium transition-all duration-300 rounded-lg group",
                         isActive
                           ? "bg-blue-500/10 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]"
                           : "text-zinc-400 hover:text-white hover:bg-white/5"
-                      }`}
+                      )}
                     >
-                      <link.icon className={`w-5 h-5 transition-colors ${isActive ? "text-blue-400" : "text-zinc-500 group-hover:text-blue-400"}`} />
+                      <link.icon
+                        className={cn(
+                          "size-5 transition-colors",
+                          isActive
+                            ? "text-blue-400"
+                            : "text-zinc-500 group-hover:text-blue-400"
+                        )}
+                      />
                       {link.label}
-                      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
+                      {isActive && (
+                        <div className="ml-auto size-1.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                      )}
                     </Link>
                   );
                 })}

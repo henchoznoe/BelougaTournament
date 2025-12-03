@@ -121,7 +121,7 @@ export default async function LandingPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4 text-sm text-zinc-300">
                                     <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-blue-500" />
+                                        <Calendar className="size-4 text-blue-500" />
                                         <span>
                                             {new Date(
                                                 tournament.startDate,
@@ -129,11 +129,11 @@ export default async function LandingPage() {
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Trophy className="h-4 w-4 text-yellow-500" />
+                                        <Trophy className="size-4 text-yellow-500" />
                                         <span>{tournament.format} Format</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Users className="h-4 w-4 text-green-500" />
+                                        <Users className="size-4 text-green-500" />
                                         <span>
                                             {tournament.maxParticipants
                                                 ? `Max ${tournament.maxParticipants} ${tournament.format === 'TEAM' ? 'Teams' : 'Players'}`

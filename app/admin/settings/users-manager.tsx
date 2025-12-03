@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createAdmin, deleteAdmin } from '@/lib/actions/users'
+import { cn } from '@/lib/utils'
 
 interface User {
     id: string
@@ -76,7 +77,12 @@ export function UsersManager({ users, currentUserId }: UsersManagerProps) {
                 </form>
                 {state?.message && (
                     <p
-                        className={`text-sm ${state.message.includes('success') ? 'text-green-500' : 'text-red-500'}`}
+                        className={cn(
+                            'text-sm',
+                            state.message.includes('success')
+                                ? 'text-green-500'
+                                : 'text-red-500',
+                        )}
                     >
                         {state.message}
                     </p>
@@ -116,7 +122,7 @@ export function UsersManager({ users, currentUserId }: UsersManagerProps) {
                                             size="icon"
                                             className="text-red-500 hover:text-red-600 hover:bg-red-100/10"
                                         >
-                                            <Trash2 className="h-4 w-4" />
+                                            <Trash2 className="size-4" />
                                         </Button>
                                     </form>
                                 )}
