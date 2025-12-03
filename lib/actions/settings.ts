@@ -33,6 +33,7 @@ export async function updateSiteSettings(
         try {
             const blob = await put(logoFile.name, logoFile, {
                 access: 'public',
+                allowOverwrite: true,
             })
             logoUrl = blob.url
         } catch (error) {

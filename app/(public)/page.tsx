@@ -30,7 +30,7 @@ async function getTournaments() {
 
 export default async function LandingPage() {
     const tournaments = await getTournaments()
-    const featuredTournament = tournaments[0] // Simplistic "featured" logic
+    const featuredTournament = tournaments[0]
 
     return (
         <div className="flex flex-col gap-16 pb-16">
@@ -43,7 +43,7 @@ export default async function LandingPage() {
                         className="object-cover opacity-40"
                         fill
                         priority
-                        src="/assets/Complet_Wall.png"
+                        src="/assets/wall.png"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-zinc-950/30" />
                 </div>
