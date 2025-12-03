@@ -9,6 +9,7 @@
 import { Calendar, Trophy, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -167,16 +168,7 @@ export default async function LandingPage() {
                 <h2 className="mb-8 text-3xl font-bold text-white">
                     Live Stream
                 </h2>
-                <div className="aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
-                    <iframe
-                        title="Twitch Stream"
-                        allowFullScreen
-                        className="h-full w-full"
-                        height="100%"
-                        src="https://player.twitch.tv/?channel=quentadoulive&parent=localhost&parent=belouga-tournament.vercel.app"
-                        width="100%"
-                    ></iframe>
-                </div>
+                <TwitchEmbed channel="quentadoulive" />
             </section>
         </div>
     )

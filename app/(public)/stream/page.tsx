@@ -6,6 +6,7 @@
  * License: MIT
  */
 
+import { TwitchEmbed } from '@/components/twitch-embed'
 import { getSiteSettings } from '@/lib/data/settings'
 
 export default async function StreamPage() {
@@ -34,16 +35,7 @@ export default async function StreamPage() {
             </div>
 
             <div className="flex-1 w-full max-w-6xl mx-auto">
-                <div className="aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl relative">
-                    <iframe
-                        src={`https://player.twitch.tv/?channel=${channel}&parent=localhost&parent=belouga-tournament.vercel.app`}
-                        height="100%"
-                        width="100%"
-                        allowFullScreen
-                        className="absolute inset-0 h-full w-full"
-                        title="Twitch Stream"
-                    ></iframe>
-                </div>
+                <TwitchEmbed channel={channel} />
             </div>
         </div>
     )
