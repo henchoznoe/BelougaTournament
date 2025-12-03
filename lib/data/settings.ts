@@ -10,17 +10,17 @@ import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export const getSiteSettings = unstable_cache(
-	async () => {
-		return await prisma.siteSettings.upsert({
-			where: { id: 1 },
-			update: {},
-			create: {
-				id: 1,
-				siteName: 'Belouga Tournament',
-				heroTitle: 'Next Tournament',
-			},
-		})
-	},
-	['site-settings'],
-	{ tags: ['site-settings'] },
+    async () => {
+        return await prisma.siteSettings.upsert({
+            where: { id: 1 },
+            update: {},
+            create: {
+                id: 1,
+                siteName: 'Belouga Tournament',
+                heroTitle: 'Next Tournament',
+            },
+        })
+    },
+    ['site-settings'],
+    { tags: ['site-settings'] },
 )

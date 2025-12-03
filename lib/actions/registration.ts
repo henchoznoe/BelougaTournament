@@ -17,131 +17,135 @@ import { prisma } from '@/lib/prisma'
 // We will validate the structure of the incoming data, and then validate the dynamic fields against the DB.
 
 const baseRegistrationSchema = z.object({
-	contactEmail: z.string().email(),
-	players: z
-		.array(
-			z.object({
-				data: z.record(z.string(), z.string()), // fieldId -> value
-				isCaptain: z.boolean().default(false),
-				nickname: z.string().min(1, 'Nickname is required'),
-			}),
-		)
-		.min(1, 'At least one player is required'),
-	teamName: z.string().optional(),
-	tournamentId: z.string().uuid(),
+    contactEmail: z.string().email(),
+    players: z
+        .array(
+            z.object({
+                data: z.record(z.string(), z.string()), // fieldId -> value
+                isCaptain: z.boolean().default(false),
+                nickname: z.string().min(1, 'Nickname is required'),
+            }),
+        )
+        .min(1, 'At least one player is required'),
+    teamName: z.string().optional(),
+    tournamentId: z.string().uuid(),
 })
 
 export type RegistrationState = {
-	errors?: {
-		[key: string]: string[]
-	}
-	message?: string
+    errors?: {
+        [key: string]: string[]
+    }
+    message?: string
 }
 
 export async function registerForTournament(
-	data: z.infer<typeof baseRegistrationSchema>,
+    data: z.infer<typeof baseRegistrationSchema>,
 ) {
-	const validation = baseRegistrationSchema.safeParse(data)
+    const validation = baseRegistrationSchema.safeParse(data)
 
-	if (!validation.success) {
-		return {
-			errors: validation.error.flatten().fieldErrors,
-			message: 'Invalid submission data.',
-		}
-	}
+    if (!validation.success) {
+        return {
+            errors: validation.error.flatten().fieldErrors,
+            message: 'Invalid submission data.',
+        }
+    }
 
-	const { tournamentId, teamName, contactEmail, players } = validation.data
+    const { tournamentId, teamName, contactEmail, players } = validation.data
 
-	// 1. Fetch Tournament and Fields to validate constraints
-	const tournament = await prisma.tournament.findUnique({
-		include: { fields: true },
-		where: { id: tournamentId },
-	})
+    // 1. Fetch Tournament and Fields to validate constraints
+    const tournament = await prisma.tournament.findUnique({
+        include: { fields: true },
+        where: { id: tournamentId },
+    })
 
-	if (!tournament) {
-		return { message: 'Tournament not found.' }
-	}
+    if (!tournament) {
+        return { message: 'Tournament not found.' }
+    }
 
-	// Check if registration is open
-	const now = new Date()
-	if (now < tournament.registrationOpen || now > tournament.registrationClose) {
-		return { message: 'Registration is closed.' }
-	}
+    // Check if registration is open
+    const now = new Date()
+    if (
+        now < tournament.registrationOpen ||
+        now > tournament.registrationClose
+    ) {
+        return { message: 'Registration is closed.' }
+    }
 
-	// Max participants check moved to transaction for atomicity
+    // Max participants check moved to transaction for atomicity
 
-	// Validate Dynamic Fields for each player
-	for (const player of players) {
-		for (const field of tournament.fields) {
-			const value = player.data[field.id]
+    // Validate Dynamic Fields for each player
+    for (const player of players) {
+        for (const field of tournament.fields) {
+            const value = player.data[field.id]
 
-			if (field.required && (!value || value.trim() === '')) {
-				return {
-					message: `Missing required field: ${field.label} for player ${player.nickname}`,
-				}
-			}
+            if (field.required && (!value || value.trim() === '')) {
+                return {
+                    message: `Missing required field: ${field.label} for player ${player.nickname}`,
+                }
+            }
 
-			// Basic type validation could go here (e.g. is it a number?)
-		}
-	}
+            // Basic type validation could go here (e.g. is it a number?)
+        }
+    }
 
-	try {
-		await prisma.$transaction(async tx => {
-			// Check max participants inside transaction to prevent race conditions
-			if (tournament.maxParticipants) {
-				const currentRegistrations = await tx.registration.count({
-					where: { tournamentId },
-				})
+    try {
+        await prisma.$transaction(async tx => {
+            // Check max participants inside transaction to prevent race conditions
+            if (tournament.maxParticipants) {
+                const currentRegistrations = await tx.registration.count({
+                    where: { tournamentId },
+                })
 
-				if (currentRegistrations >= tournament.maxParticipants) {
-					throw new Error('Tournament is full.')
-				}
-			}
+                if (currentRegistrations >= tournament.maxParticipants) {
+                    throw new Error('Tournament is full.')
+                }
+            }
 
-			// Create Registration
-			const registration = await tx.registration.create({
-				data: {
-					contactEmail,
-					status: 'PENDING',
-					teamName: tournament.format === 'TEAM' ? teamName : undefined,
-					tournamentId,
-				},
-			})
+            // Create Registration
+            const registration = await tx.registration.create({
+                data: {
+                    contactEmail,
+                    status: 'PENDING',
+                    teamName:
+                        tournament.format === 'TEAM' ? teamName : undefined,
+                    tournamentId,
+                },
+            })
 
-			// Create Players and Data
-			for (const player of players) {
-				const createdPlayer = await tx.player.create({
-					data: {
-						isCaptain: player.isCaptain,
-						nickname: player.nickname,
-						registrationId: registration.id,
-					},
-				})
+            // Create Players and Data
+            for (const player of players) {
+                const createdPlayer = await tx.player.create({
+                    data: {
+                        isCaptain: player.isCaptain,
+                        nickname: player.nickname,
+                        registrationId: registration.id,
+                    },
+                })
 
-				// Create PlayerData
-				const dataEntries = Object.entries(player.data).map(
-					([fieldId, value]) => ({
-						playerId: createdPlayer.id,
-						tournamentFieldId: fieldId,
-						value: value,
-					}),
-				)
+                // Create PlayerData
+                const dataEntries = Object.entries(player.data).map(
+                    ([fieldId, value]) => ({
+                        playerId: createdPlayer.id,
+                        tournamentFieldId: fieldId,
+                        value: value,
+                    }),
+                )
 
-				if (dataEntries.length > 0) {
-					await tx.playerData.createMany({
-						data: dataEntries,
-					})
-				}
-			}
-		})
-	} catch (error) {
-		console.error('Registration Error:', error)
-		if (error instanceof Error && error.message === 'Tournament is full.') {
-			return { message: 'Tournament is full.' }
-		}
-		return { message: 'Failed to process registration. Please try again.' }
-	}
+                if (dataEntries.length > 0) {
+                    await tx.playerData.createMany({
+                        data: dataEntries,
+                    })
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Registration Error:', error)
+        if (error instanceof Error && error.message === 'Tournament is full.') {
+            return { message: 'Tournament is full.' }
+        }
+        return { message: 'Failed to process registration. Please try again.' }
+    }
 
-	revalidatePath(`/tournaments/${tournament.slug}`)
-	redirect(`/tournaments/${tournament.slug}?success=true`)
+    revalidatePath(`/tournaments/${tournament.slug}`)
+    redirect(`/tournaments/${tournament.slug}?success=true`)
 }
