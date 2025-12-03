@@ -60,20 +60,19 @@ export default async function ArchivePage() {
                             </CardHeader>
                             <CardContent className="space-y-4 text-sm text-zinc-400">
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-zinc-500" />
+                                    <Calendar className="size-4 text-zinc-500" />
                                     <span>
-                                        Ended{' '}
                                         {new Date(
-                                            tournament.endDate,
+                                            tournament.startDate,
                                         ).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Trophy className="h-4 w-4 text-yellow-500/50" />
-                                    <span>{tournament.format} Format</span>
+                                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                                    <Trophy className="size-4 text-yellow-500/50" />
+                                    <span>{tournament.format}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Users className="h-4 w-4 text-green-500/50" />
+                                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                                    <Users className="size-4 text-green-500/50" />
                                     <span>
                                         {tournament.maxParticipants
                                             ? `${tournament.maxParticipants} Participants`

@@ -40,7 +40,7 @@ export default async function TournamentsPage() {
                 <h1 className="text-3xl font-bold text-white">Tournaments</h1>
                 <Button asChild>
                     <Link href="/admin/tournaments/new">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 size-4" />
                         Create Tournament
                     </Link>
                 </Button>
@@ -97,24 +97,24 @@ export default async function TournamentsPage() {
                                                 asChild
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                                                className="size-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
                                             >
                                                 <Link
                                                     href={`/admin/tournaments/${tournament.id}`}
                                                 >
-                                                    <Eye className="h-4 w-4" />
+                                                    <Eye className="size-4" />
                                                 </Link>
                                             </Button>
                                             <Button
                                                 asChild
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                                className="size-8 text-zinc-400 hover:text-white hover:bg-zinc-800"
                                             >
                                                 <Link
                                                     href={`/admin/tournaments/${tournament.id}/edit`}
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="size-4" />
                                                 </Link>
                                             </Button>
                                             <DeleteTournamentButton

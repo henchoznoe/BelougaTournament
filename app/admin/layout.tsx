@@ -63,7 +63,7 @@ export default async function AdminLayout({
                         variant="ghost"
                     >
                         <Link href="/admin/settings">
-                            <Settings className="mr-2 h-4 w-4" />
+                            <Settings className="mr-2 size-4" />
                             Settings
                         </Link>
                     </Button>

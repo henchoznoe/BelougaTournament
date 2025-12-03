@@ -38,7 +38,7 @@ export default async function ContactPage() {
                     <Card className="bg-zinc-900 border-zinc-800">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-white">
-                                <Mail className="h-5 w-5 text-blue-500" />
+                                <Mail className="size-5 text-blue-500" />
                                 Email Support
                             </CardTitle>
                             <CardDescription className="text-zinc-400">
@@ -62,7 +62,7 @@ export default async function ContactPage() {
                         <Card className="bg-zinc-900 border-zinc-800">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
-                                    <MessageSquare className="h-5 w-5 text-indigo-500" />
+                                    <MessageSquare className="size-5 text-indigo-500" />
                                     Discord Community
                                 </CardTitle>
                                 <CardDescription className="text-zinc-400">
@@ -90,7 +90,7 @@ export default async function ContactPage() {
                         <Card className="bg-zinc-900 border-zinc-800">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
-                                    <Twitter className="h-5 w-5 text-sky-500" />
+                                    <Twitter className="size-5 text-sky-500" />
                                     Twitter / X
                                 </CardTitle>
                                 <CardDescription className="text-zinc-400">
@@ -118,7 +118,7 @@ export default async function ContactPage() {
                         <Card className="bg-zinc-900 border-zinc-800">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
-                                    <Video className="h-5 w-5 text-purple-500" />
+                                    <Video className="size-5 text-purple-500" />
                                     Twitch
                                 </CardTitle>
                                 <CardDescription className="text-zinc-400">

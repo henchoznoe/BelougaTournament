@@ -51,7 +51,7 @@ export default async function AdminDashboard() {
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Tournaments
                         </CardTitle>
-                        <Trophy className="h-4 w-4 text-zinc-400" />
+                        <Trophy className="size-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
@@ -64,7 +64,7 @@ export default async function AdminDashboard() {
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Active Tournaments
                         </CardTitle>
-                        <Calendar className="h-4 w-4 text-zinc-400" />
+                        <Calendar className="size-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
@@ -77,7 +77,7 @@ export default async function AdminDashboard() {
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Registrations
                         </CardTitle>
-                        <Users className="h-4 w-4 text-zinc-400" />
+                        <Users className="size-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">

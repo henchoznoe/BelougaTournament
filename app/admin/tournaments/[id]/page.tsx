@@ -93,7 +93,7 @@ export default async function TournamentManagerPage({
                 </div>
                 <Button asChild>
                     <Link href={`/admin/tournaments/${tournament.id}/edit`}>
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="mr-2 size-4" />
                         Edit Tournament
                     </Link>
                 </Button>
@@ -220,9 +220,9 @@ export default async function TournamentManagerPage({
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                                                                className="size-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
                                                             >
-                                                                <Eye className="h-4 w-4" />
+                                                                <Eye className="size-4" />
                                                             </Button>
                                                         </SheetTrigger>
                                                         <SheetContent className="overflow-y-auto bg-zinc-950 border-zinc-800 text-zinc-50">
@@ -306,9 +306,9 @@ export default async function TournamentManagerPage({
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                                                            className="size-8 text-red-400 hover:text-red-300 hover:bg-red-900/20"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="size-4" />
                                                         </Button>
                                                     </form>
                                                 </div>

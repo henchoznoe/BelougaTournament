@@ -27,10 +27,10 @@ export default async function StreamPage() {
         <div className="container mx-auto px-4 py-8 flex flex-col min-h-[80vh]">
             <div className="mb-8 text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-white">
-                    Live Stream
+                    Stream Twitch
                 </h1>
                 <p className="mt-2 text-zinc-400">
-                    Watch the action live on Twitch
+                    Regardez la compétition en direct sur Twitch, présenté sur l
                 </p>
             </div>
 

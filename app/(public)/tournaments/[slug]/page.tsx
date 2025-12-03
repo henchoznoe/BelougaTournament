@@ -67,7 +67,7 @@ export default async function TournamentPage({
                 </h1>
                 <div className="flex flex-wrap items-center gap-6 text-zinc-400">
                     <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-blue-500" />
+                        <Calendar className="size-5 text-blue-500" />
                         <span>
                             {new Date(
                                 tournament.startDate,
@@ -75,7 +75,7 @@ export default async function TournamentPage({
                         </span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-green-500" />
+                        <Users className="size-5 text-green-500" />
                         <span>{tournament.format} Format</span>
                     </div>
                     {tournament.maxParticipants && (
