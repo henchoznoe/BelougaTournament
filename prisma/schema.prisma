@@ -64,7 +64,7 @@ model TournamentField {
   required     Boolean      @default(true)
   order        Int          @default(0)
   tournamentId String
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   playerData   PlayerData[]
 }
 
@@ -75,7 +75,7 @@ model Registration {
   status       String     @default("PENDING") // e.g., PENDING, APPROVED, REJECTED
   createdAt    DateTime   @default(now())
   tournamentId String
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   players      Player[]
 }
 
@@ -84,7 +84,7 @@ model Player {
   nickname       String
   isCaptain      Boolean      @default(false)
   registrationId String
-  registration   Registration @relation(fields: [registrationId], references: [id])
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   data           PlayerData[]
 }
 
@@ -92,9 +92,9 @@ model PlayerData {
   id                String          @id @default(uuid())
   value             String
   playerId          String
-  player            Player          @relation(fields: [playerId], references: [id])
+  player            Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
   tournamentFieldId String
-  tournamentField   TournamentField @relation(fields: [tournamentFieldId], references: [id])
+  tournamentField   TournamentField @relation(fields: [tournamentFieldId], references: [id], onDelete: Cascade)
 }
 
 model SiteSettings {
