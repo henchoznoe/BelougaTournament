@@ -14,12 +14,12 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 
 const settingsSchema = z.object({
-    siteName: z.string().min(1, 'Site name is required'),
-    heroTitle: z.string().min(1, 'Hero title is required'),
     logoUrl: z.string().optional().or(z.literal('')),
     socialDiscord: z.string().optional().or(z.literal('')),
     socialTwitch: z.string().optional().or(z.literal('')),
-    socialTwitter: z.string().optional().or(z.literal('')),
+    socialTiktok: z.string().optional().or(z.literal('')),
+    socialInstagram: z.string().optional().or(z.literal('')),
+    socialYoutube: z.string().optional().or(z.literal('')),
 })
 
 export async function updateSiteSettings(
@@ -43,12 +43,12 @@ export async function updateSiteSettings(
     }
 
     const data = {
-        siteName: formData.get('siteName') as string,
-        heroTitle: formData.get('heroTitle') as string,
         logoUrl,
         socialDiscord: formData.get('socialDiscord') as string,
         socialTwitch: formData.get('socialTwitch') as string,
-        socialTwitter: formData.get('socialTwitter') as string,
+        socialTiktok: formData.get('socialTiktok') as string,
+        socialInstagram: formData.get('socialInstagram') as string,
+        socialYoutube: formData.get('socialYoutube') as string,
     }
 
     const validatedFields = settingsSchema.safeParse(data)

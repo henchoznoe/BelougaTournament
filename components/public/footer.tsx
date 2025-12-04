@@ -22,46 +22,51 @@ import Link from 'next/link'
 
 interface FooterProps {
     settings: {
-        siteName: string
         logoUrl: string | null
+        socialDiscord: string | null
+        socialTwitch: string | null
+        socialTiktok: string | null
+        socialInstagram: string | null
+        socialYoutube: string | null
     }
 }
 
 export function Footer({ settings }: FooterProps) {
     const currentYear = new Date().getFullYear()
+    const siteName = "Belouga Tournament"
 
     const socialLinks = [
         {
             name: 'Discord',
-            href: 'https://discord.gg/belouga',
+            href: settings.socialDiscord,
             icon: MessageSquare,
             color: 'hover:text-[#5865F2]',
         },
         {
             name: 'Twitch',
-            href: 'https://twitch.tv/quentadoulive',
+            href: settings.socialTwitch,
             icon: Twitch,
             color: 'hover:text-[#9146FF]',
         },
         {
             name: 'YouTube',
-            href: 'https://youtube.com',
+            href: settings.socialYoutube,
             icon: Youtube,
             color: 'hover:text-[#FF0000]',
         },
         {
             name: 'TikTok',
-            href: 'https://tiktok.com',
+            href: settings.socialTiktok,
             icon: Video,
             color: 'hover:text-[#00f2ea]',
         },
         {
             name: 'Instagram',
-            href: 'https://instagram.com',
+            href: settings.socialInstagram,
             icon: Instagram,
             color: 'hover:text-[#E1306C]',
         },
-    ]
+    ].filter(link => link.href && link.href.trim() !== '')
 
     const footerLinks = [
         {
@@ -76,7 +81,7 @@ export function Footer({ settings }: FooterProps) {
             title: 'Communauté',
             links: [
                 { label: 'Stream', href: '/stream' },
-                { label: 'Discord', href: 'https://discord.gg/belouga' },
+                { label: 'Discord', href: settings.socialDiscord || 'https://discord.gg/belouga' },
                 { label: 'Équipes', href: '/teams' }, // Placeholder
             ],
         },
@@ -100,7 +105,7 @@ export function Footer({ settings }: FooterProps) {
                             {settings.logoUrl ? (
                                 <Image
                                     src={settings.logoUrl}
-                                    alt={settings.siteName}
+                                    alt={siteName}
                                     width={120}
                                     height={120}
                                     className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
@@ -108,7 +113,7 @@ export function Footer({ settings }: FooterProps) {
                             ) : (
                                 <Image
                                     src="/assets/logo-bleu.png"
-                                    alt={settings.siteName}
+                                    alt={siteName}
                                     width={120}
                                     height={120}
                                     className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
@@ -117,7 +122,7 @@ export function Footer({ settings }: FooterProps) {
                             <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         </div>
                         <span className="font-paladins text-3xl tracking-widest text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-5xl">
-                            {settings.siteName}
+                            {siteName}
                         </span>
                     </Link>
                 </div>
@@ -133,7 +138,7 @@ export function Footer({ settings }: FooterProps) {
                             {socialLinks.map(social => (
                                 <a
                                     key={social.name}
-                                    href={social.href}
+                                    href={social.href || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className={`rounded-lg bg-zinc-900 p-2 text-zinc-400 transition-all hover:bg-zinc-800 ${social.color}`}
@@ -172,7 +177,7 @@ export function Footer({ settings }: FooterProps) {
                 <div className="border-t border-zinc-800 pt-8">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                         <p className="text-sm text-zinc-500">
-                            &copy; {currentYear} {settings.siteName}. Tous droits réservés.
+                            &copy; {currentYear} {siteName}. Tous droits réservés.
                         </p>
                         <div className="flex items-center gap-6 text-sm text-zinc-500">
                             <Link href="/privacy" className="hover:text-white transition-colors">

@@ -16,8 +16,6 @@ export const getSiteSettings = unstable_cache(
             update: {},
             create: {
                 id: 1,
-                siteName: 'Belouga Tournament',
-                heroTitle: 'Next Tournament',
             },
         })
     },

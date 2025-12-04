@@ -18,12 +18,12 @@ import { cn } from '@/lib/utils'
 
 interface SettingsFormProps {
     initialSettings: {
-        siteName: string
-        heroTitle: string
         logoUrl: string | null
         socialDiscord: string | null
         socialTwitch: string | null
-        socialTwitter: string | null
+        socialTiktok: string | null
+        socialInstagram: string | null
+        socialYoutube: string | null
     }
 }
 
@@ -40,37 +40,6 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     return (
         <form action={action} className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                    <Label htmlFor="siteName">Site Name</Label>
-                    <Input
-                        id="siteName"
-                        name="siteName"
-                        defaultValue={initialSettings.siteName}
-                        required
-                    />
-                    {state?.errors?.siteName && (
-                        <p className="text-sm text-red-500">
-                            {state.errors.siteName}
-                        </p>
-                    )}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="heroTitle">Hero Title</Label>
-                    <Input
-                        id="heroTitle"
-                        name="heroTitle"
-                        defaultValue={initialSettings.heroTitle}
-                        required
-                    />
-                    {state?.errors?.heroTitle && (
-                        <p className="text-sm text-red-500">
-                            {state.errors.heroTitle}
-                        </p>
-                    )}
-                </div>
-            </div>
-
             <div className="space-y-2">
                 <Label htmlFor="logoFile">Logo</Label>
                 <div className="flex items-center gap-4">
@@ -106,6 +75,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                         id="socialDiscord"
                         name="socialDiscord"
                         defaultValue={initialSettings.socialDiscord || ''}
+                        placeholder="https://discord.gg/..."
                     />
                 </div>
                 <div className="space-y-2">
@@ -114,14 +84,34 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                         id="socialTwitch"
                         name="socialTwitch"
                         defaultValue={initialSettings.socialTwitch || ''}
+                        placeholder="https://twitch.tv/..."
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="socialTwitter">Twitter URL</Label>
+                    <Label htmlFor="socialYoutube">YouTube URL</Label>
                     <Input
-                        id="socialTwitter"
-                        name="socialTwitter"
-                        defaultValue={initialSettings.socialTwitter || ''}
+                        id="socialYoutube"
+                        name="socialYoutube"
+                        defaultValue={initialSettings.socialYoutube || ''}
+                        placeholder="https://youtube.com/..."
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="socialTiktok">TikTok URL</Label>
+                    <Input
+                        id="socialTiktok"
+                        name="socialTiktok"
+                        defaultValue={initialSettings.socialTiktok || ''}
+                        placeholder="https://tiktok.com/..."
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="socialInstagram">Instagram URL</Label>
+                    <Input
+                        id="socialInstagram"
+                        name="socialInstagram"
+                        defaultValue={initialSettings.socialInstagram || ''}
+                        placeholder="https://instagram.com/..."
                     />
                 </div>
             </div>

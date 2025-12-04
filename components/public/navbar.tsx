@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   settings: {
-    siteName: string;
     logoUrl: string | null;
   };
 }
@@ -20,6 +19,7 @@ interface NavbarProps {
 export function Navbar({ settings }: NavbarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const siteName = "Belouga Tournament";
 
   const navLinks = [
     { href: "/", label: "Accueil", icon: Home },
@@ -41,7 +41,7 @@ export function Navbar({ settings }: NavbarProps) {
             {settings.logoUrl ? (
               <Image
                 src={settings.logoUrl}
-                alt={settings.siteName}
+                alt={siteName}
                 width={48}
                 height={48}
                 className="h-12 w-auto transition-transform duration-300 group-hover:scale-110"
@@ -49,7 +49,7 @@ export function Navbar({ settings }: NavbarProps) {
             ) : (
               <Image
                 src="/assets/logo-bleu.png"
-                alt={settings.siteName}
+                alt={siteName}
                 width={48}
                 height={48}
                 className="h-12 w-auto transition-transform duration-300 group-hover:scale-110"
@@ -58,7 +58,7 @@ export function Navbar({ settings }: NavbarProps) {
             <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
           <span className="font-paladins text-md md:text-2xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] transition-all duration-300 whitespace-nowrap">
-            {settings.siteName}
+            {siteName}
           </span>
         </Link>
 
@@ -120,7 +120,7 @@ export function Navbar({ settings }: NavbarProps) {
                     {settings.logoUrl ? (
                       <Image
                         src={settings.logoUrl}
-                        alt={settings.siteName}
+                        alt={siteName}
                         width={64}
                         height={64}
                         className="h-16 w-auto"
@@ -128,7 +128,7 @@ export function Navbar({ settings }: NavbarProps) {
                     ) : (
                       <Image
                         src="/assets/logo-bleu.png"
-                        alt={settings.siteName}
+                        alt={siteName}
                         width={64}
                         height={64}
                         className="h-16 w-auto"
@@ -137,7 +137,7 @@ export function Navbar({ settings }: NavbarProps) {
                     <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full -z-10" />
                   </div>
                   <SheetTitle className="font-paladins text-2xl text-center text-white tracking-wider">
-                    {settings.siteName}
+                    {siteName}
                   </SheetTitle>
                 </div>
               </SheetHeader>
