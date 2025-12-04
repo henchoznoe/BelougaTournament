@@ -112,7 +112,7 @@ export function Footer({ settings }: FooterProps) {
                                 />
                             ) : (
                                 <Image
-                                    src="/assets/logo-bleu.png"
+                                    src="/assets/logo-blue.png"
                                     alt={siteName}
                                     width={120}
                                     height={120}

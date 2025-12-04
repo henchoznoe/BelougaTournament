@@ -11,6 +11,7 @@ import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
+import { ScrollToTop } from '@/components/scroll-to-top'
 import './globals.css'
 
 const inter = Inter({
@@ -42,6 +43,7 @@ export default function RootLayout({
                     'antialiased font-sans',
                 )}
             >
+                <ScrollToTop />
                 {children}
                 <Toaster />
             </body>

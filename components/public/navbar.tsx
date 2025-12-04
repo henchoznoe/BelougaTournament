@@ -48,7 +48,7 @@ export function Navbar({ settings }: NavbarProps) {
               />
             ) : (
               <Image
-                src="/assets/logo-bleu.png"
+                src="/assets/logo-blue.png"
                 alt={siteName}
                 width={48}
                 height={48}
@@ -127,7 +127,7 @@ export function Navbar({ settings }: NavbarProps) {
                       />
                     ) : (
                       <Image
-                        src="/assets/logo-bleu.png"
+                        src="/assets/logo-blue.png"
                         alt={siteName}
                         width={64}
                         height={64}
