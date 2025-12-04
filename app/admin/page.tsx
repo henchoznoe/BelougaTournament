@@ -6,8 +6,18 @@
  * License: MIT
  */
 
-import { Trophy, UserCheck, Users } from 'lucide-react'
+import {
+    Activity,
+    ArrowUpRight,
+    Calendar,
+    Settings,
+    Trophy,
+    UserCheck,
+    Users,
+} from 'lucide-react'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { prisma } from '@/lib/prisma'
 
@@ -58,133 +68,253 @@ export default async function AdminDashboard() {
     const stats = await getStats()
 
     return (
-        <div className="space-y-8">
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                        Dashboard
+                    </h1>
+                    <p className="text-zinc-400 mt-1">
+                        Overview of your tournament platform.
+                    </p>
+                </div>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                    <Link href="/admin/tournaments/new">Create Tournament</Link>
+                </Button>
+            </div>
 
             {/* Stats Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-zinc-800 bg-zinc-950">
+                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Tournaments
                         </CardTitle>
-                        <Trophy className="size-4 text-zinc-400" />
+                        <div className="size-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <Trophy className="size-4 text-blue-500" />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
                             {stats.totalTournaments}
                         </div>
-                        <p className="text-xs text-zinc-500">
-                            {stats.activeTournaments} Active,{' '}
-                            {stats.archivedTournaments} Archived
+                        <p className="text-xs text-zinc-500 mt-1">
+                            <span className="text-blue-400 font-medium">
+                                {stats.activeTournaments}
+                            </span>{' '}
+                            Active
+                            <span className="mx-1">•</span>
+                            <span className="text-zinc-400">
+                                {stats.archivedTournaments}
+                            </span>{' '}
+                            Archived
                         </p>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950">
+
+                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
-                            Total Registrations
+                            Registrations
                         </CardTitle>
-                        <Users className="size-4 text-zinc-400" />
+                        <div className="size-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                            <Users className="size-4 text-purple-500" />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
                             {stats.totalRegistrations}
                         </div>
-                        <p className="text-xs text-zinc-500">
-                            {stats.pendingRegistrations} Pending,{' '}
-                            {stats.approvedRegistrations} Approved
+                        <p className="text-xs text-zinc-500 mt-1">
+                            <span className="text-yellow-500 font-medium">
+                                {stats.pendingRegistrations}
+                            </span>{' '}
+                            Pending
+                            <span className="mx-1">•</span>
+                            <span className="text-green-500 font-medium">
+                                {stats.approvedRegistrations}
+                            </span>{' '}
+                            Approved
                         </p>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950">
+
+                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Participants
                         </CardTitle>
-                        <UserCheck className="size-4 text-zinc-400" />
+                        <div className="size-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                            <UserCheck className="size-4 text-emerald-500" />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
                             {stats.totalParticipants}
                         </div>
-                        <p className="text-xs text-zinc-500">
-                            Across all tournaments
+                        <p className="text-xs text-zinc-500 mt-1">
+                            Unique players across all events
                         </p>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950">
+
+                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
-                            Admin Users
+                            System Users
                         </CardTitle>
-                        <Users className="size-4 text-zinc-400" />
+                        <div className="size-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                            <Activity className="size-4 text-orange-500" />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-white">
                             {stats.totalUsers}
                         </div>
-                        <p className="text-xs text-zinc-500">
-                            System administrators
+                        <p className="text-xs text-zinc-500 mt-1">
+                            Administrators & Managers
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Recent Registrations */}
-            <div className="space-y-4">
-                <h2 className="text-xl font-bold text-white">
-                    Recent Activity
-                </h2>
-                <div className="rounded-md border border-zinc-800 bg-zinc-950">
-                    {stats.recentRegistrations.length > 0 ? (
-                        <div className="divide-y divide-zinc-800">
-                            {stats.recentRegistrations.map(reg => (
-                                <div
-                                    key={reg.id}
-                                    className="flex items-center justify-between p-4"
-                                >
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium text-white">
-                                                {reg.teamName ||
+            <div className="grid gap-4 md:grid-cols-7">
+                <Card className="col-span-4 border-zinc-800 bg-zinc-900/50">
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+                            <Activity className="size-5 text-blue-500" />
+                            Recent Activity
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {stats.recentRegistrations.length > 0 ? (
+                            <div className="space-y-4">
+                                {stats.recentRegistrations.map(reg => (
+                                    <div
+                                        key={reg.id}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-zinc-400">
+                                                {(
+                                                    reg.teamName ||
                                                     reg.players[0]?.nickname ||
-                                                    'Unknown'}
-                                            </p>
-                                            <Badge
-                                                variant={
-                                                    reg.status === 'APPROVED'
-                                                        ? 'default'
-                                                        : reg.status ===
-                                                            'PENDING'
-                                                          ? 'secondary'
-                                                          : 'destructive'
-                                                }
-                                            >
-                                                {reg.status}
-                                            </Badge>
+                                                    '?'
+                                                )
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium text-white">
+                                                        {reg.teamName ||
+                                                            reg.players[0]
+                                                                ?.nickname ||
+                                                            'Unknown'}
+                                                    </p>
+                                                    <Badge
+                                                        variant={
+                                                            reg.status ===
+                                                            'APPROVED'
+                                                                ? 'default'
+                                                                : reg.status ===
+                                                                    'PENDING'
+                                                                  ? 'secondary'
+                                                                  : 'destructive'
+                                                        }
+                                                        className="text-[10px] h-5 px-1.5"
+                                                    >
+                                                        {reg.status}
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-xs text-zinc-400 flex items-center gap-1">
+                                                    Registered for
+                                                    <span className="text-blue-400 font-medium">
+                                                        {reg.tournament.title}
+                                                    </span>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="text-sm text-zinc-400">
-                                            Registered for{' '}
-                                            <span className="text-blue-400">
-                                                {reg.tournament.title}
+                                        <div className="text-xs text-zinc-500 flex flex-col items-end gap-1">
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="size-3" />
+                                                {new Date(
+                                                    reg.createdAt,
+                                                ).toLocaleDateString()}
                                             </span>
-                                        </p>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 text-[10px] text-zinc-400 hover:text-white px-2"
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/admin/tournaments/${reg.tournamentId}`}
+                                                >
+                                                    View
+                                                    <ArrowUpRight className="ml-1 size-3" />
+                                                </Link>
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-zinc-500">
-                                        {new Date(
-                                            reg.createdAt,
-                                        ).toLocaleDateString()}
-                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-12 text-center text-zinc-500 flex flex-col items-center gap-2">
+                                <Activity className="size-8 opacity-20" />
+                                <p>No recent activity found.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="col-span-3 border-zinc-800 bg-zinc-900/50">
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+                            <Trophy className="size-5 text-yellow-500" />
+                            Quick Actions
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        <Button
+                            variant="outline"
+                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            asChild
+                        >
+                            <Link href="/admin/tournaments/new">
+                                <div className="size-6 rounded bg-blue-500/20 flex items-center justify-center mr-3">
+                                    <Trophy className="size-3 text-blue-500" />
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="p-8 text-center text-zinc-500">
-                            No registrations yet.
-                        </div>
-                    )}
-                </div>
+                                Create New Tournament
+                            </Link>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            asChild
+                        >
+                            <Link href="/admin/users">
+                                <div className="size-6 rounded bg-purple-500/20 flex items-center justify-center mr-3">
+                                    <Users className="size-3 text-purple-500" />
+                                </div>
+                                Manage Users
+                            </Link>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            asChild
+                        >
+                            <Link href="/admin/settings">
+                                <div className="size-6 rounded bg-zinc-500/20 flex items-center justify-center mr-3">
+                                    <Settings className="size-3 text-zinc-400" />
+                                </div>
+                                Platform Settings
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )
