@@ -10,7 +10,7 @@
 
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
-import { ScreenShareOff } from "lucide-react";
+import { Loader2, ScreenShareOff } from "lucide-react";
 
 const TWITCH_SCRIPT_URL = "https://embed.twitch.tv/embed/v1.js";
 const TWITCH_PLAYER_ELEMENT_ID = "twitch-embed";
@@ -45,11 +45,13 @@ interface TwitchPlayer {
   removeEventListener: (event: string, callback: () => void) => void;
   play: () => void;
   pause: () => void;
+  setMuted: (muted: boolean) => void;
 }
 
 export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbedProps) {
 
   const [isStreamOnline, setIsStreamOnline] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false);
   const playerRef = useRef<TwitchPlayer | null>(null);
 
@@ -63,51 +65,79 @@ export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbed
         width,
         height,
         channel,
-        parent: ["localhost", process.env.NEXT_PUBLIC_TWITCH_PARENT || "localhost"],
+        parent: ["localhost", process.env.NEXT_PUBLIC_TWITCH_PARENT || "localhost", window.location.hostname],
         layout: "video",
-        autoplay: true,
+        autoplay: true
       });
 
       playerRef.current = embed;
 
-      const handleOnline = () => setIsStreamOnline(true);
-      const handleOffline = () => setIsStreamOnline(false);
+      const handleOnline = () => {
+        console.log("Stream is Online");
+        setIsStreamOnline(true);
+        setIsLoading(false);
+      };
 
-      embed.addEventListener("ONLINE", handleOnline);
-      embed.addEventListener("OFFLINE", handleOffline);
+      const handleOffline = () => {
+        console.log("Stream is Offline");
+        setIsStreamOnline(false);
+        setIsLoading(false);
+      };
+
+      const handleReady = () => {
+        console.log("Stream is Ready");
+        embed.setMuted(true);
+        embed.play();
+      };
+
+      embed.addEventListener("online", handleOnline);
+      embed.addEventListener("offline", handleOffline);
+      embed.addEventListener("VIDEO_READY", handleReady);
 
       return () => {
-        embed.removeEventListener("ONLINE", handleOnline);
-        embed.removeEventListener("OFFLINE", handleOffline);
+        embed.removeEventListener("online", handleOnline);
+        embed.removeEventListener("offline", handleOffline);
+        embed.removeEventListener("VIDEO_READY", handleReady);
       };
     } catch (error) {
       console.error("Failed to initialize Twitch Embed:", error);
+      setIsLoading(false);
     }
   }, [isScriptLoaded, channel, width, height]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg bg-zinc-950 shadow-xl border border-zinc-800">
+    <div className="relative w-full overflow-hidden rounded-lg bg-zinc-950 shadow-xl border border-zinc-800" style={{ height }}>
       <Script
         src={TWITCH_SCRIPT_URL}
         onLoad={() => setIsScriptLoaded(true)}
         strategy="afterInteractive"
       />
 
+      {/* Twitch Player - Always rendered "visible" but covered by overlays when needed */}
       <div
         id={TWITCH_PLAYER_ELEMENT_ID}
-        className={isStreamOnline ? "block" : "hidden"}
+        className="absolute inset-0 z-0"
         style={{ width: "100%", height: "100%" }}
       />
 
-      {!isStreamOnline && (
-        <div className="flex flex-col items-center justify-center p-12 text-center h-[600px] w-full">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
+          <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
+          <p className="text-zinc-400">Chargement du stream...</p>
+        </div>
+      )}
+
+      {/* Offline Overlay */}
+      {!isLoading && !isStreamOnline && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-zinc-950 p-12 text-center">
           <div className="mb-4 rounded-full bg-zinc-900 p-6 ring-1 ring-zinc-800">
             <ScreenShareOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="mb-2 text-xl font-semibold text-white">
             Le stream est actuellement offline
           </h3>
-          <p className="text-zinc-400 max-w-md">
+          <p className="max-w-md text-zinc-400">
             {channel} ne stream pas actuellement. Revenez plus tard ou suivez sa chaîne sur Twitch pour être informé de son prochain stream.
           </p>
         </div>
