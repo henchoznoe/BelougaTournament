@@ -59,6 +59,11 @@ export function TournamentForm({ initialData, onSubmit, submitLabel = "Create To
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setServerError(null);
     try {
+      // Twitch Integration: Default streamUrl if empty
+      if (!values.streamUrl || values.streamUrl.trim() === "") {
+        values.streamUrl = "https://twitch.tv/quentadoulive";
+      }
+
       const result = await onSubmit(values);
       if (result?.message) {
         setServerError(result.message);
@@ -171,7 +176,7 @@ export function TournamentForm({ initialData, onSubmit, submitLabel = "Create To
                 />
               ))}
             </div>
-            
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <FormField
                 control={form.control}
@@ -268,8 +273,6 @@ export function TournamentForm({ initialData, onSubmit, submitLabel = "Create To
                           <SelectItem value="NUMBER">Number</SelectItem>
                           <SelectItem value="SELECT">Select</SelectItem>
                           <SelectItem value="CHECKBOX">Checkbox</SelectItem>
-                          <SelectItem value="DISCORD_ID">Discord ID</SelectItem>
-                          <SelectItem value="RIOT_ID">Riot ID</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

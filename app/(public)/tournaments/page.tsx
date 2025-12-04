@@ -30,7 +30,12 @@ import { prisma } from '@/lib/prisma'
 async function getTournaments() {
     return await prisma.tournament.findMany({
         orderBy: { startDate: 'asc' },
-        where: { isArchived: false },
+        where: {
+            isArchived: false,
+            endDate: {
+                gte: new Date(),
+            },
+        },
     })
 }
 
