@@ -9,9 +9,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
+import { ScrollToTop } from '@/components/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
-import { ScrollToTop } from '@/components/scroll-to-top'
 import './globals.css'
 
 const inter = Inter({

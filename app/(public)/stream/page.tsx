@@ -6,14 +6,14 @@
  * License: MIT
  */
 
-import { StreamWrapper } from '@/components/public/stream-wrapper'
+import { TwitchEmbed } from '@/components/twitch-embed'
 import { getSiteSettings } from '@/lib/data/settings'
 
 export default async function StreamPage() {
     const settings = await getSiteSettings()
 
     // Extract channel name from URL or use as is
-    let channel = 'quentadoulive' // Default fallback
+    let channel = 'quentadoulive'
     if (settings.socialTwitch) {
         const match = settings.socialTwitch.match(/twitch\.tv\/([a-zA-Z0-9_]+)/)
         if (match) {
@@ -37,7 +37,7 @@ export default async function StreamPage() {
             </div>
 
             <div className="flex-1 w-full max-w-6xl mx-auto">
-                <StreamWrapper channel={channel} />
+                <TwitchEmbed channel={channel} />
             </div>
         </div>
     )

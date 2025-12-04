@@ -6,19 +6,24 @@
  * License: MIT
  */
 
-import { LandingContent } from '@/components/public/landing-content'
-import { prisma } from '@/lib/prisma'
+import { Suspense } from 'react'
+import { Features } from '@/components/public/landing/features'
+import { Hero } from '@/components/public/landing/hero'
+import { Stats } from '@/components/public/landing/stats'
+import { StreamSection } from '@/components/public/landing/stream-section'
+import { TournamentsSection } from '@/components/public/landing/tournaments-section'
+import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
 
-async function getTournaments() {
-    return await prisma.tournament.findMany({
-        orderBy: { startDate: 'asc' },
-        take: 6,
-        where: { isArchived: false },
-    })
-}
-
-export default async function LandingPage() {
-    const tournaments = await getTournaments()
-
-    return <LandingContent tournaments={tournaments} />
+export default function LandingPage() {
+    return (
+        <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
+            <Hero />
+            <Stats />
+            <Features />
+            <Suspense fallback={<TournamentsSkeleton />}>
+                <TournamentsSection />
+            </Suspense>
+            <StreamSection />
+        </div>
+    )
 }
