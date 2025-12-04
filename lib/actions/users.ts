@@ -60,3 +60,31 @@ export async function deleteAdmin(userId: string) {
         return { message: 'Failed to delete admin' }
     }
 }
+
+export async function resetAdminPassword(
+    targetUserId: string,
+    newPassword: string,
+) {
+    const session = await import('@/lib/auth').then(m => m.getSession())
+
+    if (!session || !session.user || session.user.role !== 'SUPERADMIN') {
+        throw new Error('Unauthorized: Only SuperAdmins can reset passwords')
+    }
+
+    try {
+        const hashedPassword = await hash(newPassword, 12)
+
+        await prisma.user.update({
+            where: { id: targetUserId },
+            data: {
+                passwordHash: hashedPassword,
+            },
+        })
+
+        revalidatePath('/admin/settings')
+        return { message: 'Password reset successfully' }
+    } catch (error) {
+        console.error('Password Reset Error:', error)
+        throw new Error('Failed to reset password')
+    }
+}

@@ -70,6 +70,7 @@ export default async function SettingsPage() {
                     <UsersManager
                         users={users}
                         currentUserId={payload.user.id}
+                        currentUserRole={payload.user.role}
                     />
                 </CardContent>
             </Card>

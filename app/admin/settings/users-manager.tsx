@@ -2,18 +2,31 @@
  * File: app/admin/settings/users-manager.tsx
  * Description: Client component for managing admin users.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-04
  * License: MIT
  */
 
 'use client'
 
-import { Trash2 } from 'lucide-react'
-import { useActionState } from 'react'
+import { KeyRound, Loader2, Trash2 } from 'lucide-react'
+import { useActionState, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createAdmin, deleteAdmin } from '@/lib/actions/users'
+import {
+    createAdmin,
+    deleteAdmin,
+    resetAdminPassword,
+} from '@/lib/actions/users'
 import { cn } from '@/lib/utils'
 
 interface User {
@@ -26,6 +39,7 @@ interface User {
 interface UsersManagerProps {
     users: User[]
     currentUserId: string
+    currentUserRole: string
 }
 
 const initialState = {
@@ -33,8 +47,35 @@ const initialState = {
     errors: {},
 }
 
-export function UsersManager({ users, currentUserId }: UsersManagerProps) {
+export function UsersManager({
+    users,
+    currentUserId,
+    currentUserRole,
+}: UsersManagerProps) {
     const [state, action, isPending] = useActionState(createAdmin, initialState)
+    const [resetPasswordOpen, setResetPasswordOpen] = useState(false)
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [newPassword, setNewPassword] = useState('')
+    const [isResetting, setIsResetting] = useState(false)
+
+    const handleResetPassword = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!selectedUser || !newPassword) return
+
+        setIsResetting(true)
+        try {
+            await resetAdminPassword(selectedUser.id, newPassword)
+            toast.success(`Password updated for ${selectedUser.email}`)
+            setResetPasswordOpen(false)
+            setNewPassword('')
+            setSelectedUser(null)
+        } catch (error) {
+            console.error(error)
+            toast.error('Failed to reset password')
+        } finally {
+            setIsResetting(false)
+        }
+    }
 
     return (
         <div className="space-y-8">
@@ -104,7 +145,21 @@ export function UsersManager({ users, currentUserId }: UsersManagerProps) {
                         >
                             <div>{user.email}</div>
                             <div>{user.role}</div>
-                            <div className="text-right">
+                            <div className="text-right flex justify-end gap-2">
+                                {currentUserRole === 'SUPERADMIN' &&
+                                    user.id !== currentUserId && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-yellow-500 hover:text-yellow-600 hover:bg-yellow-100/10"
+                                            onClick={() => {
+                                                setSelectedUser(user)
+                                                setResetPasswordOpen(true)
+                                            }}
+                                        >
+                                            <KeyRound className="size-4" />
+                                        </Button>
+                                    )}
                                 {user.id !== currentUserId && (
                                     <form
                                         action={async () => {
@@ -131,6 +186,49 @@ export function UsersManager({ users, currentUserId }: UsersManagerProps) {
                     ))}
                 </div>
             </div>
+
+            <Dialog
+                open={resetPasswordOpen}
+                onOpenChange={setResetPasswordOpen}
+            >
+                <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-50">
+                    <DialogHeader>
+                        <DialogTitle>Reset Password</DialogTitle>
+                        <DialogDescription>
+                            Enter a new password for {selectedUser?.email}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleResetPassword} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="new-password">New Password</Label>
+                            <Input
+                                id="new-password"
+                                type="password"
+                                value={newPassword}
+                                onChange={e => setNewPassword(e.target.value)}
+                                required
+                                minLength={6}
+                                className="bg-zinc-900 border-zinc-800"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setResetPasswordOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isResetting}>
+                                {isResetting && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Confirm Reset
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
