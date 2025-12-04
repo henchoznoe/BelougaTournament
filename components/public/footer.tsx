@@ -33,7 +33,7 @@ export function Footer({ settings }: FooterProps) {
     const socialLinks = [
         {
             name: 'Discord',
-            href: 'https://discord.gg/belouga', // Placeholder
+            href: 'https://discord.gg/belouga',
             icon: MessageSquare,
             color: 'hover:text-[#5865F2]',
         },
@@ -45,19 +45,19 @@ export function Footer({ settings }: FooterProps) {
         },
         {
             name: 'YouTube',
-            href: 'https://youtube.com', // Placeholder
+            href: 'https://youtube.com',
             icon: Youtube,
             color: 'hover:text-[#FF0000]',
         },
         {
             name: 'TikTok',
-            href: 'https://tiktok.com', // Placeholder
+            href: 'https://tiktok.com',
             icon: Video,
             color: 'hover:text-[#00f2ea]',
         },
         {
             name: 'Instagram',
-            href: 'https://instagram.com', // Placeholder
+            href: 'https://instagram.com',
             icon: Instagram,
             color: 'hover:text-[#E1306C]',
         },
@@ -93,34 +93,38 @@ export function Footer({ settings }: FooterProps) {
     return (
         <footer className="border-t border-zinc-800 bg-zinc-950 pt-16 pb-8">
             <div className="container mx-auto px-4">
+                {/* Top Section: Logo & Title */}
+                <div className="mb-16 flex flex-col items-center justify-center text-center">
+                    <Link href="/" className="group flex flex-col items-center gap-6">
+                        <div className="relative">
+                            {settings.logoUrl ? (
+                                <Image
+                                    src={settings.logoUrl}
+                                    alt={settings.siteName}
+                                    width={120}
+                                    height={120}
+                                    className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
+                                />
+                            ) : (
+                                <Image
+                                    src="/assets/logo-bleu.png"
+                                    alt={settings.siteName}
+                                    width={120}
+                                    height={120}
+                                    className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
+                                />
+                            )}
+                            <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        </div>
+                        <span className="font-paladins text-3xl tracking-widest text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-5xl">
+                            {settings.siteName}
+                        </span>
+                    </Link>
+                </div>
+
                 <div className="grid gap-12 lg:grid-cols-4 mb-16">
-                    {/* Brand Section */}
+                    {/* Brand Section (Description & Socials) */}
                     <div className="space-y-6">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="relative">
-                                {settings.logoUrl ? (
-                                    <Image
-                                        src={settings.logoUrl}
-                                        alt={settings.siteName}
-                                        width={48}
-                                        height={48}
-                                        className="h-12 w-auto transition-transform duration-300 group-hover:scale-110"
-                                    />
-                                ) : (
-                                    <Image
-                                        src="/assets/logo-bleu.png"
-                                        alt={settings.siteName}
-                                        width={48}
-                                        height={48}
-                                        className="h-12 w-auto transition-transform duration-300 group-hover:scale-110"
-                                    />
-                                )}
-                                <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </div>
-                            <span className="font-paladins text-xl text-white tracking-wider">
-                                {settings.siteName}
-                            </span>
-                        </Link>
                         <p className="text-zinc-400 leading-relaxed">
                             La plateforme de référence pour les tournois e-sport amateurs.
                             Rejoignez la compétition et montrez votre talent.
