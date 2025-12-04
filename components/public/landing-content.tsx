@@ -75,7 +75,7 @@ export function LandingContent({ tournaments }: LandingContentProps) {
         <div className="absolute inset-0 z-0">
           <Image
             alt="Belouga Background"
-            className="object-cover opacity-40"
+            className="object-cover opacity-50"
             fill
             priority
             src="/assets/wall.png"

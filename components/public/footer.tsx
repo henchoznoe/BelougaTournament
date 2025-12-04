@@ -84,7 +84,7 @@ export function Footer({ settings }: FooterProps) {
             title: 'Support',
             links: [
                 { label: 'Contact', href: '/contact' },
-                { label: 'FAQ', href: '/faq' }, // Placeholder
+                { label: 'Administration', href: '/admin' },
                 { label: 'Mentions Légales', href: '/legal' }, // Placeholder
             ],
         },

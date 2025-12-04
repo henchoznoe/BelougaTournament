@@ -19,7 +19,7 @@ export async function login(_prevState: unknown, formData: FormData) {
     const password = formData.get('password') as string
 
     if (!email || !password) {
-        return { message: 'Email and password are required.' }
+        return { message: "L'email et le mot de passe sont requis.", email }
     }
 
     const user = await prisma.user.findUnique({
@@ -27,11 +27,11 @@ export async function login(_prevState: unknown, formData: FormData) {
     })
 
     if (!user || !(await compare(password, user.passwordHash))) {
-        return { message: 'Invalid credentials.' }
+        return { message: 'Identifiants invalides.', email }
     }
 
     if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPERADMIN) {
-        return { message: 'Unauthorized access.' }
+        return { message: 'Accès non autorisé.', email }
     }
 
     // Create session
@@ -54,5 +54,5 @@ export async function login(_prevState: unknown, formData: FormData) {
 
 export async function logout() {
     ;(await cookies()).delete('session')
-    redirect('/login')
+    redirect('/')
 }
