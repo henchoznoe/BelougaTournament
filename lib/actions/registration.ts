@@ -11,6 +11,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 
 // We can't statically define the schema here because it depends on the tournament fields.
@@ -71,7 +72,20 @@ export async function registerForTournament(
         return { message: 'Registration is closed.' }
     }
 
-    // Max participants check moved to transaction for atomicity
+    // 2. Check for duplicates
+    // We check if the contactEmail is already used for this tournament.
+    const existingRegistration = await prisma.registration.findUnique({
+        where: {
+            tournamentId_contactEmail: {
+                tournamentId,
+                contactEmail,
+            },
+        },
+    })
+
+    if (existingRegistration) {
+        return { message: 'Email already used for this tournament.' }
+    }
 
     // Validate Dynamic Fields for each player
     for (const player of players) {
@@ -83,15 +97,20 @@ export async function registerForTournament(
                     message: `Missing required field: ${field.label} for player ${player.nickname}`,
                 }
             }
-
-            // Basic type validation could go here (e.g. is it a number?)
         }
     }
 
     try {
         await prisma.$transaction(async tx => {
-            // Check max participants inside transaction to prevent race conditions
+            // 3. Max Participants Logic
+            // maxParticipants refers to the number of "Registration Slots".
+            // - For TEAM format: 1 Registration = 1 Team
+            // - For SOLO format: 1 Registration = 1 Player (or 1 Entry)
+            let status: 'PENDING' | 'APPROVED' = 'PENDING'
+
             if (tournament.maxParticipants) {
+                // Lock the table or rows if necessary, but here we rely on the transaction isolation
+                // to ensure the count is accurate at the moment of check.
                 const currentRegistrations = await tx.registration.count({
                     where: { tournamentId },
                 })
@@ -99,13 +118,22 @@ export async function registerForTournament(
                 if (currentRegistrations >= tournament.maxParticipants) {
                     throw new Error('Tournament is full.')
                 }
+
+                // 4. Auto-Approve Logic
+                // If autoApprove is enabled and we are within limits, approve immediately.
+                if (tournament.autoApprove) {
+                    status = 'APPROVED'
+                }
+            } else if (tournament.autoApprove) {
+                // If no max limit is set, but autoApprove is on, approve.
+                status = 'APPROVED'
             }
 
             // Create Registration
             const registration = await tx.registration.create({
                 data: {
                     contactEmail,
-                    status: 'PENDING',
+                    status,
                     teamName:
                         tournament.format === 'TEAM' ? teamName : undefined,
                     tournamentId,
@@ -140,9 +168,18 @@ export async function registerForTournament(
         })
     } catch (error) {
         console.error('Registration Error:', error)
-        if (error instanceof Error && error.message === 'Tournament is full.') {
-            return { message: 'Tournament is full.' }
+        if (error instanceof Error) {
+            if (error.message === 'Tournament is full.') {
+                return { message: 'Tournament is full.' }
+            }
         }
+
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                return { message: 'Email already used for this tournament.' }
+            }
+        }
+
         return { message: 'Failed to process registration. Please try again.' }
     }
 
