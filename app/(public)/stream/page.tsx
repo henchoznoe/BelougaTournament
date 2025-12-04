@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import { TwitchEmbed } from '@/components/twitch-embed'
+import { StreamWrapper } from '@/components/public/stream-wrapper'
 import { getSiteSettings } from '@/lib/data/settings'
 
 export default async function StreamPage() {
@@ -37,7 +37,7 @@ export default async function StreamPage() {
             </div>
 
             <div className="flex-1 w-full max-w-6xl mx-auto">
-                <TwitchEmbed channel={channel} />
+                <StreamWrapper channel={channel} />
             </div>
         </div>
     )

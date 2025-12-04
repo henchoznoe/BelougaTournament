@@ -1,6 +1,12 @@
 "use client";
 
-import { TwitchEmbed } from "@/components/twitch-embed";
+import { lazy, Suspense } from "react";
+
+const TwitchEmbed = lazy(() =>
+  import("@/components/twitch-embed").then((module) => ({
+    default: module.TwitchEmbed,
+  }))
+);
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -384,7 +390,15 @@ export function LandingContent({ tournaments }: LandingContentProps) {
             </div>
 
             <div className="mx-auto max-w-5xl overflow-hidden rounded-xl shadow-[0_0_50px_-10px_rgba(147,51,234,0.3)] ring-1 ring-white/10">
-              <TwitchEmbed channel="quentadoulive" />
+              <Suspense
+                fallback={
+                  <div className="flex h-[600px] w-full items-center justify-center rounded-lg bg-zinc-900 text-zinc-500">
+                    Chargement du stream...
+                  </div>
+                }
+              >
+                <TwitchEmbed channel="quentadoulive" />
+              </Suspense>
             </div>
           </div>
         </div>
