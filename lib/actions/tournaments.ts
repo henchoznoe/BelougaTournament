@@ -243,3 +243,60 @@ export async function updateTournament(
     revalidatePath(`/admin/tournaments/${id}`)
     redirect('/admin/tournaments')
 }
+
+export async function exportTournamentData(tournamentId: string) {
+    const auth = await checkAuth()
+    if (!auth.success) {
+        throw new Error(auth.message)
+    }
+
+    const tournament = await prisma.tournament.findUnique({
+        where: { id: tournamentId },
+        include: {
+            fields: {
+                orderBy: { order: 'asc' },
+            },
+            registrations: {
+                include: {
+                    players: {
+                        include: {
+                            data: true,
+                        },
+                    },
+                },
+            },
+        },
+    })
+
+    if (!tournament) {
+        throw new Error('Tournament not found')
+    }
+
+    const fields = tournament.fields
+
+    // Flatten data
+    const flattenedData = tournament.registrations.flatMap(reg => {
+        return reg.players.map(player => {
+            const row: Record<string, string> = {
+                'Registration ID': reg.id,
+                'Team Name': reg.teamName || '',
+                'Contact Email': reg.contactEmail,
+                Status: reg.status,
+                'Registration Date': reg.createdAt.toISOString(),
+                'Player Nickname': player.nickname,
+            }
+
+            // Add dynamic fields
+            for (const field of fields) {
+                const playerData = player.data.find(
+                    d => d.tournamentFieldId === field.id,
+                )
+                row[field.label] = playerData ? playerData.value : ''
+            }
+
+            return row
+        })
+    })
+
+    return JSON.stringify(flattenedData)
+}

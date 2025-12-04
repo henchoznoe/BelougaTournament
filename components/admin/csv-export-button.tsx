@@ -2,76 +2,76 @@
  * File: components/admin/csv-export-button.tsx
  * Description: Client component for exporting registration data to CSV.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-04
  * License: MIT
  */
 
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { exportTournamentData } from "@/lib/actions/tournaments";
+import { toast } from "sonner";
 
 interface CsvExportButtonProps {
-  data: any[];
-  fields: any[];
+  tournamentId: string;
 }
 
-export function CsvExportButton({ data, fields }: CsvExportButtonProps) {
+export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
+  const [isPending, startTransition] = useTransition();
+
   const handleExport = () => {
-    if (!data || data.length === 0) return;
+    startTransition(async () => {
+      try {
+        const jsonString = await exportTournamentData(tournamentId);
+        const data = JSON.parse(jsonString);
 
-    // Flatten data
-    const flattenedData = data.flatMap((reg) => {
-      return reg.players.map((player: any) => {
-        const row: any = {
-          RegistrationID: reg.id,
-          TeamName: reg.teamName || "",
-          ContactEmail: reg.contactEmail,
-          Status: reg.status,
-          RegistrationDate: new Date(reg.createdAt).toISOString(),
-          PlayerNickname: player.nickname,
-          IsCaptain: player.isCaptain ? "Yes" : "No",
-        };
+        if (!data || data.length === 0) {
+            toast.error("No data to export.");
+            return;
+        }
 
-        // Add dynamic fields
-        fields.forEach((field) => {
-          const playerData = player.data.find((d: any) => d.tournamentFieldId === field.id);
-          row[field.label] = playerData ? playerData.value : "";
-        });
+        // Convert to CSV
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+          headers.join(","),
+          ...data.map((row: any) =>
+            headers
+              .map((header) => {
+                const value = row[header] ? row[header].toString().replace(/"/g, '""') : "";
+                return `"${value}"`;
+              })
+              .join(",")
+          ),
+        ].join("\n");
 
-        return row;
-      });
+        // Download
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `tournament-${tournamentId}-registrations.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success("Export successful!");
+      } catch (error) {
+        console.error("Export failed:", error);
+        toast.error("Failed to export data.");
+      }
     });
-
-    // Convert to CSV
-    const headers = Object.keys(flattenedData[0]);
-    const csvContent = [
-      headers.join(","),
-      ...flattenedData.map((row) =>
-        headers
-          .map((header) => {
-            const value = row[header] ? row[header].toString().replace(/"/g, '""') : "";
-            return `"${value}"`;
-          })
-          .join(",")
-      ),
-    ].join("\n");
-
-    // Download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "registrations.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (
-    <Button variant="outline" onClick={handleExport}>
-      <Download className="mr-2 h-4 w-4" />
+    <Button variant="outline" onClick={handleExport} disabled={isPending}>
+      {isPending ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="mr-2 h-4 w-4" />
+      )}
       Export CSV
     </Button>
   );

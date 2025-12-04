@@ -141,10 +141,7 @@ export default async function TournamentManagerPage({
 
                 <TabsContent value="registrants" className="space-y-4">
                     <div className="flex justify-end">
-                        <CsvExportButton
-                            data={tournament.registrations}
-                            fields={tournament.fields}
-                        />
+                        <CsvExportButton tournamentId={tournament.id} />
                     </div>
 
                     <div className="rounded-md border border-zinc-800 bg-zinc-950">
