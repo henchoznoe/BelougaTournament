@@ -104,6 +104,7 @@ export function Navbar({ settings }: NavbarProps) {
                 variant="ghost"
                 size="icon"
                 className="text-zinc-400 hover:text-white hover:bg-white/10"
+                suppressHydrationWarning
               >
                 <Menu className="size-6" />
                 <span className="sr-only">Toggle menu</span>
