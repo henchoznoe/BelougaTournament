@@ -2,18 +2,18 @@
  * File: app/admin/tournaments/[id]/page.tsx
  * Description: Tournament manager page for viewing details, managing registrations, and updating settings.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-04
  * License: MIT
  */
 
 import {
+    Calendar,
     Edit,
     Eye,
+    Swords,
     Trash2,
     Trophy,
     Users,
-    Calendar,
-    Swords,
 } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -91,7 +91,7 @@ export default async function TournamentManagerPage({
         : 0
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -103,44 +103,44 @@ export default async function TournamentManagerPage({
                         </h1>
                     </div>
                     <p className="text-zinc-400 max-w-2xl">
-                        Manage registrations, bracket integration, and
-                        tournament settings.
+                        Gérez les inscriptions, l'intégration des brackets et
+                        les paramètres du tournoi.
                     </p>
                 </div>
                 <Button
                     asChild
                     variant="outline"
-                    className="h-12 border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900 hover:border-blue-500/50 hover:text-blue-400"
+                    className="h-12 border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300"
                 >
                     <Link href={`/admin/tournaments/${tournament.id}/edit`}>
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit Tournament
+                        Modifier le Tournoi
                     </Link>
                 </Button>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-zinc-900/50 border border-zinc-800 p-1 h-auto">
+                <TabsList className="bg-zinc-900/50 border border-white/10 p-1 h-auto backdrop-blur-xl">
                     <TabsTrigger
                         value="overview"
-                        className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4"
+                        className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4 text-zinc-400"
                     >
-                        Overview
+                        Vue d'ensemble
                     </TabsTrigger>
                     <TabsTrigger
                         value="registrants"
-                        className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4"
+                        className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4 text-zinc-400"
                     >
-                        Registrants ({tournament.registrations.length})
+                        Inscrits ({tournament.registrations.length})
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
+                        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-zinc-400">
-                                    Fill Rate
+                                    Remplissage
                                 </CardTitle>
                                 <Users className="h-4 w-4 text-blue-500" />
                             </CardHeader>
@@ -163,7 +163,7 @@ export default async function TournamentManagerPage({
                                 </p>
                             </CardContent>
                         </Card>
-                        <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
+                        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-zinc-400">
                                     Format
@@ -175,11 +175,11 @@ export default async function TournamentManagerPage({
                                     {tournament.format}
                                 </div>
                                 <p className="text-xs text-zinc-500 mt-1">
-                                    Tournament Structure
+                                    Structure du tournoi
                                 </p>
                             </CardContent>
                         </Card>
-                        <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
+                        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-zinc-400">
                                     Date
@@ -190,23 +190,23 @@ export default async function TournamentManagerPage({
                                 <div className="text-2xl font-bold text-white">
                                     {new Date(
                                         tournament.startDate,
-                                    ).toLocaleDateString()}
+                                    ).toLocaleDateString('fr-FR')}
                                 </div>
                                 <p className="text-xs text-zinc-500 mt-1">
-                                    Start Date
+                                    Date de début
                                 </p>
                             </CardContent>
                         </Card>
                     </div>
 
-                    <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
+                    <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
                         <CardHeader>
                             <CardTitle className="text-white">
-                                Challonge Integration
+                                Intégration Challonge
                             </CardTitle>
                             <CardDescription className="text-zinc-400">
-                                Enter the Challonge Tournament ID to embed the
-                                bracket on the public page.
+                                Entrez l'ID du tournoi Challonge pour intégrer
+                                l'arbre sur la page publique.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -219,15 +219,15 @@ export default async function TournamentManagerPage({
                             >
                                 <Input
                                     name="challongeId"
-                                    placeholder="e.g. belouga_cup_1"
+                                    placeholder="ex: belouga_cup_1"
                                     defaultValue={tournament.challongeId || ''}
-                                    className="bg-zinc-900/50 border-zinc-800 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                                 />
                                 <Button
                                     type="submit"
                                     className="bg-blue-600 hover:bg-blue-500 text-white"
                                 >
-                                    Save ID
+                                    Enregistrer l'ID
                                 </Button>
                             </form>
                         </CardContent>
@@ -239,18 +239,18 @@ export default async function TournamentManagerPage({
                         <CsvExportButton tournamentId={tournament.id} />
                     </div>
 
-                    <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 backdrop-blur-sm overflow-hidden shadow-xl">
+                    <div className="rounded-xl border border-white/10 bg-zinc-900/50 backdrop-blur-xl overflow-hidden shadow-xl">
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/50">
+                                <TableRow className="border-white/10 bg-white/5 hover:bg-white/5">
                                     <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pl-6">
-                                        Name
+                                        Nom
                                     </TableHead>
                                     <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
                                         Contact
                                     </TableHead>
                                     <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                                        Status
+                                        Statut
                                     </TableHead>
                                     <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
                                         Date
@@ -265,16 +265,16 @@ export default async function TournamentManagerPage({
                                     tournament.registrations.map(reg => (
                                         <TableRow
                                             key={reg.id}
-                                            className="border-zinc-800/50 hover:bg-white/5 transition-colors group"
+                                            className="border-white/5 hover:bg-white/5 transition-colors group"
                                         >
                                             <TableCell className="font-medium text-white py-4 pl-6">
                                                 {reg.teamName ||
                                                     reg.players[0]?.nickname ||
-                                                    'Unknown'}
+                                                    'Inconnu'}
                                                 {reg.players.length > 1 && (
                                                     <span className="ml-2 text-xs text-zinc-500">
                                                         ({reg.players.length}{' '}
-                                                        players)
+                                                        joueurs)
                                                     </span>
                                                 )}
                                             </TableCell>
@@ -293,13 +293,18 @@ export default async function TournamentManagerPage({
                                                               : 'bg-red-500/10 text-red-400 border-red-500/20'
                                                     }`}
                                                 >
-                                                    {reg.status}
+                                                    {reg.status === 'APPROVED'
+                                                        ? 'APPROUVÉ'
+                                                        : reg.status ===
+                                                            'PENDING'
+                                                          ? 'EN ATTENTE'
+                                                          : 'REFUSÉ'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-zinc-300 py-4">
                                                 {new Date(
                                                     reg.createdAt,
-                                                ).toLocaleDateString()}
+                                                ).toLocaleDateString('fr-FR')}
                                             </TableCell>
                                             <TableCell className="text-right py-4 pr-6">
                                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -313,15 +318,15 @@ export default async function TournamentManagerPage({
                                                                 <Eye className="h-4 w-4" />
                                                             </Button>
                                                         </SheetTrigger>
-                                                        <SheetContent className="overflow-y-auto bg-zinc-950 border-zinc-800 text-zinc-50 sm:max-w-xl">
+                                                        <SheetContent className="overflow-y-auto bg-zinc-950 border-white/10 text-zinc-50 sm:max-w-xl">
                                                             <SheetHeader>
                                                                 <SheetTitle className="text-2xl font-bold text-white">
-                                                                    Registration
-                                                                    Details
+                                                                    Détails de
+                                                                    l'inscription
                                                                 </SheetTitle>
                                                                 <SheetDescription>
                                                                     {reg.teamName ||
-                                                                        'Player Details'}
+                                                                        'Détails du joueur'}
                                                                 </SheetDescription>
                                                             </SheetHeader>
                                                             <div className="mt-8 space-y-6">
@@ -331,7 +336,7 @@ export default async function TournamentManagerPage({
                                                                             key={
                                                                                 player.id
                                                                             }
-                                                                            className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-6"
+                                                                            className="rounded-xl border border-white/10 bg-zinc-900/30 p-6"
                                                                         >
                                                                             <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-white">
                                                                                 {
@@ -348,13 +353,13 @@ export default async function TournamentManagerPage({
                                                                                                     d.tournamentFieldId,
                                                                                             )
                                                                                                 ?.label ||
-                                                                                            'Unknown Field'
+                                                                                            'Champ Inconnu'
                                                                                         return (
                                                                                             <div
                                                                                                 key={
                                                                                                     d.id
                                                                                                 }
-                                                                                                className="flex justify-between items-center border-b border-zinc-800/50 pb-2 last:border-0 last:pb-0"
+                                                                                                className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0"
                                                                                             >
                                                                                                 <span className="text-zinc-400">
                                                                                                     {
@@ -403,7 +408,7 @@ export default async function TournamentManagerPage({
                                             colSpan={5}
                                             className="h-32 text-center text-zinc-500"
                                         >
-                                            No registrations yet.
+                                            Aucune inscription pour le moment.
                                         </TableCell>
                                     </TableRow>
                                 )}
