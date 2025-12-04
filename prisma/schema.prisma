@@ -23,8 +23,6 @@ enum FieldType {
   NUMBER
   SELECT
   CHECKBOX
-  DISCORD_ID
-  RIOT_ID
 }
 
 enum RegistrationStatus {
@@ -92,7 +90,6 @@ model Registration {
 model Player {
   id             String       @id @default(uuid())
   nickname       String
-  isCaptain      Boolean      @default(false)
   registrationId String
   registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   data           PlayerData[]
@@ -109,10 +106,10 @@ model PlayerData {
 
 model SiteSettings {
   id            Int     @id @default(1)
-  siteName      String  @default("Belouga Tournament")
-  heroTitle     String  @default("Next Tournament")
-  logoUrl       String?
-  socialDiscord String?
-  socialTwitch  String?
-  socialTwitter String?
+  logoUrl         String?
+  socialDiscord   String?
+  socialTiktok    String?
+  socialTwitch    String?
+  socialInstagram String?
+  socialYoutube   String?
 }
