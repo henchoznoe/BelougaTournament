@@ -8,20 +8,20 @@
 
 import {
     Calendar,
-    Users,
-    Trophy,
-    Swords,
-    Video,
-    Info,
     ChevronRight,
+    Info,
+    Swords,
+    Trophy,
+    Users,
+    Video,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import { RegistrationForm } from '@/components/tournament/registration-form'
-import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { prisma } from '@/lib/prisma'
 
 async function getTournament(slug: string) {
     return await prisma.tournament.findUnique({

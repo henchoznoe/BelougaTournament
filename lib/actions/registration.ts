@@ -8,12 +8,12 @@
 
 'use server'
 
+import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { Prisma } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
+import { prisma } from '@/lib/prisma'
 
 // We can't statically define the schema here because it depends on the tournament fields.
 // We will validate the structure of the incoming data, and then validate the dynamic fields against the DB.
