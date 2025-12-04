@@ -75,7 +75,6 @@ export function LandingContent({ tournaments }: LandingContentProps) {
             src="/assets/wall.png"
           />
           <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center mask-[linear-gradient(180deg,white,rgba(255,255,255,0))]" />
         </div>
 
         <motion.div
@@ -142,7 +141,7 @@ export function LandingContent({ tournaments }: LandingContentProps) {
               size="lg"
               variant="outline"
             >
-              <Link href="#tournaments">Voir tous les tournois</Link>
+              <Link href="/tournaments">Voir tous les tournois</Link>
             </Button>
           </motion.div>
         </motion.div>
