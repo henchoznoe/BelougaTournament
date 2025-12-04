@@ -12,7 +12,7 @@ import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { updateSiteSettings } from '@/lib/actions/settings'
+import { updateSettings } from '@/lib/actions/settings'
 
 import { cn } from '@/lib/utils'
 
@@ -34,14 +34,14 @@ const initialState = {
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const [state, action, isPending] = useActionState(
-        updateSiteSettings,
+        updateSettings,
         initialState,
     )
 
     return (
         <form action={action} className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="logoFile">Logo</Label>
+                <Label htmlFor="logo">Logo</Label>
                 <div className="flex items-center gap-4">
                     {initialSettings.logoUrl && (
                         // biome-ignore lint/performance/noImgElement: dynamic logo size
@@ -51,12 +51,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                             className="h-10 w-auto rounded border border-zinc-200 bg-white p-1"
                         />
                     )}
-                    <Input
-                        id="logoFile"
-                        name="logoFile"
-                        type="file"
-                        accept="image/*"
-                    />
+                    <Input id="logo" name="logo" type="file" accept="image/*" />
                     <input
                         type="hidden"
                         name="logoUrl"

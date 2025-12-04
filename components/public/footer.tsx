@@ -19,19 +19,10 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getSiteSettings } from '@/lib/data/settings'
 
-interface FooterProps {
-    settings: {
-        logoUrl: string | null
-        socialDiscord: string | null
-        socialTwitch: string | null
-        socialTiktok: string | null
-        socialInstagram: string | null
-        socialYoutube: string | null
-    }
-}
-
-export function Footer({ settings }: FooterProps) {
+export async function Footer() {
+    const settings = await getSiteSettings()
     const currentYear = new Date().getFullYear()
     const siteName = "Belouga Tournament"
 

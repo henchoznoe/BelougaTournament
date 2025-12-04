@@ -35,6 +35,7 @@ export async function sendEmail({ to, subject, html }: EmailPayload) {
 export function generateRegistrationEmailHtml(
     tournamentTitle: string,
     status: string,
+    cancellationUrl: string,
 ) {
     return `
     <div style="font-family: sans-serif; color: #333;">
@@ -42,6 +43,9 @@ export function generateRegistrationEmailHtml(
       <p>Thank you for registering for <strong>${tournamentTitle}</strong>.</p>
       <p>Your current registration status is: <strong>${status}</strong>.</p>
       <p>We will notify you if there are any changes to your status.</p>
+      <br/>
+      <p>If you wish to cancel your registration, you can do so by clicking the link below:</p>
+      <p><a href="${cancellationUrl}" style="color: #ef4444;">Cancel my registration</a></p>
       <br/>
       <p>Best regards,</p>
       <p>The Belouga Tournament Team</p>

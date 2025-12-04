@@ -31,6 +31,7 @@ export type RegistrationMinAggregateOutputType = {
   status: $Enums.RegistrationStatus | null
   createdAt: Date | null
   tournamentId: string | null
+  cancellationToken: string | null
 }
 
 export type RegistrationMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type RegistrationMaxAggregateOutputType = {
   status: $Enums.RegistrationStatus | null
   createdAt: Date | null
   tournamentId: string | null
+  cancellationToken: string | null
 }
 
 export type RegistrationCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type RegistrationCountAggregateOutputType = {
   status: number
   createdAt: number
   tournamentId: number
+  cancellationToken: number
   _all: number
 }
 
@@ -60,6 +63,7 @@ export type RegistrationMinAggregateInputType = {
   status?: true
   createdAt?: true
   tournamentId?: true
+  cancellationToken?: true
 }
 
 export type RegistrationMaxAggregateInputType = {
@@ -69,6 +73,7 @@ export type RegistrationMaxAggregateInputType = {
   status?: true
   createdAt?: true
   tournamentId?: true
+  cancellationToken?: true
 }
 
 export type RegistrationCountAggregateInputType = {
@@ -78,6 +83,7 @@ export type RegistrationCountAggregateInputType = {
   status?: true
   createdAt?: true
   tournamentId?: true
+  cancellationToken?: true
   _all?: true
 }
 
@@ -160,6 +166,7 @@ export type RegistrationGroupByOutputType = {
   status: $Enums.RegistrationStatus
   createdAt: Date
   tournamentId: string
+  cancellationToken: string
   _count: RegistrationCountAggregateOutputType | null
   _min: RegistrationMinAggregateOutputType | null
   _max: RegistrationMaxAggregateOutputType | null
@@ -190,6 +197,7 @@ export type RegistrationWhereInput = {
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   tournamentId?: Prisma.StringFilter<"Registration"> | string
+  cancellationToken?: Prisma.StringFilter<"Registration"> | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
   players?: Prisma.PlayerListRelationFilter
 }
@@ -201,6 +209,7 @@ export type RegistrationOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournamentId?: Prisma.SortOrder
+  cancellationToken?: Prisma.SortOrder
   tournament?: Prisma.TournamentOrderByWithRelationInput
   players?: Prisma.PlayerOrderByRelationAggregateInput
 }
@@ -216,6 +225,7 @@ export type RegistrationWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   tournamentId?: Prisma.StringFilter<"Registration"> | string
+  cancellationToken?: Prisma.StringFilter<"Registration"> | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
   players?: Prisma.PlayerListRelationFilter
 }, "id" | "tournamentId_contactEmail">
@@ -227,6 +237,7 @@ export type RegistrationOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournamentId?: Prisma.SortOrder
+  cancellationToken?: Prisma.SortOrder
   _count?: Prisma.RegistrationCountOrderByAggregateInput
   _max?: Prisma.RegistrationMaxOrderByAggregateInput
   _min?: Prisma.RegistrationMinOrderByAggregateInput
@@ -242,6 +253,7 @@ export type RegistrationScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumRegistrationStatusWithAggregatesFilter<"Registration"> | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Registration"> | Date | string
   tournamentId?: Prisma.StringWithAggregatesFilter<"Registration"> | string
+  cancellationToken?: Prisma.StringWithAggregatesFilter<"Registration"> | string
 }
 
 export type RegistrationCreateInput = {
@@ -250,6 +262,7 @@ export type RegistrationCreateInput = {
   contactEmail: string
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
+  cancellationToken?: string
   tournament: Prisma.TournamentCreateNestedOneWithoutRegistrationsInput
   players?: Prisma.PlayerCreateNestedManyWithoutRegistrationInput
 }
@@ -261,6 +274,7 @@ export type RegistrationUncheckedCreateInput = {
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
   tournamentId: string
+  cancellationToken?: string
   players?: Prisma.PlayerUncheckedCreateNestedManyWithoutRegistrationInput
 }
 
@@ -270,6 +284,7 @@ export type RegistrationUpdateInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutRegistrationsNestedInput
   players?: Prisma.PlayerUpdateManyWithoutRegistrationNestedInput
 }
@@ -281,6 +296,7 @@ export type RegistrationUncheckedUpdateInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
   players?: Prisma.PlayerUncheckedUpdateManyWithoutRegistrationNestedInput
 }
 
@@ -291,6 +307,7 @@ export type RegistrationCreateManyInput = {
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
   tournamentId: string
+  cancellationToken?: string
 }
 
 export type RegistrationUpdateManyMutationInput = {
@@ -299,6 +316,7 @@ export type RegistrationUpdateManyMutationInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type RegistrationUncheckedUpdateManyInput = {
@@ -308,6 +326,7 @@ export type RegistrationUncheckedUpdateManyInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type RegistrationListRelationFilter = {
@@ -332,6 +351,7 @@ export type RegistrationCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournamentId?: Prisma.SortOrder
+  cancellationToken?: Prisma.SortOrder
 }
 
 export type RegistrationMaxOrderByAggregateInput = {
@@ -341,6 +361,7 @@ export type RegistrationMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournamentId?: Prisma.SortOrder
+  cancellationToken?: Prisma.SortOrder
 }
 
 export type RegistrationMinOrderByAggregateInput = {
@@ -350,6 +371,7 @@ export type RegistrationMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournamentId?: Prisma.SortOrder
+  cancellationToken?: Prisma.SortOrder
 }
 
 export type RegistrationScalarRelationFilter = {
@@ -423,6 +445,7 @@ export type RegistrationCreateWithoutTournamentInput = {
   contactEmail: string
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
+  cancellationToken?: string
   players?: Prisma.PlayerCreateNestedManyWithoutRegistrationInput
 }
 
@@ -432,6 +455,7 @@ export type RegistrationUncheckedCreateWithoutTournamentInput = {
   contactEmail: string
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
+  cancellationToken?: string
   players?: Prisma.PlayerUncheckedCreateNestedManyWithoutRegistrationInput
 }
 
@@ -471,6 +495,7 @@ export type RegistrationScalarWhereInput = {
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   tournamentId?: Prisma.StringFilter<"Registration"> | string
+  cancellationToken?: Prisma.StringFilter<"Registration"> | string
 }
 
 export type RegistrationCreateWithoutPlayersInput = {
@@ -479,6 +504,7 @@ export type RegistrationCreateWithoutPlayersInput = {
   contactEmail: string
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
+  cancellationToken?: string
   tournament: Prisma.TournamentCreateNestedOneWithoutRegistrationsInput
 }
 
@@ -489,6 +515,7 @@ export type RegistrationUncheckedCreateWithoutPlayersInput = {
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
   tournamentId: string
+  cancellationToken?: string
 }
 
 export type RegistrationCreateOrConnectWithoutPlayersInput = {
@@ -513,6 +540,7 @@ export type RegistrationUpdateWithoutPlayersInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutRegistrationsNestedInput
 }
 
@@ -523,6 +551,7 @@ export type RegistrationUncheckedUpdateWithoutPlayersInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type RegistrationCreateManyTournamentInput = {
@@ -531,6 +560,7 @@ export type RegistrationCreateManyTournamentInput = {
   contactEmail: string
   status?: $Enums.RegistrationStatus
   createdAt?: Date | string
+  cancellationToken?: string
 }
 
 export type RegistrationUpdateWithoutTournamentInput = {
@@ -539,6 +569,7 @@ export type RegistrationUpdateWithoutTournamentInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
   players?: Prisma.PlayerUpdateManyWithoutRegistrationNestedInput
 }
 
@@ -548,6 +579,7 @@ export type RegistrationUncheckedUpdateWithoutTournamentInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
   players?: Prisma.PlayerUncheckedUpdateManyWithoutRegistrationNestedInput
 }
 
@@ -557,6 +589,7 @@ export type RegistrationUncheckedUpdateManyWithoutTournamentInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancellationToken?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -597,6 +630,7 @@ export type RegistrationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   status?: boolean
   createdAt?: boolean
   tournamentId?: boolean
+  cancellationToken?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   players?: boolean | Prisma.Registration$playersArgs<ExtArgs>
   _count?: boolean | Prisma.RegistrationCountOutputTypeDefaultArgs<ExtArgs>
@@ -609,6 +643,7 @@ export type RegistrationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   createdAt?: boolean
   tournamentId?: boolean
+  cancellationToken?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["registration"]>
 
@@ -619,6 +654,7 @@ export type RegistrationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   createdAt?: boolean
   tournamentId?: boolean
+  cancellationToken?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["registration"]>
 
@@ -629,9 +665,10 @@ export type RegistrationSelectScalar = {
   status?: boolean
   createdAt?: boolean
   tournamentId?: boolean
+  cancellationToken?: boolean
 }
 
-export type RegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamName" | "contactEmail" | "status" | "createdAt" | "tournamentId", ExtArgs["result"]["registration"]>
+export type RegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamName" | "contactEmail" | "status" | "createdAt" | "tournamentId" | "cancellationToken", ExtArgs["result"]["registration"]>
 export type RegistrationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   players?: boolean | Prisma.Registration$playersArgs<ExtArgs>
@@ -657,6 +694,7 @@ export type $RegistrationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     status: $Enums.RegistrationStatus
     createdAt: Date
     tournamentId: string
+    cancellationToken: string
   }, ExtArgs["result"]["registration"]>
   composites: {}
 }
@@ -1088,6 +1126,7 @@ export interface RegistrationFieldRefs {
   readonly status: Prisma.FieldRef<"Registration", 'RegistrationStatus'>
   readonly createdAt: Prisma.FieldRef<"Registration", 'DateTime'>
   readonly tournamentId: Prisma.FieldRef<"Registration", 'String'>
+  readonly cancellationToken: Prisma.FieldRef<"Registration", 'String'>
 }
     
 

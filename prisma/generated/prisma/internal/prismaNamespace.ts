@@ -1020,7 +1020,8 @@ export const RegistrationScalarFieldEnum = {
   contactEmail: 'contactEmail',
   status: 'status',
   createdAt: 'createdAt',
-  tournamentId: 'tournamentId'
+  tournamentId: 'tournamentId',
+  cancellationToken: 'cancellationToken'
 } as const
 
 export type RegistrationScalarFieldEnum = (typeof RegistrationScalarFieldEnum)[keyof typeof RegistrationScalarFieldEnum]

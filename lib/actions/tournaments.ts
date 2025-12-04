@@ -77,8 +77,11 @@ export async function createTournament(
         console.error('Database Error:', error)
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === 'P2002' &&
-            (error.meta?.target as string[])?.includes('slug')
+            (error as Prisma.PrismaClientKnownRequestError).code === 'P2002' &&
+            (
+                (error as Prisma.PrismaClientKnownRequestError).meta
+                    ?.target as string[]
+            )?.includes('slug')
         ) {
             return {
                 message:

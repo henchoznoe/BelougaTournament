@@ -22,12 +22,9 @@ const settingsSchema = z.object({
     socialYoutube: z.string().optional().or(z.literal('')),
 })
 
-export async function updateSiteSettings(
-    _prevState: unknown,
-    formData: FormData,
-) {
+export async function updateSettings(_prevState: unknown, formData: FormData) {
     let logoUrl = formData.get('logoUrl') as string
-    const logoFile = formData.get('logoFile') as File
+    const logoFile = formData.get('logo') as File
 
     if (logoFile && logoFile.size > 0) {
         try {

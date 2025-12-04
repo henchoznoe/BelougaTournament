@@ -6,10 +6,11 @@
  * License: MIT
  */
 
-import { Edit, Eye, Trash2 } from 'lucide-react'
+import { Edit } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CsvExportButton } from '@/components/admin/csv-export-button'
+import { RegistrationsTable } from '@/components/admin/registrations-table'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -19,28 +20,11 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-    deleteRegistration,
-    updateChallongeId,
-} from '@/lib/actions/tournament-manager'
+import { updateChallongeId } from '@/lib/actions/tournament-manager'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 async function getTournament(id: string) {
     return await prisma.tournament.findUnique({
@@ -164,169 +148,9 @@ export default async function TournamentManagerPage({
                     </div>
 
                     <div className="rounded-md border border-zinc-800 bg-zinc-950">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-zinc-800 hover:bg-zinc-900/50">
-                                    <TableHead className="text-zinc-400">
-                                        Name
-                                    </TableHead>
-                                    <TableHead className="text-zinc-400">
-                                        Contact
-                                    </TableHead>
-                                    <TableHead className="text-zinc-400">
-                                        Status
-                                    </TableHead>
-                                    <TableHead className="text-zinc-400">
-                                        Date
-                                    </TableHead>
-                                    <TableHead className="text-right text-zinc-400">
-                                        Actions
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {tournament.registrations.length > 0 ? (
-                                    tournament.registrations.map(reg => (
-                                        <TableRow
-                                            key={reg.id}
-                                            className="border-zinc-800 hover:bg-zinc-900/50"
-                                        >
-                                            <TableCell className="font-medium text-white">
-                                                {reg.teamName ||
-                                                    reg.players[0]?.nickname ||
-                                                    'Unknown'}
-                                                {reg.players.length > 1 && (
-                                                    <span className="ml-2 text-xs text-zinc-500">
-                                                        ({reg.players.length}{' '}
-                                                        players)
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-zinc-300">
-                                                {reg.contactEmail}
-                                            </TableCell>
-                                            <TableCell className="text-zinc-300">
-                                                {reg.status}
-                                            </TableCell>
-                                            <TableCell className="text-zinc-300">
-                                                {new Date(
-                                                    reg.createdAt,
-                                                ).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Sheet>
-                                                        <SheetTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="size-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
-                                                            >
-                                                                <Eye className="size-4" />
-                                                            </Button>
-                                                        </SheetTrigger>
-                                                        <SheetContent className="overflow-y-auto bg-zinc-950 border-zinc-800 text-zinc-50">
-                                                            <SheetHeader>
-                                                                <SheetTitle className="text-white">
-                                                                    Registration
-                                                                    Details
-                                                                </SheetTitle>
-                                                                <SheetDescription>
-                                                                    {reg.teamName ||
-                                                                        'Player Details'}
-                                                                </SheetDescription>
-                                                            </SheetHeader>
-                                                            <div className="mt-6 space-y-6">
-                                                                {reg.players.map(
-                                                                    player => (
-                                                                        <div
-                                                                            key={
-                                                                                player.id
-                                                                            }
-                                                                            className="rounded-lg border border-zinc-800 p-4"
-                                                                        >
-                                                                            <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                                                                                {
-                                                                                    player.nickname
-                                                                                }
-                                                                                {player.isCaptain && (
-                                                                                    <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded">
-                                                                                        Captain
-                                                                                    </span>
-                                                                                )}
-                                                                            </h4>
-                                                                            <div className="space-y-2 text-sm">
-                                                                                {player.data.map(
-                                                                                    d => {
-                                                                                        const fieldLabel =
-                                                                                            tournament.fields.find(
-                                                                                                f =>
-                                                                                                    f.id ===
-                                                                                                    d.tournamentFieldId,
-                                                                                            )
-                                                                                                ?.label ||
-                                                                                            'Unknown Field'
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={
-                                                                                                    d.id
-                                                                                                }
-                                                                                                className="flex justify-between border-b border-zinc-800/50 pb-1 last:border-0"
-                                                                                            >
-                                                                                                <span className="text-zinc-400">
-                                                                                                    {
-                                                                                                        fieldLabel
-                                                                                                    }
-                                                                                                    :
-                                                                                                </span>
-                                                                                                <span className="text-white font-medium">
-                                                                                                    {
-                                                                                                        d.value
-                                                                                                    }
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        )
-                                                                                    },
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    ),
-                                                                )}
-                                                            </div>
-                                                        </SheetContent>
-                                                    </Sheet>
-
-                                                    <form
-                                                        action={deleteRegistration.bind(
-                                                            null,
-                                                            reg.id,
-                                                            tournament.id,
-                                                        )}
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="size-8 text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                                                        >
-                                                            <Trash2 className="size-4" />
-                                                        </Button>
-                                                    </form>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={5}
-                                            className="h-24 text-center text-zinc-500"
-                                        >
-                                            No registrations yet.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                        <RegistrationsTable
+                            registrations={tournament.registrations}
+                        />
                     </div>
                 </TabsContent>
             </Tabs>

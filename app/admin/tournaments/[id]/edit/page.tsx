@@ -11,6 +11,8 @@ import { TournamentForm } from '@/components/admin/tournament-form'
 import { updateTournament } from '@/lib/actions/tournaments'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 async function getTournament(id: string) {
     return await prisma.tournament.findUnique({
         where: { id },

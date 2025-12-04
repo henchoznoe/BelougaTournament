@@ -84,6 +84,8 @@ model Registration {
   tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   players      Player[]
 
+  cancellationToken String @default(uuid())
+
   @@unique([tournamentId, contactEmail])
 }
 

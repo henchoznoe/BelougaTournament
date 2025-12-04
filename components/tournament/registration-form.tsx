@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { registerForTournament } from "@/lib/actions/registration";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Prisma } from "@prisma/client";
+import { Prisma, TournamentField } from "@prisma/client";
 import { Plus, Trash2, User, Mail, Gamepad2, Users, Trophy } from "lucide-react";
 import { useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -34,7 +34,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
   // 1. Generate Zod Schema dynamically based on tournament fields and format
   const formSchema = useMemo(() => {
     const fieldSchema = z.object(
-      tournament.fields.reduce((acc, field) => {
+      tournament.fields.reduce((acc: Record<string, z.ZodTypeAny>, field: TournamentField) => {
         let validator: any = z.string();
 
         if (field.type === "NUMBER") {
@@ -77,7 +77,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
       players: Array.from({ length: tournament.format === "SOLO" ? 1 : Math.max(1, tournament.teamSize) }).map((_, i) => ({
         nickname: "",
         isCaptain: i === 0,
-        data: tournament.fields.reduce((acc, field) => ({ ...acc, [field.id]: "" }), {}),
+        data: tournament.fields.reduce((acc: Record<string, string>, field: TournamentField) => ({ ...acc, [field.id]: "" }), {}),
       })),
     },
   });
@@ -176,7 +176,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                 onClick={() => append({
                  nickname: "",
                  isCaptain: false,
-                 data: tournament.fields.reduce((acc, field) => ({ ...acc, [field.id]: "" }), {})
+                 data: tournament.fields.reduce((acc: Record<string, string>, field: TournamentField) => ({ ...acc, [field.id]: "" }), {})
                })}
                className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-600"
                >
@@ -235,7 +235,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                         />
 
                         {/* Dynamic Fields Loop */}
-                        {tournament.fields.map((customField) => (
+                        {tournament.fields.map((customField: TournamentField) => (
                         <FormField
                             key={customField.id}
                             control={form.control}

@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import { Mail, MessageSquare, Twitter, Video } from 'lucide-react'
+import { Mail, MessageSquare, Video } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,34 +80,6 @@ export default async function ContactPage() {
                                         rel="noopener noreferrer"
                                     >
                                         Join Discord
-                                    </Link>
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {settings.socialTwitter && (
-                        <Card className="bg-zinc-900 border-zinc-800">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-white">
-                                    <Twitter className="size-5 text-sky-500" />
-                                    Twitter / X
-                                </CardTitle>
-                                <CardDescription className="text-zinc-400">
-                                    Follow us for the latest news
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button
-                                    asChild
-                                    className="w-full bg-black hover:bg-zinc-800 text-white border border-zinc-800"
-                                >
-                                    <Link
-                                        href={settings.socialTwitter}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Follow on X
                                     </Link>
                                 </Button>
                             </CardContent>

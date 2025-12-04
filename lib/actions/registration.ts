@@ -8,12 +8,14 @@
 
 'use server'
 
-import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { prisma } from '@/lib/prisma'
+import type { Registration } from '@/prisma/generated/prisma/client'
+import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import { Prisma } from '@prisma/client'
 
 // We can't statically define the schema here because it depends on the tournament fields.
 // We will validate the structure of the incoming data, and then validate the dynamic fields against the DB.
@@ -24,7 +26,6 @@ const baseRegistrationSchema = z.object({
         .array(
             z.object({
                 data: z.record(z.string(), z.string()), // fieldId -> value
-                isCaptain: z.boolean().default(false),
                 nickname: z.string().min(1, 'Nickname is required'),
             }),
         )
@@ -101,15 +102,16 @@ export async function registerForTournament(
         }
     }
 
-    let finalStatus: 'PENDING' | 'APPROVED' = 'PENDING'
+    let finalStatus: RegistrationStatus = 'PENDING'
+    let registration: Registration | null = null
 
     try {
-        await prisma.$transaction(async tx => {
+        registration = await prisma.$transaction(async tx => {
             // 3. Max Participants Logic
             // maxParticipants refers to the number of "Registration Slots".
             // - For TEAM format: 1 Registration = 1 Team
             // - For SOLO format: 1 Registration = 1 Player (or 1 Entry)
-            let status: 'PENDING' | 'APPROVED' = 'PENDING'
+            let status: RegistrationStatus = 'PENDING'
 
             if (tournament.maxParticipants) {
                 // Lock the table or rows if necessary, but here we rely on the transaction isolation
@@ -119,13 +121,11 @@ export async function registerForTournament(
                 })
 
                 if (currentRegistrations >= tournament.maxParticipants) {
-                    throw new Error('Tournament is full.')
-                }
-
-                // 4. Auto-Approve Logic
-                // If autoApprove is enabled and we are within limits, approve immediately.
-                if (tournament.autoApprove) {
+                    status = 'WAITLIST'
+                } else if (tournament.autoApprove) {
                     status = 'APPROVED'
+                } else {
+                    status = 'PENDING'
                 }
             } else if (tournament.autoApprove) {
                 // If no max limit is set, but autoApprove is on, approve.
@@ -178,6 +178,7 @@ export async function registerForTournament(
                     })
                 }
             }
+            return registration
         })
     } catch (error) {
         console.error('Registration Error:', error)
@@ -188,7 +189,9 @@ export async function registerForTournament(
         }
 
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2002') {
+            if (
+                (error as Prisma.PrismaClientKnownRequestError).code === 'P2002'
+            ) {
                 return { message: 'Email already used for this tournament.' }
             }
         }
@@ -196,10 +199,17 @@ export async function registerForTournament(
         return { message: 'Failed to process registration. Please try again.' }
     }
 
+    if (!registration) {
+        return { message: 'Failed to process registration.' }
+    }
+
+    const cancellationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/cancel-registration?id=${registration.id}&token=${registration.cancellationToken}`
+
     // Send Confirmation Email
     const emailHtml = generateRegistrationEmailHtml(
         tournament.title,
         finalStatus,
+        cancellationUrl,
     )
 
     await sendEmail({
@@ -208,6 +218,43 @@ export async function registerForTournament(
         html: emailHtml,
     })
 
+    const message =
+        (finalStatus as RegistrationStatus) === 'WAITLIST'
+            ? 'Registration successful! You have been placed on the waitlist.'
+            : 'Registration successful!'
+
     revalidatePath(`/tournaments/${tournament.slug}`)
-    redirect(`/tournaments/${tournament.slug}?success=true`)
+    redirect(
+        `/tournaments/${tournament.slug}?success=true&message=${encodeURIComponent(message)}`,
+    )
+}
+
+export async function cancelRegistration(id: string, token: string) {
+    try {
+        const registration = await prisma.registration.findUnique({
+            where: { id },
+            include: { tournament: true },
+        })
+
+        if (!registration) {
+            return { success: false, message: 'Registration not found.' }
+        }
+
+        if (registration.cancellationToken !== token) {
+            return { success: false, message: 'Invalid cancellation token.' }
+        }
+
+        await prisma.registration.delete({
+            where: { id },
+        })
+
+        revalidatePath(`/tournaments/${registration.tournament.slug}`)
+        return {
+            success: true,
+            message: 'Registration cancelled successfully.',
+        }
+    } catch (error) {
+        console.error('Cancellation Error:', error)
+        return { success: false, message: 'Failed to cancel registration.' }
+    }
 }
