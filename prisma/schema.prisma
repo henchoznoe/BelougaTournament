@@ -27,6 +27,13 @@ enum FieldType {
   RIOT_ID
 }
 
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WAITLIST
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -50,6 +57,7 @@ model Tournament {
   teamSize          Int               @default(1)
   challongeId       String? // Optional - for embedding brackets
   streamUrl         String? // Optional
+  autoApprove       Boolean           @default(false)
   isArchived        Boolean           @default(false)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -72,11 +80,13 @@ model Registration {
   id           String     @id @default(uuid())
   teamName     String? // Optional - used if format is TEAM
   contactEmail String
-  status       String     @default("PENDING") // e.g., PENDING, APPROVED, REJECTED
+  status       RegistrationStatus @default(PENDING)
   createdAt    DateTime   @default(now())
   tournamentId String
   tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   players      Player[]
+
+  @@unique([tournamentId, contactEmail])
 }
 
 model Player {
