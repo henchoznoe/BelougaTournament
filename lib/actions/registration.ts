@@ -13,6 +13,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 
 // We can't statically define the schema here because it depends on the tournament fields.
 // We will validate the structure of the incoming data, and then validate the dynamic fields against the DB.
@@ -100,6 +101,8 @@ export async function registerForTournament(
         }
     }
 
+    let finalStatus: 'PENDING' | 'APPROVED' = 'PENDING'
+
     try {
         await prisma.$transaction(async tx => {
             // 3. Max Participants Logic
@@ -129,6 +132,8 @@ export async function registerForTournament(
                 status = 'APPROVED'
             }
 
+            finalStatus = status
+
             // Create Registration
             const registration = await tx.registration.create({
                 data: {
@@ -144,7 +149,15 @@ export async function registerForTournament(
             for (const player of players) {
                 const createdPlayer = await tx.player.create({
                     data: {
-                        isCaptain: player.isCaptain,
+                        // isCaptain removed from schema in previous turn, check if it still exists in types?
+                        // If schema was updated, we should check if isCaptain is still in PlayerCreateInput
+                        // Assuming it was removed based on previous conversation summary, but let's check.
+                        // Wait, the previous conversation said "Remove isCaptain boolean field".
+                        // So I should remove it here too if it causes error.
+                        // But I see it in the code I read earlier: "isCaptain: player.isCaptain,"
+                        // Let's keep it for now, if it errors I'll fix it.
+                        // Actually, the lint error said: "Object literal may only specify known properties, and 'isCaptain' does not exist"
+                        // So I MUST remove it.
                         nickname: player.nickname,
                         registrationId: registration.id,
                     },
@@ -182,6 +195,18 @@ export async function registerForTournament(
 
         return { message: 'Failed to process registration. Please try again.' }
     }
+
+    // Send Confirmation Email
+    const emailHtml = generateRegistrationEmailHtml(
+        tournament.title,
+        finalStatus,
+    )
+
+    await sendEmail({
+        to: contactEmail,
+        subject: `Registration Received - ${tournament.title}`,
+        html: emailHtml,
+    })
 
     revalidatePath(`/tournaments/${tournament.slug}`)
     redirect(`/tournaments/${tournament.slug}?success=true`)
