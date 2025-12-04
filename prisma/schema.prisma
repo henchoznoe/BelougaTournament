@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client"
-  output   = "./generated"
+  output   = "./generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -44,27 +45,27 @@ model Tournament {
   id                String            @id @default(uuid())
   title             String
   slug              String            @unique
-  description       String // Text or RichText
+  description       String
   startDate         DateTime
   endDate           DateTime
   registrationOpen  DateTime
   registrationClose DateTime
-  maxParticipants   Int? // Optional - can apply to teams or players depending on format
+  maxParticipants   Int?
   format            TournamentFormat
   teamSize          Int               @default(1)
-  challongeId       String? // Optional - for embedding brackets
-  streamUrl         String? // Optional
+  challongeId       String?
+  streamUrl         String            @default("https://twitch.tv/quentadoulive")
   autoApprove       Boolean           @default(false)
   isArchived        Boolean           @default(false)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
-  fields            TournamentField[]
+  fields             TournamentField[]
   registrations     Registration[]
 }
 
 model TournamentField {
   id           String       @id @default(uuid())
-  label        String // e.g., "Rank", "Ubisoft ID"
+  label        String
   type         FieldType
   required     Boolean      @default(true)
   order        Int          @default(0)
@@ -75,7 +76,7 @@ model TournamentField {
 
 model Registration {
   id           String     @id @default(uuid())
-  teamName     String? // Optional - used if format is TEAM
+  teamName     String?
   contactEmail String
   status       RegistrationStatus @default(PENDING)
   createdAt    DateTime   @default(now())

@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Tournament
@@ -268,7 +268,7 @@ export type TournamentGroupByOutputType = {
   format: $Enums.TournamentFormat
   teamSize: number
   challongeId: string | null
-  streamUrl: string | null
+  streamUrl: string
   autoApprove: boolean
   isArchived: boolean
   createdAt: Date
@@ -311,7 +311,7 @@ export type TournamentWhereInput = {
   format?: Prisma.EnumTournamentFormatFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntFilter<"Tournament"> | number
   challongeId?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  streamUrl?: Prisma.StringFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
   isArchived?: Prisma.BoolFilter<"Tournament"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -333,7 +333,7 @@ export type TournamentOrderByWithRelationInput = {
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
   challongeId?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -358,7 +358,7 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   format?: Prisma.EnumTournamentFormatFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntFilter<"Tournament"> | number
   challongeId?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  streamUrl?: Prisma.StringFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
   isArchived?: Prisma.BoolFilter<"Tournament"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -380,7 +380,7 @@ export type TournamentOrderByWithAggregationInput = {
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
   challongeId?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -408,7 +408,7 @@ export type TournamentScalarWhereWithAggregatesInput = {
   format?: Prisma.EnumTournamentFormatWithAggregatesFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntWithAggregatesFilter<"Tournament"> | number
   challongeId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  streamUrl?: Prisma.StringWithAggregatesFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
   isArchived?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
@@ -428,7 +428,7 @@ export type TournamentCreateInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -450,7 +450,7 @@ export type TournamentUncheckedCreateInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -472,7 +472,7 @@ export type TournamentUpdateInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,7 +494,7 @@ export type TournamentUncheckedUpdateInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,7 +516,7 @@ export type TournamentCreateManyInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -536,7 +536,7 @@ export type TournamentUpdateManyMutationInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -556,7 +556,7 @@ export type TournamentUncheckedUpdateManyInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -707,7 +707,7 @@ export type TournamentCreateWithoutFieldsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -728,7 +728,7 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -765,7 +765,7 @@ export type TournamentUpdateWithoutFieldsInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -786,7 +786,7 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -807,7 +807,7 @@ export type TournamentCreateWithoutRegistrationsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -828,7 +828,7 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string | null
+  streamUrl?: string
   autoApprove?: boolean
   isArchived?: boolean
   createdAt?: Date | string
@@ -865,7 +865,7 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -886,7 +886,7 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1045,7 +1045,7 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     format: $Enums.TournamentFormat
     teamSize: number
     challongeId: string | null
-    streamUrl: string | null
+    streamUrl: string
     autoApprove: boolean
     isArchived: boolean
     createdAt: Date
