@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
-    "allowJs": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "target": "ES2023",
+    "strict": true,
     "esModuleInterop": true,
+    "allowJs": true,
     "incremental": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "noEmit": true,
     "paths": {
       "@/*": ["./*"]
@@ -18,9 +21,7 @@
       }
     ],
     "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2017"
+    "skipLibCheck": true
   },
   "exclude": ["node_modules"],
   "include": [
