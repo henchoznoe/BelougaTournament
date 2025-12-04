@@ -1,3 +1,11 @@
+/**
+ * File: app/(public)/cancel-registration/page.tsx
+ * Description: Page for users to cancel their registration via email link.
+ * Author: Noé Henchoz
+ * Date: 2025-12-04
+ * License: MIT
+ */
+
 import { AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -15,12 +23,13 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CancelRegistrationPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ id: string; token: string }>
+export default async function CancelRegistrationPage(props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const { id, token } = await searchParams
+    const searchParams = await props.searchParams
+    const id = typeof searchParams.id === 'string' ? searchParams.id : undefined
+    const token =
+        typeof searchParams.token === 'string' ? searchParams.token : undefined
 
     if (!id || !token) {
         return (
@@ -73,8 +82,10 @@ export default async function CancelRegistrationPage({
 
     async function handleCancel() {
         'use server'
-        await cancelRegistration(id, token)
-        redirect(`/?cancelled=true`)
+        if (id && token) {
+            await cancelRegistration(id, token)
+            redirect(`/?cancelled=true`)
+        }
     }
 
     return (

@@ -69,28 +69,35 @@ export default async function AdminDashboard() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                    <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
                         Dashboard
                     </h1>
-                    <p className="text-zinc-400 mt-1">
+                    <p className="text-zinc-400">
                         Overview of your tournament platform.
                     </p>
                 </div>
-                <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                    <Link href="/admin/tournaments/new">Create Tournament</Link>
+                <Button
+                    asChild
+                    size="lg"
+                    className="shadow-lg shadow-blue-500/20"
+                >
+                    <Link href="/admin/tournaments/new">
+                        <Trophy className="mr-2 h-5 w-5" />
+                        Create Tournament
+                    </Link>
                 </Button>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Tournaments
                         </CardTitle>
-                        <div className="size-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                        <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                             <Trophy className="size-4 text-blue-500" />
                         </div>
                     </CardHeader>
@@ -112,12 +119,12 @@ export default async function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
+                <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Registrations
                         </CardTitle>
-                        <div className="size-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                        <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
                             <Users className="size-4 text-purple-500" />
                         </div>
                     </CardHeader>
@@ -139,12 +146,12 @@ export default async function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
+                <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             Total Participants
                         </CardTitle>
-                        <div className="size-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                        <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                             <UserCheck className="size-4 text-emerald-500" />
                         </div>
                     </CardHeader>
@@ -158,12 +165,12 @@ export default async function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-900/80 transition-colors">
+                <Card className="border-zinc-800 bg-zinc-950/50 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-zinc-400">
                             System Users
                         </CardTitle>
-                        <div className="size-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                        <div className="size-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
                             <Activity className="size-4 text-orange-500" />
                         </div>
                     </CardHeader>
@@ -179,8 +186,8 @@ export default async function AdminDashboard() {
             </div>
 
             {/* Recent Registrations */}
-            <div className="grid gap-4 md:grid-cols-7">
-                <Card className="col-span-4 border-zinc-800 bg-zinc-900/50">
+            <div className="grid gap-6 md:grid-cols-7">
+                <Card className="col-span-4 border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
                             <Activity className="size-5 text-blue-500" />
@@ -193,10 +200,10 @@ export default async function AdminDashboard() {
                                 {stats.recentRegistrations.map(reg => (
                                     <div
                                         key={reg.id}
-                                        className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors"
+                                        className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition-colors"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-zinc-400">
+                                            <div className="size-10 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-zinc-400">
                                                 {(
                                                     reg.teamName ||
                                                     reg.players[0]?.nickname ||
@@ -246,7 +253,7 @@ export default async function AdminDashboard() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-6 text-[10px] text-zinc-400 hover:text-white px-2"
+                                                className="h-6 text-[10px] text-zinc-400 hover:text-white px-2 hover:bg-zinc-800"
                                                 asChild
                                             >
                                                 <Link
@@ -269,48 +276,69 @@ export default async function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="col-span-3 border-zinc-800 bg-zinc-900/50">
+                <Card className="col-span-3 border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
                             <Trophy className="size-5 text-yellow-500" />
                             Quick Actions
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-3">
                         <Button
                             variant="outline"
-                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            className="w-full h-14 justify-start border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900 hover:text-white text-zinc-300 hover:border-blue-500/30 group"
                             asChild
                         >
                             <Link href="/admin/tournaments/new">
-                                <div className="size-6 rounded bg-blue-500/20 flex items-center justify-center mr-3">
-                                    <Trophy className="size-3 text-blue-500" />
+                                <div className="size-8 rounded bg-blue-500/10 flex items-center justify-center mr-4 group-hover:bg-blue-500/20 transition-colors">
+                                    <Trophy className="size-4 text-blue-500" />
                                 </div>
-                                Create New Tournament
+                                <div className="flex flex-col items-start">
+                                    <span className="font-medium">
+                                        Create New Tournament
+                                    </span>
+                                    <span className="text-xs text-zinc-500">
+                                        Launch a new event
+                                    </span>
+                                </div>
                             </Link>
                         </Button>
                         <Button
                             variant="outline"
-                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            className="w-full h-14 justify-start border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900 hover:text-white text-zinc-300 hover:border-purple-500/30 group"
                             asChild
                         >
                             <Link href="/admin/users">
-                                <div className="size-6 rounded bg-purple-500/20 flex items-center justify-center mr-3">
-                                    <Users className="size-3 text-purple-500" />
+                                <div className="size-8 rounded bg-purple-500/10 flex items-center justify-center mr-4 group-hover:bg-purple-500/20 transition-colors">
+                                    <Users className="size-4 text-purple-500" />
                                 </div>
-                                Manage Users
+                                <div className="flex flex-col items-start">
+                                    <span className="font-medium">
+                                        Manage Users
+                                    </span>
+                                    <span className="text-xs text-zinc-500">
+                                        Admin access control
+                                    </span>
+                                </div>
                             </Link>
                         </Button>
                         <Button
                             variant="outline"
-                            className="w-full justify-start border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-300"
+                            className="w-full h-14 justify-start border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900 hover:text-white text-zinc-300 hover:border-zinc-500/30 group"
                             asChild
                         >
                             <Link href="/admin/settings">
-                                <div className="size-6 rounded bg-zinc-500/20 flex items-center justify-center mr-3">
-                                    <Settings className="size-3 text-zinc-400" />
+                                <div className="size-8 rounded bg-zinc-500/10 flex items-center justify-center mr-4 group-hover:bg-zinc-500/20 transition-colors">
+                                    <Settings className="size-4 text-zinc-400" />
                                 </div>
-                                Platform Settings
+                                <div className="flex flex-col items-start">
+                                    <span className="font-medium">
+                                        Platform Settings
+                                    </span>
+                                    <span className="text-xs text-zinc-500">
+                                        Global configuration
+                                    </span>
+                                </div>
                             </Link>
                         </Button>
                     </CardContent>

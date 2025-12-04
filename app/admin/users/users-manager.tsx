@@ -153,7 +153,7 @@ export function UsersManager({
                         onOpenChange={setCreateAdminOpen}
                     >
                         <DialogTrigger asChild>
-                            <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]">
                                 <UserPlus className="mr-2 size-4" />
                                 Add New Admin
                             </Button>
@@ -174,7 +174,7 @@ export function UsersManager({
                                         type="email"
                                         required
                                         placeholder="admin@example.com"
-                                        className="bg-zinc-900 border-zinc-800"
+                                        className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:ring-blue-500/20"
                                     />
                                     {createState?.errors?.email && (
                                         <p className="text-sm text-red-500">
@@ -190,7 +190,7 @@ export function UsersManager({
                                         type="password"
                                         required
                                         placeholder="******"
-                                        className="bg-zinc-900 border-zinc-800"
+                                        className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:ring-blue-500/20"
                                     />
                                     {createState?.errors?.password && (
                                         <p className="text-sm text-red-500">
@@ -199,7 +199,11 @@ export function UsersManager({
                                     )}
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isCreating}>
+                                    <Button
+                                        type="submit"
+                                        disabled={isCreating}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    >
                                         {isCreating ? (
                                             <>
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

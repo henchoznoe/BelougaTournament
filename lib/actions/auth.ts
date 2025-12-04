@@ -8,10 +8,10 @@
 
 'use server'
 
-import { compare } from 'bcryptjs'
+import { compare, hash } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { encrypt, UserRole } from '@/lib/auth'
+import { encrypt, getSession, UserRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function login(_prevState: unknown, formData: FormData) {
@@ -55,4 +55,28 @@ export async function login(_prevState: unknown, formData: FormData) {
 export async function logout() {
     ;(await cookies()).delete('session')
     redirect('/')
+}
+
+export async function registerAdmin(formData: FormData) {
+    const session = await getSession()
+    if (session?.user?.role !== UserRole.SUPERADMIN) {
+        throw new Error('Unauthorized')
+    }
+
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    if (!email || !password) {
+        throw new Error('Email and password are required')
+    }
+
+    const passwordHash = await hash(password, 10)
+
+    await prisma.user.create({
+        data: {
+            email,
+            passwordHash,
+            role: UserRole.ADMIN,
+        },
+    })
 }

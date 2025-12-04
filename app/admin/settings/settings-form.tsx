@@ -223,7 +223,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <Button
                     type="submit"
                     disabled={isPending}
-                    className="ml-auto bg-blue-600 hover:bg-blue-700 text-white min-w-[150px]"
+                    className="ml-auto bg-blue-600 hover:bg-blue-700 text-white min-w-[150px] shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]"
                 >
                     {isPending ? (
                         <>

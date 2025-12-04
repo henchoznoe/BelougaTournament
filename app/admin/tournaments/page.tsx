@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import { Edit, Eye, Plus } from 'lucide-react'
+import { Edit, Eye, Plus, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { DeleteTournamentButton } from '@/components/admin/delete-tournament-button'
 import { Button } from '@/components/ui/button'
@@ -36,33 +36,44 @@ export default async function TournamentsPage() {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-white">Tournaments</h1>
-                <Button asChild>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
+                        Tournaments
+                    </h1>
+                    <p className="text-zinc-400">
+                        Manage your competitive events and brackets.
+                    </p>
+                </div>
+                <Button
+                    asChild
+                    size="lg"
+                    className="shadow-lg shadow-blue-500/20"
+                >
                     <Link href="/admin/tournaments/new">
-                        <Plus className="mr-2 size-4" />
+                        <Plus className="mr-2 h-5 w-5" />
                         Create Tournament
                     </Link>
                 </Button>
             </div>
 
-            <div className="rounded-md border border-zinc-800 bg-zinc-950">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 backdrop-blur-sm overflow-hidden shadow-xl">
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-zinc-800 hover:bg-zinc-900/50">
-                            <TableHead className="text-zinc-400">
+                        <TableRow className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/50">
+                            <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pl-6">
                                 Title
                             </TableHead>
-                            <TableHead className="text-zinc-400">
+                            <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
                                 Date
                             </TableHead>
-                            <TableHead className="text-zinc-400">
+                            <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
                                 Format
                             </TableHead>
-                            <TableHead className="text-zinc-400">
+                            <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
                                 Registrants
                             </TableHead>
-                            <TableHead className="text-right text-zinc-400">
+                            <TableHead className="text-right text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pr-6">
                                 Actions
                             </TableHead>
                         </TableRow>
@@ -72,49 +83,71 @@ export default async function TournamentsPage() {
                             tournaments.map(tournament => (
                                 <TableRow
                                     key={tournament.id}
-                                    className="border-zinc-800 hover:bg-zinc-900/50"
+                                    className="border-zinc-800/50 hover:bg-white/5 transition-colors group"
                                 >
-                                    <TableCell className="font-medium text-white">
-                                        {tournament.title}
+                                    <TableCell className="font-medium text-white py-4 pl-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-8 rounded bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
+                                                <Trophy className="size-4" />
+                                            </div>
+                                            {tournament.title}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="text-zinc-300">
+                                    <TableCell className="text-zinc-300 py-4">
                                         {new Date(
                                             tournament.startDate,
                                         ).toLocaleDateString()}
                                     </TableCell>
-                                    <TableCell className="text-zinc-300">
-                                        {tournament.format}
+                                    <TableCell className="text-zinc-300 py-4">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                            {tournament.format}
+                                        </span>
                                     </TableCell>
-                                    <TableCell className="text-zinc-300">
-                                        {tournament._count.registrations}
-                                        {tournament.maxParticipants
-                                            ? ` / ${tournament.maxParticipants}`
-                                            : ''}
+                                    <TableCell className="text-zinc-300 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1.5 w-24 bg-zinc-800 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-blue-500 rounded-full"
+                                                    style={{
+                                                        width: `${Math.min(100, (tournament._count.registrations / (tournament.maxParticipants || 100)) * 100)}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                            <span className="text-xs">
+                                                {
+                                                    tournament._count
+                                                        .registrations
+                                                }
+                                                {tournament.maxParticipants
+                                                    ? ` / ${tournament.maxParticipants}`
+                                                    : ''}
+                                            </span>
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
+                                    <TableCell className="text-right py-4 pr-6">
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button
                                                 asChild
                                                 variant="ghost"
                                                 size="icon"
-                                                className="size-8 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                                                className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10"
                                             >
                                                 <Link
                                                     href={`/admin/tournaments/${tournament.id}`}
                                                 >
-                                                    <Eye className="size-4" />
+                                                    <Eye className="h-4 w-4" />
                                                 </Link>
                                             </Button>
                                             <Button
                                                 asChild
                                                 variant="ghost"
                                                 size="icon"
-                                                className="size-8 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800"
                                             >
                                                 <Link
                                                     href={`/admin/tournaments/${tournament.id}/edit`}
                                                 >
-                                                    <Edit className="size-4" />
+                                                    <Edit className="h-4 w-4" />
                                                 </Link>
                                             </Button>
                                             <DeleteTournamentButton
@@ -128,9 +161,21 @@ export default async function TournamentsPage() {
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
-                                    className="h-24 text-center text-zinc-500"
+                                    className="h-32 text-center text-zinc-500"
                                 >
-                                    No tournaments found.
+                                    <div className="flex flex-col items-center justify-center gap-2">
+                                        <Trophy className="h-8 w-8 text-zinc-700" />
+                                        <p>No tournaments found.</p>
+                                        <Button
+                                            variant="link"
+                                            asChild
+                                            className="text-blue-500"
+                                        >
+                                            <Link href="/admin/tournaments/new">
+                                                Create your first tournament
+                                            </Link>
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         )}
