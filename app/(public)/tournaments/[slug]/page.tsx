@@ -111,16 +111,6 @@ export default async function TournamentPage({
                                 {tournament.title}
                             </h1>
                         </div>
-                        {isRegistrationOpen && (
-                            <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-6 py-3 text-center backdrop-blur-sm">
-                                <div className="text-sm font-medium text-green-400 uppercase tracking-wider">
-                                    Statut
-                                </div>
-                                <div className="text-lg font-bold text-white">
-                                    Inscriptions Ouvertes
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-6 text-zinc-400 border-t border-white/10 pt-6">
