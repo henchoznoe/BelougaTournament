@@ -2,7 +2,7 @@
  * File: next.config.ts
  * Description: Next.js configuration options.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-05
  * License: MIT
  */
 
@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
                 port: '',
             },
         ],
+    },
+    experimental: {
+        serverActions: {
+            bodySizeLimit: '5mb',
+        },
     },
 }
 

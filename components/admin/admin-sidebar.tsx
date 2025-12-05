@@ -80,7 +80,7 @@ export function AdminSidebar({ userEmail, logoutAction }: AdminSidebarProps) {
 							'flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200',
 							isActive(item.href)
 								? 'bg-blue-600/10 text-blue-400 border-l-2 border-blue-500'
-								: 'text-zinc-400 hover:text-white hover:bg-white/5',
+								: 'text-zinc-400 hover:text-blue-400 hover:bg-blue-600/10  hover:border-blue-500',
 						)}
 					>
 						<item.icon className="mr-3 h-4 w-4" />
@@ -106,11 +106,10 @@ export function AdminSidebar({ userEmail, logoutAction }: AdminSidebarProps) {
 						asChild
 						variant="ghost"
 						size="sm"
-						className="w-full justify-center text-zinc-400 hover:text-white hover:bg-white/5"
+						className="w-full justify-center bg-gray-500/10 text-gray-500 hover:bg-gray-500/20 hover:text-gray-400 border border-gray-500/20 cursor-pointer"
 					>
 						<Link href="/">
-							<Home className="mr-2 h-3 w-3" />
-							Accueil
+							<Home className="h-3 w-3" />
 						</Link>
 					</Button>
 					<form action={logoutAction}>

@@ -1,23 +1,8 @@
-/**
- * File: app/admin/settings/settings-form.tsx
- * Description: Client component for updating site settings.
- * Author: Noé Henchoz
- * Date: 2025-12-04
- * License: MIT
- */
-
 'use client'
 
-import {
-    Gamepad2,
-    Instagram,
-    Loader2,
-    Save,
-    Twitch,
-    Upload,
-    Youtube,
-} from 'lucide-react'
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
+import { Save, Upload } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -29,17 +14,12 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
-import { cn } from '@/lib/utils'
+import type { SiteSettings } from '@prisma/client'
+import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 interface SettingsFormProps {
-    initialSettings: {
-        logoUrl: string | null
-        socialDiscord: string | null
-        socialTwitch: string | null
-        socialTiktok: string | null
-        socialInstagram: string | null
-        socialYoutube: string | null
-    }
+    settings: SiteSettings
 }
 
 const initialState = {
@@ -47,196 +27,203 @@ const initialState = {
     errors: {},
 }
 
-export function SettingsForm({ initialSettings }: SettingsFormProps) {
-    const [state, action, isPending] = useActionState(
+export function SettingsForm({ settings }: SettingsFormProps) {
+    const [state, formAction, isPending] = useActionState(
         updateSettings,
         initialState,
     )
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+        }
+    }
+
+    useEffect(() => {
+        if (state.message) {
+            if (state.message === 'Settings updated successfully') {
+                toast.success('Paramètres mis à jour avec succès')
+            } else if (state.message !== 'Invalid fields') {
+                toast.error('Une erreur est survenue')
+            }
+        }
+    }, [state])
 
     return (
-        <form action={action} className="space-y-8">
-            <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold text-white">
-                        Branding
-                    </CardTitle>
-                    <CardDescription className="text-zinc-400">
-                        Manage your site's visual identity.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                        <Label htmlFor="logo" className="text-zinc-200">
-                            Logo
-                        </Label>
-                        <div className="flex items-start gap-6">
-                            <div className="shrink-0">
-                                {initialSettings.logoUrl ? (
-                                    // biome-ignore lint/performance/noImgElement: dynamic logo size
-                                    <img
-                                        src={initialSettings.logoUrl}
-                                        alt="Current Logo"
-                                        className="h-24 w-24 rounded-lg border border-zinc-700 bg-zinc-950 object-contain p-2"
-                                    />
-                                ) : (
-                                    <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-900/50">
-                                        <Upload className="size-8 text-zinc-500" />
+        <form action={formAction}>
+            <div className="grid gap-6">
+                <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+                    <CardHeader>
+                        <CardTitle className="text-white">Général</CardTitle>
+                        <CardDescription className="text-zinc-400">
+                            Configuration de base du site web.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="logo" className="text-zinc-400">
+                                Logo du site
+                            </Label>
+                            <div className="grid gap-4">
+                                {(previewUrl || settings.logoUrl) && (
+                                    <div className="relative size-32 rounded-lg border border-white/10 bg-black/20 overflow-hidden group">
+                                        <Image
+                                            src={
+                                                previewUrl ||
+                                                settings.logoUrl ||
+                                                ''
+                                            }
+                                            alt="Logo preview"
+                                            fill
+                                            className="object-contain p-2"
+                                        />
                                     </div>
                                 )}
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <Input
+                                            type="hidden"
+                                            name="logoUrl"
+                                            value={settings.logoUrl || ''}
+                                        />
+                                        <Input
+                                            id="logo"
+                                            name="logo"
+                                            type="file"
+                                            accept=".png, .jpg, .jpeg"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() =>
+                                                document
+                                                    .getElementById('logo')
+                                                    ?.click()
+                                            }
+                                            className="bg-zinc-900/50 border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white"
+                                        >
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Choisir un fichier
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-zinc-500">
+                                        Format accepté : PNG, JPG.
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex-1 space-y-2">
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+                    <CardHeader>
+                        <CardTitle className="text-white">
+                            Réseaux Sociaux
+                        </CardTitle>
+                        <CardDescription className="text-zinc-400">
+                            Liens vers vos profils sociaux affichés dans le pied
+                            de page.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="socialDiscord"
+                                    className="text-zinc-400"
+                                >
+                                    Discord
+                                </Label>
                                 <Input
-                                    id="logo"
-                                    name="logo"
-                                    type="file"
-                                    accept="image/*"
-                                    className="bg-zinc-950 border-zinc-800 text-zinc-300 file:text-zinc-300 file:bg-zinc-900 file:border-0 file:mr-4 file:py-1 file:px-2 file:rounded-md hover:file:bg-zinc-800 transition-all"
+                                    id="socialDiscord"
+                                    name="socialDiscord"
+                                    defaultValue={settings.socialDiscord || ''}
+                                    placeholder="https://discord.gg/..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                                 />
-                                <p className="text-xs text-zinc-500">
-                                    Recommended size: 512x512px. Max file size:
-                                    2MB.
-                                </p>
-                                <input
-                                    type="hidden"
-                                    name="logoUrl"
-                                    value={initialSettings.logoUrl || ''}
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="socialTwitch"
+                                    className="text-zinc-400"
+                                >
+                                    Twitch
+                                </Label>
+                                <Input
+                                    id="socialTwitch"
+                                    name="socialTwitch"
+                                    defaultValue={settings.socialTwitch || ''}
+                                    placeholder="https://twitch.tv/..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="socialTiktok"
+                                    className="text-zinc-400"
+                                >
+                                    TikTok
+                                </Label>
+                                <Input
+                                    id="socialTiktok"
+                                    name="socialTiktok"
+                                    defaultValue={settings.socialTiktok || ''}
+                                    placeholder="https://tiktok.com/@..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="socialInstagram"
+                                    className="text-zinc-400"
+                                >
+                                    Instagram
+                                </Label>
+                                <Input
+                                    id="socialInstagram"
+                                    name="socialInstagram"
+                                    defaultValue={
+                                        settings.socialInstagram || ''
+                                    }
+                                    placeholder="https://instagram.com/..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="socialYoutube"
+                                    className="text-zinc-400"
+                                >
+                                    YouTube
+                                </Label>
+                                <Input
+                                    id="socialYoutube"
+                                    name="socialYoutube"
+                                    defaultValue={settings.socialYoutube || ''}
+                                    placeholder="https://youtube.com/..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                                 />
                             </div>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
 
-            <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold text-white">
-                        Social Links
-                    </CardTitle>
-                    <CardDescription className="text-zinc-400">
-                        Connect your community platforms.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="socialDiscord"
-                            className="text-zinc-200 flex items-center gap-2"
-                        >
-                            <Gamepad2 className="size-4 text-[#5865F2]" />
-                            Discord
-                        </Label>
-                        <Input
-                            id="socialDiscord"
-                            name="socialDiscord"
-                            defaultValue={initialSettings.socialDiscord || ''}
-                            placeholder="https://discord.gg/..."
-                            className="bg-zinc-950 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:border-blue-500/50 focus:ring-blue-500/20"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="socialTwitch"
-                            className="text-zinc-200 flex items-center gap-2"
-                        >
-                            <Twitch className="size-4 text-[#9146FF]" />
-                            Twitch
-                        </Label>
-                        <Input
-                            id="socialTwitch"
-                            name="socialTwitch"
-                            defaultValue={initialSettings.socialTwitch || ''}
-                            placeholder="https://twitch.tv/..."
-                            className="bg-zinc-950 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:border-purple-500/50 focus:ring-purple-500/20"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="socialYoutube"
-                            className="text-zinc-200 flex items-center gap-2"
-                        >
-                            <Youtube className="size-4 text-[#FF0000]" />
-                            YouTube
-                        </Label>
-                        <Input
-                            id="socialYoutube"
-                            name="socialYoutube"
-                            defaultValue={initialSettings.socialYoutube || ''}
-                            placeholder="https://youtube.com/..."
-                            className="bg-zinc-950 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-red-500/20"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="socialTiktok"
-                            className="text-zinc-200 flex items-center gap-2"
-                        >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="size-4 text-pink-500"
-                            >
-                                <title>TikTok</title>
-                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                            </svg>
-                            TikTok
-                        </Label>
-                        <Input
-                            id="socialTiktok"
-                            name="socialTiktok"
-                            defaultValue={initialSettings.socialTiktok || ''}
-                            placeholder="https://tiktok.com/..."
-                            className="bg-zinc-950 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:border-pink-500/50 focus:ring-pink-500/20"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="socialInstagram"
-                            className="text-zinc-200 flex items-center gap-2"
-                        >
-                            <Instagram className="size-4 text-[#E1306C]" />
-                            Instagram
-                        </Label>
-                        <Input
-                            id="socialInstagram"
-                            name="socialInstagram"
-                            defaultValue={initialSettings.socialInstagram || ''}
-                            placeholder="https://instagram.com/..."
-                            className="bg-zinc-950 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:border-pink-600/50 focus:ring-pink-600/20"
-                        />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="flex items-center justify-between">
-                {state?.message && (
-                    <p
-                        className={cn(
-                            'text-sm font-medium',
-                            state.message.includes('success')
-                                ? 'text-green-400'
-                                : 'text-red-400',
-                        )}
+                <div className="flex justify-end">
+                    <Button
+                        type="submit"
+                        size="lg"
+                        disabled={isPending}
+                        className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
                     >
-                        {state.message}
-                    </p>
-                )}
-                <Button
-                    type="submit"
-                    disabled={isPending}
-                    className="ml-auto bg-blue-600 hover:bg-blue-700 text-white min-w-[150px] shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]"
-                >
-                    {isPending ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                        </>
-                    ) : (
-                        <>
-                            <Save className="mr-2 size-4" />
-                            Save Changes
-                        </>
-                    )}
-                </Button>
+                        <Save className="mr-2 h-5 w-5" />
+                        {isPending ? 'Enregistrement...' : 'Enregistrer'}
+                    </Button>
+                </div>
             </div>
         </form>
     )

@@ -45,7 +45,7 @@ export default function RootLayout({
             >
                 <ScrollToTop />
                 {children}
-                <Toaster />
+                <Toaster richColors />
             </body>
         </html>
     )
