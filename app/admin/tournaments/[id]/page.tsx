@@ -365,11 +365,13 @@ export default async function TournamentManagerPage({
                                                     </Sheet>
 
                                                     <form
-                                                        action={deleteRegistration.bind(
-                                                            null,
-                                                            reg.id,
-                                                            tournament.id,
-                                                        )}
+                                                        action={async () => {
+                                                            'use server'
+                                                            await deleteRegistration(
+                                                                reg.id,
+                                                                tournament.id,
+                                                            )
+                                                        }}
                                                     >
                                                         <Button
                                                             variant="ghost"

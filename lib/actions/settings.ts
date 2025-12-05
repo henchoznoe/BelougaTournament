@@ -9,75 +9,126 @@
 'use server'
 
 import { put } from '@vercel/blob'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 
+// Types
+const settingString = z.string().optional().or(z.literal(''))
+
 const settingsSchema = z.object({
-    logoUrl: z.string().optional().or(z.literal('')),
-    socialDiscord: z.string().optional().or(z.literal('')),
-    socialTwitch: z.string().optional().or(z.literal('')),
-    socialTiktok: z.string().optional().or(z.literal('')),
-    socialInstagram: z.string().optional().or(z.literal('')),
-    socialYoutube: z.string().optional().or(z.literal('')),
-    statsYears: z.string().optional().or(z.literal('')),
-    statsPlayers: z.string().optional().or(z.literal('')),
-    statsTournaments: z.string().optional().or(z.literal('')),
-    statsMatches: z.string().optional().or(z.literal('')),
+    logoUrl: settingString,
+    socialDiscord: settingString,
+    socialTwitch: settingString,
+    socialTiktok: settingString,
+    socialInstagram: settingString,
+    socialYoutube: settingString,
+    statsYears: settingString,
+    statsPlayers: settingString,
+    statsTournaments: settingString,
+    statsMatches: settingString,
 })
 
-export async function updateSettings(_prevState: unknown, formData: FormData) {
-    let logoUrl = formData.get('logoUrl') as string
-    const logoFile = formData.get('logo') as File
+export type SettingsState = {
+    message: string
+    errors?: Record<string, string[]>
+    success?: boolean
+}
 
-    if (logoFile && logoFile.size > 0) {
-        try {
-            const blob = await put(logoFile.name, logoFile, {
-                access: 'public',
-                allowOverwrite: true,
-            })
-            logoUrl = blob.url
-        } catch (error) {
-            console.error('Blob upload error:', error)
-            return { message: 'Failed to upload logo' }
-        }
+// Constants
+const DB_CONFIG = {
+    SINGLETON_ID: 1,
+} as const
+
+const CACHE_TAGS = {
+    SETTINGS: 'site-settings',
+} as const
+
+const FORM_KEYS = {
+    LOGO_FILE: 'logo',
+    LOGO_URL: 'logoUrl',
+} as const
+
+const MESSAGES = {
+    SUCCESS: 'Settings updated successfully.',
+    ERR_UPLOAD: 'Failed to upload logo file.',
+    ERR_VALIDATION: 'Invalid form data. Please check your inputs.',
+    ERR_DB: 'Database error: Failed to save settings.',
+} as const
+
+const uploadLogoIfNeeded = async (
+    formData: FormData,
+    existingUrl: string,
+): Promise<string> => {
+    const logoFile = formData.get(FORM_KEYS.LOGO_FILE) as File | null
+
+    // If no file or empty file, return existing URL
+    if (!logoFile || logoFile.size === 0) {
+        return existingUrl
     }
 
-    const data = {
-        logoUrl,
-        socialDiscord: formData.get('socialDiscord') as string,
-        socialTwitch: formData.get('socialTwitch') as string,
-        socialTiktok: formData.get('socialTiktok') as string,
-        socialInstagram: formData.get('socialInstagram') as string,
-        socialYoutube: formData.get('socialYoutube') as string,
-        statsYears: formData.get('statsYears') as string,
-        statsPlayers: formData.get('statsPlayers') as string,
-        statsTournaments: formData.get('statsTournaments') as string,
-        statsMatches: formData.get('statsMatches') as string,
-    }
+    // Upload to Vercel Blob
+    const blob = await put(logoFile.name, logoFile, {
+        access: 'public',
+        allowOverwrite: true,
+    })
 
-    const validatedFields = settingsSchema.safeParse(data)
+    return blob.url
+}
+
+const extractSettingsData = (formData: FormData, finalLogoUrl: string) => {
+    return {
+        logoUrl: finalLogoUrl,
+        socialDiscord: formData.get('socialDiscord'),
+        socialTwitch: formData.get('socialTwitch'),
+        socialTiktok: formData.get('socialTiktok'),
+        socialInstagram: formData.get('socialInstagram'),
+        socialYoutube: formData.get('socialYoutube'),
+        statsYears: formData.get('statsYears'),
+        statsPlayers: formData.get('statsPlayers'),
+        statsTournaments: formData.get('statsTournaments'),
+        statsMatches: formData.get('statsMatches'),
+    }
+}
+
+export const updateSettings = async (
+    _prevState: unknown,
+    formData: FormData,
+): Promise<SettingsState> => {
+    let logoUrl = (formData.get(FORM_KEYS.LOGO_URL) as string) || ''
+
+    try {
+        logoUrl = await uploadLogoIfNeeded(formData, logoUrl)
+    } catch (error) {
+        console.error('Blob upload error:', error)
+        return { success: false, message: MESSAGES.ERR_UPLOAD }
+    }
+    const rawData = extractSettingsData(formData, logoUrl)
+    const validatedFields = settingsSchema.safeParse(rawData)
 
     if (!validatedFields.success) {
         return {
-            message: 'Invalid fields',
+            success: false,
+            message: MESSAGES.ERR_VALIDATION,
             errors: validatedFields.error.flatten().fieldErrors,
         }
     }
 
     try {
         await prisma.siteSettings.upsert({
-            where: { id: 1 },
+            where: { id: DB_CONFIG.SINGLETON_ID },
             update: validatedFields.data,
             create: {
-                id: 1,
+                id: DB_CONFIG.SINGLETON_ID,
                 ...validatedFields.data,
             },
         })
 
-        revalidatePath('/', 'layout')
-        return { message: 'Settings updated successfully' }
-    } catch (_error) {
-        return { message: 'Failed to update settings' }
+        revalidateTag(CACHE_TAGS.SETTINGS, 'default')
+
+        return { success: true, message: MESSAGES.SUCCESS }
+    } catch (error) {
+        console.error('Settings update error:', error)
+        return { success: false, message: MESSAGES.ERR_DB }
     }
 }

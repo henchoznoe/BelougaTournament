@@ -12,17 +12,37 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 
+// Types
+type ActionResponse = {
+    success: boolean
+    message: string
+    errors?: Record<string, string[]>
+}
+
 const updateChallongeIdSchema = z.object({
-    challongeId: z.string().optional().or(z.literal('')),
+    challongeId: z.string().trim().optional().or(z.literal('')),
 })
 
-export async function updateChallongeId(
+// Constants
+const MESSAGES = {
+    SUCCESS_CHALLONGE: 'Challonge ID updated successfully.',
+    SUCCESS_DELETE: 'Registration deleted successfully.',
+    ERR_INVALID: 'Invalid input provided.',
+    ERR_UPDATE: 'Failed to update Challonge ID.',
+    ERR_DELETE: 'Failed to delete registration.',
+} as const
+
+const FORM_KEYS = {
+    CHALLONGE_ID: 'challongeId',
+} as const
+
+export const updateChallongeId = async (
     tournamentId: string,
     _prevState: unknown,
     formData: FormData,
-) {
+): Promise<ActionResponse> => {
     const rawData = {
-        challongeId: formData.get('challongeId'),
+        challongeId: formData.get(FORM_KEYS.CHALLONGE_ID),
     }
 
     const validation = updateChallongeIdSchema.safeParse(rawData)
@@ -30,7 +50,7 @@ export async function updateChallongeId(
     if (!validation.success) {
         return {
             success: false,
-            message: 'Invalid input',
+            message: MESSAGES.ERR_INVALID,
             errors: validation.error.flatten().fieldErrors,
         }
     }
@@ -42,25 +62,28 @@ export async function updateChallongeId(
             where: { id: tournamentId },
             data: { challongeId },
         })
+
         revalidatePath(`/admin/tournaments/${tournamentId}`)
-        return { success: true, message: 'Challonge ID updated successfully' }
+        return { success: true, message: MESSAGES.SUCCESS_CHALLONGE }
     } catch (error) {
         console.error('Update Challonge ID Error:', error)
-        return { success: false, message: 'Failed to update Challonge ID' }
+        return { success: false, message: MESSAGES.ERR_UPDATE }
     }
 }
 
-export async function deleteRegistration(
+export const deleteRegistration = async (
     registrationId: string,
     tournamentId: string,
-) {
+): Promise<ActionResponse> => {
     try {
         await prisma.registration.delete({
             where: { id: registrationId },
         })
+
+        revalidatePath(`/admin/tournaments/${tournamentId}`)
+        return { success: true, message: MESSAGES.SUCCESS_DELETE }
     } catch (error) {
         console.error('Delete Registration Error:', error)
+        return { success: false, message: MESSAGES.ERR_DELETE }
     }
-
-    revalidatePath(`/admin/tournaments/${tournamentId}`)
 }
