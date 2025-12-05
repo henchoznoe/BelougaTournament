@@ -1,6 +1,6 @@
 /**
- * File: lib/actions/users.ts
- * Description: Server actions for user management.
+ * File: lib/actions/admins.ts
+ * Description: Server actions for admins management.
  * Author: Noé Henchoz
  * Date: 2025-12-02
  * License: MIT
@@ -14,16 +14,16 @@ import { z } from 'zod'
 import type { UserRole } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 
-const createUserSchema = z.object({
+const createAdminSchema = z.object({
     email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
 export async function createAdmin(_prevState: unknown, formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
-    const validatedFields = createUserSchema.safeParse({ email, password })
+    const validatedFields = createAdminSchema.safeParse({ email, password })
 
     if (!validatedFields.success) {
         return {

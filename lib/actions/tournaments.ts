@@ -63,6 +63,7 @@ export async function createTournament(
             await tx.tournament.create({
                 data: {
                     ...tournamentData,
+                    streamUrl: tournamentData.streamUrl ?? '',
                     fields: {
                         create: fields.map((field, index) => ({
                             ...field,
@@ -168,7 +169,10 @@ export async function updateTournament(
             // 4. Update Tournament Basic Info
             await tx.tournament.update({
                 where: { id },
-                data: tournamentData,
+                data: {
+                    ...tournamentData,
+                    streamUrl: tournamentData.streamUrl ?? '',
+                },
             })
 
             // 5. Delete safe fields

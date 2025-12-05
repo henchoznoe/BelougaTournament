@@ -43,7 +43,7 @@ import {
 	createAdmin,
 	deleteAdmin,
 	resetAdminPassword,
-} from '@/lib/actions/users'
+} from '@/lib/actions/admins'
 import { cn } from '@/lib/utils'
 
 interface User {
