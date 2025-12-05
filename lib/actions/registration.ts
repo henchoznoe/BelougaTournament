@@ -145,38 +145,32 @@ export async function registerForTournament(
             })
 
             // Create Players and Data
-            for (const player of players) {
-                const createdPlayer = await tx.player.create({
-                    data: {
-                        // isCaptain removed from schema in previous turn, check if it still exists in types?
-                        // If schema was updated, we should check if isCaptain is still in PlayerCreateInput
-                        // Assuming it was removed based on previous conversation summary, but let's check.
-                        // Wait, the previous conversation said "Remove isCaptain boolean field".
-                        // So I should remove it here too if it causes error.
-                        // But I see it in the code I read earlier: "isCaptain: player.isCaptain,"
-                        // Let's keep it for now, if it errors I'll fix it.
-                        // Actually, the lint error said: "Object literal may only specify known properties, and 'isCaptain' does not exist"
-                        // So I MUST remove it.
-                        nickname: player.nickname,
-                        registrationId: registration.id,
-                    },
-                })
-
-                // Create PlayerData
-                const dataEntries = Object.entries(player.data).map(
-                    ([fieldId, value]) => ({
-                        playerId: createdPlayer.id,
-                        tournamentFieldId: fieldId,
-                        value: value,
-                    }),
-                )
-
-                if (dataEntries.length > 0) {
-                    await tx.playerData.createMany({
-                        data: dataEntries,
+            // Create Players and Data - Parallel Execution
+            await Promise.all(
+                players.map(async player => {
+                    const createdPlayer = await tx.player.create({
+                        data: {
+                            nickname: player.nickname,
+                            registrationId: registration.id,
+                        },
                     })
-                }
-            }
+
+                    // Create PlayerData
+                    const dataEntries = Object.entries(player.data).map(
+                        ([fieldId, value]) => ({
+                            playerId: createdPlayer.id,
+                            tournamentFieldId: fieldId,
+                            value: value,
+                        }),
+                    )
+
+                    if (dataEntries.length > 0) {
+                        await tx.playerData.createMany({
+                            data: dataEntries,
+                        })
+                    }
+                }),
+            )
             return registration
         })
     } catch (error) {
