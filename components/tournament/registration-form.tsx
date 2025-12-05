@@ -41,19 +41,23 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
   const formSchema = useMemo(() => {
     const fieldSchema = z.object(
       tournament.fields.reduce((acc: Record<string, z.ZodTypeAny>, field: TournamentField) => {
-        let validator: any = z.string();
-
-        if (field.type === "NUMBER") {
-          validator = z.string().refine((val) => !Number.isNaN(Number(val)), "Doit être un nombre");
-        }
+        let validator: z.ZodString = z.string();
 
         if (field.required) {
           validator = validator.min(1, `${field.label} est requis`);
-        } else {
-          validator = validator.optional().or(z.literal(""));
         }
 
-        acc[field.id] = validator;
+        let finalValidator: z.ZodTypeAny = validator;
+
+        if (field.type === "NUMBER") {
+          finalValidator = finalValidator.refine((val) => !Number.isNaN(Number(val)), "Doit être un nombre");
+        }
+
+        if (!field.required) {
+          finalValidator = finalValidator.optional().or(z.literal(""));
+        }
+
+        acc[field.id] = finalValidator;
         return acc;
       }, {} as Record<string, z.ZodTypeAny>)
     );

@@ -54,7 +54,7 @@ model Tournament {
   format            TournamentFormat
   teamSize          Int               @default(1)
   challongeId       String?
-  streamUrl         String            @default("https://twitch.tv/quentadoulive")
+  streamUrl         String
   autoApprove       Boolean           @default(false)
   isArchived        Boolean           @default(false)
   createdAt         DateTime          @default(now())
