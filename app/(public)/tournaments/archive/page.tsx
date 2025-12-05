@@ -36,10 +36,10 @@ export default async function ArchivePage() {
         <div className="container mx-auto px-4 py-12">
             <div className="mb-8 space-y-4">
                 <h1 className="text-4xl font-bold text-white">
-                    Tournament Archive
+                    Tournois archivés
                 </h1>
                 <p className="text-zinc-400">
-                    Explore past tournaments and results.
+                    Explore les tournois passés et leurs résultats.
                 </p>
             </div>
 
