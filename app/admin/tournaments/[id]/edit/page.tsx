@@ -9,7 +9,7 @@
 import { notFound } from 'next/navigation'
 import { TournamentForm } from '@/components/admin/tournament-form'
 import { updateTournament } from '@/lib/actions/tournaments'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 

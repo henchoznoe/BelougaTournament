@@ -18,7 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 async function getTournaments() {
     return await prisma.tournament.findMany({

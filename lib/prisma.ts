@@ -6,22 +6,21 @@
  * License: MIT
  */
 
-import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { withAccelerate } from '@prisma/extension-accelerate'
-import pg from 'pg'
 import { PrismaClient } from '../prisma/generated/prisma/client'
 
-const connectionString = `${process.env.DATABASE_URL}`
-const pool = new pg.Pool({ connectionString })
-const adapter = new PrismaPg(pool)
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient
-}
+const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+})
 
-export const prisma =
+const prisma =
     globalForPrisma.prisma ||
-    new PrismaClient({ adapter }).$extends(withAccelerate())
+    new PrismaClient({
+        adapter,
+    })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export default prisma

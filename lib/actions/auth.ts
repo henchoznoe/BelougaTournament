@@ -12,7 +12,7 @@ import { compare, hash } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { encrypt, getSession, UserRole } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 export async function login(_prevState: unknown, formData: FormData) {
     const email = formData.get('email') as string

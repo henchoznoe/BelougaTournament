@@ -48,7 +48,7 @@ import {
     deleteRegistration,
     updateChallongeId,
 } from '@/lib/actions/tournament-manager'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 

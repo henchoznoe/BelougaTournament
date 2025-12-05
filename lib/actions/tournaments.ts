@@ -8,14 +8,13 @@
 
 'use server'
 
-import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { getSession, UserRole } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-
+import prisma from '@/lib/prisma'
 import { tournamentSchema } from '@/lib/schemas/tournament'
+import { Prisma } from '@/prisma/generated/prisma/client'
 
 export type ActionState = {
     errors?: {

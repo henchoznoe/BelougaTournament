@@ -11,7 +11,7 @@
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 const settingsSchema = z.object({
     logoUrl: z.string().optional().or(z.literal('')),

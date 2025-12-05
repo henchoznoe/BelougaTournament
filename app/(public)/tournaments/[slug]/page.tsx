@@ -21,7 +21,7 @@ import { notFound } from 'next/navigation'
 import { RegistrationForm } from '@/components/tournament/registration-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 async function getTournament(slug: string) {
     return await prisma.tournament.findUnique({

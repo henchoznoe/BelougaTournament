@@ -8,7 +8,7 @@
 
 import { cookies } from 'next/headers'
 import { decrypt, UserRole } from '@/lib/auth-core'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 export * from '@/lib/auth-core'
 

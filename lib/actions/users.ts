@@ -12,7 +12,7 @@ import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import type { UserRole } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 const createUserSchema = z.object({
     email: z.string().email('Invalid email address'),

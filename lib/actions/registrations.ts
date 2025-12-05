@@ -12,7 +12,7 @@ import type { RegistrationStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { getSession, UserRole } from '@/lib/auth'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 async function checkAuth() {
     const session = await getSession()

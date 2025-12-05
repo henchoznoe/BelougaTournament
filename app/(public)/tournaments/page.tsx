@@ -25,7 +25,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 async function getTournaments() {
     return await prisma.tournament.findMany({

@@ -8,17 +8,13 @@
 
 'use server'
 
-import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
-import { prisma } from '@/lib/prisma'
-import type { Registration } from '@/prisma/generated/prisma/client'
+import prisma from '@/lib/prisma'
+import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
-
-// We can't statically define the schema here because it depends on the tournament fields.
-// We will validate the structure of the incoming data, and then validate the dynamic fields against the DB.
 
 const baseRegistrationSchema = z.object({
     contactEmail: z.string().email(),
