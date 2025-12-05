@@ -1,6 +1,5 @@
 'use client'
 
-import { Registration, RegistrationStatus } from '@prisma/client'
 import { Check, X, Clock, MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -27,6 +26,7 @@ import {
     moveToWaitlist,
     rejectRegistration,
 } from '@/lib/actions/registrations'
+import { Registration, RegistrationStatus } from '@/prisma/generated/prisma/client'
 
 interface RegistrationsTableProps {
     registrations: (Registration & {
