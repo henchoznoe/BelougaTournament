@@ -25,22 +25,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import prisma from '@/lib/prisma'
-
-async function getTournaments() {
-    return await prisma.tournament.findMany({
-        orderBy: { startDate: 'asc' },
-        where: {
-            isArchived: false,
-            endDate: {
-                gte: new Date(),
-            },
-        },
-    })
-}
+import { getPublicTournaments } from '@/lib/data/tournaments'
 
 export default async function TournamentsPage() {
-    const tournaments = await getTournaments()
+    const tournaments = await getPublicTournaments()
 
     return (
         <div className="relative min-h-screen pb-24">
