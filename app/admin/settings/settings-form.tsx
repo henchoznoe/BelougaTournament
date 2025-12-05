@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
-import type { SiteSettings } from '@prisma/client'
+import type { SiteSettings } from '@/prisma/generated/prisma/client'
 import { toast } from 'sonner'
 import { useEffect } from 'react'
 
