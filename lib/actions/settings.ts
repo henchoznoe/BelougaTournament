@@ -20,6 +20,10 @@ const settingsSchema = z.object({
     socialTiktok: z.string().optional().or(z.literal('')),
     socialInstagram: z.string().optional().or(z.literal('')),
     socialYoutube: z.string().optional().or(z.literal('')),
+    statsYears: z.string().optional().or(z.literal('')),
+    statsPlayers: z.string().optional().or(z.literal('')),
+    statsTournaments: z.string().optional().or(z.literal('')),
+    statsMatches: z.string().optional().or(z.literal('')),
 })
 
 export async function updateSettings(_prevState: unknown, formData: FormData) {
@@ -46,6 +50,10 @@ export async function updateSettings(_prevState: unknown, formData: FormData) {
         socialTiktok: formData.get('socialTiktok') as string,
         socialInstagram: formData.get('socialInstagram') as string,
         socialYoutube: formData.get('socialYoutube') as string,
+        statsYears: formData.get('statsYears') as string,
+        statsPlayers: formData.get('statsPlayers') as string,
+        statsTournaments: formData.get('statsTournaments') as string,
+        statsMatches: formData.get('statsMatches') as string,
     }
 
     const validatedFields = settingsSchema.safeParse(data)

@@ -1053,7 +1053,11 @@ export const SiteSettingsScalarFieldEnum = {
   socialTiktok: 'socialTiktok',
   socialTwitch: 'socialTwitch',
   socialInstagram: 'socialInstagram',
-  socialYoutube: 'socialYoutube'
+  socialYoutube: 'socialYoutube',
+  statsYears: 'statsYears',
+  statsPlayers: 'statsPlayers',
+  statsTournaments: 'statsTournaments',
+  statsMatches: 'statsMatches'
 } as const
 
 export type SiteSettingsScalarFieldEnum = (typeof SiteSettingsScalarFieldEnum)[keyof typeof SiteSettingsScalarFieldEnum]

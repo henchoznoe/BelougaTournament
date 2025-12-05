@@ -1,8 +1,9 @@
 'use client'
 
-import { useActionState, useState } from 'react'
 import { Save, Upload } from 'lucide-react'
 import Image from 'next/image'
+import { useActionState, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -15,8 +16,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
-import { toast } from 'sonner'
-import { useEffect } from 'react'
 
 interface SettingsFormProps {
     settings: SiteSettings
@@ -206,6 +205,84 @@ export function SettingsForm({ settings }: SettingsFormProps) {
                                     name="socialYoutube"
                                     defaultValue={settings.socialYoutube || ''}
                                     placeholder="https://youtube.com/..."
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+                    <CardHeader>
+                        <CardTitle className="text-white">
+                            Statistiques
+                        </CardTitle>
+                        <CardDescription className="text-zinc-400">
+                            Chiffres clés affichés sur la page d'accueil (ex:
+                            "1.2k+", "500+").
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="statsYears"
+                                    className="text-zinc-400"
+                                >
+                                    Années d'existence
+                                </Label>
+                                <Input
+                                    id="statsYears"
+                                    name="statsYears"
+                                    defaultValue={settings.statsYears || ''}
+                                    placeholder="ex: 2+"
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="statsPlayers"
+                                    className="text-zinc-400"
+                                >
+                                    Joueurs Inscrits
+                                </Label>
+                                <Input
+                                    id="statsPlayers"
+                                    name="statsPlayers"
+                                    defaultValue={settings.statsPlayers || ''}
+                                    placeholder="ex: 500+"
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="statsTournaments"
+                                    className="text-zinc-400"
+                                >
+                                    Tournois Organisés
+                                </Label>
+                                <Input
+                                    id="statsTournaments"
+                                    name="statsTournaments"
+                                    defaultValue={
+                                        settings.statsTournaments || ''
+                                    }
+                                    placeholder="ex: 50+"
+                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="statsMatches"
+                                    className="text-zinc-400"
+                                >
+                                    Matchs Joués
+                                </Label>
+                                <Input
+                                    id="statsMatches"
+                                    name="statsMatches"
+                                    defaultValue={settings.statsMatches || ''}
+                                    placeholder="ex: 1.2k+"
                                     className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                                 />
                             </div>

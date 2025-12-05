@@ -42,6 +42,10 @@ export type SiteSettingsMinAggregateOutputType = {
   socialTwitch: string | null
   socialInstagram: string | null
   socialYoutube: string | null
+  statsYears: string | null
+  statsPlayers: string | null
+  statsTournaments: string | null
+  statsMatches: string | null
 }
 
 export type SiteSettingsMaxAggregateOutputType = {
@@ -52,6 +56,10 @@ export type SiteSettingsMaxAggregateOutputType = {
   socialTwitch: string | null
   socialInstagram: string | null
   socialYoutube: string | null
+  statsYears: string | null
+  statsPlayers: string | null
+  statsTournaments: string | null
+  statsMatches: string | null
 }
 
 export type SiteSettingsCountAggregateOutputType = {
@@ -62,6 +70,10 @@ export type SiteSettingsCountAggregateOutputType = {
   socialTwitch: number
   socialInstagram: number
   socialYoutube: number
+  statsYears: number
+  statsPlayers: number
+  statsTournaments: number
+  statsMatches: number
   _all: number
 }
 
@@ -82,6 +94,10 @@ export type SiteSettingsMinAggregateInputType = {
   socialTwitch?: true
   socialInstagram?: true
   socialYoutube?: true
+  statsYears?: true
+  statsPlayers?: true
+  statsTournaments?: true
+  statsMatches?: true
 }
 
 export type SiteSettingsMaxAggregateInputType = {
@@ -92,6 +108,10 @@ export type SiteSettingsMaxAggregateInputType = {
   socialTwitch?: true
   socialInstagram?: true
   socialYoutube?: true
+  statsYears?: true
+  statsPlayers?: true
+  statsTournaments?: true
+  statsMatches?: true
 }
 
 export type SiteSettingsCountAggregateInputType = {
@@ -102,6 +122,10 @@ export type SiteSettingsCountAggregateInputType = {
   socialTwitch?: true
   socialInstagram?: true
   socialYoutube?: true
+  statsYears?: true
+  statsPlayers?: true
+  statsTournaments?: true
+  statsMatches?: true
   _all?: true
 }
 
@@ -199,6 +223,10 @@ export type SiteSettingsGroupByOutputType = {
   socialTwitch: string | null
   socialInstagram: string | null
   socialYoutube: string | null
+  statsYears: string | null
+  statsPlayers: string | null
+  statsTournaments: string | null
+  statsMatches: string | null
   _count: SiteSettingsCountAggregateOutputType | null
   _avg: SiteSettingsAvgAggregateOutputType | null
   _sum: SiteSettingsSumAggregateOutputType | null
@@ -232,6 +260,10 @@ export type SiteSettingsWhereInput = {
   socialTwitch?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
   socialInstagram?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
   socialYoutube?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsYears?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsPlayers?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsTournaments?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsMatches?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
 }
 
 export type SiteSettingsOrderByWithRelationInput = {
@@ -242,6 +274,10 @@ export type SiteSettingsOrderByWithRelationInput = {
   socialTwitch?: Prisma.SortOrderInput | Prisma.SortOrder
   socialInstagram?: Prisma.SortOrderInput | Prisma.SortOrder
   socialYoutube?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsYears?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsPlayers?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsTournaments?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsMatches?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type SiteSettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -255,6 +291,10 @@ export type SiteSettingsWhereUniqueInput = Prisma.AtLeast<{
   socialTwitch?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
   socialInstagram?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
   socialYoutube?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsYears?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsPlayers?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsTournaments?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
+  statsMatches?: Prisma.StringNullableFilter<"SiteSettings"> | string | null
 }, "id">
 
 export type SiteSettingsOrderByWithAggregationInput = {
@@ -265,6 +305,10 @@ export type SiteSettingsOrderByWithAggregationInput = {
   socialTwitch?: Prisma.SortOrderInput | Prisma.SortOrder
   socialInstagram?: Prisma.SortOrderInput | Prisma.SortOrder
   socialYoutube?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsYears?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsPlayers?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsTournaments?: Prisma.SortOrderInput | Prisma.SortOrder
+  statsMatches?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SiteSettingsCountOrderByAggregateInput
   _avg?: Prisma.SiteSettingsAvgOrderByAggregateInput
   _max?: Prisma.SiteSettingsMaxOrderByAggregateInput
@@ -283,6 +327,10 @@ export type SiteSettingsScalarWhereWithAggregatesInput = {
   socialTwitch?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
   socialInstagram?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
   socialYoutube?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
+  statsYears?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
+  statsPlayers?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
+  statsTournaments?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
+  statsMatches?: Prisma.StringNullableWithAggregatesFilter<"SiteSettings"> | string | null
 }
 
 export type SiteSettingsCreateInput = {
@@ -293,6 +341,10 @@ export type SiteSettingsCreateInput = {
   socialTwitch?: string | null
   socialInstagram?: string | null
   socialYoutube?: string | null
+  statsYears?: string | null
+  statsPlayers?: string | null
+  statsTournaments?: string | null
+  statsMatches?: string | null
 }
 
 export type SiteSettingsUncheckedCreateInput = {
@@ -303,6 +355,10 @@ export type SiteSettingsUncheckedCreateInput = {
   socialTwitch?: string | null
   socialInstagram?: string | null
   socialYoutube?: string | null
+  statsYears?: string | null
+  statsPlayers?: string | null
+  statsTournaments?: string | null
+  statsMatches?: string | null
 }
 
 export type SiteSettingsUpdateInput = {
@@ -313,6 +369,10 @@ export type SiteSettingsUpdateInput = {
   socialTwitch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialInstagram?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialYoutube?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsYears?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsPlayers?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsTournaments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsMatches?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type SiteSettingsUncheckedUpdateInput = {
@@ -323,6 +383,10 @@ export type SiteSettingsUncheckedUpdateInput = {
   socialTwitch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialInstagram?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialYoutube?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsYears?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsPlayers?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsTournaments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsMatches?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type SiteSettingsCreateManyInput = {
@@ -333,6 +397,10 @@ export type SiteSettingsCreateManyInput = {
   socialTwitch?: string | null
   socialInstagram?: string | null
   socialYoutube?: string | null
+  statsYears?: string | null
+  statsPlayers?: string | null
+  statsTournaments?: string | null
+  statsMatches?: string | null
 }
 
 export type SiteSettingsUpdateManyMutationInput = {
@@ -343,6 +411,10 @@ export type SiteSettingsUpdateManyMutationInput = {
   socialTwitch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialInstagram?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialYoutube?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsYears?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsPlayers?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsTournaments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsMatches?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type SiteSettingsUncheckedUpdateManyInput = {
@@ -353,6 +425,10 @@ export type SiteSettingsUncheckedUpdateManyInput = {
   socialTwitch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialInstagram?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialYoutube?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsYears?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsPlayers?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsTournaments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statsMatches?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type SiteSettingsCountOrderByAggregateInput = {
@@ -363,6 +439,10 @@ export type SiteSettingsCountOrderByAggregateInput = {
   socialTwitch?: Prisma.SortOrder
   socialInstagram?: Prisma.SortOrder
   socialYoutube?: Prisma.SortOrder
+  statsYears?: Prisma.SortOrder
+  statsPlayers?: Prisma.SortOrder
+  statsTournaments?: Prisma.SortOrder
+  statsMatches?: Prisma.SortOrder
 }
 
 export type SiteSettingsAvgOrderByAggregateInput = {
@@ -377,6 +457,10 @@ export type SiteSettingsMaxOrderByAggregateInput = {
   socialTwitch?: Prisma.SortOrder
   socialInstagram?: Prisma.SortOrder
   socialYoutube?: Prisma.SortOrder
+  statsYears?: Prisma.SortOrder
+  statsPlayers?: Prisma.SortOrder
+  statsTournaments?: Prisma.SortOrder
+  statsMatches?: Prisma.SortOrder
 }
 
 export type SiteSettingsMinOrderByAggregateInput = {
@@ -387,6 +471,10 @@ export type SiteSettingsMinOrderByAggregateInput = {
   socialTwitch?: Prisma.SortOrder
   socialInstagram?: Prisma.SortOrder
   socialYoutube?: Prisma.SortOrder
+  statsYears?: Prisma.SortOrder
+  statsPlayers?: Prisma.SortOrder
+  statsTournaments?: Prisma.SortOrder
+  statsMatches?: Prisma.SortOrder
 }
 
 export type SiteSettingsSumOrderByAggregateInput = {
@@ -403,6 +491,10 @@ export type SiteSettingsSelect<ExtArgs extends runtime.Types.Extensions.Internal
   socialTwitch?: boolean
   socialInstagram?: boolean
   socialYoutube?: boolean
+  statsYears?: boolean
+  statsPlayers?: boolean
+  statsTournaments?: boolean
+  statsMatches?: boolean
 }, ExtArgs["result"]["siteSettings"]>
 
 export type SiteSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -413,6 +505,10 @@ export type SiteSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   socialTwitch?: boolean
   socialInstagram?: boolean
   socialYoutube?: boolean
+  statsYears?: boolean
+  statsPlayers?: boolean
+  statsTournaments?: boolean
+  statsMatches?: boolean
 }, ExtArgs["result"]["siteSettings"]>
 
 export type SiteSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -423,6 +519,10 @@ export type SiteSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   socialTwitch?: boolean
   socialInstagram?: boolean
   socialYoutube?: boolean
+  statsYears?: boolean
+  statsPlayers?: boolean
+  statsTournaments?: boolean
+  statsMatches?: boolean
 }, ExtArgs["result"]["siteSettings"]>
 
 export type SiteSettingsSelectScalar = {
@@ -433,9 +533,13 @@ export type SiteSettingsSelectScalar = {
   socialTwitch?: boolean
   socialInstagram?: boolean
   socialYoutube?: boolean
+  statsYears?: boolean
+  statsPlayers?: boolean
+  statsTournaments?: boolean
+  statsMatches?: boolean
 }
 
-export type SiteSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "socialDiscord" | "socialTiktok" | "socialTwitch" | "socialInstagram" | "socialYoutube", ExtArgs["result"]["siteSettings"]>
+export type SiteSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "socialDiscord" | "socialTiktok" | "socialTwitch" | "socialInstagram" | "socialYoutube" | "statsYears" | "statsPlayers" | "statsTournaments" | "statsMatches", ExtArgs["result"]["siteSettings"]>
 
 export type $SiteSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SiteSettings"
@@ -448,6 +552,10 @@ export type $SiteSettingsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     socialTwitch: string | null
     socialInstagram: string | null
     socialYoutube: string | null
+    statsYears: string | null
+    statsPlayers: string | null
+    statsTournaments: string | null
+    statsMatches: string | null
   }, ExtArgs["result"]["siteSettings"]>
   composites: {}
 }
@@ -878,6 +986,10 @@ export interface SiteSettingsFieldRefs {
   readonly socialTwitch: Prisma.FieldRef<"SiteSettings", 'String'>
   readonly socialInstagram: Prisma.FieldRef<"SiteSettings", 'String'>
   readonly socialYoutube: Prisma.FieldRef<"SiteSettings", 'String'>
+  readonly statsYears: Prisma.FieldRef<"SiteSettings", 'String'>
+  readonly statsPlayers: Prisma.FieldRef<"SiteSettings", 'String'>
+  readonly statsTournaments: Prisma.FieldRef<"SiteSettings", 'String'>
+  readonly statsMatches: Prisma.FieldRef<"SiteSettings", 'String'>
 }
     
 

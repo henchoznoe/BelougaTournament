@@ -8,10 +8,10 @@
 
 import { Lock } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import prisma from '@/lib/prisma'
 import { AdminsManager } from '@/components/admin/admins-manager'
+import { Button } from '@/components/ui/button'
 import { getSession, UserRole } from '@/lib/auth'
+import prisma from '@/lib/prisma'
 
 export default async function AdminsPage() {
     const session = await getSession()

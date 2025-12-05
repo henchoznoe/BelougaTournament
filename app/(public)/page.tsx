@@ -13,12 +13,22 @@ import { Stats } from '@/components/public/landing/stats'
 import { StreamSection } from '@/components/public/landing/stream-section'
 import { TournamentsSection } from '@/components/public/landing/tournaments-section'
 import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
+import { getSiteSettings } from '@/lib/data/settings'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+    const settings = await getSiteSettings()
+
     return (
         <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
             <Hero />
-            <Stats />
+            <Stats
+                stats={{
+                    years: settings.statsYears,
+                    players: settings.statsPlayers,
+                    tournaments: settings.statsTournaments,
+                    matches: settings.statsMatches,
+                }}
+            />
             <Features />
             <Suspense fallback={<TournamentsSkeleton />}>
                 <TournamentsSection />

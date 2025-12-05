@@ -114,4 +114,8 @@ model SiteSettings {
   socialTwitch    String?
   socialInstagram String?
   socialYoutube   String?
+  statsYears       String?
+  statsPlayers     String?
+  statsTournaments String?
+  statsMatches     String?
 }
