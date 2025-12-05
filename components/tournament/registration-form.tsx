@@ -17,7 +17,7 @@ import { registerForTournament } from "@/lib/actions/registration";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma, TournamentField } from "@prisma/client";
 import { Plus, Trash2, User, Mail, Gamepad2, Users, Trophy } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useActionState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,12 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({ tournament }: RegistrationFormProps) {
+  const [state, formAction, isPending] = useActionState(registerForTournament, {
+    success: false,
+    message: "",
+    errors: {}
+  });
+
   // 1. Generate Zod Schema dynamically based on tournament fields and format
   const formSchema = useMemo(() => {
     const fieldSchema = z.object(
@@ -87,24 +93,16 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
     name: "players",
   });
 
-  async function onSubmit(values: FormValues) {
-    const payload = {
-      tournamentId: tournament.id,
-      teamName: values.teamName,
-      contactEmail: values.contactEmail,
-      players: values.players.map(p => ({
-        nickname: p.nickname,
-        isCaptain: p.isCaptain,
-        data: p.data as Record<string, string>,
-      })),
-    };
-
-    await registerForTournament(payload);
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form action={formAction} className="space-y-8">
+
+        {state?.message && !state?.success && (
+            <div className="p-4 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                {state.message}
+            </div>
+        )}
+
         {/* Team/Contact Info Card */}
         <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-lg overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
@@ -133,6 +131,9 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                       </div>
                     </FormControl>
                     <FormMessage />
+                    {state?.errors?.teamName && (
+                        <p className="text-sm font-medium text-destructive">{state.errors.teamName[0]}</p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -155,6 +156,9 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                     </div>
                   </FormControl>
                   <FormMessage />
+                  {state?.errors?.contactEmail && (
+                        <p className="text-sm font-medium text-destructive">{state.errors.contactEmail[0]}</p>
+                    )}
                 </FormItem>
               )}
             />
@@ -252,6 +256,8 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                                 ) : customField.type === "CHECKBOX" ? (
                                     <div className="flex items-center h-10">
                                         <Checkbox
+                                            name={field.name}
+                                            value="true"
                                             checked={field.value === "true"}
                                             onCheckedChange={(c) => field.onChange(String(c))}
                                             className="border-zinc-700 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
@@ -280,10 +286,11 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
 
         <Button
             type="submit"
+            disabled={isPending}
             size="lg"
             className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-wide shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all duration-300"
         >
-          Confirmer l'inscription
+          {isPending ? "Inscription en cours..." : "Confirmer l'inscription"}
         </Button>
       </form>
     </Form>

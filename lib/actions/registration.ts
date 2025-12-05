@@ -31,21 +31,78 @@ const baseRegistrationSchema = z.object({
 })
 
 export type RegistrationState = {
+    success?: boolean
     errors?: {
         [key: string]: string[]
     }
     message?: string
 }
 
+// Helper to parse FormData with dot notation
+function parseFormData(formData: FormData) {
+    // biome-ignore lint/suspicious/noExplicitAny: Dynamic object construction from FormData
+    const object: any = {}
+    for (const [key, value] of formData.entries()) {
+        const keys = key.split('.')
+        let current = object
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+            if (i === keys.length - 1) {
+                current[k] = value
+            } else {
+                // If the next key is a number, it's an array
+                if (!Number.isNaN(Number(keys[i + 1]))) {
+                    current[k] = current[k] || []
+                    // Ensure it's an array before pushing
+                    if (!Array.isArray(current[k])) {
+                        current[k] = []
+                    }
+                } else {
+                    current[k] = current[k] || {}
+                }
+                current = current[k]
+            }
+        }
+    }
+
+    // Convert players object to array if it is an object with numeric keys
+    // This is handled by the recursive parsing logic above if keys are like players.0.nickname
+    // but if the form structure is different, this might be needed.
+    // For now, assuming players.0.nickname structure, the above logic should create an array.
+    // If players is an object with numeric keys (e.g., { '0': { ... }, '1': { ... } }),
+    // Object.values will convert it to an array.
+    if (
+        object.players &&
+        typeof object.players === 'object' &&
+        !Array.isArray(object.players)
+    ) {
+        object.players = Object.values(object.players)
+    }
+    return object
+}
+
 export async function registerForTournament(
-    data: z.infer<typeof baseRegistrationSchema>,
-) {
-    const validation = baseRegistrationSchema.safeParse(data)
+    _prevState: RegistrationState,
+    formData: FormData,
+): Promise<RegistrationState> {
+    const rawData = parseFormData(formData)
+
+    // Ensure players structure is correct for Zod
+    if (rawData.players && Array.isArray(rawData.players)) {
+        // biome-ignore lint/suspicious/noExplicitAny: Mapping raw player data
+        rawData.players = rawData.players.map((p: any) => ({
+            ...p,
+            data: p.data || {}, // Ensure data object exists
+        }))
+    }
+
+    const validation = baseRegistrationSchema.safeParse(rawData)
 
     if (!validation.success) {
         return {
+            success: false,
             errors: validation.error.flatten().fieldErrors,
-            message: 'Invalid submission data.',
+            message: 'Veuillez corriger les erreurs dans le formulaire.',
         }
     }
 
@@ -58,7 +115,7 @@ export async function registerForTournament(
     })
 
     if (!tournament) {
-        return { message: 'Tournament not found.' }
+        return { success: false, message: 'Tournoi introuvable.' }
     }
 
     // Check if registration is open
@@ -67,7 +124,7 @@ export async function registerForTournament(
         now < tournament.registrationOpen ||
         now > tournament.registrationClose
     ) {
-        return { message: 'Registration is closed.' }
+        return { success: false, message: 'Les inscriptions sont fermées.' }
     }
 
     // 2. Check for duplicates
@@ -82,7 +139,10 @@ export async function registerForTournament(
     })
 
     if (existingRegistration) {
-        return { message: 'Email already used for this tournament.' }
+        return {
+            success: false,
+            message: 'Cet email est déjà utilisé pour ce tournoi.',
+        }
     }
 
     // Validate Dynamic Fields for each player
@@ -92,17 +152,18 @@ export async function registerForTournament(
 
             if (field.required && (!value || value.trim() === '')) {
                 return {
-                    message: `Missing required field: ${field.label} for player ${player.nickname}`,
+                    success: false,
+                    message: `Champ requis manquant : ${field.label} pour le joueur ${player.nickname}`,
                 }
             }
         }
     }
 
     let finalStatus: RegistrationStatus = 'PENDING'
-    let registration: Registration | null = null
+    let registrationResult: Registration | null = null
 
     try {
-        registration = await prisma.$transaction(async tx => {
+        registrationResult = await prisma.$transaction(async tx => {
             // 3. Max Participants Logic
             // maxParticipants refers to the number of "Registration Slots".
             // - For TEAM format: 1 Registration = 1 Team
@@ -177,7 +238,7 @@ export async function registerForTournament(
         console.error('Registration Error:', error)
         if (error instanceof Error) {
             if (error.message === 'Tournament is full.') {
-                return { message: 'Tournament is full.' }
+                return { success: false, message: 'Le tournoi est complet.' }
             }
         }
 
@@ -185,18 +246,25 @@ export async function registerForTournament(
             if (
                 (error as Prisma.PrismaClientKnownRequestError).code === 'P2002'
             ) {
-                return { message: 'Email already used for this tournament.' }
+                return {
+                    success: false,
+                    message: 'Cet email est déjà utilisé pour ce tournoi.',
+                }
             }
         }
 
-        return { message: 'Failed to process registration. Please try again.' }
+        return {
+            success: false,
+            message:
+                "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+        }
     }
 
-    if (!registration) {
-        return { message: 'Failed to process registration.' }
+    if (!registrationResult) {
+        return { success: false, message: "Échec de l'inscription." }
     }
 
-    const cancellationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/cancel-registration?id=${registration.id}&token=${registration.cancellationToken}`
+    const cancellationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
 
     // Send Confirmation Email
     const emailHtml = generateRegistrationEmailHtml(
@@ -207,16 +275,17 @@ export async function registerForTournament(
 
     await sendEmail({
         to: contactEmail,
-        subject: `Registration Received - ${tournament.title}`,
+        subject: `Inscription reçue - ${tournament.title}`,
         html: emailHtml,
     })
 
     const message =
         (finalStatus as RegistrationStatus) === 'WAITLIST'
-            ? 'Registration successful! You have been placed on the waitlist.'
-            : 'Registration successful!'
+            ? "Inscription réussie ! Vous avez été placé sur la liste d'attente."
+            : 'Inscription réussie !'
 
     revalidatePath(`/tournaments/${tournament.slug}`)
+    // Using redirect here as it's the most reliable way to reset form and show success page
     redirect(
         `/tournaments/${tournament.slug}?success=true&message=${encodeURIComponent(message)}`,
     )
