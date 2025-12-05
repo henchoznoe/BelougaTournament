@@ -6,23 +6,41 @@
  * License: MIT
  */
 
+import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import { decrypt, UserRole } from '@/lib/auth-core'
 import prisma from '@/lib/prisma'
 
 export * from '@/lib/auth-core'
 
-export async function getSession() {
-    const session = (await cookies()).get('session')?.value
-    if (!session) return null
-    try {
-        const payload = await decrypt(session)
+// Cached user fetcher to prevent database hammering
+// 1. React cache() deduplicates requests within a single render pass
+const getCachedUser = cache(async (userId: string) => {
+    // 2. unstable_cache caches the result for 60 seconds (cross-request)
+    return unstable_cache(
+        async () => {
+            return prisma.user.findUnique({
+                where: { id: userId },
+                select: { id: true, email: true, role: true },
+            })
+        },
+        ['user-role', userId], // Key parts
+        {
+            tags: ['user-role', userId], // Revalidation tags
+            revalidate: 60,
+        },
+    )()
+})
 
-        // Verify user against database for instant revocation
-        const user = await prisma.user.findUnique({
-            where: { id: payload.user.id },
-            select: { id: true, email: true, role: true },
-        })
+export async function getSession() {
+    const sessionCookie = (await cookies()).get('session')?.value
+    if (!sessionCookie) return null
+    try {
+        const payload = await decrypt(sessionCookie)
+
+        // Verify user against database (cached)
+        const user = await getCachedUser(payload.user.id)
 
         if (!user) return null
 

@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { getSession, UserRole } from '@/lib/auth'
@@ -92,7 +92,7 @@ export async function createTournament(
         }
     }
 
-    revalidatePath('/admin/tournaments')
+    revalidateTag('tournaments', 'default')
     redirect('/admin/tournaments')
 }
 
@@ -111,7 +111,7 @@ export async function deleteTournament(id: string): Promise<ActionState> {
         return { message: 'Failed to delete tournament.' }
     }
 
-    revalidatePath('/admin/tournaments')
+    revalidateTag('tournaments', 'default')
     return { message: 'Tournament deleted successfully.' }
 }
 
@@ -238,7 +238,7 @@ export async function updateTournament(
         return { message: 'Failed to update tournament.' }
     }
 
-    revalidatePath('/admin/tournaments')
+    revalidateTag('tournaments', 'default')
     revalidatePath(`/admin/tournaments/${id}`)
     redirect('/admin/tournaments')
 }
