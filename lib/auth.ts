@@ -2,7 +2,7 @@
  * File: lib/auth.ts
  * Description: Server-side session management using cookies.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-05
  * License: MIT
  */
 
@@ -14,42 +14,48 @@ import prisma from '@/lib/prisma'
 
 export * from '@/lib/auth-core'
 
+// Constants
+const COOKIE_KEYS = {
+    SESSION: 'session',
+} as const
+
+const CACHE_CONFIG = {
+    TAG_USER_ROLE: 'user-role',
+    REVALIDATE_SECONDS: 60,
+} as const
+
 // Cached user fetcher to prevent database hammering
-// 1. React cache() deduplicates requests within a single render pass
 const getCachedUser = cache(async (userId: string) => {
-    // 2. unstable_cache caches the result for 60 seconds (cross-request)
+    const fetchUser = async () => {
+        return prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, email: true, role: true },
+        })
+    }
+
     return unstable_cache(
-        async () => {
-            return prisma.user.findUnique({
-                where: { id: userId },
-                select: { id: true, email: true, role: true },
-            })
-        },
-        ['user-role', userId], // Key parts
+        fetchUser,
+        [`${CACHE_CONFIG.TAG_USER_ROLE}-${userId}`],
         {
-            tags: ['user-role', userId], // Revalidation tags
-            revalidate: 60,
+            tags: [CACHE_CONFIG.TAG_USER_ROLE, userId],
+            revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
         },
     )()
 })
 
+// Get session from cookie
 export async function getSession() {
-    const sessionCookie = (await cookies()).get('session')?.value
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get(COOKIE_KEYS.SESSION)?.value
+
     if (!sessionCookie) return null
+
     try {
         const payload = await decrypt(sessionCookie)
-
-        // Verify user against database (cached)
         const user = await getCachedUser(payload.user.id)
 
         if (!user) return null
 
-        // Ensure user still has admin privileges
-        if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPERADMIN) {
-            return null
-        }
-
-        // Return session with fresh user data
         return {
             ...payload,
             user: {
@@ -58,7 +64,24 @@ export async function getSession() {
                 role: user.role as UserRole,
             },
         }
-    } catch (_error) {
+    } catch (error) {
+        // Session is invalid or expired
+        console.error(error)
         return null
     }
+}
+
+// Get admin session from cookie and determine if it is an admin or superadmin
+export async function getAdminSession() {
+    const session = await getSession()
+
+    if (!session) return null
+
+    const isAuthorized =
+        session.user.role === UserRole.ADMIN ||
+        session.user.role === UserRole.SUPERADMIN
+
+    if (!isAuthorized) return null
+
+    return session
 }

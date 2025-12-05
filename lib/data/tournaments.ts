@@ -1,38 +1,44 @@
 /**
  * File: lib/data/tournaments.ts
  * Description: Data access functions for tournaments.
+ * Author: Noé Henchoz
+ * Date: 2025-12-05
+ * License: MIT
  */
 
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
 
-/**
- * Fetches all public, non-archived, and active tournaments.
- * Ordered by start date.
- * Cached for 1 hour, revalidated on tag 'tournaments'.
- */
+// Constants
+const CACHE_CONFIG = {
+    KEY_TOURNAMENTS: 'tournaments',
+    REVALIDATE_SECONDS: 3600, // 1 hour
+} as const
+
+const fetchPublicTournamentsFromDb = async () => {
+    return prisma.tournament.findMany({
+        orderBy: { startDate: 'asc' },
+        where: {
+            isArchived: false,
+            endDate: {
+                gte: new Date(),
+            },
+        },
+        include: {
+            _count: {
+                select: {
+                    registrations: true,
+                },
+            },
+        },
+    })
+}
+
 export const getPublicTournaments = unstable_cache(
-    async () => {
-        return await prisma.tournament.findMany({
-            orderBy: { startDate: 'asc' },
-            where: {
-                isArchived: false,
-                endDate: {
-                    gte: new Date(),
-                },
-            },
-            include: {
-                _count: {
-                    select: {
-                        registrations: true,
-                    },
-                },
-            },
-        })
-    },
-    ['tournaments'],
+    fetchPublicTournamentsFromDb,
+    [CACHE_CONFIG.KEY_TOURNAMENTS],
     {
-        tags: ['tournaments'],
-        revalidate: 3600,
+        tags: [CACHE_CONFIG.KEY_TOURNAMENTS],
+        revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
     },
 )

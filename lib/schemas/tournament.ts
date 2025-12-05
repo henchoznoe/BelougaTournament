@@ -1,3 +1,11 @@
+/**
+ * File: lib/schemas/tournament.ts
+ * Description: Tournament schema for validation.
+ * Author: Noé Henchoz
+ * Date: 2025-12-05
+ * License: MIT
+ */
+
 import { z } from 'zod'
 
 export const tournamentSchema = z.object({

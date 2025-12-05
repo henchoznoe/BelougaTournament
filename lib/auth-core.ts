@@ -2,18 +2,13 @@
  * File: lib/auth-core.ts
  * Description: Core authentication logic (JWT) independent of Next.js runtime (headers/cookies).
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-05
  * License: MIT
  */
 
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
 
-const secretKey = process.env.JWT_SECRET_KEY
-if (!secretKey) {
-    throw new Error('FATAL: JWT_SECRET_KEY is not defined')
-}
-const key = new TextEncoder().encode(secretKey)
-
+// Types
 export enum UserRole {
     ADMIN = 'ADMIN',
     SUPERADMIN = 'SUPERADMIN',
@@ -27,17 +22,50 @@ export interface SessionPayload extends JWTPayload {
     }
 }
 
-export async function encrypt(payload: SessionPayload) {
-    return await new SignJWT(payload)
-        .setProtectedHeader({ alg: 'HS256' })
+// Constants
+const ENV_KEYS = {
+    JWT_SECRET: 'JWT_SECRET_KEY',
+} as const
+
+const JWT_CONFIG = {
+    ALG: 'HS256',
+    EXPIRATION: '24h',
+} as const
+
+const ERRORS = {
+    MISSING_SECRET: `Environment variable ${ENV_KEYS.JWT_SECRET} is not defined.`,
+    INVALID_TOKEN: 'Invalid or expired session token.',
+} as const
+
+// Get encoded key from environment variable
+const getEncodedKey = (): Uint8Array => {
+    const secret = process.env[ENV_KEYS.JWT_SECRET]
+
+    if (!secret) {
+        throw new Error(ERRORS.MISSING_SECRET)
+    }
+
+    return new TextEncoder().encode(secret)
+}
+
+// Encrypt token
+export const encrypt = async (payload: SessionPayload): Promise<string> => {
+    const key = getEncodedKey()
+
+    return new SignJWT(payload)
+        .setProtectedHeader({ alg: JWT_CONFIG.ALG })
         .setIssuedAt()
-        .setExpirationTime('24h')
+        .setExpirationTime(JWT_CONFIG.EXPIRATION)
         .sign(key)
 }
 
+// Decrypt token
 export async function decrypt(input: string): Promise<SessionPayload> {
+    const key = getEncodedKey()
+
     const { payload } = await jwtVerify(input, key, {
-        algorithms: ['HS256'],
+        algorithms: [JWT_CONFIG.ALG],
     })
+
     return payload as SessionPayload
 }

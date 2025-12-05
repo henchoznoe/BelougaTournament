@@ -11,7 +11,8 @@
     "format": "biome format . --write",
     "check": "biome check --write .",
     "generate": "prisma generate",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate dev",
+    "db:deploy": "prisma generate && prisma migrate deploy && npx tsx prisma/seed-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

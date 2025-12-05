@@ -1,25 +1,63 @@
+/**
+ * File: lib/email.ts
+ * Description: Email service module to handle transactional emails via Resend.
+ * Author: Noé Henchoz
+ * Date: 2025-12-05
+ * License: MIT
+ */
+
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
+// Types
 type EmailPayload = {
     to: string
     subject: string
     html: string
 }
 
-export async function sendEmail({ to, subject, html }: EmailPayload) {
-    if (!process.env.RESEND_API_KEY) {
-        console.warn(
-            'RESEND_API_KEY is not set. Email would have been sent to:',
-            to,
-        )
-        return { success: false, error: 'Missing API Key' }
+type EmailResponse = {
+    success: boolean
+    data?: unknown
+    error?: unknown
+}
+
+// Constants
+const ENV_VAR_KEYS = {
+    API_KEY: 'RESEND_API_KEY',
+    FROM_EMAIL: 'RESEND_FROM_EMAIL',
+} as const
+
+const ERRORS = {
+    MISSING_ENV: `Environment variables ${ENV_VAR_KEYS.API_KEY} and ${ENV_VAR_KEYS.FROM_EMAIL} must be defined.`,
+    SEND_FAILED: 'Failed to send email via Resend.',
+} as const
+
+const TEAM_NAME = 'The Belouga Tournament Team'
+
+function getResendClient(): { client: Resend; fromEmail: string } {
+    const apiKey = process.env[ENV_VAR_KEYS.API_KEY]
+    const fromEmail = process.env[ENV_VAR_KEYS.FROM_EMAIL]
+
+    if (!apiKey || !fromEmail) {
+        throw new Error(ERRORS.MISSING_ENV)
     }
 
+    return {
+        client: new Resend(apiKey),
+        fromEmail,
+    }
+}
+
+export async function sendEmail({
+    to,
+    subject,
+    html,
+}: EmailPayload): Promise<EmailResponse> {
     try {
-        const data = await resend.emails.send({
-            from: 'Belouga Tournament <noreply@belouga.com>', // Update this with a verified domain later
+        const { client, fromEmail } = getResendClient()
+
+        const data = await client.emails.send({
+            from: fromEmail,
             to,
             subject,
             html,
@@ -27,8 +65,12 @@ export async function sendEmail({ to, subject, html }: EmailPayload) {
 
         return { success: true, data }
     } catch (error) {
-        console.error('Failed to send email:', error)
-        return { success: false, error }
+        console.error(ERRORS.SEND_FAILED, error)
+
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : ERRORS.SEND_FAILED,
+        }
     }
 }
 
@@ -36,7 +78,7 @@ export function generateRegistrationEmailHtml(
     tournamentTitle: string,
     status: string,
     cancellationUrl: string,
-) {
+): string {
     return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Received</h1>
@@ -48,7 +90,7 @@ export function generateRegistrationEmailHtml(
       <p><a href="${cancellationUrl}" style="color: #ef4444;">Cancel my registration</a></p>
       <br/>
       <p>Best regards,</p>
-      <p>The Belouga Tournament Team</p>
+      <p>${TEAM_NAME}</p>
     </div>
   `
 }
@@ -56,7 +98,7 @@ export function generateRegistrationEmailHtml(
 export function generateStatusUpdateEmailHtml(
     tournamentTitle: string,
     status: string,
-) {
+): string {
     return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Status Update</h1>
@@ -64,7 +106,7 @@ export function generateStatusUpdateEmailHtml(
       <p>New Status: <strong>${status}</strong></p>
       <br/>
       <p>Best regards,</p>
-      <p>The Belouga Tournament Team</p>
+      <p>${TEAM_NAME}</p>
     </div>
   `
 }
