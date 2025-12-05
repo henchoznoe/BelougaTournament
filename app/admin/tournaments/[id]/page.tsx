@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ChallongeIdForm } from '@/components/admin/challonge-id-form'
 import { CsvExportButton } from '@/components/admin/csv-export-button'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +27,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
     Sheet,
     SheetContent,
@@ -44,10 +44,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-    deleteRegistration,
-    updateChallongeId,
-} from '@/lib/actions/tournament-manager'
+import { deleteRegistration } from '@/lib/actions/tournament-manager'
 import prisma from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -210,26 +207,10 @@ export default async function TournamentManagerPage({
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form
-                                action={updateChallongeId.bind(
-                                    null,
-                                    tournament.id,
-                                )}
-                                className="flex gap-4 max-w-xl"
-                            >
-                                <Input
-                                    name="challongeId"
-                                    placeholder="ex: belouga_cup_1"
-                                    defaultValue={tournament.challongeId || ''}
-                                    className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                                />
-                                <Button
-                                    type="submit"
-                                    className="bg-blue-600 hover:bg-blue-500 text-white"
-                                >
-                                    Enregistrer l'ID
-                                </Button>
-                            </form>
+                            <ChallongeIdForm
+                                tournamentId={tournament.id}
+                                initialChallongeId={tournament.challongeId}
+                            />
                         </CardContent>
                     </Card>
                 </TabsContent>
