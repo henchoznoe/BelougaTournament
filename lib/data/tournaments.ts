@@ -21,6 +21,13 @@ export const getPublicTournaments = unstable_cache(
                     gte: new Date(),
                 },
             },
+            include: {
+                _count: {
+                    select: {
+                        registrations: true,
+                    },
+                },
+            },
         })
     },
     ['tournaments'],

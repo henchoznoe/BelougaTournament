@@ -121,8 +121,18 @@ export default async function TournamentsPage() {
                                             </div>
                                             <span>
                                                 {tournament.maxParticipants
-                                                    ? `Max ${tournament.maxParticipants} ${tournament.format === 'TEAM' ? 'Équipes' : 'Joueurs'}`
-                                                    : 'Inscriptions ouvertes'}
+                                                    ? `${tournament._count.registrations} / ${tournament.maxParticipants} ${
+                                                          tournament.format ===
+                                                          'TEAM'
+                                                              ? 'Équipes'
+                                                              : 'Joueurs'
+                                                      }`
+                                                    : `${tournament._count.registrations} Inscrit${
+                                                          tournament._count
+                                                              .registrations > 1
+                                                              ? 's'
+                                                              : ''
+                                                      }`}
                                             </span>
                                         </div>
                                     </CardContent>
