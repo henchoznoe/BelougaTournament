@@ -10,76 +10,76 @@ import { Resend } from 'resend'
 
 // Types
 type EmailPayload = {
-    to: string
-    subject: string
-    html: string
+  to: string
+  subject: string
+  html: string
 }
 
 type EmailResponse = {
-    success: boolean
-    data?: unknown
-    error?: unknown
+  success: boolean
+  data?: unknown
+  error?: unknown
 }
 
 // Constants
 const ENV_VAR_KEYS = {
-    API_KEY: 'RESEND_API_KEY',
-    FROM_EMAIL: 'RESEND_FROM_EMAIL',
+  API_KEY: 'RESEND_API_KEY',
+  FROM_EMAIL: 'RESEND_FROM_EMAIL',
 } as const
 
 const ERRORS = {
-    MISSING_ENV: `Environment variables ${ENV_VAR_KEYS.API_KEY} and ${ENV_VAR_KEYS.FROM_EMAIL} must be defined.`,
-    SEND_FAILED: 'Failed to send email via Resend.',
+  MISSING_ENV: `Environment variables ${ENV_VAR_KEYS.API_KEY} and ${ENV_VAR_KEYS.FROM_EMAIL} must be defined.`,
+  SEND_FAILED: 'Failed to send email via Resend.',
 } as const
 
 const TEAM_NAME = 'The Belouga Tournament Team'
 
 function getResendClient(): { client: Resend; fromEmail: string } {
-    const apiKey = process.env[ENV_VAR_KEYS.API_KEY]
-    const fromEmail = process.env[ENV_VAR_KEYS.FROM_EMAIL]
+  const apiKey = process.env[ENV_VAR_KEYS.API_KEY]
+  const fromEmail = process.env[ENV_VAR_KEYS.FROM_EMAIL]
 
-    if (!apiKey || !fromEmail) {
-        throw new Error(ERRORS.MISSING_ENV)
-    }
+  if (!apiKey || !fromEmail) {
+    throw new Error(ERRORS.MISSING_ENV)
+  }
 
-    return {
-        client: new Resend(apiKey),
-        fromEmail,
-    }
+  return {
+    client: new Resend(apiKey),
+    fromEmail,
+  }
 }
 
 export async function sendEmail({
-    to,
-    subject,
-    html,
+  to,
+  subject,
+  html,
 }: EmailPayload): Promise<EmailResponse> {
-    try {
-        const { client, fromEmail } = getResendClient()
+  try {
+    const { client, fromEmail } = getResendClient()
 
-        const data = await client.emails.send({
-            from: fromEmail,
-            to,
-            subject,
-            html,
-        })
+    const data = await client.emails.send({
+      from: fromEmail,
+      to,
+      subject,
+      html,
+    })
 
-        return { success: true, data }
-    } catch (error) {
-        console.error(ERRORS.SEND_FAILED, error)
+    return { success: true, data }
+  } catch (error) {
+    console.error(ERRORS.SEND_FAILED, error)
 
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : ERRORS.SEND_FAILED,
-        }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : ERRORS.SEND_FAILED,
     }
+  }
 }
 
 export function generateRegistrationEmailHtml(
-    tournamentTitle: string,
-    status: string,
-    cancellationUrl: string,
+  tournamentTitle: string,
+  status: string,
+  cancellationUrl: string,
 ): string {
-    return `
+  return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Received</h1>
       <p>Thank you for registering for <strong>${tournamentTitle}</strong>.</p>
@@ -96,10 +96,10 @@ export function generateRegistrationEmailHtml(
 }
 
 export function generateStatusUpdateEmailHtml(
-    tournamentTitle: string,
-    status: string,
+  tournamentTitle: string,
+  status: string,
 ): string {
-    return `
+  return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Status Update</h1>
       <p>Your registration status for <strong>${tournamentTitle}</strong> has been updated.</p>

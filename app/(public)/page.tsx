@@ -16,24 +16,24 @@ import { TournamentsSkeleton } from '@/components/public/landing/tournaments-ske
 import { getSiteSettings } from '@/lib/data/settings'
 
 export default async function LandingPage() {
-    const settings = await getSiteSettings()
+  const settings = await getSiteSettings()
 
-    return (
-        <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-            <Hero />
-            <Stats
-                stats={{
-                    years: settings.statsYears,
-                    players: settings.statsPlayers,
-                    tournaments: settings.statsTournaments,
-                    matches: settings.statsMatches,
-                }}
-            />
-            <Features />
-            <Suspense fallback={<TournamentsSkeleton />}>
-                <TournamentsSection />
-            </Suspense>
-            <StreamSection />
-        </div>
-    )
+  return (
+    <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
+      <Hero />
+      <Stats
+        stats={{
+          years: settings.statsYears,
+          players: settings.statsPlayers,
+          tournaments: settings.statsTournaments,
+          matches: settings.statsMatches,
+        }}
+      />
+      <Features />
+      <Suspense fallback={<TournamentsSkeleton />}>
+        <TournamentsSection />
+      </Suspense>
+      <StreamSection />
+    </div>
+  )
 }

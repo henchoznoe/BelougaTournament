@@ -11,28 +11,28 @@ import prisma from '@/lib/prisma'
 
 // Constants
 const DB_CONFIG = {
-    // Fixed ID to enforce a singleton pattern for global settings
-    SINGLETON_ID: 1,
+  // Fixed ID to enforce a singleton pattern for global settings
+  SINGLETON_ID: 1,
 } as const
 
 const CACHE_CONFIG = {
-    KEY_SETTINGS: 'site-settings',
+  KEY_SETTINGS: 'site-settings',
 } as const
 
 const fetchSettingsFromDb = async () => {
-    return prisma.siteSettings.upsert({
-        where: { id: DB_CONFIG.SINGLETON_ID },
-        update: {},
-        create: {
-            id: DB_CONFIG.SINGLETON_ID,
-        },
-    })
+  return prisma.siteSettings.upsert({
+    where: { id: DB_CONFIG.SINGLETON_ID },
+    update: {},
+    create: {
+      id: DB_CONFIG.SINGLETON_ID,
+    },
+  })
 }
 
 export const getSiteSettings = unstable_cache(
-    fetchSettingsFromDb,
-    [CACHE_CONFIG.KEY_SETTINGS],
-    {
-        tags: [CACHE_CONFIG.KEY_SETTINGS],
-    },
+  fetchSettingsFromDb,
+  [CACHE_CONFIG.KEY_SETTINGS],
+  {
+    tags: [CACHE_CONFIG.KEY_SETTINGS],
+  },
 )
