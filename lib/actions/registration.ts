@@ -110,8 +110,11 @@ export async function registerForTournament(
             let status: RegistrationStatus = 'PENDING'
 
             if (tournament.maxParticipants) {
-                // Lock the table or rows if necessary, but here we rely on the transaction isolation
-                // to ensure the count is accurate at the moment of check.
+                // Lock the Tournament row to prevent race conditions
+                // We cast ID to string to ensure safety, though it's already UUID
+                await tx.$executeRaw`SELECT * FROM "Tournament" WHERE id = ${tournamentId} FOR UPDATE`
+
+                // lock acquired, safe to count
                 const currentRegistrations = await tx.registration.count({
                     where: { tournamentId },
                 })
