@@ -11,10 +11,10 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
-import { getSession, UserRole } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { tournamentSchema } from '@/lib/schemas/tournament'
-import { Prisma } from '@/prisma/generated/prisma/client'
+import { Prisma, Role } from '@/prisma/generated/prisma/client'
 
 export type ActionState = {
   errors?: {
@@ -28,8 +28,7 @@ async function checkAuth() {
   if (
     !session ||
     !session.user ||
-    (session.user.role !== UserRole.ADMIN &&
-      session.user.role !== UserRole.SUPERADMIN)
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
   ) {
     return {
       success: false,

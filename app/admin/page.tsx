@@ -20,8 +20,9 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getSession, UserRole } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 async function getStats() {
   const [
@@ -286,7 +287,7 @@ export default async function AdminDashboard() {
             </Button>
 
             {/* Manage Admins - SuperAdmin Only */}
-            {userRole === UserRole.SUPERADMIN ? (
+            {userRole === Role.SUPERADMIN ? (
               <Button
                 variant="outline"
                 className="w-full h-16 justify-start border-white/5 bg-white/5 hover:bg-white/10 hover:text-white text-zinc-300 hover:border-purple-500/30 group"
@@ -329,7 +330,7 @@ export default async function AdminDashboard() {
             )}
 
             {/* Settings - SuperAdmin Only */}
-            {userRole === UserRole.SUPERADMIN ? (
+            {userRole === Role.SUPERADMIN ? (
               <Button
                 variant="outline"
                 className="w-full h-16 justify-start border-white/5 bg-white/5 hover:bg-white/10 hover:text-white text-zinc-300 hover:border-zinc-500/30 group"

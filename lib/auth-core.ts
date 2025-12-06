@@ -6,19 +6,16 @@
  * License: MIT
  */
 
+import type { Role } from '@/prisma/generated/prisma/enums'
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
 
 // Types
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  SUPERADMIN = 'SUPERADMIN',
-}
 
 export interface SessionPayload extends JWTPayload {
   user: {
     id: string
     email: string
-    role: UserRole
+    role: Role
   }
 }
 

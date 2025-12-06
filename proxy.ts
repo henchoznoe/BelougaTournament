@@ -6,9 +6,10 @@
  * License: MIT
  */
 
-import { UserRole, decrypt } from "@/lib/auth-core";
+import { decrypt } from "@/lib/auth-core";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { Role } from "./prisma/generated/prisma/enums";
 
 export async function proxy(request: NextRequest) {
   const session = request.cookies.get("session")?.value;
@@ -20,7 +21,7 @@ export async function proxy(request: NextRequest) {
 
     try {
       const payload = await decrypt(session);
-      if (!payload || (payload.user.role !== UserRole.ADMIN && payload.user.role !== UserRole.SUPERADMIN)) {
+      if (!payload || (payload.user.role !== Role.ADMIN && payload.user.role !== Role.SUPERADMIN)) {
          return NextResponse.redirect(new URL("/login", request.url));
       }
     } catch (error) {

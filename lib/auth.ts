@@ -9,8 +9,9 @@
 import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
-import { decrypt, UserRole } from '@/lib/auth-core'
+import { decrypt } from '@/lib/auth-core'
 import prisma from '@/lib/prisma'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 export * from '@/lib/auth-core'
 
@@ -61,7 +62,7 @@ export async function getSession() {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role as UserRole,
+        role: user.role,
       },
     }
   } catch (error) {
@@ -78,8 +79,7 @@ export async function getAdminSession() {
   if (!session) return null
 
   const isAuthorized =
-    session.user.role === UserRole.ADMIN ||
-    session.user.role === UserRole.SUPERADMIN
+    session.user.role === Role.ADMIN || session.user.role === Role.SUPERADMIN
 
   if (!isAuthorized) return null
 

@@ -10,13 +10,14 @@ import { Lock } from 'lucide-react'
 import Link from 'next/link'
 import { AdminsManager } from '@/components/admin/admins-manager'
 import { Button } from '@/components/ui/button'
-import { getSession, UserRole } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 export default async function AdminsPage() {
   const session = await getSession()
 
-  if (!session || !session.user || session.user.role !== UserRole.SUPERADMIN) {
+  if (!session || !session.user || session.user.role !== Role.SUPERADMIN) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 animate-in fade-in zoom-in duration-500">
         <div className="size-20 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">

@@ -10,7 +10,8 @@ import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { logout } from '@/lib/actions/auth'
-import { getSession, UserRole } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 export default async function AdminLayout({
   children,
@@ -22,8 +23,7 @@ export default async function AdminLayout({
   if (
     !session ||
     !session.user ||
-    (session.user.role !== UserRole.ADMIN &&
-      session.user.role !== UserRole.SUPERADMIN)
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
   ) {
     redirect('/login')
   }

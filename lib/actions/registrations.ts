@@ -10,17 +10,17 @@
 
 import type { RegistrationStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { getSession, UserRole } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
 import prisma from '@/lib/prisma'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 async function checkAuth() {
   const session = await getSession()
   if (
     !session ||
     !session.user ||
-    (session.user.role !== UserRole.ADMIN &&
-      session.user.role !== UserRole.SUPERADMIN)
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
   ) {
     return {
       success: false,
