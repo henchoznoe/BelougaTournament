@@ -2,24 +2,22 @@
  * File: components/twitch-embed.tsx
  * Description: A component to embed a Twitch stream with offline detection and a fallback UI.
  * Author: Noé Henchoz
- * Date: 2025-12-03
+ * Date: 2025-12-06
  * License: MIT
  */
 
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { Loader2, ScreenShareOff } from "lucide-react";
 
 const TWITCH_SCRIPT_URL = "https://embed.twitch.tv/embed/v1.js";
-const TWITCH_PLAYER_ELEMENT_ID = "twitch-embed";
 
 interface TwitchEmbedProps {
   channel: string;
   width?: string | number;
   height?: string | number;
-  targetDomain?: string;
 }
 
 declare global {
@@ -34,6 +32,8 @@ declare global {
           parent: string[];
           layout?: string;
           autoplay?: boolean;
+          muted?: boolean;
+          allowfullscreen?: boolean;
         }
       ) => TwitchPlayer;
     };
@@ -46,28 +46,58 @@ interface TwitchPlayer {
   play: () => void;
   pause: () => void;
   setMuted: (muted: boolean) => void;
+  getMuted: () => boolean;
+  setVolume: (volume: number) => void;
 }
 
-export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbedProps) {
-
+export function TwitchEmbed({
+  channel,
+  width = "100%",
+  height = 600,
+}: TwitchEmbedProps) {
   const [isStreamOnline, setIsStreamOnline] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false);
   const playerRef = useRef<TwitchPlayer | null>(null);
 
+  // Use React.useId() for a stable, unique ID across server and client
+  const uniqueId = useId();
+  // Sanitize the ID to ensure it's a valid HTML ID without special characters like colons
+  const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, '')}`;
+
+  useEffect(() => {
+    // Check if script is already loaded (e.g. from a previous page or navigation)
+    if (window.Twitch && window.Twitch.Embed) {
+      setIsScriptLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isScriptLoaded) return;
-    const container = document.getElementById(TWITCH_PLAYER_ELEMENT_ID);
-    if (container) container.innerHTML = "";
+
+    // Clean up previous instance if any
+    const container = document.getElementById(embedId);
+    if (container) {
+      container.innerHTML = "";
+    }
 
     try {
-      const embed = new window.Twitch.Embed(TWITCH_PLAYER_ELEMENT_ID, {
+      const parentDomain = window.location.hostname;
+      const parents = [parentDomain];
+      // Add localhost for development if we are on localhost
+      if (parentDomain === "localhost") {
+        parents.push("127.0.0.1");
+      }
+
+      const embed = new window.Twitch.Embed(embedId, {
         width,
         height,
         channel,
-        parent: ["localhost", process.env.NEXT_PUBLIC_TWITCH_PARENT || "localhost", window.location.hostname],
+        parent: parents,
         layout: "video",
-        autoplay: true
+        autoplay: true,
+        muted: true, // Start muted to allow autoplay
+        allowfullscreen: true,
       });
 
       playerRef.current = embed;
@@ -85,9 +115,12 @@ export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbed
       };
 
       const handleReady = () => {
-        console.log("Stream is Ready");
-        embed.setMuted(true);
-        embed.play();
+        console.log("Twitch Player Ready");
+        // Verify playback
+        if (playerRef.current) {
+            playerRef.current.setMuted(true);
+            playerRef.current.play();
+        }
       };
 
       embed.addEventListener("online", handleOnline);
@@ -95,34 +128,38 @@ export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbed
       embed.addEventListener("VIDEO_READY", handleReady);
 
       return () => {
-        embed.removeEventListener("online", handleOnline);
-        embed.removeEventListener("offline", handleOffline);
-        embed.removeEventListener("VIDEO_READY", handleReady);
+        if (playerRef.current) {
+          playerRef.current.removeEventListener("online", handleOnline);
+          playerRef.current.removeEventListener("offline", handleOffline);
+          playerRef.current.removeEventListener("VIDEO_READY", handleReady);
+        }
       };
     } catch (error) {
       console.error("Failed to initialize Twitch Embed:", error);
-      setIsLoading(false);
+      setIsLoading(false); // Fallback to avoid infinite loading
     }
-  }, [isScriptLoaded, channel, width, height]);
+  }, [isScriptLoaded, channel, width, height, embedId]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg bg-zinc-950 shadow-xl border border-zinc-800" style={{ height }}>
+    <div
+      className="relative w-full overflow-hidden rounded-lg bg-zinc-950 shadow-xl border border-zinc-800"
+      style={{ height }}
+    >
       <Script
         src={TWITCH_SCRIPT_URL}
         onLoad={() => setIsScriptLoaded(true)}
         strategy="afterInteractive"
       />
 
-      {/* Twitch Player - Always rendered "visible" but covered by overlays when needed */}
       <div
-        id={TWITCH_PLAYER_ELEMENT_ID}
+        id={embedId}
         className="absolute inset-0 z-0"
         style={{ width: "100%", height: "100%" }}
       />
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white pointer-events-none">
           <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
           <p className="text-zinc-400">Chargement du stream...</p>
         </div>
@@ -138,7 +175,8 @@ export function TwitchEmbed({channel, width = "100%", height = 600}: TwitchEmbed
             Le stream est actuellement offline
           </h3>
           <p className="max-w-md text-zinc-400">
-            {channel} ne stream pas actuellement. Revenez plus tard ou suivez sa chaîne sur Twitch pour être informé de son prochain stream.
+            {channel} ne stream pas actuellement. Revenez plus tard ou suivez sa
+            chaîne sur Twitch pour être informé de son prochain stream.
           </p>
         </div>
       )}

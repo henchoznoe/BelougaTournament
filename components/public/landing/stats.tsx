@@ -14,7 +14,7 @@ export interface StatsProps {
 
 export function Stats({ stats }: StatsProps) {
     return (
-        <section className="container mx-auto px-4">
+        <section className="container mx-auto px-4" id="stats">
             <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}

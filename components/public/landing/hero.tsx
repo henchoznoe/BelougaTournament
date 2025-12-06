@@ -84,7 +84,7 @@ export function Hero() {
             size="lg"
           >
             <Link href="/tournaments">
-              Participer au tournoi
+              Participer
               <ChevronRight className="ml-2 size-5" />
             </Link>
           </Button>
@@ -94,7 +94,7 @@ export function Hero() {
             size="lg"
             variant="outline"
           >
-            <Link href="/tournaments">Les tournois</Link>
+            <Link href="#stats">En savoir plus</Link>
           </Button>
         </motion.div>
       </motion.div>
