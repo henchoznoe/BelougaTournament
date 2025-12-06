@@ -38,7 +38,7 @@ interface TournamentsListProps {
 
 // Constants
 const CONTENT = {
-  SECTION_TITLE: "Tournois",
+  SECTION_TITLE: "Tournois à venir",
   VIEW_ALL: "Tout voir",
   EMPTY_TITLE: "Aucun tournoi prévu",
   EMPTY_DESC: "Revenez plus tard pour les prochaines annonces !",
