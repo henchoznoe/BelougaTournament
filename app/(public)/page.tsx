@@ -2,7 +2,7 @@
  * File: app/(public)/page.tsx
  * Description: Landing page with hero section and featured tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -18,21 +18,26 @@ import { getSiteSettings } from '@/lib/data/settings'
 export default async function LandingPage() {
   const settings = await getSiteSettings()
 
+  const statsData = {
+    years: settings.statsYears,
+    players: settings.statsPlayers,
+    tournaments: settings.statsTournaments,
+    matches: settings.statsMatches,
+  }
+
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
       <Hero />
-      <Stats
-        stats={{
-          years: settings.statsYears,
-          players: settings.statsPlayers,
-          tournaments: settings.statsTournaments,
-          matches: settings.statsMatches,
-        }}
-      />
+
+      <Stats stats={statsData} />
+
       <Features />
+
+      {/* Suspense allows the hero to load immediately while fetching tournaments */}
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>
+
       <StreamSection />
     </div>
   )
