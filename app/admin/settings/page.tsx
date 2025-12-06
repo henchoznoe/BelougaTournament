@@ -11,8 +11,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { SettingsForm } from './settings-form'
 import { Role } from '@/prisma/generated/prisma/enums'
+import { SettingsForm } from './settings-form'
 
 async function getSettings() {
   const settings = await prisma.siteSettings.findFirst()

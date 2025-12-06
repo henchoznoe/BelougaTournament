@@ -12,154 +12,184 @@ import Script from "next/script";
 import { useEffect, useRef, useState, useId } from "react";
 import { Loader2, ScreenShareOff } from "lucide-react";
 
-const TWITCH_SCRIPT_URL = "https://embed.twitch.tv/embed/v1.js";
-
+// Types
 interface TwitchEmbedProps {
-  channel: string;
-  width?: string | number;
-  height?: string | number;
+  channel: string
+  width?: string | number
+  height?: string | number
 }
 
+// Extend the global Window interface for Twitch SDK
 declare global {
   interface Window {
     Twitch: {
       Embed: new (
         id: string,
-        options: {
-          width: string | number;
-          height: string | number;
-          channel: string;
-          parent: string[];
-          layout?: string;
-          autoplay?: boolean;
-          muted?: boolean;
-          allowfullscreen?: boolean;
-        }
-      ) => TwitchPlayer;
-    };
+        options: TwitchEmbedOptions
+      ) => TwitchPlayer
+    }
   }
 }
 
-interface TwitchPlayer {
-  addEventListener: (event: string, callback: () => void) => void;
-  removeEventListener: (event: string, callback: () => void) => void;
-  play: () => void;
-  pause: () => void;
-  setMuted: (muted: boolean) => void;
-  getMuted: () => boolean;
-  setVolume: (volume: number) => void;
+interface TwitchEmbedOptions {
+  width: string | number
+  height: string | number
+  channel: string
+  parent: string[]
+  layout?: 'video' | 'video-with-chat'
+  autoplay?: boolean
+  muted?: boolean
+  allowfullscreen?: boolean
 }
 
-export function TwitchEmbed({
+interface TwitchPlayer {
+  addEventListener: (event: string, callback: () => void) => void
+  removeEventListener: (event: string, callback: () => void) => void
+  play: () => void
+  pause: () => void
+  setMuted: (muted: boolean) => void
+  getMuted: () => boolean
+  setVolume: (volume: number) => void
+}
+
+// Constants
+const TWITCH_CONFIG = {
+  SCRIPT_URL: 'https://embed.twitch.tv/embed/v1.js',
+  DEFAULT_WIDTH: '100%',
+  DEFAULT_HEIGHT: 600,
+  EVENTS: {
+    ONLINE: 'online',
+    OFFLINE: 'offline',
+    READY: 'VIDEO_READY',
+  },
+} as const
+
+const getParentDomains = (): string[] => {
+  if (typeof window === 'undefined') return []
+
+  const hostname = window.location.hostname
+  const parents = [hostname]
+
+  if (hostname === 'localhost') {
+    parents.push('127.0.0.1')
+  }
+
+  return parents
+}
+
+export const TwitchEmbed = ({
   channel,
-  width = "100%",
-  height = 600,
-}: TwitchEmbedProps) {
-  const [isStreamOnline, setIsStreamOnline] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false);
-  const playerRef = useRef<TwitchPlayer | null>(null);
+  width = TWITCH_CONFIG.DEFAULT_WIDTH,
+  height = TWITCH_CONFIG.DEFAULT_HEIGHT,
+}: TwitchEmbedProps) => {
+  // State
+  const [isStreamOnline, setIsStreamOnline] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false)
 
-  // Use React.useId() for a stable, unique ID across server and client
-  const uniqueId = useId();
-  // Sanitize the ID to ensure it's a valid HTML ID without special characters like colons
-  const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, '')}`;
+  // Refs
+  const playerRef = useRef<TwitchPlayer | null>(null)
 
+  // ID Generation (Sanitized for DOM usage)
+  const uniqueId = useId()
+  const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, '')}`
+
+  // Check for pre-loaded script (e.g., client-side navigation)
   useEffect(() => {
-    // Check if script is already loaded (e.g. from a previous page or navigation)
-    if (window.Twitch && window.Twitch.Embed) {
-      setIsScriptLoaded(true);
+    if (window.Twitch?.Embed) {
+      setIsScriptLoaded(true)
     }
-  }, []);
+  }, [])
 
+  // Initialize Player
   useEffect(() => {
-    if (!isScriptLoaded) return;
+    if (!isScriptLoaded) return
 
-    // Clean up previous instance if any
-    const container = document.getElementById(embedId);
+    const container = document.getElementById(embedId)
+    // Safety check: Clear container to prevent duplicate iframes in React Strict Mode
     if (container) {
-      container.innerHTML = "";
+      container.innerHTML = ''
     }
 
     try {
-      const parentDomain = window.location.hostname;
-      const parents = [parentDomain];
-      // Add localhost for development if we are on localhost
-      if (parentDomain === "localhost") {
-        parents.push("127.0.0.1");
-      }
-
       const embed = new window.Twitch.Embed(embedId, {
         width,
         height,
         channel,
-        parent: parents,
-        layout: "video",
+        parent: getParentDomains(),
+        layout: 'video',
         autoplay: true,
-        muted: true, // Start muted to allow autoplay
+        muted: true, // Auto-play policies usually require muting first
         allowfullscreen: true,
-      });
+      })
 
-      playerRef.current = embed;
+      playerRef.current = embed
 
+      // Event Handlers
       const handleOnline = () => {
-        console.log("Stream is Online");
-        setIsStreamOnline(true);
-        setIsLoading(false);
-      };
+        setIsStreamOnline(true)
+        setIsLoading(false)
+      }
 
       const handleOffline = () => {
-        console.log("Stream is Offline");
-        setIsStreamOnline(false);
-        setIsLoading(false);
-      };
+        setIsStreamOnline(false)
+        setIsLoading(false)
+      }
 
       const handleReady = () => {
-        console.log("Twitch Player Ready");
-        // Verify playback
+        // Ensure player starts when ready
         if (playerRef.current) {
-            playerRef.current.setMuted(true);
-            playerRef.current.play();
+          playerRef.current.setMuted(true)
+          playerRef.current.play()
         }
-      };
+      }
 
-      embed.addEventListener("online", handleOnline);
-      embed.addEventListener("offline", handleOffline);
-      embed.addEventListener("VIDEO_READY", handleReady);
+      // Bind Events
+      embed.addEventListener(TWITCH_CONFIG.EVENTS.ONLINE, handleOnline)
+      embed.addEventListener(TWITCH_CONFIG.EVENTS.OFFLINE, handleOffline)
+      embed.addEventListener(TWITCH_CONFIG.EVENTS.READY, handleReady)
 
+      // Cleanup
       return () => {
         if (playerRef.current) {
-          playerRef.current.removeEventListener("online", handleOnline);
-          playerRef.current.removeEventListener("offline", handleOffline);
-          playerRef.current.removeEventListener("VIDEO_READY", handleReady);
+            // Note: Twitch API doesn't always cleanly remove listeners, but good practice
+            try {
+                // @ts-ignore - Some Twitch types are loose on removeEventListener
+                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.ONLINE, handleOnline)
+                // @ts-ignore
+                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.OFFLINE, handleOffline)
+                // @ts-ignore
+                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.READY, handleReady)
+            } catch (e) {
+                // Ignore cleanup errors on unmount
+            }
         }
-      };
+      }
     } catch (error) {
-      console.error("Failed to initialize Twitch Embed:", error);
-      setIsLoading(false); // Fallback to avoid infinite loading
+      console.error('Failed to initialize Twitch Embed:', error)
+      setIsLoading(false)
     }
-  }, [isScriptLoaded, channel, width, height, embedId]);
+  }, [isScriptLoaded, channel, width, height, embedId])
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-lg bg-zinc-950 shadow-xl border border-zinc-800"
+      className="relative w-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl"
       style={{ height }}
     >
       <Script
-        src={TWITCH_SCRIPT_URL}
+        src={TWITCH_CONFIG.SCRIPT_URL}
         onLoad={() => setIsScriptLoaded(true)}
         strategy="afterInteractive"
       />
 
       <div
         id={embedId}
-        className="absolute inset-0 z-0"
-        style={{ width: "100%", height: "100%" }}
+        className="absolute inset-0 z-0 h-full w-full"
       />
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white pointer-events-none">
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
           <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
           <p className="text-zinc-400">Chargement du stream...</p>
         </div>
@@ -176,10 +206,10 @@ export function TwitchEmbed({
           </h3>
           <p className="max-w-md text-zinc-400">
             {channel} ne stream pas actuellement. Revenez plus tard ou suivez sa
-            chaîne sur Twitch pour être informé de son prochain stream.
+            chaîne sur Twitch.
           </p>
         </div>
       )}
     </div>
-  );
+  )
 }

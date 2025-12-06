@@ -6,8 +6,8 @@
  * License: MIT
  */
 
-import type { Role } from '@/prisma/generated/prisma/enums'
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
+import type { Role } from '@/prisma/generated/prisma/enums'
 
 // Types
 
