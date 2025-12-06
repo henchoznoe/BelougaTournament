@@ -1,8 +1,16 @@
-import { getSiteSettings } from "@/lib/data/settings";
-import { NavbarClient } from "./navbar-client";
+/**
+ * File: components/public/navbar.tsx
+ * Description: Server Component entry point for the public navbar. Fetches global settings to hydrate the client component.
+ * Author: Noé Henchoz
+ * Date: 2025-12-06
+ * License: MIT
+ */
 
-export async function Navbar() {
-  const settings = await getSiteSettings();
+import { getSiteSettings } from '@/lib/data/settings'
+import { NavbarClient } from './navbar-client'
 
-  return <NavbarClient settings={settings} />;
+export const Navbar = async () => {
+  const settings = await getSiteSettings()
+
+  return <NavbarClient settings={settings} />
 }
