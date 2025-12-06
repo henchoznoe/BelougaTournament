@@ -6,7 +6,8 @@
  * License: MIT
  */
 
-import { Mail, MessageSquare, Video } from 'lucide-react'
+import { type LucideIcon, Mail, MessageSquare, Video } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,99 +19,154 @@ import {
 } from '@/components/ui/card'
 import { getSiteSettings } from '@/lib/data/settings'
 
+// Types
+interface ContactCardProps {
+  icon: LucideIcon
+  title: string
+  description: string
+  href: string
+  buttonLabel: string
+  colors?: {
+    button?: string
+    icon?: string
+  }
+  isExternal?: boolean
+}
+
+// Constants
+const CONTENT = {
+  TITLE: 'Contactez-nous',
+  DESCRIPTION:
+    "Une question ? Une proposition ? N'hésitez pas à nous contacter via les canaux ci-dessous.",
+  EMAIL: 'contact@belouga.com',
+} as const
+
+const CARDS_CONFIG = {
+  EMAIL: {
+    TITLE: 'Support Email',
+    DESC: 'Pour toute demande générale ou administrative.',
+    BTN_LABEL: 'Envoyer un email',
+  },
+  DISCORD: {
+    TITLE: 'Communauté Discord',
+    DESC: 'Rejoignez la communauté pour discuter en direct.',
+    BTN_LABEL: 'Rejoindre le Discord',
+    COLOR_BTN: 'bg-[#5865F2] hover:bg-[#4752C4] text-white',
+    COLOR_ICON: 'text-[#5865F2]',
+  },
+  TWITCH: {
+    TITLE: 'Chaîne Twitch',
+    DESC: 'Regardez nos tournois en direct.',
+    BTN_LABEL: 'Voir le live',
+    COLOR_BTN: 'bg-[#9146FF] hover:bg-[#7c2cf5] text-white',
+    COLOR_ICON: 'text-[#9146FF]',
+  },
+} as const
+
+// Metadata
+export const metadata: Metadata = {
+  title: 'Contact',
+  description: CONTENT.DESCRIPTION,
+}
+
+const ContactCard = ({
+  icon: Icon,
+  title,
+  description,
+  href,
+  buttonLabel,
+  colors,
+  isExternal = false,
+}: ContactCardProps) => {
+  return (
+    <Card className="border-zinc-800 bg-zinc-900">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Icon className={`size-5 ${colors?.icon || 'text-blue-500'}`} />
+          {title}
+        </CardTitle>
+        <CardDescription className="text-zinc-400">
+          {description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          asChild
+          variant={colors?.button ? 'default' : 'outline'}
+          className={
+            colors?.button
+              ? colors.button
+              : 'w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }
+        >
+          <Link
+            href={href}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
+          >
+            {buttonLabel}
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default async function ContactPage() {
   const settings = await getSiteSettings()
 
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="mx-auto max-w-2xl space-y-8">
-        <div className="text-center space-y-4">
+        {/* Header */}
+        <div className="space-y-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white">
-            Contact Us
+            {CONTENT.TITLE}
           </h1>
-          <p className="text-lg text-zinc-400">
-            Have questions? Reach out to us through any of the channels below.
-          </p>
+          <p className="text-lg text-zinc-400">{CONTENT.DESCRIPTION}</p>
         </div>
 
+        {/* Contact Grid */}
         <div className="grid gap-6">
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Mail className="size-5 text-blue-500" />
-                Email Support
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                For general inquiries and support
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                asChild
-                variant="outline"
-                className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-              >
-                <Link href="mailto:contact@belouga.com">
-                  contact@belouga.com
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Email Card (Always visible) */}
+          <ContactCard
+            icon={Mail}
+            title={CARDS_CONFIG.EMAIL.TITLE}
+            description={CARDS_CONFIG.EMAIL.DESC}
+            href={`mailto:${CONTENT.EMAIL}`}
+            buttonLabel={CONTENT.EMAIL}
+          />
 
+          {/* Discord Card (Conditional) */}
           {settings.socialDiscord && (
-            <Card className="bg-zinc-900 border-zinc-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <MessageSquare className="size-5 text-indigo-500" />
-                  Discord Community
-                </CardTitle>
-                <CardDescription className="text-zinc-400">
-                  Join our community for live updates and chat
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  asChild
-                  className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                >
-                  <Link
-                    href={settings.socialDiscord}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Join Discord
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <ContactCard
+              icon={MessageSquare}
+              title={CARDS_CONFIG.DISCORD.TITLE}
+              description={CARDS_CONFIG.DISCORD.DESC}
+              href={settings.socialDiscord}
+              buttonLabel={CARDS_CONFIG.DISCORD.BTN_LABEL}
+              colors={{
+                button: CARDS_CONFIG.DISCORD.COLOR_BTN,
+                icon: CARDS_CONFIG.DISCORD.COLOR_ICON,
+              }}
+              isExternal
+            />
           )}
 
+          {/* Twitch Card (Conditional) */}
           {settings.socialTwitch && (
-            <Card className="bg-zinc-900 border-zinc-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Video className="size-5 text-purple-500" />
-                  Twitch
-                </CardTitle>
-                <CardDescription className="text-zinc-400">
-                  Watch our tournaments live
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  asChild
-                  className="w-full bg-[#9146FF] hover:bg-[#7c2cf5] text-white"
-                >
-                  <Link
-                    href={settings.socialTwitch}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Watch Live
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <ContactCard
+              icon={Video}
+              title={CARDS_CONFIG.TWITCH.TITLE}
+              description={CARDS_CONFIG.TWITCH.DESC}
+              href={settings.socialTwitch}
+              buttonLabel={CARDS_CONFIG.TWITCH.BTN_LABEL}
+              colors={{
+                button: CARDS_CONFIG.TWITCH.COLOR_BTN,
+                icon: CARDS_CONFIG.TWITCH.COLOR_ICON,
+              }}
+              isExternal
+            />
           )}
         </div>
       </div>
