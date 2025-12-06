@@ -1,3 +1,11 @@
+/**
+ * File: app/admin/settings/settings-form.tsx
+ * Description: Admin settings forms for global site configuration.
+ * Author: Noé Henchoz
+ * Date: 2025-12-07
+ * License: MIT
+ */
+
 'use client'
 
 import { Save, Upload } from 'lucide-react'
@@ -17,22 +25,113 @@ import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
+// Types
 interface SettingsFormProps {
   settings: SiteSettings
 }
 
-const initialState = {
+interface SettingsState {
+  message: string
+  success?: boolean
+  errors?: Record<string, string[]>
+}
+
+interface FieldConfig {
+  key: keyof SiteSettings
+  label: string
+  placeholder: string
+}
+
+// Constants
+const INITIAL_STATE: SettingsState = {
   message: '',
   errors: {},
+}
+
+const CONTENT = {
+  TITLE_GENERAL: 'Général',
+  DESC_GENERAL: 'Configuration de base du site web.',
+  TITLE_SOCIAL: 'Réseaux Sociaux',
+  DESC_SOCIAL: 'Liens vers vos profils sociaux affichés dans le pied de page.',
+  TITLE_STATS: 'Statistiques',
+  DESC_STATS: "Chiffres clés affichés sur la page d'accueil.",
+  LABEL_LOGO: 'Logo du site',
+  BTN_UPLOAD: 'Choisir un fichier',
+  BTN_SAVE: 'Enregistrer',
+  BTN_SAVING: 'Enregistrement...',
+  HINT_FORMAT: 'Format accepté : PNG, JPG.',
+} as const
+
+const SOCIAL_CONFIG: FieldConfig[] = [
+  {
+    key: 'socialDiscord',
+    label: 'Discord',
+    placeholder: 'https://discord.gg/...',
+  },
+  {
+    key: 'socialTwitch',
+    label: 'Twitch',
+    placeholder: 'https://twitch.tv/...',
+  },
+  {
+    key: 'socialTiktok',
+    label: 'TikTok',
+    placeholder: 'https://tiktok.com/@...',
+  },
+  {
+    key: 'socialInstagram',
+    label: 'Instagram',
+    placeholder: 'https://instagram.com/...',
+  },
+  {
+    key: 'socialYoutube',
+    label: 'YouTube',
+    placeholder: 'https://youtube.com/...',
+  },
+]
+
+const STATS_CONFIG: FieldConfig[] = [
+  { key: 'statsYears', label: "Années d'existence", placeholder: 'ex: 2+' },
+  { key: 'statsPlayers', label: 'Joueurs Inscrits', placeholder: 'ex: 500+' },
+  {
+    key: 'statsTournaments',
+    label: 'Tournois Organisés',
+    placeholder: 'ex: 50+',
+  },
+  { key: 'statsMatches', label: 'Matchs Joués', placeholder: 'ex: 1.2k+' },
+]
+
+const SettingsInput = ({
+  field,
+  defaultValue,
+}: {
+  field: FieldConfig
+  defaultValue: string | null
+}) => {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={field.key} className="text-zinc-400">
+        {field.label}
+      </Label>
+      <Input
+        id={field.key}
+        name={field.key}
+        defaultValue={defaultValue || ''}
+        placeholder={field.placeholder}
+        className="border-white/10 bg-zinc-900/50 text-white placeholder:text-zinc-600 focus:border-blue-500 focus:ring-blue-500/20"
+      />
+    </div>
+  )
 }
 
 export function SettingsForm({ settings }: SettingsFormProps) {
   const [state, formAction, isPending] = useActionState(
     updateSettings,
-    initialState,
+    INITIAL_STATE,
   )
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
+  // Handle local image preview before upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -41,12 +140,13 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     }
   }
 
+  // Toast feedback effect
   useEffect(() => {
     if (state.message) {
-      if (state.message === 'Settings updated successfully') {
-        toast.success('Paramètres mis à jour avec succès')
-      } else if (state.message !== 'Invalid fields') {
-        toast.error('Une erreur est survenue')
+      if (state.success) {
+        toast.success(state.message)
+      } else {
+        toast.error(state.message)
       }
     }
   }, [state])
@@ -54,21 +154,25 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   return (
     <form action={formAction}>
       <div className="grid gap-6">
-        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+        {/* General Section (Logo) */}
+        <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white">Général</CardTitle>
+            <CardTitle className="text-white">
+              {CONTENT.TITLE_GENERAL}
+            </CardTitle>
             <CardDescription className="text-zinc-400">
-              Configuration de base du site web.
+              {CONTENT.DESC_GENERAL}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="logo" className="text-zinc-400">
-                Logo du site
+                {CONTENT.LABEL_LOGO}
               </Label>
               <div className="grid gap-4">
+                {/* Logo Preview */}
                 {(previewUrl || settings.logoUrl) && (
-                  <div className="relative size-32 rounded-lg border border-white/10 bg-black/20 overflow-hidden group">
+                  <div className="group relative size-32 overflow-hidden rounded-lg border border-white/10 bg-black/20">
                     <Image
                       src={previewUrl || settings.logoUrl || ''}
                       alt="Logo preview"
@@ -77,8 +181,11 @@ export function SettingsForm({ settings }: SettingsFormProps) {
                     />
                   </div>
                 )}
+
+                {/* File Input */}
                 <div className="flex items-center gap-4">
                   <div className="relative">
+                    {/* Hidden input to retain old URL if no new file is picked */}
                     <Input
                       type="hidden"
                       name="logoUrl"
@@ -96,165 +203,71 @@ export function SettingsForm({ settings }: SettingsFormProps) {
                       type="button"
                       variant="outline"
                       onClick={() => document.getElementById('logo')?.click()}
-                      className="bg-zinc-900/50 border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white"
+                      className="border-white/10 bg-zinc-900/50 text-zinc-400 hover:bg-white/5 hover:text-white"
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      Choisir un fichier
+                      {CONTENT.BTN_UPLOAD}
                     </Button>
                   </div>
-                  <p className="text-xs text-zinc-500">
-                    Format accepté : PNG, JPG.
-                  </p>
+                  <p className="text-xs text-zinc-500">{CONTENT.HINT_FORMAT}</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+        {/* Social Media Section */}
+        <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white">Réseaux Sociaux</CardTitle>
+            <CardTitle className="text-white">{CONTENT.TITLE_SOCIAL}</CardTitle>
             <CardDescription className="text-zinc-400">
-              Liens vers vos profils sociaux affichés dans le pied de page.
+              {CONTENT.DESC_SOCIAL}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="socialDiscord" className="text-zinc-400">
-                  Discord
-                </Label>
-                <Input
-                  id="socialDiscord"
-                  name="socialDiscord"
-                  defaultValue={settings.socialDiscord || ''}
-                  placeholder="https://discord.gg/..."
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+              {SOCIAL_CONFIG.map(field => (
+                <SettingsInput
+                  key={field.key}
+                  field={field}
+                  defaultValue={settings[field.key] as string}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="socialTwitch" className="text-zinc-400">
-                  Twitch
-                </Label>
-                <Input
-                  id="socialTwitch"
-                  name="socialTwitch"
-                  defaultValue={settings.socialTwitch || ''}
-                  placeholder="https://twitch.tv/..."
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="socialTiktok" className="text-zinc-400">
-                  TikTok
-                </Label>
-                <Input
-                  id="socialTiktok"
-                  name="socialTiktok"
-                  defaultValue={settings.socialTiktok || ''}
-                  placeholder="https://tiktok.com/@..."
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="socialInstagram" className="text-zinc-400">
-                  Instagram
-                </Label>
-                <Input
-                  id="socialInstagram"
-                  name="socialInstagram"
-                  defaultValue={settings.socialInstagram || ''}
-                  placeholder="https://instagram.com/..."
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="socialYoutube" className="text-zinc-400">
-                  YouTube
-                </Label>
-                <Input
-                  id="socialYoutube"
-                  name="socialYoutube"
-                  defaultValue={settings.socialYoutube || ''}
-                  placeholder="https://youtube.com/..."
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+        {/* Statistics Section */}
+        <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white">Statistiques</CardTitle>
+            <CardTitle className="text-white">{CONTENT.TITLE_STATS}</CardTitle>
             <CardDescription className="text-zinc-400">
-              Chiffres clés affichés sur la page d'accueil (ex: "1.2k+",
-              "500+").
+              {CONTENT.DESC_STATS}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="statsYears" className="text-zinc-400">
-                  Années d'existence
-                </Label>
-                <Input
-                  id="statsYears"
-                  name="statsYears"
-                  defaultValue={settings.statsYears || ''}
-                  placeholder="ex: 2+"
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
+              {STATS_CONFIG.map(field => (
+                <SettingsInput
+                  key={field.key}
+                  field={field}
+                  defaultValue={settings[field.key] as string}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="statsPlayers" className="text-zinc-400">
-                  Joueurs Inscrits
-                </Label>
-                <Input
-                  id="statsPlayers"
-                  name="statsPlayers"
-                  defaultValue={settings.statsPlayers || ''}
-                  placeholder="ex: 500+"
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="statsTournaments" className="text-zinc-400">
-                  Tournois Organisés
-                </Label>
-                <Input
-                  id="statsTournaments"
-                  name="statsTournaments"
-                  defaultValue={settings.statsTournaments || ''}
-                  placeholder="ex: 50+"
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="statsMatches" className="text-zinc-400">
-                  Matchs Joués
-                </Label>
-                <Input
-                  id="statsMatches"
-                  name="statsMatches"
-                  defaultValue={settings.statsMatches || ''}
-                  placeholder="ex: 1.2k+"
-                  className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
-                />
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
+        {/* Submit Action */}
         <div className="flex justify-end">
           <Button
             type="submit"
             size="lg"
             disabled={isPending}
-            className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+            className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500"
           >
             <Save className="mr-2 h-5 w-5" />
-            {isPending ? 'Enregistrement...' : 'Enregistrer'}
+            {isPending ? CONTENT.BTN_SAVING : CONTENT.BTN_SAVE}
           </Button>
         </div>
       </div>

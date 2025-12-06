@@ -2,7 +2,7 @@
  * File: app/admin/settings/page.tsx
  * Description: Admin settings page for global site configuration.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -14,51 +14,73 @@ import prisma from '@/lib/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 import { SettingsForm } from './settings-form'
 
-async function getSettings() {
-  const settings = await prisma.siteSettings.findFirst()
-  if (!settings) {
-    return await prisma.siteSettings.create({
-      data: {},
-    })
-  }
-  return settings
+// Constants
+const DB_CONFIG = {
+  SINGLETON_ID: 1,
+} as const
+
+const CONTENT = {
+  TITLE: 'Paramètres',
+  SUBTITLE: 'Configuration globale du site et liens sociaux.',
+  ERR_ACCESS_TITLE: 'Accès Refusé',
+  ERR_ACCESS_DESC:
+    'Cette page est strictement réservée aux Super Administrateurs.',
+  BTN_BACK: 'Retour au tableau de bord',
+} as const
+
+const ROUTES = {
+  DASHBOARD: '/admin',
+} as const
+
+const fetchSiteSettings = async () => {
+  return prisma.siteSettings.upsert({
+    where: { id: DB_CONFIG.SINGLETON_ID },
+    update: {},
+    create: { id: DB_CONFIG.SINGLETON_ID },
+  })
+}
+
+const AccessDeniedState = () => {
+  return (
+    <div className="flex h-[60vh] animate-in fade-in zoom-in duration-500 flex-col items-center justify-center space-y-4 text-center">
+      <div className="flex size-20 items-center justify-center rounded-full border border-red-500/20 bg-red-500/10">
+        <Lock className="size-10 text-red-500" />
+      </div>
+      <h1 className="text-3xl font-bold text-white">
+        {CONTENT.ERR_ACCESS_TITLE}
+      </h1>
+      <p className="max-w-md text-zinc-400">{CONTENT.ERR_ACCESS_DESC}</p>
+      <Button
+        asChild
+        variant="outline"
+        className="border-white/10 text-white hover:bg-white/5"
+      >
+        <Link href={ROUTES.DASHBOARD}>{CONTENT.BTN_BACK}</Link>
+      </Button>
+    </div>
+  )
 }
 
 export default async function SettingsPage() {
+  // 1. Auth & Permission Check
   const session = await getSession()
+  const isSuperAdmin = session?.user?.role === Role.SUPERADMIN
 
-  if (!session || !session.user || session.user.role !== Role.SUPERADMIN) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 animate-in fade-in zoom-in duration-500">
-        <div className="size-20 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-          <Lock className="size-10 text-red-500" />
-        </div>
-        <h1 className="text-3xl font-bold text-white">Accès Refusé</h1>
-        <p className="text-zinc-400 max-w-md">
-          Cette page est strictement réservée aux Super Administrateurs.
-        </p>
-        <Button
-          asChild
-          variant="outline"
-          className="border-white/10 hover:bg-white/5 text-white"
-        >
-          <Link href="/admin">Retour au tableau de bord</Link>
-        </Button>
-      </div>
-    )
+  if (!isSuperAdmin) {
+    return <AccessDeniedState />
   }
 
-  const settings = await getSettings()
+  // 2. Data Fetching
+  const settings = await fetchSiteSettings()
 
+  // 3. Render
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-500">
       <div>
-        <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-          Paramètres
+        <h1 className="mb-2 text-4xl font-black tracking-tighter text-white">
+          {CONTENT.TITLE}
         </h1>
-        <p className="text-zinc-400">
-          Configuration globale du site et liens sociaux.
-        </p>
+        <p className="text-zinc-400">{CONTENT.SUBTITLE}</p>
       </div>
 
       <SettingsForm settings={settings} />
