@@ -60,6 +60,7 @@ interface AdminsManagerProps {
 }
 
 const initialState = {
+	success: false,
 	message: '',
 	errors: {},
 }
@@ -87,11 +88,15 @@ export function AdminsManager({
 
 		setIsResetting(true)
 		try {
-			await resetAdminPassword(selectedUser.id, newPassword)
-			toast.success(`Mot de passe modifié pour ${selectedUser.email}`)
-			setResetPasswordOpen(false)
-			setNewPassword('')
-			setSelectedUser(null)
+			const result = await resetAdminPassword(selectedUser.id, newPassword)
+			if (result.success) {
+				toast.success(`Mot de passe modifié pour ${selectedUser.email}`)
+				setResetPasswordOpen(false)
+				setNewPassword('')
+				setSelectedUser(null)
+			} else {
+				toast.error(result.message)
+			}
 		} catch (error) {
 			console.error(error)
 			toast.error('Erreur lors de la modification du mot de passe')
@@ -103,7 +108,7 @@ export function AdminsManager({
 	const handleDelete = async (userId: string) => {
 		if (confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?')) {
 			const result = await deleteAdmin(userId)
-			if (result.message.includes('success')) {
+			if (result.success) {
 				toast.success('Administrateur supprimé')
 			} else {
 				toast.error(result.message)
@@ -197,7 +202,7 @@ export function AdminsManager({
 								<p
 									className={cn(
 										'text-sm text-center mt-2',
-										createState.message.includes('success')
+										createState.success
 											? 'text-green-500'
 											: 'text-red-500',
 									)}
