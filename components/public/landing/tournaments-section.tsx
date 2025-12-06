@@ -1,15 +1,32 @@
+/**
+ * File: components/public/landing/tournaments-section.tsx
+ * Description: Server Component responsible for fetching and displaying the latest tournaments on the landing page.
+ * Author: Noé Henchoz
+ * Date: 2025-12-07
+ * License: MIT
+ */
+
 import prisma from "@/lib/prisma";
 import { TournamentsList } from "./tournaments-list";
 
-async function getTournaments() {
-  return await prisma.tournament.findMany({
+// Constants
+const SECTION_CONFIG = {
+  MAX_ITEMS: 3,
+} as const;
+
+const fetchUpcomingTournaments = async () => {
+  return prisma.tournament.findMany({
     orderBy: { startDate: "asc" },
-    take: 3,
-    where: { isArchived: false },
+    take: SECTION_CONFIG.MAX_ITEMS,
+    where: {
+      isArchived: false,
+      startDate: { gte: new Date() },
+    },
   });
 }
 
-export async function TournamentsSection() {
-  const tournaments = await getTournaments();
+export const TournamentsSection = async () => {
+  const tournaments = await fetchUpcomingTournaments();
+
   return <TournamentsList tournaments={tournaments} />;
 }

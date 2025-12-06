@@ -40,7 +40,7 @@ interface TournamentsListProps {
 const CONTENT = {
   SECTION_TITLE: "Tournois",
   VIEW_ALL: "Tout voir",
-  EMPTY_TITLE: "Aucun tournoi trouvé",
+  EMPTY_TITLE: "Aucun tournoi prévu",
   EMPTY_DESC: "Revenez plus tard pour les prochaines annonces !",
   LABEL_OPEN: "Inscriptions ouvertes",
   LABEL_DETAILS: "Voir les détails",
