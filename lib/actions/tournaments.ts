@@ -10,9 +10,8 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
-import type { z } from 'zod'
+import { z } from 'zod'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { validateRequestIsAdmin } from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { CACHE_TAGS } from '@/lib/constants'
@@ -23,12 +22,21 @@ import {
   dbUpdateTournament,
 } from '@/lib/data/mutations/tournaments'
 import { getTournamentExportData } from '@/lib/data/queries/tournaments'
-import type { ActionState } from '@/lib/types/actions'
 import { tournamentSchema } from '@/lib/validations/tournament'
-import { Role, type Visibility } from '@/prisma/generated/prisma/client'
+import { Role, Visibility } from '@/prisma/generated/prisma/client'
 
-// Helper Functions
-// Logic - Create
+// Schemas
+const deleteSchema = z.string()
+const updateSchema = z.object({
+  id: z.string(),
+  data: tournamentSchema,
+})
+const exportSchema = z.string()
+const visibilitySchema = z.object({
+  id: z.string(),
+  visibility: z.nativeEnum(Visibility),
+})
+
 // Logic - Create
 export const createTournament = authenticatedAction({
   schema: tournamentSchema,
@@ -52,130 +60,107 @@ export const createTournament = authenticatedAction({
 })
 
 // Logic - Delete
-export async function deleteTournament(id: string): Promise<ActionState> {
-  const error = await validateRequestIsAdmin()
-  if (error) {
-    return error
-  }
-
-  try {
-    await dbDeleteTournament(id)
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
-    }
-  }
-
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
-  return {
-    success: true,
-    message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
-  }
-}
-
-// Logic - Update
-export async function updateTournament(
-  id: string,
-  data: z.infer<typeof tournamentSchema>,
-): Promise<ActionState> {
-  const error = await validateRequestIsAdmin()
-  if (error) {
-    return error
-  }
-
-  const validatedFields = tournamentSchema.safeParse(data)
-
-  if (!validatedFields.success) {
-    return {
-      success: false,
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: ACTION_MESSAGES.TOURNAMENTS.VALIDATION_ERROR,
-    }
-  }
-
-  try {
-    await dbUpdateTournament(id, validatedFields.data)
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
-    }
-  }
-
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
-  revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
-  redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
-}
-
-// Logic - Export
-export async function exportTournamentData(
-  tournamentId: string,
-): Promise<ActionState> {
-  const error = await validateRequestIsAdmin()
-  if (error) {
-    return error
-  }
-
-  try {
-    const flattenedData = await getTournamentExportData(tournamentId)
-
-    if (!flattenedData) {
+export const deleteTournament = authenticatedAction({
+  schema: deleteSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async id => {
+    try {
+      await dbDeleteTournament(id)
+    } catch (error) {
       return {
         success: false,
-        message: ACTION_MESSAGES.TOURNAMENTS.NOT_FOUND,
+        message:
+          error instanceof Error
+            ? error.message
+            : ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
       }
     }
 
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
     return {
       success: true,
-      inputs: JSON.stringify(flattenedData),
+      message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
     }
-  } catch (error) {
-    console.error('Export Error:', error)
-    return {
-      success: false,
-      message: ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
+  },
+})
+
+// Logic - Update
+export const updateTournament = authenticatedAction({
+  schema: updateSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async ({ id, data }) => {
+    try {
+      await dbUpdateTournament(id, data)
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+      }
     }
-  }
-}
+
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
+    redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
+  },
+})
+
+// Logic - Export
+export const exportTournamentData = authenticatedAction({
+  schema: exportSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async tournamentId => {
+    try {
+      const flattenedData = await getTournamentExportData(tournamentId)
+
+      if (!flattenedData) {
+        return {
+          success: false,
+          message: ACTION_MESSAGES.TOURNAMENTS.NOT_FOUND,
+        }
+      }
+
+      return {
+        success: true,
+        inputs: JSON.stringify(flattenedData),
+      }
+    } catch (error) {
+      console.error('Export Error:', error)
+      return {
+        success: false,
+        message: ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
+      }
+    }
+  },
+})
 
 // Logic - Visibility
-// Logic - Visibility
-export async function toggleTournamentVisibility(
-  id: string,
-  visibility: Visibility,
-): Promise<ActionState> {
-  const error = await validateRequestIsAdmin()
-  if (error) {
-    return error
-  }
-
-  try {
-    await dbToggleTournamentVisibility(id, visibility)
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+export const toggleTournamentVisibility = authenticatedAction({
+  schema: visibilitySchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async ({ id, visibility }) => {
+    try {
+      await dbToggleTournamentVisibility(id, visibility)
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+      }
     }
-  }
 
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
-  revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
-  revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
-  revalidatePath(APP_ROUTES.TOURNAMENTS)
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
+    revalidatePath(APP_ROUTES.TOURNAMENTS)
 
-  return {
-    success: true,
-    message: 'Tournament visibility updated successfully.',
-  }
-}
+    return {
+      success: true,
+      message: 'Tournament visibility updated successfully.',
+    }
+  },
+})

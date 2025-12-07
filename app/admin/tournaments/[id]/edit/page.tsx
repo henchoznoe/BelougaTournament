@@ -7,9 +7,11 @@
  */
 
 import { notFound } from 'next/navigation'
+import type { z } from 'zod'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
 import { updateTournament } from '@/lib/actions/tournaments'
 import prisma from '@/lib/db/prisma'
+import type { tournamentSchema } from '@/lib/validations/tournament'
 
 // Constants
 const CONTENT = {
@@ -55,7 +57,14 @@ export default async function EditTournamentPage({
     })),
   }
 
-  const updateAction = updateTournament.bind(null, tournament.id)
+  /*
+    Wrap the server action to match the form's onSubmit signature.
+    The form passes `values`, but `updateTournament` needs `{ id, data: values }`.
+  */
+  const updateAction = async (values: z.infer<typeof tournamentSchema>) => {
+    'use server'
+    return await updateTournament({ id: tournament.id, data: values })
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">

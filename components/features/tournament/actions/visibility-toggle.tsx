@@ -30,7 +30,7 @@ export function VisibilityToggle({
 
     startTransition(async () => {
       try {
-        const result = await toggleTournamentVisibility(tournamentId, visibility)
+        const result = await toggleTournamentVisibility({ id: tournamentId, visibility })
         if (result.success) {
           toast.success(result.message)
         } else {
