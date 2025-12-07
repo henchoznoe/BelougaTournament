@@ -25,7 +25,7 @@ interface LayoutProps {
 // COMPONENT
 // ----------------------------------------------------------------------
 
-const PublicLayout = (props: LayoutProps) => {
+const PublicLayout = (props: Readonly<LayoutProps>) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

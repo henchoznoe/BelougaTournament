@@ -20,6 +20,14 @@ import { cn } from '@/lib/utils'
 import './globals.css'
 
 // ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+// ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
@@ -45,11 +53,7 @@ export const metadata: Metadata = {
 // COMPONENT
 // ----------------------------------------------------------------------
 
-const RootLayout = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) => {
+const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
     <html lang={APP_METADATA.LOCALE} className="scroll-smooth">
       <body
@@ -60,7 +64,7 @@ const RootLayout = ({
         )}
       >
         <ScrollToTop />
-        {children}
+        {props.children}
         <Toaster richColors position="top-center" />
       </body>
     </html>

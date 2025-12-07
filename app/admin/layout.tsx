@@ -18,6 +18,14 @@ import { getSession } from '@/lib/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+// ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
@@ -51,7 +59,7 @@ const AdminBackground = () => {
   )
 }
 
-const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
+const AdminLayout = async (props: Readonly<LayoutProps>) => {
   // 1. Auth Check
   const session = await getSession()
 
@@ -76,7 +84,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
       {/* Main Content Area */}
       <main className="flex-1 relative overflow-y-auto h-screen z-10">
         <div className="p-8 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {children}
+          {props.children}
         </div>
       </main>
     </div>
