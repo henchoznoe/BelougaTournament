@@ -22,7 +22,7 @@ import {
   dbToggleTournamentVisibility,
   dbUpdateTournament,
 } from '@/lib/data/mutations/tournaments'
-import prisma from '@/lib/db/prisma'
+import { getTournamentExportData } from '@/lib/data/queries/tournaments'
 import type { ActionState } from '@/lib/types/actions'
 import { tournamentSchema } from '@/lib/validations/tournament'
 import { Role, type Visibility } from '@/prisma/generated/prisma/client'
@@ -46,7 +46,7 @@ export const createTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
     redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
   },
 })
@@ -70,7 +70,7 @@ export async function deleteTournament(id: string): Promise<ActionState> {
     }
   }
 
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
   return {
     success: true,
     message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
@@ -109,7 +109,7 @@ export async function updateTournament(
     }
   }
 
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
   revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
   redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
 }
@@ -124,56 +124,14 @@ export async function exportTournamentData(
   }
 
   try {
-    const tournament = await prisma.tournament.findUnique({
-      where: { id: tournamentId },
-      include: {
-        fields: {
-          orderBy: { order: 'asc' },
-        },
-        registrations: {
-          include: {
-            players: {
-              include: {
-                data: true,
-              },
-            },
-          },
-        },
-      },
-    })
+    const flattenedData = await getTournamentExportData(tournamentId)
 
-    if (!tournament) {
+    if (!flattenedData) {
       return {
         success: false,
         message: ACTION_MESSAGES.TOURNAMENTS.NOT_FOUND,
       }
     }
-
-    const fields = tournament.fields
-
-    // Flatten data
-    const flattenedData = tournament.registrations.flatMap(reg => {
-      return reg.players.map(player => {
-        const row: Record<string, string> = {
-          'Registration ID': reg.id,
-          'Team Name': reg.teamName || '',
-          'Contact Email': reg.contactEmail,
-          Status: reg.status,
-          'Registration Date': reg.createdAt.toISOString(),
-          'Player Nickname': player.nickname,
-        }
-
-        // Add dynamic fields
-        for (const field of fields) {
-          const playerData = player.data.find(
-            d => d.tournamentFieldId === field.id,
-          )
-          row[field.label] = playerData ? playerData.value : ''
-        }
-
-        return row
-      })
-    })
 
     return {
       success: true,
@@ -211,7 +169,7 @@ export async function toggleTournamentVisibility(
     }
   }
 
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
   revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
   revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
   revalidatePath(APP_ROUTES.TOURNAMENTS)
