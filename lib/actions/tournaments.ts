@@ -11,6 +11,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
+import { authenticatedAction } from '@/lib/actions/safe-action'
 import { getSession } from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
@@ -37,64 +38,53 @@ async function checkAuth(): Promise<ActionState> {
 }
 
 // Logic - Create
-export async function createTournament(
-  data: z.infer<typeof tournamentSchema>,
-): Promise<ActionState> {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return auth
-  }
+// Logic - Create
+export const createTournament = authenticatedAction({
+  schema: tournamentSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async data => {
+    const { fields, ...tournamentData } = data
 
-  const validatedFields = tournamentSchema.safeParse(data)
-
-  if (!validatedFields.success) {
-    return {
-      success: false,
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: ACTION_MESSAGES.TOURNAMENTS.VALIDATION_ERROR,
-    }
-  }
-
-  const { fields, ...tournamentData } = validatedFields.data
-
-  try {
-    await prisma.$transaction(async tx => {
-      await tx.tournament.create({
-        data: {
-          ...tournamentData,
-          streamUrl: tournamentData.streamUrl ?? '',
-          fields: {
-            create: fields.map((field, index) => ({
-              ...field,
-              order: index,
-            })),
+    try {
+      await prisma.$transaction(async tx => {
+        await tx.tournament.create({
+          data: {
+            ...tournamentData,
+            streamUrl: tournamentData.streamUrl ?? '',
+            fields: {
+              create: fields.map((field, index) => ({
+                ...field,
+                order: index,
+              })),
+            },
           },
-        },
+        })
       })
-    })
-  } catch (error) {
-    console.error('Database Error:', error)
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      (error as Prisma.PrismaClientKnownRequestError).code === 'P2002' &&
-      (
-        (error as Prisma.PrismaClientKnownRequestError).meta?.target as string[]
-      )?.includes('slug')
-    ) {
+    } catch (error) {
+      console.error('Database Error:', error)
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        (error as Prisma.PrismaClientKnownRequestError).code === 'P2002' &&
+        (
+          (error as Prisma.PrismaClientKnownRequestError).meta
+            ?.target as string[]
+        )?.includes('slug')
+      ) {
+        return {
+          success: false,
+          message: ACTION_MESSAGES.TOURNAMENTS.DUPLICATE_SLUG,
+        }
+      }
       return {
         success: false,
-        message: ACTION_MESSAGES.TOURNAMENTS.DUPLICATE_SLUG,
+        message: ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
       }
     }
-    return {
-      success: false,
-      message: ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
-    }
-  }
 
-  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
-  redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
-}
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
+    redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
+  },
+})
 
 // Logic - Delete
 export async function deleteTournament(id: string): Promise<ActionState> {
