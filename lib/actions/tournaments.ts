@@ -12,19 +12,11 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { getSession } from '@/lib/auth'
+import { CACHE_TAGS } from '@/lib/constants'
 import prisma from '@/lib/db/prisma'
+import type { ActionState } from '@/lib/types/actions'
 import { tournamentSchema } from '@/lib/validations/tournament'
 import { Prisma, Role, type Visibility } from '@/prisma/generated/prisma/client'
-
-// Types
-export type ActionState = {
-  success?: boolean
-  errors?: {
-    [key: string]: string[]
-  }
-  message?: string
-  data?: string // Generic data return field (e.g., for standard text or JSON string)
-}
 
 // Constants
 const MESSAGES = {
@@ -116,7 +108,7 @@ export async function createTournament(
     }
   }
 
-  revalidateTag('tournaments', 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
   redirect('/admin/tournaments')
 }
 
@@ -139,7 +131,7 @@ export async function deleteTournament(id: string): Promise<ActionState> {
     }
   }
 
-  revalidateTag('tournaments', 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
   return {
     success: true,
     message: MESSAGES.DELETE_SUCCESS,
@@ -271,7 +263,7 @@ export async function updateTournament(
     }
   }
 
-  revalidateTag('tournaments', 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
   revalidatePath(`/admin/tournaments/${id}`)
   redirect('/admin/tournaments')
 }
@@ -339,7 +331,7 @@ export async function exportTournamentData(
 
     return {
       success: true,
-      data: JSON.stringify(flattenedData),
+      inputs: JSON.stringify(flattenedData),
     }
   } catch (error) {
     console.error('Export Error:', error)
@@ -373,7 +365,7 @@ export async function toggleTournamentVisibility(
     }
   }
 
-  revalidateTag('tournaments', 'default')
+  revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
   revalidatePath('/admin/tournaments')
   revalidatePath(`/admin/tournaments/${id}`)
   revalidatePath('/tournaments')

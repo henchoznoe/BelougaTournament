@@ -30,3 +30,7 @@ export const HOME_CONFIG = {
   HERO_PRIMARY_CTA_TEXT: 'Participer',
   HERO_SECONDARY_CTA_TEXT: 'En savoir plus',
 }
+
+export const CACHE_TAGS = {
+  TOURNAMENTS: 'tournaments',
+} as const

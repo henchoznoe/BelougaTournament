@@ -10,7 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { ActionState } from "@/lib/actions/tournaments";
+import { ActionState } from "@/lib/types/actions";
 import { tournamentSchema } from "@/lib/validations/tournament";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";

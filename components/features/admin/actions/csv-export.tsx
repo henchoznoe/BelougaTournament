@@ -26,12 +26,12 @@ export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
       try {
         const result = await exportTournamentData(tournamentId);
 
-        if (!result.success || !result.data) {
+        if (!result.success || !result.inputs) {
           toast.error(result.message || "Failed to export data.");
           return;
         }
 
-        const data = JSON.parse(result.data);
+        const data = JSON.parse(result.inputs as string);
 
         if (!data || data.length === 0) {
             toast.error("No data to export.");
