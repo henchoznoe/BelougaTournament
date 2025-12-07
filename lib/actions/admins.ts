@@ -10,7 +10,6 @@
 
 import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -25,24 +24,12 @@ type ActionResponse = {
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 
+import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
+
 // Constants
 const SECURITY_CONFIG = {
   SALT_ROUNDS: 12,
-  MIN_PASSWORD_LENGTH: 8,
 } as const
-
-// Schemas
-const createAdminSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z
-    .string()
-    .min(SECURITY_CONFIG.MIN_PASSWORD_LENGTH, 'Password is too short'),
-})
-
-const updateAdminSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(Role),
-})
 
 const requireSuperAdmin = async () => {
   const session = await getSession()
@@ -198,7 +185,7 @@ export const resetAdminPassword = async (
 
   try {
     // Validate simple constraints on the new password manually since it's an arg, not FormData
-    if (newPassword.length < SECURITY_CONFIG.MIN_PASSWORD_LENGTH) {
+    if (newPassword.length < 8) {
       return { success: false, message: 'Password is too short.' }
     }
 

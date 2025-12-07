@@ -10,24 +10,10 @@
 
 import { put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
-import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 
 // Types
-const settingString = z.string().optional().or(z.literal(''))
-
-const settingsSchema = z.object({
-  logoUrl: settingString,
-  socialDiscord: settingString,
-  socialTwitch: settingString,
-  socialTiktok: settingString,
-  socialInstagram: settingString,
-  socialYoutube: settingString,
-  statsYears: settingString,
-  statsPlayers: settingString,
-  statsTournaments: settingString,
-  statsMatches: settingString,
-})
+import { settingsSchema } from '@/lib/validations/settings'
 
 export type SettingsState = {
   message: string
