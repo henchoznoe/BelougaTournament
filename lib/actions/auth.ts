@@ -11,11 +11,11 @@
 import { compare } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import z from 'zod'
 import { encrypt, type SessionPayload } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { env } from '@/lib/env'
 import type { ActionState } from '@/lib/types/actions'
+import { loginSchema } from '@/lib/validations/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Constants
@@ -38,12 +38,6 @@ const MESSAGES = {
   ERR_VALIDATION: 'Invalid input data.',
   SUCCESS_REGISTER: 'Admin registered successfully.',
 } as const
-
-// Schemas
-const authSchema = z.object({
-  email: z.string().trim().email('Invalid email address'),
-  password: z.string().trim().min(1, 'Password is required'),
-})
 
 // Helper Functions
 const createSessionCookie = async (payload: SessionPayload) => {
@@ -72,7 +66,7 @@ export const login = async (
   }
 
   // Validate Input
-  const validation = authSchema.safeParse(rawData)
+  const validation = loginSchema.safeParse(rawData)
 
   if (!validation.success) {
     return {
