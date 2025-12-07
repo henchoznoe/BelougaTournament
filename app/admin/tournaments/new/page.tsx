@@ -2,7 +2,7 @@
  * File: app/admin/tournaments/new/page.tsx
  * Description: Page for creating a new tournament.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

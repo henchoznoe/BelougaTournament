@@ -63,7 +63,7 @@ export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
   const handleDelete = async () => {
     startTransition(async () => {
       try {
-        const result = await deleteTournament(id)
+        const result = await deleteTournament({ id })
         if (result?.message && result.message.includes("successfully")) {
           toast.success(result.message)
           setOpen(false)

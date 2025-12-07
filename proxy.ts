@@ -2,7 +2,7 @@
  * File: proxy.ts
  * Description: Middleware for protecting admin routes using JWT authentication.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

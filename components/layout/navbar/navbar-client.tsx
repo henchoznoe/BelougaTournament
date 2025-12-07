@@ -2,7 +2,7 @@
  * File: components/layout/navbar/navbar-client.tsx
  * Description: Interactive Navbar component handling navigation, mobile sheet, and animations.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 

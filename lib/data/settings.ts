@@ -2,7 +2,7 @@
  * File: lib/data/settings.ts
  * Description: Data fetching utility for site settings.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 

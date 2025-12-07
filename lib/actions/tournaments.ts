@@ -63,7 +63,7 @@ export const createTournament = authenticatedAction({
 export const deleteTournament = authenticatedAction({
   schema: deleteTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async id => {
+  handler: async ({ id }) => {
     try {
       await dbDeleteTournament(id)
     } catch (error) {

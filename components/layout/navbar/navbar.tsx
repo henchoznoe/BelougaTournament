@@ -2,7 +2,7 @@
  * File: components/layout/navbar/navbar.tsx
  * Description: Server Component entry point for the public navbar. Fetches global settings to hydrate the client component.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 

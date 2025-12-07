@@ -2,7 +2,7 @@
  * File: components/twitch-embed.tsx
  * Description: A component to embed a Twitch stream with offline detection and a fallback UI.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 

@@ -2,7 +2,7 @@
  * File: lib/actions/registrations.ts
  * Description: Server actions for managing registrations (admin).
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 

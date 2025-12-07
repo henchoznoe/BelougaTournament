@@ -2,7 +2,7 @@
  * File: app/(public)/loading.tsx
  * Description: Loading state for public pages.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

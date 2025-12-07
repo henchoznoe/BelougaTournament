@@ -2,7 +2,7 @@
  * File: next.config.ts
  * Description: Next.js configuration options.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 

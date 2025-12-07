@@ -2,7 +2,7 @@
  * File: app/(public)/tournaments/page.tsx
  * Description: Public page listing all upcoming tournaments with premium aesthetic.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -11,13 +11,13 @@
 // ----------------------------------------------------------------------
 
 import { Archive, Gamepad2, Trophy } from 'lucide-react'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TournamentCard } from '@/components/features/tournament/card/tournament-card'
 import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
-import type { Metadata } from 'next'
 
 // ----------------------------------------------------------------------
 // CONSTANTS

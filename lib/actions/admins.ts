@@ -2,7 +2,7 @@
  * File: lib/actions/admins.ts
  * Description: Server actions for admins management.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 

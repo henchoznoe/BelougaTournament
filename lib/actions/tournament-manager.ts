@@ -2,7 +2,7 @@
  * File: lib/actions/tournament-manager.ts
  * Description: Server actions for managing specific tournament details (Challonge, Registrations).
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

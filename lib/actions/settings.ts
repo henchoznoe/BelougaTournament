@@ -2,7 +2,7 @@
  * File: lib/actions/settings.ts
  * Description: Server actions for updating site settings.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

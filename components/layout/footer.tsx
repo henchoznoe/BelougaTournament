@@ -2,7 +2,7 @@
  * File: components/layout/footer.tsx
  * Description: Server Component for the public site footer.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 

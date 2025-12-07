@@ -66,13 +66,11 @@ export const ACTION_MESSAGES = {
   },
 } as const
 
-export const UI_MESSAGES = {
-  LOGIN: {
-    LABEL_EMAIL: 'Email',
-    PLACEHOLDER_EMAIL: 'admin@belouga.com',
-    LABEL_PASSWORD: 'Mot de passe',
-    PLACEHOLDER_PASSWORD: '••••••••',
-    BTN_LOGIN: 'Se connecter',
-    BTN_PENDING: 'Connexion...',
-  },
+export const VALIDATION_MESSAGES = {
+  DESCRIPTION_MIN: 'La description doit contenir au moins 10 caractères',
+  LABEL_REQUIRED: 'Le libellé est requis',
+  SLUG_MIN: 'Le slug doit contenir au moins 3 caractères',
+  STREAM_URL_INVALID: "L'URL du stream est invalide",
+  TEAM_SIZE_MIN: "La taille de l'équipe doit être d'au moins 1",
+  TITLE_MIN: 'Le titre doit contenir au moins 3 caractères',
 } as const

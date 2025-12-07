@@ -2,7 +2,7 @@
  * File: app/layout.tsx
  * Description: Root layout for the application.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

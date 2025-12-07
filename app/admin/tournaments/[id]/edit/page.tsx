@@ -2,7 +2,7 @@
  * File: app/admin/tournaments/[id]/edit/page.tsx
  * Description: Page for editing an existing tournament.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 

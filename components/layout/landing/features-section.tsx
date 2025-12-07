@@ -39,43 +39,42 @@ const CONTENT = {
   TITLE: "Pourquoi nous rejoindre ?",
   SUBTITLE:
     "Une expérience compétitive conçue par des joueurs, pour des joueurs.",
+  FEATURES: [
+    {
+      title: "Compétition Fair-play",
+      description:
+        "Un règlement strict et une modération active pour garantir des parties saines et équitables.",
+      icon: Swords,
+      styles: {
+        iconColor: "text-orange-400",
+        bg: "bg-orange-400/10",
+        border: "border-orange-400/20",
+      },
+    },
+    {
+      title: "Format Professionnel",
+      description:
+        "Des arbres de tournois clairs, des horaires respectés et une organisation sans faille.",
+      icon: Target,
+      styles: {
+        iconColor: "text-blue-400",
+        bg: "bg-blue-400/10",
+        border: "border-blue-400/20",
+      },
+    },
+    {
+      title: "Diffusion Live",
+      description:
+        "Vos exploits commentés en direct sur Twitch pour une expérience e-sport immersive.",
+      icon: Zap,
+      styles: {
+        iconColor: "text-purple-400",
+        bg: "bg-purple-400/10",
+        border: "border-purple-400/20",
+      },
+    },
+  ],
 } as const
-
-const FEATURES_DATA: FeatureItem[] = [
-  {
-    title: "Compétition Fair-play",
-    description:
-      "Un règlement strict et une modération active pour garantir des parties saines et équitables.",
-    icon: Swords,
-    styles: {
-      iconColor: "text-orange-400",
-      bg: "bg-orange-400/10",
-      border: "border-orange-400/20",
-    },
-  },
-  {
-    title: "Format Professionnel",
-    description:
-      "Des arbres de tournois clairs, des horaires respectés et une organisation sans faille.",
-    icon: Target,
-    styles: {
-      iconColor: "text-blue-400",
-      bg: "bg-blue-400/10",
-      border: "border-blue-400/20",
-    },
-  },
-  {
-    title: "Diffusion Live",
-    description:
-      "Vos exploits commentés en direct sur Twitch pour une expérience e-sport immersive.",
-    icon: Zap,
-    styles: {
-      iconColor: "text-purple-400",
-      bg: "bg-purple-400/10",
-      border: "border-purple-400/20",
-    },
-  },
-]
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -151,7 +150,7 @@ export const FeaturesSection = () => {
 
       {/* Grid Layout */}
       <div className="grid gap-8 md:grid-cols-3">
-        {FEATURES_DATA.map((feature, index) => (
+        {CONTENT.FEATURES.map((feature, index) => (
           <FeatureCard key={feature.title} feature={feature} index={index} />
         ))}
       </div>

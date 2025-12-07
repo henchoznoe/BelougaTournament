@@ -2,7 +2,7 @@
  * File: lib/auth.ts
  * Description: Server-side session management using cookies.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 

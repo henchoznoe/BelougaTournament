@@ -2,7 +2,7 @@
  * File: app/admin/tournaments/[id]/page.tsx
  * Description: Tournament manager page for viewing details, managing registrations, and updating settings.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 

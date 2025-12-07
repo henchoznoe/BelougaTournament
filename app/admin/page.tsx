@@ -2,7 +2,7 @@
  * File: app/admin/page.tsx
  * Description: Admin dashboard page displaying summary statistics and recent registrations.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 

@@ -2,7 +2,7 @@
  * File: components/layout/sidebar/admin-sidebar.tsx
  * Description: Client-side sidebar navigation for the admin dashboard.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 

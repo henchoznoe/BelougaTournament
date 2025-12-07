@@ -2,7 +2,7 @@
  * File: lib/validations/tournament.ts
  * Description: Tournament schema for validation.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -11,6 +11,7 @@
 // ----------------------------------------------------------------------
 
 import { z } from 'zod'
+import { VALIDATION_MESSAGES } from '@/lib/config/messages'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
@@ -18,14 +19,12 @@ import { Visibility } from '@/prisma/generated/prisma/enums'
 // ----------------------------------------------------------------------
 
 export const tournamentSchema = z.object({
-  description: z
-    .string()
-    .min(10, 'La description doit contenir au moins 10 caractères'),
+  description: z.string().min(10, VALIDATION_MESSAGES.DESCRIPTION_MIN),
   endDate: z.date(),
   fields: z.array(
     z.object({
       id: z.string().optional(),
-      label: z.string().min(1, 'Le libellé est requis'),
+      label: z.string().min(1, VALIDATION_MESSAGES.LABEL_REQUIRED),
       required: z.boolean().default(true),
       type: z.enum(['TEXT', 'NUMBER', 'SELECT', 'CHECKBOX']),
     }),
@@ -34,20 +33,20 @@ export const tournamentSchema = z.object({
   maxParticipants: z.coerce.number().optional(),
   registrationClose: z.date(),
   registrationOpen: z.date(),
-  slug: z.string().min(3, 'Le slug doit contenir au moins 3 caractères'),
+  slug: z.string().min(3, VALIDATION_MESSAGES.SLUG_MIN),
   startDate: z.date(),
   streamUrl: z
     .string()
-    .url("L'URL du stream est invalide")
+    .url(VALIDATION_MESSAGES.STREAM_URL_INVALID)
     .optional()
     .or(z.literal('')),
-  teamSize: z.coerce
-    .number()
-    .min(1, "La taille de l'équipe doit être d'au moins 1"),
-  title: z.string().min(3, 'Le titre doit contenir au moins 3 caractères'),
+  teamSize: z.coerce.number().min(1, VALIDATION_MESSAGES.TEAM_SIZE_MIN),
+  title: z.string().min(3, VALIDATION_MESSAGES.TITLE_MIN),
 })
 
-export const deleteTournamentSchema = z.string()
+export const deleteTournamentSchema = z.object({
+  id: z.string(),
+})
 
 export const updateTournamentSchema = z.object({
   id: z.string(),
