@@ -21,9 +21,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { registerForTournament } from "@/lib/actions/registration";
+import { Prisma, TournamentField } from "@/prisma/generated/prisma/client";
 import { TournamentFormat } from "@/prisma/generated/prisma/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Prisma, TournamentField } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Gamepad2, Mail, Plus, Trash2, Trophy, User, Users } from "lucide-react";
 import { useActionState, useMemo } from "react";
