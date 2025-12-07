@@ -24,7 +24,6 @@ export function formatDateTime(date: Date | string | number) {
 }
 
 export function getErrorMessage(error: unknown, fallback: string): string {
-  console.error(error)
   if (error instanceof Error) {
     return error.message
   }

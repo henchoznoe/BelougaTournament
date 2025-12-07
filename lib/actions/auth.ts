@@ -51,7 +51,7 @@ export const login = async (
     return {
       success: false,
       message: ACTION_MESSAGES.AUTH.ERR_MISSING_CREDS,
-      inputs: rawData.email?.toString(),
+      inputs: typeof rawData.email === 'string' ? rawData.email : '',
       errors: validation.error.flatten().fieldErrors,
     }
   }
