@@ -2,7 +2,7 @@
  * File: lib/actions/registration.ts
  * Description: Server actions for handling tournament registrations.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -16,6 +16,48 @@ import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { env } from '@/lib/env'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
+type FormFieldValue = string | string[] | Record<string, unknown>
+
+interface ParsedFormData {
+  [key: string]: FormFieldValue | ParsedFormData | ParsedFormData[]
+}
+
+export type RegistrationState = {
+  success?: boolean
+  errors?: {
+    [key: string]: string[]
+  }
+  message?: string
+}
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
+const MESSAGES = {
+  VALIDATION_ERROR: 'Veuillez corriger les erreurs dans le formulaire.',
+  TOURNAMENT_NOT_FOUND: 'Tournoi introuvable.',
+  REGISTRATION_CLOSED: 'Les inscriptions sont fermées.',
+  EMAIL_ALREADY_USED: 'Cet email est déjà utilisé pour ce tournoi.',
+  REQUIRED_FIELD_MISSING: (label: string, nickname: string) =>
+    `Champ requis manquant : ${label} pour le joueur ${nickname}`,
+  TOURNAMENT_FULL: 'Le tournoi est complet.',
+  GENERIC_ERROR:
+    "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+  REGISTRATION_FAILED: "Échec de l'inscription.",
+  SUCCESS_WAITLIST:
+    "Inscription réussie ! Vous avez été placé sur la liste d'attente.",
+  SUCCESS_APPROVED: 'Inscription réussie !',
+  CANCEL_NOT_FOUND: 'Registration not found.',
+  CANCEL_INVALID_TOKEN: 'Invalid cancellation token.',
+  CANCEL_SUCCESS: 'Registration cancelled successfully.',
+  CANCEL_FAILED: 'Failed to cancel registration.',
+}
 
 const baseRegistrationSchema = z.object({
   contactEmail: z.string().email(),
@@ -31,47 +73,44 @@ const baseRegistrationSchema = z.object({
   tournamentId: z.string().uuid(),
 })
 
-export type RegistrationState = {
-  success?: boolean
-  errors?: {
-    [key: string]: string[]
-  }
-  message?: string
-}
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
-// Helper to parse FormData with dot notation
-function parseFormData(formData: FormData) {
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic object construction from FormData
-  const object: any = {}
+/**
+ * Helper to parse FormData with dot notation into a nested object.
+ * Replaces the previous `any` based implementation with a recursive one.
+ */
+function parseFormData(formData: FormData): ParsedFormData {
+  const object: Record<string, unknown> = {}
+
   for (const [key, value] of formData.entries()) {
     const keys = key.split('.')
     let current = object
+
     for (let i = 0; i < keys.length; i++) {
       const k = keys[i]
-      if (i === keys.length - 1) {
+      const isLast = i === keys.length - 1
+
+      if (isLast) {
         current[k] = value
       } else {
-        // If the next key is a number, it's an array
-        if (!Number.isNaN(Number(keys[i + 1]))) {
-          current[k] = current[k] || []
-          // Ensure it's an array before pushing
-          if (!Array.isArray(current[k])) {
-            current[k] = []
-          }
-        } else {
-          current[k] = current[k] || {}
+        const nextKey = keys[i + 1]
+        const isNextArray = !Number.isNaN(Number(nextKey))
+
+        if (!current[k]) {
+          current[k] = isNextArray ? [] : {}
         }
-        current = current[k]
+
+        // Narrowing type for recursion
+        current = current[k] as Record<string, unknown>
       }
     }
   }
 
-  // Convert players object to array if it is an object with numeric keys
-  // This is handled by the recursive parsing logic above if keys are like players.0.nickname
-  // but if the form structure is different, this might be needed.
-  // For now, assuming players.0.nickname structure, the above logic should create an array.
-  // If players is an object with numeric keys (e.g., { '0': { ... }, '1': { ... } }),
-  // Object.values will convert it to an array.
+  // Handle conversion of object-like arrays (numeric keys) to actual arrays if needed
+  // Note: The loop above initializes arrays correctly if keys are numeric ('0', '1'...).
+  // We double check 'players' specifically to ensure it is an array as expected by schema.
   if (
     object.players &&
     typeof object.players === 'object' &&
@@ -79,24 +118,36 @@ function parseFormData(formData: FormData) {
   ) {
     object.players = Object.values(object.players)
   }
-  return object
+
+  return object as unknown as ParsedFormData
 }
 
 export async function registerForTournament(
   _prevState: RegistrationState,
   formData: FormData,
 ): Promise<RegistrationState> {
-  const rawData = parseFormData(formData)
-  console.log('[Registration] Raw Data:', JSON.stringify(rawData, null, 2))
+  const rawParsed = parseFormData(formData)
 
-  // Ensure players structure is correct for Zod
-  if (rawData.players && Array.isArray(rawData.players)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Mapping raw player data
-    rawData.players = rawData.players.map((p: any) => ({
-      ...p,
-      data: p.data || {}, // Ensure data object exists
-    }))
+  // Ensure strict typing for the raw data before Zod parsing
+  // This step bridges the untyped FormData world to our Zod schema
+  // We use `unknown` cast first to avoid `any` in a safe way b/c we validate right after.
+  const rawData: unknown = {
+    ...rawParsed,
+    // Ensure players map has the correct structure for data
+    players: Array.isArray(rawParsed.players)
+      ? rawParsed.players.map(p => {
+          // Manually cast p to a shape similar to RawPlayer to interact with properties safely
+          // or at least unknown/Record to check 'data'
+          const playerRecord = p as Record<string, unknown>
+          return {
+            ...playerRecord,
+            data: playerRecord.data || {},
+          }
+        })
+      : [],
   }
+
+  console.log('[Registration] Raw Data:', JSON.stringify(rawData, null, 2))
 
   const validation = baseRegistrationSchema.safeParse(rawData)
 
@@ -104,9 +155,10 @@ export async function registerForTournament(
     return {
       success: false,
       errors: validation.error.flatten().fieldErrors,
-      message: 'Veuillez corriger les erreurs dans le formulaire.',
+      message: MESSAGES.VALIDATION_ERROR,
     }
   }
+
   console.log('[Registration] Validation passed')
 
   const { tournamentId, teamName, contactEmail, players } = validation.data
@@ -118,17 +170,16 @@ export async function registerForTournament(
   })
 
   if (!tournament) {
-    return { success: false, message: 'Tournoi introuvable.' }
+    return { success: false, message: MESSAGES.TOURNAMENT_NOT_FOUND }
   }
 
   // Check if registration is open
   const now = new Date()
   if (now < tournament.registrationOpen || now > tournament.registrationClose) {
-    return { success: false, message: 'Les inscriptions sont fermées.' }
+    return { success: false, message: MESSAGES.REGISTRATION_CLOSED }
   }
 
   // 2. Check for duplicates
-  // We check if the contactEmail is already used for this tournament.
   const existingRegistration = await prisma.registration.findUnique({
     where: {
       tournamentId_contactEmail: {
@@ -141,7 +192,7 @@ export async function registerForTournament(
   if (existingRegistration) {
     return {
       success: false,
-      message: 'Cet email est déjà utilisé pour ce tournoi.',
+      message: MESSAGES.EMAIL_ALREADY_USED,
     }
   }
 
@@ -153,29 +204,26 @@ export async function registerForTournament(
       if (field.required && (!value || value.trim() === '')) {
         return {
           success: false,
-          message: `Champ requis manquant : ${field.label} pour le joueur ${player.nickname}`,
+          message: MESSAGES.REQUIRED_FIELD_MISSING(
+            field.label,
+            player.nickname,
+          ),
         }
       }
     }
   }
 
-  let finalStatus: RegistrationStatus = 'PENDING'
   let registrationResult: Registration | null = null
 
   try {
     registrationResult = await prisma.$transaction(async tx => {
       // 3. Max Participants Logic
-      // maxParticipants refers to the number of "Registration Slots".
-      // - For TEAM format: 1 Registration = 1 Team
-      // - For SOLO format: 1 Registration = 1 Player (or 1 Entry)
       let status: RegistrationStatus = 'PENDING'
 
       if (tournament.maxParticipants) {
         // Lock the Tournament row to prevent race conditions
-        // We cast ID to string to ensure safety, though it's already UUID
         await tx.$executeRaw`SELECT * FROM "Tournament" WHERE id = ${tournamentId} FOR UPDATE`
 
-        // lock acquired, safe to count
         const currentRegistrations = await tx.registration.count({
           where: { tournamentId },
         })
@@ -188,11 +236,8 @@ export async function registerForTournament(
           status = 'PENDING'
         }
       } else if (tournament.autoApprove) {
-        // If no max limit is set, but autoApprove is on, approve.
         status = 'APPROVED'
       }
-
-      finalStatus = status
 
       // Create Registration
       const registration = await tx.registration.create({
@@ -204,7 +249,6 @@ export async function registerForTournament(
         },
       })
 
-      // Create Players and Data
       // Create Players and Data - Parallel Execution
       await Promise.all(
         players.map(async player => {
@@ -215,7 +259,6 @@ export async function registerForTournament(
             },
           })
 
-          // Create PlayerData
           const dataEntries = Object.entries(player.data).map(
             ([fieldId, value]) => ({
               playerId: createdPlayer.id,
@@ -237,28 +280,27 @@ export async function registerForTournament(
     console.error('Registration Error:', error)
     if (error instanceof Error) {
       if (error.message === 'Tournament is full.') {
-        return { success: false, message: 'Le tournoi est complet.' }
+        return { success: false, message: MESSAGES.TOURNAMENT_FULL }
       }
     }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
+      if (error.code === 'P2002') {
         return {
           success: false,
-          message: 'Cet email est déjà utilisé pour ce tournoi.',
+          message: MESSAGES.EMAIL_ALREADY_USED,
         }
       }
     }
 
     return {
       success: false,
-      message:
-        "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+      message: MESSAGES.GENERIC_ERROR,
     }
   }
 
   if (!registrationResult) {
-    return { success: false, message: "Échec de l'inscription." }
+    return { success: false, message: MESSAGES.REGISTRATION_FAILED }
   }
 
   const cancellationUrl = `${env.NEXT_PUBLIC_APP_URL}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
@@ -266,7 +308,7 @@ export async function registerForTournament(
   // Send Confirmation Email
   const emailHtml = generateRegistrationEmailHtml(
     tournament.title,
-    finalStatus,
+    registrationResult.status,
     cancellationUrl,
   )
 
@@ -277,14 +319,15 @@ export async function registerForTournament(
   })
 
   const message =
-    (finalStatus as RegistrationStatus) === 'WAITLIST'
-      ? "Inscription réussie ! Vous avez été placé sur la liste d'attente."
-      : 'Inscription réussie !'
+    registrationResult.status === 'WAITLIST'
+      ? MESSAGES.SUCCESS_WAITLIST
+      : MESSAGES.SUCCESS_APPROVED
 
   revalidatePath(`/tournaments/${tournament.slug}`)
-  // Using redirect here as it's the most reliable way to reset form and show success page
   redirect(
-    `/tournaments/${tournament.slug}?success=true&message=${encodeURIComponent(message)}`,
+    `/tournaments/${tournament.slug}?success=true&message=${encodeURIComponent(
+      message,
+    )}`,
   )
 }
 
@@ -296,11 +339,11 @@ export async function cancelRegistration(id: string, token: string) {
     })
 
     if (!registration) {
-      return { success: false, message: 'Registration not found.' }
+      return { success: false, message: MESSAGES.CANCEL_NOT_FOUND }
     }
 
     if (registration.cancellationToken !== token) {
-      return { success: false, message: 'Invalid cancellation token.' }
+      return { success: false, message: MESSAGES.CANCEL_INVALID_TOKEN }
     }
 
     await prisma.registration.delete({
@@ -310,10 +353,10 @@ export async function cancelRegistration(id: string, token: string) {
     revalidatePath(`/tournaments/${registration.tournament.slug}`)
     return {
       success: true,
-      message: 'Registration cancelled successfully.',
+      message: MESSAGES.CANCEL_SUCCESS,
     }
   } catch (error) {
     console.error('Cancellation Error:', error)
-    return { success: false, message: 'Failed to cancel registration.' }
+    return { success: false, message: MESSAGES.CANCEL_FAILED }
   }
 }

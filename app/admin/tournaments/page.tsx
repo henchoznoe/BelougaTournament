@@ -6,6 +6,8 @@
  * License: MIT
  */
 
+import { Edit, Eye, Plus, Trophy } from 'lucide-react'
+import Link from 'next/link'
 import { DeleteTournamentButton } from '@/components/features/tournament/actions/delete-button'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,8 +22,6 @@ import {
 import { getAdminTournaments } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
 import { Visibility } from '@/prisma/generated/prisma/client'
-import { Edit, Eye, Plus, Trophy } from 'lucide-react'
-import Link from 'next/link'
 
 // -----------------------------------------------------------------------------
 // Constants & Configuration
