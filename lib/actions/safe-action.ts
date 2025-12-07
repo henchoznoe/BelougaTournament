@@ -76,7 +76,7 @@ export function authenticatedAction<T extends z.ZodType>({
             string,
             string[]
           >,
-          message: ACTION_MESSAGES.TOURNAMENTS.VALIDATION_ERROR, // Or a generic validation error
+          message: ACTION_MESSAGES.GENERIC.VALIDATION_ERROR, // Or a generic validation error
         }
       }
 

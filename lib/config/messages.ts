@@ -20,6 +20,9 @@ export const ACTION_MESSAGES = {
     ERR_VALIDATION: 'Invalid input data.',
     SUCCESS_REGISTER: 'Admin registered successfully.',
   },
+  GENERIC: {
+    VALIDATION_ERROR: 'Validation Error',
+  },
   TOURNAMENTS: {
     UNAUTHORIZED: 'Unauthorized: Admin access required.',
     VALIDATION_ERROR: 'Validation Error',
