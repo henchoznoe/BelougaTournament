@@ -17,11 +17,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login } from '@/lib/actions/auth'
+import { APP_CONFIG } from '@/lib/constants'
 import type { ActionState } from '@/lib/types/actions'
 
 // Constants
 const ASSETS = {
-  BACKGROUND: '/assets/wall.png',
+  BACKGROUND: APP_CONFIG.DEFAULT_BG_IMG,
 } as const
 
 const CONTENT = {

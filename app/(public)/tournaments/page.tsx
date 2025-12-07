@@ -25,8 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { APP_CONFIG } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
-
 import { formatDateTime } from '@/lib/utils'
 
 // Constants
@@ -61,7 +61,7 @@ export default async function TournamentsPage() {
           className="object-cover opacity-20 grayscale"
           fill
           priority
-          src="/assets/wall.png"
+          src={APP_CONFIG.DEFAULT_BG_IMG}
         />
         <div className="absolute inset-0 bg-zinc-950/80" />
         <div className="absolute inset-0 bg-linear-to-b from-zinc-950/50 via-transparent to-zinc-950" />
