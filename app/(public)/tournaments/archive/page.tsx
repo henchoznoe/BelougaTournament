@@ -7,6 +7,7 @@
  */
 
 import { Calendar, Trophy, Users } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,7 +20,6 @@ import {
 } from '@/components/ui/card'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
-import type { Metadata } from 'next'
 
 // Types
 interface ArchivedTournament {
@@ -58,7 +58,8 @@ export const metadata: Metadata = {
 const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {
   return prisma.tournament.findMany({
     where: {
-      OR: [{ isArchived: true }, { endDate: { lt: new Date() } }],
+      visibility: 'PUBLIC',
+      endDate: { lt: new Date() },
     },
     orderBy: { endDate: 'desc' },
   })

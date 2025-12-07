@@ -39,7 +39,7 @@ const CONFIG = {
 } as const
 
 const CONTENT = {
-  TITLE: 'Tous les Tournois',
+  TITLE: 'Prochains Tournois',
   DESCRIPTION:
     'Découvrez les prochaines compétitions, inscrivez-vous et préparez-vous à affronter les meilleurs joueurs.',
   BTN_ARCHIVE: 'Voir les archives',

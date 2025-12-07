@@ -14,7 +14,7 @@ import type { z } from 'zod'
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { tournamentSchema } from '@/lib/validations/tournament'
-import { Prisma, Role } from '@/prisma/generated/prisma/client'
+import { Prisma, Role, type Visibility } from '@/prisma/generated/prisma/client'
 
 // Types
 export type ActionState = {
@@ -347,5 +347,39 @@ export async function exportTournamentData(
       success: false,
       message: MESSAGES.DATABASE_ERROR,
     }
+  }
+}
+
+// Logic - Visibility
+export async function toggleTournamentVisibility(
+  id: string,
+  visibility: Visibility,
+): Promise<ActionState> {
+  const auth = await checkAuth()
+  if (!auth.success) {
+    return auth
+  }
+
+  try {
+    await prisma.tournament.update({
+      where: { id },
+      data: { visibility },
+    })
+  } catch (error) {
+    console.error('Visibility Update Error:', error)
+    return {
+      success: false,
+      message: MESSAGES.DB_UPDATE_ERROR,
+    }
+  }
+
+  revalidateTag('tournaments', 'default')
+  revalidatePath('/admin/tournaments')
+  revalidatePath(`/admin/tournaments/${id}`)
+  revalidatePath('/tournaments')
+
+  return {
+    success: true,
+    message: 'Tournament visibility updated successfully.',
   }
 }

@@ -27,7 +27,8 @@ import {
     rejectRegistration,
 } from '@/lib/actions/registrations'
 import { formatDate } from '@/lib/utils'
-import { Registration, RegistrationStatus } from '@/prisma/generated/prisma/client'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import type { Registration } from '@/prisma/generated/prisma/client'
 
 interface RegistrationsTableProps {
     registrations: (Registration & {

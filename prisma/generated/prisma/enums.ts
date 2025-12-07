@@ -43,3 +43,11 @@ export const RegistrationStatus = {
 } as const
 
 export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
+
+
+export const Visibility = {
+  PUBLIC: 'PUBLIC',
+  PRIVATE: 'PRIVATE'
+} as const
+
+export type Visibility = (typeof Visibility)[keyof typeof Visibility]

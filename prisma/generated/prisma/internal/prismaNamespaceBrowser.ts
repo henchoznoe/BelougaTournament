@@ -103,7 +103,7 @@ export const TournamentScalarFieldEnum = {
   challongeId: 'challongeId',
   streamUrl: 'streamUrl',
   autoApprove: 'autoApprove',
-  isArchived: 'isArchived',
+  visibility: 'visibility',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -8,7 +8,7 @@
 
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/db/prisma'
-import type { Prisma } from '@/prisma/generated/prisma/client'
+import { type Prisma, Visibility } from '@/prisma/generated/prisma/client'
 
 // Types
 export type PublicTournament = Prisma.TournamentGetPayload<{
@@ -45,7 +45,7 @@ const fetchPublicTournamentsFromDb = async (): Promise<PublicTournament[]> => {
   return prisma.tournament.findMany({
     orderBy: { startDate: 'asc' },
     where: {
-      isArchived: false,
+      visibility: Visibility.PUBLIC,
       endDate: {
         gte: new Date(),
       },

@@ -129,7 +129,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     recentRegistrations,
   ] = await Promise.all([
     prisma.tournament.count(),
-    prisma.tournament.count({ where: { isArchived: false } }),
+    prisma.tournament.count({ where: { endDate: { gt: new Date() } } }),
     prisma.registration.count({ where: { status: 'PENDING' } }),
     prisma.registration.count({ where: { status: 'APPROVED' } }),
     prisma.user.count(),

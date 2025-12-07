@@ -19,11 +19,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RegistrationForm } from '@/components/features/tournament/registration/registration-form'
+import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
-import { TwitchEmbed } from '@/components/twitch-embed'
 
 // Constants
 const CONFIG = {

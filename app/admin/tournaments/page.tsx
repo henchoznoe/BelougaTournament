@@ -9,6 +9,7 @@
 import { Edit, Eye, Plus, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { DeleteTournamentButton } from '@/components/features/tournament/actions/delete-button'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -76,11 +77,37 @@ export default async function TournamentsPage() {
                   className="border-white/5 hover:bg-white/5 transition-colors group"
                 >
                   <TableCell className="font-medium text-white py-4 pl-6">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
-                        <Trophy className="size-4" />
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="size-8 rounded bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
+                          <Trophy className="size-4" />
+                        </div>
+                        {tournament.title}
                       </div>
-                      {tournament.title}
+                      <div className="flex gap-2 ml-11">
+                        {new Date() > new Date(tournament.endDate) && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-zinc-800 text-zinc-500 border-zinc-700 text-[10px] h-5 px-1.5"
+                          >
+                            Terminé
+                          </Badge>
+                        )}
+                        {tournament.visibility === 'PRIVATE' && (
+                          <Badge
+                            variant="outline"
+                            className="border-zinc-700 text-zinc-500 text-[10px] h-5 px-1.5"
+                          >
+                            Privé
+                          </Badge>
+                        )}
+                        {tournament.visibility === 'PUBLIC' &&
+                          new Date() <= new Date(tournament.endDate) && (
+                            <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-[10px] h-5 px-1.5 hover:bg-green-500/20">
+                              Public
+                            </Badge>
+                          )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">

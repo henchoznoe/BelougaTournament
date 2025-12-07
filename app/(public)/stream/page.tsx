@@ -6,9 +6,9 @@
  * License: MIT
  */
 
+import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { getSiteSettings } from '@/lib/data/settings'
-import type { Metadata } from 'next'
 
 // Constants
 const DEFAULTS = {

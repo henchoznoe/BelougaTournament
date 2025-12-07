@@ -51,7 +51,7 @@ export type TournamentMinAggregateOutputType = {
   challongeId: string | null
   streamUrl: string | null
   autoApprove: boolean | null
-  isArchived: boolean | null
+  visibility: $Enums.Visibility | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -71,7 +71,7 @@ export type TournamentMaxAggregateOutputType = {
   challongeId: string | null
   streamUrl: string | null
   autoApprove: boolean | null
-  isArchived: boolean | null
+  visibility: $Enums.Visibility | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -91,7 +91,7 @@ export type TournamentCountAggregateOutputType = {
   challongeId: number
   streamUrl: number
   autoApprove: number
-  isArchived: number
+  visibility: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -123,7 +123,7 @@ export type TournamentMinAggregateInputType = {
   challongeId?: true
   streamUrl?: true
   autoApprove?: true
-  isArchived?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -143,7 +143,7 @@ export type TournamentMaxAggregateInputType = {
   challongeId?: true
   streamUrl?: true
   autoApprove?: true
-  isArchived?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -163,7 +163,7 @@ export type TournamentCountAggregateInputType = {
   challongeId?: true
   streamUrl?: true
   autoApprove?: true
-  isArchived?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -270,7 +270,7 @@ export type TournamentGroupByOutputType = {
   challongeId: string | null
   streamUrl: string
   autoApprove: boolean
-  isArchived: boolean
+  visibility: $Enums.Visibility
   createdAt: Date
   updatedAt: Date
   _count: TournamentCountAggregateOutputType | null
@@ -313,7 +313,7 @@ export type TournamentWhereInput = {
   challongeId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
-  isArchived?: Prisma.BoolFilter<"Tournament"> | boolean
+  visibility?: Prisma.EnumVisibilityFilter<"Tournament"> | $Enums.Visibility
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   fields?: Prisma.TournamentFieldListRelationFilter
@@ -335,7 +335,7 @@ export type TournamentOrderByWithRelationInput = {
   challongeId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  isArchived?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   fields?: Prisma.TournamentFieldOrderByRelationAggregateInput
@@ -360,7 +360,7 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   challongeId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
-  isArchived?: Prisma.BoolFilter<"Tournament"> | boolean
+  visibility?: Prisma.EnumVisibilityFilter<"Tournament"> | $Enums.Visibility
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   fields?: Prisma.TournamentFieldListRelationFilter
@@ -382,7 +382,7 @@ export type TournamentOrderByWithAggregationInput = {
   challongeId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  isArchived?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TournamentCountOrderByAggregateInput
@@ -410,7 +410,7 @@ export type TournamentScalarWhereWithAggregatesInput = {
   challongeId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringWithAggregatesFilter<"Tournament"> | string
   autoApprove?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
-  isArchived?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
+  visibility?: Prisma.EnumVisibilityWithAggregatesFilter<"Tournament"> | $Enums.Visibility
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
 }
@@ -428,9 +428,9 @@ export type TournamentCreateInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
@@ -450,9 +450,9 @@ export type TournamentUncheckedCreateInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
@@ -474,7 +474,7 @@ export type TournamentUpdateInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
@@ -496,7 +496,7 @@ export type TournamentUncheckedUpdateInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
@@ -516,9 +516,9 @@ export type TournamentCreateManyInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -538,7 +538,7 @@ export type TournamentUpdateManyMutationInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -558,7 +558,7 @@ export type TournamentUncheckedUpdateManyInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -578,7 +578,7 @@ export type TournamentCountOrderByAggregateInput = {
   challongeId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  isArchived?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -603,7 +603,7 @@ export type TournamentMaxOrderByAggregateInput = {
   challongeId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  isArchived?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -623,7 +623,7 @@ export type TournamentMinOrderByAggregateInput = {
   challongeId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  isArchived?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -664,6 +664,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type EnumVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.Visibility
 }
 
 export type TournamentCreateNestedOneWithoutFieldsInput = {
@@ -707,9 +711,9 @@ export type TournamentCreateWithoutFieldsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
@@ -728,9 +732,9 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
@@ -767,7 +771,7 @@ export type TournamentUpdateWithoutFieldsInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
@@ -788,7 +792,7 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
@@ -807,9 +811,9 @@ export type TournamentCreateWithoutRegistrationsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
@@ -828,9 +832,9 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   format: $Enums.TournamentFormat
   teamSize?: number
   challongeId?: string | null
-  streamUrl?: string
+  streamUrl: string
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: $Enums.Visibility
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
@@ -867,7 +871,7 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
@@ -888,7 +892,7 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   challongeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
@@ -949,7 +953,7 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   challongeId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
@@ -972,7 +976,7 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   challongeId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tournament"]>
@@ -992,7 +996,7 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   challongeId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tournament"]>
@@ -1012,12 +1016,12 @@ export type TournamentSelectScalar = {
   challongeId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  isArchived?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxParticipants" | "format" | "teamSize" | "challongeId" | "streamUrl" | "autoApprove" | "isArchived" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxParticipants" | "format" | "teamSize" | "challongeId" | "streamUrl" | "autoApprove" | "visibility" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
@@ -1047,7 +1051,7 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     challongeId: string | null
     streamUrl: string
     autoApprove: boolean
-    isArchived: boolean
+    visibility: $Enums.Visibility
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["tournament"]>
@@ -1489,7 +1493,7 @@ export interface TournamentFieldRefs {
   readonly challongeId: Prisma.FieldRef<"Tournament", 'String'>
   readonly streamUrl: Prisma.FieldRef<"Tournament", 'String'>
   readonly autoApprove: Prisma.FieldRef<"Tournament", 'Boolean'>
-  readonly isArchived: Prisma.FieldRef<"Tournament", 'Boolean'>
+  readonly visibility: Prisma.FieldRef<"Tournament", 'Visibility'>
   readonly createdAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tournament", 'DateTime'>
 }

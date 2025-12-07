@@ -19,7 +19,7 @@ const fetchUpcomingTournaments = async () => {
     orderBy: { startDate: "asc" },
     take: SECTION_CONFIG.MAX_ITEMS,
     where: {
-      isArchived: false,
+      visibility: 'PUBLIC',
       startDate: { gte: new Date() },
     },
   });

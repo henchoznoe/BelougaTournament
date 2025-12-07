@@ -18,6 +18,7 @@ import {
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CsvExportButton } from '@/components/features/admin/actions/csv-export'
+import { VisibilityToggle } from '@/components/features/tournament/actions/visibility-toggle'
 import { ChallongeIdForm } from '@/components/features/tournament/form/challonge-id-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -104,16 +105,22 @@ export default async function TournamentManagerPage({
             du tournoi.
           </p>
         </div>
-        <Button
-          asChild
-          variant="outline"
-          className="h-12 border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300"
-        >
-          <Link href={`/admin/tournaments/${tournament.id}/edit`}>
-            <Edit className="mr-2 h-4 w-4" />
-            Modifier le Tournoi
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <VisibilityToggle
+            tournamentId={tournament.id}
+            currentVisibility={tournament.visibility}
+          />
+          <Button
+            asChild
+            variant="outline"
+            className="h-12 border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300"
+          >
+            <Link href={`/admin/tournaments/${tournament.id}/edit`}>
+              <Edit className="mr-2 h-4 w-4" />
+              Modifier le Tournoi
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
