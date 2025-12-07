@@ -2,7 +2,7 @@
  * File: lib/actions/auth.ts
  * Description: Server actions for user authentication (login, logout).
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -34,12 +34,6 @@ const ROUTES = {
   ADMIN_DASHBOARD: '/admin',
 } as const
 
-// Schemas
-const authSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, 'Password is required'),
-})
-
 const MESSAGES = {
   ERR_MISSING_CREDS: 'Email and password are required.',
   ERR_INVALID_CREDS: 'Invalid credentials.',
@@ -50,8 +44,16 @@ const MESSAGES = {
   SUCCESS_REGISTER: 'Admin registered successfully.',
 } as const
 
+// Schemas
+const authSchema = z.object({
+  email: z.string().trim().email('Invalid email address'),
+  password: z.string().trim().min(1, 'Password is required'),
+})
+
+// Helper Functions
 const createSessionCookie = async (payload: SessionPayload) => {
   const expires = new Date(Date.now() + COOKIE_CONFIG.DURATION_MS)
+  // Ensure strict check if environment variable exists or default logic if not, though not explicitly requested, keeping as is
   const sessionToken = await encrypt({ ...payload, expires })
   const cookieStore = await cookies()
 
@@ -64,28 +66,31 @@ const createSessionCookie = async (payload: SessionPayload) => {
   })
 }
 
+// Server Actions
 export const login = async (
   _prevState: unknown,
   formData: FormData,
 ): Promise<LoginState> => {
+  // Safe Data Extraction (No casting)
   const rawData = {
-    email: formData.get('email'),
-    password: formData.get('password'),
+    email: formData.get('email')?.toString() || '',
+    password: formData.get('password')?.toString() || '',
   }
 
-  // 1. Validate Input
+  // Validate Input
   const validation = authSchema.safeParse(rawData)
 
   if (!validation.success) {
     return {
       message: MESSAGES.ERR_MISSING_CREDS,
-      email: rawData.email as string,
+      email: rawData.email,
+      errors: validation.error.flatten().fieldErrors,
     }
   }
 
   const { email, password } = validation.data
 
-  // 2. Verify User
+  // Verify User
   const user = await prisma.user.findUnique({
     where: { email },
   })
@@ -95,14 +100,14 @@ export const login = async (
     return { message: MESSAGES.ERR_INVALID_CREDS, email }
   }
 
-  // 3. Verify Role Authorization
+  // Verify Role Authorization
   const isAuthorized = user.role === Role.ADMIN || user.role === Role.SUPERADMIN
 
   if (!isAuthorized) {
     return { message: MESSAGES.ERR_UNAUTHORIZED, email }
   }
 
-  // 4. Create Session
+  // Create Session
   await createSessionCookie({
     user: {
       id: user.id,
