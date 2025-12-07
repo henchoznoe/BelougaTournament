@@ -2,11 +2,12 @@
  * File: lib/email.ts
  * Description: Email service module to handle transactional emails via Resend.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 
 import { Resend } from 'resend'
+import { env } from '@/lib/env'
 
 // Types
 type EmailPayload = {
@@ -22,29 +23,16 @@ type EmailResponse = {
 }
 
 // Constants
-const ENV_VAR_KEYS = {
-  API_KEY: 'RESEND_API_KEY',
-  FROM_EMAIL: 'RESEND_FROM_EMAIL',
-} as const
-
 const ERRORS = {
-  MISSING_ENV: `Environment variables ${ENV_VAR_KEYS.API_KEY} and ${ENV_VAR_KEYS.FROM_EMAIL} must be defined.`,
   SEND_FAILED: 'Failed to send email via Resend.',
 } as const
 
 const TEAM_NAME = 'The Belouga Tournament Team'
 
 function getResendClient(): { client: Resend; fromEmail: string } {
-  const apiKey = process.env[ENV_VAR_KEYS.API_KEY]
-  const fromEmail = process.env[ENV_VAR_KEYS.FROM_EMAIL]
-
-  if (!apiKey || !fromEmail) {
-    throw new Error(ERRORS.MISSING_ENV)
-  }
-
   return {
-    client: new Resend(apiKey),
-    fromEmail,
+    client: new Resend(env.RESEND_API_KEY),
+    fromEmail: env.RESEND_FROM,
   }
 }
 

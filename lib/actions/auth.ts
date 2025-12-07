@@ -13,6 +13,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import z from 'zod'
 import { encrypt, type SessionPayload } from '@/lib/auth'
+import { env } from '@/lib/env'
 import prisma from '@/lib/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
@@ -53,14 +54,13 @@ const authSchema = z.object({
 // Helper Functions
 const createSessionCookie = async (payload: SessionPayload) => {
   const expires = new Date(Date.now() + COOKIE_CONFIG.DURATION_MS)
-  // Ensure strict check if environment variable exists or default logic if not, though not explicitly requested, keeping as is
   const sessionToken = await encrypt({ ...payload, expires })
   const cookieStore = await cookies()
 
   cookieStore.set(COOKIE_CONFIG.NAME, sessionToken, {
     expires,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
   })

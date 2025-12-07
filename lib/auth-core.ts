@@ -2,11 +2,12 @@
  * File: lib/auth-core.ts
  * Description: Core authentication logic (JWT) independent of Next.js runtime (headers/cookies).
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
+import { env } from '@/lib/env'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
 // Types
@@ -20,29 +21,14 @@ export interface SessionPayload extends JWTPayload {
 }
 
 // Constants
-const ENV_KEYS = {
-  JWT_SECRET: 'JWT_SECRET_KEY',
-} as const
-
 const JWT_CONFIG = {
   ALG: 'HS256',
   EXPIRATION: '24h',
 } as const
 
-const ERRORS = {
-  MISSING_SECRET: `Environment variable ${ENV_KEYS.JWT_SECRET} is not defined.`,
-  INVALID_TOKEN: 'Invalid or expired session token.',
-} as const
-
 // Get encoded key from environment variable
 const getEncodedKey = (): Uint8Array => {
-  const secret = process.env[ENV_KEYS.JWT_SECRET]
-
-  if (!secret) {
-    throw new Error(ERRORS.MISSING_SECRET)
-  }
-
-  return new TextEncoder().encode(secret)
+  return new TextEncoder().encode(env.JWT_SECRET_KEY)
 }
 
 // Encrypt token

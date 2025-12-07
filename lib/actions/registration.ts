@@ -12,6 +12,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
+import { env } from '@/lib/env'
 import prisma from '@/lib/prisma'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
@@ -258,7 +259,7 @@ export async function registerForTournament(
     return { success: false, message: "Échec de l'inscription." }
   }
 
-  const cancellationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
+  const cancellationUrl = `${env.NEXT_PUBLIC_APP_URL}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
 
   // Send Confirmation Email
   const emailHtml = generateRegistrationEmailHtml(

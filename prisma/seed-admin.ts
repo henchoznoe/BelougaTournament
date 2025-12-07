@@ -2,42 +2,21 @@
  * File: prisma/seed-admin.ts
  * Description: Seed script to create the initial admin user.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 
 import 'dotenv/config';
-import { PrismaClient, Role } from './generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
 import { hash } from 'bcryptjs';
+import pg from 'pg';
+import { env } from '../lib/env';
+import { PrismaClient, Role } from './generated/prisma/client';
 
 // Constants
-const ENV_KEYS = {
-  DATABASE_URL: 'DATABASE_URL',
-  ADMIN_EMAIL: 'ADMIN_EMAIL',
-  ADMIN_PASSWORD: 'ADMIN_PASSWORD',
-} as const
-
 const SECURITY_CONFIG = {
   SALT_ROUNDS: 12,
 } as const
-
-const ERRORS = {
-  MISSING_ENV: `Missing environment variables. Please check: ${Object.values(ENV_KEYS).join(', ')}`,
-} as const
-
-function getSeedConfig() {
-  const url = process.env[ENV_KEYS.DATABASE_URL]
-  const email = process.env[ENV_KEYS.ADMIN_EMAIL]
-  const password = process.env[ENV_KEYS.ADMIN_PASSWORD]
-
-  if (!url || !email || !password) {
-    throw new Error(ERRORS.MISSING_ENV)
-  }
-
-  return { url, email, password }
-}
 
 function createPrismaClient(connectionString: string): PrismaClient {
   const pool = new pg.Pool({ connectionString })
@@ -47,20 +26,19 @@ function createPrismaClient(connectionString: string): PrismaClient {
 
 async function main() {
 
-  const config = getSeedConfig()
-  const prisma = createPrismaClient(config.url)
+  const prisma = createPrismaClient(env.DATABASE_URL)
 
   try {
-    const hashedPassword = await hash(config.password, SECURITY_CONFIG.SALT_ROUNDS)
+    const hashedPassword = await hash(env.ADMIN_PASSWORD, SECURITY_CONFIG.SALT_ROUNDS)
 
     const user = await prisma.user.upsert({
-      where: { email: config.email },
+      where: { email: env.ADMIN_EMAIL },
       update: {
         passwordHash: hashedPassword,
         role: Role.SUPERADMIN
       },
       create: {
-        email: config.email,
+        email: env.ADMIN_EMAIL,
         passwordHash: hashedPassword,
         role: Role.SUPERADMIN,
       },
