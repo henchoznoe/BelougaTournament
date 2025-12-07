@@ -22,30 +22,13 @@ type ActionResponse = {
   errors?: Record<string, string[]>
 }
 
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+import { APP_ROUTES } from '@/lib/config/routes'
+
 // Constants
 const SECURITY_CONFIG = {
   SALT_ROUNDS: 12,
   MIN_PASSWORD_LENGTH: 8,
-} as const
-
-const MESSAGES = {
-  SUCCESS_CREATE: 'Admin created successfully.',
-  SUCCESS_UPDATE: 'Admin updated successfully.',
-  SUCCESS_DELETE: 'Admin deleted successfully.',
-  SUCCESS_RESET: 'Password reset successfully.',
-  ERR_UNAUTHORIZED: 'Unauthorized operation.',
-  ERR_SUPERADMIN_ONLY:
-    'Unauthorized: Only SuperAdmins can perform this action.',
-  ERR_PROTECTED_SUPERADMIN: 'Cannot modify or delete another SuperAdmin.',
-  ERR_USER_NOT_FOUND: 'User not found.',
-  ERR_EMAIL_EXISTS: 'Failed to create admin. Email might already exist.',
-  ERR_GENERIC: 'An error occurred while processing your request.',
-  ERR_VALIDATION: 'Invalid fields provided.',
-} as const
-
-const PATHS = {
-  ADMIN_SETTINGS: '/admin/settings',
-  ADMIN_USERS: '/admin/users',
 } as const
 
 // Schemas
@@ -84,7 +67,7 @@ export const createAdmin = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: MESSAGES.ERR_VALIDATION,
+      message: ACTION_MESSAGES.ADMIN.ERR_VALIDATION,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -102,11 +85,11 @@ export const createAdmin = async (
       },
     })
 
-    revalidatePath(PATHS.ADMIN_SETTINGS)
-    return { success: true, message: MESSAGES.SUCCESS_CREATE }
+    revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
+    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_CREATE }
   } catch (error) {
     console.error('Create Admin Error:', error)
-    return { success: false, message: MESSAGES.ERR_EMAIL_EXISTS }
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_EMAIL_EXISTS }
   }
 }
 
@@ -117,7 +100,11 @@ export const updateAdmin = async (
 ): Promise<ActionResponse> => {
   // 1. Auth Check
   const session = await requireSuperAdmin()
-  if (!session) return { success: false, message: MESSAGES.ERR_SUPERADMIN_ONLY }
+  if (!session)
+    return {
+      success: false,
+      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+    }
 
   // 2. Validate Input
   const rawData = {
@@ -129,7 +116,7 @@ export const updateAdmin = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: MESSAGES.ERR_VALIDATION,
+      message: ACTION_MESSAGES.ADMIN.ERR_VALIDATION,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -137,12 +124,18 @@ export const updateAdmin = async (
   try {
     const targetUser = await prisma.user.findUnique({ where: { id: userId } })
     if (!targetUser)
-      return { success: false, message: MESSAGES.ERR_USER_NOT_FOUND }
+      return {
+        success: false,
+        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+      }
 
     // 3. Permission Logic: Protect other SuperAdmins
     // Allow editing self, but prevent editing other SuperAdmins
     if (targetUser.role === Role.SUPERADMIN && session.user.id !== userId) {
-      return { success: false, message: MESSAGES.ERR_PROTECTED_SUPERADMIN }
+      return {
+        success: false,
+        message: ACTION_MESSAGES.ADMIN.ERR_PROTECTED_SUPERADMIN,
+      }
     }
 
     await prisma.user.update({
@@ -150,35 +143,45 @@ export const updateAdmin = async (
       data: validatedFields.data,
     })
 
-    revalidatePath(PATHS.ADMIN_USERS)
-    return { success: true, message: MESSAGES.SUCCESS_UPDATE }
+    revalidatePath(APP_ROUTES.ADMIN_ADMINS)
+    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_UPDATE }
   } catch (error) {
     console.error('Update Admin Error:', error)
-    return { success: false, message: MESSAGES.ERR_GENERIC }
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
   }
 }
 
 export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
   const session = await requireSuperAdmin()
-  if (!session) return { success: false, message: MESSAGES.ERR_SUPERADMIN_ONLY }
+  if (!session)
+    return {
+      success: false,
+      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+    }
 
   try {
     const targetUser = await prisma.user.findUnique({ where: { id: userId } })
     if (!targetUser)
-      return { success: false, message: MESSAGES.ERR_USER_NOT_FOUND }
+      return {
+        success: false,
+        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+      }
 
     // Rule: Cannot delete a SuperAdmin (even self, usually prevents lockout)
     if (targetUser.role === Role.SUPERADMIN) {
-      return { success: false, message: MESSAGES.ERR_PROTECTED_SUPERADMIN }
+      return {
+        success: false,
+        message: ACTION_MESSAGES.ADMIN.ERR_PROTECTED_SUPERADMIN,
+      }
     }
 
     await prisma.user.delete({ where: { id: userId } })
 
-    revalidatePath(PATHS.ADMIN_USERS)
-    return { success: true, message: MESSAGES.SUCCESS_DELETE }
+    revalidatePath(APP_ROUTES.ADMIN_ADMINS)
+    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_DELETE }
   } catch (error) {
     console.error('Delete Admin Error:', error)
-    return { success: false, message: MESSAGES.ERR_GENERIC }
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
   }
 }
 
@@ -187,7 +190,11 @@ export const resetAdminPassword = async (
   newPassword: string,
 ): Promise<ActionResponse> => {
   const session = await requireSuperAdmin()
-  if (!session) return { success: false, message: MESSAGES.ERR_SUPERADMIN_ONLY }
+  if (!session)
+    return {
+      success: false,
+      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+    }
 
   try {
     // Validate simple constraints on the new password manually since it's an arg, not FormData
@@ -202,10 +209,10 @@ export const resetAdminPassword = async (
       data: { passwordHash: hashedPassword },
     })
 
-    revalidatePath(PATHS.ADMIN_SETTINGS)
-    return { success: true, message: MESSAGES.SUCCESS_RESET }
+    revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
+    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_RESET }
   } catch (error) {
     console.error('Password Reset Error:', error)
-    return { success: false, message: MESSAGES.ERR_GENERIC }
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
   }
 }

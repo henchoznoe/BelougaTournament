@@ -11,6 +11,7 @@ import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { ScrollToTop } from '@/components/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
+import { APP_METADATA } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import './globals.css'
 
@@ -25,23 +26,13 @@ const paladins = localFont({
   variable: '--font-paladins',
 })
 
-// Constants
-const SITE_CONFIG = {
-  TITLE: {
-    TEMPLATE: '%s | Belouga Tournament',
-    DEFAULT: 'Belouga Tournament',
-  },
-  DESCRIPTION: 'La référence des tournois amateurs e-sport.',
-  LANG: 'fr',
-} as const
-
 // Metadata
 export const metadata: Metadata = {
   title: {
-    default: SITE_CONFIG.TITLE.DEFAULT,
-    template: SITE_CONFIG.TITLE.TEMPLATE,
+    default: APP_METADATA.NAME,
+    template: APP_METADATA.TEMPLATE_TITLE,
   },
-  description: SITE_CONFIG.DESCRIPTION,
+  description: APP_METADATA.DESCRIPTION,
 }
 
 export default function RootLayout({
@@ -50,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang={SITE_CONFIG.LANG} className="scroll-smooth">
+    <html lang={APP_METADATA.LOCALE} className="scroll-smooth">
       <body
         className={cn(
           inter.variable,

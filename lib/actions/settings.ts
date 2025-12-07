@@ -35,7 +35,8 @@ export type SettingsState = {
   success?: boolean
 }
 
-// Constants
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+
 const DB_CONFIG = {
   SINGLETON_ID: 1,
 } as const
@@ -47,13 +48,6 @@ const CACHE_TAGS = {
 const FORM_KEYS = {
   LOGO_FILE: 'logo',
   LOGO_URL: 'logoUrl',
-} as const
-
-const MESSAGES = {
-  SUCCESS: 'Settings updated successfully.',
-  ERR_UPLOAD: 'Failed to upload logo file.',
-  ERR_VALIDATION: 'Invalid form data. Please check your inputs.',
-  ERR_DB: 'Database error: Failed to save settings.',
 } as const
 
 const uploadLogoIfNeeded = async (
@@ -101,7 +95,7 @@ export const updateSettings = async (
     logoUrl = await uploadLogoIfNeeded(formData, logoUrl)
   } catch (error) {
     console.error('Blob upload error:', error)
-    return { success: false, message: MESSAGES.ERR_UPLOAD }
+    return { success: false, message: ACTION_MESSAGES.SETTINGS.ERR_UPLOAD }
   }
   const rawData = extractSettingsData(formData, logoUrl)
   const validatedFields = settingsSchema.safeParse(rawData)
@@ -109,7 +103,7 @@ export const updateSettings = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: MESSAGES.ERR_VALIDATION,
+      message: ACTION_MESSAGES.SETTINGS.ERR_VALIDATION,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -126,9 +120,9 @@ export const updateSettings = async (
 
     revalidateTag(CACHE_TAGS.SETTINGS, 'default')
 
-    return { success: true, message: MESSAGES.SUCCESS }
+    return { success: true, message: ACTION_MESSAGES.SETTINGS.SUCCESS }
   } catch (error) {
     console.error('Settings update error:', error)
-    return { success: false, message: MESSAGES.ERR_DB }
+    return { success: false, message: ACTION_MESSAGES.SETTINGS.ERR_DB }
   }
 }

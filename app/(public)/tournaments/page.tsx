@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TournamentCard } from '@/components/features/tournament/card/tournament-card'
 import { Button } from '@/components/ui/button'
-import { APP_CONFIG } from '@/lib/constants'
+import { APP_METADATA } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
 
 // Constants
@@ -39,7 +39,7 @@ export default async function TournamentsPage() {
           className="object-cover opacity-20 grayscale"
           fill
           priority
-          src={APP_CONFIG.DEFAULT_BG_IMG}
+          src={APP_METADATA.DEFAULT_BG_IMG}
         />
         <div className="absolute inset-0 bg-zinc-950/80" />
         <div className="absolute inset-0 bg-linear-to-b from-zinc-950/50 via-transparent to-zinc-950" />

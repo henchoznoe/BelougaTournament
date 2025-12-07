@@ -17,7 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { APP_CONFIG } from "@/lib/constants";
+import { APP_METADATA } from "@/lib/constants";
 
 // Types
 interface NavbarClientProps {
@@ -41,13 +41,13 @@ const NAV_LINKS = [
 ] as const
 
 const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
-  const src = url || APP_CONFIG.DEFAULT_LOGO
+  const src = url || APP_METADATA.DEFAULT_LOGO
 
   return (
     <div className="relative">
       <Image
         src={src}
-        alt={APP_CONFIG.NAME}
+        alt={APP_METADATA.NAME}
         width={size}
         height={size}
         className={cn('h-auto w-auto transition-transform duration-300', className)}
@@ -85,7 +85,7 @@ export function NavbarClient({ settings }: NavbarClientProps) {
             />
           </div>
           <span className="whitespace-nowrap font-paladins text-md tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-2xl">
-            {APP_CONFIG.NAME}
+            {APP_METADATA.NAME}
           </span>
         </Link>
 
@@ -145,7 +145,7 @@ export function NavbarClient({ settings }: NavbarClientProps) {
                     <NavLogo url={settings.logoUrl} size={64} />
                   </div>
                   <SheetTitle className="font-paladins text-2xl tracking-wider text-white text-center">
-                    {APP_CONFIG.NAME}
+                    {APP_METADATA.NAME}
                   </SheetTitle>
                 </div>
               </SheetHeader>

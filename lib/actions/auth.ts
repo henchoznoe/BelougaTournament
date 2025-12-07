@@ -12,40 +12,22 @@ import { compare } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { encrypt, type SessionPayload } from '@/lib/auth'
+import { AUTH_CONFIG } from '@/lib/config/auth'
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
 import { env } from '@/lib/env'
 import type { ActionState } from '@/lib/types/actions'
 import { loginSchema } from '@/lib/validations/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Constants
-const COOKIE_CONFIG = {
-  NAME: 'session',
-  DURATION_MS: 24 * 60 * 60 * 1000, // 24 hours
-} as const
-
-const ROUTES = {
-  HOME: '/',
-  ADMIN_DASHBOARD: '/admin',
-} as const
-
-const MESSAGES = {
-  ERR_MISSING_CREDS: 'Email and password are required.',
-  ERR_INVALID_CREDS: 'Invalid credentials.',
-  ERR_UNAUTHORIZED: 'Access denied. Insufficient permissions.',
-  ERR_SUPERADMIN_ONLY:
-    'Unauthorized: Only SuperAdmins can perform this action.',
-  ERR_VALIDATION: 'Invalid input data.',
-  SUCCESS_REGISTER: 'Admin registered successfully.',
-} as const
-
 // Helper Functions
 const createSessionCookie = async (payload: SessionPayload) => {
-  const expires = new Date(Date.now() + COOKIE_CONFIG.DURATION_MS)
+  const expires = new Date(Date.now() + AUTH_CONFIG.SESSION_DURATION_MS)
   const sessionToken = await encrypt({ ...payload, expires })
   const cookieStore = await cookies()
 
-  cookieStore.set(COOKIE_CONFIG.NAME, sessionToken, {
+  cookieStore.set(AUTH_CONFIG.COOKIE_NAME, sessionToken, {
     expires,
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
@@ -71,7 +53,7 @@ export const login = async (
   if (!validation.success) {
     return {
       success: false,
-      message: MESSAGES.ERR_MISSING_CREDS,
+      message: ACTION_MESSAGES.AUTH.ERR_MISSING_CREDS,
       inputs: rawData.email,
       errors: validation.error.flatten().fieldErrors,
     }
@@ -88,7 +70,7 @@ export const login = async (
   if (!user || !(await compare(password, user.passwordHash))) {
     return {
       success: false,
-      message: MESSAGES.ERR_INVALID_CREDS,
+      message: ACTION_MESSAGES.AUTH.ERR_INVALID_CREDS,
       inputs: email,
     }
   }
@@ -99,7 +81,7 @@ export const login = async (
   if (!isAuthorized) {
     return {
       success: false,
-      message: MESSAGES.ERR_UNAUTHORIZED,
+      message: ACTION_MESSAGES.AUTH.ERR_UNAUTHORIZED,
       inputs: email,
     }
   }
@@ -113,11 +95,11 @@ export const login = async (
     },
   })
 
-  redirect(ROUTES.ADMIN_DASHBOARD)
+  redirect(APP_ROUTES.ADMIN_DASHBOARD)
 }
 
 export const logout = async () => {
   const cookieStore = await cookies()
-  cookieStore.delete(COOKIE_CONFIG.NAME)
-  redirect(ROUTES.HOME)
+  cookieStore.delete(AUTH_CONFIG.COOKIE_NAME)
+  redirect(APP_ROUTES.HOME)
 }

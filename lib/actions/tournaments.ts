@@ -12,29 +12,13 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { getSession } from '@/lib/auth'
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+import { APP_ROUTES } from '@/lib/config/routes'
 import { CACHE_TAGS } from '@/lib/constants'
 import prisma from '@/lib/db/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { tournamentSchema } from '@/lib/validations/tournament'
 import { Prisma, Role, type Visibility } from '@/prisma/generated/prisma/client'
-
-// Constants
-const MESSAGES = {
-  UNAUTHORIZED: 'Unauthorized: Admin access required.',
-  VALIDATION_ERROR: 'Validation Error',
-  DATABASE_ERROR: 'Database Error: An unexpected error occurred.',
-  DB_CREATE_ERROR: 'Database Error: Failed to create tournament.',
-  DB_UPDATE_ERROR: 'Database Error: Failed to update tournament.',
-  DB_DELETE_ERROR: 'Database Error: Failed to delete tournament.',
-  DUPLICATE_SLUG:
-    'A tournament with this slug already exists. Please choose another one.',
-  DELETE_SUCCESS: 'Tournament deleted successfully.',
-  NOT_FOUND: 'Tournament not found.',
-  FIELD_DATA_CONSTRAINT: (label: string) =>
-    `Cannot remove field "${label}" as it contains user data.`,
-  FIELD_SECURITY_ERROR: (id: string) =>
-    `Security Error: Field "${id}" does not belong to this tournament.`,
-} as const
 
 // Helper Functions
 async function checkAuth(): Promise<ActionState> {
@@ -46,7 +30,7 @@ async function checkAuth(): Promise<ActionState> {
   ) {
     return {
       success: false,
-      message: MESSAGES.UNAUTHORIZED,
+      message: ACTION_MESSAGES.TOURNAMENTS.UNAUTHORIZED,
     }
   }
   return { success: true }
@@ -67,7 +51,7 @@ export async function createTournament(
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
-      message: MESSAGES.VALIDATION_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.VALIDATION_ERROR,
     }
   }
 
@@ -99,17 +83,17 @@ export async function createTournament(
     ) {
       return {
         success: false,
-        message: MESSAGES.DUPLICATE_SLUG,
+        message: ACTION_MESSAGES.TOURNAMENTS.DUPLICATE_SLUG,
       }
     }
     return {
       success: false,
-      message: MESSAGES.DB_CREATE_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
     }
   }
 
   revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
-  redirect('/admin/tournaments')
+  redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
 }
 
 // Logic - Delete
@@ -127,14 +111,14 @@ export async function deleteTournament(id: string): Promise<ActionState> {
     console.error('Delete Error:', error)
     return {
       success: false,
-      message: MESSAGES.DB_DELETE_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
     }
   }
 
   revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
   return {
     success: true,
-    message: MESSAGES.DELETE_SUCCESS,
+    message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
   }
 }
 
@@ -154,7 +138,7 @@ export async function updateTournament(
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
-      message: MESSAGES.VALIDATION_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.VALIDATION_ERROR,
     }
   }
 
@@ -184,7 +168,9 @@ export async function updateTournament(
       // 3. Check if any field to be deleted has associated data
       for (const field of fieldsToDelete) {
         if (field._count.playerData > 0) {
-          throw new Error(MESSAGES.FIELD_DATA_CONSTRAINT(field.label))
+          throw new Error(
+            ACTION_MESSAGES.TOURNAMENTS.FIELD_DATA_CONSTRAINT(field.label),
+          )
         }
       }
 
@@ -216,7 +202,9 @@ export async function updateTournament(
             f => f.id === field.id,
           )
           if (!belongsToTournament) {
-            throw new Error(MESSAGES.FIELD_SECURITY_ERROR(field.id))
+            throw new Error(
+              ACTION_MESSAGES.TOURNAMENTS.FIELD_SECURITY_ERROR(field.id),
+            )
           }
 
           // Update existing field
@@ -259,13 +247,13 @@ export async function updateTournament(
     }
     return {
       success: false,
-      message: MESSAGES.DB_UPDATE_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
     }
   }
 
   revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
-  revalidatePath(`/admin/tournaments/${id}`)
-  redirect('/admin/tournaments')
+  revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
+  redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
 }
 
 // Logic - Export
@@ -299,7 +287,7 @@ export async function exportTournamentData(
     if (!tournament) {
       return {
         success: false,
-        message: MESSAGES.NOT_FOUND,
+        message: ACTION_MESSAGES.TOURNAMENTS.NOT_FOUND,
       }
     }
 
@@ -337,7 +325,7 @@ export async function exportTournamentData(
     console.error('Export Error:', error)
     return {
       success: false,
-      message: MESSAGES.DATABASE_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
     }
   }
 }
@@ -361,14 +349,14 @@ export async function toggleTournamentVisibility(
     console.error('Visibility Update Error:', error)
     return {
       success: false,
-      message: MESSAGES.DB_UPDATE_ERROR,
+      message: ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
     }
   }
 
   revalidateTag(CACHE_TAGS.TOURNAMENTS, 'default')
-  revalidatePath('/admin/tournaments')
-  revalidatePath(`/admin/tournaments/${id}`)
-  revalidatePath('/tournaments')
+  revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
+  revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
+  revalidatePath(APP_ROUTES.TOURNAMENTS)
 
   return {
     success: true,

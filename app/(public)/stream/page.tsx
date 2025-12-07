@@ -8,7 +8,7 @@
 
 import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
-import { APP_CONFIG } from '@/lib/constants'
+import { BUSINESS_CONFIG } from '@/lib/config/business'
 import { getSiteSettings } from '@/lib/data/settings'
 
 // Constants
@@ -28,7 +28,7 @@ const extractTwitchChannel = (
   urlOrUsername: string | null | undefined,
 ): string => {
   if (!urlOrUsername) {
-    return APP_CONFIG.DEFAULT_TWITCH_CHANNEL
+    return BUSINESS_CONFIG.DEFAULT_TWITCH_CHANNEL
   }
 
   // Try to match standard Twitch URL patterns
@@ -44,7 +44,7 @@ const extractTwitchChannel = (
     return urlOrUsername
   }
 
-  return APP_CONFIG.DEFAULT_TWITCH_CHANNEL
+  return BUSINESS_CONFIG.DEFAULT_TWITCH_CHANNEL
 }
 
 export default async function StreamPage() {

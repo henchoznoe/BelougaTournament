@@ -6,16 +6,20 @@
  * License: MIT
  */
 
-export const APP_CONFIG = {
+export const APP_METADATA = {
   LOCALE: 'fr-FR',
   NAME: 'Belouga Tournament',
+  DESCRIPTION: 'La référence des tournois amateurs e-sport.',
+  TEMPLATE_TITLE: '%s | Belouga Tournament',
   DEFAULT_LOGO: '/assets/logo-blue.png',
   DEFAULT_BG_IMG: '/assets/wall.png',
-  DEFAULT_DISCORD: 'https://discord.gg/belouga',
-  DEFAULT_STREAM_URL: 'https://twitch.tv/quentadoulive',
-  DEFAULT_TWITCH_CHANNEL: 'quentadoulive',
   AUTHOR_URL: 'https://henchoznoe.ch',
   AUTHOR_NAME: 'Noé Henchoz',
+} as const
+
+export const EXTERNAL_LINKS = {
+  DISCORD: 'https://discord.gg/belouga',
+  TWITCH: 'https://twitch.tv/quentadoulive',
 } as const
 
 export const HOME_CONFIG = {
