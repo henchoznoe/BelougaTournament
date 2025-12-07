@@ -7,9 +7,9 @@
  */
 
 import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { twMerge } from 'tailwind-merge'
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs))

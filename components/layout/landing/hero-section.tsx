@@ -9,29 +9,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { HOME_CONFIG } from "@/lib/constants";
 import { motion, Variants } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 // Constants
-const ASSETS = {
-  BACKGROUND_IMAGE: "/assets/wall.png",
-} as const
-
 const ROUTES = {
   TOURNAMENTS: "/tournaments",
   STATS_ANCHOR: "#stats",
-} as const
-
-const HERO_CONTENT = {
-  BADGE: "🚀 La référence des tournois amateurs",
-  TITLE_MAIN: "BELOUGA",
-  TITLE_GRADIENT: "TOURNAMENT",
-  DESCRIPTION_BODY: "Plongez dans l'arène ultime. Rejoignez une communauté passionnée, prouvez votre valeur et gravez votre nom dans la légende.",
-  DESCRIPTION_HIGHLIGHT: "Votre gloire commence ici.",
-  CTA_PRIMARY: "Participer",
-  CTA_SECONDARY: "En savoir plus",
 } as const
 
 // Animation Variants
@@ -63,7 +50,7 @@ export const HeroSection = () => {
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Arena Background"
-          src={ASSETS.BACKGROUND_IMAGE}
+          src={HOME_CONFIG.HERO_DEFAULT_BG_IMG}
           fill
           priority
           className="object-cover opacity-50"
@@ -83,7 +70,7 @@ export const HeroSection = () => {
         {/* Badge */}
         <motion.div variants={itemVariants} className="flex justify-center">
           <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400 backdrop-blur-sm">
-            {HERO_CONTENT.BADGE}
+            {HOME_CONFIG.HERO_BLUE_BADGE}
           </span>
         </motion.div>
 
@@ -92,9 +79,9 @@ export const HeroSection = () => {
           variants={itemVariants}
           className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl"
         >
-          {HERO_CONTENT.TITLE_MAIN}{" "}
+          {HOME_CONFIG.HERO_TITLE}{" "}
           <span className="animate-gradient-x bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            {HERO_CONTENT.TITLE_GRADIENT}
+            {HOME_CONFIG.HERO_TITLE_GRADIENT}
           </span>
         </motion.h1>
 
@@ -103,10 +90,10 @@ export const HeroSection = () => {
           variants={itemVariants}
           className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl"
         >
-          {HERO_CONTENT.DESCRIPTION_BODY}
+          {HOME_CONFIG.HERO_DESCRIPTION}
           <br />
           <span className="text-blue-400">
-            {HERO_CONTENT.DESCRIPTION_HIGHLIGHT}
+            {HOME_CONFIG.HERO_DESCRIPTION_HIGHLIGHT}
           </span>
         </motion.p>
 
@@ -121,7 +108,7 @@ export const HeroSection = () => {
             className="h-14 bg-blue-600 px-8 text-lg font-bold shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)]"
           >
             <Link href={ROUTES.TOURNAMENTS}>
-              {HERO_CONTENT.CTA_PRIMARY}
+              {HOME_CONFIG.HERO_PRIMARY_CTA_TEXT}
               <ChevronRight className="ml-2 size-5" />
             </Link>
           </Button>
@@ -133,7 +120,7 @@ export const HeroSection = () => {
             className="h-14 border-zinc-700 bg-zinc-950/50 px-8 text-lg text-white backdrop-blur transition-all hover:border-blue-500/50 hover:bg-zinc-900 hover:text-blue-400"
           >
             <Link href={ROUTES.STATS_ANCHOR}>
-              {HERO_CONTENT.CTA_SECONDARY}
+              {HOME_CONFIG.HERO_SECONDARY_CTA_TEXT}
             </Link>
           </Button>
         </motion.div>

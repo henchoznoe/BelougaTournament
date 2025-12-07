@@ -8,8 +8,8 @@
 
 import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
-import { getSiteSettings } from '@/lib/data/settings'
 import { APP_CONFIG } from '@/lib/constants'
+import { getSiteSettings } from '@/lib/data/settings'
 
 // Constants
 const CONTENT = {

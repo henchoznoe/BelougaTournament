@@ -15,12 +15,12 @@ import { HeroSection } from '@/components/layout/landing/hero-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
 import { getSiteSettings } from '@/lib/data/settings'
+import { HOME_CONFIG } from '@/lib/constants'
 
 // Metadata
 export const metadata: Metadata = {
-  title: 'Accueil - La référence e-sport amateur',
-  description:
-    "Rejoignez la compétition ultime. Tournois, communauté et diffusion en direct pour les passionnés d'e-sport.",
+  title: HOME_CONFIG.META_TITLE,
+  description: HOME_CONFIG.META_DESCRIPTION,
 }
 
 export default async function LandingPage() {
@@ -38,7 +38,6 @@ export default async function LandingPage() {
       <HeroSection />
       <StatsSection stats={statsData} />
       <FeaturesSection />
-      {/* Suspense allows the hero to load immediately while fetching tournaments */}
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>

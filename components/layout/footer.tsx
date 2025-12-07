@@ -21,6 +21,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { getSiteSettings } from '@/lib/data/settings'
+import { APP_CONFIG } from '@/lib/constants'
 
 // Types
 interface SocialLink {
@@ -41,15 +42,6 @@ interface FooterSection {
 }
 
 // Constants
-const SITE_CONFIG = {
-  NAME: 'Belouga Tournament',
-  DEFAULT_LOGO: '/assets/logo-blue.png',
-  DEFAULT_DISCORD: 'https://discord.gg/belouga',
-  AUTHOR_URL: 'https://henchoznoe.ch',
-  AUTHOR_NAME: 'Noé Henchoz',
-} as const
-
-// Map specific brand colors for hover states to avoid magic strings in JSX
 const BRAND_COLORS = {
   DISCORD: 'hover:text-[#5865F2]',
   TWITCH: 'hover:text-[#9146FF]',
@@ -59,13 +51,13 @@ const BRAND_COLORS = {
 } as const
 
 const FooterLogo = ({ url }: { url: string | null }) => {
-  const src = url || SITE_CONFIG.DEFAULT_LOGO
+  const src = url || APP_CONFIG.DEFAULT_LOGO
 
   return (
     <div className="relative">
       <Image
         src={src}
-        alt={SITE_CONFIG.NAME}
+        alt={APP_CONFIG.NAME}
         width={120}
         height={120}
         className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
@@ -79,7 +71,6 @@ export async function Footer() {
   const settings = await getSiteSettings()
   const currentYear = new Date().getFullYear()
 
-  // Prepare Social Links (Filter out empty ones)
   const socialLinks: SocialLink[] = [
     {
       name: 'Discord',
@@ -129,8 +120,7 @@ export async function Footer() {
         { label: 'Stream', href: '/stream' },
         {
           label: 'Discord',
-          // Fallback to default discord if not set in DB settings
-          href: settings.socialDiscord || SITE_CONFIG.DEFAULT_DISCORD,
+          href: settings.socialDiscord || APP_CONFIG.DEFAULT_DISCORD,
         },
         { label: 'Équipes', href: '/teams' },
       ],
@@ -154,7 +144,7 @@ export async function Footer() {
           <Link href="/" className="group flex flex-col items-center gap-6">
             <FooterLogo url={settings.logoUrl} />
             <span className="font-paladins text-3xl tracking-widest text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-5xl">
-              {SITE_CONFIG.NAME}
+              {APP_CONFIG.NAME}
             </span>
           </Link>
         </div>
@@ -209,7 +199,7 @@ export async function Footer() {
         <div className="border-t border-zinc-800 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-zinc-500">
-              &copy; {currentYear} {SITE_CONFIG.NAME}. Tous droits réservés.
+              &copy; {currentYear} {APP_CONFIG.NAME}. Tous droits réservés.
             </p>
 
             <div className="flex items-center gap-6 text-sm text-zinc-500">
@@ -220,12 +210,12 @@ export async function Footer() {
                 Conditions d'utilisation
               </Link>
               <a
-                href={SITE_CONFIG.AUTHOR_URL}
+                href={APP_CONFIG.AUTHOR_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 transition-colors hover:text-blue-400"
               >
-                Développé par <span className="font-semibold text-zinc-300">{SITE_CONFIG.AUTHOR_NAME}</span>
+                Développé par <span className="font-semibold text-zinc-300">{APP_CONFIG.AUTHOR_NAME}</span>
               </a>
             </div>
           </div>

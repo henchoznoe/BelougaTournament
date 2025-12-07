@@ -11,6 +11,12 @@ import { TournamentForm } from '@/components/features/tournament/form/tournament
 import { updateTournament } from '@/lib/actions/tournaments'
 import prisma from '@/lib/db/prisma'
 
+// Constants
+const CONTENT = {
+  TITLE: 'Modifier',
+  SUBTITLE: 'Modifier le tournoi',
+}
+
 export const dynamic = 'force-dynamic'
 
 async function getTournament(id: string) {
@@ -54,12 +60,12 @@ export default async function EditTournamentPage({
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-bold text-3xl text-white">Edit Tournament</h1>
+        <h1 className="font-bold text-3xl text-white">{CONTENT.TITLE}</h1>
       </div>
       <TournamentForm
         initialData={initialData}
         onSubmit={updateAction}
-        submitLabel="Update Tournament"
+        submitLabel={CONTENT.SUBTITLE}
       />
     </div>
   )

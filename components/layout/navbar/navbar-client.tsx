@@ -17,6 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { APP_CONFIG } from "@/lib/constants";
 
 // Types
 interface NavbarClientProps {
@@ -32,11 +33,6 @@ interface NavLogoProps {
 }
 
 // Constants
-const SITE_CONFIG = {
-  NAME: 'Belouga Tournament',
-  DEFAULT_LOGO: '/assets/logo-blue.png',
-} as const
-
 const NAV_LINKS = [
   { href: '/', label: 'Accueil', icon: Home },
   { href: '/tournaments', label: 'Tournois', icon: Trophy },
@@ -45,13 +41,13 @@ const NAV_LINKS = [
 ] as const
 
 const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
-  const src = url || SITE_CONFIG.DEFAULT_LOGO
+  const src = url || APP_CONFIG.DEFAULT_LOGO
 
   return (
     <div className="relative">
       <Image
         src={src}
-        alt={SITE_CONFIG.NAME}
+        alt={APP_CONFIG.NAME}
         width={size}
         height={size}
         className={cn('h-auto w-auto transition-transform duration-300', className)}
@@ -89,7 +85,7 @@ export function NavbarClient({ settings }: NavbarClientProps) {
             />
           </div>
           <span className="whitespace-nowrap font-paladins text-md tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-2xl">
-            {SITE_CONFIG.NAME}
+            {APP_CONFIG.NAME}
           </span>
         </Link>
 
@@ -149,7 +145,7 @@ export function NavbarClient({ settings }: NavbarClientProps) {
                     <NavLogo url={settings.logoUrl} size={64} />
                   </div>
                   <SheetTitle className="font-paladins text-2xl tracking-wider text-white text-center">
-                    {SITE_CONFIG.NAME}
+                    {APP_CONFIG.NAME}
                   </SheetTitle>
                 </div>
               </SheetHeader>
