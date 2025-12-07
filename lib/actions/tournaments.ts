@@ -10,7 +10,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { z } from 'zod'
+
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
@@ -23,20 +23,14 @@ import {
 } from '@/lib/data/mutations/tournaments'
 import { getTournamentExportData } from '@/lib/data/queries/tournaments'
 import { getErrorMessage } from '@/lib/utils'
-import { tournamentSchema } from '@/lib/validations/tournament'
-import { Role, Visibility } from '@/prisma/generated/prisma/client'
-
-// Schemas
-const deleteSchema = z.string()
-const updateSchema = z.object({
-  id: z.string(),
-  data: tournamentSchema,
-})
-const exportSchema = z.string()
-const visibilitySchema = z.object({
-  id: z.string(),
-  visibility: z.nativeEnum(Visibility),
-})
+import {
+  deleteTournamentSchema,
+  exportTournamentSchema,
+  toggleVisibilitySchema,
+  tournamentSchema,
+  updateTournamentSchema,
+} from '@/lib/validations/tournament'
+import { Role } from '@/prisma/generated/prisma/client'
 
 // Logic - Create
 export const createTournament = authenticatedAction({
@@ -62,7 +56,7 @@ export const createTournament = authenticatedAction({
 
 // Logic - Delete
 export const deleteTournament = authenticatedAction({
-  schema: deleteSchema,
+  schema: deleteTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async id => {
     try {
@@ -87,7 +81,7 @@ export const deleteTournament = authenticatedAction({
 
 // Logic - Update
 export const updateTournament = authenticatedAction({
-  schema: updateSchema,
+  schema: updateTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async ({ id, data }) => {
     try {
@@ -110,7 +104,7 @@ export const updateTournament = authenticatedAction({
 
 // Logic - Export
 export const exportTournamentData = authenticatedAction({
-  schema: exportSchema,
+  schema: exportTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async tournamentId => {
     try {
@@ -139,7 +133,7 @@ export const exportTournamentData = authenticatedAction({
 
 // Logic - Visibility
 export const toggleTournamentVisibility = authenticatedAction({
-  schema: visibilitySchema,
+  schema: toggleVisibilitySchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async ({ id, visibility }) => {
     try {

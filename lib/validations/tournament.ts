@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { Visibility } from '@/prisma/generated/prisma/enums'
 
 export const tournamentSchema = z.object({
   description: z
@@ -36,6 +37,20 @@ export const tournamentSchema = z.object({
     .number()
     .min(1, "La taille de l'équipe doit être d'au moins 1"),
   title: z.string().min(3, 'Le titre doit contenir au moins 3 caractères'),
+})
+
+export const deleteTournamentSchema = z.string()
+
+export const updateTournamentSchema = z.object({
+  id: z.string(),
+  data: tournamentSchema,
+})
+
+export const exportTournamentSchema = z.string()
+
+export const toggleVisibilitySchema = z.object({
+  id: z.string(),
+  visibility: z.nativeEnum(Visibility),
 })
 
 export type TournamentSchema = z.infer<typeof tournamentSchema>
