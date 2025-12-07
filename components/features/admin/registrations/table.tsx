@@ -26,7 +26,7 @@ import {
     moveToWaitlist,
     rejectRegistration,
 } from '@/lib/actions/registrations'
-import { formatDate } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 import type { Registration } from '@/prisma/generated/prisma/client'
 
@@ -129,7 +129,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-zinc-300">
-                                    {formatDate(reg.createdAt, { dateStyle: 'short' })}
+                                    {formatDateTime(reg.createdAt)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>

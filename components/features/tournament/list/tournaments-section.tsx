@@ -8,6 +8,7 @@
 
 import prisma from "@/lib/db/prisma";
 import { TournamentsList } from "./tournaments-list";
+import { Visibility } from "@/prisma/generated/prisma/enums";
 
 // Constants
 const SECTION_CONFIG = {
@@ -19,7 +20,7 @@ const fetchUpcomingTournaments = async () => {
     orderBy: { startDate: "asc" },
     take: SECTION_CONFIG.MAX_ITEMS,
     where: {
-      visibility: 'PUBLIC',
+      visibility: Visibility.PUBLIC,
       startDate: { gte: new Date() },
     },
   });

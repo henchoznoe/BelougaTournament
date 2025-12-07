@@ -118,8 +118,8 @@ export async function Footer() {
     {
       title: 'Tournois',
       links: [
-        { label: 'Tous les tournois', href: '/tournaments' },
-        { label: 'Résultats', href: '/tournaments/archive' },
+        { label: 'Prochains', href: '/tournaments' },
+        { label: 'Archives', href: '/tournaments/archive' },
         { label: 'Règlement', href: '/rules' },
       ],
     },

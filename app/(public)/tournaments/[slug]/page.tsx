@@ -23,15 +23,10 @@ import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
-import { formatDate } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 
 // Constants
 const CONFIG = {
-  DATE_OPTIONS: {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  } as const,
   CHALLONGE_URL: 'https://challonge.com',
 } as const
 
@@ -119,8 +114,9 @@ export default async function TournamentPage({
   }
 
   const now = new Date()
-  const isRegistrationOpen =
-    now >= tournament.registrationOpen && now <= tournament.registrationClose
+  const registrationOpen = new Date(tournament.registrationOpen)
+  const registrationClose = new Date(tournament.registrationClose)
+  const isRegistrationOpen = now >= registrationOpen && now <= registrationClose
 
   return (
     <div className="relative min-h-screen pb-24">
@@ -170,7 +166,7 @@ export default async function TournamentPage({
             <div className="flex items-center gap-2">
               <Calendar className="size-5 text-blue-500" />
               <span className="font-medium text-zinc-300">
-                {formatDate(tournament.startDate, CONFIG.DATE_OPTIONS)}
+                {formatDateTime(tournament.startDate)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -295,7 +291,7 @@ export default async function TournamentPage({
                     <div className="rounded-lg bg-blue-500/10 p-4 border border-blue-500/20">
                       <p className="text-sm text-blue-200 text-center">
                         {CONTENT.REGISTRATION.CLOSES_ON(
-                          formatDate(tournament.registrationClose),
+                          formatDateTime(tournament.registrationClose),
                         )}
                       </p>
                     </div>
@@ -311,9 +307,9 @@ export default async function TournamentPage({
                       {CONTENT.REGISTRATION.CLOSED_TITLE}
                     </p>
                     <p className="text-sm text-zinc-400">
-                      {now < tournament.registrationOpen
+                      {now < registrationOpen
                         ? CONTENT.REGISTRATION.OPENS_ON(
-                            formatDate(tournament.registrationOpen),
+                            formatDateTime(tournament.registrationOpen),
                           )
                         : CONTENT.REGISTRATION.ENDED}
                     </p>

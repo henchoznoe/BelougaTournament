@@ -20,7 +20,7 @@ import {
 import { motion, Variants } from "framer-motion";
 import { Calendar, ChevronLeft, Gamepad2, Users } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 
 // Types
 export interface Tournament {
@@ -87,7 +87,7 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
             <Calendar className="size-4 text-blue-500" />
           </div>
           <span className="font-medium capitalize">
-            {formatDate(tournament.startDate)}
+            {formatDateTime(tournament.startDate)}
           </span>
         </div>
 

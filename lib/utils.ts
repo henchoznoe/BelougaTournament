@@ -2,32 +2,23 @@
  * File: lib/utils.ts
  * Description: Utility functions for class name merging and date formatting.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { LOCALE } from '@/lib/constants'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs))
 }
 
-/**
- * Formats a date to a localized string.
- * @param date - The date to format (Date object or string/number compatible with Date constructor).
- * @param options - Intl.DateTimeFormatOptions to customize the output.
- * @returns The formatted date string.
- */
-export function formatDate(
-  date: Date | string | number,
-  options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  },
-) {
-  const d = new Date(date)
-  return d.toLocaleDateString(LOCALE, options)
+export function formatDate(date: Date | string | number) {
+  return format(new Date(date), 'PPP', { locale: fr })
+}
+
+export function formatDateTime(date: Date | string | number) {
+  return format(new Date(date), "PPP 'à' p", { locale: fr })
 }

@@ -27,16 +27,9 @@ import {
 } from '@/components/ui/card'
 import { getPublicTournaments } from '@/lib/data/tournaments'
 
-import { formatDate } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 
 // Constants
-const CONFIG = {
-  DATE_OPTIONS: {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  } as const,
-} as const
 
 const CONTENT = {
   TITLE: 'Prochains Tournois',
@@ -133,7 +126,7 @@ export default async function TournamentsPage() {
                         <Calendar className="size-4 text-blue-500" />
                       </div>
                       <span className="font-medium">
-                        {formatDate(tournament.startDate, CONFIG.DATE_OPTIONS)}
+                        {formatDateTime(tournament.startDate)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">

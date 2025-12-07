@@ -87,6 +87,7 @@ export async function registerForTournament(
   formData: FormData,
 ): Promise<RegistrationState> {
   const rawData = parseFormData(formData)
+  console.log('[Registration] Raw Data:', JSON.stringify(rawData, null, 2))
 
   // Ensure players structure is correct for Zod
   if (rawData.players && Array.isArray(rawData.players)) {
@@ -106,6 +107,7 @@ export async function registerForTournament(
       message: 'Veuillez corriger les erreurs dans le formulaire.',
     }
   }
+  console.log('[Registration] Validation passed')
 
   const { tournamentId, teamName, contactEmail, players } = validation.data
 

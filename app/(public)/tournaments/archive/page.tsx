@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import prisma from '@/lib/db/prisma'
-import { formatDate } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 
 // Types
 interface ArchivedTournament {
@@ -85,7 +85,9 @@ const ArchivedTournamentCard = ({
         {/* Date */}
         <div className="flex items-center gap-2">
           <Calendar className="size-4 text-zinc-500" />
-          <span className="capitalize">{formatDate(tournament.startDate)}</span>
+          <span className="capitalize">
+            {formatDateTime(tournament.startDate)}
+          </span>
         </div>
 
         {/* Format */}

@@ -55,7 +55,6 @@ const CONSTANTS = {
     PLAYER_DETAILS: "Détails du joueur",
     ADD_PLAYER: "Ajouter un joueur",
     PLAYER: "Joueur",
-    CAPTAIN: "Capitaine",
     NICKNAME: "Pseudo",
     SUBMIT: "Confirmer l'inscription",
     SUBMITTING: "Inscription en cours...",
@@ -64,7 +63,7 @@ const CONSTANTS = {
   },
   PLACEHOLDERS: {
     TEAM_NAME: "Ex: Les Champions",
-    EMAIL: "capitaine@exemple.com",
+    EMAIL: "email@exemple.com",
     NICKNAME: "Pseudo en jeu",
     SELECT: "Sélectionner...",
   },
@@ -159,6 +158,8 @@ export const RegistrationForm = ({ tournament }: RegistrationFormProps) => {
             </div>
         )}
 
+        <input type="hidden" name="tournamentId" value={tournament.id} />
+
         <TeamInfoCard
           control={form.control}
           tournamentFormat={tournament.format}
@@ -208,7 +209,7 @@ const TeamInfoCard = ({ control, tournamentFormat, serverErrors }: TeamInfoCardP
             {isTeam ? CONSTANTS.LABELS.TEAM_INFO_TITLE : CONSTANTS.LABELS.PLAYER_INFO_TITLE}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-6">
         {isTeam && (
           <FormField
             control={control}
@@ -356,11 +357,6 @@ const PlayerCard = ({ index, control, onRemove, tournamentFields, isTeam }: Play
                         {index + 1}
                     </div>
                     {CONSTANTS.LABELS.PLAYER} {index + 1}
-                    {index === 0 && (
-                        <span className="ml-2 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-300 ring-1 ring-blue-500/30">
-                            {CONSTANTS.LABELS.CAPTAIN}
-                        </span>
-                    )}
                 </CardTitle>
                 {isTeam && index > 0 && (
                     <Button
