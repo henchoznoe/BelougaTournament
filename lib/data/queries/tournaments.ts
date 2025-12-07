@@ -1,16 +1,28 @@
 /**
  * File: lib/data/queries/tournaments.ts
  * Description: Database queries for tournament data retrieval.
+ * Author: Noé Henchoz
+ * Date: 2025-12-07
+ * License: MIT
  */
+
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import prisma from '@/lib/db/prisma'
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 /**
  * Retrieves and formats tournament registration data for export.
  * Returns a flattened array of objects or null if the tournament is not found.
  */
-export async function getTournamentExportData(
+export const getTournamentExportData = async (
   tournamentId: string,
-): Promise<Record<string, string>[] | null> {
+): Promise<Record<string, string>[] | null> => {
   const tournament = await prisma.tournament.findUnique({
     where: { id: tournamentId },
     include: {
@@ -35,7 +47,6 @@ export async function getTournamentExportData(
 
   const fields = tournament.fields
 
-  // Flatten data
   const flattenedData = tournament.registrations.flatMap(reg => {
     return reg.players.map(player => {
       const row: Record<string, string> = {
@@ -47,7 +58,6 @@ export async function getTournamentExportData(
         'Player Nickname': player.nickname,
       }
 
-      // Add dynamic fields
       for (const field of fields) {
         const playerData = player.data.find(
           d => d.tournamentFieldId === field.id,

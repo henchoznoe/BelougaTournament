@@ -8,13 +8,21 @@
 
 'use client'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
 import { Button } from '@/components/ui/button'
 import { createTournament } from '@/lib/actions/tournaments'
 
-export default function CreateTournamentPage() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const CreateTournamentPage = () => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center gap-4">
@@ -47,3 +55,5 @@ export default function CreateTournamentPage() {
     </div>
   )
 }
+
+export default CreateTournamentPage

@@ -1,14 +1,21 @@
 /**
- * File: components/public/landing/tournaments-list.tsx
+ * File: components/features/tournament/list/tournaments-list.tsx
  * Description: Tournaments list section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-07
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import Link from "next/link"
+import { motion, type Variants } from "framer-motion"
+import { Calendar, ChevronLeft, Gamepad2, Users } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -16,13 +23,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { motion, Variants } from "framer-motion";
-import { Calendar, ChevronLeft, Gamepad2, Users } from "lucide-react";
-import Link from "next/link";
-import { formatDate, formatDateTime } from '@/lib/utils'
+} from "@/components/ui/card"
+import { formatDateTime } from '@/lib/utils'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 export interface Tournament {
   id: string
   title: string
@@ -37,7 +44,10 @@ interface TournamentsListProps {
   tournaments: Tournament[]
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   SECTION_TITLE: "Tournois à venir",
   VIEW_ALL: "Tout voir",
@@ -52,7 +62,9 @@ const ROUTES = {
   DETAILS: "/tournaments/",
 } as const
 
-
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const getParticipantLabel = (count: number | null, format: string): string => {
   if (!count) return CONTENT.LABEL_OPEN
@@ -81,7 +93,6 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
       </CardHeader>
 
       <CardContent className="space-y-4 text-sm text-zinc-300">
-        {/* Date Row */}
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-zinc-800">
             <Calendar className="size-4 text-blue-500" />
@@ -91,7 +102,6 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
           </span>
         </div>
 
-        {/* Participants Row */}
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-zinc-800">
             <Users className="size-4 text-green-500" />
@@ -138,7 +148,6 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
 
   return (
     <section className="container mx-auto px-4" id="tournaments">
-      {/* Header Section */}
       <div className="mb-12 flex items-end justify-between">
         <div>
           <motion.h2
@@ -169,7 +178,6 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
         </Button>
       </div>
 
-      {/* Grid Section */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {tournaments.length > 0 ? (
           tournaments.map((tournament, index) => (
@@ -189,5 +197,5 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
         )}
       </div>
     </section>
-  );
+  )
 }

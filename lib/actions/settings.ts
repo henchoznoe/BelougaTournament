@@ -8,12 +8,19 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
+import { ACTION_MESSAGES } from '@/lib/config/messages'
 import prisma from '@/lib/db/prisma'
-
-// Types
 import { settingsSchema } from '@/lib/validations/settings'
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
 
 export type SettingsState = {
   message: string
@@ -21,7 +28,9 @@ export type SettingsState = {
   success?: boolean
 }
 
-import { ACTION_MESSAGES } from '@/lib/config/messages'
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
 const DB_CONFIG = {
   SINGLETON_ID: 1,
@@ -35,6 +44,10 @@ const FORM_KEYS = {
   LOGO_FILE: 'logo',
   LOGO_URL: 'logoUrl',
 } as const
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const uploadLogoIfNeeded = async (
   formData: FormData,

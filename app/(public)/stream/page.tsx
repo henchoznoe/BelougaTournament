@@ -6,23 +6,33 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { BUSINESS_CONFIG } from '@/lib/config/business'
 import { getSiteSettings } from '@/lib/data/settings'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: 'Stream Twitch',
   DESCRIPTION:
     "Regardez la compétition en direct sur Twitch, n'oubliez pas de vous abonner à la chaîne pour être informé des prochains tournois.",
 } as const
 
-// Metadata
 export const metadata: Metadata = {
   title: 'Stream En Direct',
   description: 'Suivez les tournois Belouga en direct sur Twitch.',
 }
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const extractTwitchChannel = (
   urlOrUsername: string | null | undefined,
@@ -32,7 +42,6 @@ const extractTwitchChannel = (
   }
 
   // Try to match standard Twitch URL patterns
-  // Regex looks for "twitch.tv/" followed by the username (alphanumeric + underscores)
   const match = urlOrUsername.match(/twitch\.tv\/([a-zA-Z0-9_]+)/)
 
   if (match?.[1]) {
@@ -47,13 +56,16 @@ const extractTwitchChannel = (
   return BUSINESS_CONFIG.DEFAULT_TWITCH_CHANNEL
 }
 
-export default async function StreamPage() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const StreamPage = async () => {
   const settings = await getSiteSettings()
   const channel = extractTwitchChannel(settings.socialTwitch)
 
   return (
     <div className="container mx-auto flex min-h-[80vh] flex-col px-4 py-8">
-      {/* Header */}
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-white">
           {CONTENT.TITLE}
@@ -61,10 +73,11 @@ export default async function StreamPage() {
         <p className="mt-2 text-zinc-400">{CONTENT.DESCRIPTION}</p>
       </div>
 
-      {/* Video Player */}
       <div className="mx-auto w-full max-w-6xl flex-1">
         <TwitchEmbed channel={channel} />
       </div>
     </div>
   )
 }
+
+export default StreamPage

@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import {
   Calendar,
   ChevronRight,
@@ -25,7 +29,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDateTime } from '@/lib/utils'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONFIG = {
   CHALLONGE_URL: 'https://challonge.com',
 } as const
@@ -81,6 +88,10 @@ const CONTENT = {
   },
 } as const
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 export const generateMetadata = async ({
   params,
 }: {
@@ -101,11 +112,15 @@ export const generateMetadata = async ({
   }
 }
 
-export default async function TournamentPage({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const TournamentPage = async ({
   params,
 }: {
   params: Promise<{ slug: string }>
-}) {
+}) => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
 
@@ -341,3 +356,5 @@ export default async function TournamentPage({
     </div>
   )
 }
+
+export default TournamentPage

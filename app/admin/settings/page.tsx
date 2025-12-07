@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Lock } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -14,7 +18,10 @@ import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 import { SettingsForm } from './settings-form'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const DB_CONFIG = {
   SINGLETON_ID: 1,
 } as const
@@ -32,6 +39,10 @@ const ROUTES = {
   DASHBOARD: '/admin',
 } as const
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const fetchSiteSettings = async () => {
   return prisma.siteSettings.upsert({
     where: { id: DB_CONFIG.SINGLETON_ID },
@@ -39,6 +50,10 @@ const fetchSiteSettings = async () => {
     create: { id: DB_CONFIG.SINGLETON_ID },
   })
 }
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const AccessDeniedState = () => {
   return (
@@ -61,7 +76,7 @@ const AccessDeniedState = () => {
   )
 }
 
-export default async function SettingsPage() {
+const SettingsPage = async () => {
   // 1. Auth & Permission Check
   const session = await getSession()
   const isSuperAdmin = session?.user?.role === Role.SUPERADMIN
@@ -87,3 +102,5 @@ export default async function SettingsPage() {
     </div>
   )
 }
+
+export default SettingsPage

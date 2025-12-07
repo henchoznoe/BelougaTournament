@@ -6,26 +6,32 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import Script from "next/script";
-import { useEffect, useRef, useState, useId } from "react";
-import { Loader2, ScreenShareOff } from "lucide-react";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Types
+import { Loader2, ScreenShareOff } from "lucide-react"
+import Script from "next/script"
+import { useEffect, useId, useRef, useState } from "react"
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface TwitchEmbedProps {
   channel: string
   width?: string | number
   height?: string | number
 }
 
-// Extend the global Window interface for Twitch SDK
 declare global {
   interface Window {
     Twitch: {
       Embed: new (
         id: string,
-        options: TwitchEmbedOptions
+        options: TwitchEmbedOptions,
       ) => TwitchPlayer
     }
   }
@@ -36,7 +42,7 @@ interface TwitchEmbedOptions {
   height: string | number
   channel: string
   parent: string[]
-  layout?: 'video' | 'video-with-chat'
+  layout?: "video" | "video-with-chat"
   autoplay?: boolean
   muted?: boolean
   allowfullscreen?: boolean
@@ -52,63 +58,76 @@ interface TwitchPlayer {
   setVolume: (volume: number) => void
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const TWITCH_CONFIG = {
-  SCRIPT_URL: 'https://embed.twitch.tv/embed/v1.js',
-  DEFAULT_WIDTH: '100%',
+  SCRIPT_URL: "https://embed.twitch.tv/embed/v1.js",
+  DEFAULT_WIDTH: "100%",
   DEFAULT_HEIGHT: 600,
   EVENTS: {
-    ONLINE: 'online',
-    OFFLINE: 'offline',
-    READY: 'VIDEO_READY',
+    ONLINE: "online",
+    OFFLINE: "offline",
+    READY: "VIDEO_READY",
   },
 } as const
 
+const CONTENT = {
+  LOADING: "Chargement du stream...",
+  OFFLINE_TITLE: "Le stream est actuellement offline",
+  OFFLINE_DESC_PREFIX: "",
+  OFFLINE_DESC_SUFFIX:
+    " ne stream pas actuellement. Revenez plus tard ou suivez sa chaîne sur Twitch.",
+} as const
+
+// ----------------------------------------------------------------------
+// HELPER FUNCTIONS
+// ----------------------------------------------------------------------
+
 const getParentDomains = (): string[] => {
-  if (typeof window === 'undefined') return []
+  if (typeof window === "undefined") return []
 
   const hostname = window.location.hostname
   const parents = [hostname]
 
-  if (hostname === 'localhost') {
-    parents.push('127.0.0.1')
+  if (hostname === "localhost") {
+    parents.push("127.0.0.1")
   }
 
   return parents
 }
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 export const TwitchEmbed = ({
   channel,
   width = TWITCH_CONFIG.DEFAULT_WIDTH,
   height = TWITCH_CONFIG.DEFAULT_HEIGHT,
 }: TwitchEmbedProps) => {
-  // State
   const [isStreamOnline, setIsStreamOnline] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false)
 
-  // Refs
   const playerRef = useRef<TwitchPlayer | null>(null)
 
-  // ID Generation (Sanitized for DOM usage)
   const uniqueId = useId()
-  const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, '')}`
+  const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, "")}`
 
-  // Check for pre-loaded script (e.g., client-side navigation)
   useEffect(() => {
     if (window.Twitch?.Embed) {
       setIsScriptLoaded(true)
     }
   }, [])
 
-  // Initialize Player
   useEffect(() => {
     if (!isScriptLoaded) return
 
     const container = document.getElementById(embedId)
-    // Safety check: Clear container to prevent duplicate iframes in React Strict Mode
     if (container) {
-      container.innerHTML = ''
+      container.innerHTML = ""
     }
 
     try {
@@ -117,15 +136,14 @@ export const TwitchEmbed = ({
         height,
         channel,
         parent: getParentDomains(),
-        layout: 'video',
+        layout: "video",
         autoplay: true,
-        muted: true, // Auto-play policies usually require muting first
+        muted: true,
         allowfullscreen: true,
       })
 
       playerRef.current = embed
 
-      // Event Handlers
       const handleOnline = () => {
         setIsStreamOnline(true)
         setIsLoading(false)
@@ -137,36 +155,40 @@ export const TwitchEmbed = ({
       }
 
       const handleReady = () => {
-        // Ensure player starts when ready
         if (playerRef.current) {
           playerRef.current.setMuted(true)
           playerRef.current.play()
         }
       }
 
-      // Bind Events
       embed.addEventListener(TWITCH_CONFIG.EVENTS.ONLINE, handleOnline)
       embed.addEventListener(TWITCH_CONFIG.EVENTS.OFFLINE, handleOffline)
       embed.addEventListener(TWITCH_CONFIG.EVENTS.READY, handleReady)
 
-      // Cleanup
       return () => {
         if (playerRef.current) {
-            // Note: Twitch API doesn't always cleanly remove listeners, but good practice
-            try {
-                // @ts-ignore - Some Twitch types are loose on removeEventListener
-                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.ONLINE, handleOnline)
-                // @ts-ignore
-                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.OFFLINE, handleOffline)
-                // @ts-ignore
-                playerRef.current.removeEventListener(TWITCH_CONFIG.EVENTS.READY, handleReady)
-            } catch (e) {
-                // Ignore cleanup errors on unmount
-            }
+          try {
+            // @ts-ignore - Some Twitch types are loose on removeEventListener
+            playerRef.current.removeEventListener(
+              TWITCH_CONFIG.EVENTS.ONLINE,
+              handleOnline,
+            )
+            // @ts-ignore
+            playerRef.current.removeEventListener(
+              TWITCH_CONFIG.EVENTS.OFFLINE,
+              handleOffline,
+            )
+            // @ts-ignore
+            playerRef.current.removeEventListener(
+              TWITCH_CONFIG.EVENTS.READY,
+              handleReady,
+            )
+          } catch (_e) {
+            // Ignore cleanup errors on unmount
+          }
         }
       }
-    } catch (error) {
-      console.error('Failed to initialize Twitch Embed:', error)
+    } catch (_error) {
       setIsLoading(false)
     }
   }, [isScriptLoaded, channel, width, height, embedId])
@@ -182,31 +204,26 @@ export const TwitchEmbed = ({
         strategy="afterInteractive"
       />
 
-      <div
-        id={embedId}
-        className="absolute inset-0 z-0 h-full w-full"
-      />
+      <div id={embedId} className="absolute inset-0 z-0 h-full w-full" />
 
-      {/* Loading Overlay */}
       {isLoading && (
         <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
           <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
-          <p className="text-zinc-400">Chargement du stream...</p>
+          <p className="text-zinc-400">{CONTENT.LOADING}</p>
         </div>
       )}
 
-      {/* Offline Overlay */}
       {!isLoading && !isStreamOnline && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-zinc-950 p-12 text-center">
           <div className="mb-4 rounded-full bg-zinc-900 p-6 ring-1 ring-zinc-800">
             <ScreenShareOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="mb-2 text-xl font-semibold text-white">
-            Le stream est actuellement offline
+            {CONTENT.OFFLINE_TITLE}
           </h3>
           <p className="max-w-md text-zinc-400">
-            {channel} ne stream pas actuellement. Revenez plus tard ou suivez sa
-            chaîne sur Twitch.
+            {channel}
+            {CONTENT.OFFLINE_DESC_SUFFIX}
           </p>
         </div>
       )}

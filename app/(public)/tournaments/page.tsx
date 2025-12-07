@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Archive, Gamepad2, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,7 +18,9 @@ import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
 const CONTENT = {
   TITLE: 'Prochains Tournois',
@@ -27,7 +33,11 @@ const CONTENT = {
   },
 } as const
 
-export default async function TournamentsPage() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const TournamentsPage = async () => {
   const tournaments = await getPublicTournaments()
 
   return (
@@ -100,3 +110,5 @@ export default async function TournamentsPage() {
     </div>
   )
 }
+
+export default TournamentsPage

@@ -6,11 +6,17 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose'
 import { env } from '@/lib/env'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
 
 export interface SessionPayload extends JWTPayload {
   user: {
@@ -20,18 +26,23 @@ export interface SessionPayload extends JWTPayload {
   }
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const JWT_CONFIG = {
   ALG: 'HS256',
   EXPIRATION: '24h',
 } as const
 
-// Get encoded key from environment variable
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const getEncodedKey = (): Uint8Array => {
   return new TextEncoder().encode(env.JWT_SECRET_KEY)
 }
 
-// Encrypt token
 export const encrypt = async (payload: SessionPayload): Promise<string> => {
   const key = getEncodedKey()
 
@@ -42,8 +53,7 @@ export const encrypt = async (payload: SessionPayload): Promise<string> => {
     .sign(key)
 }
 
-// Decrypt token
-export async function decrypt(input: string): Promise<SessionPayload> {
+export const decrypt = async (input: string): Promise<SessionPayload> => {
   const key = getEncodedKey()
 
   const { payload } = await jwtVerify(input, key, {

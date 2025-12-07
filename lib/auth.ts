@@ -6,16 +6,25 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { decrypt } from '@/lib/auth-core'
+import { ACTION_MESSAGES } from '@/lib/config/messages'
 import prisma from '@/lib/db/prisma'
+import type { ActionState } from '@/lib/types/actions'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 export * from '@/lib/auth-core'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const COOKIE_KEYS = {
   SESSION: 'session',
 } as const
@@ -25,7 +34,10 @@ const CACHE_CONFIG = {
   REVALIDATE_SECONDS: 60,
 } as const
 
-// Cached user fetcher to prevent database hammering
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const getCachedUser = cache(async (userId: string) => {
   const fetchUser = async () => {
     return prisma.user.findUnique({
@@ -44,8 +56,7 @@ const getCachedUser = cache(async (userId: string) => {
   )()
 })
 
-// Get session from cookie
-export async function getSession() {
+export const getSession = async () => {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get(COOKIE_KEYS.SESSION)?.value
 
@@ -72,11 +83,7 @@ export async function getSession() {
   }
 }
 
-import { ACTION_MESSAGES } from '@/lib/config/messages'
-import type { ActionState } from '@/lib/types/actions'
-
-// Get admin session from cookie and determine if it is an admin or superadmin
-export async function getAdminSession() {
+export const getAdminSession = async () => {
   const session = await getSession()
 
   if (!session) return null
@@ -93,7 +100,7 @@ export async function getAdminSession() {
  * Validates that the current request is from an authenticated Admin or SuperAdmin.
  * Returns an error ActionState if invalid, or null if valid.
  */
-export async function validateRequestIsAdmin(): Promise<ActionState | null> {
+export const validateRequestIsAdmin = async (): Promise<ActionState | null> => {
   const session = await getSession()
 
   if (

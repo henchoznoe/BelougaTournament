@@ -6,9 +6,17 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function AdminLoading() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const AdminLoading = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -25,3 +33,5 @@ export default function AdminLoading() {
     </div>
   )
 }
+
+export default AdminLoading

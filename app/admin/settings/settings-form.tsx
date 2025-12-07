@@ -8,6 +8,10 @@
 
 'use client'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Save, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { useActionState, useEffect, useState } from 'react'
@@ -25,7 +29,10 @@ import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface SettingsFormProps {
   settings: SiteSettings
 }
@@ -42,7 +49,10 @@ interface FieldConfig {
   placeholder: string
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const INITIAL_STATE: SettingsState = {
   message: '',
   errors: {},
@@ -101,6 +111,10 @@ const STATS_CONFIG: FieldConfig[] = [
   { key: 'statsMatches', label: 'Matchs Joués', placeholder: 'ex: 1.2k+' },
 ]
 
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
 const SettingsInput = ({
   field,
   defaultValue,
@@ -124,7 +138,7 @@ const SettingsInput = ({
   )
 }
 
-export function SettingsForm({ settings }: SettingsFormProps) {
+export const SettingsForm = ({ settings }: SettingsFormProps) => {
   const [state, formAction, isPending] = useActionState(
     updateSettings,
     INITIAL_STATE,

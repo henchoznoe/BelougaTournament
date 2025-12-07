@@ -1,12 +1,17 @@
 /**
  * File: app/not-found.tsx
- * Description: Tournament schema for validation.
+ * Description: 404 Not Found page.
  * Author: Noé Henchoz
  * Date: 2025-12-07
  * License: MIT
  */
 
-// TODO: Update not found page
-export default function NotFound() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const NotFound = () => {
   return <div>404 - Page Not Found</div>
 }
+
+export default NotFound

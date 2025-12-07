@@ -1,5 +1,5 @@
 /**
- * File: components/admin/admins-manager.tsx
+ * File: components/features/admin/users/admins-manager.tsx
  * Description: Client component for managing admin users with premium styling and French localization.
  * Author: Noé Henchoz
  * Date: 2025-12-07
@@ -8,46 +8,53 @@
 
 'use client'
 
-import {
-	KeyRound,
-	Loader2,
-	MoreHorizontal,
-	Shield,
-	ShieldAlert,
-	Trash2,
-	UserPlus,
-} from 'lucide-react'
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { useActionState, useEffect, useState } from 'react'
+import {
+  KeyRound,
+  Loader2,
+  MoreHorizontal,
+  Shield,
+  ShieldAlert,
+  Trash2,
+  UserPlus,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-	createAdmin,
-	deleteAdmin,
-	resetAdminPassword,
+  createAdmin,
+  deleteAdmin,
+  resetAdminPassword,
 } from '@/lib/actions/admins'
 import { cn, formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface AdminUser {
   id: string
   email: string
@@ -67,7 +74,10 @@ interface ActionState {
   errors?: Record<string, string[]>
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const INITIAL_STATE: ActionState = {
   success: false,
   message: '',
@@ -77,8 +87,6 @@ const INITIAL_STATE: ActionState = {
 const CONTENT = {
   TITLE_PAGE: 'Liste des Administrateurs',
   SUBTITLE_PAGE: 'Gérez les accès et les rôles de la plateforme.',
-
-  // Create Dialog
   BTN_ADD: 'Ajouter un administrateur',
   TITLE_CREATE: 'Nouvel Administrateur',
   DESC_CREATE: 'Créez un nouveau compte administrateur. Ils auront accès au tableau de bord.',
@@ -88,16 +96,12 @@ const CONTENT = {
   PLACEHOLDER_PASSWORD: '******',
   BTN_CREATE: 'Créer le compte',
   BTN_CREATING: 'Création...',
-
-  // Reset Dialog
   TITLE_RESET: 'Réinitialiser le mot de passe',
   DESC_RESET: (email: string) => `Entrez un nouveau mot de passe pour ${email}.`,
   LABEL_NEW_PASS: 'Nouveau mot de passe',
   BTN_CANCEL: 'Annuler',
   BTN_CONFIRM: 'Confirmer',
   BTN_MODIFYING: 'Modification...',
-
-  // List & Actions
   COL_EMAIL: 'Email',
   COL_ROLE: 'Rôle',
   COL_DATE: 'Date de création',
@@ -105,12 +109,14 @@ const CONTENT = {
   ACTION_RESET: 'Réinitialiser MDP',
   ACTION_DELETE: 'Supprimer',
   CONFIRM_DELETE: 'Êtes-vous sûr de vouloir supprimer cet administrateur ?',
-
-  // Toasts
   TOAST_RESET_SUCCESS: (email: string) => `Mot de passe modifié pour ${email}`,
   TOAST_RESET_ERROR: 'Erreur lors de la modification du mot de passe',
   TOAST_DELETE_SUCCESS: 'Administrateur supprimé',
 } as const
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const ListHeader = () => {
   return (
@@ -139,7 +145,6 @@ const AdminRow = ({
 
   return (
     <div className="group grid grid-cols-12 items-center p-4 transition-colors hover:bg-white/5">
-      {/* Email + Avatar */}
       <div className="col-span-5 flex items-center gap-3 pl-2">
         <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800 font-bold text-zinc-400">
           {user.email.charAt(0).toUpperCase()}
@@ -149,7 +154,6 @@ const AdminRow = ({
         </span>
       </div>
 
-      {/* Role Badge */}
       <div className="col-span-3">
         <span
           className={cn(
@@ -164,12 +168,10 @@ const AdminRow = ({
         </span>
       </div>
 
-      {/* Date */}
       <div className="col-span-3 text-sm text-zinc-400">
         {formatDate(user.createdAt)}
       </div>
 
-      {/* Actions Menu */}
       <div className="col-span-1 pr-2 text-right">
         {canEdit && (
           <DropdownMenu>
@@ -210,15 +212,12 @@ const AdminRow = ({
   )
 }
 
-export function AdminsManager({
+export const AdminsManager = ({
   users,
   currentUserRole,
-}: AdminsManagerProps) {
-  // State for Create Action
+}: AdminsManagerProps) => {
   const [createState, createAction, isCreating] = useActionState(createAdmin, INITIAL_STATE)
   const [createAdminOpen, setCreateAdminOpen] = useState(false)
-
-  // State for Reset Action
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [newPassword, setNewPassword] = useState('')
@@ -226,15 +225,12 @@ export function AdminsManager({
 
   const isSuperAdmin = currentUserRole === Role.SUPERADMIN
 
-  // Effect to close dialog on successful creation
   useEffect(() => {
     if (createState.success) {
       setCreateAdminOpen(false)
       toast.success(createState.message)
     }
   }, [createState])
-
-  // --- Handlers ---
 
   const handleOpenReset = (user: AdminUser) => {
     setSelectedUser(user)
@@ -256,8 +252,7 @@ export function AdminsManager({
       } else {
         toast.error(result.message)
       }
-    } catch (error) {
-      console.error(error)
+    } catch (_error) {
       toast.error(CONTENT.TOAST_RESET_ERROR)
     } finally {
       setIsResetting(false)
@@ -277,7 +272,6 @@ export function AdminsManager({
 
   return (
     <div className="space-y-6">
-      {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">{CONTENT.TITLE_PAGE}</h2>
@@ -353,7 +347,6 @@ export function AdminsManager({
         )}
       </div>
 
-      {/* Users List */}
       <div className="overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
         <ListHeader />
         <div className="divide-y divide-white/5">
@@ -369,7 +362,6 @@ export function AdminsManager({
         </div>
       </div>
 
-      {/* Reset Password Modal */}
       <Dialog open={resetPasswordOpen} onOpenChange={setResetPasswordOpen}>
         <DialogContent className="border-white/10 bg-zinc-950 text-zinc-50">
           <DialogHeader>

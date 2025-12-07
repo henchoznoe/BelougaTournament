@@ -6,24 +6,32 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { type ClassValue, clsx } from 'clsx'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { twMerge } from 'tailwind-merge'
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: Date | string | number) {
+export const formatDate = (date: Date | string | number) => {
   return format(new Date(date), 'PPP', { locale: fr })
 }
 
-export function formatDateTime(date: Date | string | number) {
+export const formatDateTime = (date: Date | string | number) => {
   return format(new Date(date), "PPP 'à' p", { locale: fr })
 }
 
-export function getErrorMessage(error: unknown, fallback: string): string {
+export const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error) {
     return error.message
   }

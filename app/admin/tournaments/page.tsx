@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Edit, Eye, Plus, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { DeleteTournamentButton } from '@/components/features/tournament/actions/delete-button'
@@ -23,9 +27,9 @@ import { getAdminTournaments } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
 import { Visibility } from '@/prisma/generated/prisma/client'
 
-// -----------------------------------------------------------------------------
-// Constants & Configuration
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
 const CONTENT = {
   TITLE: 'Tournois',
@@ -53,14 +57,17 @@ const CONFIG = {
   DEFAULT_MAX_PARTICIPANTS: 100,
 } as const
 
-// -----------------------------------------------------------------------------
-// Helper Functions
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 /**
  * Calculates the completion percentage of registrations.
  */
-function getRegistrationProgress(current: number, max: number | null): number {
+const getRegistrationProgress = (
+  current: number,
+  max: number | null,
+): number => {
   const maxParticipants = max || CONFIG.DEFAULT_MAX_PARTICIPANTS
   return Math.min(100, (current / maxParticipants) * 100)
 }
@@ -68,26 +75,26 @@ function getRegistrationProgress(current: number, max: number | null): number {
 /**
  * Determines if a tournament is finished based on the current date.
  */
-function isTournamentOver(endDate: Date, now: Date): boolean {
+const isTournamentOver = (endDate: Date, now: Date): boolean => {
   return now > new Date(endDate)
 }
 
 /**
  * Determines if a tournament is currently public and active.
  */
-function isPublicActive(
+const isPublicActive = (
   visibility: Visibility,
   endDate: Date,
   now: Date,
-): boolean {
+): boolean => {
   return visibility === Visibility.PUBLIC && now <= new Date(endDate)
 }
 
-// -----------------------------------------------------------------------------
-// Main Component
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
-export default async function TournamentsPage() {
+const TournamentsPage = async () => {
   const tournaments = await getAdminTournaments()
   // Performance: Instantiate 'now' once for all comparisons
   const now = new Date()
@@ -266,3 +273,5 @@ export default async function TournamentsPage() {
     </div>
   )
 }
+
+export default TournamentsPage

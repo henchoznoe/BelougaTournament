@@ -8,28 +8,40 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
+import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 type ActionResponse = {
   success: boolean
   message: string
   errors?: Record<string, string[]>
 }
 
-import { ACTION_MESSAGES } from '@/lib/config/messages'
-import { APP_ROUTES } from '@/lib/config/routes'
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
-import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
-
-// Constants
 const SECURITY_CONFIG = {
   SALT_ROUNDS: 12,
 } as const
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const requireSuperAdmin = async () => {
   const session = await getSession()

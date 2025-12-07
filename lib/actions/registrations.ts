@@ -8,13 +8,21 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
 import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
 
-async function checkAuth() {
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
+const checkAuth = async () => {
   const session = await getSession()
   if (
     !session ||

@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Lock } from 'lucide-react'
 import Link from 'next/link'
 import { AdminsManager } from '@/components/features/admin/users/admins-manager'
@@ -14,7 +18,10 @@ import { getSession } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Types
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: 'Administrateurs',
   SUBTITLE: 'Gestion des comptes et des permissions.',
@@ -28,6 +35,10 @@ const ROUTES = {
   DASHBOARD: '/admin',
 } as const
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const fetchUsers = async () => {
   return prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
@@ -39,6 +50,10 @@ const fetchUsers = async () => {
     },
   })
 }
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const AccessDeniedState = () => {
   return (
@@ -61,7 +76,7 @@ const AccessDeniedState = () => {
   )
 }
 
-export default async function AdminsPage() {
+const AdminsPage = async () => {
   // 1. Auth & Permission Check
   const session = await getSession()
   const isSuperAdmin = session?.user?.role === Role.SUPERADMIN
@@ -95,3 +110,5 @@ export default async function AdminsPage() {
     </div>
   )
 }
+
+export default AdminsPage

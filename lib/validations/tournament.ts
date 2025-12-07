@@ -1,13 +1,21 @@
 /**
- * File: lib/schemas/tournament.ts
+ * File: lib/validations/tournament.ts
  * Description: Tournament schema for validation.
  * Author: Noé Henchoz
  * Date: 2025-12-05
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { z } from 'zod'
 import { Visibility } from '@/prisma/generated/prisma/enums'
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
 export const tournamentSchema = z.object({
   description: z

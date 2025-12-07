@@ -3,11 +3,14 @@
  * Description: Form component for registering teams or players to a tournament with premium aesthetic.
  * Author: Noé Henchoz
  * Date: 2025-12-07
-There are no deprecated packages to remove.
  * License: MIT
  */
 
 'use client'
+
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -356,7 +359,7 @@ type AppendType = (
   options?: { shouldFocus?: boolean },
 ) => void
 
-function PlayersList({
+const PlayersList = ({
   control,
   playerFields,
   append,
@@ -368,7 +371,7 @@ function PlayersList({
   append: AppendType
   remove: (index: number) => void
   tournament: TournamentWithFields
-}) {
+}) => {
   const isTeam = tournament.format === 'TEAM'
 
   const handleAddPlayer = () => {

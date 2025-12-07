@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { TournamentsSection } from '@/components/features/tournament/list/tournaments-section'
@@ -17,13 +21,20 @@ import { StreamSection } from '@/components/layout/landing/stream-section'
 import { HOME_CONFIG } from '@/lib/constants'
 import { getLandingStats } from '@/lib/data/mappers/landing'
 
-// Metadata
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 export const metadata: Metadata = {
   title: HOME_CONFIG.META_TITLE,
   description: HOME_CONFIG.META_DESCRIPTION,
 }
 
-export default async function LandingPage() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const LandingPage = async () => {
   const statsData = await getLandingStats()
 
   return (
@@ -38,3 +49,5 @@ export default async function LandingPage() {
     </div>
   )
 }
+
+export default LandingPage

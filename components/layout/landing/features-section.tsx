@@ -6,13 +6,20 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { cn } from "@/lib/utils";
-import { motion, Variants } from "framer-motion";
-import { LucideIcon, Swords, Target, Zap } from "lucide-react";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Types
+import { cn } from "@/lib/utils"
+import { Variants, motion } from "framer-motion"
+import { LucideIcon, Swords, Target, Zap } from "lucide-react"
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface FeatureItem {
   title: string
   description: string
@@ -24,16 +31,21 @@ interface FeatureItem {
   }
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: "Pourquoi nous rejoindre ?",
-  SUBTITLE: "Une expérience compétitive conçue par des joueurs, pour des joueurs.",
+  SUBTITLE:
+    "Une expérience compétitive conçue par des joueurs, pour des joueurs.",
 } as const
 
 const FEATURES_DATA: FeatureItem[] = [
   {
     title: "Compétition Fair-play",
-    description: "Un règlement strict et une modération active pour garantir des parties saines et équitables.",
+    description:
+      "Un règlement strict et une modération active pour garantir des parties saines et équitables.",
     icon: Swords,
     styles: {
       iconColor: "text-orange-400",
@@ -43,7 +55,8 @@ const FEATURES_DATA: FeatureItem[] = [
   },
   {
     title: "Format Professionnel",
-    description: "Des arbres de tournois clairs, des horaires respectés et une organisation sans faille.",
+    description:
+      "Des arbres de tournois clairs, des horaires respectés et une organisation sans faille.",
     icon: Target,
     styles: {
       iconColor: "text-blue-400",
@@ -53,7 +66,8 @@ const FEATURES_DATA: FeatureItem[] = [
   },
   {
     title: "Diffusion Live",
-    description: "Vos exploits commentés en direct sur Twitch pour une expérience e-sport immersive.",
+    description:
+      "Vos exploits commentés en direct sur Twitch pour une expérience e-sport immersive.",
     icon: Zap,
     styles: {
       iconColor: "text-purple-400",
@@ -63,14 +77,21 @@ const FEATURES_DATA: FeatureItem[] = [
   },
 ]
 
-const FeatureCard = ({ feature, index }: { feature: FeatureItem; index: number }) => {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const FeatureCard = ({
+  feature,
+  index,
+}: { feature: FeatureItem; index: number }) => {
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { delay: index * 0.2, duration: 0.5 }
-    }
+      transition: { delay: index * 0.2, duration: 0.5 },
+    },
   }
 
   return (
@@ -81,26 +102,22 @@ const FeatureCard = ({ feature, index }: { feature: FeatureItem; index: number }
       viewport={{ once: true }}
       className={cn(
         "group relative overflow-hidden rounded-2xl border bg-zinc-900/50 p-8 transition-all hover:-translate-y-2 hover:bg-zinc-900",
-        feature.styles.border
+        feature.styles.border,
       )}
     >
       {/* Icon Container */}
       <div
         className={cn(
           "mb-6 inline-flex rounded-xl p-4 transition-colors group-hover:bg-opacity-20",
-          feature.styles.bg
+          feature.styles.bg,
         )}
       >
         <feature.icon className={cn("size-8", feature.styles.iconColor)} />
       </div>
 
       {/* Content */}
-      <h3 className="mb-3 text-2xl font-bold text-white">
-        {feature.title}
-      </h3>
-      <p className="leading-relaxed text-zinc-400">
-        {feature.description}
-      </p>
+      <h3 className="mb-3 text-2xl font-bold text-white">{feature.title}</h3>
+      <p className="leading-relaxed text-zinc-400">{feature.description}</p>
 
       {/* Background Glow Effect */}
       <div className="absolute -right-12 -top-12 size-32 rounded-full bg-white/5 blur-3xl transition-all group-hover:bg-white/10" />
@@ -139,5 +156,5 @@ export const FeaturesSection = () => {
         ))}
       </div>
     </section>
-  );
+  )
 }

@@ -1,16 +1,20 @@
 /**
  * File: components/features/auth/login-form.tsx
  * Description: Login form component handling user input and authentication state.
- * Author: Noé Henchoz
+ * Author: No\u00e9 Henchoz
  * Date: 2025-12-07
  * License: MIT
  */
 
 'use client'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import { useActionState } from 'react'
 import { motion } from 'framer-motion'
 import { Lock, Mail } from 'lucide-react'
-import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,18 +22,25 @@ import { login } from '@/lib/actions/auth'
 import { UI_MESSAGES } from '@/lib/config/messages'
 import type { ActionState } from '@/lib/types/actions'
 
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const INITIAL_STATE: ActionState<string> = {
   success: false,
   message: '',
   inputs: '',
 }
 
-export function LoginForm() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+export const LoginForm = () => {
   const [state, formAction, isPending] = useActionState(login, INITIAL_STATE)
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Email Field */}
       <div className="space-y-2">
         <Label
           htmlFor="email"
@@ -51,7 +62,6 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Password Field */}
       <div className="space-y-2">
         <Label
           htmlFor="password"
@@ -72,7 +82,6 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Error Feedback */}
       {state?.message && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -83,7 +92,6 @@ export function LoginForm() {
         </motion.div>
       )}
 
-      {/* Submit Button */}
       <Button
         type="submit"
         disabled={isPending}

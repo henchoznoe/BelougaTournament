@@ -6,10 +6,17 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/db/prisma'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const DB_CONFIG = {
   // Fixed ID to enforce a singleton pattern for global settings
   SINGLETON_ID: 1,
@@ -18,6 +25,10 @@ const DB_CONFIG = {
 const CACHE_CONFIG = {
   KEY_SETTINGS: 'site-settings',
 } as const
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const fetchSettingsFromDb = async () => {
   return prisma.siteSettings.upsert({

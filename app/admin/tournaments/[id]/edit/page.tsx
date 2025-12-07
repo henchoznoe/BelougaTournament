@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { notFound } from 'next/navigation'
 import type { z } from 'zod'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
@@ -13,15 +17,22 @@ import { updateTournament } from '@/lib/actions/tournaments'
 import prisma from '@/lib/db/prisma'
 import type { tournamentSchema } from '@/lib/validations/tournament'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: 'Modifier',
   SUBTITLE: 'Modifier le tournoi',
 }
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 export const dynamic = 'force-dynamic'
 
-async function getTournament(id: string) {
+const getTournament = async (id: string) => {
   return await prisma.tournament.findUnique({
     where: { id },
     include: {
@@ -32,11 +43,15 @@ async function getTournament(id: string) {
   })
 }
 
-export default async function EditTournamentPage({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const EditTournamentPage = async ({
   params,
 }: {
   params: Promise<{ id: string }>
-}) {
+}) => {
   const { id } = await params
   const tournament = await getTournament(id)
 
@@ -79,3 +94,5 @@ export default async function EditTournamentPage({
     </div>
   )
 }
+
+export default EditTournamentPage

@@ -6,22 +6,34 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { TwitchEmbed } from "@/components/twitch-embed";
-import { Suspense } from "react";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Constants
+import { TwitchEmbed } from "@/components/twitch-embed"
+import { Suspense } from "react"
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const STREAM_CONFIG = {
   CHANNEL: "quentadoulive",
-} as const;
+} as const
 
 const CONTENT = {
   BADGE_LABEL: "EN DIRECT",
   TITLE: "Suivez l'action",
-  DESCRIPTION: "Ne manquez aucun moment fort. Retrouvez les meilleurs matchs commentés en direct sur notre chaîne Twitch.",
+  DESCRIPTION:
+    "Ne manquez aucun moment fort. Retrouvez les meilleurs matchs commentés en direct sur notre chaîne Twitch.",
   LOADING_LABEL: "Chargement du stream...",
-} as const;
+} as const
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const LiveBadge = () => {
   return (
@@ -32,7 +44,7 @@ const LiveBadge = () => {
       </span>
       {CONTENT.BADGE_LABEL}
     </div>
-  );
+  )
 }
 
 const StreamLoader = () => {
@@ -40,7 +52,7 @@ const StreamLoader = () => {
     <div className="flex h-[600px] w-full items-center justify-center rounded-lg bg-zinc-900 text-zinc-500">
       {CONTENT.LOADING_LABEL}
     </div>
-  );
+  )
 }
 
 export const StreamSection = () => {
@@ -48,7 +60,6 @@ export const StreamSection = () => {
     <section className="container mx-auto px-4" id="stream">
       <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-1 backdrop-blur-xl">
         <div className="rounded-[20px] bg-zinc-950 p-8 md:p-12">
-
           {/* Header */}
           <div className="mb-12 flex flex-col items-center text-center">
             <LiveBadge />
@@ -66,9 +77,8 @@ export const StreamSection = () => {
               <TwitchEmbed channel={STREAM_CONFIG.CHANNEL} />
             </Suspense>
           </div>
-
         </div>
       </div>
     </section>
-  );
+  )
 }

@@ -6,11 +6,19 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { APP_METADATA } from '@/lib/constants'
 
-export default function PublicLoading() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const PublicLoading = () => {
   return (
     <div className="flex min-h-[80vh] w-full flex-col items-center justify-center gap-6">
       <div className="relative">
@@ -32,3 +40,5 @@ export default function PublicLoading() {
     </div>
   )
 }
+
+export default PublicLoading

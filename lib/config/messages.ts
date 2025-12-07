@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 export const ACTION_MESSAGES = {
   AUTH: {
     ERR_MISSING_CREDS: 'Email and password are required.',

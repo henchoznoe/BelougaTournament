@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { type LucideIcon, Mail, MessageSquare, Video } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -19,7 +23,10 @@ import {
 } from '@/components/ui/card'
 import { getSiteSettings } from '@/lib/data/settings'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface ContactCardProps {
   icon: LucideIcon
   title: string
@@ -33,7 +40,10 @@ interface ContactCardProps {
   isExternal?: boolean
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: 'Contactez-nous',
   DESCRIPTION:
@@ -84,11 +94,14 @@ const CARDS_CONFIG = {
   },
 } as const
 
-// Metadata
 export const metadata: Metadata = {
   title: 'Contact',
   description: CONTENT.DESCRIPTION,
 }
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const ContactCard = ({
   icon: Icon,
@@ -133,13 +146,12 @@ const ContactCard = ({
   )
 }
 
-export default async function ContactPage() {
+const ContactPage = async () => {
   const settings = await getSiteSettings()
 
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="mx-auto max-w-2xl space-y-8">
-        {/* Header */}
         <div className="space-y-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white">
             {CONTENT.TITLE}
@@ -147,9 +159,7 @@ export default async function ContactPage() {
           <p className="text-lg text-zinc-400">{CONTENT.DESCRIPTION}</p>
         </div>
 
-        {/* Contact Grid */}
         <div className="grid gap-6">
-          {/* Email Card (Always visible) */}
           <ContactCard
             icon={Mail}
             title={CARDS_CONFIG.EMAIL.TITLE}
@@ -158,7 +168,6 @@ export default async function ContactPage() {
             buttonLabel={CONTENT.EMAIL}
           />
 
-          {/* Discord Card (Conditional) */}
           {settings.socialDiscord && (
             <ContactCard
               icon={MessageSquare}
@@ -174,7 +183,6 @@ export default async function ContactPage() {
             />
           )}
 
-          {/* Twitch Card (Conditional) */}
           {settings.socialTwitch && (
             <ContactCard
               icon={Video}
@@ -190,7 +198,6 @@ export default async function ContactPage() {
             />
           )}
 
-          {/* YouTube Card (Conditional) */}
           {settings.socialYoutube && (
             <ContactCard
               icon={Video}
@@ -206,7 +213,6 @@ export default async function ContactPage() {
             />
           )}
 
-          {/* Instagram Card (Conditional) */}
           {settings.socialInstagram && (
             <ContactCard
               icon={Video}
@@ -222,7 +228,6 @@ export default async function ContactPage() {
             />
           )}
 
-          {/* TikTok Card (Conditional) */}
           {settings.socialTiktok && (
             <ContactCard
               icon={Video}
@@ -242,3 +247,5 @@ export default async function ContactPage() {
     </div>
   )
 }
+
+export default ContactPage

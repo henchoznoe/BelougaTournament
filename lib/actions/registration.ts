@@ -8,9 +8,14 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+
 import prisma from '@/lib/db/prisma'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { env } from '@/lib/env'
@@ -39,7 +44,7 @@ export type RegistrationState = {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const MESSAGES = {
+const CONTENT = {
   VALIDATION_ERROR: 'Veuillez corriger les erreurs dans le formulaire.',
   TOURNAMENT_NOT_FOUND: 'Tournoi introuvable.',
   REGISTRATION_CLOSED: 'Les inscriptions sont fermées.',
@@ -53,22 +58,29 @@ const MESSAGES = {
   SUCCESS_WAITLIST:
     "Inscription réussie ! Vous avez été placé sur la liste d'attente.",
   SUCCESS_APPROVED: 'Inscription réussie !',
-  CANCEL_NOT_FOUND: 'Registration not found.',
-  CANCEL_INVALID_TOKEN: 'Invalid cancellation token.',
-  CANCEL_SUCCESS: 'Registration cancelled successfully.',
-  CANCEL_FAILED: 'Failed to cancel registration.',
-}
+  CANCEL_NOT_FOUND: 'Inscription introuvable.',
+  CANCEL_INVALID_TOKEN: "Jeton d'annulation invalide.",
+  CANCEL_SUCCESS: 'Inscription annulée avec succès.',
+  CANCEL_FAILED: "Échec de l'annulation de l'inscription.",
+  EMAIL_SUBJECT_PREFIX: 'Inscription reçue - ',
+  LOGS: {
+    RAW_DATA: '[Registration] Raw Data:',
+    VALIDATION_PASSED: '[Registration] Validation passed',
+    ERROR_REGISTRATION: 'Registration Error:',
+    ERROR_CANCELLATION: 'Cancellation Error:',
+  },
+} as const
 
-const baseRegistrationSchema = z.object({
+const BASE_REGISTRATION_SCHEMA = z.object({
   contactEmail: z.string().email(),
   players: z
     .array(
       z.object({
         data: z.record(z.string(), z.string()), // fieldId -> value
-        nickname: z.string().min(1, 'Nickname is required'),
+        nickname: z.string().min(1, 'Le pseudo est requis'),
       }),
     )
-    .min(1, 'At least one player is required'),
+    .min(1, 'Au moins un joueur est requis'),
   teamName: z.string().optional(),
   tournamentId: z.string().uuid(),
 })
@@ -81,7 +93,7 @@ const baseRegistrationSchema = z.object({
  * Helper to parse FormData with dot notation into a nested object.
  * Replaces the previous `any` based implementation with a recursive one.
  */
-function parseFormData(formData: FormData): ParsedFormData {
+const parseFormData = (formData: FormData): ParsedFormData => {
   const object: Record<string, unknown> = {}
 
   for (const [key, value] of formData.entries()) {
@@ -122,10 +134,10 @@ function parseFormData(formData: FormData): ParsedFormData {
   return object as unknown as ParsedFormData
 }
 
-export async function registerForTournament(
+export const registerForTournament = async (
   _prevState: RegistrationState,
   formData: FormData,
-): Promise<RegistrationState> {
+): Promise<RegistrationState> => {
   const rawParsed = parseFormData(formData)
 
   // Ensure strict typing for the raw data before Zod parsing
@@ -147,19 +159,19 @@ export async function registerForTournament(
       : [],
   }
 
-  console.log('[Registration] Raw Data:', JSON.stringify(rawData, null, 2))
+  console.log(CONTENT.LOGS.RAW_DATA, JSON.stringify(rawData, null, 2))
 
-  const validation = baseRegistrationSchema.safeParse(rawData)
+  const validation = BASE_REGISTRATION_SCHEMA.safeParse(rawData)
 
   if (!validation.success) {
     return {
       success: false,
       errors: validation.error.flatten().fieldErrors,
-      message: MESSAGES.VALIDATION_ERROR,
+      message: CONTENT.VALIDATION_ERROR,
     }
   }
 
-  console.log('[Registration] Validation passed')
+  console.log(CONTENT.LOGS.VALIDATION_PASSED)
 
   const { tournamentId, teamName, contactEmail, players } = validation.data
 
@@ -170,13 +182,13 @@ export async function registerForTournament(
   })
 
   if (!tournament) {
-    return { success: false, message: MESSAGES.TOURNAMENT_NOT_FOUND }
+    return { success: false, message: CONTENT.TOURNAMENT_NOT_FOUND }
   }
 
   // Check if registration is open
   const now = new Date()
   if (now < tournament.registrationOpen || now > tournament.registrationClose) {
-    return { success: false, message: MESSAGES.REGISTRATION_CLOSED }
+    return { success: false, message: CONTENT.REGISTRATION_CLOSED }
   }
 
   // 2. Check for duplicates
@@ -192,7 +204,7 @@ export async function registerForTournament(
   if (existingRegistration) {
     return {
       success: false,
-      message: MESSAGES.EMAIL_ALREADY_USED,
+      message: CONTENT.EMAIL_ALREADY_USED,
     }
   }
 
@@ -204,10 +216,7 @@ export async function registerForTournament(
       if (field.required && (!value || value.trim() === '')) {
         return {
           success: false,
-          message: MESSAGES.REQUIRED_FIELD_MISSING(
-            field.label,
-            player.nickname,
-          ),
+          message: CONTENT.REQUIRED_FIELD_MISSING(field.label, player.nickname),
         }
       }
     }
@@ -277,10 +286,10 @@ export async function registerForTournament(
       return registration
     })
   } catch (error) {
-    console.error('Registration Error:', error)
+    console.error(CONTENT.LOGS.ERROR_REGISTRATION, error)
     if (error instanceof Error) {
       if (error.message === 'Tournament is full.') {
-        return { success: false, message: MESSAGES.TOURNAMENT_FULL }
+        return { success: false, message: CONTENT.TOURNAMENT_FULL }
       }
     }
 
@@ -288,19 +297,19 @@ export async function registerForTournament(
       if (error.code === 'P2002') {
         return {
           success: false,
-          message: MESSAGES.EMAIL_ALREADY_USED,
+          message: CONTENT.EMAIL_ALREADY_USED,
         }
       }
     }
 
     return {
       success: false,
-      message: MESSAGES.GENERIC_ERROR,
+      message: CONTENT.GENERIC_ERROR,
     }
   }
 
   if (!registrationResult) {
-    return { success: false, message: MESSAGES.REGISTRATION_FAILED }
+    return { success: false, message: CONTENT.REGISTRATION_FAILED }
   }
 
   const cancellationUrl = `${env.NEXT_PUBLIC_APP_URL}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
@@ -314,14 +323,14 @@ export async function registerForTournament(
 
   await sendEmail({
     to: contactEmail,
-    subject: `Inscription reçue - ${tournament.title}`,
+    subject: `${CONTENT.EMAIL_SUBJECT_PREFIX}${tournament.title}`,
     html: emailHtml,
   })
 
   const message =
     registrationResult.status === 'WAITLIST'
-      ? MESSAGES.SUCCESS_WAITLIST
-      : MESSAGES.SUCCESS_APPROVED
+      ? CONTENT.SUCCESS_WAITLIST
+      : CONTENT.SUCCESS_APPROVED
 
   revalidatePath(`/tournaments/${tournament.slug}`)
   redirect(
@@ -331,7 +340,7 @@ export async function registerForTournament(
   )
 }
 
-export async function cancelRegistration(id: string, token: string) {
+export const cancelRegistration = async (id: string, token: string) => {
   try {
     const registration = await prisma.registration.findUnique({
       where: { id },
@@ -339,11 +348,11 @@ export async function cancelRegistration(id: string, token: string) {
     })
 
     if (!registration) {
-      return { success: false, message: MESSAGES.CANCEL_NOT_FOUND }
+      return { success: false, message: CONTENT.CANCEL_NOT_FOUND }
     }
 
     if (registration.cancellationToken !== token) {
-      return { success: false, message: MESSAGES.CANCEL_INVALID_TOKEN }
+      return { success: false, message: CONTENT.CANCEL_INVALID_TOKEN }
     }
 
     await prisma.registration.delete({
@@ -353,10 +362,10 @@ export async function cancelRegistration(id: string, token: string) {
     revalidatePath(`/tournaments/${registration.tournament.slug}`)
     return {
       success: true,
-      message: MESSAGES.CANCEL_SUCCESS,
+      message: CONTENT.CANCEL_SUCCESS,
     }
   } catch (error) {
-    console.error('Cancellation Error:', error)
-    return { success: false, message: MESSAGES.CANCEL_FAILED }
+    console.error(CONTENT.LOGS.ERROR_CANCELLATION, error)
+    return { success: false, message: CONTENT.CANCEL_FAILED }
   }
 }

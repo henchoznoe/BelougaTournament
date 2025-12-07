@@ -6,22 +6,28 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { APP_METADATA, HOME_CONFIG } from "@/lib/constants";
-import { motion, Variants } from "framer-motion";
-import { ChevronRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Constants
+import Image from "next/image"
+import Link from "next/link"
+import { motion, type Variants } from "framer-motion"
+import { ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { APP_METADATA, HOME_CONFIG } from "@/lib/constants"
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const ROUTES = {
   TOURNAMENTS: "/tournaments",
   STATS_ANCHOR: "#stats",
 } as const
 
-// Animation Variants
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -31,7 +37,7 @@ const containerVariants: Variants = {
       delayChildren: 0.2,
     },
   },
-};
+}
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -40,13 +46,15 @@ const itemVariants: Variants = {
     y: 0,
     transition: { duration: 0.5, ease: "easeOut" },
   },
-};
+}
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 export const HeroSection = () => {
   return (
     <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
-
-      {/* Background Layer */}
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Arena Background"
@@ -56,25 +64,21 @@ export const HeroSection = () => {
           className="object-cover opacity-50"
           sizes="100vw"
         />
-        {/* Gradient Overlay for better text readability */}
         <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
       </div>
 
-      {/* Content Container */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 max-w-5xl space-y-8"
       >
-        {/* Badge */}
         <motion.div variants={itemVariants} className="flex justify-center">
           <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400 backdrop-blur-sm">
             {HOME_CONFIG.HERO_BLUE_BADGE}
           </span>
         </motion.div>
 
-        {/* Main Title */}
         <motion.h1
           variants={itemVariants}
           className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl"
@@ -85,7 +89,6 @@ export const HeroSection = () => {
           </span>
         </motion.h1>
 
-        {/* Description */}
         <motion.p
           variants={itemVariants}
           className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl"
@@ -97,7 +100,6 @@ export const HeroSection = () => {
           </span>
         </motion.p>
 
-        {/* CTA Buttons */}
         <motion.div
           variants={itemVariants}
           className="flex flex-wrap justify-center gap-6 pt-4"
@@ -126,5 +128,5 @@ export const HeroSection = () => {
         </motion.div>
       </motion.div>
     </section>
-  );
+  )
 }

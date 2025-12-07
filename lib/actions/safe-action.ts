@@ -6,11 +6,19 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import type { z } from 'zod'
 import { getSession } from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import type { ActionState } from '@/lib/types/actions'
 import type { Role } from '@/prisma/generated/prisma/enums'
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
 
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
@@ -22,6 +30,10 @@ type ActionOptions<T extends z.ZodType> = {
   role?: Role | Role[]
   handler: ActionHandler<z.infer<T>, unknown>
 }
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 /**
  * Wraps a server action with authentication, role checking, and input validation.

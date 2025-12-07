@@ -6,11 +6,17 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/db/prisma'
 import { type Prisma, Visibility } from '@/prisma/generated/prisma/client'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
 export type PublicTournament = Prisma.TournamentGetPayload<{
   include: {
     _count: {
@@ -34,12 +40,19 @@ export type TournamentWithDetails = Prisma.TournamentGetPayload<{
   }
 }>
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CACHE_CONFIG = {
   KEY_TOURNAMENTS: 'tournaments',
   KEY_TOURNAMENT_SLUG: (slug: string) => `tournament-${slug}`,
   REVALIDATE_SECONDS: 3600, // 1 hour
 } as const
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const fetchPublicTournamentsFromDb = async (): Promise<PublicTournament[]> => {
   return prisma.tournament.findMany({

@@ -8,22 +8,32 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 type ActionResponse = {
   success: boolean
   message: string
   errors?: Record<string, string[]>
 }
 
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const updateChallongeIdSchema = z.object({
   challongeId: z.string().trim().optional().or(z.literal('')),
 })
 
-// Constants
 const MESSAGES = {
   SUCCESS_CHALLONGE: 'Challonge ID updated successfully.',
   SUCCESS_DELETE: 'Registration deleted successfully.',
@@ -35,6 +45,10 @@ const MESSAGES = {
 const FORM_KEYS = {
   CHALLONGE_ID: 'challongeId',
 } as const
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 export const updateChallongeId = async (
   tournamentId: string,

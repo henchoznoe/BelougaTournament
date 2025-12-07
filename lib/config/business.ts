@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 export const BUSINESS_CONFIG = {
   DEFAULT_STREAM_URL: 'https://twitch.tv/quentadoulive',
   DEFAULT_TWITCH_CHANNEL: 'quentadoulive',

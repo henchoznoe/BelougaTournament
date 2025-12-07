@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
@@ -15,7 +19,10 @@ import { APP_METADATA } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import './globals.css'
 
-// Fonts
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -26,7 +33,6 @@ const paladins = localFont({
   variable: '--font-paladins',
 })
 
-// Metadata
 export const metadata: Metadata = {
   title: {
     default: APP_METADATA.NAME,
@@ -35,11 +41,15 @@ export const metadata: Metadata = {
   description: APP_METADATA.DESCRIPTION,
 }
 
-export default function RootLayout({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode
-}>) {
+}>) => {
   return (
     <html lang={APP_METADATA.LOCALE} className="scroll-smooth">
       <body
@@ -56,3 +66,5 @@ export default function RootLayout({
     </html>
   )
 }
+
+export default RootLayout

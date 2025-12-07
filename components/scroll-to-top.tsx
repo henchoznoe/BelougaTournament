@@ -6,18 +6,25 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import { usePathname } from "next/navigation"
+import { useEffect } from "react"
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 export const ScrollToTop = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   useEffect(() => {
-    // Force scroll to top on mount (refresh) and navigation
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    window.scrollTo(0, 0)
+  }, [pathname])
 
-  return null;
+  return null
 }

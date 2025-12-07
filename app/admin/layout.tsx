@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
@@ -13,7 +17,10 @@ import { logout } from '@/lib/actions/auth'
 import { getSession } from '@/lib/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const ASSETS = {
   BACKGROUND: '/assets/wall.png',
 } as const
@@ -21,6 +28,10 @@ const ASSETS = {
 const ROUTES = {
   LOGIN: '/login',
 } as const
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const AdminBackground = () => {
   return (
@@ -40,11 +51,7 @@ const AdminBackground = () => {
   )
 }
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   // 1. Auth Check
   const session = await getSession()
 
@@ -75,3 +82,5 @@ export default async function AdminLayout({
     </div>
   )
 }
+
+export default AdminLayout

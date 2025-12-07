@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { AlertTriangle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -21,12 +25,18 @@ import {
 import { cancelRegistration } from '@/lib/actions/registration'
 import prisma from '@/lib/db/prisma'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const ROUTES = {
   HOME: '/',
 } as const
@@ -49,6 +59,12 @@ const CONTENT = {
   BTN_KEEP: 'Non, garder ma place',
   BTN_CONFIRM: "Oui, annuler l'inscription",
 } as const
+
+export const dynamic = 'force-dynamic'
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const ErrorState = ({
   title,
@@ -81,10 +97,7 @@ const ErrorState = ({
   )
 }
 
-// Force dynamic rendering as this page depends on search parameters
-export const dynamic = 'force-dynamic'
-
-export default async function CancelRegistrationPage(props: PageProps) {
+const CancelRegistrationPage = async (props: PageProps) => {
   const searchParams = await props.searchParams
 
   // Validate Inputs
@@ -118,7 +131,7 @@ export default async function CancelRegistrationPage(props: PageProps) {
   }
 
   // Server Action Wrapper
-  async function handleCancel() {
+  const handleCancel = async () => {
     'use server'
     // We re-validate inside the action for security
     if (id && token) {
@@ -174,3 +187,5 @@ export default async function CancelRegistrationPage(props: PageProps) {
     </div>
   )
 }
+
+export default CancelRegistrationPage

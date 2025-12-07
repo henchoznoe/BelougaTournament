@@ -8,9 +8,12 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
-
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
@@ -32,7 +35,10 @@ import {
 } from '@/lib/validations/tournament'
 import { Role } from '@/prisma/generated/prisma/client'
 
-// Logic - Create
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 export const createTournament = authenticatedAction({
   schema: tournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
@@ -54,7 +60,6 @@ export const createTournament = authenticatedAction({
   },
 })
 
-// Logic - Delete
 export const deleteTournament = authenticatedAction({
   schema: deleteTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
@@ -79,7 +84,6 @@ export const deleteTournament = authenticatedAction({
   },
 })
 
-// Logic - Update
 export const updateTournament = authenticatedAction({
   schema: updateTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
@@ -102,7 +106,6 @@ export const updateTournament = authenticatedAction({
   },
 })
 
-// Logic - Export
 export const exportTournamentData = authenticatedAction({
   schema: exportTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
@@ -131,7 +134,6 @@ export const exportTournamentData = authenticatedAction({
   },
 })
 
-// Logic - Visibility
 export const toggleTournamentVisibility = authenticatedAction({
   schema: toggleVisibilitySchema,
   role: [Role.ADMIN, Role.SUPERADMIN],

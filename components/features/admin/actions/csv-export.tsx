@@ -6,13 +6,31 @@
  * License: MIT
  */
 
-'use client'
+"use client"
 
-import { Button } from '@/components/ui/button'
-import { exportTournamentData } from '@/lib/actions/tournaments'
-import { Download, Loader2 } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import { Download, Loader2 } from "lucide-react"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+import { exportTournamentData } from "@/lib/actions/tournaments"
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
+const CONTENT = {
+  EXPORT_BTN: "Export CSV",
+  SUCCESS: "Export successful!",
+  ERROR_GENERIC: "Failed to export data.",
+  ERROR_NO_DATA: "No data to export.",
+  FILENAME_PREFIX: "tournament-",
+  FILENAME_SUFFIX: "-registrations.csv",
+} as const
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -25,10 +43,10 @@ interface CsvExportButtonProps {
 type ExportDataRow = Record<string, string | number | boolean | null>
 
 // ----------------------------------------------------------------------
-// LOGIC
+// COMPONENT
 // ----------------------------------------------------------------------
 
-export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
+export const CsvExportButton = ({ tournamentId }: CsvExportButtonProps) => {
   const [isPending, startTransition] = useTransition()
 
   const handleExport = () => {
@@ -37,53 +55,50 @@ export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
         const result = await exportTournamentData(tournamentId)
 
         if (!result.success || !result.inputs) {
-          toast.error(result.message || 'Failed to export data.')
+          toast.error(result.message || CONTENT.ERROR_GENERIC)
           return
         }
 
         const data = JSON.parse(result.inputs as string) as ExportDataRow[]
 
         if (!data || data.length === 0) {
-          toast.error('No data to export.')
+          toast.error(CONTENT.ERROR_NO_DATA)
           return
         }
 
-        // Convert to CSV
         const headers = Object.keys(data[0])
         const csvContent = [
-          headers.join(','),
+          headers.join(","),
           ...data.map((row) =>
             headers
               .map((header) => {
                 const value = row[header]
                   ? row[header]?.toString().replace(/"/g, '""')
-                  : ''
+                  : ""
                 return `"${value}"`
               })
-              .join(','),
+              .join(","),
           ),
-        ].join('\n')
+        ].join("\n")
 
-        // Download
         const blob = new Blob([csvContent], {
-          type: 'text/csv;charset=utf-8;',
+          type: "text/csv;charset=utf-8;",
         })
         const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.setAttribute('href', url)
+        const link = document.createElement("a")
+        link.setAttribute("href", url)
         link.setAttribute(
-          'download',
-          `tournament-${tournamentId}-registrations.csv`,
+          "download",
+          `${CONTENT.FILENAME_PREFIX}${tournamentId}${CONTENT.FILENAME_SUFFIX}`,
         )
-        link.style.visibility = 'hidden'
+        link.style.visibility = "hidden"
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
 
-        toast.success('Export successful!')
-      } catch (error) {
-        console.error('Export failed:', error)
-        toast.error('Failed to export data.')
+        toast.success(CONTENT.SUCCESS)
+      } catch (_error) {
+        toast.error(CONTENT.ERROR_GENERIC)
       }
     })
   }
@@ -95,7 +110,7 @@ export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
       ) : (
         <Download className="mr-2 h-4 w-4" />
       )}
-      Export CSV
+      {CONTENT.EXPORT_BTN}
     </Button>
   )
 }

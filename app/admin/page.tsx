@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import {
   Activity,
   ArrowUpRight,
@@ -26,7 +30,10 @@ import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 type DashboardStats = {
   activeTournaments: number
   totalTournaments: number
@@ -60,7 +67,10 @@ interface QuickActionProps {
   }
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const LABELS = {
   TITLE: 'Tableau de bord',
   SUBTITLE: "Vue d'ensemble de votre plateforme de tournois.",
@@ -117,7 +127,10 @@ const STYLES = {
   },
 } as const
 
-// Helper Functions
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const [
     totalTournaments,
@@ -155,7 +168,10 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
   }
 }
 
-// Components
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
 const StatCard = ({
   title,
   value,
@@ -189,10 +205,6 @@ const StatCard = ({
   )
 }
 
-/**
- * Renders a quick action button.
- * Handles the "Locked" state if the user doesn't have the required role.
- */
 const QuickActionButton = ({
   title,
   description,
@@ -245,9 +257,6 @@ const QuickActionButton = ({
   )
 }
 
-/**
- * Renders a single row in the recent activity list.
- */
 const RecentActivityItem = ({
   registration,
 }: {
@@ -319,8 +328,7 @@ const RecentActivityItem = ({
   )
 }
 
-// Default Export
-export default async function AdminDashboard() {
+const AdminDashboard = async () => {
   const session = await getSession()
   const stats = await fetchDashboardStats()
   const userRole = session?.user?.role
@@ -458,3 +466,5 @@ export default async function AdminDashboard() {
     </div>
   )
 }
+
+export default AdminDashboard

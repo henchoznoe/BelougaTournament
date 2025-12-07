@@ -6,14 +6,22 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Footer } from '@/components/layout/footer'
 import { Navbar } from '@/components/layout/navbar/navbar'
 
-export default function PublicLayout({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const PublicLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode
-}>) {
+}>) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -22,3 +30,5 @@ export default function PublicLayout({
     </div>
   )
 }
+
+export default PublicLayout

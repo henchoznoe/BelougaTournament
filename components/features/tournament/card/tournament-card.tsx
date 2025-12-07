@@ -1,15 +1,18 @@
 /**
  * File: components/features/tournament/card/tournament-card.tsx
- * Description: specific card component for displaying tournament summary.
+ * Description: Specific card component for displaying tournament summary.
  * Author: Noé Henchoz
  * Date: 2025-12-07
  * License: MIT
  */
 
-import { Calendar, ChevronRight, Users } from "lucide-react";
-import Link from "next/link";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-import { Button } from "@/components/ui/button";
+import Link from "next/link"
+import { Calendar, ChevronRight, Users } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -17,11 +20,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { type PublicTournament } from "@/lib/data/tournaments";
-import { formatDateTime } from "@/lib/utils";
+} from "@/components/ui/card"
+import { type PublicTournament } from "@/lib/data/tournaments"
+import { formatDateTime } from "@/lib/utils"
 
-// Constants
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
+type TournamentCardProps = {
+  tournament: PublicTournament
+}
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   BTN_DETAILS: "Voir les détails",
   FORMAT: {
@@ -30,13 +44,13 @@ const CONTENT = {
   },
   PREFIX_ID: "ID:",
   PREFIX_REGISTERED: "Inscrit",
-} as const;
+} as const
 
-type TournamentCardProps = {
-  tournament: PublicTournament;
-};
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
-export function TournamentCard({ tournament }: TournamentCardProps) {
+export const TournamentCard = ({ tournament }: TournamentCardProps) => {
   return (
     <Card className="group h-full border-zinc-800 bg-zinc-900/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-[0_0_30px_-10px_rgba(37,99,235,0.3)] hover:-translate-y-1">
       <CardHeader>
@@ -93,5 +107,5 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         </Button>
       </CardFooter>
     </Card>
-  );
+  )
 }

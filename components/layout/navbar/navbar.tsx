@@ -6,8 +6,16 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { getSiteSettings } from '@/lib/data/settings'
 import { NavbarClient } from './navbar-client'
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 export const Navbar = async () => {
   const settings = await getSiteSettings()

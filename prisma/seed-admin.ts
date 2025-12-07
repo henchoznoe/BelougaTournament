@@ -6,36 +6,51 @@
  * License: MIT
  */
 
-import 'dotenv/config';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { hash } from 'bcryptjs';
-import pg from 'pg';
-import { env } from '../lib/env';
-import { PrismaClient, Role } from './generated/prisma/client';
+import "dotenv/config"
 
-// Constants
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import { PrismaPg } from "@prisma/adapter-pg"
+import { hash } from "bcryptjs"
+import pg from "pg"
+
+import { env } from "../lib/env"
+import { PrismaClient, Role } from "./generated/prisma/client"
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const SECURITY_CONFIG = {
   SALT_ROUNDS: 12,
 } as const
 
-function createPrismaClient(connectionString: string): PrismaClient {
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
+const createPrismaClient = (connectionString: string): PrismaClient => {
   const pool = new pg.Pool({ connectionString })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
 
-async function main() {
-
+const main = async () => {
   const prisma = createPrismaClient(env.DATABASE_URL)
 
   try {
-    const hashedPassword = await hash(env.ADMIN_PASSWORD, SECURITY_CONFIG.SALT_ROUNDS)
+    const hashedPassword = await hash(
+      env.ADMIN_PASSWORD,
+      SECURITY_CONFIG.SALT_ROUNDS,
+    )
 
     const user = await prisma.user.upsert({
       where: { email: env.ADMIN_EMAIL },
       update: {
         passwordHash: hashedPassword,
-        role: Role.SUPERADMIN
+        role: Role.SUPERADMIN,
       },
       create: {
         email: env.ADMIN_EMAIL,
@@ -44,9 +59,11 @@ async function main() {
       },
     })
 
-    console.log(`Seed successful: ${user.email} is ready with role ${user.role}`)
+    console.log(
+      `Seed successful: ${user.email} is ready with role ${user.role}`,
+    )
   } catch (error) {
-    console.error('Seed failed:', error)
+    console.error("Seed failed:", error)
     throw error
   } finally {
     await prisma.$disconnect()

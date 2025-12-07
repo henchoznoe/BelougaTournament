@@ -9,7 +9,10 @@
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 type EmailPayload = {
   to: string
   subject: string
@@ -22,25 +25,32 @@ type EmailResponse = {
   error?: unknown
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const ERRORS = {
   SEND_FAILED: 'Failed to send email via Resend.',
 } as const
 
 const TEAM_NAME = 'The Belouga Tournament Team'
 
-function getResendClient(): { client: Resend; fromEmail: string } {
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
+const getResendClient = (): { client: Resend; fromEmail: string } => {
   return {
     client: new Resend(env.RESEND_API_KEY),
     fromEmail: env.RESEND_FROM,
   }
 }
 
-export async function sendEmail({
+export const sendEmail = async ({
   to,
   subject,
   html,
-}: EmailPayload): Promise<EmailResponse> {
+}: EmailPayload): Promise<EmailResponse> => {
   try {
     const { client, fromEmail } = getResendClient()
 
@@ -62,11 +72,11 @@ export async function sendEmail({
   }
 }
 
-export function generateRegistrationEmailHtml(
+export const generateRegistrationEmailHtml = (
   tournamentTitle: string,
   status: string,
   cancellationUrl: string,
-): string {
+): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Received</h1>
@@ -83,10 +93,10 @@ export function generateRegistrationEmailHtml(
   `
 }
 
-export function generateStatusUpdateEmailHtml(
+export const generateStatusUpdateEmailHtml = (
   tournamentTitle: string,
   status: string,
-): string {
+): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
       <h1>Registration Status Update</h1>

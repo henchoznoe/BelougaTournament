@@ -8,6 +8,10 @@
 
 'use server'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { compare } from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -21,7 +25,10 @@ import type { ActionState } from '@/lib/types/actions'
 import { loginSchema } from '@/lib/validations/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// Helper Functions
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 const createSessionCookie = async (payload: SessionPayload) => {
   const expires = new Date(Date.now() + AUTH_CONFIG.SESSION_DURATION_MS)
   const sessionToken = await encrypt({ ...payload, expires })
@@ -37,6 +44,7 @@ const createSessionCookie = async (payload: SessionPayload) => {
 }
 
 // Server Actions
+
 export const login = async (
   _prevState: ActionState<string> | undefined,
   formData: FormData,

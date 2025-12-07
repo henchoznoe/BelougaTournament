@@ -6,24 +6,31 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { motion } from "framer-motion";
-import { Menu, Trophy, Video, Mail, Home } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { APP_METADATA } from "@/lib/constants";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Types
+import { useState } from "react"
+import { usePathname } from "next/navigation"
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { Menu, Trophy, Video, Mail, Home } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+import { APP_METADATA } from "@/lib/constants"
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface NavbarClientProps {
   settings: {
-    logoUrl: string | null;
-  };
+    logoUrl: string | null
+  }
 }
 
 interface NavLogoProps {
@@ -32,13 +39,20 @@ interface NavLogoProps {
   className?: string
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const NAV_LINKS = [
   { href: '/', label: 'Accueil', icon: Home },
   { href: '/tournaments', label: 'Tournois', icon: Trophy },
   { href: '/stream', label: 'Stream', icon: Video },
   { href: '/contact', label: 'Contact', icon: Mail },
 ] as const
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
   const src = url || APP_METADATA.DEFAULT_LOGO
@@ -53,17 +67,15 @@ const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
         className={cn('h-auto w-auto transition-transform duration-300', className)}
         style={{ height: size, width: 'auto' }}
       />
-      {/* Glow Effect */}
       <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/20 blur-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
     </div>
   )
 }
 
-export function NavbarClient({ settings }: NavbarClientProps) {
+export const NavbarClient = ({ settings }: NavbarClientProps) => {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
-  // Helper for active state
   const isLinkActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
@@ -75,8 +87,6 @@ export function NavbarClient({ settings }: NavbarClientProps) {
       className="sticky top-0 z-50 w-full border-b border-white/10 bg-zinc-950/80 backdrop-blur-md supports-backdrop-filter:bg-zinc-950/60"
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
-
-        {/* Desktop Logo & Brand */}
         <Link href="/" className="group flex items-center gap-3">
           <div className="hidden md:block">
             <NavLogo
@@ -89,7 +99,6 @@ export function NavbarClient({ settings }: NavbarClientProps) {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map((link) => {
             const isActive = isLinkActive(link.href)
@@ -121,7 +130,6 @@ export function NavbarClient({ settings }: NavbarClientProps) {
           })}
         </nav>
 
-        {/* Mobile Navigation (Sheet) */}
         <div className="md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>

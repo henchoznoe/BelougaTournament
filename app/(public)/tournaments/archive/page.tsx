@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { Calendar, Trophy, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -21,7 +25,10 @@ import {
 import prisma from '@/lib/db/prisma'
 import { formatDateTime } from '@/lib/utils'
 
-// Types
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface ArchivedTournament {
   id: string
   title: string
@@ -32,7 +39,10 @@ interface ArchivedTournament {
   maxParticipants: number | null
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const CONTENT = {
   TITLE: 'Tournois archivés',
   SUBTITLE: 'Explorez les tournois passés et leurs résultats.',
@@ -43,12 +53,15 @@ const CONTENT = {
     count ? `${count} places` : 'Places illimitées',
 } as const
 
-// Metadata
 export const metadata: Metadata = {
   title: 'Archives des Tournois',
   description:
     "Consultez l'historique et les résultats des tournois Belouga passés.",
 }
+
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
 
 const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {
   return prisma.tournament.findMany({
@@ -59,6 +72,10 @@ const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {
     orderBy: { endDate: 'desc' },
   })
 }
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const ArchivedTournamentCard = ({
   tournament,
@@ -123,7 +140,7 @@ const EmptyArchiveState = () => {
   )
 }
 
-export default async function ArchivePage() {
+const ArchivePage = async () => {
   const tournaments = await fetchArchivedTournaments()
 
   return (
@@ -152,3 +169,5 @@ export default async function ArchivePage() {
     </div>
   )
 }
+
+export default ArchivePage

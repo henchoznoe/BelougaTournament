@@ -1,29 +1,37 @@
 /**
- * File: components/public/footer.tsx
+ * File: components/layout/footer.tsx
  * Description: Server Component for the public site footer.
  * Author: Noé Henchoz
  * Date: 2025-12-06
  * License: MIT
  */
 
-import {
-    Gamepad2,
-    Instagram,
-    Mail,
-    MapPin,
-    Twitch,
-    Twitter,
-    Youtube,
-    Video,
-    MessageSquare,
-    LucideIcon,
-} from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { getSiteSettings } from '@/lib/data/settings'
-import { APP_METADATA, EXTERNAL_LINKS } from '@/lib/constants'
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
 
-// Types
+import {
+  Gamepad2,
+  Instagram,
+  type LucideIcon,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Twitch,
+  Twitter,
+  Video,
+  Youtube,
+} from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+
+import { APP_METADATA, EXTERNAL_LINKS } from "@/lib/constants"
+import { getSiteSettings } from "@/lib/data/settings"
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
 interface SocialLink {
   name: string
   href: string | null
@@ -41,14 +49,50 @@ interface FooterSection {
   links: FooterLink[]
 }
 
-// Constants
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const BRAND_COLORS = {
-  DISCORD: 'hover:text-[#5865F2]',
-  TWITCH: 'hover:text-[#9146FF]',
-  YOUTUBE: 'hover:text-[#FF0000]',
-  TIKTOK: 'hover:text-[#00f2ea]',
-  INSTAGRAM: 'hover:text-[#E1306C]',
+  DISCORD: "hover:text-[#5865F2]",
+  TWITCH: "hover:text-[#9146FF]",
+  YOUTUBE: "hover:text-[#FF0000]",
+  TIKTOK: "hover:text-[#00f2ea]",
+  INSTAGRAM: "hover:text-[#E1306C]",
 } as const
+
+const CONTENT = {
+  DESCRIPTION:
+    "La plateforme de référence pour les tournois e-sport amateurs. Rejoignez la compétition et montrez votre talent.",
+  RIGHTS_RESERVED: "Tous droits réservés.",
+  DEVELOPED_BY: "Développé par",
+  LINKS: {
+    PRIVACY: "Politique de confidentialité",
+    TERMS: "Conditions d'utilisation",
+    TOURNAMENTS: {
+      TITLE: "Tournois",
+      UPCOMING: "Prochains",
+      ARCHIVE: "Archives",
+      RULES: "Règlement",
+    },
+    COMMUNITY: {
+      TITLE: "Communauté",
+      STREAM: "Stream",
+      DISCORD: "Discord",
+      TEAMS: "Équipes",
+    },
+    SUPPORT: {
+      TITLE: "Support",
+      CONTACT: "Contact",
+      ADMIN: "Administration",
+      LEGAL: "Mentions Légales",
+    },
+  },
+} as const
+
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
 
 const FooterLogo = ({ url }: { url: string | null }) => {
   const src = url || APP_METADATA.DEFAULT_LOGO
@@ -62,75 +106,77 @@ const FooterLogo = ({ url }: { url: string | null }) => {
         height={120}
         className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
       />
-      <div className="absolute inset-0 -z-10 opacity-0 blur-3xl transition-opacity duration-500 rounded-full bg-blue-500/20 group-hover:opacity-100" />
+      <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
     </div>
   )
 }
 
-export async function Footer() {
+export const Footer = async () => {
   const settings = await getSiteSettings()
   const currentYear = new Date().getFullYear()
 
   const socialLinks: SocialLink[] = [
     {
-      name: 'Discord',
+      name: "Discord",
       href: settings.socialDiscord,
       icon: MessageSquare,
       colorClass: BRAND_COLORS.DISCORD,
     },
     {
-      name: 'Twitch',
+      name: "Twitch",
       href: settings.socialTwitch,
       icon: Twitch,
       colorClass: BRAND_COLORS.TWITCH,
     },
     {
-      name: 'YouTube',
+      name: "YouTube",
       href: settings.socialYoutube,
       icon: Youtube,
       colorClass: BRAND_COLORS.YOUTUBE,
     },
     {
-      name: 'TikTok',
+      name: "TikTok",
       href: settings.socialTiktok,
       icon: Video,
       colorClass: BRAND_COLORS.TIKTOK,
     },
     {
-      name: 'Instagram',
+      name: "Instagram",
       href: settings.socialInstagram,
       icon: Instagram,
       colorClass: BRAND_COLORS.INSTAGRAM,
     },
-  ].filter((link) => Boolean(link.href && link.href.trim() !== ''))
+  ].filter((link) => Boolean(link.href && link.href.trim() !== ""))
 
-  // Define Navigation Structure
   const footerSections: FooterSection[] = [
     {
-      title: 'Tournois',
+      title: CONTENT.LINKS.TOURNAMENTS.TITLE,
       links: [
-        { label: 'Prochains', href: '/tournaments' },
-        { label: 'Archives', href: '/tournaments/archive' },
-        { label: 'Règlement', href: '/rules' },
+        { label: CONTENT.LINKS.TOURNAMENTS.UPCOMING, href: "/tournaments" },
+        {
+          label: CONTENT.LINKS.TOURNAMENTS.ARCHIVE,
+          href: "/tournaments/archive",
+        },
+        { label: CONTENT.LINKS.TOURNAMENTS.RULES, href: "/rules" },
       ],
     },
     {
-      title: 'Communauté',
+      title: CONTENT.LINKS.COMMUNITY.TITLE,
       links: [
-        { label: 'Stream', href: '/stream' },
+        { label: CONTENT.LINKS.COMMUNITY.STREAM, href: "/stream" },
         {
-          label: 'Discord',
+          label: CONTENT.LINKS.COMMUNITY.DISCORD,
           href: settings.socialDiscord || EXTERNAL_LINKS.DISCORD,
         },
-        { label: 'Équipes', href: '/teams' },
+        { label: CONTENT.LINKS.COMMUNITY.TEAMS, href: "/teams" },
       ],
     },
     {
-      title: 'Support',
+      title: CONTENT.LINKS.SUPPORT.TITLE,
       links: [
-        { label: 'Contact', href: '/contact' },
-        { label: 'Administration', href: '/admin' },
-        { label: 'Mentions Légales', href: '/legal' },
+        { label: CONTENT.LINKS.SUPPORT.CONTACT, href: "/contact" },
+        { label: CONTENT.LINKS.SUPPORT.ADMIN, href: "/admin" },
+        { label: CONTENT.LINKS.SUPPORT.LEGAL, href: "/legal" },
       ],
     },
   ]
@@ -138,8 +184,6 @@ export async function Footer() {
   return (
     <footer className="border-t border-zinc-800 bg-zinc-950 pb-8 pt-16">
       <div className="container mx-auto px-4">
-
-        {/* Top Section: Brand Identity */}
         <div className="mb-16 flex flex-col items-center justify-center text-center">
           <Link href="/" className="group flex flex-col items-center gap-6">
             <FooterLogo url={settings.logoUrl} />
@@ -149,20 +193,16 @@ export async function Footer() {
           </Link>
         </div>
 
-        {/* Middle Section: Grid Layout */}
         <div className="mb-16 grid gap-12 lg:grid-cols-4">
-
-          {/* Description & Social Icons */}
           <div className="space-y-6">
             <p className="leading-relaxed text-zinc-400">
-              La plateforme de référence pour les tournois e-sport amateurs.
-              Rejoignez la compétition et montrez votre talent.
+              {CONTENT.DESCRIPTION}
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
-                  href={social.href || '#'}
+                  href={social.href || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`rounded-lg bg-zinc-900 p-2 text-zinc-400 transition-all hover:bg-zinc-800 ${social.colorClass}`}
@@ -174,7 +214,6 @@ export async function Footer() {
             </div>
           </div>
 
-          {/* Navigation Columns */}
           {footerSections.map((section) => (
             <div key={section.title}>
               <h3 className="mb-6 font-bold text-white">{section.title}</h3>
@@ -195,19 +234,25 @@ export async function Footer() {
           ))}
         </div>
 
-        {/* Bottom Bar: Copyright & Legal */}
         <div className="border-t border-zinc-800 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-zinc-500">
-              &copy; {currentYear} {APP_METADATA.NAME}. Tous droits réservés.
+              &copy; {currentYear} {APP_METADATA.NAME}.{" "}
+              {CONTENT.RIGHTS_RESERVED}
             </p>
 
             <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <Link href="/privacy" className="transition-colors hover:text-white">
-                Politique de confidentialité
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-white"
+              >
+                {CONTENT.LINKS.PRIVACY}
               </Link>
-              <Link href="/terms" className="transition-colors hover:text-white">
-                Conditions d'utilisation
+              <Link
+                href="/terms"
+                className="transition-colors hover:text-white"
+              >
+                {CONTENT.LINKS.TERMS}
               </Link>
               <a
                 href={APP_METADATA.AUTHOR_URL}
@@ -215,7 +260,10 @@ export async function Footer() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 transition-colors hover:text-blue-400"
               >
-                Développé par <span className="font-semibold text-zinc-300">{APP_METADATA.AUTHOR_NAME}</span>
+                {CONTENT.DEVELOPED_BY}{" "}
+                <span className="font-semibold text-zinc-300">
+                  {APP_METADATA.AUTHOR_NAME}
+                </span>
               </a>
             </div>
           </div>

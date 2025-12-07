@@ -8,6 +8,10 @@
 
 'use client'
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
@@ -18,9 +22,17 @@ import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
 
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
 const BACK_LINK_TEXT = "Retour à l'accueil"
 
-export default function LoginPage() {
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const LoginPage = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 text-zinc-50">
       {/* Background Layer */}
@@ -64,3 +76,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+export default LoginPage

@@ -6,42 +6,58 @@
  * License: MIT
  */
 
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { ACTION_MESSAGES } from "@/lib/config/messages";
-import { ActionState } from "@/lib/types/actions";
-import { tournamentSchema } from "@/lib/validations/tournament";
-import { TournamentFormat } from "@/prisma/generated/prisma/enums";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Save } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { CustomFieldsManager } from "./tournament-form/custom-fields-manager";
-import { DatesSection } from "./tournament-form/dates-section";
-import { GeneralInfoSection } from "./tournament-form/general-info-section";
-import { SettingsSection } from "./tournament-form/settings-section";
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
+import { Button } from "@/components/ui/button"
+import { Form } from "@/components/ui/form"
+import { ACTION_MESSAGES } from "@/lib/config/messages"
+import { ActionState } from "@/lib/types/actions"
+import { tournamentSchema } from "@/lib/validations/tournament"
+import { TournamentFormat } from "@/prisma/generated/prisma/enums"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Save } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { CustomFieldsManager } from "./tournament-form/custom-fields-manager"
+import { DatesSection } from "./tournament-form/dates-section"
+import { GeneralInfoSection } from "./tournament-form/general-info-section"
+import { SettingsSection } from "./tournament-form/settings-section"
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
 
 const CONTENT = {
   SUBMIT_LABEL_DEFAULT: "Créer le Tournoi",
-} as const;
+} as const
 
-const formSchema = tournamentSchema;
+const formSchema = tournamentSchema
+
+// ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
 
 type TournamentFormProps = {
-  initialData?: z.infer<typeof formSchema>;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<ActionState>;
-  submitLabel?: string;
-};
+  initialData?: z.infer<typeof formSchema>
+  onSubmit: (values: z.infer<typeof formSchema>) => Promise<ActionState>
+  submitLabel?: string
+}
 
-export function TournamentForm({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+export const TournamentForm = ({
   initialData,
   onSubmit,
   submitLabel = CONTENT.SUBMIT_LABEL_DEFAULT,
-}: TournamentFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+}: TournamentFormProps) => {
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -53,17 +69,19 @@ export function TournamentForm({
       teamSize: 1,
       fields: [],
     },
-  });
+  })
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setServerError(null);
+    setServerError(null)
 
-    const result = await onSubmit(values);
+    const result = await onSubmit(values)
 
     if (!result.success) {
-      setServerError(result.message || ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR);
+      setServerError(
+        result.message || ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
+      )
     }
-  };
+  }
 
   return (
     <Form {...form}>
@@ -92,5 +110,5 @@ export function TournamentForm({
         </div>
       </form>
     </Form>
-  );
+  )
 }

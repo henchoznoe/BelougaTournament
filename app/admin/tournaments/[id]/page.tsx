@@ -6,6 +6,10 @@
  * License: MIT
  */
 
+// ----------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------
+
 import {
   Calendar,
   Edit,
@@ -49,9 +53,13 @@ import { deleteRegistration } from '@/lib/actions/tournament-manager'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 
+// ----------------------------------------------------------------------
+// LOGIC
+// ----------------------------------------------------------------------
+
 export const dynamic = 'force-dynamic'
 
-async function getTournament(id: string) {
+const getTournament = async (id: string) => {
   return await prisma.tournament.findUnique({
     where: { id },
     include: {
@@ -70,11 +78,15 @@ async function getTournament(id: string) {
   })
 }
 
-export default async function TournamentManagerPage({
+// ----------------------------------------------------------------------
+// COMPONENT
+// ----------------------------------------------------------------------
+
+const TournamentManagerPage = async ({
   params,
 }: {
   params: Promise<{ id: string }>
-}) {
+}) => {
   const { id } = await params
   const tournament = await getTournament(id)
 
@@ -372,3 +384,5 @@ export default async function TournamentManagerPage({
     </div>
   )
 }
+
+export default TournamentManagerPage
