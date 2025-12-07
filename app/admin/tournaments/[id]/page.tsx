@@ -46,6 +46,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { deleteRegistration } from '@/lib/actions/tournament-manager'
 import prisma from '@/lib/prisma'
+import { formatDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -181,7 +182,7 @@ export default async function TournamentManagerPage({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  {new Date(tournament.startDate).toLocaleDateString('fr-FR')}
+                  {formatDate(tournament.startDate)}
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Date de début</p>
               </CardContent>
@@ -269,7 +270,7 @@ export default async function TournamentManagerPage({
                         </span>
                       </TableCell>
                       <TableCell className="text-zinc-300 py-4">
-                        {new Date(reg.createdAt).toLocaleDateString('fr-FR')}
+                        {formatDate(reg.createdAt)}
                       </TableCell>
                       <TableCell className="text-right py-4 pr-6">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

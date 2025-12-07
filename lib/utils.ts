@@ -1,6 +1,6 @@
 /**
  * File: lib/utils.ts
- * Description: Utility functions for class name merging.
+ * Description: Utility functions for class name merging and date formatting.
  * Author: Noé Henchoz
  * Date: 2025-12-02
  * License: MIT
@@ -8,6 +8,7 @@
 
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { LOCALE } from '@/lib/constants'
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs))
@@ -28,5 +29,5 @@ export function formatDate(
   },
 ) {
   const d = new Date(date)
-  return d.toLocaleDateString('fr-FR', options)
+  return d.toLocaleDateString(LOCALE, options)
 }

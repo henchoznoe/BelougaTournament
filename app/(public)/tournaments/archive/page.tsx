@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import prisma from '@/lib/prisma'
+import { formatDate } from '@/lib/utils'
 
 async function getArchivedTournaments() {
   const now = new Date()
@@ -59,9 +60,7 @@ export default async function ArchivePage() {
               <CardContent className="space-y-4 text-sm text-zinc-400">
                 <div className="flex items-center gap-2">
                   <Calendar className="size-4 text-zinc-500" />
-                  <span>
-                    {new Date(tournament.startDate).toLocaleDateString()}
-                  </span>
+                  <span>{formatDate(tournament.startDate)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Trophy className="size-4 text-yellow-500/50" />

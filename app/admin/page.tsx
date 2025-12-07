@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Types
@@ -257,7 +258,7 @@ const RecentActivityItem = ({
       <div className="flex flex-col items-end gap-1 text-xs text-zinc-500">
         <span className="flex items-center gap-1">
           <Calendar className="size-3" />
-          {new Date(registration.createdAt).toLocaleDateString('fr-FR')}
+          {formatDate(registration.createdAt)}
         </span>
         <Button
           variant="ghost"
