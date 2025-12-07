@@ -17,13 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login } from '@/lib/actions/auth'
-
-// Types
-type LoginState = {
-  message?: string
-  email?: string
-  errors?: Record<string, string[]>
-}
+import type { ActionState } from '@/lib/types/actions'
 
 // Constants
 const ASSETS = {
@@ -42,9 +36,10 @@ const CONTENT = {
   BTN_PENDING: 'Connexion...',
 } as const
 
-const INITIAL_STATE: LoginState = {
+const INITIAL_STATE: ActionState<string> = {
+  success: false,
   message: '',
-  email: '',
+  inputs: '',
 }
 
 export default function LoginPage() {
@@ -116,7 +111,7 @@ export default function LoginPage() {
                       type="email"
                       placeholder={CONTENT.PLACEHOLDER_EMAIL}
                       required
-                      defaultValue={state.email}
+                      defaultValue={state.inputs}
                       className="h-11 border-white/10 bg-zinc-950/50 pl-10 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-zinc-950/80 focus:ring-blue-500/20"
                     />
                   </div>

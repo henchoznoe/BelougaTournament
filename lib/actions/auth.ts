@@ -15,14 +15,8 @@ import z from 'zod'
 import { encrypt, type SessionPayload } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { env } from '@/lib/env'
+import type { ActionState } from '@/lib/types/actions'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-// Types
-type LoginState = {
-  message?: string
-  email?: string
-  errors?: Record<string, string[]>
-}
 
 // Constants
 const COOKIE_CONFIG = {
@@ -68,9 +62,9 @@ const createSessionCookie = async (payload: SessionPayload) => {
 
 // Server Actions
 export const login = async (
-  _prevState: unknown,
+  _prevState: ActionState<string> | undefined,
   formData: FormData,
-): Promise<LoginState> => {
+): Promise<ActionState<string>> => {
   // Safe Data Extraction (No casting)
   const rawData = {
     email: formData.get('email')?.toString() || '',
@@ -82,8 +76,9 @@ export const login = async (
 
   if (!validation.success) {
     return {
+      success: false,
       message: MESSAGES.ERR_MISSING_CREDS,
-      email: rawData.email,
+      inputs: rawData.email,
       errors: validation.error.flatten().fieldErrors,
     }
   }
@@ -97,14 +92,22 @@ export const login = async (
 
   // We use a generic error message to avoid enumerating users
   if (!user || !(await compare(password, user.passwordHash))) {
-    return { message: MESSAGES.ERR_INVALID_CREDS, email }
+    return {
+      success: false,
+      message: MESSAGES.ERR_INVALID_CREDS,
+      inputs: email,
+    }
   }
 
   // Verify Role Authorization
   const isAuthorized = user.role === Role.ADMIN || user.role === Role.SUPERADMIN
 
   if (!isAuthorized) {
-    return { message: MESSAGES.ERR_UNAUTHORIZED, email }
+    return {
+      success: false,
+      message: MESSAGES.ERR_UNAUTHORIZED,
+      inputs: email,
+    }
   }
 
   // Create Session
