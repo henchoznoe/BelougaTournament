@@ -6,8 +6,33 @@
  * License: MIT
  */
 
+import type { Prisma } from '@prisma/client'
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
+
+// Types
+export type PublicTournament = Prisma.TournamentGetPayload<{
+  include: {
+    _count: {
+      select: {
+        registrations: true
+      }
+    }
+  }
+}>
+
+export type TournamentWithDetails = Prisma.TournamentGetPayload<{
+  include: {
+    fields: {
+      orderBy: { order: 'asc' }
+    }
+    _count: {
+      select: {
+        registrations: true
+      }
+    }
+  }
+}>
 
 // Constants
 const CACHE_CONFIG = {
@@ -16,9 +41,7 @@ const CACHE_CONFIG = {
   REVALIDATE_SECONDS: 3600, // 1 hour
 } as const
 
-// --- Private Database Fetchers ---
-
-const fetchPublicTournamentsFromDb = async () => {
+const fetchPublicTournamentsFromDb = async (): Promise<PublicTournament[]> => {
   return prisma.tournament.findMany({
     orderBy: { startDate: 'asc' },
     where: {
@@ -37,7 +60,9 @@ const fetchPublicTournamentsFromDb = async () => {
   })
 }
 
-const fetchTournamentBySlugFromDb = async (slug: string) => {
+const fetchTournamentBySlugFromDb = async (
+  slug: string,
+): Promise<TournamentWithDetails | null> => {
   return prisma.tournament.findUnique({
     where: { slug },
     include: {
@@ -52,8 +77,6 @@ const fetchTournamentBySlugFromDb = async (slug: string) => {
     },
   })
 }
-
-// --- Public Data Access Functions ---
 
 /**
  * Fetches all public, active tournaments.
@@ -72,7 +95,9 @@ export const getPublicTournaments = unstable_cache(
  * Fetches a single tournament by slug with detailed fields.
  * Cached for performance.
  */
-export const getTournamentBySlug = async (slug: string) => {
+export const getTournamentBySlug = async (
+  slug: string,
+): Promise<TournamentWithDetails | null> => {
   const getCachedTournament = unstable_cache(
     fetchTournamentBySlugFromDb,
     [CACHE_CONFIG.KEY_TOURNAMENT_SLUG(slug)],
@@ -89,7 +114,7 @@ export const getTournamentBySlug = async (slug: string) => {
  * Fetches all tournaments for the admin dashboard.
  * NOT Cached to ensure real-time data for management.
  */
-export const getAdminTournaments = async () => {
+export const getAdminTournaments = async (): Promise<PublicTournament[]> => {
   return prisma.tournament.findMany({
     orderBy: { startDate: 'desc' },
     include: {
