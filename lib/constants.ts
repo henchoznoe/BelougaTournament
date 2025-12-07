@@ -10,6 +10,7 @@ export const APP_CONFIG = {
   LOCALE: 'fr-FR',
   NAME: 'Belouga Tournament',
   DEFAULT_LOGO: '/assets/logo-blue.png',
+  DEFAULT_BG_IMG: '/assets/wall.png',
   DEFAULT_DISCORD: 'https://discord.gg/belouga',
   DEFAULT_STREAM_URL: 'https://twitch.tv/quentadoulive',
   DEFAULT_TWITCH_CHANNEL: 'quentadoulive',
@@ -20,7 +21,6 @@ export const APP_CONFIG = {
 export const HOME_CONFIG = {
   META_TITLE: 'Belouga Tournament',
   META_DESCRIPTION: 'Les tournois Belouga créés par Quentadoulive.',
-  HERO_DEFAULT_BG_IMG: '/assets/wall.png',
   HERO_BLUE_BADGE: 'La référence e-sport amateur',
   HERO_TITLE: 'BELOUGA',
   HERO_TITLE_GRADIENT: 'TOURNAMENT',

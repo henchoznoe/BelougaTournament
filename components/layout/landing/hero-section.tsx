@@ -9,7 +9,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { HOME_CONFIG } from "@/lib/constants";
+import { APP_CONFIG, HOME_CONFIG } from "@/lib/constants";
 import { motion, Variants } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
@@ -50,7 +50,7 @@ export const HeroSection = () => {
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Arena Background"
-          src={HOME_CONFIG.HERO_DEFAULT_BG_IMG}
+          src={APP_CONFIG.DEFAULT_BG_IMG}
           fill
           priority
           className="object-cover opacity-50"
