@@ -16,17 +16,11 @@ import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
 import { getSiteSettings } from '@/lib/data/settings'
 
-// Constants
-const SEO_CONFIG = {
-  TITLE: 'Accueil - La référence e-sport amateur',
-  DESCRIPTION:
-    "Rejoignez la compétition ultime. Tournois, communauté et diffusion en direct pour les passionnés d'e-sport.",
-} as const
-
 // Metadata
 export const metadata: Metadata = {
-  title: SEO_CONFIG.TITLE,
-  description: SEO_CONFIG.DESCRIPTION,
+  title: 'Accueil - La référence e-sport amateur',
+  description:
+    "Rejoignez la compétition ultime. Tournois, communauté et diffusion en direct pour les passionnés d'e-sport.",
 }
 
 export default async function LandingPage() {

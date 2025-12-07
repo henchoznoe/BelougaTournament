@@ -9,34 +9,26 @@
 import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { getSiteSettings } from '@/lib/data/settings'
+import { APP_CONFIG } from '@/lib/constants'
 
 // Constants
-const DEFAULTS = {
-  CHANNEL: 'quentadoulive',
-} as const
-
 const CONTENT = {
   TITLE: 'Stream Twitch',
   DESCRIPTION:
     "Regardez la compétition en direct sur Twitch, n'oubliez pas de vous abonner à la chaîne pour être informé des prochains tournois.",
 } as const
 
-const SEO_CONFIG = {
-  TITLE: 'Stream En Direct',
-  DESCRIPTION: 'Suivez les tournois Belouga en direct sur Twitch.',
-} as const
-
 // Metadata
 export const metadata: Metadata = {
-  title: SEO_CONFIG.TITLE,
-  description: SEO_CONFIG.DESCRIPTION,
+  title: 'Stream En Direct',
+  description: 'Suivez les tournois Belouga en direct sur Twitch.',
 }
 
 const extractTwitchChannel = (
   urlOrUsername: string | null | undefined,
 ): string => {
   if (!urlOrUsername) {
-    return DEFAULTS.CHANNEL
+    return APP_CONFIG.DEFAULT_TWITCH_CHANNEL
   }
 
   // Try to match standard Twitch URL patterns
@@ -52,7 +44,7 @@ const extractTwitchChannel = (
     return urlOrUsername
   }
 
-  return DEFAULTS.CHANNEL
+  return APP_CONFIG.DEFAULT_TWITCH_CHANNEL
 }
 
 export default async function StreamPage() {

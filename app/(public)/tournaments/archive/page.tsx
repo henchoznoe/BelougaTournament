@@ -43,16 +43,11 @@ const CONTENT = {
     count ? `${count} places` : 'Places illimitées',
 } as const
 
-const SEO_CONFIG = {
-  TITLE: 'Archives des Tournois',
-  DESCRIPTION:
-    "Consultez l'historique et les résultats des tournois Belouga passés.",
-} as const
-
 // Metadata
 export const metadata: Metadata = {
-  title: SEO_CONFIG.TITLE,
-  description: SEO_CONFIG.DESCRIPTION,
+  title: 'Archives des Tournois',
+  description:
+    "Consultez l'historique et les résultats des tournois Belouga passés.",
 }
 
 const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {

@@ -6,7 +6,15 @@
  * License: MIT
  */
 
+import type { Metadata } from 'next'
+
+// Metadata
+export const metadata: Metadata = {
+  title: 'Politique de Confidentialité',
+  description: 'Politique de Confidentialité',
+}
+
 // TODO : Implement privacy page
 export default function Privacy() {
-  return <div>Privacy</div>
+  return <div>Politique de Confidentialité</div>
 }

@@ -166,7 +166,7 @@ const AdminRow = ({
 
       {/* Date */}
       <div className="col-span-3 text-sm text-zinc-400">
-        {formatDate(user.createdAt, { dateStyle: 'short' })}
+        {formatDate(user.createdAt)}
       </div>
 
       {/* Actions Menu */}

@@ -6,7 +6,15 @@
  * License: MIT
  */
 
+import type { Metadata } from 'next'
+
+// Metadata
+export const metadata: Metadata = {
+  title: 'Mentions Légales',
+  description: 'Mentions Légales',
+}
+
 // TODO : Implement legal page
 export default function Legal() {
-  return <div>Legal</div>
+  return <div>Mentions Légales</div>
 }

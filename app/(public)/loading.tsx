@@ -8,6 +8,7 @@
 
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import { APP_CONFIG } from '@/lib/constants'
 
 export default function PublicLoading() {
   return (
@@ -15,8 +16,8 @@ export default function PublicLoading() {
       <div className="relative">
         <div className="absolute inset-0 animate-pulse rounded-full bg-blue-500/20 blur-xl" />
         <Image
-          src="/assets/logo-blue.png"
-          alt="Belouga Tournament"
+          src={APP_CONFIG.DEFAULT_LOGO}
+          alt={APP_CONFIG.NAME}
           width={80}
           height={80}
           className="relative z-10 animate-bounce-slow"

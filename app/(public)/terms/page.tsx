@@ -6,7 +6,15 @@
  * License: MIT
  */
 
+import type { Metadata } from 'next'
+
+// Metadata
+export const metadata: Metadata = {
+  title: 'Conditions Générales',
+  description: 'Conditions Générales',
+}
+
 // TODO : Implement terms page
 export default function Terms() {
-  return <div>Terms</div>
+  return <div>Conditions Générales</div>
 }

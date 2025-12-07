@@ -6,7 +6,15 @@
  * License: MIT
  */
 
+import type { Metadata } from 'next'
+
+// Metadata
+export const metadata: Metadata = {
+  title: 'Règles',
+  description: 'Règles',
+}
+
 // TODO : Implement rules page
 export default function Rules() {
-  return <div>Rules</div>
+  return <div>Règles</div>
 }

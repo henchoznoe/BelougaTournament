@@ -111,7 +111,7 @@ export default async function TournamentsPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">
-                    {formatDate(tournament.startDate, { dateStyle: 'short' })}
+                    {formatDate(tournament.startDate)}
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
