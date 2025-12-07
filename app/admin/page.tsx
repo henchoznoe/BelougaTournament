@@ -61,22 +61,63 @@ interface QuickActionProps {
 }
 
 // Constants
-const CONTENT = {
+const LABELS = {
   TITLE: 'Tableau de bord',
   SUBTITLE: "Vue d'ensemble de votre plateforme de tournois.",
   BTN_NEW_TOURNAMENT: 'Créer un Tournoi',
   SECTION_ACTIVITY: 'Activité Récente',
   SECTION_ACTIONS: 'Actions Rapides',
   EMPTY_ACTIVITY: 'Aucune activité récente.',
-  LOCKED_LABEL: 'Réservé aux SuperAdmins',
+  LOCKED: 'Réservé aux SuperAdmins',
   STATS: {
     ACTIVE: 'Tournois Actifs',
     PENDING: 'Inscriptions en attente',
     PARTICIPANTS: 'Total Participants',
     ADMINS: 'Total Administrateurs',
   },
+  BADGES: {
+    APPROVED: 'APPROUVÉ',
+    PENDING: 'EN ATTENTE',
+    REJECTED: 'REFUSÉ',
+  },
+  ACTIONS: {
+    MANAGE_TOURNAMENTS: 'Gérer les Tournois',
+    MANAGE_TOURNAMENTS_DESC: 'Créer, modifier et gérer',
+    MANAGE_ADMINS: 'Gérer les Admins',
+    MANAGE_ADMINS_DESC: 'Comptes et accès',
+    SITE_SETTINGS: 'Paramètres du Site',
+    SITE_SETTINGS_DESC: 'Configuration globale',
+    VIEW: 'Voir',
+  },
+  REGISTERED_TO: 'Inscrit au tournoi',
+  OF_TOTAL: 'Sur {total} tournois au total',
+  APPROVED_COUNT: 'Approuvées',
+  UNIQUE_PLAYERS: 'Joueurs uniques',
+  SITE_MANAGERS: 'Gestionnaires du site',
 } as const
 
+const STYLES = {
+  BLUE: {
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-500',
+    hoverBg: 'group-hover:bg-blue-500/20',
+    hoverBorder: 'hover:border-blue-500/30',
+  },
+  PURPLE: {
+    bg: 'bg-purple-500/10',
+    text: 'text-purple-500',
+    hoverBg: 'group-hover:bg-purple-500/20',
+    hoverBorder: 'hover:border-purple-500/30',
+  },
+  ZINC: {
+    bg: 'bg-zinc-500/10',
+    text: 'text-zinc-400',
+    hoverBg: 'group-hover:bg-zinc-500/20',
+    hoverBorder: 'hover:border-zinc-500/30',
+  },
+} as const
+
+// Helper Functions
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const [
     totalTournaments,
@@ -114,6 +155,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
   }
 }
 
+// Components
 const StatCard = ({
   title,
   value,
@@ -175,9 +217,7 @@ const QuickActionButton = ({
           </div>
           <div className="flex flex-col items-start">
             <span className="text-base font-medium">{title}</span>
-            <span className="text-xs text-zinc-600">
-              {CONTENT.LOCKED_LABEL}
-            </span>
+            <span className="text-xs text-zinc-600">{LABELS.LOCKED}</span>
           </div>
         </Button>
       </div>
@@ -219,17 +259,21 @@ const RecentActivityItem = ({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return <Badge className="h-5 px-1.5 text-[10px]">APPROUVÉ</Badge>
+        return (
+          <Badge className="h-5 px-1.5 text-[10px]">
+            {LABELS.BADGES.APPROVED}
+          </Badge>
+        )
       case 'PENDING':
         return (
           <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-            EN ATTENTE
+            {LABELS.BADGES.PENDING}
           </Badge>
         )
       default:
         return (
           <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-            REFUSÉ
+            {LABELS.BADGES.REJECTED}
           </Badge>
         )
     }
@@ -247,7 +291,7 @@ const RecentActivityItem = ({
             {getStatusBadge(registration.status)}
           </div>
           <p className="flex items-center gap-1 text-xs text-zinc-400">
-            Inscrit au tournoi
+            {LABELS.REGISTERED_TO}
             <span className="font-medium text-blue-400">
               {registration.tournament.title}
             </span>
@@ -267,7 +311,7 @@ const RecentActivityItem = ({
           asChild
         >
           <Link href={`/admin/tournaments/${registration.tournamentId}`}>
-            Voir <ArrowUpRight className="ml-1 size-3" />
+            {LABELS.ACTIONS.VIEW} <ArrowUpRight className="ml-1 size-3" />
           </Link>
         </Button>
       </div>
@@ -275,6 +319,7 @@ const RecentActivityItem = ({
   )
 }
 
+// Default Export
 export default async function AdminDashboard() {
   const session = await getSession()
   const stats = await fetchDashboardStats()
@@ -286,9 +331,9 @@ export default async function AdminDashboard() {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="mb-2 text-4xl font-black tracking-tighter text-white">
-            {CONTENT.TITLE}
+            {LABELS.TITLE}
           </h1>
-          <p className="text-zinc-400">{CONTENT.SUBTITLE}</p>
+          <p className="text-zinc-400">{LABELS.SUBTITLE}</p>
         </div>
         <Button
           asChild
@@ -297,7 +342,7 @@ export default async function AdminDashboard() {
         >
           <Link href="/admin/tournaments/new">
             <Trophy className="mr-2 h-5 w-5" />
-            {CONTENT.BTN_NEW_TOURNAMENT}
+            {LABELS.BTN_NEW_TOURNAMENT}
           </Link>
         </Button>
       </div>
@@ -305,14 +350,17 @@ export default async function AdminDashboard() {
       {/* KPI Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title={CONTENT.STATS.ACTIVE}
+          title={LABELS.STATS.ACTIVE}
           value={stats.activeTournaments}
           icon={Trophy}
           colorClass="text-blue-500"
-          subtext={`Sur ${stats.totalTournaments} tournois au total`}
+          subtext={LABELS.OF_TOTAL.replace(
+            '{total}',
+            stats.totalTournaments.toString(),
+          )}
         />
         <StatCard
-          title={CONTENT.STATS.PENDING}
+          title={LABELS.STATS.PENDING}
           value={stats.pendingRegistrations}
           icon={Users}
           colorClass="text-yellow-500"
@@ -321,23 +369,23 @@ export default async function AdminDashboard() {
               <span className="font-medium text-green-500">
                 {stats.approvedRegistrations}
               </span>{' '}
-              Approuvées
+              {LABELS.APPROVED_COUNT}
             </span>
           }
         />
         <StatCard
-          title={CONTENT.STATS.PARTICIPANTS}
+          title={LABELS.STATS.PARTICIPANTS}
           value={stats.totalParticipants}
           icon={UserCheck}
           colorClass="text-emerald-500"
-          subtext="Joueurs uniques"
+          subtext={LABELS.UNIQUE_PLAYERS}
         />
         <StatCard
-          title={CONTENT.STATS.ADMINS}
+          title={LABELS.STATS.ADMINS}
           value={stats.totalAdmins}
           icon={Activity}
           colorClass="text-purple-500"
-          subtext="Gestionnaires du site"
+          subtext={LABELS.SITE_MANAGERS}
         />
       </div>
 
@@ -348,7 +396,7 @@ export default async function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
               <Activity className="size-5 text-blue-500" />
-              {CONTENT.SECTION_ACTIVITY}
+              {LABELS.SECTION_ACTIVITY}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -361,7 +409,7 @@ export default async function AdminDashboard() {
             ) : (
               <div className="flex flex-col items-center gap-2 py-12 text-center text-zinc-500">
                 <Activity className="size-8 opacity-20" />
-                <p>{CONTENT.EMPTY_ACTIVITY}</p>
+                <p>{LABELS.EMPTY_ACTIVITY}</p>
               </div>
             )}
           </CardContent>
@@ -372,52 +420,37 @@ export default async function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
               <Trophy className="size-5 text-yellow-500" />
-              {CONTENT.SECTION_ACTIONS}
+              {LABELS.SECTION_ACTIONS}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <QuickActionButton
-              title="Gérer les Tournois"
-              description="Créer, modifier et gérer"
+              title={LABELS.ACTIONS.MANAGE_TOURNAMENTS}
+              description={LABELS.ACTIONS.MANAGE_TOURNAMENTS_DESC}
               icon={Trophy}
               href="/admin/tournaments"
               currentRole={userRole}
-              colors={{
-                bg: 'bg-blue-500/10',
-                text: 'text-blue-500',
-                hoverBg: 'group-hover:bg-blue-500/20',
-                hoverBorder: 'hover:border-blue-500/30',
-              }}
+              colors={STYLES.BLUE}
             />
 
             <QuickActionButton
-              title="Gérer les Admins"
-              description="Comptes et accès"
+              title={LABELS.ACTIONS.MANAGE_ADMINS}
+              description={LABELS.ACTIONS.MANAGE_ADMINS_DESC}
               icon={Users}
               href="/admin/admins"
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
-              colors={{
-                bg: 'bg-purple-500/10',
-                text: 'text-purple-500',
-                hoverBg: 'group-hover:bg-purple-500/20',
-                hoverBorder: 'hover:border-purple-500/30',
-              }}
+              colors={STYLES.PURPLE}
             />
 
             <QuickActionButton
-              title="Paramètres du Site"
-              description="Configuration globale"
+              title={LABELS.ACTIONS.SITE_SETTINGS}
+              description={LABELS.ACTIONS.SITE_SETTINGS_DESC}
               icon={Settings}
               href="/admin/settings"
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
-              colors={{
-                bg: 'bg-zinc-500/10',
-                text: 'text-zinc-400',
-                hoverBg: 'group-hover:bg-zinc-500/20',
-                hoverBorder: 'hover:border-zinc-500/30',
-              }}
+              colors={STYLES.ZINC}
             />
           </CardContent>
         </Card>
