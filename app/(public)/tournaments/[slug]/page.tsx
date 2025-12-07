@@ -21,18 +21,7 @@ import { notFound } from 'next/navigation'
 import { RegistrationForm } from '@/components/tournament/registration-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import prisma from '@/lib/prisma'
-
-async function getTournament(slug: string) {
-  return await prisma.tournament.findUnique({
-    include: {
-      fields: {
-        orderBy: { order: 'asc' },
-      },
-    },
-    where: { slug },
-  })
-}
+import { getTournamentBySlug } from '@/lib/data/tournaments'
 
 export async function generateMetadata({
   params,
@@ -40,7 +29,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const tournament = await getTournament(slug)
+  const tournament = await getTournamentBySlug(slug)
 
   if (!tournament) {
     return {
@@ -60,7 +49,7 @@ export default async function TournamentPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const tournament = await getTournament(slug)
+  const tournament = await getTournamentBySlug(slug)
 
   if (!tournament) {
     notFound()

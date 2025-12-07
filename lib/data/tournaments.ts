@@ -2,7 +2,7 @@
  * File: lib/data/tournaments.ts
  * Description: Data access functions for tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-05
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -12,8 +12,11 @@ import prisma from '@/lib/prisma'
 // Constants
 const CACHE_CONFIG = {
   KEY_TOURNAMENTS: 'tournaments',
+  KEY_TOURNAMENT_SLUG: (slug: string) => `tournament-${slug}`,
   REVALIDATE_SECONDS: 3600, // 1 hour
 } as const
+
+// --- Private Database Fetchers ---
 
 const fetchPublicTournamentsFromDb = async () => {
   return prisma.tournament.findMany({
@@ -34,6 +37,28 @@ const fetchPublicTournamentsFromDb = async () => {
   })
 }
 
+const fetchTournamentBySlugFromDb = async (slug: string) => {
+  return prisma.tournament.findUnique({
+    where: { slug },
+    include: {
+      fields: {
+        orderBy: { order: 'asc' },
+      },
+      _count: {
+        select: {
+          registrations: true,
+        },
+      },
+    },
+  })
+}
+
+// --- Public Data Access Functions ---
+
+/**
+ * Fetches all public, active tournaments.
+ * Cached for performance.
+ */
 export const getPublicTournaments = unstable_cache(
   fetchPublicTournamentsFromDb,
   [CACHE_CONFIG.KEY_TOURNAMENTS],
@@ -42,3 +67,35 @@ export const getPublicTournaments = unstable_cache(
     revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
   },
 )
+
+/**
+ * Fetches a single tournament by slug with detailed fields.
+ * Cached for performance.
+ */
+export const getTournamentBySlug = async (slug: string) => {
+  const getCachedTournament = unstable_cache(
+    fetchTournamentBySlugFromDb,
+    [CACHE_CONFIG.KEY_TOURNAMENT_SLUG(slug)],
+    {
+      tags: [CACHE_CONFIG.KEY_TOURNAMENT_SLUG(slug)],
+      revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
+    },
+  )
+
+  return getCachedTournament(slug)
+}
+
+/**
+ * Fetches all tournaments for the admin dashboard.
+ * NOT Cached to ensure real-time data for management.
+ */
+export const getAdminTournaments = async () => {
+  return prisma.tournament.findMany({
+    orderBy: { startDate: 'desc' },
+    include: {
+      _count: {
+        select: { registrations: true },
+      },
+    },
+  })
+}

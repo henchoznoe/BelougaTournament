@@ -18,21 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import prisma from '@/lib/prisma'
-
-async function getTournaments() {
-  return await prisma.tournament.findMany({
-    orderBy: { startDate: 'desc' },
-    include: {
-      _count: {
-        select: { registrations: true },
-      },
-    },
-  })
-}
+import { getAdminTournaments } from '@/lib/data/tournaments'
 
 export default async function TournamentsPage() {
-  const tournaments = await getTournaments()
+  const tournaments = await getAdminTournaments()
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
