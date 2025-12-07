@@ -10,8 +10,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { ACTION_MESSAGES } from "@/lib/config/messages";
 import { ActionState } from "@/lib/types/actions";
 import { tournamentSchema } from "@/lib/validations/tournament";
+import { TournamentFormat } from "@/prisma/generated/prisma/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import { useState } from "react";
@@ -24,7 +26,6 @@ import { SettingsSection } from "./tournament-form/settings-section";
 
 const CONTENT = {
   SUBMIT_LABEL_DEFAULT: "Créer le Tournoi",
-  ERROR_UNEXPECTED: "Une erreur inattendue est survenue.",
 } as const;
 
 const formSchema = tournamentSchema;
@@ -48,7 +49,7 @@ export function TournamentForm({
       title: "",
       slug: "",
       description: "",
-      format: "SOLO",
+      format: TournamentFormat.SOLO,
       teamSize: 1,
       fields: [],
     },
@@ -56,16 +57,11 @@ export function TournamentForm({
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setServerError(null);
-    try {
-      // Logic Cleaned: Default streamUrl logic removed.
-      // If needed, the backend or database default should handle it.
 
-      const result = await onSubmit(values);
-      if (!result.success) {
-        setServerError(result.message || CONTENT.ERROR_UNEXPECTED);
-      }
-    } catch (error) {
-      setServerError(CONTENT.ERROR_UNEXPECTED);
+    const result = await onSubmit(values);
+
+    if (!result.success) {
+      setServerError(result.message || ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR);
     }
   };
 
