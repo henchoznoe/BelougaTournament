@@ -22,6 +22,7 @@ export const ACTION_MESSAGES = {
   },
   GENERIC: {
     VALIDATION_ERROR: 'Validation Error',
+    ERROR: 'An unexpected error occurred.',
   },
   TOURNAMENTS: {
     UNAUTHORIZED: 'Unauthorized: Admin access required.',

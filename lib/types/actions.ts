@@ -15,5 +15,6 @@ export type ActionState<T = unknown> = {
   message?: string
   errors?: Record<string, string[]>
   inputs?: T
+  data?: T
   timestamp?: number
 }

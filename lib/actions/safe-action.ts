@@ -86,7 +86,7 @@ export function authenticatedAction<T extends z.ZodType>({
       console.error('Safe Action Error:', error)
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_GENERIC, // Generic error fallback
+        message: ACTION_MESSAGES.GENERIC.ERROR, // Generic error fallback
       }
     }
   }

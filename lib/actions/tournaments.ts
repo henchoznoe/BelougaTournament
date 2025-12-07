@@ -122,7 +122,7 @@ export const exportTournamentData = authenticatedAction({
 
       return {
         success: true,
-        inputs: JSON.stringify(flattenedData),
+        data: JSON.stringify(flattenedData),
       }
     } catch (error) {
       console.error('Export Error:', error)
