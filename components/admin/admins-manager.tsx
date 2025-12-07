@@ -44,7 +44,7 @@ import {
 	deleteAdmin,
 	resetAdminPassword,
 } from '@/lib/actions/admins'
-import { cn } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Types
@@ -166,7 +166,7 @@ const AdminRow = ({
 
       {/* Date */}
       <div className="col-span-3 text-sm text-zinc-400">
-        {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+        {formatDate(user.createdAt, { dateStyle: 'short' })}
       </div>
 
       {/* Actions Menu */}

@@ -26,6 +26,7 @@ import {
     moveToWaitlist,
     rejectRegistration,
 } from '@/lib/actions/registrations'
+import { formatDate } from '@/lib/utils'
 import { Registration, RegistrationStatus } from '@/prisma/generated/prisma/client'
 
 interface RegistrationsTableProps {
@@ -127,7 +128,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-zinc-300">
-                                    {new Date(reg.createdAt).toLocaleDateString()}
+                                    {formatDate(reg.createdAt, { dateStyle: 'short' })}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>

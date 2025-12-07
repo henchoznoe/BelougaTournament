@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { getAdminTournaments } from '@/lib/data/tournaments'
+import { formatDate } from '@/lib/utils'
 
 export default async function TournamentsPage() {
   const tournaments = await getAdminTournaments()
@@ -83,7 +84,7 @@ export default async function TournamentsPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">
-                    {new Date(tournament.startDate).toLocaleDateString('fr-FR')}
+                    {formatDate(tournament.startDate, { dateStyle: 'short' })}
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">

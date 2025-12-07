@@ -22,10 +22,10 @@ import { RegistrationForm } from '@/components/tournament/registration-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
+import { formatDate } from '@/lib/utils'
 
 // Constants
 const CONFIG = {
-  LOCALE: 'fr-FR',
   DATE_OPTIONS: {
     weekday: 'long',
     day: 'numeric',
@@ -170,10 +170,7 @@ export default async function TournamentPage({
             <div className="flex items-center gap-2">
               <Calendar className="size-5 text-blue-500" />
               <span className="font-medium text-zinc-300">
-                {new Date(tournament.startDate).toLocaleDateString(
-                  CONFIG.LOCALE,
-                  CONFIG.DATE_OPTIONS,
-                )}
+                {formatDate(tournament.startDate, CONFIG.DATE_OPTIONS)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -304,9 +301,7 @@ export default async function TournamentPage({
                     <div className="rounded-lg bg-blue-500/10 p-4 border border-blue-500/20">
                       <p className="text-sm text-blue-200 text-center">
                         {CONTENT.REGISTRATION.CLOSES_ON(
-                          new Date(
-                            tournament.registrationClose,
-                          ).toLocaleDateString(CONFIG.LOCALE),
+                          formatDate(tournament.registrationClose),
                         )}
                       </p>
                     </div>
@@ -324,9 +319,7 @@ export default async function TournamentPage({
                     <p className="text-sm text-zinc-400">
                       {now < tournament.registrationOpen
                         ? CONTENT.REGISTRATION.OPENS_ON(
-                            new Date(
-                              tournament.registrationOpen,
-                            ).toLocaleDateString(CONFIG.LOCALE),
+                            formatDate(tournament.registrationOpen),
                           )
                         : CONTENT.REGISTRATION.ENDED}
                     </p>

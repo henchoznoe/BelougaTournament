@@ -20,6 +20,7 @@ import {
 import { motion, Variants } from "framer-motion";
 import { Calendar, ChevronLeft, Gamepad2, Users } from "lucide-react";
 import Link from "next/link";
+import { formatDate } from '@/lib/utils'
 
 // Types
 export interface Tournament {
@@ -51,13 +52,7 @@ const ROUTES = {
   DETAILS: "/tournaments/",
 } as const
 
-const formatDate = (date: Date | string): string => {
-  return new Date(date).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  })
-}
+
 
 const getParticipantLabel = (count: number | null, format: string): string => {
   if (!count) return CONTENT.LABEL_OPEN

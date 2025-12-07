@@ -27,9 +27,10 @@ import {
 } from '@/components/ui/card'
 import { getPublicTournaments } from '@/lib/data/tournaments'
 
+import { formatDate } from '@/lib/utils'
+
 // Constants
 const CONFIG = {
-  LOCALE: 'fr-FR',
   DATE_OPTIONS: {
     weekday: 'long',
     day: 'numeric',
@@ -132,10 +133,7 @@ export default async function TournamentsPage() {
                         <Calendar className="size-4 text-blue-500" />
                       </div>
                       <span className="font-medium">
-                        {new Date(tournament.startDate).toLocaleDateString(
-                          CONFIG.LOCALE,
-                          CONFIG.DATE_OPTIONS,
-                        )}
+                        {formatDate(tournament.startDate, CONFIG.DATE_OPTIONS)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
