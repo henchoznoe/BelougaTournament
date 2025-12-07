@@ -2,7 +2,7 @@
  * File: app/(public)/contact/page.tsx
  * Description: Public contact page.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -60,6 +60,27 @@ const CARDS_CONFIG = {
     BTN_LABEL: 'Voir le live',
     COLOR_BTN: 'bg-[#9146FF] hover:bg-[#7c2cf5] text-white',
     COLOR_ICON: 'text-[#9146FF]',
+  },
+  YOUTUBE: {
+    TITLE: 'Chaîne YouTube',
+    DESC: 'Regardez les replays des tournois et les best of.',
+    BTN_LABEL: 'Voir le live',
+    COLOR_BTN: 'bg-[#FF0000] hover:bg-[#FF0000] text-white',
+    COLOR_ICON: 'text-[#FF0000]',
+  },
+  INSTAGRAM: {
+    TITLE: 'Chaîne Instagram',
+    DESC: 'Venez nous suivre pour être informé des tournois et des news.',
+    BTN_LABEL: 'Voir le live',
+    COLOR_BTN: 'bg-[#E1306C] hover:bg-[#E1306C] text-white',
+    COLOR_ICON: 'text-[#E1306C]',
+  },
+  TIKTOK: {
+    TITLE: 'Chaîne TikTok',
+    DESC: 'Venez nous suivre pour être informé des tournois et des news.',
+    BTN_LABEL: 'Voir le live',
+    COLOR_BTN: 'bg-[#00f2ea] hover:bg-[#00f2ea] text-white',
+    COLOR_ICON: 'text-[#00f2ea]',
   },
 } as const
 
@@ -164,6 +185,54 @@ export default async function ContactPage() {
               colors={{
                 button: CARDS_CONFIG.TWITCH.COLOR_BTN,
                 icon: CARDS_CONFIG.TWITCH.COLOR_ICON,
+              }}
+              isExternal
+            />
+          )}
+
+          {/* YouTube Card (Conditional) */}
+          {settings.socialYoutube && (
+            <ContactCard
+              icon={Video}
+              title={CARDS_CONFIG.YOUTUBE.TITLE}
+              description={CARDS_CONFIG.YOUTUBE.DESC}
+              href={settings.socialYoutube}
+              buttonLabel={CARDS_CONFIG.YOUTUBE.BTN_LABEL}
+              colors={{
+                button: CARDS_CONFIG.YOUTUBE.COLOR_BTN,
+                icon: CARDS_CONFIG.YOUTUBE.COLOR_ICON,
+              }}
+              isExternal
+            />
+          )}
+
+          {/* Instagram Card (Conditional) */}
+          {settings.socialInstagram && (
+            <ContactCard
+              icon={Video}
+              title={CARDS_CONFIG.INSTAGRAM.TITLE}
+              description={CARDS_CONFIG.INSTAGRAM.DESC}
+              href={settings.socialInstagram}
+              buttonLabel={CARDS_CONFIG.INSTAGRAM.BTN_LABEL}
+              colors={{
+                button: CARDS_CONFIG.INSTAGRAM.COLOR_BTN,
+                icon: CARDS_CONFIG.INSTAGRAM.COLOR_ICON,
+              }}
+              isExternal
+            />
+          )}
+
+          {/* TikTok Card (Conditional) */}
+          {settings.socialTiktok && (
+            <ContactCard
+              icon={Video}
+              title={CARDS_CONFIG.TIKTOK.TITLE}
+              description={CARDS_CONFIG.TIKTOK.DESC}
+              href={settings.socialTiktok}
+              buttonLabel={CARDS_CONFIG.TIKTOK.BTN_LABEL}
+              colors={{
+                button: CARDS_CONFIG.TIKTOK.COLOR_BTN,
+                icon: CARDS_CONFIG.TIKTOK.COLOR_ICON,
               }}
               isExternal
             />

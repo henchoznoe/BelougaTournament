@@ -2,7 +2,7 @@
  * File: app/(public)/tournaments/[slug]/page.tsx
  * Description: Public tournament detail page with premium aesthetic and French localization.
  * Author: Noé Henchoz
- * Date: 2025-12-04
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
+import { TwitchEmbed } from '@/components/twitch-embed'
 
 // Constants
 const CONFIG = {
@@ -37,8 +38,7 @@ const CONFIG = {
 const CONTENT = {
   METADATA: {
     NOT_FOUND: 'Tournoi introuvable',
-    TITLE_TEMPLATE: (title: string) =>
-      `Rejoignez ${title} | Belouga Tournament`,
+    TITLE_TEMPLATE: (title: string) => `${title}`,
   },
   BUTTONS: {
     BACK: 'Retour aux tournois',
@@ -64,9 +64,9 @@ const CONTENT = {
     DESC: 'Rejoignez notre Discord pour contacter les administrateurs du tournoi.',
   },
   BRACKET: {
-    EMPTY_TITLE: 'Arbre non disponible',
-    EMPTY_DESC: "L'arbre du tournoi n'a pas encore été publié.",
-    TITLE_IFRAME: 'Arbre du tournoi',
+    EMPTY_TITLE: 'Bracket non disponible',
+    EMPTY_DESC: "Le bracket du tournoi n'a pas encore été publié.",
+    TITLE_IFRAME: 'Bracket du tournoi',
   },
   STREAM: {
     EMPTY_TITLE: 'Stream hors ligne',
@@ -86,11 +86,11 @@ const CONTENT = {
   },
 } as const
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
 }: {
   params: Promise<{ slug: string }>
-}) {
+}) => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
 
@@ -260,14 +260,8 @@ export default async function TournamentPage({
                 {tournament.streamUrl ? (
                   <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-1 backdrop-blur-sm overflow-hidden">
                     <div className="aspect-video w-full bg-zinc-950">
-                      <iframe
-                        src={tournament.streamUrl}
-                        width="100%"
-                        height="100%"
-                        allowFullScreen
-                        title={CONTENT.STREAM.TITLE_IFRAME}
-                        className="w-full h-full"
-                      ></iframe>
+                      {/* TODO: Get the channel name from the settings.socialTwitch */}
+                      <TwitchEmbed channel={'quentadoulive'} />
                     </div>
                   </div>
                 ) : (
@@ -335,8 +329,13 @@ export default async function TournamentPage({
                 <p className="text-sm text-zinc-400 mb-4">
                   {CONTENT.HELP.DESC}
                 </p>
-                <Button className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors">
-                  {CONTENT.BUTTONS.JOIN_DISCORD}
+                <Button
+                  asChild
+                  className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
+                >
+                  <Link href={'#'} target="_blank">
+                    {CONTENT.BUTTONS.JOIN_DISCORD}
+                  </Link>
                 </Button>
               </div>
             </div>

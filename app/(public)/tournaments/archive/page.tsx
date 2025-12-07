@@ -2,7 +2,7 @@
  * File: app/(public)/tournaments/archive/page.tsx
  * Description: Public page for archived tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -19,79 +19,136 @@ import {
 } from '@/components/ui/card'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
+import type { Metadata } from 'next'
 
-async function getArchivedTournaments() {
-  const now = new Date()
-  return await prisma.tournament.findMany({
+// Types
+interface ArchivedTournament {
+  id: string
+  title: string
+  description: string
+  slug: string
+  startDate: Date
+  format: string
+  maxParticipants: number | null
+}
+
+// Constants
+const CONTENT = {
+  TITLE: 'Tournois archivés',
+  SUBTITLE: 'Explorez les tournois passés et leurs résultats.',
+  EMPTY: 'Aucun tournoi archivé trouvé pour le moment.',
+  BTN_RESULTS: 'Voir les résultats',
+  LABEL_FORMAT: 'Format :',
+  LABEL_PLAYERS: (count: number | null) =>
+    count ? `${count} places` : 'Places illimitées',
+} as const
+
+const SEO_CONFIG = {
+  TITLE: 'Archives des Tournois',
+  DESCRIPTION:
+    "Consultez l'historique et les résultats des tournois Belouga passés.",
+} as const
+
+// Metadata
+export const metadata: Metadata = {
+  title: SEO_CONFIG.TITLE,
+  description: SEO_CONFIG.DESCRIPTION,
+}
+
+const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {
+  return prisma.tournament.findMany({
     where: {
-      OR: [{ isArchived: true }, { endDate: { lt: now } }],
+      OR: [{ isArchived: true }, { endDate: { lt: new Date() } }],
     },
     orderBy: { endDate: 'desc' },
   })
 }
 
+const ArchivedTournamentCard = ({
+  tournament,
+}: {
+  tournament: ArchivedTournament
+}) => {
+  return (
+    <Card className="flex flex-col border-zinc-800 bg-zinc-900/50 opacity-90 transition-all hover:border-zinc-700 hover:opacity-100">
+      <CardHeader>
+        <CardTitle className="text-xl text-zinc-200">
+          {tournament.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-2 text-zinc-500">
+          {tournament.description}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="flex-1 space-y-4 text-sm text-zinc-400">
+        {/* Date */}
+        <div className="flex items-center gap-2">
+          <Calendar className="size-4 text-zinc-500" />
+          <span className="capitalize">{formatDate(tournament.startDate)}</span>
+        </div>
+
+        {/* Format */}
+        <div className="flex items-center gap-2">
+          <Trophy className="size-4 text-yellow-500/50" />
+          <span>
+            {CONTENT.LABEL_FORMAT} {tournament.format}
+          </span>
+        </div>
+
+        {/* Participants Capacity */}
+        <div className="flex items-center gap-2">
+          <Users className="size-4 text-green-500/50" />
+          <span>{CONTENT.LABEL_PLAYERS(tournament.maxParticipants)}</span>
+        </div>
+      </CardContent>
+
+      <CardFooter className="mt-auto">
+        <Button
+          asChild
+          variant="secondary"
+          className="w-full bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+        >
+          <Link href={`/tournaments/${tournament.slug}`}>
+            {CONTENT.BTN_RESULTS}
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+const EmptyArchiveState = () => {
+  return (
+    <div className="col-span-full py-24 text-center text-zinc-500">
+      <p>{CONTENT.EMPTY}</p>
+    </div>
+  )
+}
+
 export default async function ArchivePage() {
-  const tournaments = await getArchivedTournaments()
+  const tournaments = await fetchArchivedTournaments()
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mb-8 space-y-4">
-        <h1 className="text-4xl font-bold text-white">Tournois archivés</h1>
-        <p className="text-zinc-400">
-          Explore les tournois passés et leurs résultats.
-        </p>
+    <div className="container mx-auto min-h-[80vh] px-4 py-12">
+      {/* Header */}
+      <div className="mb-12 space-y-4">
+        <h1 className="text-4xl font-bold tracking-tight text-white">
+          {CONTENT.TITLE}
+        </h1>
+        <p className="text-lg text-zinc-400">{CONTENT.SUBTITLE}</p>
       </div>
 
+      {/* Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {tournaments.length > 0 ? (
           tournaments.map(tournament => (
-            <Card
+            <ArchivedTournamentCard
               key={tournament.id}
-              className="border-zinc-800 bg-zinc-900/50 opacity-80 hover:opacity-100 transition-opacity"
-            >
-              <CardHeader>
-                <CardTitle className="text-xl text-zinc-200">
-                  {tournament.title}
-                </CardTitle>
-                <CardDescription className="line-clamp-2 text-zinc-500">
-                  {tournament.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm text-zinc-400">
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-4 text-zinc-500" />
-                  <span>{formatDate(tournament.startDate)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-400">
-                  <Trophy className="size-4 text-yellow-500/50" />
-                  <span>{tournament.format}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-400">
-                  <Users className="size-4 text-green-500/50" />
-                  <span>
-                    {tournament.maxParticipants
-                      ? `${tournament.maxParticipants} Participants`
-                      : 'Open Registration'}
-                  </span>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  asChild
-                  variant="secondary"
-                  className="w-full bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                >
-                  <Link href={`/tournaments/${tournament.slug}`}>
-                    View Results
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+              tournament={tournament}
+            />
           ))
         ) : (
-          <div className="col-span-full py-12 text-center text-zinc-500">
-            No archived tournaments found.
-          </div>
+          <EmptyArchiveState />
         )}
       </div>
     </div>
