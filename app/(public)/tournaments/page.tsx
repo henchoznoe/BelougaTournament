@@ -27,6 +27,34 @@ import {
 } from '@/components/ui/card'
 import { getPublicTournaments } from '@/lib/data/tournaments'
 
+// Constants
+const CONFIG = {
+  LOCALE: 'fr-FR',
+  DATE_OPTIONS: {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  } as const,
+} as const
+
+const CONTENT = {
+  TITLE: 'Tous les Tournois',
+  DESCRIPTION:
+    'Découvrez les prochaines compétitions, inscrivez-vous et préparez-vous à affronter les meilleurs joueurs.',
+  BTN_ARCHIVE: 'Voir les archives',
+  BTN_DETAILS: 'Voir les détails',
+  EMPTY: {
+    TITLE: 'Aucun tournoi prévu',
+    DESC: 'Revenez plus tard pour découvrir les prochaines compétitions !',
+  },
+  FORMAT: {
+    TEAM: 'Équipes',
+    PLAYER: 'Joueurs',
+  },
+  PREFIX_ID: 'ID:',
+  PREFIX_REGISTERED: 'Inscrit',
+} as const
+
 export default async function TournamentsPage() {
   const tournaments = await getPublicTournaments()
 
@@ -52,11 +80,10 @@ export default async function TournamentsPage() {
             <Trophy className="size-8 text-blue-400" />
           </div>
           <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            Tous les Tournois
+            {CONTENT.TITLE}
           </h1>
           <p className="max-w-2xl text-lg text-zinc-400">
-            Découvrez les prochaines compétitions, inscrivez-vous et
-            préparez-vous à affronter les meilleurs joueurs.
+            {CONTENT.DESCRIPTION}
           </p>
 
           <div className="pt-4">
@@ -67,7 +94,7 @@ export default async function TournamentsPage() {
             >
               <Link href="/tournaments/archive">
                 <Archive className="mr-2 size-4" />
-                Voir les archives
+                {CONTENT.BTN_ARCHIVE}
               </Link>
             </Button>
           </div>
@@ -89,7 +116,7 @@ export default async function TournamentsPage() {
                         {tournament.format}
                       </span>
                       <span className="text-xs text-zinc-500 font-mono">
-                        ID: {tournament.slug.slice(0, 8)}
+                        {CONTENT.PREFIX_ID} {tournament.slug.slice(0, 8)}
                       </span>
                     </div>
                     <CardTitle className="text-2xl text-white group-hover:text-blue-400 transition-colors">
@@ -106,12 +133,8 @@ export default async function TournamentsPage() {
                       </div>
                       <span className="font-medium">
                         {new Date(tournament.startDate).toLocaleDateString(
-                          'fr-FR',
-                          {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                          },
+                          CONFIG.LOCALE,
+                          CONFIG.DATE_OPTIONS,
                         )}
                       </span>
                     </div>
@@ -123,10 +146,10 @@ export default async function TournamentsPage() {
                         {tournament.maxParticipants
                           ? `${tournament._count.registrations} / ${tournament.maxParticipants} ${
                               tournament.format === 'TEAM'
-                                ? 'Équipes'
-                                : 'Joueurs'
+                                ? CONTENT.FORMAT.TEAM
+                                : CONTENT.FORMAT.PLAYER
                             }`
-                          : `${tournament._count.registrations} Inscrit${
+                          : `${tournament._count.registrations} ${CONTENT.PREFIX_REGISTERED}${
                               tournament._count.registrations > 1 ? 's' : ''
                             }`}
                       </span>
@@ -138,7 +161,7 @@ export default async function TournamentsPage() {
                       className="w-full bg-zinc-800 font-semibold text-white hover:bg-blue-600 transition-all duration-300"
                     >
                       <Link href={`/tournaments/${tournament.slug}`}>
-                        Voir les détails
+                        {CONTENT.BTN_DETAILS}
                         <ChevronRight className="ml-2 size-4" />
                       </Link>
                     </Button>
@@ -152,11 +175,9 @@ export default async function TournamentsPage() {
                 <Gamepad2 className="size-10 text-zinc-600" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                Aucun tournoi prévu
+                {CONTENT.EMPTY.TITLE}
               </h3>
-              <p className="text-zinc-500">
-                Revenez plus tard pour découvrir les prochaines compétitions !
-              </p>
+              <p className="text-zinc-500">{CONTENT.EMPTY.DESC}</p>
             </div>
           )}
         </div>
