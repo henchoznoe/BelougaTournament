@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/db/prisma";
 import { TournamentsList } from "./tournaments-list";
 
 // Constants

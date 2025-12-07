@@ -8,12 +8,12 @@
 
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { Features } from '@/components/public/landing/features'
-import { Hero } from '@/components/public/landing/hero'
-import { Stats } from '@/components/public/landing/stats'
-import { StreamSection } from '@/components/public/landing/stream-section'
-import { TournamentsSection } from '@/components/public/landing/tournaments-section'
-import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
+import { TournamentsSection } from '@/components/features/tournament/list/tournaments-section'
+import { TournamentsSkeleton } from '@/components/features/tournament/list/tournaments-skeleton'
+import { FeaturesSection } from '@/components/layout/landing/features-section'
+import { HeroSection } from '@/components/layout/landing/hero-section'
+import { StatsSection } from '@/components/layout/landing/stats-section'
+import { StreamSection } from '@/components/layout/landing/stream-section'
 import { getSiteSettings } from '@/lib/data/settings'
 
 // Constants
@@ -41,9 +41,9 @@ export default async function LandingPage() {
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-      <Hero />
-      <Stats stats={statsData} />
-      <Features />
+      <HeroSection />
+      <StatsSection stats={statsData} />
+      <FeaturesSection />
       {/* Suspense allows the hero to load immediately while fetching tournaments */}
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />

@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 
 async function getArchivedTournaments() {

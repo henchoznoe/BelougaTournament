@@ -10,7 +10,7 @@
 
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { TournamentForm } from '@/components/admin/tournament-form'
+import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
 import { Button } from '@/components/ui/button'
 import { createTournament } from '@/lib/actions/tournaments'
 

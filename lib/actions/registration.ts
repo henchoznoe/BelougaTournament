@@ -11,9 +11,9 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import prisma from '@/lib/db/prisma'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { env } from '@/lib/env'
-import prisma from '@/lib/prisma'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 

@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getSession } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 

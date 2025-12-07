@@ -10,8 +10,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
+import prisma from '@/lib/db/prisma'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
-import prisma from '@/lib/prisma'
 import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
 
 async function checkAuth() {

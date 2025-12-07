@@ -8,7 +8,7 @@
 
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
 import { logout } from '@/lib/actions/auth'
 import { getSession } from '@/lib/auth'
 import { Role } from '@/prisma/generated/prisma/enums'

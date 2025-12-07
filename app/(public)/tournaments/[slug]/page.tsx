@@ -18,7 +18,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { RegistrationForm } from '@/components/tournament/registration-form'
+import { RegistrationForm } from '@/components/features/tournament/registration/registration-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'

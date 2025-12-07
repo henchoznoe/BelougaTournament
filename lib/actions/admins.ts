@@ -12,7 +12,7 @@ import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { getSession } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Types

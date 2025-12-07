@@ -13,8 +13,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import z from 'zod'
 import { encrypt, type SessionPayload } from '@/lib/auth'
+import prisma from '@/lib/db/prisma'
 import { env } from '@/lib/env'
-import prisma from '@/lib/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Types

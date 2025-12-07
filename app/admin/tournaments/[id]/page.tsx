@@ -17,8 +17,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChallongeIdForm } from '@/components/admin/challonge-id-form'
-import { CsvExportButton } from '@/components/admin/csv-export-button'
+import { CsvExportButton } from '@/components/features/admin/actions/csv-export'
+import { ChallongeIdForm } from '@/components/features/tournament/form/challonge-id-form'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -45,7 +45,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { deleteRegistration } from '@/lib/actions/tournament-manager'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'

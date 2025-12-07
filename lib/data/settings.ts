@@ -7,7 +7,7 @@
  */
 
 import { unstable_cache } from 'next/cache'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 
 // Constants
 const DB_CONFIG = {

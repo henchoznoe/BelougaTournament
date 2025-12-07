@@ -10,7 +10,7 @@ import { Lock } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getSession } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 import { SettingsForm } from './settings-form'
 

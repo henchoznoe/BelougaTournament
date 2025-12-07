@@ -8,7 +8,7 @@
 
 import { Edit, Eye, Plus, Trophy } from 'lucide-react'
 import Link from 'next/link'
-import { DeleteTournamentButton } from '@/components/admin/delete-tournament-button'
+import { DeleteTournamentButton } from '@/components/features/tournament/actions/delete-button'
 import { Button } from '@/components/ui/button'
 import {
   Table,

@@ -7,7 +7,7 @@
  */
 
 import { unstable_cache } from 'next/cache'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import type { Prisma } from '@/prisma/generated/prisma/client'
 
 // Types

@@ -10,7 +10,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 
 // Types
 type ActionResponse = {

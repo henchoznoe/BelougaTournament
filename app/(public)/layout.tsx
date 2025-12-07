@@ -6,8 +6,8 @@
  * License: MIT
  */
 
-import { Footer } from '@/components/public/footer'
-import { Navbar } from '@/components/public/navbar'
+import { Footer } from '@/components/layout/footer'
+import { Navbar } from '@/components/layout/navbar/navbar'
 
 export default function PublicLayout({
   children,

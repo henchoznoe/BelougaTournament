@@ -12,8 +12,8 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { getSession } from '@/lib/auth'
-import prisma from '@/lib/prisma'
-import { tournamentSchema } from '@/lib/schemas/tournament'
+import prisma from '@/lib/db/prisma'
+import { tournamentSchema } from '@/lib/validations/tournament'
 import { Prisma, Role } from '@/prisma/generated/prisma/client'
 
 // Types

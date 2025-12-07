@@ -11,7 +11,7 @@
 import { put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 
 // Types
 const settingString = z.string().optional().or(z.literal(''))

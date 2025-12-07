@@ -8,7 +8,7 @@
 
 import { PrismaPg } from '@prisma/adapter-pg'
 import { env } from '@/lib/env'
-import { PrismaClient } from '../prisma/generated/prisma/client'
+import { PrismaClient } from '@/prisma/generated/prisma/client'
 
 // Create Prisma client
 // Note: Depending on adapter usage, check if connectionString passed as object property is correct for @prisma/adapter-pg.

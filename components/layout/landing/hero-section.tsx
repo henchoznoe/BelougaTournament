@@ -1,8 +1,8 @@
 /**
- * File: components/public/landing/hero.tsx
+ * File: components/layout/landing/hero-section.tsx
  * Description: Main hero section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -55,7 +55,7 @@ const itemVariants: Variants = {
   },
 };
 
-export const Hero = () => {
+export const HeroSection = () => {
   return (
     <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
 

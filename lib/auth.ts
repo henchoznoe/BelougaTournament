@@ -10,7 +10,7 @@ import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { decrypt } from '@/lib/auth-core'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 export * from '@/lib/auth-core'

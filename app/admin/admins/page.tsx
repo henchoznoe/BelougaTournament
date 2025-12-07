@@ -8,10 +8,10 @@
 
 import { Lock } from 'lucide-react'
 import Link from 'next/link'
-import { AdminsManager } from '@/components/admin/admins-manager'
+import { AdminsManager } from '@/components/features/admin/users/admins-manager'
 import { Button } from '@/components/ui/button'
 import { getSession } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // Types

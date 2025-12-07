@@ -1,8 +1,8 @@
 /**
- * File: components/public/landing/stats.tsx
+ * File: components/layout/landing/stats-section.tsx
  * Description: Stats section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-06
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -55,7 +55,7 @@ const STATS_CONFIG: StatConfigItem[] = [
     },
 ]
 
-export const Stats = ({ stats }: StatsProps) => {
+export const StatsSection = ({ stats }: StatsProps) => {
     return (
         <section className="container mx-auto px-4 scroll-mt-24" id="stats">
             <motion.div
