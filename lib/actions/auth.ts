@@ -41,11 +41,8 @@ export const login = async (
   _prevState: ActionState<string> | undefined,
   formData: FormData,
 ): Promise<ActionState<string>> => {
-  // Safe Data Extraction (No casting)
-  const rawData = {
-    email: formData.get('email')?.toString() || '',
-    password: formData.get('password')?.toString() || '',
-  }
+  // Safe Data Extraction
+  const rawData = Object.fromEntries(formData)
 
   // Validate Input
   const validation = loginSchema.safeParse(rawData)
@@ -54,7 +51,7 @@ export const login = async (
     return {
       success: false,
       message: ACTION_MESSAGES.AUTH.ERR_MISSING_CREDS,
-      inputs: rawData.email,
+      inputs: rawData.email?.toString(),
       errors: validation.error.flatten().fieldErrors,
     }
   }
