@@ -22,3 +22,11 @@ export function formatDate(date: Date | string | number) {
 export function formatDateTime(date: Date | string | number) {
   return format(new Date(date), "PPP 'à' p", { locale: fr })
 }
+
+export function getErrorMessage(error: unknown, fallback: string): string {
+  console.error(error)
+  if (error instanceof Error) {
+    return error.message
+  }
+  return fallback
+}

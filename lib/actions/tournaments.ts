@@ -22,6 +22,7 @@ import {
   dbUpdateTournament,
 } from '@/lib/data/mutations/tournaments'
 import { getTournamentExportData } from '@/lib/data/queries/tournaments'
+import { getErrorMessage } from '@/lib/utils'
 import { tournamentSchema } from '@/lib/validations/tournament'
 import { Role, Visibility } from '@/prisma/generated/prisma/client'
 
@@ -47,10 +48,10 @@ export const createTournament = authenticatedAction({
     } catch (error) {
       return {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
+        message: getErrorMessage(
+          error,
+          ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
+        ),
       }
     }
 
@@ -69,10 +70,10 @@ export const deleteTournament = authenticatedAction({
     } catch (error) {
       return {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
+        message: getErrorMessage(
+          error,
+          ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
+        ),
       }
     }
 
@@ -94,10 +95,10 @@ export const updateTournament = authenticatedAction({
     } catch (error) {
       return {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+        message: getErrorMessage(
+          error,
+          ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+        ),
       }
     }
 
@@ -146,10 +147,10 @@ export const toggleTournamentVisibility = authenticatedAction({
     } catch (error) {
       return {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+        message: getErrorMessage(
+          error,
+          ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+        ),
       }
     }
 
