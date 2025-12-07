@@ -17,7 +17,6 @@ import { redirect } from 'next/navigation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { CACHE_TAGS } from '@/lib/constants'
 import {
   dbCreateTournament,
   dbDeleteTournament,
@@ -25,6 +24,7 @@ import {
   dbUpdateTournament,
 } from '@/lib/data/mutations/tournaments'
 import { getTournamentExportData } from '@/lib/data/queries/tournaments'
+import { TOURNAMENT_CACHE_TAGS } from '@/lib/data/tournaments'
 import { getErrorMessage } from '@/lib/utils'
 import {
   deleteTournamentSchema,
@@ -55,7 +55,7 @@ export const createTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
   },
 })
@@ -76,7 +76,7 @@ export const deleteTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     return {
       success: true,
       message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
@@ -100,7 +100,7 @@ export const updateTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
     redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
   },
@@ -150,7 +150,7 @@ export const toggleTournamentVisibility = authenticatedAction({
       }
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
     revalidatePath(APP_ROUTES.TOURNAMENTS)

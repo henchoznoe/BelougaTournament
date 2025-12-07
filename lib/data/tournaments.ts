@@ -44,9 +44,13 @@ export type TournamentWithDetails = Prisma.TournamentGetPayload<{
 // CONSTANTS
 // ----------------------------------------------------------------------
 
+export const TOURNAMENT_CACHE_TAGS = {
+  TOURNAMENTS: 'tournaments',
+  TOURNAMENT_SLUG: (slug: string) => `tournament-${slug}`,
+} as const
+
 const CACHE_CONFIG = {
-  KEY_TOURNAMENTS: 'tournaments',
-  KEY_TOURNAMENT_SLUG: (slug: string) => `tournament-${slug}`,
+  ...TOURNAMENT_CACHE_TAGS,
   REVALIDATE_SECONDS: 3600, // 1 hour
 } as const
 
@@ -97,9 +101,9 @@ const fetchTournamentBySlugFromDb = async (
  */
 export const getPublicTournaments = unstable_cache(
   fetchPublicTournamentsFromDb,
-  [CACHE_CONFIG.KEY_TOURNAMENTS],
+  [CACHE_CONFIG.TOURNAMENTS],
   {
-    tags: [CACHE_CONFIG.KEY_TOURNAMENTS],
+    tags: [CACHE_CONFIG.TOURNAMENTS],
     revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
   },
 )
@@ -113,9 +117,9 @@ export const getTournamentBySlug = async (
 ): Promise<TournamentWithDetails | null> => {
   const getCachedTournament = unstable_cache(
     fetchTournamentBySlugFromDb,
-    [CACHE_CONFIG.KEY_TOURNAMENT_SLUG(slug)],
+    [CACHE_CONFIG.TOURNAMENT_SLUG(slug)],
     {
-      tags: [CACHE_CONFIG.KEY_TOURNAMENT_SLUG(slug)],
+      tags: [CACHE_CONFIG.TOURNAMENT_SLUG(slug)],
       revalidate: CACHE_CONFIG.REVALIDATE_SECONDS,
     },
   )

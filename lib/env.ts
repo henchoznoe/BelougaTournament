@@ -48,10 +48,10 @@ const envSchema = z.object({
     .min(1, 'NEXT_PUBLIC_TWITCH_PARENT is required'),
   NEXT_PUBLIC_DEFAULT_STREAM_URL: z
     .string()
-    .min(1, 'NEXT_PUBLIC_DEFAULT_STREAM_URL must be a valid URL'),
+    .url('NEXT_PUBLIC_DEFAULT_STREAM_URL must be a valid URL'),
   NEXT_PUBLIC_APP_URL: z
     .string()
-    .min(1, 'NEXT_PUBLIC_APP_URL must be a valid URL')
+    .url('NEXT_PUBLIC_APP_URL must be a valid URL')
     .optional()
     .default('http://localhost:3000'),
 })

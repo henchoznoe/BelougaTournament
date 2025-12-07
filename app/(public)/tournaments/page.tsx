@@ -17,6 +17,7 @@ import { TournamentCard } from '@/components/features/tournament/card/tournament
 import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
+import type { Metadata } from 'next'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -32,6 +33,11 @@ const CONTENT = {
     DESC: 'Revenez plus tard pour découvrir les prochaines compétitions !',
   },
 } as const
+
+export const metadata: Metadata = {
+  title: CONTENT.TITLE,
+  description: CONTENT.DESCRIPTION,
+}
 
 // ----------------------------------------------------------------------
 // COMPONENT

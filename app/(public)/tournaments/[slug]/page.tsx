@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDateTime } from '@/lib/utils'
+import type { Metadata } from 'next'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -87,6 +88,12 @@ const CONTENT = {
     ENDED: "La période d'inscription est terminée.",
   },
 } as const
+
+export const metadata: Metadata = {
+  // TODO: Generate metadata from tournament data
+  title: 'Tournoi',
+  description: 'Tournoi',
+}
 
 // ----------------------------------------------------------------------
 // LOGIC

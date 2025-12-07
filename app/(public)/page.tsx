@@ -18,16 +18,30 @@ import { FeaturesSection } from '@/components/layout/landing/features-section'
 import { HeroSection } from '@/components/layout/landing/hero-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
-import { HOME_CONFIG } from '@/lib/constants'
 import { getLandingStats } from '@/lib/data/mappers/landing'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
+const CONTENT = {
+  META_TITLE: 'Belouga Tournament',
+  META_DESCRIPTION: 'Les tournois Belouga créés par Quentadoulive.',
+  HERO: {
+    HERO_BLUE_BADGE: 'La référence e-sport amateur',
+    HERO_TITLE: 'BELOUGA',
+    HERO_TITLE_GRADIENT: 'TOURNAMENT',
+    HERO_DESCRIPTION:
+      "Rejoignez la compétition ultime. Tournois, communauté et diffusion en direct pour les passionnés d'e-sport.",
+    HERO_DESCRIPTION_HIGHLIGHT: 'Votre gloire commence ici.',
+    HERO_PRIMARY_CTA_TEXT: 'Participer',
+    HERO_SECONDARY_CTA_TEXT: 'En savoir plus',
+  },
+} as const
+
 export const metadata: Metadata = {
-  title: HOME_CONFIG.META_TITLE,
-  description: HOME_CONFIG.META_DESCRIPTION,
+  title: CONTENT.META_TITLE,
+  description: CONTENT.META_DESCRIPTION,
 }
 
 // ----------------------------------------------------------------------
@@ -39,7 +53,7 @@ const LandingPage = async () => {
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-      <HeroSection />
+      <HeroSection content={CONTENT.HERO} />
       <StatsSection stats={statsData} />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>

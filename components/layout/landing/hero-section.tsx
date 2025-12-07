@@ -12,12 +12,29 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
+import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { APP_METADATA, HOME_CONFIG } from "@/lib/constants"
+import { APP_METADATA } from "@/lib/constants"
+
+// ----------------------------------------------------------------------
+// TYPES
+// ----------------------------------------------------------------------
+
+interface HeroSectionProps {
+  content: {
+    HERO_BLUE_BADGE: string
+    HERO_TITLE: string
+    HERO_TITLE_GRADIENT: string
+    HERO_DESCRIPTION: string
+    HERO_DESCRIPTION_HIGHLIGHT: string
+    HERO_PRIMARY_CTA_TEXT: string
+    HERO_SECONDARY_CTA_TEXT: string
+  }
+}
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -52,7 +69,7 @@ const itemVariants: Variants = {
 // COMPONENT
 // ----------------------------------------------------------------------
 
-export const HeroSection = () => {
+export const HeroSection = ({ content }: HeroSectionProps) => {
   return (
     <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
       <div className="absolute inset-0 z-0 select-none">
@@ -75,7 +92,7 @@ export const HeroSection = () => {
       >
         <motion.div variants={itemVariants} className="flex justify-center">
           <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400 backdrop-blur-sm">
-            {HOME_CONFIG.HERO_BLUE_BADGE}
+            {content.HERO_BLUE_BADGE}
           </span>
         </motion.div>
 
@@ -83,9 +100,9 @@ export const HeroSection = () => {
           variants={itemVariants}
           className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl"
         >
-          {HOME_CONFIG.HERO_TITLE}{" "}
+          {content.HERO_TITLE}{" "}
           <span className="animate-gradient-x bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            {HOME_CONFIG.HERO_TITLE_GRADIENT}
+            {content.HERO_TITLE_GRADIENT}
           </span>
         </motion.h1>
 
@@ -93,10 +110,10 @@ export const HeroSection = () => {
           variants={itemVariants}
           className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl"
         >
-          {HOME_CONFIG.HERO_DESCRIPTION}
+          {content.HERO_DESCRIPTION}
           <br />
           <span className="text-blue-400">
-            {HOME_CONFIG.HERO_DESCRIPTION_HIGHLIGHT}
+            {content.HERO_DESCRIPTION_HIGHLIGHT}
           </span>
         </motion.p>
 
@@ -110,7 +127,7 @@ export const HeroSection = () => {
             className="h-14 bg-blue-600 px-8 text-lg font-bold shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)]"
           >
             <Link href={ROUTES.TOURNAMENTS}>
-              {HOME_CONFIG.HERO_PRIMARY_CTA_TEXT}
+              {content.HERO_PRIMARY_CTA_TEXT}
               <ChevronRight className="ml-2 size-5" />
             </Link>
           </Button>
@@ -122,7 +139,7 @@ export const HeroSection = () => {
             className="h-14 border-zinc-700 bg-zinc-950/50 px-8 text-lg text-white backdrop-blur transition-all hover:border-blue-500/50 hover:bg-zinc-900 hover:text-blue-400"
           >
             <Link href={ROUTES.STATS_ANCHOR}>
-              {HOME_CONFIG.HERO_SECONDARY_CTA_TEXT}
+              {content.HERO_SECONDARY_CTA_TEXT}
             </Link>
           </Button>
         </motion.div>

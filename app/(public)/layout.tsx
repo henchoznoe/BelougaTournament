@@ -14,18 +14,22 @@ import { Footer } from '@/components/layout/footer'
 import { Navbar } from '@/components/layout/navbar/navbar'
 
 // ----------------------------------------------------------------------
+// TYPES & INTERFACES
+// ----------------------------------------------------------------------
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+// ----------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------
 
-const PublicLayout = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) => {
+const PublicLayout = (props: LayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">{props.children}</main>
       <Footer />
     </div>
   )
