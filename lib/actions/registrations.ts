@@ -8,12 +8,11 @@
 
 'use server'
 
-import type { RegistrationStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
 import prisma from '@/lib/prisma'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
 
 async function checkAuth() {
   const session = await getSession()

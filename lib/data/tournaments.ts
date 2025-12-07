@@ -6,9 +6,9 @@
  * License: MIT
  */
 
-import type { Prisma } from '@prisma/client'
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
+import type { Prisma } from '@/prisma/generated/prisma/client'
 
 // Types
 export type PublicTournament = Prisma.TournamentGetPayload<{
