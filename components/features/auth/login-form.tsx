@@ -15,16 +15,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login } from '@/lib/actions/auth'
+import { UI_MESSAGES } from '@/lib/config/messages'
 import type { ActionState } from '@/lib/types/actions'
-
-const CONTENT = {
-  LABEL_EMAIL: 'Email',
-  PLACEHOLDER_EMAIL: 'admin@belouga.com',
-  LABEL_PASSWORD: 'Mot de passe',
-  PLACEHOLDER_PASSWORD: '••••••••',
-  BTN_LOGIN: 'Se connecter',
-  BTN_PENDING: 'Connexion...',
-} as const
 
 const INITIAL_STATE: ActionState<string> = {
   success: false,
@@ -43,7 +35,7 @@ export function LoginForm() {
           htmlFor="email"
           className="text-xs font-medium uppercase tracking-wider text-zinc-500"
         >
-          {CONTENT.LABEL_EMAIL}
+          {UI_MESSAGES.LOGIN.LABEL_EMAIL}
         </Label>
         <div className="group relative">
           <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-blue-400" />
@@ -51,7 +43,7 @@ export function LoginForm() {
             id="email"
             name="email"
             type="email"
-            placeholder={CONTENT.PLACEHOLDER_EMAIL}
+            placeholder={UI_MESSAGES.LOGIN.PLACEHOLDER_EMAIL}
             required
             defaultValue={state.inputs}
             className="h-11 border-white/10 bg-zinc-950/50 pl-10 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-zinc-950/80 focus:ring-blue-500/20"
@@ -65,7 +57,7 @@ export function LoginForm() {
           htmlFor="password"
           className="text-xs font-medium uppercase tracking-wider text-zinc-500"
         >
-          {CONTENT.LABEL_PASSWORD}
+          {UI_MESSAGES.LOGIN.LABEL_PASSWORD}
         </Label>
         <div className="group relative">
           <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-blue-400" />
@@ -74,7 +66,7 @@ export function LoginForm() {
             name="password"
             type="password"
             required
-            placeholder={CONTENT.PLACEHOLDER_PASSWORD}
+            placeholder={UI_MESSAGES.LOGIN.PLACEHOLDER_PASSWORD}
             className="h-11 border-white/10 bg-zinc-950/50 pl-10 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-zinc-950/80 focus:ring-blue-500/20"
           />
         </div>
@@ -97,7 +89,7 @@ export function LoginForm() {
         disabled={isPending}
         className="h-11 w-full bg-blue-600 text-base font-semibold transition-all hover:bg-blue-500 hover:shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isPending ? CONTENT.BTN_PENDING : CONTENT.BTN_LOGIN}
+        {isPending ? UI_MESSAGES.LOGIN.BTN_PENDING : UI_MESSAGES.LOGIN.BTN_LOGIN}
       </Button>
     </form>
   )

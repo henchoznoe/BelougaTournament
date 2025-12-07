@@ -58,3 +58,14 @@ export const ACTION_MESSAGES = {
     ERR_DB: 'Database error: Failed to save settings.',
   },
 } as const
+
+export const UI_MESSAGES = {
+  LOGIN: {
+    LABEL_EMAIL: 'Email',
+    PLACEHOLDER_EMAIL: 'admin@belouga.com',
+    LABEL_PASSWORD: 'Mot de passe',
+    PLACEHOLDER_PASSWORD: '••••••••',
+    BTN_LOGIN: 'Se connecter',
+    BTN_PENDING: 'Connexion...',
+  },
+} as const
