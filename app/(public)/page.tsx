@@ -15,7 +15,7 @@ import { HeroSection } from '@/components/layout/landing/hero-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
 import { HOME_CONFIG } from '@/lib/constants'
-import { getSiteSettings } from '@/lib/data/settings'
+import { getLandingStats } from '@/lib/data/mappers/landing'
 
 // Metadata
 export const metadata: Metadata = {
@@ -24,14 +24,7 @@ export const metadata: Metadata = {
 }
 
 export default async function LandingPage() {
-  const settings = await getSiteSettings()
-
-  const statsData = {
-    years: settings.statsYears,
-    players: settings.statsPlayers,
-    tournaments: settings.statsTournaments,
-    matches: settings.statsMatches,
-  }
+  const statsData = await getLandingStats()
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
