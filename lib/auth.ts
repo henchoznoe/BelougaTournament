@@ -72,6 +72,9 @@ export async function getSession() {
   }
 }
 
+import { ACTION_MESSAGES } from '@/lib/config/messages'
+import type { ActionState } from '@/lib/types/actions'
+
 // Get admin session from cookie and determine if it is an admin or superadmin
 export async function getAdminSession() {
   const session = await getSession()
@@ -84,4 +87,25 @@ export async function getAdminSession() {
   if (!isAuthorized) return null
 
   return session
+}
+
+/**
+ * Validates that the current request is from an authenticated Admin or SuperAdmin.
+ * Returns an error ActionState if invalid, or null if valid.
+ */
+export async function validateRequestIsAdmin(): Promise<ActionState | null> {
+  const session = await getSession()
+
+  if (
+    !session ||
+    !session.user ||
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
+  ) {
+    return {
+      success: false,
+      message: ACTION_MESSAGES.TOURNAMENTS.UNAUTHORIZED, // Or a generic UNAUTHORIZED message
+    }
+  }
+
+  return null
 }

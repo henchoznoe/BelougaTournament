@@ -12,7 +12,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { z } from 'zod'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { getSession } from '@/lib/auth'
+import { validateRequestIsAdmin } from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { CACHE_TAGS } from '@/lib/constants'
@@ -28,21 +28,6 @@ import { tournamentSchema } from '@/lib/validations/tournament'
 import { Role, type Visibility } from '@/prisma/generated/prisma/client'
 
 // Helper Functions
-async function checkAuth(): Promise<ActionState> {
-  const session = await getSession()
-  if (
-    !session ||
-    !session.user ||
-    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
-  ) {
-    return {
-      success: false,
-      message: ACTION_MESSAGES.TOURNAMENTS.UNAUTHORIZED,
-    }
-  }
-  return { success: true }
-}
-
 // Logic - Create
 // Logic - Create
 export const createTournament = authenticatedAction({
@@ -68,9 +53,9 @@ export const createTournament = authenticatedAction({
 
 // Logic - Delete
 export async function deleteTournament(id: string): Promise<ActionState> {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return auth
+  const error = await validateRequestIsAdmin()
+  if (error) {
+    return error
   }
 
   try {
@@ -97,9 +82,9 @@ export async function updateTournament(
   id: string,
   data: z.infer<typeof tournamentSchema>,
 ): Promise<ActionState> {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return auth
+  const error = await validateRequestIsAdmin()
+  if (error) {
+    return error
   }
 
   const validatedFields = tournamentSchema.safeParse(data)
@@ -133,9 +118,9 @@ export async function updateTournament(
 export async function exportTournamentData(
   tournamentId: string,
 ): Promise<ActionState> {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return auth
+  const error = await validateRequestIsAdmin()
+  if (error) {
+    return error
   }
 
   try {
@@ -209,9 +194,9 @@ export async function toggleTournamentVisibility(
   id: string,
   visibility: Visibility,
 ): Promise<ActionState> {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return auth
+  const error = await validateRequestIsAdmin()
+  if (error) {
+    return error
   }
 
   try {
