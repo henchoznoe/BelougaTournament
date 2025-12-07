@@ -21,20 +21,170 @@ import {
 } from '@/components/ui/table'
 import { getAdminTournaments } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
+import { type Tournament, Visibility } from '@/prisma/generated/prisma/client'
+
+// --- Constants ---
+
+const CONFIG = {
+  DEFAULT_MAX_PARTICIPANTS: 100,
+  ANIMATION_DURATION: 500,
+} as const
+
+const CONTENT = {
+  TITLE: 'Tournois',
+  DESCRIPTION: 'Gérez vos événements compétitifs et vos arbres de tournoi.',
+  CREATE_BUTTON: 'Créer un Tournoi',
+  TABLE: {
+    HEADERS: {
+      TITLE: 'Titre',
+      DATE: 'Date',
+      FORMAT: 'Format',
+      REGISTRATIONS: 'Inscrits',
+      ACTIONS: 'Actions',
+    },
+    BADGES: {
+      FINISHED: 'Terminé',
+      PRIVATE: 'Privé',
+      PUBLIC: 'Public',
+    },
+    EMPTY: {
+      MESSAGE: 'Aucun tournoi trouvé.',
+      CTA: 'Créer votre premier tournoi',
+    },
+  },
+} as const
+
+// --- Helper Components ---
+
+interface TournamentStatusBadgeProps {
+  tournament: Pick<Tournament, 'endDate' | 'visibility'>
+  now: Date
+}
+
+function TournamentStatusBadge({
+  tournament,
+  now,
+}: TournamentStatusBadgeProps) {
+  const isFinished = now > new Date(tournament.endDate)
+  const isPrivate = tournament.visibility === Visibility.PRIVATE
+  const isPublic = tournament.visibility === Visibility.PUBLIC
+
+  if (isFinished) {
+    return (
+      <Badge
+        variant="secondary"
+        className="bg-zinc-800 text-zinc-500 border-zinc-700 text-[10px] h-5 px-1.5"
+      >
+        {CONTENT.TABLE.BADGES.FINISHED}
+      </Badge>
+    )
+  }
+
+  if (isPrivate) {
+    return (
+      <Badge
+        variant="outline"
+        className="border-zinc-700 text-zinc-500 text-[10px] h-5 px-1.5"
+      >
+        {CONTENT.TABLE.BADGES.PRIVATE}
+      </Badge>
+    )
+  }
+
+  if (isPublic) {
+    return (
+      <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-[10px] h-5 px-1.5 hover:bg-green-500/20">
+        {CONTENT.TABLE.BADGES.PUBLIC}
+      </Badge>
+    )
+  }
+
+  return null
+}
+
+interface ParticipationProgressProps {
+  count: number
+  max: number | null
+}
+
+function ParticipationProgress({ count, max }: ParticipationProgressProps) {
+  const maxParticipants = max || CONFIG.DEFAULT_MAX_PARTICIPANTS
+  const percentage = Math.min(100, (count / maxParticipants) * 100)
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-24 bg-zinc-800 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-blue-500 rounded-full"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <span className="text-xs">
+        {count}
+        {max ? ` / ${max}` : ''}
+      </span>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <TableRow>
+      <TableCell colSpan={5} className="h-32 text-center text-zinc-500">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <Trophy className="h-8 w-8 text-zinc-700" />
+          <p>{CONTENT.TABLE.EMPTY.MESSAGE}</p>
+          <Button variant="link" asChild className="text-blue-500">
+            <Link href="/admin/tournaments/new">{CONTENT.TABLE.EMPTY.CTA}</Link>
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )
+}
+
+function ActionButtons({ id }: { id: string }) {
+  return (
+    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button
+        asChild
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10"
+      >
+        <Link href={`/admin/tournaments/${id}`}>
+          <Eye className="h-4 w-4" />
+        </Link>
+      </Button>
+      <Button
+        asChild
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10"
+      >
+        <Link href={`/admin/tournaments/${id}/edit`}>
+          <Edit className="h-4 w-4" />
+        </Link>
+      </Button>
+      <DeleteTournamentButton id={id} />
+    </div>
+  )
+}
+
+// --- Main Page ---
 
 export default async function TournamentsPage() {
   const tournaments = await getAdminTournaments()
+  const now = new Date()
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-            Tournois
+            {CONTENT.TITLE}
           </h1>
-          <p className="text-zinc-400">
-            Gérez vos événements compétitifs et vos arbres de tournoi.
-          </p>
+          <p className="text-zinc-400">{CONTENT.DESCRIPTION}</p>
         </div>
         <Button
           asChild
@@ -43,7 +193,7 @@ export default async function TournamentsPage() {
         >
           <Link href="/admin/tournaments/new">
             <Plus className="mr-2 h-5 w-5" />
-            Créer un Tournoi
+            {CONTENT.CREATE_BUTTON}
           </Link>
         </Button>
       </div>
@@ -53,19 +203,19 @@ export default async function TournamentsPage() {
           <TableHeader>
             <TableRow className="border-white/10 bg-white/5 hover:bg-white/5">
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pl-6">
-                Titre
+                {CONTENT.TABLE.HEADERS.TITLE}
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                Date
+                {CONTENT.TABLE.HEADERS.DATE}
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                Format
+                {CONTENT.TABLE.HEADERS.FORMAT}
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                Inscrits
+                {CONTENT.TABLE.HEADERS.REGISTRATIONS}
               </TableHead>
               <TableHead className="text-right text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pr-6">
-                Actions
+                {CONTENT.TABLE.HEADERS.ACTIONS}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -85,28 +235,10 @@ export default async function TournamentsPage() {
                         {tournament.title}
                       </div>
                       <div className="flex gap-2 ml-11">
-                        {new Date() > new Date(tournament.endDate) && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-zinc-800 text-zinc-500 border-zinc-700 text-[10px] h-5 px-1.5"
-                          >
-                            Terminé
-                          </Badge>
-                        )}
-                        {tournament.visibility === 'PRIVATE' && (
-                          <Badge
-                            variant="outline"
-                            className="border-zinc-700 text-zinc-500 text-[10px] h-5 px-1.5"
-                          >
-                            Privé
-                          </Badge>
-                        )}
-                        {tournament.visibility === 'PUBLIC' &&
-                          new Date() <= new Date(tournament.endDate) && (
-                            <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-[10px] h-5 px-1.5 hover:bg-green-500/20">
-                              Public
-                            </Badge>
-                          )}
+                        <TournamentStatusBadge
+                          tournament={tournament}
+                          now={now}
+                        />
                       </div>
                     </div>
                   </TableCell>
@@ -119,67 +251,18 @@ export default async function TournamentsPage() {
                     </span>
                   </TableCell>
                   <TableCell className="text-zinc-300 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-24 bg-zinc-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{
-                            width: `${Math.min(100, (tournament._count.registrations / (tournament.maxParticipants || 100)) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs">
-                        {tournament._count.registrations}
-                        {tournament.maxParticipants
-                          ? ` / ${tournament.maxParticipants}`
-                          : ''}
-                      </span>
-                    </div>
+                    <ParticipationProgress
+                      count={tournament._count.registrations}
+                      max={tournament.maxParticipants}
+                    />
                   </TableCell>
                   <TableCell className="text-right py-4 pr-6">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10"
-                      >
-                        <Link href={`/admin/tournaments/${tournament.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10"
-                      >
-                        <Link href={`/admin/tournaments/${tournament.id}/edit`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <DeleteTournamentButton id={tournament.id} />
-                    </div>
+                    <ActionButtons id={tournament.id} />
                   </TableCell>
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-32 text-center text-zinc-500"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Trophy className="h-8 w-8 text-zinc-700" />
-                    <p>Aucun tournoi trouvé.</p>
-                    <Button variant="link" asChild className="text-blue-500">
-                      <Link href="/admin/tournaments/new">
-                        Créer votre premier tournoi
-                      </Link>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <EmptyState />
             )}
           </TableBody>
         </Table>
