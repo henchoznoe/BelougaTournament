@@ -2,7 +2,7 @@
  * File: lib/actions/tournaments.ts
  * Description: Server actions for creating, updating, and deleting tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-02
+ * Date: 2025-12-07
  * License: MIT
  */
 
@@ -16,14 +16,36 @@ import prisma from '@/lib/prisma'
 import { tournamentSchema } from '@/lib/schemas/tournament'
 import { Prisma, Role } from '@/prisma/generated/prisma/client'
 
+// Types
 export type ActionState = {
+  success?: boolean
   errors?: {
     [key: string]: string[]
   }
   message?: string
+  data?: string // Generic data return field (e.g., for standard text or JSON string)
 }
 
-async function checkAuth() {
+// Constants
+const MESSAGES = {
+  UNAUTHORIZED: 'Unauthorized: Admin access required.',
+  VALIDATION_ERROR: 'Validation Error',
+  DATABASE_ERROR: 'Database Error: An unexpected error occurred.',
+  DB_CREATE_ERROR: 'Database Error: Failed to create tournament.',
+  DB_UPDATE_ERROR: 'Database Error: Failed to update tournament.',
+  DB_DELETE_ERROR: 'Database Error: Failed to delete tournament.',
+  DUPLICATE_SLUG:
+    'A tournament with this slug already exists. Please choose another one.',
+  DELETE_SUCCESS: 'Tournament deleted successfully.',
+  NOT_FOUND: 'Tournament not found.',
+  FIELD_DATA_CONSTRAINT: (label: string) =>
+    `Cannot remove field "${label}" as it contains user data.`,
+  FIELD_SECURITY_ERROR: (id: string) =>
+    `Security Error: Field "${id}" does not belong to this tournament.`,
+} as const
+
+// Helper Functions
+async function checkAuth(): Promise<ActionState> {
   const session = await getSession()
   if (
     !session ||
@@ -32,26 +54,28 @@ async function checkAuth() {
   ) {
     return {
       success: false,
-      message: 'Unauthorized: Admin access required.',
+      message: MESSAGES.UNAUTHORIZED,
     }
   }
   return { success: true }
 }
 
+// Logic - Create
 export async function createTournament(
   data: z.infer<typeof tournamentSchema>,
 ): Promise<ActionState> {
   const auth = await checkAuth()
   if (!auth.success) {
-    return { message: auth.message }
+    return auth
   }
 
   const validatedFields = tournamentSchema.safeParse(data)
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Validation Error',
+      message: MESSAGES.VALIDATION_ERROR,
     }
   }
 
@@ -82,12 +106,13 @@ export async function createTournament(
       )?.includes('slug')
     ) {
       return {
-        message:
-          'A tournament with this slug already exists. Please choose another one.',
+        success: false,
+        message: MESSAGES.DUPLICATE_SLUG,
       }
     }
     return {
-      message: 'Database Error: Failed to create tournament.',
+      success: false,
+      message: MESSAGES.DB_CREATE_ERROR,
     }
   }
 
@@ -95,10 +120,11 @@ export async function createTournament(
   redirect('/admin/tournaments')
 }
 
+// Logic - Delete
 export async function deleteTournament(id: string): Promise<ActionState> {
   const auth = await checkAuth()
   if (!auth.success) {
-    return { message: auth.message }
+    return auth
   }
 
   try {
@@ -107,28 +133,36 @@ export async function deleteTournament(id: string): Promise<ActionState> {
     })
   } catch (error) {
     console.error('Delete Error:', error)
-    return { message: 'Failed to delete tournament.' }
+    return {
+      success: false,
+      message: MESSAGES.DB_DELETE_ERROR,
+    }
   }
 
   revalidateTag('tournaments', 'default')
-  return { message: 'Tournament deleted successfully.' }
+  return {
+    success: true,
+    message: MESSAGES.DELETE_SUCCESS,
+  }
 }
 
+// Logic - Update
 export async function updateTournament(
   id: string,
   data: z.infer<typeof tournamentSchema>,
 ): Promise<ActionState> {
   const auth = await checkAuth()
   if (!auth.success) {
-    return { message: auth.message }
+    return auth
   }
 
   const validatedFields = tournamentSchema.safeParse(data)
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Validation Error',
+      message: MESSAGES.VALIDATION_ERROR,
     }
   }
 
@@ -158,9 +192,7 @@ export async function updateTournament(
       // 3. Check if any field to be deleted has associated data
       for (const field of fieldsToDelete) {
         if (field._count.playerData > 0) {
-          throw new Error(
-            `Cannot remove field "${field.label}" as it contains user data.`,
-          )
+          throw new Error(MESSAGES.FIELD_DATA_CONSTRAINT(field.label))
         }
       }
 
@@ -183,7 +215,6 @@ export async function updateTournament(
       }
 
       // 6. Upsert fields (Update existing, Create new)
-      // We iterate to maintain the order from the form
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i]
 
@@ -193,9 +224,7 @@ export async function updateTournament(
             f => f.id === field.id,
           )
           if (!belongsToTournament) {
-            throw new Error(
-              `Security Error: Field "${field.id}" does not belong to this tournament.`,
-            )
+            throw new Error(MESSAGES.FIELD_SECURITY_ERROR(field.id))
           }
 
           // Update existing field
@@ -224,17 +253,22 @@ export async function updateTournament(
     })
   } catch (error) {
     console.error('Update Error:', error)
-    // Return specific error message if it was a validation error we threw
-    if (
-      error instanceof Error &&
-      error.message.includes('Cannot remove field')
-    ) {
-      return { message: error.message }
+    if (error instanceof Error) {
+      // Return specific business rule errors
+      if (
+        error.message.includes('Cannot remove field') ||
+        error.message.includes('Security Error')
+      ) {
+        return {
+          success: false,
+          message: error.message,
+        }
+      }
     }
-    if (error instanceof Error && error.message.includes('Security Error')) {
-      return { message: error.message }
+    return {
+      success: false,
+      message: MESSAGES.DB_UPDATE_ERROR,
     }
-    return { message: 'Failed to update tournament.' }
   }
 
   revalidateTag('tournaments', 'default')
@@ -242,59 +276,76 @@ export async function updateTournament(
   redirect('/admin/tournaments')
 }
 
-export async function exportTournamentData(tournamentId: string) {
+// Logic - Export
+export async function exportTournamentData(
+  tournamentId: string,
+): Promise<ActionState> {
   const auth = await checkAuth()
   if (!auth.success) {
-    throw new Error(auth.message)
+    return auth
   }
 
-  const tournament = await prisma.tournament.findUnique({
-    where: { id: tournamentId },
-    include: {
-      fields: {
-        orderBy: { order: 'asc' },
-      },
-      registrations: {
-        include: {
-          players: {
-            include: {
-              data: true,
+  try {
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        fields: {
+          orderBy: { order: 'asc' },
+        },
+        registrations: {
+          include: {
+            players: {
+              include: {
+                data: true,
+              },
             },
           },
         },
       },
-    },
-  })
-
-  if (!tournament) {
-    throw new Error('Tournament not found')
-  }
-
-  const fields = tournament.fields
-
-  // Flatten data
-  const flattenedData = tournament.registrations.flatMap(reg => {
-    return reg.players.map(player => {
-      const row: Record<string, string> = {
-        'Registration ID': reg.id,
-        'Team Name': reg.teamName || '',
-        'Contact Email': reg.contactEmail,
-        Status: reg.status,
-        'Registration Date': reg.createdAt.toISOString(),
-        'Player Nickname': player.nickname,
-      }
-
-      // Add dynamic fields
-      for (const field of fields) {
-        const playerData = player.data.find(
-          d => d.tournamentFieldId === field.id,
-        )
-        row[field.label] = playerData ? playerData.value : ''
-      }
-
-      return row
     })
-  })
 
-  return JSON.stringify(flattenedData)
+    if (!tournament) {
+      return {
+        success: false,
+        message: MESSAGES.NOT_FOUND,
+      }
+    }
+
+    const fields = tournament.fields
+
+    // Flatten data
+    const flattenedData = tournament.registrations.flatMap(reg => {
+      return reg.players.map(player => {
+        const row: Record<string, string> = {
+          'Registration ID': reg.id,
+          'Team Name': reg.teamName || '',
+          'Contact Email': reg.contactEmail,
+          Status: reg.status,
+          'Registration Date': reg.createdAt.toISOString(),
+          'Player Nickname': player.nickname,
+        }
+
+        // Add dynamic fields
+        for (const field of fields) {
+          const playerData = player.data.find(
+            d => d.tournamentFieldId === field.id,
+          )
+          row[field.label] = playerData ? playerData.value : ''
+        }
+
+        return row
+      })
+    })
+
+    return {
+      success: true,
+      data: JSON.stringify(flattenedData),
+    }
+  } catch (error) {
+    console.error('Export Error:', error)
+    return {
+      success: false,
+      message: MESSAGES.DATABASE_ERROR,
+    }
+  }
 }

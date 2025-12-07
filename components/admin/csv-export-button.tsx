@@ -24,8 +24,14 @@ export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
   const handleExport = () => {
     startTransition(async () => {
       try {
-        const jsonString = await exportTournamentData(tournamentId);
-        const data = JSON.parse(jsonString);
+        const result = await exportTournamentData(tournamentId);
+
+        if (!result.success || !result.data) {
+          toast.error(result.message || "Failed to export data.");
+          return;
+        }
+
+        const data = JSON.parse(result.data);
 
         if (!data || data.length === 0) {
             toast.error("No data to export.");
@@ -33,9 +39,11 @@ export function CsvExportButton({ tournamentId }: CsvExportButtonProps) {
         }
 
         // Convert to CSV
+        // biome-ignore lint/suspicious/noExplicitAny: Data is dynamic JSON
         const headers = Object.keys(data[0]);
         const csvContent = [
           headers.join(","),
+          // biome-ignore lint/suspicious/noExplicitAny: Data is dynamic JSON
           ...data.map((row: any) =>
             headers
               .map((header) => {
