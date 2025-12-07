@@ -1,5 +1,5 @@
 /**
- * File: components/admin/tournament-form.tsx
+ * File: components/features/tournament/form/tournament-form.tsx
  * Description: Reusable form component for creating and editing tournaments.
  * Author: Noé Henchoz
  * Date: 2025-12-07
@@ -10,6 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { ActionState } from "@/lib/actions/tournaments";
 import { tournamentSchema } from "@/lib/validations/tournament";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
@@ -21,20 +22,23 @@ import { DatesSection } from "./tournament-form/dates-section";
 import { GeneralInfoSection } from "./tournament-form/general-info-section";
 import { SettingsSection } from "./tournament-form/settings-section";
 
-const DEFAULT_STREAM_URL = "https://twitch.tv/quentadoulive";
+const CONTENT = {
+  SUBMIT_LABEL_DEFAULT: "Créer le Tournoi",
+  ERROR_UNEXPECTED: "Une erreur inattendue est survenue.",
+} as const;
 
 const formSchema = tournamentSchema;
 
 type TournamentFormProps = {
   initialData?: z.infer<typeof formSchema>;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<any>;
+  onSubmit: (values: z.infer<typeof formSchema>) => Promise<ActionState>;
   submitLabel?: string;
 };
 
 export function TournamentForm({
   initialData,
   onSubmit,
-  submitLabel = "Créer le Tournoi",
+  submitLabel = CONTENT.SUBMIT_LABEL_DEFAULT,
 }: TournamentFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -53,17 +57,15 @@ export function TournamentForm({
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setServerError(null);
     try {
-      // Twitch Integration: Default streamUrl if empty
-      if (!values.streamUrl || values.streamUrl.trim() === "") {
-        values.streamUrl = DEFAULT_STREAM_URL;
-      }
+      // Logic Cleaned: Default streamUrl logic removed.
+      // If needed, the backend or database default should handle it.
 
       const result = await onSubmit(values);
-      if (result?.message) {
-        setServerError(result.message);
+      if (!result.success) {
+        setServerError(result.message || CONTENT.ERROR_UNEXPECTED);
       }
     } catch (error) {
-      setServerError("Une erreur inattendue est survenue.");
+      setServerError(CONTENT.ERROR_UNEXPECTED);
     }
   };
 

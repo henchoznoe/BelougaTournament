@@ -40,7 +40,7 @@ export default function CreateTournamentPage() {
 
       <TournamentForm
         onSubmit={async values => {
-          await createTournament(values)
+          return await createTournament(values)
         }}
         submitLabel="Créer le Tournoi"
       />

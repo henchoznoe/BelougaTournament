@@ -14,8 +14,8 @@ import { FeaturesSection } from '@/components/layout/landing/features-section'
 import { HeroSection } from '@/components/layout/landing/hero-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
-import { getSiteSettings } from '@/lib/data/settings'
 import { HOME_CONFIG } from '@/lib/constants'
+import { getSiteSettings } from '@/lib/data/settings'
 
 // Metadata
 export const metadata: Metadata = {
