@@ -2,7 +2,7 @@
  * File: components/layout/landing/hero-section.tsx
  * Description: Main hero section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -12,7 +12,6 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
@@ -71,7 +70,7 @@ const itemVariants: Variants = {
 
 export const HeroSection = ({ content }: HeroSectionProps) => {
   return (
-    <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
+    <section className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 text-center">
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Arena Background"

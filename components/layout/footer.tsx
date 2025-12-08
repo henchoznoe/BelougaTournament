@@ -78,8 +78,7 @@ const CONTENT = {
     COMMUNITY: {
       TITLE: "Communauté",
       STREAM: "Stream",
-      DISCORD: "Discord",
-      SPONSORS: "Sponsors",
+      DISCORD: "Discord"
     },
     SUPPORT: {
       TITLE: "Support",
@@ -168,7 +167,6 @@ export const Footer = async () => {
           label: CONTENT.LINKS.COMMUNITY.DISCORD,
           href: settings.socialDiscord || EXTERNAL_LINKS.DISCORD,
         },
-        { label: CONTENT.LINKS.COMMUNITY.SPONSORS, href: "/sponsors" },
       ],
     },
     {
