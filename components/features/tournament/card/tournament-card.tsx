@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card"
 import { type PublicTournament } from "@/lib/data/tournaments"
 import { formatDateTime } from "@/lib/utils"
+import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -100,7 +101,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           asChild
           className="w-full bg-zinc-800 font-semibold text-white hover:bg-blue-600 transition-all duration-300"
         >
-          <Link href={`/tournaments/${tournament.slug}`}>
+          <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
             {CONTENT.BTN_DETAILS}
             <ChevronRight className="ml-2 size-4" />
           </Link>

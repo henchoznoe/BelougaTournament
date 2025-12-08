@@ -16,9 +16,9 @@ import { TournamentsSection } from '@/components/features/tournament/list/tourna
 import { TournamentsSkeleton } from '@/components/features/tournament/list/tournaments-skeleton'
 import { FeaturesSection } from '@/components/layout/landing/features-section'
 import { HeroSection } from '@/components/layout/landing/hero-section'
+import { SponsorsSection } from '@/components/layout/landing/sponsors-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
-import { SponsorsSection } from '@/components/layout/landing/sponsors-section'
 import { getLandingStats } from '@/lib/data/mappers/landing'
 
 // ----------------------------------------------------------------------

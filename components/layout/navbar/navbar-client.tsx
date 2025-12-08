@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { APP_METADATA } from "@/lib/constants"
+import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -44,10 +45,10 @@ interface NavLogoProps {
 // ----------------------------------------------------------------------
 
 const NAV_LINKS = [
-  { href: '/', label: 'Accueil', icon: Home },
-  { href: '/tournaments', label: 'Tournois', icon: Trophy },
-  { href: '/stream', label: 'Stream', icon: Video },
-  { href: '/contact', label: 'Contact', icon: Mail },
+  { href: APP_ROUTES.HOME, label: 'Accueil', icon: Home },
+  { href: APP_ROUTES.TOURNAMENTS, label: 'Tournois', icon: Trophy },
+  { href: APP_ROUTES.STREAM, label: 'Stream', icon: Video },
+  { href: APP_ROUTES.CONTACT, label: 'Contact', icon: Mail },
 ] as const
 
 // ----------------------------------------------------------------------

@@ -21,6 +21,7 @@ import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { env } from '@/lib/env'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import { APP_ROUTES } from '../config/routes'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -335,9 +336,9 @@ export const registerForTournament = async (
       ? CONTENT.SUCCESS_WAITLIST
       : CONTENT.SUCCESS_APPROVED
 
-  revalidatePath(`/tournaments/${tournament.slug}`)
+  revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`)
   redirect(
-    `/tournaments/${tournament.slug}?success=true&message=${encodeURIComponent(
+    `${APP_ROUTES.TOURNAMENTS}/${tournament.slug}?success=true&message=${encodeURIComponent(
       message,
     )}`,
   )
@@ -362,7 +363,7 @@ export const cancelRegistration = async (id: string, token: string) => {
       where: { id },
     })
 
-    revalidatePath(`/tournaments/${registration.tournament.slug}`)
+    revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${registration.tournament.slug}`)
     return {
       success: true,
       message: CONTENT.CANCEL_SUCCESS,

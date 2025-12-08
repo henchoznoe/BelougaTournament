@@ -15,6 +15,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import auth from '@/lib/auth'
+import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 import { SettingsForm } from './settings-form'
@@ -34,10 +35,6 @@ const CONTENT = {
   ERR_ACCESS_DESC:
     'Cette page est strictement réservée aux Super Administrateurs.',
   BTN_BACK: 'Retour au tableau de bord',
-} as const
-
-const ROUTES = {
-  DASHBOARD: '/admin',
 } as const
 
 // ----------------------------------------------------------------------
@@ -71,7 +68,7 @@ const AccessDeniedState = () => {
         variant="outline"
         className="border-white/10 text-white hover:bg-white/5"
       >
-        <Link href={ROUTES.DASHBOARD}>{CONTENT.BTN_BACK}</Link>
+        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>{CONTENT.BTN_BACK}</Link>
       </Button>
     </div>
   )

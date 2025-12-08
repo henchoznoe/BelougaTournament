@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import auth from '@/lib/auth'
+import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -320,7 +321,9 @@ const RecentActivityItem = ({
           className="h-6 px-2 text-[10px] text-zinc-400 hover:bg-white/10 hover:text-white"
           asChild
         >
-          <Link href={`/admin/tournaments/${registration.tournamentId}`}>
+          <Link
+            href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`}
+          >
             {LABELS.ACTIONS.VIEW} <ArrowUpRight className="ml-1 size-3" />
           </Link>
         </Button>
@@ -352,7 +355,7 @@ const AdminDashboard = async () => {
           size="lg"
           className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500"
         >
-          <Link href="/admin/tournaments/new">
+          <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
             <Trophy className="mr-2 h-5 w-5" />
             {LABELS.BTN_NEW_TOURNAMENT}
           </Link>
@@ -440,7 +443,7 @@ const AdminDashboard = async () => {
               title={LABELS.ACTIONS.MANAGE_TOURNAMENTS}
               description={LABELS.ACTIONS.MANAGE_TOURNAMENTS_DESC}
               icon={Trophy}
-              href="/admin/tournaments"
+              href={APP_ROUTES.ADMIN_TOURNAMENTS}
               currentRole={userRole}
               colors={STYLES.BLUE}
             />
@@ -449,7 +452,7 @@ const AdminDashboard = async () => {
               title={LABELS.ACTIONS.MANAGE_ADMINS}
               description={LABELS.ACTIONS.MANAGE_ADMINS_DESC}
               icon={Users}
-              href="/admin/admins"
+              href={APP_ROUTES.ADMIN_ADMINS}
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
               colors={STYLES.PURPLE}
@@ -459,7 +462,7 @@ const AdminDashboard = async () => {
               title={LABELS.ACTIONS.SITE_SETTINGS}
               description={LABELS.ACTIONS.SITE_SETTINGS_DESC}
               icon={Settings}
-              href="/admin/settings"
+              href={APP_ROUTES.ADMIN_SETTINGS}
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
               colors={STYLES.ZINC}

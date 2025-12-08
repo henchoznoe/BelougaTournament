@@ -469,7 +469,7 @@ const PlayerCard = ({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2 pt-4">
+      <CardContent className="flex flex-col gap-4">
         <FormField
           control={control}
           name={`players.${index}.nickname`}
@@ -501,7 +501,7 @@ const PlayerCard = ({
                 <FormLabel className="text-xs text-zinc-500">
                   {customField.label}
                   {customField.required && (
-                    <span className="text-red-500 ml-1">*</span>
+                    <span className="text-red-500">*</span>
                   )}
                 </FormLabel>
                 <FormControl>

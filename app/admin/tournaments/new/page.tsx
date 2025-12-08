@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
 import { Button } from '@/components/ui/button'
 import { createTournament } from '@/lib/actions/tournaments'
+import { APP_ROUTES } from '@/lib/config/routes'
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -32,7 +33,7 @@ const CreateTournamentPage = () => {
           size="icon"
           className="shrink-0 border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
         >
-          <Link href="/admin/tournaments">
+          <Link href={APP_ROUTES.ADMIN_TOURNAMENTS}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

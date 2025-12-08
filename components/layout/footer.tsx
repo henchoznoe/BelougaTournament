@@ -11,14 +11,10 @@
 // ----------------------------------------------------------------------
 
 import {
-  Gamepad2,
   Instagram,
   type LucideIcon,
-  Mail,
-  MapPin,
   MessageSquare,
   Twitch,
-  Twitter,
   Video,
   Youtube,
 } from "lucide-react"
@@ -27,6 +23,7 @@ import Link from "next/link"
 
 import { APP_METADATA, EXTERNAL_LINKS } from "@/lib/constants"
 import { getSiteSettings } from "@/lib/data/settings"
+import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -151,18 +148,18 @@ export const Footer = async () => {
     {
       title: CONTENT.LINKS.TOURNAMENTS.TITLE,
       links: [
-        { label: CONTENT.LINKS.TOURNAMENTS.UPCOMING, href: "/tournaments" },
+        { label: CONTENT.LINKS.TOURNAMENTS.UPCOMING, href: APP_ROUTES.TOURNAMENTS },
         {
           label: CONTENT.LINKS.TOURNAMENTS.ARCHIVE,
-          href: "/tournaments/archive",
+          href: APP_ROUTES.TOURNAMENTS_ARCHIVE,
         },
-        { label: CONTENT.LINKS.TOURNAMENTS.RULES, href: "/rules" },
+        { label: CONTENT.LINKS.TOURNAMENTS.RULES, href: APP_ROUTES.RULES },
       ],
     },
     {
       title: CONTENT.LINKS.COMMUNITY.TITLE,
       links: [
-        { label: CONTENT.LINKS.COMMUNITY.STREAM, href: "/stream" },
+        { label: CONTENT.LINKS.COMMUNITY.STREAM, href: APP_ROUTES.STREAM },
         {
           label: CONTENT.LINKS.COMMUNITY.DISCORD,
           href: settings.socialDiscord || EXTERNAL_LINKS.DISCORD,
@@ -172,9 +169,9 @@ export const Footer = async () => {
     {
       title: CONTENT.LINKS.SUPPORT.TITLE,
       links: [
-        { label: CONTENT.LINKS.SUPPORT.CONTACT, href: "/contact" },
-        { label: CONTENT.LINKS.SUPPORT.ADMIN, href: "/admin" },
-        { label: CONTENT.LINKS.SUPPORT.LEGAL, href: "/legal" },
+        { label: CONTENT.LINKS.SUPPORT.CONTACT, href: APP_ROUTES.CONTACT },
+        { label: CONTENT.LINKS.SUPPORT.ADMIN, href: APP_ROUTES.ADMIN_DASHBOARD },
+        { label: CONTENT.LINKS.SUPPORT.LEGAL, href: APP_ROUTES.LEGAL },
       ],
     },
   ]
@@ -241,13 +238,13 @@ export const Footer = async () => {
 
             <div className="flex items-center gap-6 text-sm text-zinc-500">
               <Link
-                href="/privacy"
+                href={APP_ROUTES.PRIVACY}
                 className="transition-colors hover:text-white"
               >
                 {CONTENT.LINKS.PRIVACY}
               </Link>
               <Link
-                href="/terms"
+                href={APP_ROUTES.TERMS}
                 className="transition-colors hover:text-white"
               >
                 {CONTENT.LINKS.TERMS}

@@ -2,7 +2,7 @@
  * File: app/(public)/layout.tsx
  * Description: Layout for public-facing pages (navbar, footer).
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -27,9 +27,9 @@ interface LayoutProps {
 
 const PublicLayout = (props: Readonly<LayoutProps>) => {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-dvh">
       <Navbar />
-      <main className="flex-1">{props.children}</main>
+      <main>{props.children}</main>
       <Footer />
     </div>
   )

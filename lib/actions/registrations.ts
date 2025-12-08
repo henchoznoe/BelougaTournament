@@ -18,6 +18,7 @@ import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
 import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
+import { APP_ROUTES } from '../config/routes'
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -69,7 +70,7 @@ export async function updateRegistrationStatus(
       html: emailHtml,
     })
 
-    revalidatePath(`/admin/tournaments/${tournamentId}`)
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
     return { message: 'Status updated successfully.' }
   } catch (error) {
     console.error('Update Status Error:', error)
@@ -99,7 +100,9 @@ export async function approveRegistration(registrationId: string) {
       html: emailHtml,
     })
 
-    revalidatePath(`/admin/tournaments/${registration.tournamentId}`)
+    revalidatePath(
+      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
+    )
     return { success: true }
   } catch (error) {
     console.error('Failed to approve registration:', error)
@@ -129,7 +132,9 @@ export async function rejectRegistration(registrationId: string) {
       html: emailHtml,
     })
 
-    revalidatePath(`/admin/tournaments/${registration.tournamentId}`)
+    revalidatePath(
+      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
+    )
     return { success: true }
   } catch (error) {
     console.error('Failed to reject registration:', error)
@@ -159,7 +164,9 @@ export async function moveToWaitlist(registrationId: string) {
       html: emailHtml,
     })
 
-    revalidatePath(`/admin/tournaments/${registration.tournamentId}`)
+    revalidatePath(
+      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
+    )
     return { success: true }
   } catch (error) {
     console.error('Failed to move to waitlist:', error)

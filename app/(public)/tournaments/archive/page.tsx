@@ -16,8 +16,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TournamentCard } from '@/components/features/tournament/card/tournament-card'
 import { Button } from '@/components/ui/button'
+import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
-import { PublicTournament } from '@/lib/data/tournaments'
+import type { PublicTournament } from '@/lib/data/tournaments'
 import prisma from '@/lib/db/prisma'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
@@ -102,7 +103,7 @@ const ArchivePage = async () => {
               variant="outline"
               className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all"
             >
-              <Link href="/tournaments">
+              <Link href={APP_ROUTES.TOURNAMENTS}>
                 <ChevronLeft className="mr-2 size-4" />
                 {CONTENT.BTN_BACK}
               </Link>

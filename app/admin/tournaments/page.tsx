@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { APP_ROUTES } from '@/lib/config/routes'
 import { getAdminTournaments } from '@/lib/data/tournaments'
 import { formatDate } from '@/lib/utils'
 import { Visibility } from '@/prisma/generated/prisma/client'
@@ -114,7 +115,7 @@ const TournamentsPage = async () => {
           size="lg"
           className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
         >
-          <Link href="/admin/tournaments/new">
+          <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
             <Plus className="mr-2 h-5 w-5" />
             {CONTENT.CREATE_BUTTON}
           </Link>
@@ -227,7 +228,9 @@ const TournamentsPage = async () => {
                           size="icon"
                           className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10"
                         >
-                          <Link href={`/admin/tournaments/${tournament.id}`}>
+                          <Link
+                            href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournament.id}`}
+                          >
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -238,7 +241,7 @@ const TournamentsPage = async () => {
                           className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10"
                         >
                           <Link
-                            href={`/admin/tournaments/${tournament.id}/edit`}
+                            href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournament.id}/edit`}
                           >
                             <Edit className="h-4 w-4" />
                           </Link>
@@ -259,7 +262,7 @@ const TournamentsPage = async () => {
                     <Trophy className="h-8 w-8 text-zinc-700" />
                     <p>{CONTENT.EMPTY_STATE.MESSAGE}</p>
                     <Button variant="link" asChild className="text-blue-500">
-                      <Link href="/admin/tournaments/new">
+                      <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
                         {CONTENT.EMPTY_STATE.CTA}
                       </Link>
                     </Button>

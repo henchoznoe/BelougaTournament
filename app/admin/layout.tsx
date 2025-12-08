@@ -16,6 +16,7 @@ import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
 import { logout } from '@/lib/actions/auth-actions'
 import auth from '@/lib/auth'
+import { APP_ROUTES } from '@/lib/config/routes'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
@@ -32,10 +33,6 @@ interface LayoutProps {
 
 const ASSETS = {
   BACKGROUND: '/assets/wall.png',
-} as const
-
-const ROUTES = {
-  LOGIN: '/login',
 } as const
 
 // ----------------------------------------------------------------------
@@ -74,9 +71,9 @@ const AdminLayout = async (props: Readonly<LayoutProps>) => {
 
   if (!isAuthorized) {
     if (session?.user?.role === Role.USER) {
-      redirect('/unauthorized')
+      redirect(APP_ROUTES.UNAUTHORIZED)
     }
-    redirect(ROUTES.LOGIN)
+    redirect(APP_ROUTES.LOGIN)
   }
 
   // 2. Render Layout

@@ -14,7 +14,7 @@
 
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
-import { Calendar, ChevronLeft, Gamepad2, Users } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, Gamepad2, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { formatDateTime } from '@/lib/utils'
+import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -55,11 +56,6 @@ const CONTENT = {
   EMPTY_DESC: "Revenez plus tard pour les prochaines annonces !",
   LABEL_OPEN: "Inscriptions ouvertes",
   LABEL_DETAILS: "Voir les détails",
-} as const
-
-const ROUTES = {
-  LIST: "/tournaments",
-  DETAILS: "/tournaments/",
 } as const
 
 // ----------------------------------------------------------------------
@@ -117,7 +113,7 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
           asChild
           className="w-full bg-zinc-800 font-semibold text-white transition-colors hover:bg-blue-600"
         >
-          <Link href={`${ROUTES.DETAILS}${tournament.slug}`}>
+          <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
             {CONTENT.LABEL_DETAILS}
           </Link>
         </Button>
@@ -170,10 +166,10 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
         <Button
           asChild
           variant="ghost"
-          className="mb-8 pl-0 text-zinc-400 transition-all hover:bg-white/5 hover:pl-4 hover:text-white"
+          className="pr-0 text-zinc-400 transition-all hover:bg-white/5 hover:pr-4 hover:text-white"
         >
-          <Link href={ROUTES.LIST}>
-            {CONTENT.VIEW_ALL} <ChevronLeft className="mr-2 size-4 rotate-180" />
+          <Link href={APP_ROUTES.TOURNAMENTS}>
+            {CONTENT.VIEW_ALL} <ChevronRight className="mr-2 size-4" />
           </Link>
         </Button>
       </div>

@@ -18,6 +18,7 @@ import { motion, type Variants } from "framer-motion"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { APP_METADATA } from "@/lib/constants"
+import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------
 // TYPES
@@ -40,7 +41,7 @@ interface HeroSectionProps {
 // ----------------------------------------------------------------------
 
 const ROUTES = {
-  TOURNAMENTS: "/tournaments",
+  TOURNAMENTS: APP_ROUTES.TOURNAMENTS,
   STATS_ANCHOR: "#stats",
 } as const
 

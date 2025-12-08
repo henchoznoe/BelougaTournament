@@ -18,6 +18,7 @@ import { z } from 'zod'
 import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { RegistrationStatus, Role } from '@/prisma/generated/prisma/client'
+import { APP_ROUTES } from '../config/routes'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -89,7 +90,7 @@ export const updateChallongeId = async (
       data: { challongeId },
     })
 
-    revalidatePath(`/admin/tournaments/${tournamentId}`)
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
     return { success: true, message: MESSAGES.SUCCESS_CHALLONGE }
   } catch (error) {
     console.error('Update Challonge ID Error:', error)
@@ -106,7 +107,7 @@ export const deleteRegistration = async (
       where: { id: registrationId },
     })
 
-    revalidatePath(`/admin/tournaments/${tournamentId}`)
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
     return { success: true, message: MESSAGES.SUCCESS_DELETE }
   } catch (error) {
     console.error('Delete Registration Error:', error)
@@ -150,7 +151,7 @@ export const updateRegistrationStatus = async (
       data: { status },
     })
 
-    revalidatePath(`/admin/tournaments/${tournamentId}`)
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
     return { success: true, message: MESSAGES.SUCCESS_STATUS }
   } catch (error) {
     console.error('Update Registration Status Error:', error)

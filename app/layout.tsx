@@ -65,7 +65,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
       >
         <ScrollToTop />
         {props.children}
-        <Toaster richColors position="top-center" />
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   )

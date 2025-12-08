@@ -26,6 +26,7 @@ import { RegistrationForm } from '@/components/features/tournament/registration/
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { APP_ROUTES } from '@/lib/config/routes'
 import { getSiteSettings } from '@/lib/data/settings'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDateTime } from '@/lib/utils'
@@ -157,7 +158,7 @@ const TournamentPage = async ({
           variant="ghost"
           className="mb-8 text-zinc-400 hover:bg-white/5 hover:text-white pl-0 hover:pl-4 transition-all"
         >
-          <Link href="/tournaments">
+          <Link href={APP_ROUTES.TOURNAMENTS}>
             <ChevronRight className="mr-2 size-4 rotate-180" />
             {CONTENT.BUTTONS.BACK}
           </Link>
@@ -304,8 +305,8 @@ const TournamentPage = async ({
 
                 {isRegistrationOpen ? (
                   <div className="space-y-6">
-                    <div className="rounded-lg bg-blue-500/10 p-4 border border-blue-500/20">
-                      <p className="text-sm text-blue-200 text-center">
+                    <div className="rounded-lg bg-orange-500/10 p-4 border border-orange-500/20">
+                      <p className="text-sm text-white text-center">
                         {CONTENT.REGISTRATION.CLOSES_ON(
                           formatDateTime(tournament.registrationClose),
                         )}
