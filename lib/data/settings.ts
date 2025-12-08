@@ -12,6 +12,7 @@
 
 import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/db/prisma'
+import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -26,18 +27,30 @@ const CACHE_CONFIG = {
   KEY_SETTINGS: 'site-settings',
 } as const
 
+const DEFAULT_SETTINGS: SiteSettings = {
+  id: DB_CONFIG.SINGLETON_ID,
+  logoUrl: null,
+  socialDiscord: null,
+  socialTiktok: null,
+  socialTwitch: null,
+  socialInstagram: null,
+  socialYoutube: null,
+  statsYears: null,
+  statsPlayers: null,
+  statsTournaments: null,
+  statsMatches: null,
+}
+
 // ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
 
-const fetchSettingsFromDb = async () => {
-  return prisma.siteSettings.upsert({
+const fetchSettingsFromDb = async (): Promise<SiteSettings> => {
+  const settings = await prisma.siteSettings.findUnique({
     where: { id: DB_CONFIG.SINGLETON_ID },
-    update: {},
-    create: {
-      id: DB_CONFIG.SINGLETON_ID,
-    },
   })
+
+  return settings ?? DEFAULT_SETTINGS
 }
 
 export const getSiteSettings = unstable_cache(

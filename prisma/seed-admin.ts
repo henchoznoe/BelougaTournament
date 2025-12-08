@@ -18,6 +18,33 @@ import { PrismaClient } from "./generated/prisma/client"
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
+// TYPES
+// ----------------------------------------------------------------------
+
+type InitialUser = {
+  email: string
+  name: string
+  role: Role
+}
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
+const INITIAL_USERS: InitialUser[] = [
+  {
+    email: "henchoznoe@gmail.com",
+    name: "Noé Henchoz",
+    role: Role.SUPERADMIN,
+  },
+  {
+    email: "rutschoquentin@gmail.com",
+    name: "Quentin Rutscho",
+    role: Role.SUPERADMIN,
+  }
+]
+
+// ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
 
@@ -31,23 +58,26 @@ const main = async () => {
   const prisma = createPrismaClient(env.DATABASE_URL)
 
   try {
-    const user = await prisma.user.upsert({
-      where: { email: env.ADMIN_EMAIL },
-      update: {
-        role: Role.SUPERADMIN,
-        emailVerified: true
+    for (const user of INITIAL_USERS) {
+      await prisma.user.upsert({
+        where: { email: user.email },
+        update: {
+          role: user.role,
+          emailVerified: true
       },
       create: {
-        email: env.ADMIN_EMAIL,
-        name: "Noé Henchoz",
-        role: Role.SUPERADMIN,
+        email: user.email,
+        name: user.name,
+        role: user.role,
         emailVerified: true
       },
     })
-
-    console.log(
-      `Seed successful: ${user.name} (${user.email}) is ready with role ${user.role}`,
-    )
+    }
+    for (const user of INITIAL_USERS) {
+      console.log(
+        `Seed successful: ${user.name} (${user.email}) is ready with role ${user.role}`,
+      )
+    }
   } catch (error) {
     console.error("Seed failed:", error)
     throw error

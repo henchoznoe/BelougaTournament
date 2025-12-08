@@ -34,9 +34,6 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   DIRECT_URL: z.string().min(1, 'DIRECT_URL is required'),
 
-  // Admin Seed
-  ADMIN_EMAIL: z.string().email('ADMIN_EMAIL must be a valid email'),
-
   // Email (Resend)
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM: z.string().min(1, 'RESEND_FROM is required'),
