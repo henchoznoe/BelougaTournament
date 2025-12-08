@@ -26,6 +26,7 @@ import { RegistrationForm } from '@/components/features/tournament/registration/
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { getSiteSettings } from '@/lib/data/settings'
 import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { formatDateTime } from '@/lib/utils'
 
@@ -123,6 +124,7 @@ const TournamentPage = async ({
 }) => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
+  const settings = await getSiteSettings()
 
   if (!tournament) {
     notFound()
@@ -268,11 +270,10 @@ const TournamentPage = async ({
               </TabsContent>
 
               <TabsContent value="stream" className="mt-6">
-                {tournament.streamUrl ? (
+                {settings.socialTwitch ? (
                   <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-1 backdrop-blur-sm overflow-hidden">
                     <div className="aspect-video w-full bg-zinc-950">
-                      {/* TODO: Get the channel name from the settings.socialTwitch */}
-                      <TwitchEmbed channel={'quentadoulive'} />
+                      <TwitchEmbed channel={settings.socialTwitch} />
                     </div>
                   </div>
                 ) : (
@@ -344,7 +345,10 @@ const TournamentPage = async ({
                   asChild
                   className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
                 >
-                  <Link href={'#'} target="_blank">
+                  <Link
+                    href={settings.socialDiscord ?? '#'}
+                    target={settings.socialDiscord ? '_blank' : undefined}
+                  >
                     {CONTENT.BUTTONS.JOIN_DISCORD}
                   </Link>
                 </Button>
