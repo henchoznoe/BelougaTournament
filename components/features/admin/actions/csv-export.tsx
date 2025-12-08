@@ -18,16 +18,13 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { exportTournamentData } from "@/lib/actions/tournaments"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  EXPORT_BTN: "Export CSV",
-  SUCCESS: "Export successful!",
-  ERROR_GENERIC: "Failed to export data.",
-  ERROR_NO_DATA: "No data to export.",
+const CONFIG = {
   FILENAME_PREFIX: "tournament-",
   FILENAME_SUFFIX: "-registrations.csv",
 } as const
@@ -55,14 +52,14 @@ export const CsvExportButton = ({ tournamentId }: CsvExportButtonProps) => {
         const result = await exportTournamentData(tournamentId)
 
         if (!result.success || !result.inputs) {
-          toast.error(result.message || CONTENT.ERROR_GENERIC)
+          toast.error(result.message || fr.pages.admin.actions.csv.errorGeneric)
           return
         }
 
         const data = JSON.parse(result.inputs as string) as ExportDataRow[]
 
         if (!data || data.length === 0) {
-          toast.error(CONTENT.ERROR_NO_DATA)
+          toast.error(fr.pages.admin.actions.csv.errorNoData)
           return
         }
 
@@ -89,16 +86,16 @@ export const CsvExportButton = ({ tournamentId }: CsvExportButtonProps) => {
         link.setAttribute("href", url)
         link.setAttribute(
           "download",
-          `${CONTENT.FILENAME_PREFIX}${tournamentId}${CONTENT.FILENAME_SUFFIX}`,
+          `${CONFIG.FILENAME_PREFIX}${tournamentId}${CONFIG.FILENAME_SUFFIX}`,
         )
         link.style.visibility = "hidden"
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
 
-        toast.success(CONTENT.SUCCESS)
+        toast.success(fr.pages.admin.actions.csv.success)
       } catch (_error) {
-        toast.error(CONTENT.ERROR_GENERIC)
+        toast.error(fr.pages.admin.actions.csv.errorGeneric)
       }
     })
   }
@@ -110,7 +107,7 @@ export const CsvExportButton = ({ tournamentId }: CsvExportButtonProps) => {
       ) : (
         <Download className="mr-2 h-4 w-4" />
       )}
-      {CONTENT.EXPORT_BTN}
+      {fr.pages.admin.actions.csv.exportBtn}
     </Button>
   )
 }

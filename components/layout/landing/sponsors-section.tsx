@@ -15,6 +15,7 @@
 import { cn } from "@/lib/utils"
 import { Variants, motion } from "framer-motion"
 import { Crown, Gem, Handshake, LucideIcon } from "lucide-react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -38,52 +39,7 @@ interface SponsorItem {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: "Ils nous font confiance",
-  SUBTITLE:
-    "Ils soutiennent l'e-sport amateur et rendent cette aventure possible.",
-  SPONSORS: [
-    {
-      id: "sponsor-1",
-      name: "Sponsor Principal",
-      tier: "PLATINUM",
-      description: "Partenaire officiel du Belouga Tournament.",
-      icon: Crown,
-      styles: {
-        iconColor: "text-amber-400",
-        bg: "bg-amber-400/10",
-        border: "border-amber-400/20",
-        glow: "bg-amber-400/20",
-      },
-    } as SponsorItem,
-    {
-      id: "sponsor-2",
-      name: "Partenaire Tech",
-      tier: "GOLD",
-      description: "Fournisseur de serveurs haute performance.",
-      icon: Gem,
-      styles: {
-        iconColor: "text-blue-400",
-        bg: "bg-blue-400/10",
-        border: "border-blue-400/20",
-        glow: "bg-blue-400/20",
-      },
-    } as SponsorItem,
-    {
-      id: "sponsor-3",
-      name: "Soutien Communautaire",
-      tier: "SILVER",
-      description: "Aide au développement de la scène locale.",
-      icon: Handshake,
-      styles: {
-        iconColor: "text-emerald-400",
-        bg: "bg-emerald-400/10",
-        border: "border-emerald-400/20",
-        glow: "bg-emerald-400/20",
-      },
-    } as SponsorItem,
-  ],
-} as const
+
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -152,7 +108,7 @@ export const SponsorsSection = () => {
           viewport={{ once: true }}
           className="text-3xl font-bold text-white sm:text-5xl"
         >
-          {CONTENT.TITLE}
+          {fr.pages.home.sponsors.title}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -161,13 +117,53 @@ export const SponsorsSection = () => {
           transition={{ delay: 0.2 }}
           className="mt-4 text-lg text-zinc-400"
         >
-          {CONTENT.SUBTITLE}
+          {fr.pages.home.sponsors.subtitle}
         </motion.p>
       </div>
 
       {/* Grid Layout - Responsive: 1 col mobile, 3 cols desktop */}
       <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {CONTENT.SPONSORS.map((sponsor, index) => (
+        {[
+          {
+            id: "sponsor-1",
+            name: fr.pages.home.sponsors.partners.platinum.name,
+            tier: "PLATINUM",
+            description: fr.pages.home.sponsors.partners.platinum.description,
+            icon: Crown,
+            styles: {
+              iconColor: "text-amber-400",
+              bg: "bg-amber-400/10",
+              border: "border-amber-400/20",
+              glow: "bg-amber-400/20",
+            },
+          } as SponsorItem,
+          {
+            id: "sponsor-2",
+            name: fr.pages.home.sponsors.partners.gold.name,
+            tier: "GOLD",
+            description: fr.pages.home.sponsors.partners.gold.description,
+            icon: Gem,
+            styles: {
+              iconColor: "text-blue-400",
+              bg: "bg-blue-400/10",
+              border: "border-blue-400/20",
+              glow: "bg-blue-400/20",
+            },
+          } as SponsorItem,
+          {
+            id: "sponsor-3",
+            name: fr.pages.home.sponsors.partners.silver.name,
+            tier: "SILVER",
+            description: fr.pages.home.sponsors.partners.silver.description,
+            icon: Handshake,
+            styles: {
+              iconColor: "text-emerald-400",
+              bg: "bg-emerald-400/10",
+              border: "border-emerald-400/20",
+              glow: "bg-emerald-400/20",
+            },
+          } as SponsorItem,
+        ].map((sponsor, index) => (
           <SponsorCard key={sponsor.id} sponsor={sponsor} index={index} />
         ))}
       </div>
@@ -181,7 +177,7 @@ export const SponsorsSection = () => {
          className="mt-12 text-center"
         >
           <p className="text-sm text-zinc-500">
-            Vous souhaitez devenir partenaire ? <span className="text-zinc-300 hover:text-white cursor-pointer underline underline-offset-4 transition-colors">Contactez-nous</span>
+            {fr.pages.home.sponsors.cta.text} <span className="text-zinc-300 hover:text-white cursor-pointer underline underline-offset-4 transition-colors">{fr.pages.home.sponsors.cta.link}</span>
           </p>
        </motion.div>
     </section>

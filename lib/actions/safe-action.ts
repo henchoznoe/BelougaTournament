@@ -13,7 +13,7 @@
 import { headers } from 'next/headers'
 import type { z } from 'zod'
 import auth from '@/lib/auth'
-import { ACTION_MESSAGES } from '@/lib/config/messages'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { ActionState } from '@/lib/types/actions'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
@@ -58,7 +58,7 @@ export function authenticatedAction<T extends z.ZodType>({
       if (!session || !session.user) {
         return {
           success: false,
-          message: ACTION_MESSAGES.AUTH.ERR_UNAUTHORIZED,
+          message: fr.common.server.actions.auth.unauthorized,
         }
       }
 
@@ -70,7 +70,7 @@ export function authenticatedAction<T extends z.ZodType>({
         if (!allowedRoles.includes(session.user.role as Role)) {
           return {
             success: false,
-            message: ACTION_MESSAGES.AUTH.ERR_UNAUTHORIZED,
+            message: fr.common.server.actions.auth.unauthorized,
           }
         }
       }
@@ -85,7 +85,7 @@ export function authenticatedAction<T extends z.ZodType>({
             string,
             string[]
           >,
-          message: ACTION_MESSAGES.GENERIC.VALIDATION_ERROR, // Or a generic validation error
+          message: fr.common.server.actions.auth.validation,
         }
       }
 
@@ -96,7 +96,7 @@ export function authenticatedAction<T extends z.ZodType>({
       console.error('Safe Action Error:', error)
       return {
         success: false,
-        message: ACTION_MESSAGES.GENERIC.ERROR, // Generic error fallback
+        message: fr.common.errors.generic,
       }
     }
   }

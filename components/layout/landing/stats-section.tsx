@@ -14,6 +14,7 @@
 
 import { motion } from "framer-motion"
 import { Calendar, Gamepad2, LucideIcon, Trophy, Users } from "lucide-react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -45,22 +46,22 @@ const DEFAULT_VALUE = "??"
 const STATS_CONFIG: StatConfigItem[] = [
   {
     key: "years",
-    label: "Années d'existence",
+    label: fr.pages.home.stats.labels.years,
     icon: Calendar,
   },
   {
     key: "players",
-    label: "Joueurs Inscrits",
+    label: fr.pages.home.stats.labels.players,
     icon: Users,
   },
   {
     key: "tournaments",
-    label: "Tournois Organisés",
+    label: fr.pages.home.stats.labels.tournaments,
     icon: Trophy,
   },
   {
     key: "matches",
-    label: "Matchs Joués",
+    label: fr.pages.home.stats.labels.matches,
     icon: Gamepad2,
   },
 ]

@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import auth from '@/lib/auth'
 import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
 
@@ -72,41 +73,6 @@ interface QuickActionProps {
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
-
-const LABELS = {
-  TITLE: 'Tableau de bord',
-  SUBTITLE: "Vue d'ensemble de votre plateforme de tournois.",
-  BTN_NEW_TOURNAMENT: 'Créer un Tournoi',
-  SECTION_ACTIVITY: 'Activité Récente',
-  SECTION_ACTIONS: 'Actions Rapides',
-  EMPTY_ACTIVITY: 'Aucune activité récente.',
-  LOCKED: 'Réservé aux SuperAdmins',
-  STATS: {
-    ACTIVE: 'Tournois Actifs',
-    PENDING: 'Inscriptions en attente',
-    PARTICIPANTS: 'Total Participants',
-    ADMINS: 'Total Administrateurs',
-  },
-  BADGES: {
-    APPROVED: 'APPROUVÉ',
-    PENDING: 'EN ATTENTE',
-    REJECTED: 'REFUSÉ',
-  },
-  ACTIONS: {
-    MANAGE_TOURNAMENTS: 'Gérer les Tournois',
-    MANAGE_TOURNAMENTS_DESC: 'Créer, modifier et gérer',
-    MANAGE_ADMINS: 'Gérer les Admins',
-    MANAGE_ADMINS_DESC: 'Comptes et accès',
-    SITE_SETTINGS: 'Paramètres du Site',
-    SITE_SETTINGS_DESC: 'Configuration globale',
-    VIEW: 'Voir',
-  },
-  REGISTERED_TO: 'Inscrit au tournoi',
-  OF_TOTAL: 'Sur {total} tournois au total',
-  APPROVED_COUNT: 'Approuvées',
-  UNIQUE_PLAYERS: 'Joueurs uniques',
-  SITE_MANAGERS: 'Gestionnaires du site',
-} as const
 
 const STYLES = {
   BLUE: {
@@ -231,7 +197,9 @@ const QuickActionButton = ({
           </div>
           <div className="flex flex-col items-start">
             <span className="text-base font-medium">{title}</span>
-            <span className="text-xs text-zinc-600">{LABELS.LOCKED}</span>
+            <span className="text-xs text-zinc-600">
+              {fr.pages.admin.dashboard.locked}
+            </span>
           </div>
         </Button>
       </div>
@@ -272,19 +240,19 @@ const RecentActivityItem = ({
       case 'APPROVED':
         return (
           <Badge className="h-5 px-1.5 text-[10px]">
-            {LABELS.BADGES.APPROVED}
+            {fr.pages.admin.dashboard.badges.approved}
           </Badge>
         )
       case 'PENDING':
         return (
           <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-            {LABELS.BADGES.PENDING}
+            {fr.pages.admin.dashboard.badges.pending}
           </Badge>
         )
       default:
         return (
           <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-            {LABELS.BADGES.REJECTED}
+            {fr.pages.admin.dashboard.badges.rejected}
           </Badge>
         )
     }
@@ -302,7 +270,7 @@ const RecentActivityItem = ({
             {getStatusBadge(registration.status)}
           </div>
           <p className="flex items-center gap-1 text-xs text-zinc-400">
-            {LABELS.REGISTERED_TO}
+            {fr.pages.admin.dashboard.registeredTo}
             <span className="font-medium text-blue-400">
               {registration.tournament.title}
             </span>
@@ -324,7 +292,8 @@ const RecentActivityItem = ({
           <Link
             href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`}
           >
-            {LABELS.ACTIONS.VIEW} <ArrowUpRight className="ml-1 size-3" />
+            {fr.pages.admin.dashboard.actions.view}{' '}
+            <ArrowUpRight className="ml-1 size-3" />
           </Link>
         </Button>
       </div>
@@ -346,9 +315,9 @@ const AdminDashboard = async () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="mb-2 text-4xl font-black tracking-tighter text-white">
-            {LABELS.TITLE}
+            {fr.pages.admin.dashboard.title}
           </h1>
-          <p className="text-zinc-400">{LABELS.SUBTITLE}</p>
+          <p className="text-zinc-400">{fr.pages.admin.dashboard.subtitle}</p>
         </div>
         <Button
           asChild
@@ -357,7 +326,7 @@ const AdminDashboard = async () => {
         >
           <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
             <Trophy className="mr-2 h-5 w-5" />
-            {LABELS.BTN_NEW_TOURNAMENT}
+            {fr.pages.admin.dashboard.btnNewTournament}
           </Link>
         </Button>
       </div>
@@ -365,17 +334,17 @@ const AdminDashboard = async () => {
       {/* KPI Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title={LABELS.STATS.ACTIVE}
+          title={fr.pages.admin.dashboard.stats.active}
           value={stats.activeTournaments}
           icon={Trophy}
           colorClass="text-blue-500"
-          subtext={LABELS.OF_TOTAL.replace(
+          subtext={fr.pages.admin.dashboard.ofTotal.replace(
             '{total}',
             stats.totalTournaments.toString(),
           )}
         />
         <StatCard
-          title={LABELS.STATS.PENDING}
+          title={fr.pages.admin.dashboard.stats.pending}
           value={stats.pendingRegistrations}
           icon={Users}
           colorClass="text-yellow-500"
@@ -384,23 +353,23 @@ const AdminDashboard = async () => {
               <span className="font-medium text-green-500">
                 {stats.approvedRegistrations}
               </span>{' '}
-              {LABELS.APPROVED_COUNT}
+              {fr.pages.admin.dashboard.approvedCount}
             </span>
           }
         />
         <StatCard
-          title={LABELS.STATS.PARTICIPANTS}
+          title={fr.pages.admin.dashboard.stats.participants}
           value={stats.totalParticipants}
           icon={UserCheck}
           colorClass="text-emerald-500"
-          subtext={LABELS.UNIQUE_PLAYERS}
+          subtext={fr.pages.admin.dashboard.uniquePlayers}
         />
         <StatCard
-          title={LABELS.STATS.ADMINS}
+          title={fr.pages.admin.dashboard.stats.admins}
           value={stats.totalAdmins}
           icon={Activity}
           colorClass="text-purple-500"
-          subtext={LABELS.SITE_MANAGERS}
+          subtext={fr.pages.admin.dashboard.siteManagers}
         />
       </div>
 
@@ -411,7 +380,7 @@ const AdminDashboard = async () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
               <Activity className="size-5 text-blue-500" />
-              {LABELS.SECTION_ACTIVITY}
+              {fr.pages.admin.dashboard.sectionActivity}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -424,7 +393,7 @@ const AdminDashboard = async () => {
             ) : (
               <div className="flex flex-col items-center gap-2 py-12 text-center text-zinc-500">
                 <Activity className="size-8 opacity-20" />
-                <p>{LABELS.EMPTY_ACTIVITY}</p>
+                <p>{fr.pages.admin.dashboard.emptyActivity}</p>
               </div>
             )}
           </CardContent>
@@ -435,13 +404,15 @@ const AdminDashboard = async () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
               <Trophy className="size-5 text-yellow-500" />
-              {LABELS.SECTION_ACTIONS}
+              {fr.pages.admin.dashboard.sectionActions}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <QuickActionButton
-              title={LABELS.ACTIONS.MANAGE_TOURNAMENTS}
-              description={LABELS.ACTIONS.MANAGE_TOURNAMENTS_DESC}
+              title={fr.pages.admin.dashboard.actions.manageTournaments}
+              description={
+                fr.pages.admin.dashboard.actions.manageTournamentsDesc
+              }
               icon={Trophy}
               href={APP_ROUTES.ADMIN_TOURNAMENTS}
               currentRole={userRole}
@@ -449,8 +420,8 @@ const AdminDashboard = async () => {
             />
 
             <QuickActionButton
-              title={LABELS.ACTIONS.MANAGE_ADMINS}
-              description={LABELS.ACTIONS.MANAGE_ADMINS_DESC}
+              title={fr.pages.admin.dashboard.actions.manageAdmins}
+              description={fr.pages.admin.dashboard.actions.manageAdminsDesc}
               icon={Users}
               href={APP_ROUTES.ADMIN_ADMINS}
               requiredRole={Role.SUPERADMIN}
@@ -459,8 +430,8 @@ const AdminDashboard = async () => {
             />
 
             <QuickActionButton
-              title={LABELS.ACTIONS.SITE_SETTINGS}
-              description={LABELS.ACTIONS.SITE_SETTINGS_DESC}
+              title={fr.pages.admin.dashboard.actions.siteSettings}
+              description={fr.pages.admin.dashboard.actions.siteSettingsDesc}
               icon={Settings}
               href={APP_ROUTES.ADMIN_SETTINGS}
               requiredRole={Role.SUPERADMIN}

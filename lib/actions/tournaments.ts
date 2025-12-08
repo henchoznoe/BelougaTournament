@@ -15,7 +15,6 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 import {
   dbCreateTournament,
@@ -25,6 +24,7 @@ import {
 } from '@/lib/data/mutations/tournaments'
 import { getTournamentExportData } from '@/lib/data/queries/tournaments'
 import { TOURNAMENT_CACHE_TAGS } from '@/lib/data/tournaments'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { getErrorMessage } from '@/lib/utils'
 import {
   deleteTournamentSchema,
@@ -50,7 +50,7 @@ export const createTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR,
+          fr.common.server.actions.tournaments.createError,
         ),
       }
     }
@@ -71,7 +71,7 @@ export const deleteTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR,
+          fr.common.server.actions.tournaments.deleteError,
         ),
       }
     }
@@ -79,7 +79,7 @@ export const deleteTournament = authenticatedAction({
     revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     return {
       success: true,
-      message: ACTION_MESSAGES.TOURNAMENTS.DELETE_SUCCESS,
+      message: fr.common.server.actions.tournaments.deleteSuccess,
     }
   },
 })
@@ -95,7 +95,7 @@ export const updateTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+          fr.common.server.actions.tournaments.updateError,
         ),
       }
     }
@@ -116,7 +116,7 @@ export const exportTournamentData = authenticatedAction({
       if (!flattenedData) {
         return {
           success: false,
-          message: ACTION_MESSAGES.TOURNAMENTS.NOT_FOUND,
+          message: fr.common.server.actions.tournaments.notFound,
         }
       }
 
@@ -128,7 +128,7 @@ export const exportTournamentData = authenticatedAction({
       console.error('Export Error:', error)
       return {
         success: false,
-        message: ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
+        message: fr.common.server.actions.tournaments.databaseError,
       }
     }
   },
@@ -145,7 +145,7 @@ export const toggleTournamentVisibility = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR,
+          fr.common.server.actions.tournaments.updateError,
         ),
       }
     }
@@ -157,7 +157,7 @@ export const toggleTournamentVisibility = authenticatedAction({
 
     return {
       success: true,
-      message: 'Tournament visibility updated successfully.',
+      message: fr.pages.admin.tournaments.detail.visibility.toastSuccess,
     }
   },
 })

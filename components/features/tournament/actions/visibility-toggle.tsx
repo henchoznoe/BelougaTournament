@@ -13,9 +13,10 @@
 // ----------------------------------------------------------------------
 
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { useTransition } from "react"
+import { useOptimistic, useTransition } from "react"
 import { toast } from "sonner"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,19 +25,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toggleTournamentVisibility } from "@/lib/actions/tournaments"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 import { cn } from "@/lib/utils"
 import { Visibility } from "@/prisma/generated/prisma/enums"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const CONTENT = {
-  PUBLIC: "Public",
-  PRIVATE: "Privé",
-  ERROR_UPDATE: "Erreur lors de la mise à jour",
-  ERROR_GENERIC: "Une erreur inattendue est survenue",
-} as const
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -56,26 +47,41 @@ export const VisibilityToggle = ({
   currentVisibility,
 }: VisibilityToggleProps) => {
   const [isPending, startTransition] = useTransition()
+  const [optimisticVisibility, setOptimisticVisibility] = useOptimistic(
+    currentVisibility,
+    (_, newVisibility: Visibility) => newVisibility,
+  )
 
   const handleToggle = (visibility: Visibility) => {
     if (visibility === currentVisibility) return
 
     startTransition(async () => {
+      setOptimisticVisibility(visibility)
       try {
         const result = await toggleTournamentVisibility({
           id: tournamentId,
           visibility,
         })
-        if (result.success) {
-          toast.success(result.message)
+        if (!result.success) {
+          toast.error(
+            result.message ||
+              fr.pages.admin.tournaments.detail.visibility.errorUpdate,
+          )
         } else {
-          toast.error(result.message || CONTENT.ERROR_UPDATE)
+          toast.success(
+            fr.pages.admin.tournaments.detail.visibility.toastSuccess,
+          )
         }
       } catch (_error) {
-        toast.error(CONTENT.ERROR_GENERIC)
+        toast.error(fr.common.errors.generic)
       }
     })
   }
+
+  const visibilityLabel =
+    optimisticVisibility === Visibility.PUBLIC
+      ? fr.pages.admin.tournaments.detail.visibility.public
+      : fr.pages.admin.tournaments.detail.visibility.private
 
   return (
     <DropdownMenu>
@@ -84,7 +90,7 @@ export const VisibilityToggle = ({
           variant="outline"
           className={cn(
             "h-12 border-white/10 bg-white/5 hover:bg-white/10 transition-colors",
-            currentVisibility === Visibility.PUBLIC
+            optimisticVisibility === Visibility.PUBLIC
               ? "text-green-400 hover:text-green-300 border-green-500/20 bg-green-500/10 hover:bg-green-500/20"
               : "text-zinc-400 hover:text-zinc-300",
           )}
@@ -92,14 +98,12 @@ export const VisibilityToggle = ({
         >
           {isPending ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : currentVisibility === Visibility.PUBLIC ? (
+          ) : optimisticVisibility === Visibility.PUBLIC ? (
             <Eye className="mr-2 h-4 w-4" />
           ) : (
             <EyeOff className="mr-2 h-4 w-4" />
           )}
-          {currentVisibility === Visibility.PUBLIC
-            ? CONTENT.PUBLIC
-            : CONTENT.PRIVATE}
+          {visibilityLabel}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -111,14 +115,14 @@ export const VisibilityToggle = ({
           className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white gap-2"
         >
           <Eye className="h-4 w-4 text-green-500" />
-          <span>{CONTENT.PUBLIC}</span>
+          <span>{fr.pages.admin.tournaments.detail.visibility.public}</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => handleToggle(Visibility.PRIVATE)}
           className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white gap-2"
         >
           <EyeOff className="h-4 w-4 text-zinc-500" />
-          <span>{CONTENT.PRIVATE}</span>
+          <span>{fr.pages.admin.tournaments.detail.visibility.private}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -21,12 +21,7 @@ import SocialLogin from '@/components/features/auth/social-login'
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const BACK_LINK_TEXT = "Retour à l'accueil"
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -63,7 +58,7 @@ const LoginPage = () => {
           >
             <Link href={APP_ROUTES.HOME}>
               <ArrowLeft className="mr-2 size-4" />
-              {BACK_LINK_TEXT}
+              {fr.common.actions.backToHome}
             </Link>
           </Button>
 

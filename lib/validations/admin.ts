@@ -11,6 +11,7 @@
 // ----------------------------------------------------------------------
 
 import { z } from 'zod'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
@@ -18,7 +19,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 // ----------------------------------------------------------------------
 
 export const createAdminSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email(fr.common.server.validations.emailInvalid),
 })
 
 export const updateAdminSchema = z.object({

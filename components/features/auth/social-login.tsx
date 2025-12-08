@@ -15,6 +15,7 @@
 import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -29,14 +30,14 @@ export default function SocialLogin() {
             })
         } catch (error) {
             console.error(error)
-            toast.error("Erreur lors de la connexion")
+            toast.error(fr.pages.login.social.error)
         }
     }
 
     return (
         <div className="flex flex-col gap-4 w-full">
             <Button onClick={() => handleLogin("discord")} className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white">
-                Se connecter avec Discord
+                {fr.pages.login.social.discord}
             </Button>
         </div>
     )

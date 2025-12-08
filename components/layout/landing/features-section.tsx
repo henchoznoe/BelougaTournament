@@ -15,6 +15,7 @@
 import { cn } from "@/lib/utils"
 import { Variants, motion } from "framer-motion"
 import { LucideIcon, Swords, Target, Zap } from "lucide-react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -35,46 +36,7 @@ interface FeatureItem {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: "Pourquoi nous rejoindre ?",
-  SUBTITLE:
-    "Une expérience compétitive conçue par des joueurs, pour des joueurs.",
-  FEATURES: [
-    {
-      title: "Compétition Fair-play",
-      description:
-        "Un règlement strict et une modération active pour garantir des parties saines et équitables.",
-      icon: Swords,
-      styles: {
-        iconColor: "text-orange-400",
-        bg: "bg-orange-400/10",
-        border: "border-orange-400/20",
-      },
-    },
-    {
-      title: "Format Professionnel",
-      description:
-        "Des arbres de tournois clairs, des horaires respectés et une organisation sans faille.",
-      icon: Target,
-      styles: {
-        iconColor: "text-blue-400",
-        bg: "bg-blue-400/10",
-        border: "border-blue-400/20",
-      },
-    },
-    {
-      title: "Diffusion Live",
-      description:
-        "Vos exploits commentés en direct sur Twitch pour une expérience e-sport immersive.",
-      icon: Zap,
-      styles: {
-        iconColor: "text-purple-400",
-        bg: "bg-purple-400/10",
-        border: "border-purple-400/20",
-      },
-    },
-  ],
-} as const
+
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -135,7 +97,7 @@ export const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-3xl font-bold text-white sm:text-5xl"
         >
-          {CONTENT.TITLE}
+          {fr.pages.home.features.title}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -144,13 +106,44 @@ export const FeaturesSection = () => {
           transition={{ delay: 0.2 }}
           className="mt-4 text-lg text-zinc-400"
         >
-          {CONTENT.SUBTITLE}
+          {fr.pages.home.features.subtitle}
         </motion.p>
       </div>
 
       {/* Grid Layout */}
       <div className="grid gap-8 md:grid-cols-3">
-        {CONTENT.FEATURES.map((feature, index) => (
+        {[
+          {
+            title: fr.pages.home.features.items.fairPlay.title,
+            description: fr.pages.home.features.items.fairPlay.description,
+            icon: Swords,
+            styles: {
+              iconColor: "text-orange-400",
+              bg: "bg-orange-400/10",
+              border: "border-orange-400/20",
+            },
+          },
+          {
+            title: fr.pages.home.features.items.proFormat.title,
+            description: fr.pages.home.features.items.proFormat.description,
+            icon: Target,
+            styles: {
+              iconColor: "text-blue-400",
+              bg: "bg-blue-400/10",
+              border: "border-blue-400/20",
+            },
+          },
+          {
+            title: fr.pages.home.features.items.liveStream.title,
+            description: fr.pages.home.features.items.liveStream.description,
+            icon: Zap,
+            styles: {
+              iconColor: "text-purple-400",
+              bg: "bg-purple-400/10",
+              border: "border-purple-400/20",
+            },
+          },
+        ].map((feature, index) => (
           <FeatureCard key={feature.title} feature={feature} index={index} />
         ))}
       </div>

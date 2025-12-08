@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { APP_ROUTES } from '@/lib/config/routes'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export default function UnauthorizedPage() {
   return (
@@ -30,22 +31,15 @@ export default function UnauthorizedPage() {
             <AlertCircle className="h-6 w-6 text-yellow-500" />
           </div>
           <CardTitle className="text-xl font-bold text-white">
-            Accès Restreint
+            {fr.pages.unauthorized.title}
           </CardTitle>
           <CardDescription className="text-zinc-400">
-            Votre compte a été créé avec succès, mais vous n'avez pas les droits
-            nécessaires pour accéder au tableau de bord.
+            {fr.pages.unauthorized.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-center text-sm text-zinc-300">
-          <p>
-            L'accès à l'administration est réservé aux administrateurs
-            approuvés.
-          </p>
-          <p>
-            Si vous pensez qu'il s'agit d'une erreur, veuillez contacter un
-            super-administrateur pour qu'il active votre compte.
-          </p>
+          <p>{fr.pages.unauthorized.messages.restricted}</p>
+          <p>{fr.pages.unauthorized.messages.contact}</p>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button
@@ -55,7 +49,7 @@ export default function UnauthorizedPage() {
           >
             <Link href={APP_ROUTES.HOME}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à l'accueil
+              {fr.common.actions.backToHome}
             </Link>
           </Button>
         </CardFooter>

@@ -8,61 +8,36 @@
 
 import type { Metadata } from 'next'
 import { LegalPageLayout } from '@/components/layout/legal-page-layout'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const metadata: Metadata = {
-  title: "Conditions Générales d'Utilisation",
-  description:
-    "Conditions régissant l'utilisation de la plateforme Belouga Tournament.",
+  title: fr.pages.terms.metaTitle,
+  description: fr.pages.terms.metaDescription,
 }
 
 export default function TermsPage() {
   return (
     <LegalPageLayout
-      title="Conditions Générales"
-      description="En accédant à ce site, vous acceptez les présentes conditions générales d'utilisation."
+      title={fr.pages.terms.title}
+      description={fr.pages.terms.description}
     >
-      <h2>Objet</h2>
-      <p>
-        Les présentes Conditions Générales d'Utilisation (CGU) ont pour objet de
-        définir les modalités de mise à disposition des services du site Belouga
-        Tournament et les conditions d'utilisation du service par l'Utilisateur.
-      </p>
+      <h2>{fr.pages.terms.sections.object.title}</h2>
+      <p>{fr.pages.terms.sections.object.content}</p>
 
-      <h2>Accès au Service</h2>
-      <p>
-        Le service est accessible gratuitement à tout Utilisateur disposant d'un
-        accès à internet. Tous les coûts afférents à l'accès au service, que ce
-        soient les frais matériels, logiciels ou d'accès à internet sont
-        exclusivement à la charge de l'Utilisateur.
-      </p>
+      <h2>{fr.pages.terms.sections.access.title}</h2>
+      <p>{fr.pages.terms.sections.access.content}</p>
 
-      <h2>Compte Utilisateur</h2>
-      <p>
-        L'Utilisateur est responsable du maintien de la confidentialité de ses
-        identifiants de connexion. Toute action effectuée via son compte est
-        réputée avoir été effectuée par lui-même.
-      </p>
+      <h2>{fr.pages.terms.sections.account.title}</h2>
+      <p>{fr.pages.terms.sections.account.content}</p>
 
-      <h2>Responsabilité</h2>
-      <p>
-        Les informations diffusées sur le site sont présentées à titre
-        informatif. L'éditeur ne peut être tenu responsable de l'utilisation
-        faite des informations présentes sur le site, ni de tout préjudice
-        direct ou indirect pouvant en découler.
-      </p>
+      <h2>{fr.pages.terms.sections.liability.title}</h2>
+      <p>{fr.pages.terms.sections.liability.content}</p>
 
-      <h2>Propriété Intellectuelle</h2>
-      <p>
-        Les marques, logos, signes ainsi que tout le contenu du site (textes,
-        images, son...) font l'objet d'une protection par le Code de la
-        propriété intellectuelle et plus particulièrement par le droit d'auteur.
-      </p>
+      <h2>{fr.pages.terms.sections.intellectualProperty.title}</h2>
+      <p>{fr.pages.terms.sections.intellectualProperty.content}</p>
 
-      <h2>Droit Applicable</h2>
-      <p>
-        Les présentes CGU sont soumises au droit français. En cas de litige non
-        résolu à l'amiable, les tribunaux français seront seuls compétents.
-      </p>
+      <h2>{fr.pages.terms.sections.law.title}</h2>
+      <p>{fr.pages.terms.sections.law.content}</p>
     </LegalPageLayout>
   )
 }

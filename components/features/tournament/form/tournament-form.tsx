@@ -12,9 +12,10 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
+import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
-import { ACTION_MESSAGES } from "@/lib/config/messages"
+
 import { ActionState } from "@/lib/types/actions"
 import { tournamentSchema } from "@/lib/validations/tournament"
 import { TournamentFormat } from "@/prisma/generated/prisma/enums"
@@ -32,9 +33,7 @@ import { SettingsSection } from "./tournament-form/settings-section"
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  SUBMIT_LABEL_DEFAULT: "Créer le Tournoi",
-} as const
+
 
 const formSchema = tournamentSchema
 
@@ -55,7 +54,7 @@ type TournamentFormProps = {
 export const TournamentForm = ({
   initialData,
   onSubmit,
-  submitLabel = CONTENT.SUBMIT_LABEL_DEFAULT,
+  submitLabel,
 }: TournamentFormProps) => {
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -78,7 +77,7 @@ export const TournamentForm = ({
 
     if (!result.success) {
       setServerError(
-        result.message || ACTION_MESSAGES.TOURNAMENTS.DATABASE_ERROR,
+        result.message || fr.common.errors.generic,
       )
     }
   }
@@ -104,7 +103,7 @@ export const TournamentForm = ({
               className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
             >
               <Save className="mr-2 h-5 w-5" />
-              {submitLabel}
+              {submitLabel || fr.pages.admin.tournaments.form.createSubmit}
             </Button>
           </div>
         </div>

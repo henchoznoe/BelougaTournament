@@ -14,20 +14,15 @@ import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
 import { BUSINESS_CONFIG } from '@/lib/config/business'
 import { getSiteSettings } from '@/lib/data/settings'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: 'Stream Twitch',
-  DESCRIPTION:
-    "Regardez la compétition en direct sur Twitch, n'oubliez pas de vous abonner à la chaîne pour être informé des prochains tournois.",
-} as const
-
 export const metadata: Metadata = {
-  title: 'Stream En Direct',
-  description: 'Suivez les tournois Belouga en direct sur Twitch.',
+  title: fr.pages.stream.metaTitle,
+  description: fr.pages.stream.metaDescription,
 }
 
 // ----------------------------------------------------------------------
@@ -68,9 +63,9 @@ const StreamPage = async () => {
     <div className="container mx-auto flex min-h-[80vh] flex-col px-4 py-8">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-white">
-          {CONTENT.TITLE}
+          {fr.pages.stream.title}
         </h1>
-        <p className="mt-2 text-zinc-400">{CONTENT.DESCRIPTION}</p>
+        <p className="mt-2 text-zinc-400">{fr.pages.stream.description}</p>
       </div>
 
       <div className="mx-auto w-full max-w-6xl flex-1">

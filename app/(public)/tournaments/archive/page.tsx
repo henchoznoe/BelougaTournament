@@ -20,26 +20,16 @@ import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
 import type { PublicTournament } from '@/lib/data/tournaments'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: 'Tournois archivés',
-  SUBTITLE: 'Explorez les tournois passés et leurs résultats.',
-  EMPTY: {
-    TITLE: 'Aucune archive',
-    DESC: 'Aucun tournoi archivé trouvé pour le moment.',
-  },
-  BTN_BACK: 'Retour aux tournois',
-} as const
-
 export const metadata: Metadata = {
-  title: 'Archives des Tournois',
-  description:
-    "Consultez l'historique et les résultats des tournois Belouga passés.",
+  title: fr.pages.tournamentsArchive.metaTitle,
+  description: fr.pages.tournamentsArchive.metaDescription,
 }
 
 // ----------------------------------------------------------------------
@@ -93,9 +83,11 @@ const ArchivePage = async () => {
             <Archive className="size-8 text-purple-400" />
           </div>
           <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-            {CONTENT.TITLE}
+            {fr.pages.tournamentsArchive.title}
           </h1>
-          <p className="max-w-2xl text-lg text-zinc-400">{CONTENT.SUBTITLE}</p>
+          <p className="max-w-2xl text-lg text-zinc-400">
+            {fr.pages.tournamentsArchive.subtitle}
+          </p>
 
           <div className="pt-4">
             <Button
@@ -105,7 +97,7 @@ const ArchivePage = async () => {
             >
               <Link href={APP_ROUTES.TOURNAMENTS}>
                 <ChevronLeft className="mr-2 size-4" />
-                {CONTENT.BTN_BACK}
+                {fr.pages.tournamentsArchive.btnBack}
               </Link>
             </Button>
           </div>
@@ -129,9 +121,11 @@ const ArchivePage = async () => {
                 <Gamepad2 className="size-10 text-zinc-600" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                {CONTENT.EMPTY.TITLE}
+                {fr.pages.tournamentsArchive.empty.title}
               </h3>
-              <p className="text-zinc-500">{CONTENT.EMPTY.DESC}</p>
+              <p className="text-zinc-500">
+                {fr.pages.tournamentsArchive.empty.desc}
+              </p>
             </div>
           )}
         </div>

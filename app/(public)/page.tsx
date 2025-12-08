@@ -21,28 +21,11 @@ import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
 import { getLandingStats } from '@/lib/data/mappers/landing'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const CONTENT = {
-  META_TITLE: 'Belouga Tournament',
-  META_DESCRIPTION: 'Les tournois Belouga créés par Quentadoulive.',
-  HERO: {
-    HERO_BLUE_BADGE: 'La référence e-sport amateur',
-    HERO_TITLE: 'BELOUGA',
-    HERO_TITLE_GRADIENT: 'TOURNAMENT',
-    HERO_DESCRIPTION:
-      "Rejoignez la compétition ultime. Tournois, communauté et diffusion en direct pour les passionnés d'e-sport.",
-    HERO_DESCRIPTION_HIGHLIGHT: 'Votre gloire commence ici.',
-    HERO_PRIMARY_CTA_TEXT: 'Participer',
-    HERO_SECONDARY_CTA_TEXT: 'En savoir plus',
-  },
-} as const
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const metadata: Metadata = {
-  title: CONTENT.META_TITLE,
-  description: CONTENT.META_DESCRIPTION,
+  title: fr.pages.home.metaTitle,
+  description: fr.pages.home.metaDescription,
 }
 
 // ----------------------------------------------------------------------
@@ -54,7 +37,17 @@ const LandingPage = async () => {
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-      <HeroSection content={CONTENT.HERO} />
+      <HeroSection
+        content={{
+          HERO_BLUE_BADGE: fr.pages.home.hero.badge,
+          HERO_TITLE: fr.pages.home.hero.title,
+          HERO_TITLE_GRADIENT: fr.pages.home.hero.titleGradient,
+          HERO_DESCRIPTION: fr.pages.home.hero.description,
+          HERO_DESCRIPTION_HIGHLIGHT: fr.pages.home.hero.descriptionHighlight,
+          HERO_PRIMARY_CTA_TEXT: fr.pages.home.hero.primaryCta,
+          HERO_SECONDARY_CTA_TEXT: fr.pages.home.hero.secondaryCta,
+        }}
+      />
       <StatsSection stats={statsData} />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>

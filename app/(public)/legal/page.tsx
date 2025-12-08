@@ -8,53 +8,39 @@
 
 import type { Metadata } from 'next'
 import { LegalPageLayout } from '@/components/layout/legal-page-layout'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const metadata: Metadata = {
-  title: 'Mentions Légales',
-  description: 'Mentions légales et informations sur l’éditeur.',
+  title: fr.pages.legal.metaTitle,
+  description: fr.pages.legal.metaDescription,
 }
 
 export default function LegalPage() {
   return (
     <LegalPageLayout
-      title="Mentions Légales"
-      description="Informations légales concernant l'éditeur et l'hébergement du site."
+      title={fr.pages.legal.title}
+      description={fr.pages.legal.description}
     >
-      <h2>Éditeur du Site</h2>
+      <h2>{fr.pages.legal.sections.editor.title}</h2>
+      <p>{fr.pages.legal.sections.editor.content}</p>
+
+      <h2>{fr.pages.legal.sections.hosting.title}</h2>
       <p>
-        Le site Belouga Tournament est édité à titre personnel. Pour toute
-        question ou réclamation, vous pouvez nous contacter via le formulaire de
-        contact disponible sur la plateforme.
+        {fr.pages.legal.sections.hosting.contentPrefix}
+        <br />
+        {fr.pages.legal.sections.hosting.address.map(line => (
+          <span key={line}>
+            {line}
+            <br />
+          </span>
+        ))}
       </p>
 
-      <h2>Hébergement</h2>
-      <p>
-        Ce site est hébergé par Vercel Inc., dont le siège social est situé au :
-        <br />
-        Vercel Inc.
-        <br />
-        340 S Lemon Ave #4133
-        <br />
-        Walnut, CA 91789
-        <br />
-        États-Unis
-      </p>
+      <h2>{fr.pages.legal.sections.intellectualProperty.title}</h2>
+      <p>{fr.pages.legal.sections.intellectualProperty.content}</p>
 
-      <h2>Propriété Intellectuelle</h2>
-      <p>
-        L'ensemble de ce site relève de la législation française et
-        internationale sur le droit d'auteur et la propriété intellectuelle.
-        Tous les droits de reproduction sont réservés, y compris pour les
-        documents téléchargeables et les représentations iconographiques et
-        photographiques.
-      </p>
-
-      <h2>Contenu</h2>
-      <p>
-        La reproduction de tout ou partie de ce site sur un support électronique
-        quel qu'il soit est formellement interdite sauf autorisation expresse du
-        directeur de la publication.
-      </p>
+      <h2>{fr.pages.legal.sections.content.title}</h2>
+      <p>{fr.pages.legal.sections.content.content}</p>
     </LegalPageLayout>
   )
 }

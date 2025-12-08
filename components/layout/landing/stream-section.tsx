@@ -14,6 +14,7 @@
 
 import { TwitchEmbed } from "@/components/twitch-embed"
 import { Suspense } from "react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -23,13 +24,7 @@ const STREAM_CONFIG = {
   CHANNEL: "quentadoulive",
 } as const
 
-const CONTENT = {
-  BADGE_LABEL: "EN DIRECT",
-  TITLE: "Suivez l'action",
-  DESCRIPTION:
-    "Ne manquez aucun moment fort. Retrouvez les meilleurs matchs commentés en direct sur notre chaîne Twitch.",
-  LOADING_LABEL: "Chargement du stream...",
-} as const
+
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -42,7 +37,7 @@ const LiveBadge = () => {
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
       </span>
-      {CONTENT.BADGE_LABEL}
+      {fr.pages.home.stream.badge}
     </div>
   )
 }
@@ -50,7 +45,7 @@ const LiveBadge = () => {
 const StreamLoader = () => {
   return (
     <div className="flex h-[600px] w-full items-center justify-center rounded-lg bg-zinc-900 text-zinc-500">
-      {CONTENT.LOADING_LABEL}
+      {fr.pages.home.stream.loading}
     </div>
   )
 }
@@ -64,10 +59,10 @@ export const StreamSection = () => {
           <div className="mb-12 flex flex-col items-center text-center">
             <LiveBadge />
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-5xl">
-              {CONTENT.TITLE}
+              {fr.pages.home.stream.title}
             </h2>
             <p className="max-w-xl text-lg text-zinc-400">
-              {CONTENT.DESCRIPTION}
+              {fr.pages.home.stream.description}
             </p>
           </div>
 

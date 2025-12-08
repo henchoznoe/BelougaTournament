@@ -11,8 +11,10 @@
 // ----------------------------------------------------------------------
 
 import Link from "next/link"
-import { Calendar, ChevronRight, Users } from "lucide-react"
+import { Calendar, ChevronRight, Users, ArrowRight } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 import {
   Card,
   CardContent,
@@ -24,6 +26,7 @@ import {
 import { type PublicTournament } from "@/lib/data/tournaments"
 import { formatDateTime } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/routes"
+import { TournamentFormat } from "@/prisma/generated/prisma/enums"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -32,20 +35,6 @@ import { APP_ROUTES } from "@/lib/config/routes"
 type TournamentCardProps = {
   tournament: PublicTournament
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const CONTENT = {
-  BTN_DETAILS: "Voir les détails",
-  FORMAT: {
-    TEAM: "Équipes",
-    PLAYER: "Joueurs",
-  },
-  PREFIX_ID: "ID:",
-  PREFIX_REGISTERED: "Inscrit",
-} as const
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -59,9 +48,9 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 ring-1 ring-blue-500/20">
             {tournament.format}
           </span>
-          <span className="text-xs text-zinc-500 font-mono">
-            {CONTENT.PREFIX_ID} {tournament.slug.slice(0, 8)}
-          </span>
+          <Badge variant="outline" className="border-zinc-700 text-zinc-400">
+            {fr.components.tournamentCard.prefixId} {tournament.id}
+          </Badge>
         </div>
         <CardTitle className="text-2xl text-white group-hover:text-blue-400 transition-colors">
           {tournament.title}
@@ -85,14 +74,13 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           </div>
           <span>
             {tournament.maxParticipants
-              ? `${tournament._count.registrations} / ${tournament.maxParticipants} ${
-                  tournament.format === "TEAM"
-                    ? CONTENT.FORMAT.TEAM
-                    : CONTENT.FORMAT.PLAYER
-                }`
-              : `${tournament._count.registrations} ${CONTENT.PREFIX_REGISTERED}${
-                  tournament._count.registrations > 1 ? "s" : ""
-                }`}
+              ? `${tournament._count.registrations} / ${tournament.maxParticipants}`
+              : `${tournament._count.registrations}`}
+            <span className="ml-2 text-zinc-400">
+              {tournament.format === TournamentFormat.TEAM
+                ? fr.components.tournamentCard.format.team
+                : fr.components.tournamentCard.format.player}
+            </span>
           </span>
         </div>
       </CardContent>
@@ -102,8 +90,10 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           className="w-full bg-zinc-800 font-semibold text-white hover:bg-blue-600 transition-all duration-300"
         >
           <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
-            {CONTENT.BTN_DETAILS}
-            <ChevronRight className="ml-2 size-4" />
+            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
+              {fr.components.tournamentCard.btnDetails}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </Link>
         </Button>
       </CardFooter>

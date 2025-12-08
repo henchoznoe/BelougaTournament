@@ -43,6 +43,7 @@ import {
 import { cn, formatDateTime } from "@/lib/utils"
 import { CalendarIcon, Clock } from "lucide-react"
 import { useFormContext } from "react-hook-form"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -54,12 +55,7 @@ type TimeUpdateType = "hour" | "minute"
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const DATE_FIELDS = [
-  { name: "startDate", label: "Date de début" },
-  { name: "endDate", label: "Date de fin" },
-  { name: "registrationOpen", label: "Ouverture des inscriptions" },
-  { name: "registrationClose", label: "Fermeture des inscriptions" },
-] as const
+
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -87,14 +83,19 @@ export const DatesSection = () => {
   return (
     <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">Dates & Horaires</CardTitle>
+        <CardTitle className="text-white">{fr.pages.admin.tournaments.form.sections.dates.title}</CardTitle>
         <CardDescription className="text-zinc-400">
-          Planification du tournoi et des inscriptions.
+          {fr.pages.admin.tournaments.form.sections.dates.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {DATE_FIELDS.map(dateField => (
+          {[
+            { name: "startDate", label: fr.pages.admin.tournaments.form.sections.dates.labels.startDate },
+            { name: "endDate", label: fr.pages.admin.tournaments.form.sections.dates.labels.endDate },
+            { name: "registrationOpen", label: fr.pages.admin.tournaments.form.sections.dates.labels.registrationOpen },
+            { name: "registrationClose", label: fr.pages.admin.tournaments.form.sections.dates.labels.registrationClose },
+          ].map(dateField => (
             <FormField
               key={dateField.name}
               control={control}
@@ -117,7 +118,7 @@ export const DatesSection = () => {
                           {field.value ? (
                             formatDateTime(field.value)
                           ) : (
-                            <span>Choisir une date</span>
+                            <span>{fr.pages.admin.tournaments.form.sections.dates.placeholder}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>

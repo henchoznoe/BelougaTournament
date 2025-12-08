@@ -24,6 +24,7 @@ import Link from "next/link"
 import { APP_METADATA, EXTERNAL_LINKS } from "@/lib/constants"
 import { getSiteSettings } from "@/lib/data/settings"
 import { APP_ROUTES } from "@/lib/config/routes"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -58,33 +59,7 @@ const BRAND_COLORS = {
   INSTAGRAM: "hover:text-[#E1306C]",
 } as const
 
-const CONTENT = {
-  DESCRIPTION:
-    "La plateforme de référence pour les tournois e-sport amateurs. Rejoignez la compétition et montrez votre talent.",
-  RIGHTS_RESERVED: "Tous droits réservés.",
-  DEVELOPED_BY: "Développé par",
-  LINKS: {
-    PRIVACY: "Politique de confidentialité",
-    TERMS: "Conditions d'utilisation",
-    TOURNAMENTS: {
-      TITLE: "Tournois",
-      UPCOMING: "Prochains",
-      ARCHIVE: "Archives",
-      RULES: "Règlement",
-    },
-    COMMUNITY: {
-      TITLE: "Communauté",
-      STREAM: "Stream",
-      DISCORD: "Discord"
-    },
-    SUPPORT: {
-      TITLE: "Support",
-      CONTACT: "Contact",
-      ADMIN: "Administration",
-      LEGAL: "Mentions Légales",
-    },
-  },
-} as const
+
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -146,32 +121,32 @@ export const Footer = async () => {
 
   const footerSections: FooterSection[] = [
     {
-      title: CONTENT.LINKS.TOURNAMENTS.TITLE,
+      title: fr.layout.footer.links.tournaments.title,
       links: [
-        { label: CONTENT.LINKS.TOURNAMENTS.UPCOMING, href: APP_ROUTES.TOURNAMENTS },
+        { label: fr.layout.footer.links.tournaments.upcoming, href: APP_ROUTES.TOURNAMENTS },
         {
-          label: CONTENT.LINKS.TOURNAMENTS.ARCHIVE,
+          label: fr.layout.footer.links.tournaments.archive,
           href: APP_ROUTES.TOURNAMENTS_ARCHIVE,
         },
-        { label: CONTENT.LINKS.TOURNAMENTS.RULES, href: APP_ROUTES.RULES },
+        { label: fr.layout.footer.links.tournaments.rules, href: APP_ROUTES.RULES },
       ],
     },
     {
-      title: CONTENT.LINKS.COMMUNITY.TITLE,
+      title: fr.layout.footer.links.community.title,
       links: [
-        { label: CONTENT.LINKS.COMMUNITY.STREAM, href: APP_ROUTES.STREAM },
+        { label: fr.layout.footer.links.community.stream, href: APP_ROUTES.STREAM },
         {
-          label: CONTENT.LINKS.COMMUNITY.DISCORD,
+          label: fr.layout.footer.links.community.discord,
           href: settings.socialDiscord || EXTERNAL_LINKS.DISCORD,
         },
       ],
     },
     {
-      title: CONTENT.LINKS.SUPPORT.TITLE,
+      title: fr.layout.footer.links.support.title,
       links: [
-        { label: CONTENT.LINKS.SUPPORT.CONTACT, href: APP_ROUTES.CONTACT },
-        { label: CONTENT.LINKS.SUPPORT.ADMIN, href: APP_ROUTES.ADMIN_DASHBOARD },
-        { label: CONTENT.LINKS.SUPPORT.LEGAL, href: APP_ROUTES.LEGAL },
+        { label: fr.layout.footer.links.support.contact, href: APP_ROUTES.CONTACT },
+        { label: fr.layout.footer.links.support.admin, href: APP_ROUTES.ADMIN_DASHBOARD },
+        { label: fr.layout.footer.links.support.legal, href: APP_ROUTES.LEGAL },
       ],
     },
   ]
@@ -191,7 +166,7 @@ export const Footer = async () => {
         <div className="mb-16 grid gap-12 lg:grid-cols-4">
           <div className="space-y-6">
             <p className="leading-relaxed text-zinc-400">
-              {CONTENT.DESCRIPTION}
+              {fr.layout.footer.description}
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (
@@ -231,36 +206,36 @@ export const Footer = async () => {
 
         <div className="border-t border-zinc-800 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-zinc-500">
-              &copy; {currentYear} {APP_METADATA.NAME}.{" "}
-              {CONTENT.RIGHTS_RESERVED}
-            </p>
+              <p className="text-sm text-zinc-500">
+                &copy; {currentYear} {APP_METADATA.NAME}.{" "}
+                {fr.layout.footer.rightsReserved}
+              </p>
 
-            <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <Link
-                href={APP_ROUTES.PRIVACY}
-                className="transition-colors hover:text-white"
-              >
-                {CONTENT.LINKS.PRIVACY}
-              </Link>
-              <Link
-                href={APP_ROUTES.TERMS}
-                className="transition-colors hover:text-white"
-              >
-                {CONTENT.LINKS.TERMS}
-              </Link>
-              <a
-                href={APP_METADATA.AUTHOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 transition-colors hover:text-blue-400"
-              >
-                {CONTENT.DEVELOPED_BY}{" "}
-                <span className="font-semibold text-zinc-300">
-                  {APP_METADATA.AUTHOR_NAME}
-                </span>
-              </a>
-            </div>
+              <div className="flex items-center gap-6 text-sm text-zinc-500">
+                <Link
+                  href={APP_ROUTES.PRIVACY}
+                  className="transition-colors hover:text-white"
+                >
+                  {fr.layout.footer.links.privacy}
+                </Link>
+                <Link
+                  href={APP_ROUTES.TERMS}
+                  className="transition-colors hover:text-white"
+                >
+                  {fr.layout.footer.links.terms}
+                </Link>
+                <a
+                  href={APP_METADATA.AUTHOR_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 transition-colors hover:text-blue-400"
+                >
+                  {fr.layout.footer.developedBy}{" "}
+                  <span className="font-semibold text-zinc-300">
+                    {APP_METADATA.AUTHOR_NAME}
+                  </span>
+                </a>
+              </div>
           </div>
         </div>
       </div>

@@ -23,6 +23,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { cn } from "@/lib/utils"
 import { APP_METADATA } from "@/lib/constants"
 import { APP_ROUTES } from "@/lib/config/routes"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -45,10 +46,10 @@ interface NavLogoProps {
 // ----------------------------------------------------------------------
 
 const NAV_LINKS = [
-  { href: APP_ROUTES.HOME, label: 'Accueil', icon: Home },
-  { href: APP_ROUTES.TOURNAMENTS, label: 'Tournois', icon: Trophy },
-  { href: APP_ROUTES.STREAM, label: 'Stream', icon: Video },
-  { href: APP_ROUTES.CONTACT, label: 'Contact', icon: Mail },
+  { href: APP_ROUTES.HOME, label: fr.layout.navbar.links.home, icon: Home },
+  { href: APP_ROUTES.TOURNAMENTS, label: fr.layout.navbar.links.tournaments, icon: Trophy },
+  { href: APP_ROUTES.STREAM, label: fr.layout.navbar.links.stream, icon: Video },
+  { href: APP_ROUTES.CONTACT, label: fr.layout.navbar.links.contact, icon: Mail },
 ] as const
 
 // ----------------------------------------------------------------------

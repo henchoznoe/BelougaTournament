@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useFormContext } from "react-hook-form"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -40,9 +41,9 @@ export const GeneralInfoSection = () => {
   return (
     <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">Informations Générales</CardTitle>
+        <CardTitle className="text-white">{fr.pages.admin.tournaments.form.sections.general.title}</CardTitle>
         <CardDescription className="text-zinc-400">
-          Détails de base du tournoi.
+          {fr.pages.admin.tournaments.form.sections.general.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
@@ -52,10 +53,10 @@ export const GeneralInfoSection = () => {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Titre</FormLabel>
+                <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.title}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Belouga Cup #1"
+                    placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.title}
                     {...field}
                     className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                   />
@@ -69,10 +70,10 @@ export const GeneralInfoSection = () => {
             name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Slug (URL)</FormLabel>
+                <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.slug}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="belouga-cup-1"
+                    placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.slug}
                     {...field}
                     className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                   />
@@ -88,10 +89,10 @@ export const GeneralInfoSection = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-400">Description</FormLabel>
+              <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.description}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Règles et détails du tournoi..."
+                  placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.description}
                   {...field}
                   className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600 min-h-[100px]"
                 />

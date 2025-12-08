@@ -26,6 +26,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/routes"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -40,36 +41,24 @@ interface AdminSidebarProps {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  BRAND_NAME: "BELOUGA",
-  MENU_LABEL: "Menu",
-  CONNECTED_AS: "Connecté en tant que",
-  LINKS: {
-    DASHBOARD: "Tableau de bord",
-    TOURNAMENTS: "Tournois",
-    ADMINS: "Administrateurs",
-    SETTINGS: "Paramètres",
-  },
-} as const
-
 const MENU_ITEMS = [
   {
-    label: CONTENT.LINKS.DASHBOARD,
+    label: fr.layout.sidebar.links.dashboard,
     href: APP_ROUTES.ADMIN_DASHBOARD,
     icon: LayoutDashboard,
   },
   {
-    label: CONTENT.LINKS.TOURNAMENTS,
+    label: fr.layout.sidebar.links.tournaments,
     href: APP_ROUTES.ADMIN_TOURNAMENTS,
     icon: Trophy,
   },
   {
-    label: CONTENT.LINKS.ADMINS,
+    label: fr.layout.sidebar.links.admins,
     href: APP_ROUTES.ADMIN_ADMINS,
     icon: Users,
   },
   {
-    label: CONTENT.LINKS.SETTINGS,
+    label: fr.layout.sidebar.links.settings,
     href: APP_ROUTES.ADMIN_SETTINGS,
     icon: Settings,
   },
@@ -96,14 +85,14 @@ export const AdminSidebar = ({
     <aside className="sticky top-0 z-50 flex h-screen w-full flex-col border-r border-white/10 bg-zinc-900/50 backdrop-blur-xl p-6 md:w-72">
       <div className="mb-10 flex items-center gap-2">
         <span className="text-2xl font-black tracking-tighter text-white">
-          {CONTENT.BRAND_NAME}
+          {fr.layout.sidebar.brandName}
           <span className="text-blue-500">.</span>
         </span>
       </div>
 
       <nav className="flex flex-1 flex-col gap-2">
         <p className="mb-2 px-4 text-xs font-medium uppercase tracking-wider text-zinc-500">
-          {CONTENT.MENU_LABEL}
+          {fr.layout.sidebar.menuLabel}
         </p>
         {MENU_ITEMS.map((item) => (
           <Link
@@ -125,7 +114,7 @@ export const AdminSidebar = ({
       <div className="mt-auto border-t border-white/10 pt-6">
         <div className="mb-4 rounded-lg border border-white/5 bg-white/5 p-3 px-2">
           <p className="mb-1 text-xs font-medium text-zinc-500">
-            {CONTENT.CONNECTED_AS}
+            {fr.layout.sidebar.connectedAs}
           </p>
           <p
             className="truncate text-sm font-medium text-white"

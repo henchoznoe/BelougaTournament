@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/card'
 import { cancelRegistration } from '@/lib/actions/registration'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -39,25 +40,6 @@ interface PageProps {
 
 const ROUTES = {
   HOME: '/',
-} as const
-
-const CONTENT = {
-  ERR_INVALID_REQUEST: {
-    TITLE: 'Requête Invalide',
-    DESC: "L'identifiant d'inscription ou le jeton de sécurité est manquant.",
-  },
-  ERR_INVALID_LINK: {
-    TITLE: 'Lien Expiré ou Invalide',
-    DESC: "Ce lien d'annulation n'est plus valide. Votre inscription a peut-être déjà été annulée.",
-  },
-  BTN_HOME: "Retour à l'accueil",
-  CONFIRM_TITLE: "Annuler l'inscription",
-  CONFIRM_DESC: (tournamentName: string) =>
-    `Êtes-vous sûr de vouloir annuler votre inscription pour le tournoi "${tournamentName}" ?`,
-  WARNING_TEXT:
-    "Cette action est irréversible. En annulant, vous perdrez définitivement votre place dans le tournoi (ou la liste d'attente).",
-  BTN_KEEP: 'Non, garder ma place',
-  BTN_CONFIRM: "Oui, annuler l'inscription",
 } as const
 
 export const dynamic = 'force-dynamic'
@@ -89,7 +71,9 @@ const ErrorState = ({
             variant="outline"
             className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:text-white"
           >
-            <Link href={ROUTES.HOME}>{CONTENT.BTN_HOME}</Link>
+            <Link href={ROUTES.HOME}>
+              {fr.pages.cancelRegistration.buttons.home}
+            </Link>
           </Button>
         </CardFooter>
       </Card>
@@ -108,8 +92,10 @@ const CancelRegistrationPage = async (props: PageProps) => {
   if (!id || !token) {
     return (
       <ErrorState
-        title={CONTENT.ERR_INVALID_REQUEST.TITLE}
-        description={CONTENT.ERR_INVALID_REQUEST.DESC}
+        title={fr.pages.cancelRegistration.errors.invalidRequest.title}
+        description={
+          fr.pages.cancelRegistration.errors.invalidRequest.description
+        }
       />
     )
   }
@@ -124,8 +110,8 @@ const CancelRegistrationPage = async (props: PageProps) => {
   if (!registration || registration.cancellationToken !== token) {
     return (
       <ErrorState
-        title={CONTENT.ERR_INVALID_LINK.TITLE}
-        description={CONTENT.ERR_INVALID_LINK.DESC}
+        title={fr.pages.cancelRegistration.errors.invalidLink.title}
+        description={fr.pages.cancelRegistration.errors.invalidLink.description}
       />
     )
   }
@@ -149,17 +135,21 @@ const CancelRegistrationPage = async (props: PageProps) => {
             <div className="flex size-10 items-center justify-center rounded-full bg-red-500/10">
               <AlertTriangle className="size-6" />
             </div>
-            <CardTitle className="text-xl">{CONTENT.CONFIRM_TITLE}</CardTitle>
+            <CardTitle className="text-xl">
+              {fr.pages.cancelRegistration.confirm.title}
+            </CardTitle>
           </div>
           <CardDescription className="text-base text-zinc-400">
-            {CONTENT.CONFIRM_DESC(registration.tournament.title)}
+            {fr.pages.cancelRegistration.confirm.description(
+              registration.tournament.title,
+            )}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
             <p className="text-sm font-medium text-red-400">
-              {CONTENT.WARNING_TEXT}
+              {fr.pages.cancelRegistration.confirm.warning}
             </p>
           </div>
         </CardContent>
@@ -170,7 +160,9 @@ const CancelRegistrationPage = async (props: PageProps) => {
             variant="outline"
             className="w-full border-zinc-700 hover:bg-zinc-800 hover:text-white"
           >
-            <Link href={ROUTES.HOME}>{CONTENT.BTN_KEEP}</Link>
+            <Link href={ROUTES.HOME}>
+              {fr.pages.cancelRegistration.buttons.keep}
+            </Link>
           </Button>
 
           <form action={handleCancel} className="w-full">
@@ -179,7 +171,7 @@ const CancelRegistrationPage = async (props: PageProps) => {
               variant="destructive"
               className="w-full bg-red-600 hover:bg-red-700"
             >
-              {CONTENT.BTN_CONFIRM}
+              {fr.pages.cancelRegistration.buttons.confirm}
             </Button>
           </form>
         </CardFooter>

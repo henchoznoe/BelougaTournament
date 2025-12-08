@@ -10,8 +10,10 @@
 // COMPONENT
 // ----------------------------------------------------------------------
 
+import { fr } from '@/lib/i18n/dictionaries/fr'
+
 const NotFound = () => {
-  return <div>404 - Page Not Found</div>
+  return <div>{fr.common.errors.notFound}</div>
 }
 
 export default NotFound

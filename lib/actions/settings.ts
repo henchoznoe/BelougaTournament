@@ -14,8 +14,8 @@
 
 import { put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
-import { ACTION_MESSAGES } from '@/lib/config/messages'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { settingsSchema } from '@/lib/validations/settings'
 
 // ----------------------------------------------------------------------
@@ -94,7 +94,10 @@ export const updateSettings = async (
     logoUrl = await uploadLogoIfNeeded(formData, logoUrl)
   } catch (error) {
     console.error('Blob upload error:', error)
-    return { success: false, message: ACTION_MESSAGES.SETTINGS.ERR_UPLOAD }
+    return {
+      success: false,
+      message: fr.common.server.actions.settings.uploadError,
+    }
   }
   const rawData = extractSettingsData(formData, logoUrl)
   const validatedFields = settingsSchema.safeParse(rawData)
@@ -102,7 +105,7 @@ export const updateSettings = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: ACTION_MESSAGES.SETTINGS.ERR_VALIDATION,
+      message: fr.common.server.actions.settings.validationError,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -119,9 +122,12 @@ export const updateSettings = async (
 
     revalidateTag(CACHE_TAGS.SETTINGS, 'default')
 
-    return { success: true, message: ACTION_MESSAGES.SETTINGS.SUCCESS }
+    return { success: true, message: fr.common.server.actions.settings.success }
   } catch (error) {
     console.error('Settings update error:', error)
-    return { success: false, message: ACTION_MESSAGES.SETTINGS.ERR_DB }
+    return {
+      success: false,
+      message: fr.common.server.actions.settings.dbError,
+    }
   }
 }

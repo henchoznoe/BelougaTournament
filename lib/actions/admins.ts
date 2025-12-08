@@ -15,9 +15,9 @@
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import auth from '@/lib/auth'
-import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
 import { Role } from '@/prisma/generated/prisma/enums'
 
@@ -50,7 +50,7 @@ export const promoteUser = async (userId: string): Promise<ActionResponse> => {
   if (!session)
     return {
       success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+      message: fr.common.server.actions.admin.superAdminOnly,
     }
 
   try {
@@ -58,7 +58,7 @@ export const promoteUser = async (userId: string): Promise<ActionResponse> => {
     if (!targetUser)
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+        message: fr.common.server.actions.admin.userNotFound,
       }
 
     if (targetUser.role !== Role.USER) {
@@ -80,7 +80,10 @@ export const promoteUser = async (userId: string): Promise<ActionResponse> => {
     }
   } catch (error) {
     console.error('Promote User Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
+    return {
+      success: false,
+      message: fr.common.server.actions.admin.genericError,
+    }
   }
 }
 
@@ -98,7 +101,7 @@ export const createAdmin = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_VALIDATION,
+      message: fr.common.server.actions.admin.validationError,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -113,7 +116,10 @@ export const createAdmin = async (
     })
 
     if (existingUser) {
-      return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_EMAIL_EXISTS }
+      return {
+        success: false,
+        message: fr.common.server.actions.admin.emailExists,
+      }
     }
 
     // Create user pre-provisioned for OAuth
@@ -127,10 +133,16 @@ export const createAdmin = async (
     })
 
     revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
-    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_CREATE }
+    return {
+      success: true,
+      message: fr.common.server.actions.admin.successCreate,
+    }
   } catch (error) {
     console.error('Create Admin Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
+    return {
+      success: false,
+      message: fr.common.server.actions.admin.genericError,
+    }
   }
 }
 
@@ -146,7 +158,7 @@ export const updateAdmin = async (
   if (!session)
     return {
       success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+      message: fr.common.server.actions.admin.superAdminOnly,
     }
 
   // 2. Validate Input
@@ -159,7 +171,7 @@ export const updateAdmin = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_VALIDATION,
+      message: fr.common.server.actions.admin.validationError,
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -169,7 +181,7 @@ export const updateAdmin = async (
     if (!targetUser)
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+        message: fr.common.server.actions.admin.userNotFound,
       }
 
     // 3. Permission Logic: Protect other SuperAdmins
@@ -177,7 +189,7 @@ export const updateAdmin = async (
     if (targetUser.role === Role.SUPERADMIN && session.user.id !== userId) {
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_PROTECTED_SUPERADMIN,
+        message: fr.common.server.actions.admin.protectedSuperAdmin,
       }
     }
 
@@ -187,10 +199,16 @@ export const updateAdmin = async (
     })
 
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
-    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_UPDATE }
+    return {
+      success: true,
+      message: fr.common.server.actions.admin.successUpdate,
+    }
   } catch (error) {
     console.error('Update Admin Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
+    return {
+      success: false,
+      message: fr.common.server.actions.admin.genericError,
+    }
   }
 }
 
@@ -199,7 +217,7 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
   if (!session)
     return {
       success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+      message: fr.common.server.actions.admin.superAdminOnly,
     }
 
   try {
@@ -207,23 +225,29 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
     if (!targetUser)
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+        message: fr.common.server.actions.admin.userNotFound,
       }
 
     // Rule: Cannot delete a SuperAdmin (even self, usually prevents lockout)
     if (targetUser.role === Role.SUPERADMIN) {
       return {
         success: false,
-        message: ACTION_MESSAGES.ADMIN.ERR_PROTECTED_SUPERADMIN,
+        message: fr.common.server.actions.admin.protectedSuperAdmin,
       }
     }
 
     await prisma.user.delete({ where: { id: userId } })
 
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
-    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_DELETE }
+    return {
+      success: true,
+      message: fr.common.server.actions.admin.successDelete,
+    }
   } catch (error) {
     console.error('Delete Admin Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
+    return {
+      success: false,
+      message: fr.common.server.actions.admin.genericError,
+    }
   }
 }

@@ -11,8 +11,8 @@
 // ----------------------------------------------------------------------
 
 import type { z } from 'zod'
-import { ACTION_MESSAGES } from '@/lib/config/messages'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { tournamentSchema } from '@/lib/validations/tournament'
 import { Prisma, type Visibility } from '@/prisma/generated/prisma/client'
 
@@ -48,9 +48,9 @@ export const dbCreateTournament = async (
       error.code === 'P2002' &&
       (error.meta?.target as string[])?.includes('slug')
     ) {
-      throw new Error(ACTION_MESSAGES.TOURNAMENTS.DUPLICATE_SLUG)
+      throw new Error(fr.common.server.actions.tournaments.duplicateSlug)
     }
-    throw new Error(ACTION_MESSAGES.TOURNAMENTS.DB_CREATE_ERROR)
+    throw new Error(fr.common.server.actions.tournaments.createError)
   }
 }
 
@@ -60,7 +60,7 @@ export const dbDeleteTournament = async (id: string) => {
       where: { id },
     })
   } catch (_error) {
-    throw new Error(ACTION_MESSAGES.TOURNAMENTS.DB_DELETE_ERROR)
+    throw new Error(fr.common.server.actions.tournaments.deleteError)
   }
 }
 
@@ -92,7 +92,9 @@ export const dbUpdateTournament = async (
       for (const field of fieldsToDelete) {
         if (field._count.playerData > 0) {
           throw new Error(
-            ACTION_MESSAGES.TOURNAMENTS.FIELD_DATA_CONSTRAINT(field.label),
+            fr.common.server.actions.tournaments.fieldDataConstraint(
+              field.label,
+            ),
           )
         }
       }
@@ -122,7 +124,7 @@ export const dbUpdateTournament = async (
           )
           if (!belongsToTournament) {
             throw new Error(
-              ACTION_MESSAGES.TOURNAMENTS.FIELD_SECURITY_ERROR(field.id),
+              fr.common.server.actions.tournaments.fieldSecurityError(field.id),
             )
           }
 
@@ -151,14 +153,14 @@ export const dbUpdateTournament = async (
   } catch (error) {
     if (error instanceof Error) {
       if (
-        error.message === ACTION_MESSAGES.TOURNAMENTS.DUPLICATE_SLUG ||
-        error.message.includes('Cannot remove field') ||
-        error.message.includes('Security Error')
+        error.message === fr.common.server.actions.tournaments.duplicateSlug ||
+        error.message.includes('Impossible de supprimer le champ') ||
+        error.message.includes('Erreur de sécurité')
       ) {
         throw error
       }
     }
-    throw new Error(ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR)
+    throw new Error(fr.common.server.actions.tournaments.updateError)
   }
 }
 
@@ -172,6 +174,6 @@ export const dbToggleTournamentVisibility = async (
       data: { visibility },
     })
   } catch (_error) {
-    throw new Error(ACTION_MESSAGES.TOURNAMENTS.DB_UPDATE_ERROR)
+    throw new Error(fr.common.server.actions.tournaments.updateError)
   }
 }

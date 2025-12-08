@@ -15,6 +15,8 @@
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
 import { Calendar, ChevronLeft, ChevronRight, Gamepad2, Users } from "lucide-react"
+import { useRef } from "react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -49,21 +51,13 @@ interface TournamentsListProps {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  SECTION_TITLE: "Tournois à venir",
-  VIEW_ALL: "Tout voir",
-  EMPTY_TITLE: "Aucun tournoi prévu",
-  EMPTY_DESC: "Revenez plus tard pour les prochaines annonces !",
-  LABEL_OPEN: "Inscriptions ouvertes",
-  LABEL_DETAILS: "Voir les détails",
-} as const
 
 // ----------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------
 
 const getParticipantLabel = (count: number | null, format: string): string => {
-  if (!count) return CONTENT.LABEL_OPEN
+  if (!count) return fr.components.tournamentsList.labelOpen
   const type = format === "TEAM" ? "Équipes" : "Joueurs"
   return `Max ${count} ${type}`
 }
@@ -114,7 +108,7 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
           className="w-full bg-zinc-800 font-semibold text-white transition-colors hover:bg-blue-600"
         >
           <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
-            {CONTENT.LABEL_DETAILS}
+            {fr.components.tournamentsList.labelDetails}
           </Link>
         </Button>
       </CardFooter>
@@ -124,14 +118,12 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
 
 const EmptyState = () => {
   return (
-    <div className="col-span-full py-24 text-center">
-      <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-zinc-900">
-        <Gamepad2 className="size-8 text-zinc-600" />
-      </div>
-      <h3 className="text-xl font-medium text-white">{CONTENT.EMPTY_TITLE}</h3>
-      <p className="mt-2 text-zinc-500">
-        {CONTENT.EMPTY_DESC}
-      </p>
+    <div className="col-span-full py-12 text-center">
+      <Calendar className="mx-auto h-12 w-12 text-zinc-600 mb-4" />
+      <h3 className="text-xl font-bold text-white mb-2">
+        {fr.components.tournamentsList.emptyTitle}
+      </h3>
+      <p className="text-zinc-500">{fr.components.tournamentsList.emptyDesc}</p>
     </div>
   )
 }
@@ -152,7 +144,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
             viewport={{ once: true }}
             className="text-3xl font-bold text-white sm:text-4xl"
           >
-            {CONTENT.SECTION_TITLE}
+            {fr.components.tournamentsList.sectionTitle}
           </motion.h2>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -169,7 +161,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           className="pr-0 text-zinc-400 transition-all hover:bg-white/5 hover:pr-4 hover:text-white"
         >
           <Link href={APP_ROUTES.TOURNAMENTS}>
-            {CONTENT.VIEW_ALL} <ChevronRight className="mr-2 size-4" />
+            {fr.components.tournamentsList.viewAll} <ChevronRight className="mr-2 size-4" />
           </Link>
         </Button>
       </div>

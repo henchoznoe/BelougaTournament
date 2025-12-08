@@ -8,6 +8,7 @@
 
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -29,11 +30,10 @@ type EmailResponse = {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const ERRORS = {
-  SEND_FAILED: 'Failed to send email via Resend.',
-} as const
+// ERRORS logic moved to inline of helper or kept if system internal, but text moved to fr
+// We can use fr.common.email.errorSend for the error message
 
-const TEAM_NAME = 'The Belouga Tournament Team'
+// TEAM_NAME logic moved to fr dictionary
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -63,11 +63,11 @@ export const sendEmail = async ({
 
     return { success: true, data }
   } catch (error) {
-    console.error(ERRORS.SEND_FAILED, error)
+    console.error(fr.common.email.errorSend, error)
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : ERRORS.SEND_FAILED,
+      error: error instanceof Error ? error.message : fr.common.email.errorSend,
     }
   }
 }
@@ -79,16 +79,16 @@ export const generateRegistrationEmailHtml = (
 ): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
-      <h1>Registration Received</h1>
-      <p>Thank you for registering for <strong>${tournamentTitle}</strong>.</p>
-      <p>Your current registration status is: <strong>${status}</strong>.</p>
-      <p>We will notify you if there are any changes to your status.</p>
+      <h1>${fr.common.email.registrationReceived.title}</h1>
+      <p>${fr.common.email.registrationReceived.thankYou(tournamentTitle)}</p>
+      <p>${fr.common.email.registrationReceived.currentStatus(status)}</p>
+      <p>${fr.common.email.registrationReceived.notification}</p>
       <br/>
-      <p>If you wish to cancel your registration, you can do so by clicking the link below:</p>
-      <p><a href="${cancellationUrl}" style="color: #ef4444;">Cancel my registration</a></p>
+      <p>${fr.common.email.registrationReceived.cancelText}</p>
+      <p><a href="${cancellationUrl}" style="color: #ef4444;">${fr.common.email.registrationReceived.cancelLinkText}</a></p>
       <br/>
-      <p>Best regards,</p>
-      <p>${TEAM_NAME}</p>
+      <p>${fr.common.email.registrationReceived.closing}</p>
+      <p>${fr.common.email.registrationReceived.teamName}</p>
     </div>
   `
 }
@@ -99,12 +99,12 @@ export const generateStatusUpdateEmailHtml = (
 ): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
-      <h1>Registration Status Update</h1>
-      <p>Your registration status for <strong>${tournamentTitle}</strong> has been updated.</p>
-      <p>New Status: <strong>${status}</strong></p>
+      <h1>${fr.common.email.statusUpdate.title}</h1>
+      <p>${fr.common.email.statusUpdate.content(tournamentTitle)}</p>
+      <p>${fr.common.email.statusUpdate.newStatus(status)}</p>
       <br/>
-      <p>Best regards,</p>
-      <p>${TEAM_NAME}</p>
+      <p>${fr.common.email.registrationReceived.closing}</p>
+      <p>${fr.common.email.registrationReceived.teamName}</p>
     </div>
   `
 }

@@ -18,20 +18,12 @@ import { Button } from '@/components/ui/button'
 import auth from '@/lib/auth'
 import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
-
-const CONTENT = {
-  TITLE: 'Administrateurs',
-  SUBTITLE: 'Gestion des comptes et des permissions.',
-  ERR_ACCESS_TITLE: 'Accès Refusé',
-  ERR_ACCESS_DESC:
-    'Cette page est strictement réservée aux Super Administrateurs.',
-  BTN_BACK: 'Retour au tableau de bord',
-} as const
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -60,15 +52,19 @@ const AccessDeniedState = () => {
         <Lock className="size-10 text-red-500" />
       </div>
       <h1 className="text-3xl font-bold text-white">
-        {CONTENT.ERR_ACCESS_TITLE}
+        {fr.pages.admin.admins.accessDenied.title}
       </h1>
-      <p className="max-w-md text-zinc-400">{CONTENT.ERR_ACCESS_DESC}</p>
+      <p className="max-w-md text-zinc-400">
+        {fr.pages.admin.admins.accessDenied.description}
+      </p>
       <Button
         asChild
         variant="outline"
         className="border-white/10 text-white hover:bg-white/5"
       >
-        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>{CONTENT.BTN_BACK}</Link>
+        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>
+          {fr.pages.admin.admins.accessDenied.back}
+        </Link>
       </Button>
     </div>
   )
@@ -95,9 +91,9 @@ const AdminsPage = async () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="mb-2 text-4xl font-black tracking-tighter text-white">
-            {CONTENT.TITLE}
+            {fr.pages.admin.admins.title}
           </h1>
-          <p className="text-zinc-400">{CONTENT.SUBTITLE}</p>
+          <p className="text-zinc-400">{fr.pages.admin.admins.subtitle}</p>
         </div>
       </div>
 

@@ -29,20 +29,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { deleteTournament } from "@/lib/actions/tournaments"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: "Are you absolutely sure?",
-  DESCRIPTION:
-    "This action cannot be undone. This will permanently delete the tournament and all associated data including registrations and matches.",
-  BTN_CANCEL: "Cancel",
-  BTN_DELETE: "Delete",
-  BTN_DELETING: "Deleting...",
-  TOAST_ERROR_GENERIC: "An unexpected error occurred.",
-} as const
+
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -71,7 +64,7 @@ export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
           toast.error(result.message)
         }
       } catch (_error) {
-        toast.error(CONTENT.TOAST_ERROR_GENERIC)
+        toast.error(fr.common.errors.generic)
       }
     })
   }
@@ -90,21 +83,21 @@ export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className="border-zinc-800 bg-zinc-950 text-zinc-50">
         <AlertDialogHeader>
-          <AlertDialogTitle>{CONTENT.TITLE}</AlertDialogTitle>
+          <AlertDialogTitle>{fr.pages.admin.actions.delete.title}</AlertDialogTitle>
           <AlertDialogDescription className="text-zinc-400">
-            {CONTENT.DESCRIPTION}
+            {fr.pages.admin.actions.delete.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="border-zinc-800 bg-transparent hover:bg-zinc-900 hover:text-white">
-            {CONTENT.BTN_CANCEL}
+            {fr.pages.admin.actions.delete.btnCancel}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             className="bg-red-600 text-white hover:bg-red-700"
             disabled={isPending}
           >
-            {isPending ? CONTENT.BTN_DELETING : CONTENT.BTN_DELETE}
+            {isPending ? fr.pages.admin.actions.delete.btnDeleting : fr.pages.admin.actions.delete.btnDelete}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

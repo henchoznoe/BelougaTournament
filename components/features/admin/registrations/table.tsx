@@ -42,6 +42,7 @@ import {
 import { formatDateTime } from "@/lib/utils"
 import type { Registration } from "@/prisma/generated/prisma/client"
 import { RegistrationStatus } from "@/prisma/generated/prisma/enums"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -57,27 +58,13 @@ interface RegistrationsTableProps {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TABLE_HEADERS: [
-    "Team / Player",
-    "Contact Email",
-    "Status",
-    "Created At",
-    "Actions",
-  ],
-  NO_DATA: "No registrations found.",
-  PLAYERS_COUNT: (count: number) => `(${count} players)`,
-  UNKNOWN_NAME: "Unknown",
-  ACTIONS_LABEL: "Actions",
-  ACTION_APPROVE: "Approve",
-  ACTION_WAITLIST: "Waitlist",
-  ACTION_REJECT: "Reject",
-  TOAST_APPROVE_SUCCESS: "Registration approved",
-  TOAST_WAITLIST_SUCCESS: "Moved to waitlist",
-  TOAST_REJECT_SUCCESS: "Registration rejected",
-  TOAST_ERROR_GENERIC: "An unexpected error occurred",
-  TOAST_ACTION_FAILED: "Action failed",
-} as const
+const TABLE_HEADERS = [
+  fr.pages.admin.registration.table.headers.teamPlayer,
+  fr.pages.admin.registration.table.headers.email,
+  fr.pages.admin.registration.table.headers.status,
+  fr.pages.admin.registration.table.headers.createdAt,
+  fr.pages.admin.registration.table.headers.actions,
+]
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -99,10 +86,13 @@ export const RegistrationsTable = ({
       if (result.success) {
         toast.success(successMessage)
       } else {
-        toast.error(result.error || CONTENT.TOAST_ACTION_FAILED)
+        toast.error(
+          result.error ||
+            fr.pages.admin.registration.table.toasts.actionFailed,
+        )
       }
     } catch (_error) {
-      toast.error(CONTENT.TOAST_ERROR_GENERIC)
+      toast.error(fr.common.errors.generic)
     } finally {
       setIsLoading(null)
     }
@@ -128,11 +118,11 @@ export const RegistrationsTable = ({
       <Table>
         <TableHeader>
           <TableRow className="border-zinc-800 hover:bg-zinc-900/50">
-            {CONTENT.TABLE_HEADERS.map((header, index) => (
+            {TABLE_HEADERS.map((header, index) => (
               <TableHead
                 key={header}
                 className={`text-zinc-400 ${
-                  index === CONTENT.TABLE_HEADERS.length - 1 ? "text-right" : ""
+                  index === TABLE_HEADERS.length - 1 ? "text-right" : ""
                 }`}
               >
                 {header}
@@ -147,7 +137,7 @@ export const RegistrationsTable = ({
                 colSpan={5}
                 className="h-24 text-center text-zinc-500"
               >
-                {CONTENT.NO_DATA}
+                {fr.pages.admin.registration.table.noData}
               </TableCell>
             </TableRow>
           ) : (
@@ -159,10 +149,10 @@ export const RegistrationsTable = ({
                 <TableCell className="font-medium text-white">
                   {reg.teamName ||
                     reg.players[0]?.nickname ||
-                    CONTENT.UNKNOWN_NAME}
+                    fr.pages.admin.registration.table.unknownName}
                   {reg.players.length > 1 && (
                     <span className="ml-2 text-xs text-zinc-500">
-                      {CONTENT.PLAYERS_COUNT(reg.players.length)}
+                      {fr.pages.admin.registration.table.playersCount(reg.players.length)}
                     </span>
                   )}
                 </TableCell>
@@ -197,33 +187,33 @@ export const RegistrationsTable = ({
                       className="bg-zinc-950 border-zinc-800 text-zinc-200"
                     >
                       <DropdownMenuLabel>
-                        {CONTENT.ACTIONS_LABEL}
+                        {fr.pages.admin.registration.table.actions.label}
                       </DropdownMenuLabel>
                       <DropdownMenuItem
                         onClick={() =>
                           handleAction(
                             approveRegistration,
                             reg.id,
-                            CONTENT.TOAST_APPROVE_SUCCESS,
+                            fr.pages.admin.registration.table.toasts.approveSuccess,
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-green-400 cursor-pointer"
                       >
                         <Check className="mr-2 h-4 w-4" />
-                        {CONTENT.ACTION_APPROVE}
+                        {fr.pages.admin.registration.table.actions.approve}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
                           handleAction(
                             moveToWaitlist,
                             reg.id,
-                            CONTENT.TOAST_WAITLIST_SUCCESS,
+                            fr.pages.admin.registration.table.toasts.waitlistSuccess,
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-orange-400 cursor-pointer"
                       >
                         <Clock className="mr-2 h-4 w-4" />
-                        {CONTENT.ACTION_WAITLIST}
+                        {fr.pages.admin.registration.table.actions.waitlist}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-zinc-800" />
                       <DropdownMenuItem
@@ -231,13 +221,13 @@ export const RegistrationsTable = ({
                           handleAction(
                             rejectRegistration,
                             reg.id,
-                            CONTENT.TOAST_REJECT_SUCCESS,
+                            fr.pages.admin.registration.table.toasts.rejectSuccess,
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-red-400 cursor-pointer"
                       >
                         <X className="mr-2 h-4 w-4" />
-                        {CONTENT.ACTION_REJECT}
+                        {fr.pages.admin.registration.table.actions.reject}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

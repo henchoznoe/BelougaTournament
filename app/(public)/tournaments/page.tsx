@@ -19,25 +19,15 @@ import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
 import { getPublicTournaments } from '@/lib/data/tournaments'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: 'Prochains Tournois',
-  DESCRIPTION:
-    'Découvrez les prochaines compétitions, inscrivez-vous et préparez-vous à affronter les meilleurs joueurs.',
-  BTN_ARCHIVE: 'Voir les archives',
-  EMPTY: {
-    TITLE: 'Aucun tournoi prévu',
-    DESC: 'Revenez plus tard pour découvrir les prochaines compétitions !',
-  },
-} as const
-
 export const metadata: Metadata = {
-  title: CONTENT.TITLE,
-  description: CONTENT.DESCRIPTION,
+  title: fr?.pages?.tournaments?.list?.title || 'Tournaments',
+  description: fr?.pages?.tournaments?.list?.description || 'View tournaments',
 }
 
 // ----------------------------------------------------------------------
@@ -69,10 +59,10 @@ const TournamentsPage = async () => {
             <Trophy className="size-8 text-blue-400" />
           </div>
           <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            {CONTENT.TITLE}
+            {fr.pages.tournaments.list.title}
           </h1>
           <p className="max-w-2xl text-lg text-zinc-400">
-            {CONTENT.DESCRIPTION}
+            {fr.pages.tournaments.list.description}
           </p>
 
           <div className="pt-4">
@@ -83,7 +73,7 @@ const TournamentsPage = async () => {
             >
               <Link href={APP_ROUTES.TOURNAMENTS_ARCHIVE}>
                 <Archive className="mr-2 size-4" />
-                {CONTENT.BTN_ARCHIVE}
+                {fr.pages.tournaments.list.btnArchive}
               </Link>
             </Button>
           </div>
@@ -107,9 +97,11 @@ const TournamentsPage = async () => {
                 <Gamepad2 className="size-10 text-zinc-600" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                {CONTENT.EMPTY.TITLE}
+                {fr.pages.tournaments.list.empty.title}
               </h3>
-              <p className="text-zinc-500">{CONTENT.EMPTY.DESC}</p>
+              <p className="text-zinc-500">
+                {fr.pages.tournaments.list.empty.desc}
+              </p>
             </div>
           )}
         </div>

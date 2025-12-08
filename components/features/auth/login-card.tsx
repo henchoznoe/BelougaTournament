@@ -12,6 +12,7 @@
 
 import type { ReactNode } from 'react'
 import { Gamepad2 } from 'lucide-react'
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -25,10 +26,7 @@ interface LoginCardProps {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  TITLE: 'Admin Login',
-  SUBTITLE: 'Accès réservé aux administrateurs',
-} as const
+
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -43,9 +41,9 @@ export const LoginCard = ({ children }: LoginCardProps) => {
             <Gamepad2 className="size-8 text-blue-400" />
           </div>
           <h1 className="font-paladins text-3xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            {CONTENT.TITLE}
+            {fr.pages.login.title}
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">{CONTENT.SUBTITLE}</p>
+          <p className="mt-2 text-sm text-zinc-400">{fr.pages.login.subtitle}</p>
         </div>
 
         {children}

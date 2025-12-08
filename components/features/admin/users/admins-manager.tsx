@@ -50,6 +50,7 @@ import {
   promoteUser,
 } from '@/lib/actions/admins'
 import { cn, formatDate } from '@/lib/utils'
+import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ... existing types
@@ -83,43 +84,17 @@ const INITIAL_STATE: ActionState = {
   errors: {},
 }
 
-const CONTENT = {
-  TITLE_PAGE: 'Liste des Utilisateurs',
-  SUBTITLE_PAGE: "Gérez les accès administrateurs et les demandes en attente.",
-  BTN_ADD: 'Ajouter un administrateur',
-  TITLE_CREATE: 'Nouvel Administrateur',
-  DESC_CREATE: 'Créez un nouveau compte administrateur. Ils auront accès au tableau de bord.',
-  LABEL_EMAIL: 'Email',
-  PLACEHOLDER_EMAIL: 'admin@exemple.com',
-  BTN_CREATE: 'Créer le compte',
-  BTN_CREATING: 'Création...',
-  BTN_CANCEL: 'Annuler',
-  BTN_CONFIRM: 'Confirmer',
-  BTN_MODIFYING: 'Modification...',
-  COL_EMAIL: 'Email',
-  COL_ROLE: 'Rôle',
-  COL_DATE: 'Date de création',
-  COL_ACTIONS: 'Actions',
-  ACTION_DELETE: 'Supprimer',
-  ACTION_PROMOTE: 'Promouvoir Admin',
-  CONFIRM_DELETE: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
-  CONFIRM_PROMOTE: 'Voulez-vous promouvoir cet utilisateur en tant qu\'administrateur ?',
-  TOAST_DELETE_SUCCESS: 'Utilisateur supprimé',
-  TOAST_PROMOTE_SUCCESS: 'Utilisateur promu administrateur',
-  ROLE_USER: 'Utilisateur',
-  ROLE_ADMIN: 'Administrateur',
-  ROLE_SUPERADMIN: 'Super Admin',
-} as const
+
 
 // ... existing ListHeader
 
 const ListHeader = () => {
   return (
     <div className="grid grid-cols-12 border-b border-white/10 bg-white/5 p-4 text-xs font-medium uppercase tracking-wider text-zinc-400">
-      <div className="col-span-5 pl-2">{CONTENT.COL_EMAIL}</div>
-      <div className="col-span-3">{CONTENT.COL_ROLE}</div>
-      <div className="col-span-3">{CONTENT.COL_DATE}</div>
-      <div className="col-span-1 pr-2 text-right">{CONTENT.COL_ACTIONS}</div>
+      <div className="col-span-5 pl-2">{fr.pages.admin.admins.manager.table.headers.email}</div>
+      <div className="col-span-3">{fr.pages.admin.admins.manager.table.headers.role}</div>
+      <div className="col-span-3">{fr.pages.admin.admins.manager.table.headers.date}</div>
+      <div className="col-span-1 pr-2 text-right">{fr.pages.admin.admins.manager.table.headers.actions}</div>
     </div>
   )
 }
@@ -141,10 +116,10 @@ const AdminRow = ({
   const canEdit = isViewerSuperAdmin && !isSuperAdminTarget
 
   const roleLabel = isSuperAdminTarget
-    ? CONTENT.ROLE_SUPERADMIN
+    ? fr.pages.admin.admins.manager.roles.superadmin
     : isAdminTarget
-      ? CONTENT.ROLE_ADMIN
-      : CONTENT.ROLE_USER
+      ? fr.pages.admin.admins.manager.roles.admin
+      : fr.pages.admin.admins.manager.roles.user
 
   const roleIcon = isSuperAdminTarget
     ? <ShieldAlert className="size-3" />
@@ -210,7 +185,7 @@ const AdminRow = ({
                   className="cursor-pointer text-blue-500 focus:bg-blue-900/20 focus:text-blue-400"
                 >
                   <ShieldCheck className="mr-2 size-4" />
-                  {CONTENT.ACTION_PROMOTE}
+                  {fr.pages.admin.admins.manager.table.actions.promote}
                 </DropdownMenuItem>
               )}
 
@@ -219,7 +194,7 @@ const AdminRow = ({
                 className="cursor-pointer text-red-500 focus:bg-red-900/20 focus:text-red-400"
               >
                 <Trash2 className="mr-2 size-4" />
-                {CONTENT.ACTION_DELETE}
+                {fr.pages.admin.admins.manager.table.actions.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -246,10 +221,10 @@ export const AdminsManager = ({
   }, [createState])
 
   const handleDelete = async (userId: string) => {
-    if (confirm(CONTENT.CONFIRM_DELETE)) {
+    if (confirm(fr.pages.admin.admins.manager.table.confirm.delete)) {
       const result = await deleteAdmin(userId)
       if (result.success) {
-        toast.success(CONTENT.TOAST_DELETE_SUCCESS)
+        toast.success(fr.pages.admin.admins.manager.toasts.deleteSuccess)
       } else {
         toast.error(result.message)
       }
@@ -257,10 +232,10 @@ export const AdminsManager = ({
   }
 
   const handlePromote = async (userId: string) => {
-    if (confirm(CONTENT.CONFIRM_PROMOTE)) {
+    if (confirm(fr.pages.admin.admins.manager.table.confirm.promote)) {
       const result = await promoteUser(userId)
       if (result.success) {
-        toast.success(CONTENT.TOAST_PROMOTE_SUCCESS)
+        toast.success(fr.pages.admin.admins.manager.toasts.promoteSuccess)
       } else {
         toast.error(result.message)
       }
@@ -285,8 +260,8 @@ export const AdminsManager = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">{CONTENT.TITLE_PAGE}</h2>
-          <p className="text-sm text-zinc-400">{CONTENT.SUBTITLE_PAGE}</p>
+          <h2 className="text-xl font-bold text-white">{fr.pages.admin.admins.manager.title}</h2>
+          <p className="text-sm text-zinc-400">{fr.pages.admin.admins.manager.subtitle}</p>
         </div>
 
         {isSuperAdmin && (
@@ -294,23 +269,23 @@ export const AdminsManager = ({
             <DialogTrigger asChild>
               <Button className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500">
                 <UserPlus className="mr-2 size-4" />
-                {CONTENT.BTN_ADD}
+                {fr.pages.admin.admins.manager.buttons.add}
               </Button>
             </DialogTrigger>
             <DialogContent className="border-white/10 bg-zinc-950 text-zinc-50">
               <DialogHeader>
-                <DialogTitle>{CONTENT.TITLE_CREATE}</DialogTitle>
-                <DialogDescription>{CONTENT.DESC_CREATE}</DialogDescription>
+                <DialogTitle>{fr.pages.admin.admins.manager.dialog.title}</DialogTitle>
+                <DialogDescription>{fr.pages.admin.admins.manager.dialog.description}</DialogDescription>
               </DialogHeader>
               <form action={createAction} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">{CONTENT.LABEL_EMAIL}</Label>
+                  <Label htmlFor="email">{fr.pages.admin.admins.manager.labels.email}</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     required
-                    placeholder={CONTENT.PLACEHOLDER_EMAIL}
+                    placeholder={fr.pages.admin.admins.manager.placeholders.email}
                     className="border-white/10 bg-zinc-900/50 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:ring-blue-500/20"
                   />
                   {createState?.errors?.email && (
@@ -326,10 +301,10 @@ export const AdminsManager = ({
                     {isCreating ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {CONTENT.BTN_CREATING}
+                        {fr.pages.admin.admins.manager.buttons.creating}
                       </>
                     ) : (
-                      CONTENT.BTN_CREATE
+                      fr.pages.admin.admins.manager.buttons.create
                     )}
                   </Button>
                 </DialogFooter>

@@ -18,6 +18,7 @@ import { TournamentForm } from '@/components/features/tournament/form/tournament
 import { Button } from '@/components/ui/button'
 import { createTournament } from '@/lib/actions/tournaments'
 import { APP_ROUTES } from '@/lib/config/routes'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -39,10 +40,10 @@ const CreateTournamentPage = () => {
         </Button>
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-            Créer un Tournoi
+            {fr.pages.admin.tournaments.form.createTitle}
           </h1>
           <p className="text-zinc-400">
-            Configurez les détails et les règles de votre nouveau tournoi.
+            {fr.pages.admin.tournaments.form.createSubtitle}
           </p>
         </div>
       </div>
@@ -51,7 +52,7 @@ const CreateTournamentPage = () => {
         onSubmit={async values => {
           return await createTournament(values)
         }}
-        submitLabel="Créer le Tournoi"
+        submitLabel={fr.pages.admin.tournaments.form.createSubmit}
       />
     </div>
   )

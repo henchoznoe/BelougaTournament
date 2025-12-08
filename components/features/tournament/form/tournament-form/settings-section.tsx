@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useFormContext } from "react-hook-form"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -46,9 +47,9 @@ export const SettingsSection = () => {
   return (
     <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">Format & Configuration</CardTitle>
+        <CardTitle className="text-white">{fr.pages.admin.tournaments.form.sections.settings.title}</CardTitle>
         <CardDescription className="text-zinc-400">
-          Structure et limites du tournoi.
+          {fr.pages.admin.tournaments.form.sections.settings.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,19 +59,19 @@ export const SettingsSection = () => {
             name="format"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Format</FormLabel>
+                <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.settings.labels.format}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="bg-zinc-900/50 border-white/10 text-white focus:ring-blue-500/20">
-                      <SelectValue placeholder="Sélectionner le format" />
+                      <SelectValue placeholder={fr.pages.admin.tournaments.form.sections.settings.placeholders.format} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-zinc-950 border-white/10 text-white">
-                    <SelectItem value="SOLO">Solo</SelectItem>
-                    <SelectItem value="TEAM">Équipe</SelectItem>
+                    <SelectItem value="SOLO">{fr.pages.admin.tournaments.form.sections.settings.options.solo}</SelectItem>
+                    <SelectItem value="TEAM">{fr.pages.admin.tournaments.form.sections.settings.options.team}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -83,7 +84,7 @@ export const SettingsSection = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-zinc-400">
-                  Taille de l'équipe
+                  {fr.pages.admin.tournaments.form.sections.settings.labels.teamSize}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -106,7 +107,7 @@ export const SettingsSection = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-zinc-400">
-                  Participants Max
+                  {fr.pages.admin.tournaments.form.sections.settings.labels.maxParticipants}
                 </FormLabel>
                 <FormControl>
                   <Input

@@ -11,7 +11,7 @@
 // ----------------------------------------------------------------------
 
 import { z } from 'zod'
-import { VALIDATION_MESSAGES } from '@/lib/config/messages'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
@@ -19,12 +19,12 @@ import { Visibility } from '@/prisma/generated/prisma/enums'
 // ----------------------------------------------------------------------
 
 export const tournamentSchema = z.object({
-  description: z.string().min(10, VALIDATION_MESSAGES.DESCRIPTION_MIN),
+  description: z.string().min(10, fr.common.server.validations.descriptionMin),
   endDate: z.date(),
   fields: z.array(
     z.object({
       id: z.string().optional(),
-      label: z.string().min(1, VALIDATION_MESSAGES.LABEL_REQUIRED),
+      label: z.string().min(1, fr.common.server.validations.labelRequired),
       required: z.boolean().default(true),
       type: z.enum(['TEXT', 'NUMBER']),
     }),
@@ -33,15 +33,15 @@ export const tournamentSchema = z.object({
   maxParticipants: z.coerce.number().optional(),
   registrationClose: z.date(),
   registrationOpen: z.date(),
-  slug: z.string().min(3, VALIDATION_MESSAGES.SLUG_MIN),
+  slug: z.string().min(3, fr.common.server.validations.slugMin),
   startDate: z.date(),
   streamUrl: z
     .string()
-    .url(VALIDATION_MESSAGES.STREAM_URL_INVALID)
+    .url(fr.common.server.validations.streamUrlInvalid)
     .optional()
     .or(z.literal('')),
-  teamSize: z.coerce.number().min(1, VALIDATION_MESSAGES.TEAM_SIZE_MIN),
-  title: z.string().min(3, VALIDATION_MESSAGES.TITLE_MIN),
+  teamSize: z.coerce.number().min(1, fr.common.server.validations.teamSizeMin),
+  title: z.string().min(3, fr.common.server.validations.titleMin),
 })
 
 export const deleteTournamentSchema = z.object({

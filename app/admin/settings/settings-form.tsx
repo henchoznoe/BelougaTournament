@@ -27,6 +27,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateSettings } from '@/lib/actions/settings'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
 // ----------------------------------------------------------------------
@@ -58,20 +59,6 @@ const INITIAL_STATE: SettingsState = {
   errors: {},
 }
 
-const CONTENT = {
-  TITLE_GENERAL: 'Général',
-  DESC_GENERAL: 'Configuration de base du site web.',
-  TITLE_SOCIAL: 'Réseaux Sociaux',
-  DESC_SOCIAL: 'Liens vers vos profils sociaux affichés dans le pied de page.',
-  TITLE_STATS: 'Statistiques',
-  DESC_STATS: "Chiffres clés affichés sur la page d'accueil.",
-  LABEL_LOGO: 'Logo du site',
-  BTN_UPLOAD: 'Choisir un fichier',
-  BTN_SAVE: 'Enregistrer',
-  BTN_SAVING: 'Enregistrement...',
-  HINT_FORMAT: 'Format accepté : PNG, JPG.',
-} as const
-
 const SOCIAL_CONFIG: FieldConfig[] = [
   {
     key: 'socialDiscord',
@@ -101,14 +88,29 @@ const SOCIAL_CONFIG: FieldConfig[] = [
 ]
 
 const STATS_CONFIG: FieldConfig[] = [
-  { key: 'statsYears', label: "Années d'existence", placeholder: 'ex: 2+' },
-  { key: 'statsPlayers', label: 'Joueurs Inscrits', placeholder: 'ex: 500+' },
+  {
+    key: 'statsYears',
+    label: fr.pages.admin.settings.form.sections.stats.labels.years,
+    placeholder: fr.pages.admin.settings.form.sections.stats.placeholders.years,
+  },
+  {
+    key: 'statsPlayers',
+    label: fr.pages.admin.settings.form.sections.stats.labels.players,
+    placeholder:
+      fr.pages.admin.settings.form.sections.stats.placeholders.players,
+  },
   {
     key: 'statsTournaments',
-    label: 'Tournois Organisés',
-    placeholder: 'ex: 50+',
+    label: fr.pages.admin.settings.form.sections.stats.labels.tournaments,
+    placeholder:
+      fr.pages.admin.settings.form.sections.stats.placeholders.tournaments,
   },
-  { key: 'statsMatches', label: 'Matchs Joués', placeholder: 'ex: 1.2k+' },
+  {
+    key: 'statsMatches',
+    label: fr.pages.admin.settings.form.sections.stats.labels.matches,
+    placeholder:
+      fr.pages.admin.settings.form.sections.stats.placeholders.matches,
+  },
 ]
 
 // ----------------------------------------------------------------------
@@ -172,16 +174,16 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
         <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-white">
-              {CONTENT.TITLE_GENERAL}
+              {fr.pages.admin.settings.form.sections.general.title}
             </CardTitle>
             <CardDescription className="text-zinc-400">
-              {CONTENT.DESC_GENERAL}
+              {fr.pages.admin.settings.form.sections.general.description}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="logo" className="text-zinc-400">
-                {CONTENT.LABEL_LOGO}
+                {fr.pages.admin.settings.form.sections.general.labels.logo}
               </Label>
               <div className="grid gap-4">
                 {/* Logo Preview */}
@@ -220,10 +222,15 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
                       className="border-white/10 bg-zinc-900/50 text-zinc-400 hover:bg-white/5 hover:text-white"
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      {CONTENT.BTN_UPLOAD}
+                      {
+                        fr.pages.admin.settings.form.sections.general.buttons
+                          .upload
+                      }
                     </Button>
                   </div>
-                  <p className="text-xs text-zinc-500">{CONTENT.HINT_FORMAT}</p>
+                  <p className="text-xs text-zinc-500">
+                    {fr.pages.admin.settings.form.sections.general.hints.format}
+                  </p>
                 </div>
               </div>
             </div>
@@ -233,9 +240,11 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
         {/* Social Media Section */}
         <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white">{CONTENT.TITLE_SOCIAL}</CardTitle>
+            <CardTitle className="text-white">
+              {fr.pages.admin.settings.form.sections.social.title}
+            </CardTitle>
             <CardDescription className="text-zinc-400">
-              {CONTENT.DESC_SOCIAL}
+              {fr.pages.admin.settings.form.sections.social.description}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -254,9 +263,11 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
         {/* Statistics Section */}
         <Card className="border-white/10 bg-zinc-900/50 shadow-xl backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white">{CONTENT.TITLE_STATS}</CardTitle>
+            <CardTitle className="text-white">
+              {fr.pages.admin.settings.form.sections.stats.title}
+            </CardTitle>
             <CardDescription className="text-zinc-400">
-              {CONTENT.DESC_STATS}
+              {fr.pages.admin.settings.form.sections.stats.description}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -281,7 +292,9 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
             className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500"
           >
             <Save className="mr-2 h-5 w-5" />
-            {isPending ? CONTENT.BTN_SAVING : CONTENT.BTN_SAVE}
+            {isPending
+              ? fr.pages.admin.settings.form.buttons.saving
+              : fr.pages.admin.settings.form.buttons.save}
           </Button>
         </div>
       </div>

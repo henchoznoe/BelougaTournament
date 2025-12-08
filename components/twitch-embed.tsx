@@ -15,6 +15,7 @@
 import { Loader2, ScreenShareOff } from "lucide-react"
 import Script from "next/script"
 import { useEffect, useId, useRef, useState } from "react"
+import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -73,13 +74,7 @@ const TWITCH_CONFIG = {
   },
 } as const
 
-const CONTENT = {
-  LOADING: "Chargement du stream...",
-  OFFLINE_TITLE: "Le stream est actuellement offline",
-  OFFLINE_DESC_PREFIX: "",
-  OFFLINE_DESC_SUFFIX:
-    " ne stream pas actuellement. Revenez plus tard ou suivez sa chaîne sur Twitch.",
-} as const
+
 
 // ----------------------------------------------------------------------
 // HELPER FUNCTIONS
@@ -209,7 +204,7 @@ export const TwitchEmbed = ({
       {isLoading && (
         <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
           <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
-          <p className="text-zinc-400">{CONTENT.LOADING}</p>
+          <p className="text-zinc-400">{fr.components.twitchEmbed.loading}</p>
         </div>
       )}
 
@@ -219,11 +214,11 @@ export const TwitchEmbed = ({
             <ScreenShareOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="mb-2 text-xl font-semibold text-white">
-            {CONTENT.OFFLINE_TITLE}
+            {fr.components.twitchEmbed.offlineTitle}
           </h3>
           <p className="max-w-md text-zinc-400">
             {channel}
-            {CONTENT.OFFLINE_DESC_SUFFIX}
+            {fr.components.twitchEmbed.offlineDescSuffix}
           </p>
         </div>
       )}

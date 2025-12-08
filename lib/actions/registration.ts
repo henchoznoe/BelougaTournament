@@ -22,6 +22,7 @@ import { env } from '@/lib/env'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 import { APP_ROUTES } from '../config/routes'
+import { fr } from '../i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -45,43 +46,20 @@ export type RegistrationState = {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-const CONTENT = {
-  VALIDATION_ERROR: 'Veuillez corriger les erreurs dans le formulaire.',
-  TOURNAMENT_NOT_FOUND: 'Tournoi introuvable.',
-  REGISTRATION_CLOSED: 'Les inscriptions sont fermées.',
-  EMAIL_ALREADY_USED: 'Cet email est déjà utilisé pour ce tournoi.',
-  REQUIRED_FIELD_MISSING: (label: string, nickname: string) =>
-    `Champ requis manquant : ${label} pour le joueur ${nickname}`,
-  TOURNAMENT_FULL: 'Le tournoi est complet.',
-  GENERIC_ERROR:
-    "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
-  REGISTRATION_FAILED: "Échec de l'inscription.",
-  SUCCESS_WAITLIST:
-    "Inscription réussie ! Vous avez été placé sur la liste d'attente.",
-  SUCCESS_APPROVED: 'Inscription réussie !',
-  CANCEL_NOT_FOUND: 'Inscription introuvable.',
-  CANCEL_INVALID_TOKEN: "Jeton d'annulation invalide.",
-  CANCEL_SUCCESS: 'Inscription annulée avec succès.',
-  CANCEL_FAILED: "Échec de l'annulation de l'inscription.",
-  EMAIL_SUBJECT_PREFIX: 'Inscription reçue - ',
-  LOGS: {
-    RAW_DATA: '[Registration] Raw Data:',
-    VALIDATION_PASSED: '[Registration] Validation passed',
-    ERROR_REGISTRATION: 'Registration Error:',
-    ERROR_CANCELLATION: 'Cancellation Error:',
-  },
-} as const
+// CONTENT constant removed in favor of fr dictionary
 
 const BASE_REGISTRATION_SCHEMA = z.object({
-  contactEmail: z.string().email(),
+  contactEmail: z.string().email(fr.common.server.validations.emailInvalid),
   players: z
     .array(
       z.object({
         data: z.record(z.string(), z.string()), // fieldId -> value
-        nickname: z.string().min(1, 'Le pseudo est requis'),
+        nickname: z
+          .string()
+          .min(1, fr.common.server.validations.nicknameRequired),
       }),
     )
-    .min(1, 'Au moins un joueur est requis'),
+    .min(1, fr.common.server.validations.playersMin),
   teamName: z.string().optional(),
   tournamentId: z.string().uuid(),
 })
@@ -160,7 +138,7 @@ export const registerForTournament = async (
       : [],
   }
 
-  console.log(CONTENT.LOGS.RAW_DATA, JSON.stringify(rawData, null, 2))
+  console.log('[Registration] Raw Data:', JSON.stringify(rawData, null, 2))
 
   const validation = BASE_REGISTRATION_SCHEMA.safeParse(rawData)
 
@@ -168,11 +146,11 @@ export const registerForTournament = async (
     return {
       success: false,
       errors: validation.error.flatten().fieldErrors,
-      message: CONTENT.VALIDATION_ERROR,
+      message: fr.common.registration.validationError,
     }
   }
 
-  console.log(CONTENT.LOGS.VALIDATION_PASSED)
+  console.log('[Registration] Validation passed')
 
   const { tournamentId, teamName, contactEmail, players } = validation.data
 
@@ -183,13 +161,19 @@ export const registerForTournament = async (
   })
 
   if (!tournament) {
-    return { success: false, message: CONTENT.TOURNAMENT_NOT_FOUND }
+    return {
+      success: false,
+      message: fr.common.registration.tournamentNotFound,
+    }
   }
 
   // Check if registration is open
   const now = new Date()
   if (now < tournament.registrationOpen || now > tournament.registrationClose) {
-    return { success: false, message: CONTENT.REGISTRATION_CLOSED }
+    return {
+      success: false,
+      message: fr.common.registration.registrationClosed,
+    }
   }
 
   // 2. Check for duplicates
@@ -205,7 +189,7 @@ export const registerForTournament = async (
   if (existingRegistration) {
     return {
       success: false,
-      message: CONTENT.EMAIL_ALREADY_USED,
+      message: fr.common.registration.emailAlreadyUsed,
     }
   }
 
@@ -217,7 +201,10 @@ export const registerForTournament = async (
       if (field.required && (!value || value.trim() === '')) {
         return {
           success: false,
-          message: CONTENT.REQUIRED_FIELD_MISSING(field.label, player.nickname),
+          message: fr.common.registration.fieldMissing(
+            field.label,
+            player.nickname,
+          ),
         }
       }
     }
@@ -290,10 +277,13 @@ export const registerForTournament = async (
       return registration
     })
   } catch (error) {
-    console.error(CONTENT.LOGS.ERROR_REGISTRATION, error)
+    console.error('Registration Error:', error)
     if (error instanceof Error) {
       if (error.message === 'Tournament is full.') {
-        return { success: false, message: CONTENT.TOURNAMENT_FULL }
+        return {
+          success: false,
+          message: fr.common.registration.tournamentFull,
+        }
       }
     }
 
@@ -301,19 +291,19 @@ export const registerForTournament = async (
       if (error.code === 'P2002') {
         return {
           success: false,
-          message: CONTENT.EMAIL_ALREADY_USED,
+          message: fr.common.registration.emailAlreadyUsed,
         }
       }
     }
 
     return {
       success: false,
-      message: CONTENT.GENERIC_ERROR,
+      message: fr.common.errors.generic,
     }
   }
 
   if (!registrationResult) {
-    return { success: false, message: CONTENT.REGISTRATION_FAILED }
+    return { success: false, message: fr.common.registration.failed }
   }
 
   const cancellationUrl = `${env.NEXT_PUBLIC_APP_URL}/cancel-registration?id=${registrationResult.id}&token=${registrationResult.cancellationToken}`
@@ -327,14 +317,14 @@ export const registerForTournament = async (
 
   await sendEmail({
     to: contactEmail,
-    subject: `${CONTENT.EMAIL_SUBJECT_PREFIX}${tournament.title}`,
+    subject: `${fr.common.email.subjectPrefix}${tournament.title}`,
     html: emailHtml,
   })
 
   const message =
     registrationResult.status === 'WAITLIST'
-      ? CONTENT.SUCCESS_WAITLIST
-      : CONTENT.SUCCESS_APPROVED
+      ? fr.common.registration.successWaitlist
+      : fr.common.registration.successApproved
 
   revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`)
   redirect(
@@ -352,11 +342,14 @@ export const cancelRegistration = async (id: string, token: string) => {
     })
 
     if (!registration) {
-      return { success: false, message: CONTENT.CANCEL_NOT_FOUND }
+      return { success: false, message: fr.common.registration.cancelNotFound }
     }
 
     if (registration.cancellationToken !== token) {
-      return { success: false, message: CONTENT.CANCEL_INVALID_TOKEN }
+      return {
+        success: false,
+        message: fr.common.registration.cancelInvalidToken,
+      }
     }
 
     await prisma.registration.delete({
@@ -366,10 +359,10 @@ export const cancelRegistration = async (id: string, token: string) => {
     revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${registration.tournament.slug}`)
     return {
       success: true,
-      message: CONTENT.CANCEL_SUCCESS,
+      message: fr.common.registration.cancelSuccess,
     }
   } catch (error) {
-    console.error(CONTENT.LOGS.ERROR_CANCELLATION, error)
-    return { success: false, message: CONTENT.CANCEL_FAILED }
+    console.error('Cancellation Error:', error)
+    return { success: false, message: fr.common.registration.cancelFailed }
   }
 }
