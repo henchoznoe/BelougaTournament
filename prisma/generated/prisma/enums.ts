@@ -28,9 +28,7 @@ export type TournamentFormat = (typeof TournamentFormat)[keyof typeof Tournament
 
 export const FieldType = {
   TEXT: 'TEXT',
-  NUMBER: 'NUMBER',
-  SELECT: 'SELECT',
-  CHECKBOX: 'CHECKBOX'
+  NUMBER: 'NUMBER'
 } as const
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType]

@@ -505,33 +505,12 @@ const PlayerCard = ({
                   )}
                 </FormLabel>
                 <FormControl>
-                  {customField.type === 'SELECT' ? (
-                    <Input
-                      {...field}
-                      value={field.value as string}
-                      placeholder={CONSTANTS.PLACEHOLDERS.SELECT}
-                      className="border-white/10 bg-zinc-950/30 text-white placeholder:text-zinc-700 focus:border-blue-500/50 focus:bg-zinc-950/50"
-                    />
-                  ) : customField.type === 'CHECKBOX' ? (
-                    <div className="flex items-center h-10">
-                      <Checkbox
-                        name={field.name}
-                        value="true"
-                        checked={field.value === 'true'}
-                        onCheckedChange={(c) => field.onChange(String(c))}
-                        className="border-zinc-700 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                      />
-                    </div>
-                  ) : (
-                    <Input
-                      {...field}
-                      value={field.value as string | number}
-                      type={
-                        customField.type === 'NUMBER' ? 'number' : 'text'
-                      }
-                      className="border-white/10 bg-zinc-950/30 text-white placeholder:text-zinc-700 focus:border-blue-500/50 focus:bg-zinc-950/50"
-                    />
-                  )}
+                  <Input
+                    {...field}
+                    value={field.value as string | number}
+                    type={customField.type === "NUMBER" ? "number" : "text"}
+                    className="border-white/10 bg-zinc-950/30 text-white placeholder:text-zinc-700 focus:border-blue-500/50 focus:bg-zinc-950/50"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -26,7 +26,7 @@ export const tournamentSchema = z.object({
       id: z.string().optional(),
       label: z.string().min(1, VALIDATION_MESSAGES.LABEL_REQUIRED),
       required: z.boolean().default(true),
-      type: z.enum(['TEXT', 'NUMBER', 'SELECT', 'CHECKBOX']),
+      type: z.enum(['TEXT', 'NUMBER']),
     }),
   ),
   format: z.enum(['SOLO', 'TEAM']),

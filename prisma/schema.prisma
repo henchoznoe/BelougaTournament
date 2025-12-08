@@ -22,8 +22,6 @@ enum TournamentFormat {
 enum FieldType {
   TEXT
   NUMBER
-  SELECT
-  CHECKBOX
 }
 
 enum RegistrationStatus {

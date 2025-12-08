@@ -111,8 +111,6 @@ export const CustomFieldsManager = () => {
                     <SelectContent className="bg-zinc-950 border-white/10 text-white">
                       <SelectItem value="TEXT">Texte</SelectItem>
                       <SelectItem value="NUMBER">Nombre</SelectItem>
-                      <SelectItem value="SELECT">Sélection</SelectItem>
-                      <SelectItem value="CHECKBOX">Case à cocher</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
