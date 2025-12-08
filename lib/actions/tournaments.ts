@@ -102,7 +102,7 @@ export const updateTournament = authenticatedAction({
 
     revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
     revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
-    redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
+    redirect(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
   },
 })
 
