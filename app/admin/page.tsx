@@ -21,11 +21,12 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getSession } from '@/lib/auth'
+import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -329,9 +330,12 @@ const RecentActivityItem = ({
 }
 
 const AdminDashboard = async () => {
-  const session = await getSession()
+  // 1. Auth Check
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
   const stats = await fetchDashboardStats()
-  const userRole = session?.user?.role
+  const userRole = session?.user?.role as Role | undefined
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-500">

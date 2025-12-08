@@ -2,7 +2,7 @@
  * File: app/login/page.tsx
  * Description: Login page for admin authentication with premium gaming aesthetic.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -17,7 +17,7 @@ import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LoginCard } from '@/components/features/auth/login-card'
-import { LoginForm } from '@/components/features/auth/login-form'
+import SocialLogin from '@/components/features/auth/social-login'
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
@@ -69,7 +69,7 @@ const LoginPage = () => {
 
           {/* Login Card Component */}
           <LoginCard>
-            <LoginForm />
+            <SocialLogin />
           </LoginCard>
         </motion.div>
       </div>

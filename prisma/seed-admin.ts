@@ -1,31 +1,21 @@
 /**
  * File: prisma/seed-admin.ts
- * Description: Seed script to create the initial admin user.
+ * Description: Seed script to create the initial admin user for OAuth.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
-
-import "dotenv/config"
 
 // ----------------------------------------------------------------------
 // IMPORTS
 // ----------------------------------------------------------------------
 
+import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
-import { hash } from "bcryptjs"
 import pg from "pg"
-
 import { env } from "../lib/env"
-import { PrismaClient, Role } from "./generated/prisma/client"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const SECURITY_CONFIG = {
-  SALT_ROUNDS: 12,
-} as const
+import { PrismaClient } from "./generated/prisma/client"
+import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
 // LOGIC
@@ -41,26 +31,22 @@ const main = async () => {
   const prisma = createPrismaClient(env.DATABASE_URL)
 
   try {
-    const hashedPassword = await hash(
-      env.ADMIN_PASSWORD,
-      SECURITY_CONFIG.SALT_ROUNDS,
-    )
-
     const user = await prisma.user.upsert({
       where: { email: env.ADMIN_EMAIL },
       update: {
-        passwordHash: hashedPassword,
         role: Role.SUPERADMIN,
+        emailVerified: true
       },
       create: {
         email: env.ADMIN_EMAIL,
-        passwordHash: hashedPassword,
+        name: "Noé Henchoz",
         role: Role.SUPERADMIN,
+        emailVerified: true
       },
     })
 
     console.log(
-      `Seed successful: ${user.email} is ready with role ${user.role}`,
+      `Seed successful: ${user.name} (${user.email}) is ready with role ${user.role}`,
     )
   } catch (error) {
     console.error("Seed failed:", error)

@@ -10,11 +10,12 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
+import { headers } from 'next/headers'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
-import { logout } from '@/lib/actions/auth'
-import { getSession } from '@/lib/auth'
+import { logout } from '@/lib/actions/auth-actions'
+import auth from '@/lib/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
@@ -61,7 +62,9 @@ const AdminBackground = () => {
 
 const AdminLayout = async (props: Readonly<LayoutProps>) => {
   // 1. Auth Check
-  const session = await getSession()
+  const session = await auth.api.getSession({
+    headers: await headers(), // Pass headers for server-side auth
+  })
 
   // We rely on getSession returning null if invalid/expired.
   // We also enforce Role checking here as a second layer of defense.
@@ -70,6 +73,9 @@ const AdminLayout = async (props: Readonly<LayoutProps>) => {
     (session.user.role === Role.ADMIN || session.user.role === Role.SUPERADMIN)
 
   if (!isAuthorized) {
+    if (session?.user?.role === Role.USER) {
+      redirect('/unauthorized')
+    }
     redirect(ROUTES.LOGIN)
   }
 

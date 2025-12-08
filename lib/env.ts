@@ -2,7 +2,7 @@
  * File: lib/env.ts
  * Description: Type-safe environment configuration using Zod.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -22,8 +22,13 @@ const envSchema = z.object({
     .enum(['development', 'test', 'production'])
     .default('development'),
 
-  // Security / JWT
-  JWT_SECRET_KEY: z.string().min(1, 'JWT_SECRET_KEY is required'),
+  // Better Auth
+  BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
+  BETTER_AUTH_URL: z.string().url().default('http://localhost:3000'),
+
+  // OAuth Providers
+  DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
+  DISCORD_CLIENT_SECRET: z.string().min(1, 'DISCORD_CLIENT_SECRET is required'),
 
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
@@ -31,9 +36,6 @@ const envSchema = z.object({
 
   // Admin Seed
   ADMIN_EMAIL: z.string().email('ADMIN_EMAIL must be a valid email'),
-  ADMIN_PASSWORD: z
-    .string()
-    .min(6, 'ADMIN_PASSWORD must be at least 6 characters'),
 
   // Email (Resend)
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),

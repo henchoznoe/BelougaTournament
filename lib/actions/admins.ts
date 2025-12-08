@@ -12,9 +12,9 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
-import { getSession } from '@/lib/auth'
+import { headers } from 'next/headers'
+import auth from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import { APP_ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/db/prisma'
@@ -32,23 +32,56 @@ type ActionResponse = {
 }
 
 // ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const SECURITY_CONFIG = {
-  SALT_ROUNDS: 12,
-} as const
-
-// ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
 
 const requireSuperAdmin = async () => {
-  const session = await getSession()
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
   if (session?.user?.role !== Role.SUPERADMIN) {
     return null
   }
   return session
+}
+
+export const promoteUser = async (userId: string): Promise<ActionResponse> => {
+  const session = await requireSuperAdmin()
+  if (!session)
+    return {
+      success: false,
+      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
+    }
+
+  try {
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+    if (!targetUser)
+      return {
+        success: false,
+        message: ACTION_MESSAGES.ADMIN.ERR_USER_NOT_FOUND,
+      }
+
+    if (targetUser.role !== Role.USER) {
+      return {
+        success: false,
+        message: 'Cet utilisateur a déjà un rôle.', // TODO: Add to messages
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: Role.ADMIN },
+    })
+
+    revalidatePath(APP_ROUTES.ADMIN_ADMINS)
+    return {
+      success: true,
+      message: 'Utilisateur promu administrateur avec succès.',
+    }
+  } catch (error) {
+    console.error('Promote User Error:', error)
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
+  }
 }
 
 export const createAdmin = async (
@@ -58,7 +91,6 @@ export const createAdmin = async (
   // 1. Validate Input
   const rawData = {
     email: formData.get('email'),
-    password: formData.get('password'),
   }
 
   const validatedFields = createAdminSchema.safeParse(rawData)
@@ -73,14 +105,24 @@ export const createAdmin = async (
 
   // 2. Perform Action
   try {
-    const { email, password } = validatedFields.data
-    const hashedPassword = await hash(password, SECURITY_CONFIG.SALT_ROUNDS)
+    const { email } = validatedFields.data
 
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    })
+
+    if (existingUser) {
+      return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_EMAIL_EXISTS }
+    }
+
+    // Create user pre-provisioned for OAuth
     await prisma.user.create({
       data: {
         email,
-        passwordHash: hashedPassword,
-        role: Role.ADMIN,
+        name: 'Admin (Pending)', // Placeholder name
+        role: Role.ADMIN, // Explicitly create as ADMIN as this is an intentional admin action
+        emailVerified: true, // Trust admin created emails
       },
     })
 
@@ -88,9 +130,11 @@ export const createAdmin = async (
     return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_CREATE }
   } catch (error) {
     console.error('Create Admin Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_EMAIL_EXISTS }
+    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
   }
 }
+
+// ... rest of the file ...
 
 export const updateAdmin = async (
   userId: string,
@@ -180,38 +224,6 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
     return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_DELETE }
   } catch (error) {
     console.error('Delete Admin Error:', error)
-    return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
-  }
-}
-
-export const resetAdminPassword = async (
-  targetUserId: string,
-  newPassword: string,
-): Promise<ActionResponse> => {
-  const session = await requireSuperAdmin()
-  if (!session)
-    return {
-      success: false,
-      message: ACTION_MESSAGES.ADMIN.ERR_SUPERADMIN_ONLY,
-    }
-
-  try {
-    // Validate simple constraints on the new password manually since it's an arg, not FormData
-    if (newPassword.length < 8) {
-      return { success: false, message: 'Password is too short.' }
-    }
-
-    const hashedPassword = await hash(newPassword, SECURITY_CONFIG.SALT_ROUNDS)
-
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { passwordHash: hashedPassword },
-    })
-
-    revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
-    return { success: true, message: ACTION_MESSAGES.ADMIN.SUCCESS_RESET }
-  } catch (error) {
-    console.error('Password Reset Error:', error)
     return { success: false, message: ACTION_MESSAGES.ADMIN.ERR_GENERIC }
   }
 }

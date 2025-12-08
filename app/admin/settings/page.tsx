@@ -11,9 +11,10 @@
 // ----------------------------------------------------------------------
 
 import { Lock } from 'lucide-react'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { getSession } from '@/lib/auth'
+import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 import { SettingsForm } from './settings-form'
@@ -78,7 +79,9 @@ const AccessDeniedState = () => {
 
 const SettingsPage = async () => {
   // 1. Auth & Permission Check
-  const session = await getSession()
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
   const isSuperAdmin = session?.user?.role === Role.SUPERADMIN
 
   if (!isSuperAdmin) {

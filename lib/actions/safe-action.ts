@@ -2,7 +2,7 @@
  * File: lib/actions/safe-action.ts
  * Description: Generic wrapper for safe, authenticated server actions.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -10,8 +10,9 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
+import { headers } from 'next/headers'
 import type { z } from 'zod'
-import { getSession } from '@/lib/auth'
+import auth from '@/lib/auth'
 import { ACTION_MESSAGES } from '@/lib/config/messages'
 import type { ActionState } from '@/lib/types/actions'
 import type { Role } from '@/prisma/generated/prisma/enums'
@@ -20,9 +21,13 @@ import type { Role } from '@/prisma/generated/prisma/enums'
 // TYPES & INTERFACES
 // ----------------------------------------------------------------------
 
+// Update ActionHandler to reflect Better-Auth session structure
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
-  session: NonNullable<Awaited<ReturnType<typeof getSession>>>,
+  session: {
+    user: { role: Role; [key: string]: unknown }
+    session: Record<string, unknown>
+  },
 ) => Promise<ActionState<TOutput>>
 
 type ActionOptions<T extends z.ZodType> = {
@@ -46,7 +51,9 @@ export function authenticatedAction<T extends z.ZodType>({
   return async (data: z.infer<T>): Promise<ActionState> => {
     try {
       // 1. Authentication Check
-      const session = await getSession()
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      })
 
       if (!session || !session.user) {
         return {
@@ -58,7 +65,9 @@ export function authenticatedAction<T extends z.ZodType>({
       // 2. Role Check
       if (role) {
         const allowedRoles = Array.isArray(role) ? role : [role]
-        if (!allowedRoles.includes(session.user.role)) {
+        // Cast role to Role enum to satisfy TypeScript if needed,
+        // assuming database role matches enum
+        if (!allowedRoles.includes(session.user.role as Role)) {
           return {
             success: false,
             message: ACTION_MESSAGES.AUTH.ERR_UNAUTHORIZED,
@@ -81,7 +90,8 @@ export function authenticatedAction<T extends z.ZodType>({
       }
 
       // 4. Execute Handler
-      return await handler(validatedFields.data, session)
+      // biome-ignore lint/suspicious/noExplicitAny: Casting to match ActionHandler type
+      return await handler(validatedFields.data, session as any)
     } catch (error) {
       console.error('Safe Action Error:', error)
       return {
