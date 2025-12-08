@@ -13,8 +13,11 @@
 // ----------------------------------------------------------------------
 
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { z } from 'zod'
+import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
+import { RegistrationStatus, Role } from '@/prisma/generated/prisma/client'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -34,12 +37,21 @@ const updateChallongeIdSchema = z.object({
   challongeId: z.string().trim().optional().or(z.literal('')),
 })
 
+const updateRegistrationStatusSchema = z.object({
+  registrationId: z.string().uuid(),
+  status: z.nativeEnum(RegistrationStatus),
+  tournamentId: z.string().uuid(),
+})
+
 const MESSAGES = {
   SUCCESS_CHALLONGE: 'Challonge ID updated successfully.',
   SUCCESS_DELETE: 'Registration deleted successfully.',
+  SUCCESS_STATUS: 'Registration status updated successfully.',
   ERR_INVALID: 'Invalid input provided.',
   ERR_UPDATE: 'Failed to update Challonge ID.',
   ERR_DELETE: 'Failed to delete registration.',
+  ERR_STATUS: 'Failed to update registration status.',
+  ERR_UNAUTHORIZED: 'Unauthorized action.',
 } as const
 
 const FORM_KEYS = {
@@ -99,5 +111,49 @@ export const deleteRegistration = async (
   } catch (error) {
     console.error('Delete Registration Error:', error)
     return { success: false, message: MESSAGES.ERR_DELETE }
+  }
+}
+
+export const updateRegistrationStatus = async (
+  registrationId: string,
+  status: RegistrationStatus,
+  tournamentId: string,
+): Promise<ActionResponse> => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (
+    !session ||
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
+  ) {
+    return { success: false, message: MESSAGES.ERR_UNAUTHORIZED }
+  }
+
+  const validation = updateRegistrationStatusSchema.safeParse({
+    registrationId,
+    status,
+    tournamentId,
+  })
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: MESSAGES.ERR_INVALID,
+      errors: validation.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await prisma.registration.update({
+      where: { id: registrationId },
+      data: { status },
+    })
+
+    revalidatePath(`/admin/tournaments/${tournamentId}`)
+    return { success: true, message: MESSAGES.SUCCESS_STATUS }
+  } catch (error) {
+    console.error('Update Registration Status Error:', error)
+    return { success: false, message: MESSAGES.ERR_STATUS }
   }
 }

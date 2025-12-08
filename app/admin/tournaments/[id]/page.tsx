@@ -12,12 +12,14 @@
 
 import {
   Calendar,
+  Check,
   Edit,
   Eye,
   Swords,
   Trash2,
   Trophy,
   Users,
+  X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -49,7 +51,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { deleteRegistration } from '@/lib/actions/tournament-manager'
+import {
+  deleteRegistration,
+  updateRegistrationStatus,
+} from '@/lib/actions/tournament-manager'
 import prisma from '@/lib/db/prisma'
 import { formatDate } from '@/lib/utils'
 
@@ -293,6 +298,50 @@ const TournamentManagerPage = async ({
                       </TableCell>
                       <TableCell className="text-right py-4 pr-6">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {reg.status === 'PENDING' && (
+                            <>
+                              <form
+                                action={async () => {
+                                  'use server'
+                                  await updateRegistrationStatus(
+                                    reg.id,
+                                    'APPROVED',
+                                    tournament.id,
+                                  )
+                                }}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-zinc-400 hover:text-green-400 hover:bg-green-500/10"
+                                  title="Approuver"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                              </form>
+
+                              <form
+                                action={async () => {
+                                  'use server'
+                                  await updateRegistrationStatus(
+                                    reg.id,
+                                    'REJECTED',
+                                    tournament.id,
+                                  )
+                                }}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
+                                  title="Refuser"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </form>
+                            </>
+                          )}
+
                           <Sheet>
                             <SheetTrigger asChild>
                               <Button
