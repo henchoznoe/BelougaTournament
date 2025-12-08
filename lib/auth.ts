@@ -23,6 +23,7 @@ const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  trustedOrigins: [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL],
   socialProviders: {
     discord: {
       clientId: env.DISCORD_CLIENT_ID,
