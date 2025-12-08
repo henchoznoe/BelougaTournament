@@ -21,7 +21,13 @@ import { PrismaClient } from '@/prisma/generated/prisma/client'
 const createPrismaClient = (connectionString: string): PrismaClient => {
   // biome-ignore lint/suspicious/noExplicitAny: library type definition mismatch workaround
   const adapter = new PrismaPg({ connectionString }) as any
-  return new PrismaClient({ adapter })
+  return new PrismaClient({
+    adapter,
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
+  })
 }
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
