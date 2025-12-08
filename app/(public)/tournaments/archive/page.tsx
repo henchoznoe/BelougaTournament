@@ -2,7 +2,7 @@
  * File: app/(public)/tournaments/archive/page.tsx
  * Description: Public page for archived tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-08
  * License: MIT
  */
 
@@ -10,34 +10,16 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { Calendar, Trophy, Users } from 'lucide-react'
+import { Archive, ChevronLeft, Gamepad2 } from 'lucide-react'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
+import { TournamentCard } from '@/components/features/tournament/card/tournament-card'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { APP_METADATA } from '@/lib/constants'
+import { PublicTournament } from '@/lib/data/tournaments'
 import prisma from '@/lib/db/prisma'
-import { formatDateTime } from '@/lib/utils'
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
-interface ArchivedTournament {
-  id: string
-  title: string
-  description: string
-  slug: string
-  startDate: Date
-  format: string
-  maxParticipants: number | null
-}
+import { Visibility } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -46,11 +28,11 @@ interface ArchivedTournament {
 const CONTENT = {
   TITLE: 'Tournois archivés',
   SUBTITLE: 'Explorez les tournois passés et leurs résultats.',
-  EMPTY: 'Aucun tournoi archivé trouvé pour le moment.',
-  BTN_RESULTS: 'Voir les résultats',
-  LABEL_FORMAT: 'Format :',
-  LABEL_PLAYERS: (count: number | null) =>
-    count ? `${count} places` : 'Places illimitées',
+  EMPTY: {
+    TITLE: 'Aucune archive',
+    DESC: 'Aucun tournoi archivé trouvé pour le moment.',
+  },
+  BTN_BACK: 'Retour aux tournois',
 } as const
 
 export const metadata: Metadata = {
@@ -63,108 +45,95 @@ export const metadata: Metadata = {
 // LOGIC
 // ----------------------------------------------------------------------
 
-const fetchArchivedTournaments = async (): Promise<ArchivedTournament[]> => {
-  return prisma.tournament.findMany({
+const fetchArchivedTournaments = async (): Promise<PublicTournament[]> => {
+  const tournaments = await prisma.tournament.findMany({
     where: {
-      visibility: 'PUBLIC',
+      visibility: Visibility.PUBLIC,
       endDate: { lt: new Date() },
     },
     orderBy: { endDate: 'desc' },
+    include: {
+      _count: {
+        select: { registrations: true },
+      },
+    },
   })
+
+  // StartDate is guaranteed to be a Date object from Prisma
+  return tournaments as PublicTournament[]
 }
 
 // ----------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------
 
-const ArchivedTournamentCard = ({
-  tournament,
-}: {
-  tournament: ArchivedTournament
-}) => {
-  return (
-    <Card className="flex flex-col border-zinc-800 bg-zinc-900/50 opacity-90 transition-all hover:border-zinc-700 hover:opacity-100">
-      <CardHeader>
-        <CardTitle className="text-xl text-zinc-200">
-          {tournament.title}
-        </CardTitle>
-        <CardDescription className="line-clamp-2 text-zinc-500">
-          {tournament.description}
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="flex-1 space-y-4 text-sm text-zinc-400">
-        {/* Date */}
-        <div className="flex items-center gap-2">
-          <Calendar className="size-4 text-zinc-500" />
-          <span className="capitalize">
-            {formatDateTime(tournament.startDate)}
-          </span>
-        </div>
-
-        {/* Format */}
-        <div className="flex items-center gap-2">
-          <Trophy className="size-4 text-yellow-500/50" />
-          <span>
-            {CONTENT.LABEL_FORMAT} {tournament.format}
-          </span>
-        </div>
-
-        {/* Participants Capacity */}
-        <div className="flex items-center gap-2">
-          <Users className="size-4 text-green-500/50" />
-          <span>{CONTENT.LABEL_PLAYERS(tournament.maxParticipants)}</span>
-        </div>
-      </CardContent>
-
-      <CardFooter className="mt-auto">
-        <Button
-          asChild
-          variant="secondary"
-          className="w-full bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
-        >
-          <Link href={`/tournaments/${tournament.slug}`}>
-            {CONTENT.BTN_RESULTS}
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
-  )
-}
-
-const EmptyArchiveState = () => {
-  return (
-    <div className="col-span-full py-24 text-center text-zinc-500">
-      <p>{CONTENT.EMPTY}</p>
-    </div>
-  )
-}
-
 const ArchivePage = async () => {
   const tournaments = await fetchArchivedTournaments()
 
   return (
-    <div className="container mx-auto min-h-[80vh] px-4 py-12">
-      {/* Header */}
-      <div className="mb-12 space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight text-white">
-          {CONTENT.TITLE}
-        </h1>
-        <p className="text-lg text-zinc-400">{CONTENT.SUBTITLE}</p>
+    <div className="relative min-h-screen pb-24">
+      {/* Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          alt="Belouga Tournament Arena Background"
+          src={APP_METADATA.DEFAULT_BG_IMG}
+          fill
+          priority
+          className="object-cover opacity-50"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
       </div>
 
-      {/* Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {tournaments.length > 0 ? (
-          tournaments.map(tournament => (
-            <ArchivedTournamentCard
-              key={tournament.id}
-              tournament={tournament}
-            />
-          ))
-        ) : (
-          <EmptyArchiveState />
-        )}
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="mb-12 flex flex-col items-center text-center space-y-4 animate-in fade-in slide-in-from-top-8 duration-700">
+          <div className="inline-flex items-center justify-center p-3 rounded-full bg-purple-500/10 ring-1 ring-purple-500/20 mb-4">
+            <Archive className="size-8 text-purple-400" />
+          </div>
+          <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+            {CONTENT.TITLE}
+          </h1>
+          <p className="max-w-2xl text-lg text-zinc-400">{CONTENT.SUBTITLE}</p>
+
+          <div className="pt-4">
+            <Button
+              asChild
+              variant="outline"
+              className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all"
+            >
+              <Link href="/tournaments">
+                <ChevronLeft className="mr-2 size-4" />
+                {CONTENT.BTN_BACK}
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {tournaments.length > 0 ? (
+            tournaments.map((tournament, index) => (
+              <div
+                key={tournament.id}
+                className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-backwards"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <TournamentCard tournament={tournament} />
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-24 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-zinc-900/50 ring-1 ring-zinc-800">
+                <Gamepad2 className="size-10 text-zinc-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {CONTENT.EMPTY.TITLE}
+              </h3>
+              <p className="text-zinc-500">{CONTENT.EMPTY.DESC}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

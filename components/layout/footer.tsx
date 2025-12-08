@@ -78,8 +78,7 @@ const CONTENT = {
     COMMUNITY: {
       TITLE: "Communauté",
       STREAM: "Stream",
-      DISCORD: "Discord",
-      SPONSORS: "Sponsors",
+      DISCORD: "Discord"
     },
     SUPPORT: {
       TITLE: "Support",

@@ -18,6 +18,7 @@ import { FeaturesSection } from '@/components/layout/landing/features-section'
 import { HeroSection } from '@/components/layout/landing/hero-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
+import { SponsorsSection } from '@/components/layout/landing/sponsors-section'
 import { getLandingStats } from '@/lib/data/mappers/landing'
 
 // ----------------------------------------------------------------------
@@ -60,6 +61,7 @@ const LandingPage = async () => {
         <TournamentsSection />
       </Suspense>
       <StreamSection />
+      <SponsorsSection />
     </div>
   )
 }
