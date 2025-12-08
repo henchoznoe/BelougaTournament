@@ -99,10 +99,12 @@ const TournamentManagerPage = async ({
     notFound()
   }
 
+  const validRegistrationsCount = tournament.registrations.filter(
+    r => r.status === 'APPROVED' || r.status === 'PENDING',
+  ).length
+
   const fillRate = tournament.maxParticipants
-    ? Math.round(
-        (tournament.registrations.length / tournament.maxParticipants) * 100,
-      )
+    ? Math.round((validRegistrationsCount / tournament.maxParticipants) * 100)
     : 0
 
   return (
@@ -176,7 +178,7 @@ const TournamentManagerPage = async ({
                   />
                 </div>
                 <p className="text-xs text-zinc-500 mt-2">
-                  {tournament.registrations.length} /{' '}
+                  {validRegistrationsCount} /{' '}
                   {tournament.maxParticipants || '∞'} participants
                 </p>
               </CardContent>

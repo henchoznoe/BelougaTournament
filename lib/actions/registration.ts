@@ -234,7 +234,10 @@ export const registerForTournament = async (
         await tx.$executeRaw`SELECT * FROM "Tournament" WHERE id = ${tournamentId} FOR UPDATE`
 
         const currentRegistrations = await tx.registration.count({
-          where: { tournamentId },
+          where: {
+            tournamentId,
+            status: { not: 'REJECTED' },
+          },
         })
 
         if (currentRegistrations >= tournament.maxParticipants) {
