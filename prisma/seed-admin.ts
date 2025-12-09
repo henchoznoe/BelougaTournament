@@ -55,6 +55,7 @@ const createPrismaClient = (connectionString: string): PrismaClient => {
 }
 
 const main = async () => {
+  console.log("Seeding...")
   const prisma = createPrismaClient(env.DATABASE_URL)
 
   try {
@@ -75,13 +76,15 @@ const main = async () => {
     }
     for (const user of INITIAL_USERS) {
       console.log(
-        `Seed successful: ${user.name} (${user.email}) is ready with role ${user.role}`,
+        `User ${user.name} (${user.email}) is ready with role ${user.role}`,
       )
     }
+    console.log("Seed completed successfully!")
   } catch (error) {
     console.error("Seed failed:", error)
     throw error
   } finally {
+    console.log("Disconnecting from database...")
     await prisma.$disconnect()
   }
 }

@@ -2,7 +2,7 @@
  * File: components/layout/footer.tsx
  * Description: Server Component for the public site footer.
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-09
  * License: MIT
  */
 
@@ -21,10 +21,11 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 
-import { APP_METADATA, EXTERNAL_LINKS } from "@/lib/constants"
+import { APP_METADATA } from "@/lib/constants"
 import { getSiteSettings } from "@/lib/data/settings"
 import { APP_ROUTES } from "@/lib/config/routes"
 import { fr } from "@/lib/i18n/dictionaries/fr"
+import { cn } from "@/lib/utils"
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES
@@ -39,7 +40,7 @@ interface SocialLink {
 
 interface FooterLink {
   label: string
-  href: string
+  href: string | null
 }
 
 interface FooterSection {
@@ -58,8 +59,6 @@ const BRAND_COLORS = {
   TIKTOK: "hover:text-[#00f2ea]",
   INSTAGRAM: "hover:text-[#E1306C]",
 } as const
-
-
 
 // ----------------------------------------------------------------------
 // COMPONENT
@@ -84,7 +83,6 @@ const FooterLogo = ({ url }: { url: string | null }) => {
 
 export const Footer = async () => {
   const settings = await getSiteSettings()
-  const currentYear = new Date().getFullYear()
 
   const socialLinks: SocialLink[] = [
     {
@@ -137,7 +135,7 @@ export const Footer = async () => {
         { label: fr.layout.footer.links.community.stream, href: APP_ROUTES.STREAM },
         {
           label: fr.layout.footer.links.community.discord,
-          href: settings.socialDiscord || EXTERNAL_LINKS.DISCORD,
+          href: settings.socialDiscord,
         },
       ],
     },
@@ -163,19 +161,19 @@ export const Footer = async () => {
           </Link>
         </div>
 
-        <div className="mb-16 grid gap-12 lg:grid-cols-4">
+        <div className="mb-16 grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-6">
             <p className="leading-relaxed text-zinc-400">
               {fr.layout.footer.description}
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-2 lg:gap-3 flex-wrap justify-center md:justify-start">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`rounded-lg bg-zinc-900 p-2 text-zinc-400 transition-all hover:bg-zinc-800 ${social.colorClass}`}
+                  className={cn("rounded-lg bg-zinc-900 p-2 text-zinc-400 transition-all hover:bg-zinc-800", social.colorClass)}
                   aria-label={social.name}
                 >
                   <social.icon className="size-5" />
@@ -188,8 +186,9 @@ export const Footer = async () => {
             <div key={section.title}>
               <h3 className="mb-6 font-bold text-white">{section.title}</h3>
               <ul className="space-y-4">
-                {section.links.map((link) => (
-                  <li key={link.label}>
+                {section.links.map((link) => {
+                  if (!link.href) return null
+                  return <li key={link.label}>
                     <Link
                       href={link.href}
                       className="group flex items-center gap-2 text-zinc-400 transition-colors hover:text-blue-400"
@@ -198,20 +197,20 @@ export const Footer = async () => {
                       {link.label}
                     </Link>
                   </li>
-                ))}
+                })}
               </ul>
             </div>
           ))}
         </div>
 
         <div className="border-t border-zinc-800 pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <p className="text-sm text-zinc-500">
-                &copy; {currentYear} {APP_METADATA.NAME}.{" "}
+          <div className="flex flex-col items-center justify-between gap-2 lg:gap-4 lg:flex-row">
+              <p className="text-sm text-zinc-500 text-center lg:text-left">
+                &copy; {new Date().getFullYear()} {APP_METADATA.NAME}.{" "}
                 {fr.layout.footer.rightsReserved}
               </p>
 
-              <div className="flex items-center gap-6 text-sm text-zinc-500">
+              <div className="flex flex-col items-center gap-2 lg:gap-6 text-sm text-zinc-500 lg:flex-row">
                 <Link
                   href={APP_ROUTES.PRIVACY}
                   className="transition-colors hover:text-white"
@@ -228,12 +227,9 @@ export const Footer = async () => {
                   href={APP_METADATA.AUTHOR_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 transition-colors hover:text-blue-400"
+                  className="transition-colors hover:text-white"
                 >
-                  {fr.layout.footer.developedBy}{" "}
-                  <span className="font-semibold text-zinc-300">
-                    {APP_METADATA.AUTHOR_NAME}
-                  </span>
+                  {fr.layout.footer.developedBy}{' '}{APP_METADATA.AUTHOR_NAME}
                 </a>
               </div>
           </div>

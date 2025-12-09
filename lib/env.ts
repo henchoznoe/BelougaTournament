@@ -2,7 +2,7 @@
  * File: lib/env.ts
  * Description: Type-safe environment configuration using Zod.
  * Author: Noé Henchoz
- * Date: 2025-12-08
+ * Date: 2025-12-09
  * License: MIT
  */
 
@@ -24,7 +24,7 @@ const envSchema = z.object({
 
   // Better Auth
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
-  BETTER_AUTH_URL: z.string().url().default('http://localhost:3000'),
+  BETTER_AUTH_URL: z.url('BETTER_AUTH_URL is required'),
 
   // OAuth Providers
   DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
@@ -45,14 +45,10 @@ const envSchema = z.object({
   NEXT_PUBLIC_TWITCH_PARENT: z
     .string()
     .min(1, 'NEXT_PUBLIC_TWITCH_PARENT is required'),
-  NEXT_PUBLIC_DEFAULT_STREAM_URL: z
-    .string()
-    .url('NEXT_PUBLIC_DEFAULT_STREAM_URL must be a valid URL'),
-  NEXT_PUBLIC_APP_URL: z
-    .string()
-    .url('NEXT_PUBLIC_APP_URL must be a valid URL')
-    .optional()
-    .default('http://localhost:3000'),
+  NEXT_PUBLIC_DEFAULT_STREAM_URL: z.url(
+    'NEXT_PUBLIC_DEFAULT_STREAM_URL is required',
+  ),
+  NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL is required'),
 })
 
 // ----------------------------------------------------------------------
@@ -62,11 +58,16 @@ const envSchema = z.object({
 const _env = envSchema.safeParse(process.env)
 
 if (!_env.success) {
-  console.error(
-    '❌ Invalid environment variables:',
-    JSON.stringify(_env.error.format(), null, 4),
-  )
-  throw new Error('Invalid environment variables')
+  console.error('❌ Invalid environment variables:')
+  for (const issue of _env.error.issues) {
+    console.error(`${issue.path.join('.')}: ${issue.message}`)
+  }
+
+  if (typeof process !== 'undefined' && typeof process.exit === 'function') {
+    process.exit(1)
+  } else {
+    throw new Error('Invalid environment variables')
+  }
 }
 
 export const env = _env.data

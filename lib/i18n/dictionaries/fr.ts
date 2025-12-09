@@ -146,7 +146,7 @@ export const fr = {
     },
     footer: {
       description:
-        'La plateforme de référence pour les tournois e-sport amateurs. Rejoignez la compétition et montrez votre talent.',
+        'La plateforme de référence pour les tournois e-sport amateurs.',
       rightsReserved: 'Tous droits réservés.',
       developedBy: 'Développé par',
       links: {

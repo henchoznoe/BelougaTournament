@@ -27,15 +27,6 @@ type EmailResponse = {
 }
 
 // ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-// ERRORS logic moved to inline of helper or kept if system internal, but text moved to fr
-// We can use fr.common.email.errorSend for the error message
-
-// TEAM_NAME logic moved to fr dictionary
-
-// ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
 
