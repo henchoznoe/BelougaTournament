@@ -1,5 +1,5 @@
 /**
- * File: components/shared/misc/scroll-to-top.tsx
+ * File: components/shared/ui/scroll-to-top.tsx
  * Description: Client component to force scroll to top on navigation and refresh.
  * Author: Noé Henchoz
  * Date: 2025-12-07

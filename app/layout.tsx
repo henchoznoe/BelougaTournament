@@ -13,7 +13,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
-import { ScrollToTop } from '@/components/shared/misc/scroll-to-top'
+import { ScrollToTop } from '@/components/shared/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { APP_METADATA } from '@/lib/config/constants'
 import { cn } from '@/lib/utils'
