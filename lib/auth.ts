@@ -19,6 +19,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 // ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
+
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',

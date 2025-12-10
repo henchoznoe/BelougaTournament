@@ -12,7 +12,11 @@
 
 import { z } from 'zod'
 import { fr } from '@/lib/i18n/dictionaries/fr'
-import { Visibility } from '@/prisma/generated/prisma/enums'
+import {
+  FieldType,
+  TournamentFormat,
+  Visibility,
+} from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -26,17 +30,16 @@ export const tournamentSchema = z.object({
       id: z.string().optional(),
       label: z.string().min(1, fr.common.server.validations.labelRequired),
       required: z.boolean().default(true),
-      type: z.enum(['TEXT', 'NUMBER']),
+      type: z.enum(FieldType),
     }),
   ),
-  format: z.enum(['SOLO', 'TEAM']),
+  format: z.enum(TournamentFormat),
   maxParticipants: z.coerce.number().optional(),
   registrationClose: z.date(),
   registrationOpen: z.date(),
   slug: z.string().min(3, fr.common.server.validations.slugMin),
   startDate: z.date(),
   streamUrl: z
-    .string()
     .url(fr.common.server.validations.streamUrlInvalid)
     .optional()
     .or(z.literal('')),
@@ -57,7 +60,7 @@ export const exportTournamentSchema = z.string()
 
 export const toggleVisibilitySchema = z.object({
   id: z.string(),
-  visibility: z.nativeEnum(Visibility),
+  visibility: z.enum(Visibility),
 })
 
 export type TournamentSchema = z.infer<typeof tournamentSchema>

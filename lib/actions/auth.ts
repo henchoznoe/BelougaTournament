@@ -1,5 +1,5 @@
 /**
- * File: lib/actions/auth-actions.ts
+ * File: lib/actions/auth.ts
  * Description: Server actions for authentication.
  * Author: Noé Henchoz
  * Date: 2025-12-08

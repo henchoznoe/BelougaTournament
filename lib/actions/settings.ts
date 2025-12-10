@@ -120,7 +120,7 @@ export const updateSettings = async (
       },
     })
 
-    revalidateTag(CACHE_TAGS.SETTINGS, 'default')
+    revalidateTag(CACHE_TAGS.SETTINGS, 'max')
 
     return { success: true, message: fr.common.server.actions.settings.success }
   } catch (error) {

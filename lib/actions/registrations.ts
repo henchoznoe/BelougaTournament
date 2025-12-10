@@ -2,7 +2,7 @@
  * File: lib/actions/registrations.ts
  * Description: Server actions for managing registrations (admin).
  * Author: Noé Henchoz
- * Date: 2025-12-07
+ * Date: 2025-12-10
  * License: MIT
  */
 
@@ -17,48 +17,81 @@ import { headers } from 'next/headers'
 import auth from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import { generateStatusUpdateEmailHtml, sendEmail } from '@/lib/email'
-import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
+import { RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
 import { APP_ROUTES } from '../config/routes'
 
 // ----------------------------------------------------------------------
-// LOGIC
+// TYPES & INTERFACES
 // ----------------------------------------------------------------------
 
-const checkAuth = async () => {
+type ActionResponse = {
+  success: boolean
+  message?: string
+  error?: string
+}
+
+// ----------------------------------------------------------------------
+// CONSTANTS
+// ----------------------------------------------------------------------
+
+const SUBJECT_MAP: Partial<Record<RegistrationStatus, string>> = {
+  [RegistrationStatus.APPROVED]: 'Registration Approved',
+  [RegistrationStatus.REJECTED]: 'Registration Rejected',
+  [RegistrationStatus.WAITLIST]: 'Registration Status Update',
+}
+
+// ----------------------------------------------------------------------
+// INTERNAL HELPERS
+// ----------------------------------------------------------------------
+
+/**
+ * Verifies if the current user has admin privileges.
+ */
+async function ensureAdminAuth(): Promise<ActionResponse> {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
+
   if (
-    !session ||
-    !session.user ||
+    !session?.user ||
     (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
   ) {
     return {
       success: false,
-      message: 'Unauthorized: Admin access required.',
+      error: 'Unauthorized: Admin access required.',
     }
   }
+
   return { success: true }
 }
 
-export async function updateRegistrationStatus(
+/**
+ * Core logic to update status, send email, and revalidate.
+ * Centralizes the logic to avoid code duplication.
+ */
+async function processRegistrationUpdate(
   registrationId: string,
   newStatus: RegistrationStatus,
-  tournamentId: string,
-) {
-  const auth = await checkAuth()
-  if (!auth.success) {
-    return { message: auth.message }
+): Promise<ActionResponse> {
+  // Validation
+  const authCheck = await ensureAdminAuth()
+  if (!authCheck.success) return authCheck
+
+  if (!registrationId) {
+    return { success: false, error: 'Registration ID is required.' }
   }
 
   try {
+    // Database Update
     const registration = await prisma.registration.update({
       where: { id: registrationId },
       data: { status: newStatus },
       include: { tournament: true },
     })
 
-    // Send Status Update Email
+    // Email Notification
+    const emailSubjectPrefix =
+      SUBJECT_MAP[newStatus] ?? 'Registration Status Update'
     const emailHtml = generateStatusUpdateEmailHtml(
       registration.tournament.title,
       newStatus,
@@ -66,110 +99,41 @@ export async function updateRegistrationStatus(
 
     await sendEmail({
       to: registration.contactEmail,
-      subject: `Status Update - ${registration.tournament.title}`,
+      subject: `${emailSubjectPrefix} - ${registration.tournament.title}`,
       html: emailHtml,
     })
 
-    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
-    return { message: 'Status updated successfully.' }
+    // Revalidation
+    revalidatePath(
+      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
+    )
+
+    return { success: true, message: `Status updated to ${newStatus}.` }
   } catch (error) {
-    console.error('Update Status Error:', error)
-    return { message: 'Failed to update status.' }
+    console.error(`Failed to update registration ${registrationId}:`, error)
+    return { success: false, error: 'Internal server error during update.' }
   }
+}
+
+// ----------------------------------------------------------------------
+// PUBLIC ACTIONS
+// ----------------------------------------------------------------------
+
+export async function updateRegistrationStatus(
+  registrationId: string,
+  newStatus: RegistrationStatus,
+) {
+  return processRegistrationUpdate(registrationId, newStatus)
 }
 
 export async function approveRegistration(registrationId: string) {
-  const auth = await checkAuth()
-  if (!auth.success) return { success: false, error: auth.message }
-
-  try {
-    const registration = await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: 'APPROVED' },
-      include: { tournament: true },
-    })
-
-    const emailHtml = generateStatusUpdateEmailHtml(
-      registration.tournament.title,
-      'APPROVED',
-    )
-
-    await sendEmail({
-      to: registration.contactEmail,
-      subject: `Registration Approved - ${registration.tournament.title}`,
-      html: emailHtml,
-    })
-
-    revalidatePath(
-      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
-    )
-    return { success: true }
-  } catch (error) {
-    console.error('Failed to approve registration:', error)
-    return { success: false, error: 'Failed to approve registration' }
-  }
+  return processRegistrationUpdate(registrationId, RegistrationStatus.APPROVED)
 }
 
 export async function rejectRegistration(registrationId: string) {
-  const auth = await checkAuth()
-  if (!auth.success) return { success: false, error: auth.message }
-
-  try {
-    const registration = await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: 'REJECTED' },
-      include: { tournament: true },
-    })
-
-    const emailHtml = generateStatusUpdateEmailHtml(
-      registration.tournament.title,
-      'REJECTED',
-    )
-
-    await sendEmail({
-      to: registration.contactEmail,
-      subject: `Registration Rejected - ${registration.tournament.title}`,
-      html: emailHtml,
-    })
-
-    revalidatePath(
-      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
-    )
-    return { success: true }
-  } catch (error) {
-    console.error('Failed to reject registration:', error)
-    return { success: false, error: 'Failed to reject registration' }
-  }
+  return processRegistrationUpdate(registrationId, RegistrationStatus.REJECTED)
 }
 
 export async function moveToWaitlist(registrationId: string) {
-  const auth = await checkAuth()
-  if (!auth.success) return { success: false, error: auth.message }
-
-  try {
-    const registration = await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: 'WAITLIST' },
-      include: { tournament: true },
-    })
-
-    const emailHtml = generateStatusUpdateEmailHtml(
-      registration.tournament.title,
-      'WAITLIST',
-    )
-
-    await sendEmail({
-      to: registration.contactEmail,
-      subject: `Registration Status Update - ${registration.tournament.title}`,
-      html: emailHtml,
-    })
-
-    revalidatePath(
-      `${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`,
-    )
-    return { success: true }
-  } catch (error) {
-    console.error('Failed to move to waitlist:', error)
-    return { success: false, error: 'Failed to move to waitlist' }
-  }
+  return processRegistrationUpdate(registrationId, RegistrationStatus.WAITLIST)
 }

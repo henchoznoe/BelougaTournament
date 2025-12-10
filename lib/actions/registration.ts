@@ -20,7 +20,7 @@ import prisma from '@/lib/db/prisma'
 import { generateRegistrationEmailHtml, sendEmail } from '@/lib/email'
 import { env } from '@/lib/env'
 import { Prisma, type Registration } from '@/prisma/generated/prisma/client'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 import { APP_ROUTES } from '../config/routes'
 import { fr } from '../i18n/dictionaries/fr'
 
@@ -215,7 +215,7 @@ export const registerForTournament = async (
   try {
     registrationResult = await prisma.$transaction(async tx => {
       // 3. Max Participants Logic
-      let status: RegistrationStatus = 'PENDING'
+      let status: RegistrationStatus = RegistrationStatus.PENDING
 
       if (tournament.maxParticipants) {
         // Lock the Tournament row to prevent race conditions
@@ -224,12 +224,12 @@ export const registerForTournament = async (
         const currentRegistrations = await tx.registration.count({
           where: {
             tournamentId,
-            status: { not: 'REJECTED' },
+            status: { not: RegistrationStatus.REJECTED },
           },
         })
 
         if (currentRegistrations >= tournament.maxParticipants) {
-          status = 'WAITLIST'
+          status = RegistrationStatus.WAITLIST
         } else if (tournament.autoApprove) {
           status = 'APPROVED'
         } else {
@@ -322,7 +322,7 @@ export const registerForTournament = async (
   })
 
   const message =
-    registrationResult.status === 'WAITLIST'
+    registrationResult.status === RegistrationStatus.WAITLIST
       ? fr.common.registration.successWaitlist
       : fr.common.registration.successApproved
 

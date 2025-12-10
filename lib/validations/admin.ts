@@ -19,12 +19,12 @@ import { Role } from '@/prisma/generated/prisma/enums'
 // ----------------------------------------------------------------------
 
 export const createAdminSchema = z.object({
-  email: z.string().email(fr.common.server.validations.emailInvalid),
+  email: z.email(fr.common.server.validations.emailInvalid),
 })
 
 export const updateAdminSchema = z.object({
-  email: z.string().email(),
-  role: z.nativeEnum(Role),
+  email: z.email(fr.common.server.validations.emailInvalid),
+  role: z.enum(Role),
 })
 
 export type CreateAdminInput = z.infer<typeof createAdminSchema>

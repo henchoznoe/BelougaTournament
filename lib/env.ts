@@ -42,12 +42,6 @@ const envSchema = z.object({
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
 
   // Public
-  NEXT_PUBLIC_TWITCH_PARENT: z
-    .string()
-    .min(1, 'NEXT_PUBLIC_TWITCH_PARENT is required'),
-  NEXT_PUBLIC_DEFAULT_STREAM_URL: z.url(
-    'NEXT_PUBLIC_DEFAULT_STREAM_URL is required',
-  ),
   NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL is required'),
 })
 

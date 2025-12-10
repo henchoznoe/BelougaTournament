@@ -20,11 +20,3 @@ export const APP_METADATA = {
   AUTHOR_URL: 'https://henchoznoe.ch',
   AUTHOR_NAME: 'Noé Henchoz',
 } as const
-
-export const FALLBACK_SOCIAL_LINKS = {
-  DISCORD: 'https://discord.gg/qACSpXBfcw',
-  TWITCH: 'https://www.twitch.tv/quentadoulive',
-  TIKTOK: 'https://www.tiktok.com/@quentadou',
-  YOUTUBE: 'https://www.youtube.com/@quentadou9064',
-  INSTAGRAM: 'https://www.instagram.com/quentadou._',
-} as const
