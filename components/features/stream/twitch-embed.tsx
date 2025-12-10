@@ -22,7 +22,7 @@ import { fr } from "@/lib/i18n/dictionaries/fr"
 // ----------------------------------------------------------------------
 
 interface TwitchEmbedProps {
-  channel: string
+  channel: string | null | undefined
   width?: string | number
   height?: string | number
 }
@@ -93,6 +93,28 @@ const getParentDomains = (): string[] => {
   return parents
 }
 
+const extractTwitchChannel = (
+  urlOrUsername: string | null | undefined,
+): string | null => {
+  if (!urlOrUsername) {
+    return null
+  }
+
+  // Try to match standard Twitch URL patterns
+  const match = urlOrUsername.match(/twitch\.tv\/([a-zA-Z0-9_]+)/)
+
+  if (match?.[1]) {
+    return match[1]
+  }
+
+  // If no URL pattern is found but string is not empty and has no slashes, assume it's the username
+  if (!urlOrUsername.includes('/')) {
+    return urlOrUsername
+  }
+
+  return null
+}
+
 // ----------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------
@@ -111,11 +133,25 @@ export const TwitchEmbed = ({
   const uniqueId = useId()
   const embedId = `twitch-embed-${uniqueId.replace(/[^a-zA-Z0-9-_]/g, "")}`
 
+  const channelName = extractTwitchChannel(channel)
+
   useEffect(() => {
     if (window.Twitch?.Embed) {
       setIsScriptLoaded(true)
     }
   }, [])
+
+  if (!channelName) {
+     return (
+        <div
+            className="flex w-full flex-col items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 p-12 text-center text-zinc-400 shadow-xl"
+            style={{ height }}
+        >
+            <ScreenShareOff className="mb-4 size-10 text-zinc-600" />
+            <p>{fr.components.twitchEmbed.notConfigured}</p>
+        </div>
+    )
+  }
 
   useEffect(() => {
     if (!isScriptLoaded) return
@@ -129,7 +165,7 @@ export const TwitchEmbed = ({
       const embed = new window.Twitch.Embed(embedId, {
         width,
         height,
-        channel,
+        channel: channelName,
         parent: getParentDomains(),
         layout: "video",
         autoplay: true,
@@ -186,7 +222,7 @@ export const TwitchEmbed = ({
     } catch (_error) {
       setIsLoading(false)
     }
-  }, [isScriptLoaded, channel, width, height, embedId])
+  }, [isScriptLoaded, channelName, width, height, embedId])
 
   return (
     <div

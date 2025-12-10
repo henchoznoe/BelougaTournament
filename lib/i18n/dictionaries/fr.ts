@@ -950,6 +950,7 @@ export const fr = {
       offlineTitle: 'Le stream est actuellement offline',
       offlineDescSuffix:
         ' ne stream pas actuellement. Revenez plus tard ou suivez sa chaîne sur Twitch.',
+      notConfigured: "Aucune chaîne Twitch n'a été configurée pour le moment.",
     },
     tournamentsList: {
       sectionTitle: 'Tournois à venir',

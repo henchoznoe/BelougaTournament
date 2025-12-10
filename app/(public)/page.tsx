@@ -20,7 +20,10 @@ import { SponsorsSection } from '@/components/features/landing/sponsors-section'
 import { StatsSection } from '@/components/features/landing/stats-section'
 import { StreamSection } from '@/components/features/landing/stream-section'
 import { fr } from '@/lib/i18n/dictionaries/fr'
-import { getLandingStats } from '@/lib/services/settings.service'
+import {
+  getLandingStats,
+  getSiteSettings,
+} from '@/lib/services/settings.service'
 
 export const metadata: Metadata = {
   title: fr.pages.home.metaTitle,
@@ -32,7 +35,10 @@ export const metadata: Metadata = {
 // ----------------------------------------------------------------------
 
 const LandingPage = async () => {
-  const statsData = await getLandingStats()
+  const [statsData, settings] = await Promise.all([
+    getLandingStats(),
+    getSiteSettings(),
+  ])
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
@@ -52,7 +58,7 @@ const LandingPage = async () => {
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>
-      <StreamSection />
+      <StreamSection channel={settings.socialTwitch} />
       <SponsorsSection />
     </div>
   )

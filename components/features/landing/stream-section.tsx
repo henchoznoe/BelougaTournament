@@ -17,16 +17,6 @@ import { Suspense } from "react"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-const STREAM_CONFIG = {
-  CHANNEL: "quentadoulive",
-} as const
-
-
-
-// ----------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------
 
@@ -50,7 +40,11 @@ const StreamLoader = () => {
   )
 }
 
-export const StreamSection = () => {
+interface StreamSectionProps {
+  channel: string | null | undefined
+}
+
+export const StreamSection = ({ channel }: StreamSectionProps) => {
   return (
     <section className="container mx-auto px-4" id="stream">
       <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-1 backdrop-blur-xl">
@@ -69,7 +63,7 @@ export const StreamSection = () => {
           {/* Embed Container */}
           <div className="mx-auto max-w-5xl overflow-hidden rounded-xl shadow-[0_0_50px_-10px_rgba(147,51,234,0.3)] ring-1 ring-white/10">
             <Suspense fallback={<StreamLoader />}>
-              <TwitchEmbed channel={STREAM_CONFIG.CHANNEL} />
+              <TwitchEmbed channel={channel} />
             </Suspense>
           </div>
         </div>
