@@ -24,7 +24,7 @@ const envSchema = z.object({
 
   // Better Auth
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
-  BETTER_AUTH_URL: z.url('BETTER_AUTH_URL is required'),
+  BETTER_AUTH_URL: z.string().url().default('http://localhost:3000'),
 
   // OAuth Providers
   DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
@@ -42,7 +42,11 @@ const envSchema = z.object({
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
 
   // Public
-  NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL is required'),
+  NEXT_PUBLIC_APP_URL: z
+    .string()
+    .url('NEXT_PUBLIC_APP_URL must be a valid URL')
+    .optional()
+    .default('http://localhost:3000'),
 })
 
 // ----------------------------------------------------------------------
