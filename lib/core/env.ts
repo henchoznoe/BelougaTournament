@@ -1,6 +1,6 @@
 /**
  * File: lib/core/env.ts
- * Description: Environment configuration using Zod for type-safe validation.
+ * Description: Environment configuration using Zod with explicit client-side mapping.
  * Author: Noé Henchoz
  * Date: 2025-12-09
  * License: MIT
@@ -9,7 +9,7 @@
 import { z } from 'zod'
 
 const clientSchema = z.object({
-  NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL is required'),
+  NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL must be a valid URL'),
 })
 
 const serverSchema = z.object({
@@ -37,9 +37,13 @@ const serverSchema = z.object({
 })
 
 const isServer = typeof window === 'undefined'
-// Always parse client-side
-const parsedClient = clientSchema.safeParse(process.env)
-// Parse server-side only if we are on the server
+
+// Parse client-side
+const parsedClient = clientSchema.safeParse({
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+})
+
+// Parse server-side
 const parsedServer = isServer
   ? serverSchema.safeParse(process.env)
   : { success: true as const, data: {} as z.infer<typeof serverSchema> }
