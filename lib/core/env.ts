@@ -1,30 +1,24 @@
 /**
- * File: lib/env.ts
- * Description: Type-safe environment configuration using Zod.
+ * File: lib/core/env.ts
+ * Description: Environment configuration using Zod for type-safe validation.
  * Author: Noé Henchoz
  * Date: 2025-12-09
  * License: MIT
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { z } from 'zod'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
+const clientSchema = z.object({
+  NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL is required'),
+})
 
-const envSchema = z.object({
+const serverSchema = z.object({
   // General
-  NODE_ENV: z
-    .enum(['development', 'test', 'production'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'test', 'production']),
 
   // Better Auth
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
-  BETTER_AUTH_URL: z.string().url().default('http://localhost:3000'),
+  BETTER_AUTH_URL: z.url('BETTER_AUTH_URL is required'),
 
   // OAuth Providers
   DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
@@ -40,27 +34,37 @@ const envSchema = z.object({
 
   // Storage
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
-
-  // Public
-  NEXT_PUBLIC_APP_URL: z
-    .string()
-    .url('NEXT_PUBLIC_APP_URL must be a valid URL')
-    .optional()
-    .default('http://localhost:3000'),
 })
 
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
+const isServer = typeof window === 'undefined'
+// Always parse client-side
+const parsedClient = clientSchema.safeParse(process.env)
+// Parse server-side only if we are on the server
+const parsedServer = isServer
+  ? serverSchema.safeParse(process.env)
+  : { success: true as const, data: {} as z.infer<typeof serverSchema> }
 
-const _env = envSchema.safeParse(process.env)
+// Centralized error handling
+if (!parsedClient.success || !parsedServer.success) {
+  console.error('❌ Invalid environment variables:')
 
-if (!_env.success) {
-  console.error(
-    '❌ Invalid environment variables:',
-    JSON.stringify(_env.error.format(), null, 4),
-  )
-  throw new Error('Invalid environment variables')
+  const clientErrors = parsedClient.success ? [] : parsedClient.error.issues
+  const serverErrors = parsedServer.success ? [] : parsedServer.error.issues
+  const allErrors = [...clientErrors, ...serverErrors]
+
+  allErrors.forEach(issue => {
+    console.error(`- ${issue.path.join('.')}: ${issue.message}`)
+  })
+
+  if (isServer && process.env.NODE_ENV !== 'test') {
+    process.exit(1)
+  } else if (isServer) {
+    throw new Error('Invalid environment variables')
+  }
 }
 
-export const env = _env.data
+// Export merged and typed
+export const env = {
+  ...parsedClient.data,
+  ...(parsedServer.data as z.infer<typeof serverSchema>),
+} as z.infer<typeof clientSchema> & z.infer<typeof serverSchema>
