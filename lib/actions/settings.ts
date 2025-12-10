@@ -1,25 +1,18 @@
 /**
  * File: lib/actions/settings.ts
  * Description: Server actions for updating site settings.
- * Author: Noé Henchoz
- * Date: 2025-12-07
- * License: MIT
  */
 
 'use server'
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { put } from '@vercel/blob'
-import { revalidateTag } from 'next/cache'
-import prisma from '@/lib/db/prisma'
+import { revalidatePath } from 'next/cache'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 import { settingsSchema } from '@/lib/validations/settings'
 
 // ----------------------------------------------------------------------
-// TYPES & INTERFACES
+// TYPES
 // ----------------------------------------------------------------------
 
 export type SettingsState = {
@@ -34,10 +27,6 @@ export type SettingsState = {
 
 const DB_CONFIG = {
   SINGLETON_ID: 1,
-} as const
-
-const CACHE_TAGS = {
-  SETTINGS: 'site-settings',
 } as const
 
 const FORM_KEYS = {
@@ -120,7 +109,7 @@ export const updateSettings = async (
       },
     })
 
-    revalidateTag(CACHE_TAGS.SETTINGS, 'max')
+    revalidatePath('/', 'layout')
 
     return { success: true, message: fr.common.server.actions.settings.success }
   } catch (error) {

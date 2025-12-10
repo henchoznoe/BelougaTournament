@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { type PublicTournament } from "@/lib/data/tournaments"
+import { type PublicTournament } from "@/lib/services/tournament.service"
 import { formatDateTime } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/routes"
 import { TournamentFormat } from "@/prisma/generated/prisma/enums"

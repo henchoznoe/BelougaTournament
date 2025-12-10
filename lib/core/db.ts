@@ -11,7 +11,7 @@
 // ----------------------------------------------------------------------
 
 import { PrismaPg } from '@prisma/adapter-pg'
-import { env } from '@/lib/env'
+import { env } from '@/lib/core/env'
 import { PrismaClient } from '@/prisma/generated/prisma/client'
 
 // ----------------------------------------------------------------------

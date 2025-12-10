@@ -24,8 +24,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { getAdminTournaments } from '@/lib/data/tournaments'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getAdminTournaments } from '@/lib/services/tournament.service'
 import { formatDate } from '@/lib/utils'
 import { Visibility } from '@/prisma/generated/prisma/client'
 

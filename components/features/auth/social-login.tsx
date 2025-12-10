@@ -13,7 +13,7 @@
 // ----------------------------------------------------------------------
 
 import { Button } from "@/components/ui/button"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/core/auth-client"
 import { toast } from "sonner"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 

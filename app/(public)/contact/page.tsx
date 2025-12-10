@@ -21,8 +21,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { getSiteSettings } from '@/lib/data/settings'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getSiteSettings } from '@/lib/services/settings.service'
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES

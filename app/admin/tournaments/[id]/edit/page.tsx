@@ -13,8 +13,8 @@
 import { notFound } from 'next/navigation'
 import type { z } from 'zod'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
-import { updateTournament } from '@/lib/actions/tournaments'
-import prisma from '@/lib/db/prisma'
+import { updateTournament } from '@/lib/actions/tournament'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { tournamentSchema } from '@/lib/validations/tournament'
 

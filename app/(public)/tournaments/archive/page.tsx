@@ -18,9 +18,9 @@ import { TournamentCard } from '@/components/features/tournament/card/tournament
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
-import type { PublicTournament } from '@/lib/data/tournaments'
-import prisma from '@/lib/db/prisma'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import type { PublicTournament } from '@/lib/services/tournament.service'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------

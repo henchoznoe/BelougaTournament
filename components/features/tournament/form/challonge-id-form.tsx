@@ -17,7 +17,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { updateChallongeId } from "@/lib/actions/tournament-manager"
+import { updateChallongeId } from "@/lib/actions/tournament"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------

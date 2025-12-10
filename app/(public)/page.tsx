@@ -19,9 +19,8 @@ import { HeroSection } from '@/components/layout/landing/hero-section'
 import { SponsorsSection } from '@/components/layout/landing/sponsors-section'
 import { StatsSection } from '@/components/layout/landing/stats-section'
 import { StreamSection } from '@/components/layout/landing/stream-section'
-import { getLandingStats } from '@/lib/data/mappers/landing'
-
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getLandingStats } from '@/lib/services/settings.service'
 
 export const metadata: Metadata = {
   title: fr.pages.home.metaTitle,

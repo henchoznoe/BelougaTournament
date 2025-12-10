@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { cancelRegistration } from '@/lib/actions/registration'
-import prisma from '@/lib/db/prisma'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------

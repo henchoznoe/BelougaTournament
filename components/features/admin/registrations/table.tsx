@@ -38,7 +38,7 @@ import {
   approveRegistration,
   moveToWaitlist,
   rejectRegistration,
-} from "@/lib/actions/registrations"
+} from "@/lib/actions/registration"
 import { formatDateTime } from "@/lib/utils"
 import type { Registration } from "@/prisma/generated/prisma/client"
 import { RegistrationStatus } from "@/prisma/generated/prisma/enums"

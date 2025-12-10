@@ -18,8 +18,8 @@ import { TournamentCard } from '@/components/features/tournament/card/tournament
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { APP_METADATA } from '@/lib/constants'
-import { getPublicTournaments } from '@/lib/data/tournaments'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getPublicTournaments } from '@/lib/services/tournament.service'
 
 // ----------------------------------------------------------------------
 // CONSTANTS

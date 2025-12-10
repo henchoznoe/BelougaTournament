@@ -10,7 +10,7 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import prisma from "@/lib/db/prisma"
+import prisma from "@/lib/core/db"
 import { Visibility } from "@/prisma/generated/prisma/enums"
 import { TournamentsList } from "./tournaments-list"
 

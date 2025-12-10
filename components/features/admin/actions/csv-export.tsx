@@ -17,7 +17,7 @@ import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { exportTournamentData } from "@/lib/actions/tournaments"
+import { exportTournamentData } from "@/lib/actions/tournament"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------

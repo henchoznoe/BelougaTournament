@@ -12,9 +12,9 @@
 
 import type { Metadata } from 'next'
 import { TwitchEmbed } from '@/components/twitch-embed'
-import { BUSINESS_CONFIG } from '@/lib/config/business'
-import { getSiteSettings } from '@/lib/data/settings'
+import { BUSINESS_CONFIG } from '@/lib/config/site'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getSiteSettings } from '@/lib/services/settings.service'
 
 // ----------------------------------------------------------------------
 // CONSTANTS

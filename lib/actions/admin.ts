@@ -1,29 +1,21 @@
 /**
- * File: lib/actions/admins.ts
+ * File: lib/actions/admin.ts
  * Description: Server actions for admin management with strict SuperAdmin authorization.
- * Author: Noé Henchoz
- * Date: 2025-12-10
- * License: MIT
  */
 
 'use server'
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
-import type { z } from 'zod'
-import auth from '@/lib/auth'
 import { APP_ROUTES } from '@/lib/config/routes'
-import prisma from '@/lib/db/prisma'
+import auth from '@/lib/core/auth'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import * as UserService from '@/lib/services/user.service'
 import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------
-// TYPES & INTERFACES
+// TYPES
 // ----------------------------------------------------------------------
 
 type ActionResponse = {
@@ -36,7 +28,6 @@ type ActionResponse = {
 // CONSTANTS
 // ----------------------------------------------------------------------
 
-// TODO: Move to i18n
 const MESSAGES = {
   USER_ALREADY_HAS_ROLE: 'Cet utilisateur a déjà un rôle.',
   USER_PROMOTED: 'Utilisateur promu administrateur avec succès.',
@@ -44,13 +35,9 @@ const MESSAGES = {
 }
 
 // ----------------------------------------------------------------------
-// INTERNAL HELPERS
+// HELPERS
 // ----------------------------------------------------------------------
 
-/**
- * Ensures the current user is a SuperAdmin.
- * Throws an error if not authorized to interrupt the flow cleanly.
- */
 async function assertSuperAdmin() {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -62,24 +49,6 @@ async function assertSuperAdmin() {
   return session
 }
 
-/**
- * Maps Zod issues to a field-error record.
- */
-function mapValidationErrors(issues: z.ZodIssue[]): Record<string, string[]> {
-  const errors: Record<string, string[]> = {}
-  issues.forEach(issue => {
-    const path = issue.path[0]?.toString() || 'global'
-    if (!errors[path]) {
-      errors[path] = []
-    }
-    errors[path].push(issue.message)
-  })
-  return errors
-}
-
-/**
- * Wrapper to handle errors uniformly.
- */
 function handleActionError(error: unknown): ActionResponse {
   if (error instanceof Error && error.message === 'UNAUTHORIZED_SUPERADMIN') {
     return {
@@ -96,14 +65,14 @@ function handleActionError(error: unknown): ActionResponse {
 }
 
 // ----------------------------------------------------------------------
-// PUBLIC ACTIONS
+// ACTIONS
 // ----------------------------------------------------------------------
 
 export const promoteUser = async (userId: string): Promise<ActionResponse> => {
   try {
     await assertSuperAdmin()
 
-    const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+    const targetUser = await UserService.getUserById(userId)
     if (!targetUser) {
       return {
         success: false,
@@ -118,10 +87,7 @@ export const promoteUser = async (userId: string): Promise<ActionResponse> => {
       }
     }
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { role: Role.ADMIN },
-    })
+    await UserService.updateUserRole(userId, Role.ADMIN)
 
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
     return {
@@ -140,7 +106,6 @@ export const createAdmin = async (
   try {
     await assertSuperAdmin()
 
-    // Validate Input
     const rawData = {
       email: formData.get('email'),
     }
@@ -151,14 +116,13 @@ export const createAdmin = async (
       return {
         success: false,
         message: fr.common.server.actions.admin.validationError,
-        errors: mapValidationErrors(validatedFields.error.issues),
+        errors: validatedFields.error.flatten().fieldErrors,
       }
     }
 
-    // Business Logic
     const { email } = validatedFields.data
 
-    const existingUser = await prisma.user.findUnique({ where: { email } })
+    const existingUser = await UserService.getUserByEmail(email)
     if (existingUser) {
       return {
         success: false,
@@ -166,14 +130,7 @@ export const createAdmin = async (
       }
     }
 
-    await prisma.user.create({
-      data: {
-        email,
-        name: MESSAGES.ADMIN_PENDING_NAME,
-        role: Role.ADMIN,
-        emailVerified: true,
-      },
-    })
+    await UserService.createAdminUser(email, MESSAGES.ADMIN_PENDING_NAME)
 
     revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
     return {
@@ -193,7 +150,6 @@ export const updateAdmin = async (
   try {
     const session = await assertSuperAdmin()
 
-    // Validate Input
     const rawData = {
       email: formData.get('email'),
       role: formData.get('role'),
@@ -204,12 +160,11 @@ export const updateAdmin = async (
       return {
         success: false,
         message: fr.common.server.actions.admin.validationError,
-        errors: mapValidationErrors(validatedFields.error.issues),
+        errors: validatedFields.error.flatten().fieldErrors,
       }
     }
 
-    // Check Target
-    const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+    const targetUser = await UserService.getUserById(userId)
     if (!targetUser) {
       return {
         success: false,
@@ -217,7 +172,6 @@ export const updateAdmin = async (
       }
     }
 
-    // Protect SuperAdmins
     if (targetUser.role === Role.SUPERADMIN && session.user.id !== userId) {
       return {
         success: false,
@@ -225,10 +179,7 @@ export const updateAdmin = async (
       }
     }
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: validatedFields.data,
-    })
+    await UserService.updateUser(userId, validatedFields.data)
 
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
     return {
@@ -244,7 +195,7 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
   try {
     await assertSuperAdmin()
 
-    const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+    const targetUser = await UserService.getUserById(userId)
     if (!targetUser) {
       return {
         success: false,
@@ -259,7 +210,7 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
       }
     }
 
-    await prisma.user.delete({ where: { id: userId } })
+    await UserService.deleteUser(userId)
 
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
     return {

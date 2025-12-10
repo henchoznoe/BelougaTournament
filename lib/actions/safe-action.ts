@@ -12,7 +12,7 @@
 
 import { headers } from 'next/headers'
 import type { z } from 'zod'
-import auth from '@/lib/auth'
+import auth from '@/lib/core/auth'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { ActionState } from '@/lib/types/actions'
 import type { Role } from '@/prisma/generated/prisma/enums'

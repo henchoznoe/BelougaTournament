@@ -12,8 +12,8 @@
 
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import prisma from '@/lib/db/prisma'
-import { env } from '@/lib/env'
+import prisma from '@/lib/core/db'
+import { env } from '@/lib/core/env'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------

@@ -16,7 +16,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TournamentForm } from '@/components/features/tournament/form/tournament-form'
 import { Button } from '@/components/ui/button'
-import { createTournament } from '@/lib/actions/tournaments'
+import { createTournament } from '@/lib/actions/tournament'
 import { APP_ROUTES } from '@/lib/config/routes'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 

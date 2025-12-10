@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { toggleTournamentVisibility } from "@/lib/actions/tournaments"
+import { toggleTournamentVisibility } from "@/lib/actions/tournament"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 import { cn } from "@/lib/utils"
 import { Visibility } from "@/prisma/generated/prisma/enums"

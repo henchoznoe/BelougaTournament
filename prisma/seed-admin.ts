@@ -13,9 +13,9 @@
 import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
 import pg from "pg"
-import { env } from "../lib/env"
 import { PrismaClient } from "./generated/prisma/client"
 import { Role } from '@/prisma/generated/prisma/enums'
+import { env } from "@/lib/core/env"
 
 // ----------------------------------------------------------------------
 // TYPES

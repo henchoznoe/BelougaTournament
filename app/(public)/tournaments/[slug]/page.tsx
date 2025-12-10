@@ -27,9 +27,9 @@ import { TwitchEmbed } from '@/components/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { getSiteSettings } from '@/lib/data/settings'
-import { getTournamentBySlug } from '@/lib/data/tournaments'
 import { fr } from '@/lib/i18n/dictionaries/fr'
+import { getSiteSettings } from '@/lib/services/settings.service'
+import { getTournamentBySlug } from '@/lib/services/tournament.service'
 import { formatDateTime } from '@/lib/utils'
 
 // ----------------------------------------------------------------------

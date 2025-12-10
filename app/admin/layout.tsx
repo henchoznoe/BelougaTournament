@@ -15,8 +15,8 @@ import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
 import { logout } from '@/lib/actions/auth'
-import auth from '@/lib/auth'
 import { APP_ROUTES } from '@/lib/config/routes'
+import auth from '@/lib/core/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ----------------------------------------------------------------------

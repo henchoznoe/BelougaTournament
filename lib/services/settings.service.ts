@@ -1,25 +1,13 @@
 /**
- * File: lib/data/settings.ts
- * Description: Data fetching utility for site settings.
- * Author: Noé Henchoz
- * Date: 2025-12-07
- * License: MIT
+ * File: lib/services/settings.service.ts
+ * Description: Data access layer for site settings.
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { unstable_cache } from 'next/cache'
-import prisma from '@/lib/db/prisma'
+import prisma from '@/lib/core/db'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const DB_CONFIG = {
-  // Fixed ID to enforce a singleton pattern for global settings
   SINGLETON_ID: 1,
 } as const
 
@@ -41,10 +29,6 @@ const DEFAULT_SETTINGS: SiteSettings = {
   statsMatches: null,
 }
 
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
-
 const fetchSettingsFromDb = async (): Promise<SiteSettings> => {
   const settings = await prisma.siteSettings.findUnique({
     where: { id: DB_CONFIG.SINGLETON_ID },
@@ -60,3 +44,14 @@ export const getSiteSettings = unstable_cache(
     tags: [CACHE_CONFIG.KEY_SETTINGS],
   },
 )
+
+export const getLandingStats = async () => {
+  const settings = await getSiteSettings()
+
+  return {
+    years: settings.statsYears,
+    players: settings.statsPlayers,
+    tournaments: settings.statsTournaments,
+    matches: settings.statsMatches,
+  }
+}

@@ -54,9 +54,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   deleteRegistration,
   updateRegistrationStatus,
-} from '@/lib/actions/tournament-manager'
+} from '@/lib/actions/registration'
 import { APP_ROUTES } from '@/lib/config/routes'
-import prisma from '@/lib/db/prisma'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 import { formatDate } from '@/lib/utils'
 
@@ -325,7 +325,6 @@ const TournamentManagerPage = async ({
                                   await updateRegistrationStatus(
                                     reg.id,
                                     'APPROVED',
-                                    tournament.id,
                                   )
                                 }}
                               >
@@ -348,7 +347,6 @@ const TournamentManagerPage = async ({
                                   await updateRegistrationStatus(
                                     reg.id,
                                     'REJECTED',
-                                    tournament.id,
                                   )
                                 }}
                               >

@@ -7,7 +7,7 @@
  */
 
 import { Resend } from 'resend'
-import { env } from '@/lib/env'
+import { env } from '@/lib/core/env'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------

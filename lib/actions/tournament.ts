@@ -1,31 +1,21 @@
 /**
- * File: lib/actions/tournaments.ts
+ * File: lib/actions/tournament.ts
  * Description: Server actions for creating, updating, and deleting tournaments.
- * Author: Noé Henchoz
- * Date: 2025-12-07
- * License: MIT
  */
 
 'use server'
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { APP_ROUTES } from '@/lib/config/routes'
-import {
-  dbCreateTournament,
-  dbDeleteTournament,
-  dbToggleTournamentVisibility,
-  dbUpdateTournament,
-} from '@/lib/data/mutations/tournaments'
-import { getTournamentExportData } from '@/lib/data/queries/tournaments'
-import { TOURNAMENT_CACHE_TAGS } from '@/lib/data/tournaments'
+import auth from '@/lib/core/auth'
+import prisma from '@/lib/core/db'
 import { fr } from '@/lib/i18n/dictionaries/fr'
-import { getErrorMessage } from '@/lib/utils'
+import * as TournamentService from '@/lib/services/tournament.service'
+import { getErrorMessage } from '@/lib/utils/errors'
 import {
   deleteTournamentSchema,
   exportTournamentSchema,
@@ -44,7 +34,7 @@ export const createTournament = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async data => {
     try {
-      await dbCreateTournament(data)
+      await TournamentService.createTournament(data)
     } catch (error) {
       return {
         success: false,
@@ -55,7 +45,7 @@ export const createTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     redirect(APP_ROUTES.ADMIN_TOURNAMENTS)
   },
 })
@@ -65,7 +55,7 @@ export const deleteTournament = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async ({ id }) => {
     try {
-      await dbDeleteTournament(id)
+      await TournamentService.deleteTournament(id)
     } catch (error) {
       return {
         success: false,
@@ -76,7 +66,7 @@ export const deleteTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     return {
       success: true,
       message: fr.common.server.actions.tournaments.deleteSuccess,
@@ -89,7 +79,7 @@ export const updateTournament = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async ({ id, data }) => {
     try {
-      await dbUpdateTournament(id, data)
+      await TournamentService.updateTournament(id, data)
     } catch (error) {
       return {
         success: false,
@@ -100,7 +90,7 @@ export const updateTournament = authenticatedAction({
       }
     }
 
-    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
     redirect(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
   },
@@ -111,7 +101,8 @@ export const exportTournamentData = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async tournamentId => {
     try {
-      const flattenedData = await getTournamentExportData(tournamentId)
+      const flattenedData =
+        await TournamentService.getTournamentExportData(tournamentId)
 
       if (!flattenedData) {
         return {
@@ -139,7 +130,7 @@ export const toggleTournamentVisibility = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async ({ id, visibility }) => {
     try {
-      await dbToggleTournamentVisibility(id, visibility)
+      await TournamentService.toggleTournamentVisibility(id, visibility)
     } catch (error) {
       return {
         success: false,
@@ -150,7 +141,7 @@ export const toggleTournamentVisibility = authenticatedAction({
       }
     }
 
-    revalidateTag(TOURNAMENT_CACHE_TAGS.TOURNAMENTS, 'max')
+    revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${id}`)
     revalidatePath(APP_ROUTES.TOURNAMENTS)
@@ -161,3 +152,54 @@ export const toggleTournamentVisibility = authenticatedAction({
     }
   },
 })
+
+// Consolidated from tournament-manager.ts
+const updateChallongeIdSchema = z.object({
+  challongeId: z.string().trim().optional().or(z.literal('')),
+})
+
+export const updateChallongeId = async (
+  tournamentId: string,
+  _prevState: unknown,
+  formData: FormData,
+) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (
+    !session?.user ||
+    (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN)
+  ) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  const rawData = {
+    challongeId: formData.get('challongeId'),
+  }
+
+  const validation = updateChallongeIdSchema.safeParse(rawData)
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: 'Invalid input',
+      errors: validation.error.flatten().fieldErrors,
+    }
+  }
+
+  const challongeId = validation.data.challongeId || null
+
+  try {
+    await prisma.tournament.update({
+      where: { id: tournamentId },
+      data: { challongeId },
+    })
+
+    revalidatePath(`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournamentId}`)
+    return { success: true, message: 'Challonge ID updated successfully.' }
+  } catch (error) {
+    console.error('Update Challonge ID Error:', error)
+    return { success: false, message: 'Failed to update Challonge ID.' }
+  }
+}

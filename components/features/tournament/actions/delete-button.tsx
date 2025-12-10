@@ -28,7 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { deleteTournament } from "@/lib/actions/tournaments"
+import { deleteTournament } from "@/lib/actions/tournament"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 
 // ----------------------------------------------------------------------

@@ -10,7 +10,7 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { getSiteSettings } from '@/lib/data/settings'
+import { getSiteSettings } from '@/lib/services/settings.service'
 import { NavbarClient } from './navbar-client'
 
 // ----------------------------------------------------------------------

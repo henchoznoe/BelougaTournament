@@ -48,7 +48,7 @@ import {
   createAdmin,
   deleteAdmin,
   promoteUser,
-} from '@/lib/actions/admins'
+} from '@/lib/actions/admin'
 import { cn, formatDate } from '@/lib/utils'
 import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Role } from '@/prisma/generated/prisma/enums'
