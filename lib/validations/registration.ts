@@ -6,7 +6,7 @@ export const registrationSchema = z.object({
   players: z
     .array(
       z.object({
-        data: z.record(z.string(), z.string()), // fieldId -> value
+        data: z.record(z.string(), z.string()),
         nickname: z
           .string()
           .min(1, fr.common.server.validations.nicknameRequired),
@@ -14,7 +14,7 @@ export const registrationSchema = z.object({
     )
     .min(1, fr.common.server.validations.playersMin),
   teamName: z.string().optional(),
-  tournamentId: z.string().uuid(),
+  tournamentId: z.uuid(),
 })
 
 export type RegistrationInput = z.infer<typeof registrationSchema>

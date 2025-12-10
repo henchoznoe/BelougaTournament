@@ -17,7 +17,7 @@ import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { APP_METADATA } from "@/lib/constants"
+import { APP_METADATA } from "@/lib/config/constants"
 import { APP_ROUTES } from "@/lib/config/routes"
 
 // ----------------------------------------------------------------------

@@ -12,7 +12,7 @@
 
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { APP_METADATA } from '@/lib/constants'
+import { APP_METADATA } from '@/lib/config/constants'
 
 // ----------------------------------------------------------------------
 // COMPONENT

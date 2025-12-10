@@ -21,7 +21,7 @@ import { Menu, Trophy, Video, Mail, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
-import { APP_METADATA } from "@/lib/constants"
+import { APP_METADATA } from "@/lib/config/constants"
 import { APP_ROUTES } from "@/lib/config/routes"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 

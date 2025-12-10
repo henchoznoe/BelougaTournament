@@ -19,8 +19,8 @@ import Link from 'next/link'
 import { LoginCard } from '@/components/features/auth/login-card'
 import SocialLogin from '@/components/features/auth/social-login'
 import { Button } from '@/components/ui/button'
+import { APP_METADATA } from '@/lib/config/constants'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { APP_METADATA } from '@/lib/constants'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // ----------------------------------------------------------------------

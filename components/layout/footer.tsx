@@ -21,7 +21,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 
-import { APP_METADATA } from "@/lib/constants"
+import { APP_METADATA } from "@/lib/config/constants"
 import { getSiteSettings } from "@/lib/services/settings.service"
 import { APP_ROUTES } from "@/lib/config/routes"
 import { fr } from "@/lib/i18n/dictionaries/fr"

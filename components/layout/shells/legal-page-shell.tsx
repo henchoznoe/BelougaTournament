@@ -6,7 +6,7 @@
  * License: MIT
  */
 
-import { APP_METADATA } from '@/lib/constants'
+import { APP_METADATA } from '@/lib/config/constants'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
 
