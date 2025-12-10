@@ -14,7 +14,7 @@ import { headers } from 'next/headers'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
-import { logout } from '@/lib/actions/auth'
+import { logoutHandler } from '@/lib/actions/auth'
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -82,7 +82,10 @@ const AdminLayout = async (props: Readonly<LayoutProps>) => {
       <AdminBackground />
 
       {/* Sidebar Navigation */}
-      <AdminSidebar userEmail={session.user.email} logoutAction={logout} />
+      <AdminSidebar
+        userEmail={session.user.email}
+        logoutAction={logoutHandler}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 relative overflow-y-auto h-screen z-10">

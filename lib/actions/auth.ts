@@ -12,17 +12,14 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import auth from '@/lib/core/auth'
+import { logout } from '@/lib/services/auth.service'
 
 // ----------------------------------------------------------------------
 // LOGIC
 // ----------------------------------------------------------------------
 
-export async function logout() {
-  await auth.api.signOut({
-    headers: await headers(),
-  })
+export const logoutHandler = async () => {
+  await logout()
   redirect('/')
 }
