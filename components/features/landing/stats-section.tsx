@@ -1,5 +1,5 @@
 /**
- * File: components/layout/landing/stats-section.tsx
+ * File: components/features/landing/stats-section.tsx
  * Description: Stats section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-07

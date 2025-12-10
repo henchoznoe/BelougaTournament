@@ -7,7 +7,7 @@
  */
 
 import type { Metadata } from 'next'
-import { LegalPageLayout } from '@/components/layout/legal-page-layout'
+import { LegalPageLayout } from '@/components/layout/shells/legal-page-shell'
 import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const metadata: Metadata = {

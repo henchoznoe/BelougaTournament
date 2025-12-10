@@ -1,5 +1,5 @@
 /**
- * File: components/features/tournament/registration/registration-form.tsx
+ * File: components/features/registration/registration-form.tsx
  * Description: Form component for registering teams or players to a tournament with premium aesthetic.
  * Author: Noé Henchoz
  * Date: 2025-12-07

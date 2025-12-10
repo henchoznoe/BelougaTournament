@@ -1,5 +1,5 @@
 /**
- * File: components/layout/landing/features-section.tsx
+ * File: components/features/landing/features-section.tsx
  * Description: Features section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-07

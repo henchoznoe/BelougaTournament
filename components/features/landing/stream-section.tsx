@@ -1,5 +1,5 @@
 /**
- * File: components/layout/landing/stream-section.tsx
+ * File: components/features/landing/stream-section.tsx
  * Description: Stream section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-07
@@ -12,7 +12,7 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { TwitchEmbed } from "@/components/twitch-embed"
+import { TwitchEmbed } from "@/components/features/stream/twitch-embed"
 import { Suspense } from "react"
 import { fr } from "@/lib/i18n/dictionaries/fr"
 

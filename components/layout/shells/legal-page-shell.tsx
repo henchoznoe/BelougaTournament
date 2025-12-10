@@ -1,5 +1,5 @@
 /**
- * File: components/layout/legal-page-layout.tsx
+ * File: components/layout/shells/legal-page-shell.tsx
  * Description: Reusable layout for legal and content pages (Rules, Terms, Privacy, etc.)
  * Author: Noé Henchoz
  * Date: 2025-12-08
