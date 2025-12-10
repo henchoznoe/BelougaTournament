@@ -1,5 +1,5 @@
 /**
- * File: components/features/landing/stream-section.tsx
+ * File: components/features/landing/stream/stream.tsx
  * Description: Stream section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-07

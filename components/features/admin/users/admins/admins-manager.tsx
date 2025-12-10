@@ -1,5 +1,5 @@
 /**
- * File: components/features/admin/users/admins-manager.tsx
+ * File: components/features/admin/users/admins/admins-manager.tsx
  * Description: Client component for managing admin users with premium styling and French localization.
  * Author: Noé Henchoz
  * Date: 2025-12-07

@@ -1,5 +1,5 @@
 /**
- * File: components/features/landing/sponsors-section.tsx
+ * File: components/features/landing/sponsors/sponsors.tsx
  * Description: Sponsors section displaying main partners of the tournament.
  * Author: Noé Henchoz
  * Date: 2025-12-08

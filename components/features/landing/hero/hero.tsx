@@ -1,5 +1,5 @@
 /**
- * File: components/features/landing/hero-section.tsx
+ * File: components/features/landing/hero/hero.tsx
  * Description: Main hero section of the landing page.
  * Author: Noé Henchoz
  * Date: 2025-12-08

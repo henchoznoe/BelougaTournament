@@ -13,7 +13,7 @@
 import { Lock } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { AdminsManager } from '@/components/features/admin/users/admins-manager'
+import { AdminsManager } from '@/components/features/admin/users/admins/admins-manager'
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
