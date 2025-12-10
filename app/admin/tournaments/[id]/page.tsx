@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { CsvExportButton } from '@/components/features/admin/actions/csv-export'
+import { CsvExportButton } from '@/components/features/admin/controls/csv-export'
 import { VisibilityToggle } from '@/components/features/tournament/actions/visibility-toggle'
 import { ChallongeIdForm } from '@/components/features/tournament/form/challonge-id-form'
 import { Button } from '@/components/ui/button'

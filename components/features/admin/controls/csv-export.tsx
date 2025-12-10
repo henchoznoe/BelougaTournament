@@ -1,5 +1,5 @@
 /**
- * File: components/features/admin/actions/csv-export.tsx
+ * File: components/features/admin/controls/csv-export.tsx
  * Description: Client component for exporting registration data to CSV.
  * Author: Noé Henchoz
  * Date: 2025-12-07
