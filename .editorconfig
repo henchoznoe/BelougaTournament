@@ -1,3 +1,9 @@
+# File: .editorconfig
+# Description: Editor configuration
+# Author: Noé Henchoz
+# License: MIT
+# Copyright (c) 2026 Noé Henchoz
+
 root = true
 
 [*]

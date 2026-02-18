@@ -12,7 +12,11 @@
     "check": "biome check --write .",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
-    "db:deploy": "prisma generate && prisma migrate deploy && npx tsx prisma/seed-admin.ts"
+    "db:deploy": "prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

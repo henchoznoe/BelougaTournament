@@ -2,14 +2,14 @@
 
 <div align="center">
   <h3>Modern Tournament Management Platform</h3>
-  <p>Built with Next.js 16, Prisma, and Tailwind CSS.</p>
+  <p>Built with Next.js 16, Prisma 7, and TailwindCSS v4.</p>
 </div>
 
 ## 📝 Description
 
 **Belouga Tournament** is a robust, full-stack tournament management platform redesigned for modern e-sports communities. Migrated from a legacy stack to **Next.js 16 (App Router)**, it focuses on performance, type safety, and developer experience.
 
-The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic forms, brackets) while providing a seamless, account-free registration experience for players (Solo/Team).
+The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic forms, brackets) while providing a seamless registration experience for players (Solo/Team).
 
 ## 🚀 Tech Stack
 
@@ -17,7 +17,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 - **Database:** PostgreSQL (via Vercel Postgres)
 - **ORM:** [Prisma 7](https://www.prisma.io/)
 - **Types:** TypeScript (Strict)
-- **UI:** [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/)
 - **State/Form:** React Hook Form + Zod v4 + Server Actions
 - **Animations:** Framer Motion + Tailwind Animate
 - **Tooling:** [Biome](https://biomejs.dev/) (Linting/Formatting)
@@ -26,9 +26,8 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 ### 🎮 Public Interface
 - **Dynamic Landing Page:** Features "Hero" tournament, live Twitch integration (`quentadoulive`), and stats.
-- **Tournament Hub:** Detailed views including rules, cashprize, dynamic format (Solo/Team), and embedded **Challonge** brackets.
+- **Tournament Hub:** Detailed views including rules, cashprize, dynamic format (Solo/Team), and embedded **Toornament** brackets.
 - **Registration Engine:**
-  - **Account-Free:** Players register directly without login.
   - **Dynamic Fields:** Support for admin-defined questions (Riot ID, Rank, etc.).
   - **Team Management:** Built-in support for Captain + Teammates flow.
   - **Validation:** Real-time checks for quotas (SLOT limits) and dates.
@@ -54,7 +53,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 │   ├── layout/           # Layout components (Headers, Footers, Sections)
 │   └── ui/               # Reusable primitives (shadcn/ui)
 ├── lib/                  # Core Utilities & Business Logic
-│   ├── actions/          # Server Actions (Mutations)
+│   ├── actions/          # Server Actions
 │   ├── config/           # Configuration primitives (Routes, Messages)
 │   ├── data/             # Data Access Layer (Queries/Mutations)
 │   ├── validations/      # Zod Schemas
@@ -68,8 +67,8 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL Database (Local or Vercel Postgres)
+- Node.js 25+ (tested with 25.6.1)
+- A PostgreSQL Database
 
 ### Installation
 
@@ -81,7 +80,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 2.  **Install dependencies:**
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  **Environment Setup:**
@@ -89,47 +88,58 @@ The platform enables administrators to host and manage diverse gaming tournament
     ```bash
     cp .env.example .env
     ```
-    *Ensure all environment variables are set before running the app.*
+    *Ensure all environment variables are set before running the app. `.env` is used for local development only, while `.env.preview` and `.env.production` are used for preview and production deployments respectively (You must copy the content of these files to the Vercel Project Settings > Environment Variables).*
 
 4.  **Database Initialization:**
     ```bash
     # Generate Prisma Client
-    npm run generate
+    pnpm generate
 
-    # Push schema to DB (Dev only)
-    npx prisma db push
+    # Start local infrastructure
+    pnpm docker:up
 
-    # Seed initial Admin user
-    npx tsx prisma/seed-admin.ts
+    # Push schema to DB and seed initial Admin users
+    pnpm db:deploy
+
+    # Launch Prisma Studio
+    pnpm db:studio
     ```
 
 5.  **Run Development Server:**
     ```bash
-    npm run dev
+    pnpm dev
     ```
 
-    Visit [http://localhost:3000](http://localhost:3000).
+    > Visit [http://localhost:3000](http://localhost:3000).
 
 ## 📜 Scripts
 
 | Script | Description |
 | :--- | :--- |
-| `npm run dev` | Starts the development server with Turbopack. |
-| `npm run build` | Builds the application for production. |
-| `npm run start` | Starts the production server. |
-| `npm run check` | Runs **Biome** to check for linting and formatting errors. |
-| `npm run format` | Formatting fix with Biome. |
-| `npm run db:deploy` | Deploys migrations and seeds database (Production). |
+| `pnpm dev` | Starts the development server with Turbopack. |
+| `pnpm build` | Builds the application for production. |
+| `pnpm start` | Starts the production server. |
+| `pnpm check` | Runs **Biome** to check for linting and formatting errors. |
+| `pnpm format` | Formatting fix with Biome. |
+| `pnpm db:reset` | Resets the database (Force). |
+| `pnpm db:studio` | Opens Prisma Studio to visualize data. |
+| `pnpm docker:up` | Starts the local infrastructure (PostgreSQL). |
+| `pnpm docker:down` | Stops the local infrastructure. |
 
-## 📐 Coding Conventions
+## 🏗️ Deployment (Vercel)
 
-This project follows strict architectural guidelines to ensure scalability:
+#### Preview & Production
+The project is deployed on **Vercel**.
 
-1.  **Colocation:** UI-specific text (Labels, Titles) is colocated within components in a `CONTENT` constant.
-2.  **Centralized Config:** System messages (Errors, Toasts) are stored in `lib/config/messages.ts`. routes in `routes.ts`.
-3.  **Server Actions:** All mutations use the `authenticatedAction` wrapper for consistent error handling and auth checks.
-4.  **Strict Typing:** `Zod` is used for all validations (Env vars, Server Actions inputs, Forms).
-5.  **Separation of Concerns:** Data access (Prisma) is strictly separated from Server Actions (Controllers).
+1.  **Environment Variables:**
+    - **Do not** check in `.env.preview` or `.env.production`.
+    - Manually copy the content of these files to the **Vercel Project Settings > Environment Variables**.
+    - Assign variables to the specific **Environment** (Preview or Production).
+
+2.  **Database:**
+    - Ensure your Vercel project is connected to a Vercel Postgres instance (or external provider).
+    - The build command `pnpm build` will just build the app.
+    - The `postinstall` script (if configured) or manual `pnpm db:deploy` should be used to apply migrations on promotion.
 
 ## 🔒 Security
 

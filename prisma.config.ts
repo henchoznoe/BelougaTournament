@@ -1,3 +1,11 @@
+/**
+ * File: prisma.config.ts
+ * Description: Prisma configuration options.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
 import 'dotenv/config'
 import { defineConfig, env } from 'prisma/config'
 
