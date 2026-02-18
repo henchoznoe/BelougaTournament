@@ -1,14 +1,10 @@
 /**
  * File: prisma/seed-admin.ts
- * Description: Seed script to create the initial admin user for OAuth.
+ * Description: Seed script to create the initial admin users.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
@@ -17,19 +13,11 @@ import { PrismaClient } from "./generated/prisma/client"
 import { Role } from '@/prisma/generated/prisma/enums'
 import { env } from "@/lib/core/env"
 
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
-
 type InitialUser = {
   email: string
   name: string
   role: Role
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const INITIAL_USERS: InitialUser[] = [
   {
@@ -44,16 +32,14 @@ const INITIAL_USERS: InitialUser[] = [
   }
 ]
 
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
-
+// Create Prisma client
 const createPrismaClient = (connectionString: string): PrismaClient => {
   const pool = new pg.Pool({ connectionString })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
 
+// Main function to create the initial admin users
 const main = async () => {
   console.log("Seeding...")
   const prisma = createPrismaClient(env.DATABASE_URL)
