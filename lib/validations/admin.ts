@@ -1,29 +1,20 @@
 /**
  * File: lib/validations/admin.ts
- * Description: Validation schemas for admin creation and updates.
+ * Description: Validation schemas for admin management
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { z } from 'zod'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 export const createAdminSchema = z.object({
-  email: z.email(fr.common.server.validations.emailInvalid),
+  email: z.email('Email invalide'),
 })
 
 export const updateAdminSchema = z.object({
-  email: z.email(fr.common.server.validations.emailInvalid),
+  email: z.email('Email invalide'),
   role: z.enum(Role),
 })
 

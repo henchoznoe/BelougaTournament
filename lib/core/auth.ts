@@ -2,23 +2,15 @@
  * File: lib/auth.ts
  * Description: Authentication configuration using Better Auth.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import prisma from '@/lib/core/db'
+import prisma from '@/lib/core/prisma'
 import { env } from '@/lib/core/env'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -38,6 +30,55 @@ const auth = betterAuth({
         required: false,
         defaultValue: Role.USER,
         input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        after: async session => {
+          try {
+            const user = await prisma.user.findUnique({
+              where: { id: session.userId },
+              include: { accounts: true },
+            })
+
+            if (!user) return
+
+            const discordAccount = user.accounts.find(
+              acc => acc.providerId === 'discord',
+            )
+            if (!discordAccount?.accessToken) return
+
+            const response = await fetch('https://discord.com/api/users/@me', {
+              headers: {
+                Authorization: `Bearer ${discordAccount.accessToken}`,
+              },
+            })
+
+            if (!response.ok) return
+
+            const discordProfile = await response.json()
+
+            const avatarUrl = discordProfile.avatar
+              ? `https://cdn.discordapp.com/avatars/${discordProfile.id}/${discordProfile.avatar}.png`
+              : null
+
+            const name = discordProfile.global_name || discordProfile.username
+
+            if (user.name !== name || user.image !== avatarUrl) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  name: name,
+                  image: avatarUrl,
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to sync Discord profile', error)
+          }
+        },
       },
     },
   },

@@ -2,24 +2,15 @@
  * File: components/features/landing/sponsors/sponsors.tsx
  * Description: Sponsors section displaying main partners of the tournament.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { cn } from "@/lib/utils"
 import { Variants, motion } from "framer-motion"
 import { Crown, Gem, Handshake, LucideIcon } from "lucide-react"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface SponsorItem {
   id: string
@@ -34,16 +25,6 @@ interface SponsorItem {
     glow: string
   }
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const SponsorCard = ({
   sponsor,
@@ -108,7 +89,7 @@ export const SponsorsSection = () => {
           viewport={{ once: true }}
           className="text-3xl font-bold text-white sm:text-5xl"
         >
-          {fr.pages.home.sponsors.title}
+          Nos Sponsors
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -117,7 +98,7 @@ export const SponsorsSection = () => {
           transition={{ delay: 0.2 }}
           className="mt-4 text-lg text-zinc-400"
         >
-          {fr.pages.home.sponsors.subtitle}
+          Découvrez nos partenaires
         </motion.p>
       </div>
 
@@ -126,9 +107,9 @@ export const SponsorsSection = () => {
         {[
           {
             id: "sponsor-1",
-            name: fr.pages.home.sponsors.partners.platinum.name,
+            name: "Sponsor 1",
             tier: "PLATINUM",
-            description: fr.pages.home.sponsors.partners.platinum.description,
+            description: "Description du sponsor 1",
             icon: Crown,
             styles: {
               iconColor: "text-amber-400",
@@ -139,9 +120,9 @@ export const SponsorsSection = () => {
           } as SponsorItem,
           {
             id: "sponsor-2",
-            name: fr.pages.home.sponsors.partners.gold.name,
+            name: "Sponsor 2",
             tier: "GOLD",
-            description: fr.pages.home.sponsors.partners.gold.description,
+            description: "Description du sponsor 2",
             icon: Gem,
             styles: {
               iconColor: "text-blue-400",
@@ -152,9 +133,9 @@ export const SponsorsSection = () => {
           } as SponsorItem,
           {
             id: "sponsor-3",
-            name: fr.pages.home.sponsors.partners.silver.name,
+            name: "Sponsor 3",
             tier: "SILVER",
-            description: fr.pages.home.sponsors.partners.silver.description,
+            description: "Description du sponsor 3",
             icon: Handshake,
             styles: {
               iconColor: "text-emerald-400",
@@ -177,7 +158,7 @@ export const SponsorsSection = () => {
          className="mt-12 text-center"
         >
           <p className="text-sm text-zinc-500">
-            {fr.pages.home.sponsors.cta.text} <span className="text-zinc-300 hover:text-white cursor-pointer underline underline-offset-4 transition-colors">{fr.pages.home.sponsors.cta.link}</span>
+            Voir plus de sponsors <span className="text-zinc-300 hover:text-white cursor-pointer underline underline-offset-4 transition-colors">ici</span>
           </p>
        </motion.div>
     </section>

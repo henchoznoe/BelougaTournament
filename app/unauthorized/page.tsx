@@ -2,8 +2,8 @@
  * File: app/unauthorized/page.tsx
  * Description: Page displayed to users with the USER role who are pending approval.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { AlertCircle, ArrowLeft } from 'lucide-react'
@@ -18,7 +18,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export default function UnauthorizedPage() {
   return (
@@ -31,15 +30,15 @@ export default function UnauthorizedPage() {
             <AlertCircle className="h-6 w-6 text-yellow-500" />
           </div>
           <CardTitle className="text-xl font-bold text-white">
-            {fr.pages.unauthorized.title}
+            Accès non autorisé
           </CardTitle>
           <CardDescription className="text-zinc-400">
-            {fr.pages.unauthorized.description}
+            Vous n'avez pas accès à cette page.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-center text-sm text-zinc-300">
-          <p>{fr.pages.unauthorized.messages.restricted}</p>
-          <p>{fr.pages.unauthorized.messages.contact}</p>
+          <p>Vous n'avez pas accès à cette page.</p>
+          <p>Vous pouvez revenir à la page d'accueil.</p>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button
@@ -49,7 +48,7 @@ export default function UnauthorizedPage() {
           >
             <Link href={APP_ROUTES.HOME}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {fr.common.actions.backToHome}
+              Retour à l'accueil
             </Link>
           </Button>
         </CardFooter>

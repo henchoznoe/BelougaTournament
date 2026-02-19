@@ -2,19 +2,14 @@
  * File: components/features/tournament/card/tournament-card.tsx
  * Description: Specific card component for displaying tournament summary.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import Link from "next/link"
 import { Calendar, ChevronRight, Users, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import {
   Card,
   CardContent,
@@ -28,17 +23,9 @@ import { formatDateTime } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/routes"
 import { TournamentFormat } from "@/prisma/generated/prisma/enums"
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
 type TournamentCardProps = {
   tournament: PublicTournament
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const TournamentCard = ({ tournament }: TournamentCardProps) => {
   return (
@@ -49,7 +36,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
             {tournament.format}
           </span>
           <Badge variant="outline" className="border-zinc-700 text-zinc-400">
-            {fr.components.tournamentCard.prefixId} {tournament.id}
+            Tournoi {tournament.id}
           </Badge>
         </div>
         <CardTitle className="text-2xl text-white group-hover:text-blue-400 transition-colors">
@@ -78,8 +65,8 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
               : `${tournament._count.registrations}`}
             <span className="ml-2 text-zinc-400">
               {tournament.format === TournamentFormat.TEAM
-                ? fr.components.tournamentCard.format.team
-                : fr.components.tournamentCard.format.player}
+                ? "Équipe"
+                : "Joueur"}
             </span>
           </span>
         </div>
@@ -91,7 +78,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
         >
           <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
             <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
-              {fr.components.tournamentCard.btnDetails}
+              Voir les détails
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>

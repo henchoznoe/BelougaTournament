@@ -2,13 +2,9 @@
  * File: lib/config/routes.ts
  * Description: Global route definitions for the application.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 export const APP_ROUTES = {
   HOME: '/',

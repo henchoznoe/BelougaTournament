@@ -1,18 +1,17 @@
 /**
  * File: lib/services/tournament.service.ts
- * Description: Data access layer for tournaments (Queries & Mutations).
+ * Description: Data access layer for tournaments.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { unstable_cache } from 'next/cache'
 import type { z } from 'zod'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import type { tournamentSchema } from '@/lib/validations/tournament'
-import { Prisma, type Visibility } from '@/prisma/generated/prisma/client'
-
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
+import { Prisma } from '@/prisma/generated/prisma/client'
+import { Visibility } from '@/prisma/generated/prisma/enums'
 
 export type PublicTournament = Prisma.TournamentGetPayload<{
   include: {
@@ -37,10 +36,6 @@ export type TournamentWithDetails = Prisma.TournamentGetPayload<{
   }
 }>
 
-// ----------------------------------------------------------------------
-// CACHE CONFIG
-// ----------------------------------------------------------------------
-
 export const TOURNAMENT_CACHE_TAGS = {
   TOURNAMENTS: 'tournaments',
   TOURNAMENT_SLUG: (slug: string) => `tournament-${slug}`,
@@ -51,15 +46,11 @@ const CACHE_CONFIG = {
   REVALIDATE_SECONDS: 3600, // 1 hour
 } as const
 
-// ----------------------------------------------------------------------
-// READS (QUERIES)
-// ----------------------------------------------------------------------
-
 const fetchPublicTournamentsFromDb = async (): Promise<PublicTournament[]> => {
   return prisma.tournament.findMany({
     orderBy: { startDate: 'asc' },
     where: {
-      visibility: 'PUBLIC', // Using string literal if enum import fails, or rely on Prisma.Visibility logic
+      visibility: Visibility.PUBLIC,
       endDate: {
         gte: new Date(),
       },
@@ -179,10 +170,6 @@ export const getTournamentExportData = async (
   return flattenedData
 }
 
-// ----------------------------------------------------------------------
-// WRITES (MUTATIONS)
-// ----------------------------------------------------------------------
-
 export const createTournament = async (
   data: z.infer<typeof tournamentSchema>,
 ) => {
@@ -211,9 +198,9 @@ export const createTournament = async (
       error.code === 'P2002' &&
       (error.meta?.target as string[])?.includes('slug')
     ) {
-      throw new Error(fr.common.server.actions.tournaments.duplicateSlug)
+      throw new Error('Slug already exists')
     }
-    throw new Error(fr.common.server.actions.tournaments.createError)
+    throw new Error('Failed to create tournament')
   }
 }
 
@@ -244,11 +231,7 @@ export const updateTournament = async (
 
       for (const field of fieldsToDelete) {
         if (field._count.playerData > 0) {
-          throw new Error(
-            fr.common.server.actions.tournaments.fieldDataConstraint(
-              field.label,
-            ),
-          )
+          throw new Error(`Field ${field.label} has data and cannot be deleted`)
         }
       }
 
@@ -277,7 +260,7 @@ export const updateTournament = async (
           )
           if (!belongsToTournament) {
             throw new Error(
-              fr.common.server.actions.tournaments.fieldSecurityError(field.id),
+              `Field ${field.id} does not belong to this tournament`,
             )
           }
 
@@ -306,14 +289,14 @@ export const updateTournament = async (
   } catch (error) {
     if (error instanceof Error) {
       if (
-        error.message === fr.common.server.actions.tournaments.duplicateSlug ||
-        error.message.includes('Impossible de supprimer le champ') ||
-        error.message.includes('Erreur de sécurité')
+        error.message === 'Slug already exists' ||
+        error.message.includes('Field') ||
+        error.message.includes('Security error')
       ) {
         throw error
       }
     }
-    throw new Error(fr.common.server.actions.tournaments.updateError)
+    throw new Error('Failed to update tournament')
   }
 }
 
@@ -323,7 +306,7 @@ export const deleteTournament = async (id: string) => {
       where: { id },
     })
   } catch (_error) {
-    throw new Error(fr.common.server.actions.tournaments.deleteError)
+    throw new Error('Failed to delete tournament')
   }
 }
 
@@ -337,6 +320,6 @@ export const toggleTournamentVisibility = async (
       data: { visibility },
     })
   } catch (_error) {
-    throw new Error(fr.common.server.actions.tournaments.updateError)
+    throw new Error('Failed to update tournament visibility')
   }
 }

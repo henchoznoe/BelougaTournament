@@ -2,13 +2,9 @@
  * File: app/admin/tournaments/[id]/page.tsx
  * Description: Tournament manager page for viewing details, managing registrations, and updating settings.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   Calendar,
@@ -56,13 +52,8 @@ import {
   updateRegistrationStatus,
 } from '@/lib/actions/registration'
 import { APP_ROUTES } from '@/lib/config/routes'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import { formatDate } from '@/lib/utils'
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 export const dynamic = 'force-dynamic'
 
@@ -84,10 +75,6 @@ const getTournament = async (id: string) => {
     },
   })
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const TournamentManagerPage = async ({
   params,
@@ -121,9 +108,7 @@ const TournamentManagerPage = async ({
               {tournament.title}
             </h1>
           </div>
-          <p className="text-zinc-400 max-w-2xl">
-            {fr.pages.admin.tournaments.detail.subtitle}
-          </p>
+          <p className="text-zinc-400 max-w-2xl">Manage this tournament</p>
         </div>
         <div className="flex items-center gap-3">
           <VisibilityToggle
@@ -139,7 +124,7 @@ const TournamentManagerPage = async ({
               href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournament.id}/edit`}
             >
               <Edit className="mr-2 h-4 w-4" />
-              {fr.pages.admin.tournaments.detail.buttons.edit}
+              Edit
             </Link>
           </Button>
         </div>
@@ -151,15 +136,13 @@ const TournamentManagerPage = async ({
             value="overview"
             className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4 text-zinc-400"
           >
-            {fr.pages.admin.tournaments.detail.tabs.overview}
+            Overview
           </TabsTrigger>
           <TabsTrigger
             value="registrants"
             className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white py-2 px-4 text-zinc-400"
           >
-            {fr.pages.admin.tournaments.detail.tabs.registrants(
-              tournament.registrations.length,
-            )}
+            Registrants
           </TabsTrigger>
         </TabsList>
 
@@ -168,7 +151,7 @@ const TournamentManagerPage = async ({
             <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-zinc-400">
-                  {fr.pages.admin.tournaments.detail.cards.fillRate.title}
+                  Fill rate
                 </CardTitle>
                 <Users className="h-4 w-4 text-blue-500" />
               </CardHeader>
@@ -184,18 +167,14 @@ const TournamentManagerPage = async ({
                 </div>
                 <p className="text-xs text-zinc-500 mt-2">
                   {validRegistrationsCount} /{' '}
-                  {tournament.maxParticipants || '∞'}{' '}
-                  {
-                    fr.pages.admin.tournaments.detail.cards.fillRate
-                      .participants
-                  }
+                  {tournament.maxParticipants || '∞'} participants
                 </p>
               </CardContent>
             </Card>
             <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-zinc-400">
-                  {fr.pages.admin.tournaments.detail.cards.format.title}
+                  Format
                 </CardTitle>
                 <Swords className="h-4 w-4 text-purple-500" />
               </CardHeader>
@@ -203,15 +182,13 @@ const TournamentManagerPage = async ({
                 <div className="text-2xl font-bold text-white">
                   {tournament.format}
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {fr.pages.admin.tournaments.detail.cards.format.subtitle}
-                </p>
+                <p className="text-xs text-zinc-500 mt-1">Format</p>
               </CardContent>
             </Card>
             <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-zinc-400">
-                  {fr.pages.admin.tournaments.detail.cards.date.title}
+                  Date
                 </CardTitle>
                 <Calendar className="h-4 w-4 text-green-500" />
               </CardHeader>
@@ -219,20 +196,16 @@ const TournamentManagerPage = async ({
                 <div className="text-2xl font-bold text-white">
                   {formatDate(tournament.startDate)}
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {fr.pages.admin.tournaments.detail.cards.date.subtitle}
-                </p>
+                <p className="text-xs text-zinc-500 mt-1">Date</p>
               </CardContent>
             </Card>
           </div>
 
           <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader>
-              <CardTitle className="text-white">
-                {fr.pages.admin.tournaments.detail.cards.challonge.title}
-              </CardTitle>
+              <CardTitle className="text-white">Challonge</CardTitle>
               <CardDescription className="text-zinc-400">
-                {fr.pages.admin.tournaments.detail.cards.challonge.description}
+                Challonge ID
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -254,19 +227,19 @@ const TournamentManagerPage = async ({
               <TableHeader>
                 <TableRow className="border-white/10 bg-white/5 hover:bg-white/5">
                   <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pl-6">
-                    {fr.pages.admin.tournaments.detail.table.name}
+                    Name
                   </TableHead>
                   <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                    {fr.pages.admin.tournaments.detail.table.contact}
+                    Contact
                   </TableHead>
                   <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                    {fr.pages.admin.tournaments.detail.table.status}
+                    Status
                   </TableHead>
                   <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                    {fr.pages.admin.tournaments.detail.table.date}
+                    Date
                   </TableHead>
                   <TableHead className="text-right text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pr-6">
-                    {fr.pages.admin.tournaments.detail.table.actions}
+                    Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -280,12 +253,10 @@ const TournamentManagerPage = async ({
                       <TableCell className="font-medium text-white py-4 pl-6">
                         {reg.teamName ||
                           reg.players[0]?.nickname ||
-                          fr.pages.admin.tournaments.detail.sheet.unknownTeam}
+                          'Unknown team'}
                         {reg.players.length > 1 && (
                           <span className="ml-2 text-xs text-zinc-500">
-                            {fr.pages.admin.tournaments.detail.sheet.playersCount(
-                              reg.players.length,
-                            )}
+                            {reg.players.length} players
                           </span>
                         )}
                       </TableCell>
@@ -303,13 +274,10 @@ const TournamentManagerPage = async ({
                           }`}
                         >
                           {reg.status === 'APPROVED'
-                            ? fr.pages.admin.tournaments.detail.table
-                                .statusLabels.approved
+                            ? 'Approved'
                             : reg.status === 'PENDING'
-                              ? fr.pages.admin.tournaments.detail.table
-                                  .statusLabels.pending
-                              : fr.pages.admin.tournaments.detail.table
-                                  .statusLabels.rejected}
+                              ? 'Pending'
+                              : 'Rejected'}
                         </span>
                       </TableCell>
                       <TableCell className="text-zinc-300 py-4">
@@ -332,10 +300,7 @@ const TournamentManagerPage = async ({
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 text-zinc-400 hover:text-green-400 hover:bg-green-500/10"
-                                  title={
-                                    fr.pages.admin.tournaments.detail.buttons
-                                      .approve
-                                  }
+                                  title="Approve"
                                 >
                                   <Check className="h-4 w-4" />
                                 </Button>
@@ -354,10 +319,7 @@ const TournamentManagerPage = async ({
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
-                                  title={
-                                    fr.pages.admin.tournaments.detail.buttons
-                                      .reject
-                                  }
+                                  title="Reject"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
@@ -378,13 +340,10 @@ const TournamentManagerPage = async ({
                             <SheetContent className="overflow-y-auto bg-zinc-950 border-white/10 text-zinc-50 sm:max-w-xl">
                               <SheetHeader>
                                 <SheetTitle className="text-2xl font-bold text-white">
-                                  {
-                                    fr.pages.admin.tournaments.detail.sheet
-                                      .title
-                                  }
+                                  Details
                                 </SheetTitle>
                                 <SheetDescription>
-                                  {reg.teamName || 'Détails du joueur'}
+                                  {reg.teamName || 'Details'}
                                 </SheetDescription>
                               </SheetHeader>
                               <div className="mt-8 space-y-6">
@@ -401,9 +360,7 @@ const TournamentManagerPage = async ({
                                         const fieldLabel =
                                           tournament.fields.find(
                                             f => f.id === d.tournamentFieldId,
-                                          )?.label ||
-                                          fr.pages.admin.tournaments.detail
-                                            .sheet.unknownField
+                                          )?.label || 'Unknown field'
                                         return (
                                           <div
                                             key={d.id}
@@ -449,7 +406,7 @@ const TournamentManagerPage = async ({
                       colSpan={5}
                       className="h-32 text-center text-zinc-500"
                     >
-                      {fr.pages.admin.tournaments.detail.table.empty}
+                      No registrations
                     </TableCell>
                   </TableRow>
                 )}

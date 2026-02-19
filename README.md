@@ -25,7 +25,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 ## ✨ Core Features
 
 ### 🎮 Public Interface
-- **Dynamic Landing Page:** Features "Hero" tournament, live Twitch integration (`quentadoulive`), and stats.
+- **Dynamic Landing Page:** Features "Hero" tournament, live Twitch integration (`quentadoulive`).
 - **Tournament Hub:** Detailed views including rules, cashprize, dynamic format (Solo/Team), and embedded **Toornament** brackets.
 - **Registration Engine:**
   - **Dynamic Fields:** Support for admin-defined questions (Riot ID, Rank, etc.).

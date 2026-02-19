@@ -1,29 +1,23 @@
 /**
  * File: lib/actions/settings.ts
- * Description: Server actions for updating site settings.
+ * Description: Server actions for managing site settings.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use server'
 
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import { settingsSchema } from '@/lib/validations/settings'
-
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
 
 export type SettingsState = {
   message: string
   errors?: Record<string, string[]>
   success?: boolean
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const DB_CONFIG = {
   SINGLETON_ID: 1,
@@ -33,10 +27,6 @@ const FORM_KEYS = {
   LOGO_FILE: 'logo',
   LOGO_URL: 'logoUrl',
 } as const
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const uploadLogoIfNeeded = async (
   formData: FormData,
@@ -66,10 +56,6 @@ const extractSettingsData = (formData: FormData, finalLogoUrl: string) => {
     socialTiktok: formData.get('socialTiktok'),
     socialInstagram: formData.get('socialInstagram'),
     socialYoutube: formData.get('socialYoutube'),
-    statsYears: formData.get('statsYears'),
-    statsPlayers: formData.get('statsPlayers'),
-    statsTournaments: formData.get('statsTournaments'),
-    statsMatches: formData.get('statsMatches'),
   }
 }
 
@@ -85,7 +71,7 @@ export const updateSettings = async (
     console.error('Blob upload error:', error)
     return {
       success: false,
-      message: fr.common.server.actions.settings.uploadError,
+      message: "Une erreur est survenue lors de l'upload du logo",
     }
   }
   const rawData = extractSettingsData(formData, logoUrl)
@@ -94,7 +80,7 @@ export const updateSettings = async (
   if (!validatedFields.success) {
     return {
       success: false,
-      message: fr.common.server.actions.settings.validationError,
+      message: 'Une erreur est survenue lors de la validation des données',
       errors: validatedFields.error.flatten().fieldErrors,
     }
   }
@@ -111,12 +97,15 @@ export const updateSettings = async (
 
     revalidatePath('/', 'layout')
 
-    return { success: true, message: fr.common.server.actions.settings.success }
+    return {
+      success: true,
+      message: 'Les paramètres ont été mis à jour avec succès',
+    }
   } catch (error) {
     console.error('Settings update error:', error)
     return {
       success: false,
-      message: fr.common.server.actions.settings.dbError,
+      message: 'Une erreur est survenue lors de la mise à jour des paramètres',
     }
   }
 }

@@ -1,16 +1,15 @@
 /**
  * File: lib/services/user.service.ts
  * Description: Data access layer for users.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import type { z } from 'zod'
-import prisma from '@/lib/core/db'
+import prisma from '@/lib/core/prisma'
 import type { updateAdminSchema } from '@/lib/validations/admin'
-import { Role } from '@/prisma/generated/prisma/client'
-
-// ----------------------------------------------------------------------
-// READS
-// ----------------------------------------------------------------------
+import { Role } from '@/prisma/generated/prisma/enums'
 
 export const getUserById = async (id: string) => {
   return prisma.user.findUnique({
@@ -23,10 +22,6 @@ export const getUserByEmail = async (email: string) => {
     where: { email },
   })
 }
-
-// ----------------------------------------------------------------------
-// WRITES
-// ----------------------------------------------------------------------
 
 export const createAdminUser = async (email: string, name: string) => {
   return prisma.user.create({

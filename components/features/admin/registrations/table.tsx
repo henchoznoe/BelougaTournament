@@ -2,15 +2,11 @@
  * File: components/features/admin/registrations/table.tsx
  * Description: Client component for displaying and managing tournament registrations.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Check, Clock, MoreHorizontal, X } from "lucide-react"
 import { useState } from "react"
@@ -42,11 +38,7 @@ import {
 import { formatDateTime } from "@/lib/utils"
 import type { Registration } from "@/prisma/generated/prisma/client"
 import { RegistrationStatus } from "@/prisma/generated/prisma/enums"
-import { fr } from "@/lib/i18n/dictionaries/fr"
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface RegistrationsTableProps {
   registrations: (Registration & {
@@ -54,21 +46,13 @@ interface RegistrationsTableProps {
   })[]
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const TABLE_HEADERS = [
-  fr.pages.admin.registration.table.headers.teamPlayer,
-  fr.pages.admin.registration.table.headers.email,
-  fr.pages.admin.registration.table.headers.status,
-  fr.pages.admin.registration.table.headers.createdAt,
-  fr.pages.admin.registration.table.headers.actions,
+  "Team / Player",
+  "Email",
+  "Status",
+  "Created At",
+  "Actions",
 ]
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const RegistrationsTable = ({
   registrations,
@@ -88,11 +72,11 @@ export const RegistrationsTable = ({
       } else {
         toast.error(
           result.error ||
-            fr.pages.admin.registration.table.toasts.actionFailed,
+            "Action failed",
         )
       }
     } catch (_error) {
-      toast.error(fr.common.errors.generic)
+      toast.error("An error occurred")
     } finally {
       setIsLoading(null)
     }
@@ -137,7 +121,7 @@ export const RegistrationsTable = ({
                 colSpan={5}
                 className="h-24 text-center text-zinc-500"
               >
-                {fr.pages.admin.registration.table.noData}
+                No registrations found
               </TableCell>
             </TableRow>
           ) : (
@@ -149,10 +133,10 @@ export const RegistrationsTable = ({
                 <TableCell className="font-medium text-white">
                   {reg.teamName ||
                     reg.players[0]?.nickname ||
-                    fr.pages.admin.registration.table.unknownName}
+                    "Unknown name"}
                   {reg.players.length > 1 && (
                     <span className="ml-2 text-xs text-zinc-500">
-                      {fr.pages.admin.registration.table.playersCount(reg.players.length)}
+                      {`+${reg.players.length - 1} more`}
                     </span>
                   )}
                 </TableCell>
@@ -187,33 +171,33 @@ export const RegistrationsTable = ({
                       className="bg-zinc-950 border-zinc-800 text-zinc-200"
                     >
                       <DropdownMenuLabel>
-                        {fr.pages.admin.registration.table.actions.label}
+                        Actions
                       </DropdownMenuLabel>
                       <DropdownMenuItem
                         onClick={() =>
                           handleAction(
                             approveRegistration,
                             reg.id,
-                            fr.pages.admin.registration.table.toasts.approveSuccess,
+                            "Inscription approuvée",
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-green-400 cursor-pointer"
                       >
-                        <Check className="mr-2 h-4 w-4" />
-                        {fr.pages.admin.registration.table.actions.approve}
+                        <Check className="mr-2 size-4" />
+                        Approuver
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
                           handleAction(
                             moveToWaitlist,
                             reg.id,
-                            fr.pages.admin.registration.table.toasts.waitlistSuccess,
+                            "Inscription mise sur liste d'attente",
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-orange-400 cursor-pointer"
                       >
                         <Clock className="mr-2 h-4 w-4" />
-                        {fr.pages.admin.registration.table.actions.waitlist}
+                        Mettre sur liste d'attente
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-zinc-800" />
                       <DropdownMenuItem
@@ -221,13 +205,13 @@ export const RegistrationsTable = ({
                           handleAction(
                             rejectRegistration,
                             reg.id,
-                            fr.pages.admin.registration.table.toasts.rejectSuccess,
+                            "Inscription refusée",
                           )
                         }
                         className="focus:bg-zinc-900 focus:text-red-400 cursor-pointer"
                       >
                         <X className="mr-2 h-4 w-4" />
-                        {fr.pages.admin.registration.table.actions.reject}
+                        Refuser
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

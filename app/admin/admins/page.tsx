@@ -1,14 +1,10 @@
 /**
  * File: app/admin/admins/page.tsx
- * Description: Page for managing administrators.
+ * Description: Admins management page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Lock } from 'lucide-react'
 import { headers } from 'next/headers'
@@ -17,17 +13,8 @@ import { AdminsManager } from '@/components/features/admin/users/admins/admins-m
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const fetchUsers = async () => {
   return prisma.user.findMany({
@@ -41,10 +28,6 @@ const fetchUsers = async () => {
   })
 }
 
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
-
 const AccessDeniedState = () => {
   return (
     <div className="flex h-[60vh] animate-in fade-in zoom-in duration-500 flex-col items-center justify-center space-y-4 text-center">
@@ -52,19 +35,18 @@ const AccessDeniedState = () => {
         <Lock className="size-10 text-red-500" />
       </div>
       <h1 className="text-3xl font-bold text-white">
-        {fr.pages.admin.admins.accessDenied.title}
+        Vous n'avez pas accès à cette page
       </h1>
       <p className="max-w-md text-zinc-400">
-        {fr.pages.admin.admins.accessDenied.description}
+        Vous devez être connecté en tant que super admin pour accéder à cette
+        page
       </p>
       <Button
         asChild
         variant="outline"
         className="border-white/10 text-white hover:bg-white/5"
       >
-        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>
-          {fr.pages.admin.admins.accessDenied.back}
-        </Link>
+        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>Retour au tableau de bord</Link>
       </Button>
     </div>
   )
@@ -91,9 +73,9 @@ const AdminsPage = async () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="mb-2 text-4xl font-black tracking-tighter text-white">
-            {fr.pages.admin.admins.title}
+            Gestion des administrateurs
           </h1>
-          <p className="text-zinc-400">{fr.pages.admin.admins.subtitle}</p>
+          <p className="text-zinc-400">Gérez les administrateurs du tournoi</p>
         </div>
       </div>
 

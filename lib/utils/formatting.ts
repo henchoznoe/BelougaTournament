@@ -1,3 +1,11 @@
+/**
+ * File: lib/utils/formatting.ts
+ * Description: Utility functions for date formatting
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 

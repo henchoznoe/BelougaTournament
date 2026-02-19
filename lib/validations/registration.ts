@@ -1,18 +1,23 @@
+/**
+ * File: lib/validations/registration.ts
+ * Description: Validation schemas for registration
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
 import { z } from 'zod'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const registrationSchema = z.object({
-  contactEmail: z.string().email(fr.common.server.validations.emailInvalid),
+  contactEmail: z.email('Email invalide'),
   players: z
     .array(
       z.object({
         data: z.record(z.string(), z.string()),
-        nickname: z
-          .string()
-          .min(1, fr.common.server.validations.nicknameRequired),
+        nickname: z.string().min(1, 'Pseudo requis'),
       }),
     )
-    .min(1, fr.common.server.validations.playersMin),
+    .min(1, 'Au moins un joueur requis'),
   teamName: z.string().optional(),
   tournamentId: z.uuid(),
 })

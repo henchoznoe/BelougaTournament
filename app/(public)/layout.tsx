@@ -1,29 +1,17 @@
 /**
  * File: app/(public)/layout.tsx
- * Description: Layout for public-facing pages (navbar, footer).
+ * Description: Layout for public-facing pages.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Footer } from '@/components/layout/footer'
 import { Navbar } from '@/components/layout/navbar/navbar'
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
 interface LayoutProps {
   children: React.ReactNode
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const PublicLayout = (props: Readonly<LayoutProps>) => {
   return (

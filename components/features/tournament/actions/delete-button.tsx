@@ -2,15 +2,11 @@
  * File: components/features/tournament/actions/delete-button.tsx
  * Description: Client component for deleting tournaments with confirmation dialog.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
@@ -29,25 +25,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { deleteTournament } from "@/lib/actions/tournament"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface DeleteTournamentButtonProps {
   id: string
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
   const [isPending, startTransition] = useTransition()
@@ -64,7 +45,7 @@ export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
           toast.error(result.message)
         }
       } catch (_error) {
-        toast.error(fr.common.errors.generic)
+        toast.error("Une erreur est survenue")
       }
     })
   }
@@ -83,21 +64,21 @@ export const DeleteTournamentButton = ({ id }: DeleteTournamentButtonProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className="border-zinc-800 bg-zinc-950 text-zinc-50">
         <AlertDialogHeader>
-          <AlertDialogTitle>{fr.pages.admin.actions.delete.title}</AlertDialogTitle>
+          <AlertDialogTitle>Supprimer le tournoi</AlertDialogTitle>
           <AlertDialogDescription className="text-zinc-400">
-            {fr.pages.admin.actions.delete.description}
+            Êtes-vous sûr de vouloir supprimer ce tournoi ?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="border-zinc-800 bg-transparent hover:bg-zinc-900 hover:text-white">
-            {fr.pages.admin.actions.delete.btnCancel}
+            Annuler
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             className="bg-red-600 text-white hover:bg-red-700"
             disabled={isPending}
           >
-            {isPending ? fr.pages.admin.actions.delete.btnDeleting : fr.pages.admin.actions.delete.btnDelete}
+            {isPending ? "Suppression..." : "Supprimer"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

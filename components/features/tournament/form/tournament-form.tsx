@@ -2,17 +2,12 @@
  * File: components/features/tournament/form/tournament-form.tsx
  * Description: Reusable form component for creating and editing tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 
@@ -29,27 +24,13 @@ import { DatesSection } from "./tournament-form/dates-section"
 import { GeneralInfoSection } from "./tournament-form/general-info-section"
 import { SettingsSection } from "./tournament-form/settings-section"
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
 const formSchema = tournamentSchema
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 type TournamentFormProps = {
   initialData?: z.infer<typeof formSchema>
   onSubmit: (values: z.infer<typeof formSchema>) => Promise<ActionState>
   submitLabel?: string
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const TournamentForm = ({
   initialData,
@@ -77,7 +58,7 @@ export const TournamentForm = ({
 
     if (!result.success) {
       setServerError(
-        result.message || fr.common.errors.generic,
+        result.message || "Une erreur est survenue",
       )
     }
   }
@@ -103,7 +84,7 @@ export const TournamentForm = ({
               className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
             >
               <Save className="mr-2 h-5 w-5" />
-              {submitLabel || fr.pages.admin.tournaments.form.createSubmit}
+              {submitLabel || "Créer"}
             </Button>
           </div>
         </div>

@@ -2,35 +2,16 @@
  * File: components/features/auth/login-card.tsx
  * Description: Visual wrapper for the login form with header and styling.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import type { ReactNode } from 'react'
 import { Gamepad2 } from 'lucide-react'
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface LoginCardProps {
   children: ReactNode
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const LoginCard = ({ children }: LoginCardProps) => {
   return (
@@ -41,9 +22,9 @@ export const LoginCard = ({ children }: LoginCardProps) => {
             <Gamepad2 className="size-8 text-blue-400" />
           </div>
           <h1 className="font-paladins text-3xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            {fr.pages.login.title}
+            Connexion
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">{fr.pages.login.subtitle}</p>
+          <p className="mt-2 text-sm text-zinc-400">Connectez-vous à votre compte</p>
         </div>
 
         {children}

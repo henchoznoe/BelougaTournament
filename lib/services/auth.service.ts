@@ -2,8 +2,8 @@
  * File: lib/services/auth.service.ts
  * Description: Service for handling authentication logic.
  * Author: Noé Henchoz
- * Date: 2025-12-10
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { headers } from 'next/headers'

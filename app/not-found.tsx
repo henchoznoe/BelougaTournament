@@ -2,18 +2,12 @@
  * File: app/not-found.tsx
  * Description: 404 Not Found page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
-
-import { fr } from '@/lib/i18n/dictionaries/fr'
-
 const NotFound = () => {
-  return <div>{fr.common.errors.notFound}</div>
+  return <div>404 Not Found</div>
 }
 
 export default NotFound

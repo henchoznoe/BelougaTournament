@@ -2,24 +2,15 @@
  * File: components/features/stream/twitch-embed.tsx
  * Description: A component to embed a Twitch stream with offline detection and a fallback UI.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { Loader2, ScreenShareOff } from "lucide-react"
 import Script from "next/script"
 import { useEffect, useId, useRef, useState } from "react"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface TwitchEmbedProps {
   channel: string | null | undefined
@@ -59,10 +50,6 @@ interface TwitchPlayer {
   setVolume: (volume: number) => void
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const TWITCH_CONFIG = {
   SCRIPT_URL: "https://embed.twitch.tv/embed/v1.js",
   DEFAULT_WIDTH: "100%",
@@ -73,12 +60,6 @@ const TWITCH_CONFIG = {
     READY: "VIDEO_READY",
   },
 } as const
-
-
-
-// ----------------------------------------------------------------------
-// HELPER FUNCTIONS
-// ----------------------------------------------------------------------
 
 const getParentDomains = (): string[] => {
   if (typeof window === "undefined") return []
@@ -115,10 +96,6 @@ const extractTwitchChannel = (
   return null
 }
 
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
-
 export const TwitchEmbed = ({
   channel,
   width = TWITCH_CONFIG.DEFAULT_WIDTH,
@@ -148,7 +125,7 @@ export const TwitchEmbed = ({
             style={{ height }}
         >
             <ScreenShareOff className="mb-4 size-10 text-zinc-600" />
-            <p>{fr.components.twitchEmbed.notConfigured}</p>
+            <p>Le stream n'est pas configuré</p>
         </div>
     )
   }
@@ -240,7 +217,7 @@ export const TwitchEmbed = ({
       {isLoading && (
         <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 text-white">
           <Loader2 className="mb-4 size-10 animate-spin text-blue-500" />
-          <p className="text-zinc-400">{fr.components.twitchEmbed.loading}</p>
+          <p className="text-zinc-400">Chargement du stream...</p>
         </div>
       )}
 
@@ -250,11 +227,11 @@ export const TwitchEmbed = ({
             <ScreenShareOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="mb-2 text-xl font-semibold text-white">
-            {fr.components.twitchEmbed.offlineTitle}
+            Le stream est hors ligne
           </h3>
           <p className="max-w-md text-zinc-400">
             {channel}
-            {fr.components.twitchEmbed.offlineDescSuffix}
+            Le stream n'est pas en direct
           </p>
         </div>
       )}

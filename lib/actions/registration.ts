@@ -11,21 +11,16 @@ import { redirect } from 'next/navigation'
 
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
-import prisma from '@/lib/core/db'
 import {
   generateRegistrationEmailHtml,
   generateStatusUpdateEmailHtml,
   sendEmail,
 } from '@/lib/core/email'
 import { env } from '@/lib/core/env'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import * as RegistrationService from '@/lib/services/registration.service'
 import { registrationSchema } from '@/lib/validations/registration'
 import { RegistrationStatus, Role } from '@/prisma/generated/prisma/client'
-
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
 
 export type RegistrationState = {
   success?: boolean
@@ -41,19 +36,11 @@ type ActionResponse = {
   error?: string
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const SUBJECT_MAP: Partial<Record<RegistrationStatus, string>> = {
   [RegistrationStatus.APPROVED]: 'Registration Approved',
   [RegistrationStatus.REJECTED]: 'Registration Rejected',
   [RegistrationStatus.WAITLIST]: 'Registration Status Update',
 }
-
-// ----------------------------------------------------------------------
-// HELPERS
-// ----------------------------------------------------------------------
 
 /**
  * Helper to parse FormData with dot notation into a nested object.
@@ -155,10 +142,6 @@ async function processRegistrationUpdate(
   }
 }
 
-// ----------------------------------------------------------------------
-// PUBLIC ACTIONS
-// ----------------------------------------------------------------------
-
 export const registerForTournament = async (
   _prevState: RegistrationState,
   formData: FormData,
@@ -185,7 +168,7 @@ export const registerForTournament = async (
     return {
       success: false,
       errors: validation.error.flatten().fieldErrors,
-      message: fr.common.registration.validationError,
+      message: 'Erreur de validation.',
     }
   }
 
@@ -200,7 +183,7 @@ export const registerForTournament = async (
   if (!tournamentData) {
     return {
       success: false,
-      message: fr.common.registration.tournamentNotFound,
+      message: 'Tournoi non trouvé.',
     }
   }
 
@@ -212,7 +195,8 @@ export const registerForTournament = async (
   ) {
     return {
       success: false,
-      message: fr.common.registration.registrationClosed,
+      message:
+        'Les inscriptions ne sont pas encore ouvertes ou sont terminées.',
     }
   }
 
@@ -225,7 +209,7 @@ export const registerForTournament = async (
   if (existing) {
     return {
       success: false,
-      message: fr.common.registration.emailAlreadyUsed,
+      message: 'Email déjà utilisé.',
     }
   }
 
@@ -236,10 +220,7 @@ export const registerForTournament = async (
       if (field.required && (!value || value.trim() === '')) {
         return {
           success: false,
-          message: fr.common.registration.fieldMissing(
-            field.label,
-            player.nickname,
-          ),
+          message: `Le champ ${field.label} est requis pour le joueur ${player.nickname}.`,
         }
       }
     }
@@ -264,14 +245,14 @@ export const registerForTournament = async (
 
     await sendEmail({
       to: contactEmail,
-      subject: `${fr.common.email.subjectPrefix}${tournamentData.title}`,
+      subject: `Inscription au tournoi ${tournamentData.title}`,
       html: emailHtml,
     })
 
     const message =
       result.status === RegistrationStatus.WAITLIST
-        ? fr.common.registration.successWaitlist
-        : fr.common.registration.successApproved
+        ? "Inscription en liste d'attente."
+        : 'Inscription approuvée.'
 
     revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${tournamentData.slug}`)
     redirect(
@@ -280,19 +261,16 @@ export const registerForTournament = async (
       )}`,
     )
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === fr.common.registration.emailAlreadyUsed
-    ) {
+    if (error instanceof Error && error.message === 'Email déjà utilisé.') {
       return {
         success: false,
-        message: fr.common.registration.emailAlreadyUsed,
+        message: 'Email déjà utilisé.',
       }
     }
     console.error('Registration Error:', error)
     return {
       success: false,
-      message: fr.common.errors.generic,
+      message: 'Une erreur est survenue.',
     }
   }
 }
@@ -302,13 +280,13 @@ export const cancelRegistration = async (id: string, token: string) => {
     const registration = await RegistrationService.getRegistrationById(id)
 
     if (!registration) {
-      return { success: false, message: fr.common.registration.cancelNotFound }
+      return { success: false, message: 'Inscription non trouvée.' }
     }
 
     if (registration.cancellationToken !== token) {
       return {
         success: false,
-        message: fr.common.registration.cancelInvalidToken,
+        message: "Token d'annulation invalide.",
       }
     }
 
@@ -317,17 +295,13 @@ export const cancelRegistration = async (id: string, token: string) => {
     revalidatePath(`${APP_ROUTES.TOURNAMENTS}/${registration.tournament.slug}`)
     return {
       success: true,
-      message: fr.common.registration.cancelSuccess,
+      message: 'Inscription annulée avec succès.',
     }
   } catch (error) {
     console.error('Cancellation Error:', error)
-    return { success: false, message: fr.common.registration.cancelFailed }
+    return { success: false, message: "Erreur lors de l'annulation." }
   }
 }
-
-// ----------------------------------------------------------------------
-// ADMIN ACTIONS
-// ----------------------------------------------------------------------
 
 export async function updateRegistrationStatus(
   registrationId: string,

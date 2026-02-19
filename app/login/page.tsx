@@ -1,16 +1,12 @@
 /**
  * File: app/login/page.tsx
- * Description: Login page for admin authentication with premium gaming aesthetic.
+ * Description: Login page for admin authentication
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
@@ -21,11 +17,6 @@ import SocialLogin from '@/components/features/auth/social-login'
 import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/config/constants'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const LoginPage = () => {
   return (
@@ -58,7 +49,7 @@ const LoginPage = () => {
           >
             <Link href={APP_ROUTES.HOME}>
               <ArrowLeft className="mr-2 size-4" />
-              {fr.common.actions.backToHome}
+              Retour à l'accueil
             </Link>
           </Button>
 

@@ -2,15 +2,11 @@
  * File: components/features/tournament/form/tournament-form/dates-section.tsx
  * Description: Form section for tournament dates (Start, End, Registration).
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -43,23 +39,8 @@ import {
 import { cn, formatDateTime } from "@/lib/utils"
 import { CalendarIcon, Clock } from "lucide-react"
 import { useFormContext } from "react-hook-form"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 type TimeUpdateType = "hour" | "minute"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const updateTime = (
   date: Date | undefined,
@@ -72,10 +53,6 @@ const updateTime = (
   if (type === "minute") newDate.setMinutes(Number.parseInt(value))
   return newDate
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const DatesSection = () => {
   const { control } = useFormContext()

@@ -1,24 +1,16 @@
 /**
  * File: lib/validations/auth.ts
- * Description: Validation schemas for authentication.
+ * Description: Validation schemas for authentication
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { z } from 'zod'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 export const loginSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.email('Email invalide'),
+  password: z.string().min(1, 'Mot de passe requis'),
 })
 
 export type LoginInput = z.infer<typeof loginSchema>

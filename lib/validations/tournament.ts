@@ -1,34 +1,25 @@
 /**
  * File: lib/validations/tournament.ts
- * Description: Tournament schema for validation.
+ * Description: Validation schemas for tournament management
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { z } from 'zod'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import {
   FieldType,
   TournamentFormat,
   Visibility,
 } from '@/prisma/generated/prisma/enums'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 export const tournamentSchema = z.object({
-  description: z.string().min(10, fr.common.server.validations.descriptionMin),
+  description: z.string().min(10, 'Description trop courte'),
   endDate: z.date(),
   fields: z.array(
     z.object({
       id: z.string().optional(),
-      label: z.string().min(1, fr.common.server.validations.labelRequired),
+      label: z.string().min(1, 'Label requis'),
       required: z.boolean().default(true),
       type: z.enum(FieldType),
     }),
@@ -37,14 +28,11 @@ export const tournamentSchema = z.object({
   maxParticipants: z.coerce.number().optional(),
   registrationClose: z.date(),
   registrationOpen: z.date(),
-  slug: z.string().min(3, fr.common.server.validations.slugMin),
+  slug: z.string().min(3, 'Slug trop court'),
   startDate: z.date(),
-  streamUrl: z
-    .url(fr.common.server.validations.streamUrlInvalid)
-    .optional()
-    .or(z.literal('')),
-  teamSize: z.coerce.number().min(1, fr.common.server.validations.teamSizeMin),
-  title: z.string().min(3, fr.common.server.validations.titleMin),
+  streamUrl: z.url('URL invalide').optional().or(z.literal('')),
+  teamSize: z.coerce.number().min(1, "Taille d'équipe invalide"),
+  title: z.string().min(3, 'Titre trop court'),
 })
 
 export const deleteTournamentSchema = z.object({

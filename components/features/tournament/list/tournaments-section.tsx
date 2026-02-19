@@ -2,29 +2,17 @@
  * File: components/features/tournament/list/tournaments-section.tsx
  * Description: Server Component responsible for fetching and displaying the latest tournaments on the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
-import prisma from "@/lib/core/db"
+import prisma from "@/lib/core/prisma"
 import { Visibility } from "@/prisma/generated/prisma/enums"
 import { TournamentsList } from "./tournaments-list"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const SECTION_CONFIG = {
   MAX_ITEMS: 3,
 } as const
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const fetchUpcomingTournaments = async () => {
   return prisma.tournament.findMany({

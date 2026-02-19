@@ -2,15 +2,11 @@
  * File: components/layout/navbar/navbar-client.tsx
  * Description: Interactive Navbar component handling navigation, mobile sheet, and animations.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { useState } from "react"
 import { usePathname } from "next/navigation"
@@ -23,11 +19,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { cn } from "@/lib/utils"
 import { APP_METADATA } from "@/lib/config/constants"
 import { APP_ROUTES } from "@/lib/config/routes"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface NavbarClientProps {
   settings: {
@@ -41,20 +32,12 @@ interface NavLogoProps {
   className?: string
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const NAV_LINKS = [
-  { href: APP_ROUTES.HOME, label: fr.layout.navbar.links.home, icon: Home },
-  { href: APP_ROUTES.TOURNAMENTS, label: fr.layout.navbar.links.tournaments, icon: Trophy },
-  { href: APP_ROUTES.STREAM, label: fr.layout.navbar.links.stream, icon: Video },
-  { href: APP_ROUTES.CONTACT, label: fr.layout.navbar.links.contact, icon: Mail },
+  { href: APP_ROUTES.HOME, label: "Accueil", icon: Home },
+  { href: APP_ROUTES.TOURNAMENTS, label: "Tournois", icon: Trophy },
+  { href: APP_ROUTES.STREAM, label: "Stream", icon: Video },
+  { href: APP_ROUTES.CONTACT, label: "Contact", icon: Mail },
 ] as const
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
   const src = url || APP_METADATA.DEFAULT_LOGO

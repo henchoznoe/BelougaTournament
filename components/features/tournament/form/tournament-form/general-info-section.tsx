@@ -2,15 +2,11 @@
  * File: components/features/tournament/form/tournament-form/general-info-section.tsx
  * Description: Form section for general tournament information (Title, Slug, Description).
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   Card,
@@ -29,11 +25,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useFormContext } from "react-hook-form"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const GeneralInfoSection = () => {
   const { control } = useFormContext()
@@ -41,9 +32,9 @@ export const GeneralInfoSection = () => {
   return (
     <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">{fr.pages.admin.tournaments.form.sections.general.title}</CardTitle>
+        <CardTitle className="text-white">Informations générales</CardTitle>
         <CardDescription className="text-zinc-400">
-          {fr.pages.admin.tournaments.form.sections.general.description}
+          Informations générales du tournoi
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
@@ -53,10 +44,10 @@ export const GeneralInfoSection = () => {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.title}</FormLabel>
+                <FormLabel className="text-zinc-400">Titre</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.title}
+                    placeholder="Titre"
                     {...field}
                     className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                   />
@@ -70,10 +61,10 @@ export const GeneralInfoSection = () => {
             name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.slug}</FormLabel>
+                <FormLabel className="text-zinc-400">Slug</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.slug}
+                    placeholder="Slug"
                     {...field}
                     className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                   />
@@ -89,10 +80,10 @@ export const GeneralInfoSection = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.general.labels.description}</FormLabel>
+              <FormLabel className="text-zinc-400">Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={fr.pages.admin.tournaments.form.sections.general.placeholders.description}
+                  placeholder="Description"
                   {...field}
                   className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600 min-h-[100px]"
                 />

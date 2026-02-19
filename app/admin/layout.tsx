@@ -2,42 +2,22 @@
  * File: app/admin/layout.tsx
  * Description: Layout for the admin dashboard, including the sidebar navigation.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
-import { headers } from 'next/headers'
 import Image from 'next/image'
-import { redirect } from 'next/navigation'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
 import { logoutHandler } from '@/lib/actions/auth'
-import { APP_ROUTES } from '@/lib/config/routes'
-import auth from '@/lib/core/auth'
-import { Role } from '@/prisma/generated/prisma/enums'
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
+import AdminGuard from '@/components/auth/admin-guard'
 
 interface LayoutProps {
   children: React.ReactNode
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const ASSETS = {
   BACKGROUND: '/assets/wall.png',
 } as const
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const AdminBackground = () => {
   return (
@@ -58,42 +38,20 @@ const AdminBackground = () => {
 }
 
 const AdminLayout = async (props: Readonly<LayoutProps>) => {
-  // 1. Auth Check
-  const session = await auth.api.getSession({
-    headers: await headers(), // Pass headers for server-side auth
-  })
-
-  // We rely on getSession returning null if invalid/expired.
-  // We also enforce Role checking here as a second layer of defense.
-  const isAuthorized =
-    session?.user &&
-    (session.user.role === Role.ADMIN || session.user.role === Role.SUPERADMIN)
-
-  if (!isAuthorized) {
-    if (session?.user?.role === Role.USER) {
-      redirect(APP_ROUTES.UNAUTHORIZED)
-    }
-    redirect(APP_ROUTES.LOGIN)
-  }
-
-  // 2. Render Layout
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
-      <AdminBackground />
+    <AdminGuard>
+      <div className="flex min-h-screen flex-col md:flex-row bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
+        <AdminBackground />
 
-      {/* Sidebar Navigation */}
-      <AdminSidebar
-        userEmail={session.user.email}
-        logoutAction={logoutHandler}
-      />
+        <AdminSidebar userEmail={'TODO'} logoutAction={logoutHandler} />
 
-      {/* Main Content Area */}
-      <main className="flex-1 relative overflow-y-auto h-screen z-10">
-        <div className="p-8 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {props.children}
-        </div>
-      </main>
-    </div>
+        <main className="flex-1 relative overflow-y-auto h-screen z-10">
+          <div className="p-8 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {props.children}
+          </div>
+        </main>
+      </div>
+    </AdminGuard>
   )
 }
 

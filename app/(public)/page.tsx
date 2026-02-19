@@ -2,58 +2,41 @@
  * File: app/(public)/page.tsx
  * Description: Landing page with hero section and featured tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { FeaturesSection } from '@/components/features/landing/features/features'
 import { HeroSection } from '@/components/features/landing/hero/hero'
 import { SponsorsSection } from '@/components/features/landing/sponsors/sponsors'
-import { StatsSection } from '@/components/features/landing/stats/stats'
 import { StreamSection } from '@/components/features/landing/stream/stream'
 import { TournamentsSection } from '@/components/features/tournament/list/tournaments-section'
 import { TournamentsSkeleton } from '@/components/features/tournament/list/tournaments-skeleton'
-import { fr } from '@/lib/i18n/dictionaries/fr'
-import {
-  getLandingStats,
-  getSiteSettings,
-} from '@/lib/services/settings.service'
+import { getSiteSettings } from '@/lib/services/settings.service'
 
 export const metadata: Metadata = {
-  title: fr.pages.home.metaTitle,
-  description: fr.pages.home.metaDescription,
+  title: 'Accueil',
+  description: 'Accueil',
 }
 
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
-
 const LandingPage = async () => {
-  const [statsData, settings] = await Promise.all([
-    getLandingStats(),
-    getSiteSettings(),
-  ])
+  const [settings] = await Promise.all([getSiteSettings()])
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
       <HeroSection
         content={{
-          HERO_BLUE_BADGE: fr.pages.home.hero.badge,
-          HERO_TITLE: fr.pages.home.hero.title,
-          HERO_TITLE_GRADIENT: fr.pages.home.hero.titleGradient,
-          HERO_DESCRIPTION: fr.pages.home.hero.description,
-          HERO_DESCRIPTION_HIGHLIGHT: fr.pages.home.hero.descriptionHighlight,
-          HERO_PRIMARY_CTA_TEXT: fr.pages.home.hero.primaryCta,
-          HERO_SECONDARY_CTA_TEXT: fr.pages.home.hero.secondaryCta,
+          HERO_BLUE_BADGE: 'Tournois',
+          HERO_TITLE: 'Tournois',
+          HERO_TITLE_GRADIENT: 'Tournois',
+          HERO_DESCRIPTION: 'Tournois',
+          HERO_DESCRIPTION_HIGHLIGHT: 'Tournois',
+          HERO_PRIMARY_CTA_TEXT: 'Tournois',
+          HERO_SECONDARY_CTA_TEXT: 'Tournois',
         }}
       />
-      <StatsSection stats={statsData} />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />

@@ -1,9 +1,9 @@
 /**
  * File: lib/core/env.ts
- * Description: Environment configuration using Zod with explicit client-side mapping.
+ * Description: Environment variables configuration
  * Author: Noé Henchoz
- * Date: 2025-12-09
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { z } from 'zod'

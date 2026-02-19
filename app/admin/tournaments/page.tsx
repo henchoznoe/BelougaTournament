@@ -2,13 +2,9 @@
  * File: app/admin/tournaments/page.tsx
  * Description: List of all tournaments with management actions.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Edit, Eye, Plus, Trophy } from 'lucide-react'
 import Link from 'next/link'
@@ -24,22 +20,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import { getAdminTournaments } from '@/lib/services/tournament.service'
 import { formatDate } from '@/lib/utils'
 import { Visibility } from '@/prisma/generated/prisma/client'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const CONFIG = {
   DEFAULT_MAX_PARTICIPANTS: 100,
 } as const
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 /**
  * Calculates the completion percentage of registrations.
@@ -85,11 +72,9 @@ const TournamentsPage = async () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-            {fr.pages.admin.tournaments.list.title}
+            Tournaments
           </h1>
-          <p className="text-zinc-400">
-            {fr.pages.admin.tournaments.list.subtitle}
-          </p>
+          <p className="text-zinc-400">Manage all tournaments</p>
         </div>
         <Button
           asChild
@@ -98,7 +83,7 @@ const TournamentsPage = async () => {
         >
           <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
             <Plus className="mr-2 h-5 w-5" />
-            {fr.pages.admin.tournaments.list.createButton}
+            Create tournament
           </Link>
         </Button>
       </div>
@@ -109,19 +94,19 @@ const TournamentsPage = async () => {
           <TableHeader>
             <TableRow className="border-white/10 bg-white/5 hover:bg-white/5">
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pl-6">
-                {fr.pages.admin.tournaments.list.tableHeaders.title}
+                Title
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                {fr.pages.admin.tournaments.list.tableHeaders.date}
+                Date
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                {fr.pages.admin.tournaments.list.tableHeaders.format}
+                Format
               </TableHead>
               <TableHead className="text-zinc-400 font-medium uppercase tracking-wider text-xs py-4">
-                {fr.pages.admin.tournaments.list.tableHeaders.registrations}
+                Registrations
               </TableHead>
               <TableHead className="text-right text-zinc-400 font-medium uppercase tracking-wider text-xs py-4 pr-6">
-                {fr.pages.admin.tournaments.list.tableHeaders.actions}
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -158,7 +143,7 @@ const TournamentsPage = async () => {
                               variant="secondary"
                               className="bg-zinc-800 text-zinc-500 border-zinc-700 text-[10px] h-5 px-1.5"
                             >
-                              {fr.pages.admin.tournaments.list.badges.finished}
+                              Finished
                             </Badge>
                           )}
                           {tournament.visibility === Visibility.PRIVATE && (
@@ -166,12 +151,12 @@ const TournamentsPage = async () => {
                               variant="outline"
                               className="border-zinc-700 text-zinc-500 text-[10px] h-5 px-1.5"
                             >
-                              {fr.pages.admin.tournaments.list.badges.private}
+                              Private
                             </Badge>
                           )}
                           {isPublic && (
                             <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-[10px] h-5 px-1.5 hover:bg-green-500/20">
-                              {fr.pages.admin.tournaments.list.badges.public}
+                              Public
                             </Badge>
                           )}
                         </div>
@@ -241,10 +226,10 @@ const TournamentsPage = async () => {
                 >
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Trophy className="h-8 w-8 text-zinc-700" />
-                    <p>{fr.pages.admin.tournaments.list.emptyState.message}</p>
+                    <p>There are no tournaments yet.</p>
                     <Button variant="link" asChild className="text-blue-500">
                       <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
-                        {fr.pages.admin.tournaments.list.emptyState.cta}
+                        Create tournament
                       </Link>
                     </Button>
                   </div>

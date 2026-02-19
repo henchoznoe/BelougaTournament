@@ -2,13 +2,9 @@
  * File: app/layout.tsx
  * Description: Root layout for the application.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -19,17 +15,9 @@ import { APP_METADATA } from '@/lib/config/constants'
 import { cn } from '@/lib/utils'
 import './globals.css'
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
 interface LayoutProps {
   children: React.ReactNode
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const inter = Inter({
   subsets: ['latin'],
@@ -48,10 +36,6 @@ export const metadata: Metadata = {
   },
   description: APP_METADATA.DESCRIPTION,
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (

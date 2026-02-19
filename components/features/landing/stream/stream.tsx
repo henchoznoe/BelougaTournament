@@ -2,23 +2,14 @@
  * File: components/features/landing/stream/stream.tsx
  * Description: Stream section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { TwitchEmbed } from "@/components/features/stream/twitch-embed"
 import { Suspense } from "react"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const LiveBadge = () => {
   return (
@@ -27,7 +18,7 @@ const LiveBadge = () => {
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
         <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
       </span>
-      {fr.pages.home.stream.badge}
+      En direct
     </div>
   )
 }
@@ -35,7 +26,7 @@ const LiveBadge = () => {
 const StreamLoader = () => {
   return (
     <div className="flex h-[600px] w-full items-center justify-center rounded-lg bg-zinc-900 text-zinc-500">
-      {fr.pages.home.stream.loading}
+      Chargement du stream...
     </div>
   )
 }
@@ -53,10 +44,10 @@ export const StreamSection = ({ channel }: StreamSectionProps) => {
           <div className="mb-12 flex flex-col items-center text-center">
             <LiveBadge />
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-5xl">
-              {fr.pages.home.stream.title}
+              Suivez le tournoi en direct
             </h2>
             <p className="max-w-xl text-lg text-zinc-400">
-              {fr.pages.home.stream.description}
+              Ne manquez pas une seconde du tournoi, suivez-le en direct sur notre chaîne Twitch
             </p>
           </div>
 

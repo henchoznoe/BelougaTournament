@@ -2,13 +2,9 @@
  * File: app/(public)/contact/page.tsx
  * Description: Public contact page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { type LucideIcon, Mail, MessageSquare, Video } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -21,12 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import { getSiteSettings } from '@/lib/services/settings.service'
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface ContactCardProps {
   icon: LucideIcon
@@ -41,20 +32,12 @@ interface ContactCardProps {
   isExternal?: boolean
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const CONTACT_EMAIL = 'contact@belouga.com'
 
 export const metadata: Metadata = {
-  title: fr.pages.contact.title,
-  description: fr.pages.contact.description,
+  title: 'Contact',
+  description: 'Contactez-nous pour toute question ou suggestion.',
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const ContactCard = ({
   icon: Icon,
@@ -107,29 +90,29 @@ const ContactPage = async () => {
       <div className="mx-auto max-w-2xl space-y-8">
         <div className="space-y-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white">
-            {fr.pages.contact.title}
+            Contact
           </h1>
           <p className="text-lg text-zinc-400">
-            {fr.pages.contact.description}
+            Contactez-nous pour toute question ou suggestion.
           </p>
         </div>
 
         <div className="grid gap-6">
           <ContactCard
             icon={Mail}
-            title={fr.pages.contact.cards.email.title}
-            description={fr.pages.contact.cards.email.desc}
+            title="Email"
+            description="Envoyez-nous un email pour toute question ou suggestion."
             href={`mailto:${CONTACT_EMAIL}`}
-            buttonLabel={fr.pages.contact.cards.email.btnLabel}
+            buttonLabel="Envoyer"
           />
 
           {settings.socialDiscord && (
             <ContactCard
               icon={MessageSquare}
-              title={fr.pages.contact.cards.discord.title}
-              description={fr.pages.contact.cards.discord.desc}
+              title="Discord"
+              description="Rejoignez-nous sur Discord pour discuter de tout."
               href={settings.socialDiscord}
-              buttonLabel={fr.pages.contact.cards.discord.btnLabel}
+              buttonLabel="Rejoindre"
               colors={{
                 button: 'bg-[#5865F2] hover:bg-[#4752C4] text-white',
                 icon: 'text-[#5865F2]',
@@ -141,10 +124,10 @@ const ContactPage = async () => {
           {settings.socialTwitch && (
             <ContactCard
               icon={Video}
-              title={fr.pages.contact.cards.twitch.title}
-              description={fr.pages.contact.cards.twitch.desc}
+              title="Twitch"
+              description="Rejoignez-nous sur Twitch pour discuter de tout."
               href={settings.socialTwitch}
-              buttonLabel={fr.pages.contact.cards.twitch.btnLabel}
+              buttonLabel="Rejoindre"
               colors={{
                 button: 'bg-[#9146FF] hover:bg-[#7c2cf5] text-white',
                 icon: 'text-[#9146FF]',
@@ -156,10 +139,10 @@ const ContactPage = async () => {
           {settings.socialYoutube && (
             <ContactCard
               icon={Video}
-              title={fr.pages.contact.cards.youtube.title}
-              description={fr.pages.contact.cards.youtube.desc}
+              title="Youtube"
+              description="Rejoignez-nous sur Youtube pour discuter de tout."
               href={settings.socialYoutube}
-              buttonLabel={fr.pages.contact.cards.youtube.btnLabel}
+              buttonLabel="Rejoindre"
               colors={{
                 button: 'bg-[#FF0000] hover:bg-[#FF0000] text-white',
                 icon: 'text-[#FF0000]',
@@ -171,10 +154,10 @@ const ContactPage = async () => {
           {settings.socialInstagram && (
             <ContactCard
               icon={Video}
-              title={fr.pages.contact.cards.instagram.title}
-              description={fr.pages.contact.cards.instagram.desc}
+              title="Instagram"
+              description="Rejoignez-nous sur Instagram pour discuter de tout."
               href={settings.socialInstagram}
-              buttonLabel={fr.pages.contact.cards.instagram.btnLabel}
+              buttonLabel="Rejoindre"
               colors={{
                 button: 'bg-[#E1306C] hover:bg-[#E1306C] text-white',
                 icon: 'text-[#E1306C]',
@@ -186,10 +169,10 @@ const ContactPage = async () => {
           {settings.socialTiktok && (
             <ContactCard
               icon={Video}
-              title={fr.pages.contact.cards.tiktok.title}
-              description={fr.pages.contact.cards.tiktok.desc}
+              title="Tiktok"
+              description="Rejoignez-nous sur Tiktok pour discuter de tout."
               href={settings.socialTiktok}
-              buttonLabel={fr.pages.contact.cards.tiktok.btnLabel}
+              buttonLabel="Rejoindre"
               colors={{
                 button: 'bg-[#00f2ea] hover:bg-[#00f2ea] text-white',
                 icon: 'text-[#00f2ea]',

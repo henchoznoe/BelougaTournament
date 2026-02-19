@@ -1,16 +1,12 @@
 /**
- * File: components/features/landing/hero/hero.tsx
- * Description: Main hero section of the landing page.
+ * File: lib/utils/formatting.ts
+ * Description: Utility functions for date formatting
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import Image from "next/image"
 import Link from "next/link"
@@ -19,10 +15,6 @@ import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { APP_METADATA } from "@/lib/config/constants"
 import { APP_ROUTES } from "@/lib/config/routes"
-
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
 
 interface HeroSectionProps {
   content: {
@@ -35,10 +27,6 @@ interface HeroSectionProps {
     HERO_SECONDARY_CTA_TEXT: string
   }
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const ROUTES = {
   TOURNAMENTS: APP_ROUTES.TOURNAMENTS,
@@ -64,10 +52,6 @@ const itemVariants: Variants = {
     transition: { duration: 0.5, ease: "easeOut" },
   },
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const HeroSection = ({ content }: HeroSectionProps) => {
   return (

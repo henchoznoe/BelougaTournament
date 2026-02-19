@@ -2,13 +2,9 @@
  * File: lib/constants.ts
  * Description: Global constants for the application.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 export const APP_METADATA = {
   LOCALE: 'fr-FR',

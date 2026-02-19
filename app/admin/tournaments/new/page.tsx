@@ -2,15 +2,11 @@
  * File: app/admin/tournaments/new/page.tsx
  * Description: Page for creating a new tournament.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -18,11 +14,6 @@ import { TournamentForm } from '@/components/features/tournament/form/tournament
 import { Button } from '@/components/ui/button'
 import { createTournament } from '@/lib/actions/tournament'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const CreateTournamentPage = () => {
   return (
@@ -40,11 +31,9 @@ const CreateTournamentPage = () => {
         </Button>
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-            {fr.pages.admin.tournaments.form.createTitle}
+            Create tournament
           </h1>
-          <p className="text-zinc-400">
-            {fr.pages.admin.tournaments.form.createSubtitle}
-          </p>
+          <p className="text-zinc-400">Create a new tournament</p>
         </div>
       </div>
 
@@ -52,7 +41,7 @@ const CreateTournamentPage = () => {
         onSubmit={async values => {
           return await createTournament(values)
         }}
-        submitLabel={fr.pages.admin.tournaments.form.createSubmit}
+        submitLabel="Create tournament"
       />
     </div>
   )

@@ -2,19 +2,11 @@
  * File: app/admin/loading.tsx
  * Description: Loading state for admin pages.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { Skeleton } from '@/components/ui/skeleton'
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const AdminLoading = () => {
   return (

@@ -2,15 +2,11 @@
  * File: components/features/tournament/form/tournament-form/custom-fields-manager.tsx
  * Description: Form section for managing dynamic tournament registration fields.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Button } from "@/components/ui/button"
 import {
@@ -38,11 +34,6 @@ import {
 } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import { useFieldArray, useFormContext } from "react-hook-form"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const CustomFieldsManager = () => {
   const { control } = useFormContext()
@@ -55,9 +46,9 @@ export const CustomFieldsManager = () => {
     <Card className="border-white/10 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="text-white">{fr.pages.admin.tournaments.form.sections.customFields.title}</CardTitle>
+          <CardTitle className="text-white">Champs personnalisés</CardTitle>
           <CardDescription className="text-zinc-400">
-            {fr.pages.admin.tournaments.form.sections.customFields.description}
+            Champs personnalisés
           </CardDescription>
         </div>
         <Button
@@ -68,7 +59,7 @@ export const CustomFieldsManager = () => {
           className="border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
         >
           <Plus className="mr-2 h-4 w-4" />
-          {fr.pages.admin.tournaments.form.sections.customFields.addButton}
+          Ajouter un champ
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -82,10 +73,10 @@ export const CustomFieldsManager = () => {
               name={`fields.${index}.label`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.customFields.labels.label}</FormLabel>
+                  <FormLabel className="text-zinc-400">Label</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={fr.pages.admin.tournaments.form.sections.customFields.placeholders.label}
+                      placeholder="Label"
                       {...field}
                       className="bg-zinc-900/50 border-white/10 focus:border-blue-500 focus:ring-blue-500/20 text-white placeholder:text-zinc-600"
                     />
@@ -99,7 +90,7 @@ export const CustomFieldsManager = () => {
               name={`fields.${index}.type`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.customFields.labels.type}</FormLabel>
+                  <FormLabel className="text-zinc-400">Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -110,8 +101,8 @@ export const CustomFieldsManager = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-zinc-950 border-white/10 text-white">
-                      <SelectItem value="TEXT">{fr.pages.admin.tournaments.form.sections.customFields.options.text}</SelectItem>
-                      <SelectItem value="NUMBER">{fr.pages.admin.tournaments.form.sections.customFields.options.number}</SelectItem>
+                      <SelectItem value="TEXT">Texte</SelectItem>
+                      <SelectItem value="NUMBER">Nombre</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -123,7 +114,7 @@ export const CustomFieldsManager = () => {
               name={`fields.${index}.required`}
               render={({ field }) => (
                 <FormItem className="flex flex-col items-center gap-3 pb-2">
-                  <FormLabel className="text-zinc-400">{fr.pages.admin.tournaments.form.sections.customFields.labels.required}</FormLabel>
+                  <FormLabel className="text-zinc-400">Requis</FormLabel>
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -147,7 +138,7 @@ export const CustomFieldsManager = () => {
         ))}
         {fields.length === 0 && (
           <div className="py-8 text-center text-zinc-500 text-sm border border-dashed border-white/10 rounded-lg">
-            {fr.pages.admin.tournaments.form.sections.customFields.empty}
+            Aucun champ personnalisé
           </div>
         )}
       </CardContent>

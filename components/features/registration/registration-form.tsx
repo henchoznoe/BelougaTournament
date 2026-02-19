@@ -2,15 +2,11 @@
  * File: components/features/registration/registration-form.tsx
  * Description: Form component for registering teams or players to a tournament with premium aesthetic.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +24,6 @@ import {
   type RegistrationState,
   registerForTournament,
 } from '@/lib/actions/registration'
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import type {
   Prisma,
   TournamentField,
@@ -54,10 +49,6 @@ import {
 } from 'react-hook-form'
 import { z } from 'zod'
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
 type TournamentWithFields = Prisma.TournamentGetPayload<{
   include: { fields: { orderBy: { order: 'asc' } } }
 }>
@@ -65,16 +56,6 @@ type TournamentWithFields = Prisma.TournamentGetPayload<{
 interface RegistrationFormProps {
   tournament: TournamentWithFields
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const createRegistrationSchema = (tournament: TournamentWithFields) => {
   const fieldSchema = z.object(
@@ -85,7 +66,7 @@ const createRegistrationSchema = (tournament: TournamentWithFields) => {
         if (field.required) {
           validator = validator.min(
             1,
-            fr.pages.admin.registration.errors.fieldRequired(field.label),
+            `Le champ ${field.label} est requis`,
           )
         }
 
@@ -94,7 +75,7 @@ const createRegistrationSchema = (tournament: TournamentWithFields) => {
         if (field.type === 'NUMBER') {
           finalValidator = finalValidator.refine(
             (val) => !Number.isNaN(Number(val)),
-            fr.pages.admin.registration.errors.numberRequired,
+            "Le champ doit être un nombre",
           )
         }
 
@@ -110,7 +91,7 @@ const createRegistrationSchema = (tournament: TournamentWithFields) => {
   )
 
   const playerSchema = z.object({
-    nickname: z.string().min(2, fr.pages.admin.registration.errors.nicknameMin),
+    nickname: z.string().min(2, "Le pseudo doit contenir au moins 2 caractères"),
     isCaptain: z.boolean(),
     data: fieldSchema,
   })
@@ -118,9 +99,9 @@ const createRegistrationSchema = (tournament: TournamentWithFields) => {
   return z.object({
     teamName:
       tournament.format === 'TEAM'
-        ? z.string().min(3, fr.pages.admin.registration.errors.teamNameRequired)
+        ? z.string().min(3, "Le nom de l'équipe doit contenir au moins 3 caractères")
         : z.string().optional(),
-    contactEmail: z.string().email(fr.pages.admin.registration.errors.emailInvalid),
+    contactEmail: z.email("L'email doit être valide"),
     players: z.array(playerSchema).min(1),
   })
 }
@@ -218,7 +199,7 @@ export const RegistrationForm = ({ tournament }: RegistrationFormProps) => {
           size="lg"
           className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-wide shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all duration-300"
         >
-          {isPending ? fr.pages.admin.registration.labels.submitting : fr.pages.admin.registration.labels.submit}
+          {isPending ? "Envoi..." : "S'inscrire"}
         </Button>
       </form>
     </Form>
@@ -249,8 +230,8 @@ const TeamInfoCard = ({
             <User className="size-5 text-blue-400" />
           )}
           {isTeam
-            ? fr.pages.admin.registration.labels.teamInfoTitle
-            : fr.pages.admin.registration.labels.playerInfoTitle}
+            ? "Informations sur l'équipe"
+            : "Informations sur le joueur"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -261,13 +242,13 @@ const TeamInfoCard = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                  {fr.pages.admin.registration.labels.teamName}
+                  Nom de l'équipe
                 </FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Trophy className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-blue-400" />
                     <Input
-                      placeholder={fr.pages.admin.registration.placeholders.teamName}
+                      placeholder="Nom de l'équipe"
                       {...field}
                       className="h-11 border-white/10 bg-zinc-950/50 pl-10 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-zinc-950/80 focus:ring-blue-500/20"
                     />
@@ -289,14 +270,14 @@ const TeamInfoCard = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                {fr.pages.admin.registration.labels.contactEmail}
+                Email de contact
               </FormLabel>
               <FormControl>
                 <div className="relative group">
                   <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-blue-400" />
                   <Input
                     type="email"
-                    placeholder={fr.pages.admin.registration.placeholders.email}
+                    placeholder="Email de contact"
                     {...field}
                     className="h-11 border-white/10 bg-zinc-950/50 pl-10 text-white placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-zinc-950/80 focus:ring-blue-500/20"
                   />
@@ -368,8 +349,8 @@ const PlayersList = ({
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <Gamepad2 className="size-5 text-purple-400" />
           {isTeam
-            ? fr.pages.admin.registration.labels.playersSection
-            : fr.pages.admin.registration.labels.playerDetails}
+            ? "Joueurs"
+            : "Détails du joueur"}
         </h3>
         {isTeam && (
           <Button
@@ -379,7 +360,7 @@ const PlayersList = ({
             onClick={handleAddPlayer}
             className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-600"
           >
-            <Plus className="mr-2 h-4 w-4" /> {fr.pages.admin.registration.labels.addPlayer}
+            <Plus className="mr-2 h-4 w-4" /> Ajouter un joueur
           </Button>
         )}
       </div>
@@ -429,7 +410,7 @@ const PlayerCard = ({
           <div className="flex size-6 items-center justify-center rounded bg-zinc-800 text-xs font-bold text-zinc-400">
             {index + 1}
           </div>
-          {fr.pages.admin.registration.labels.player} {index + 1}
+          Joueur {index + 1}
         </CardTitle>
         {isTeam && index > 0 && (
           <Button
@@ -450,11 +431,11 @@ const PlayerCard = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs text-zinc-500">
-                {fr.pages.admin.registration.labels.nickname}
+                Pseudo
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder={fr.pages.admin.registration.placeholders.nickname}
+                  placeholder="Pseudo"
                   {...field}
                   className="border-white/10 bg-zinc-950/30 text-white placeholder:text-zinc-700 focus:border-blue-500/50 focus:bg-zinc-950/50"
                 />

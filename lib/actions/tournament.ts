@@ -1,6 +1,9 @@
 /**
  * File: lib/actions/tournament.ts
- * Description: Server actions for creating, updating, and deleting tournaments.
+ * Description: Server actions for managing tournaments.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use server'
@@ -12,8 +15,7 @@ import { z } from 'zod'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import * as TournamentService from '@/lib/services/tournament.service'
 import { getErrorMessage } from '@/lib/utils/errors'
 import {
@@ -24,10 +26,6 @@ import {
   updateTournamentSchema,
 } from '@/lib/validations/tournament'
 import { Role } from '@/prisma/generated/prisma/client'
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 export const createTournament = authenticatedAction({
   schema: tournamentSchema,
@@ -40,7 +38,7 @@ export const createTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          fr.common.server.actions.tournaments.createError,
+          'Une erreur est survenue lors de la création du tournoi',
         ),
       }
     }
@@ -61,7 +59,7 @@ export const deleteTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          fr.common.server.actions.tournaments.deleteError,
+          'Une erreur est survenue lors de la suppression du tournoi',
         ),
       }
     }
@@ -69,7 +67,7 @@ export const deleteTournament = authenticatedAction({
     revalidatePath(APP_ROUTES.ADMIN_TOURNAMENTS)
     return {
       success: true,
-      message: fr.common.server.actions.tournaments.deleteSuccess,
+      message: 'Le tournoi a été supprimé avec succès',
     }
   },
 })
@@ -85,7 +83,7 @@ export const updateTournament = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          fr.common.server.actions.tournaments.updateError,
+          'Une erreur est survenue lors de la mise à jour du tournoi',
         ),
       }
     }
@@ -107,7 +105,7 @@ export const exportTournamentData = authenticatedAction({
       if (!flattenedData) {
         return {
           success: false,
-          message: fr.common.server.actions.tournaments.notFound,
+          message: "Le tournoi n'a pas été trouvé",
         }
       }
 
@@ -119,7 +117,7 @@ export const exportTournamentData = authenticatedAction({
       console.error('Export Error:', error)
       return {
         success: false,
-        message: fr.common.server.actions.tournaments.databaseError,
+        message: "Une erreur est survenue lors de l'exportation du tournoi",
       }
     }
   },
@@ -136,7 +134,7 @@ export const toggleTournamentVisibility = authenticatedAction({
         success: false,
         message: getErrorMessage(
           error,
-          fr.common.server.actions.tournaments.updateError,
+          'Une erreur est survenue lors de la mise à jour du tournoi',
         ),
       }
     }
@@ -148,7 +146,7 @@ export const toggleTournamentVisibility = authenticatedAction({
 
     return {
       success: true,
-      message: fr.pages.admin.tournaments.detail.visibility.toastSuccess,
+      message: 'Le tournoi a été mis à jour avec succès',
     }
   },
 })

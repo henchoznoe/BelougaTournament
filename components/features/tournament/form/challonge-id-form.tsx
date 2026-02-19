@@ -2,15 +2,11 @@
  * File: components/features/tournament/form/challonge-id-form.tsx
  * Description: Client form component for updating tournament Challonge ID.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { useActionState, useEffect } from "react"
 import { toast } from "sonner"
@@ -18,11 +14,6 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateChallongeId } from "@/lib/actions/tournament"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const INITIAL_STATE = {
   success: false,
@@ -30,18 +21,10 @@ const INITIAL_STATE = {
   errors: {},
 }
 
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
-
 interface ChallongeIdFormProps {
   tournamentId: string
   initialChallongeId: string | null
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const ChallongeIdForm = ({
   tournamentId,
@@ -68,7 +51,7 @@ export const ChallongeIdForm = ({
       <div className="flex-1">
         <Input
           name="challongeId"
-          placeholder={fr.components.challongeIdForm.placeholderId}
+          placeholder="ID Challonge"
           defaultValue={initialChallongeId || ""}
           className="bg-zinc-900/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 focus:ring-blue-500/20"
         />
@@ -83,7 +66,7 @@ export const ChallongeIdForm = ({
         disabled={isPending}
         className="bg-blue-600 text-white hover:bg-blue-500"
       >
-        {isPending ? fr.components.challongeIdForm.btnSaving : fr.components.challongeIdForm.btnSave}
+        {isPending ? "Sauvegarde..." : "Sauvegarder"}
       </Button>
     </form>
   )

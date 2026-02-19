@@ -2,27 +2,15 @@
  * File: components/features/tournament/list/tournaments-skeleton.tsx
  * Description: Skeleton component for the tournaments section on the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { Skeleton } from "@/components/ui/skeleton"
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
 
 const CONFIG = {
   SKELETON_COUNT: 3,
 } as const
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const TournamentCardSkeleton = () => {
   return (

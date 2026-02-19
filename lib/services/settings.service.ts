@@ -1,10 +1,13 @@
 /**
  * File: lib/services/settings.service.ts
  * Description: Data access layer for site settings.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { unstable_cache } from 'next/cache'
-import prisma from '@/lib/core/db'
+import prisma from '@/lib/core/prisma'
 import type { SiteSettings } from '@/prisma/generated/prisma/client'
 
 const DB_CONFIG = {
@@ -23,10 +26,6 @@ const DEFAULT_SETTINGS: SiteSettings = {
   socialTwitch: null,
   socialInstagram: null,
   socialYoutube: null,
-  statsYears: null,
-  statsPlayers: null,
-  statsTournaments: null,
-  statsMatches: null,
 }
 
 const fetchSettingsFromDb = async (): Promise<SiteSettings> => {
@@ -44,14 +43,3 @@ export const getSiteSettings = unstable_cache(
     tags: [CACHE_CONFIG.KEY_SETTINGS],
   },
 )
-
-export const getLandingStats = async () => {
-  const settings = await getSiteSettings()
-
-  return {
-    years: settings.statsYears,
-    players: settings.statsPlayers,
-    tournaments: settings.statsTournaments,
-    matches: settings.statsMatches,
-  }
-}

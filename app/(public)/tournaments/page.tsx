@@ -1,14 +1,10 @@
 /**
  * File: app/(public)/tournaments/page.tsx
- * Description: Public page listing all upcoming tournaments with premium aesthetic.
+ * Description: Public page listing all upcoming tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Archive, Gamepad2, Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -18,21 +14,12 @@ import { TournamentCard } from '@/components/features/tournament/card/tournament
 import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/config/constants'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import { getPublicTournaments } from '@/lib/services/tournament.service'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 export const metadata: Metadata = {
-  title: fr?.pages?.tournaments?.list?.title || 'Tournaments',
-  description: fr?.pages?.tournaments?.list?.description || 'View tournaments',
+  title: 'Tournois',
+  description: 'View tournaments',
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const TournamentsPage = async () => {
   const tournaments = await getPublicTournaments()
@@ -59,10 +46,10 @@ const TournamentsPage = async () => {
             <Trophy className="size-8 text-blue-400" />
           </div>
           <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            {fr.pages.tournaments.list.title}
+            Tournois
           </h1>
           <p className="max-w-2xl text-lg text-zinc-400">
-            {fr.pages.tournaments.list.description}
+            Voir les tournois futurs
           </p>
 
           <div className="pt-4">
@@ -73,7 +60,7 @@ const TournamentsPage = async () => {
             >
               <Link href={APP_ROUTES.TOURNAMENTS_ARCHIVE}>
                 <Archive className="mr-2 size-4" />
-                {fr.pages.tournaments.list.btnArchive}
+                Voir les archives
               </Link>
             </Button>
           </div>
@@ -97,10 +84,10 @@ const TournamentsPage = async () => {
                 <Gamepad2 className="size-10 text-zinc-600" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                {fr.pages.tournaments.list.empty.title}
+                Aucun tournoi trouvé
               </h3>
               <p className="text-zinc-500">
-                {fr.pages.tournaments.list.empty.desc}
+                Il semble que vous n'ayez pas de tournoi à afficher.
               </p>
             </div>
           )}

@@ -1,14 +1,10 @@
 /**
  * File: app/(public)/tournaments/[slug]/page.tsx
- * Description: Public tournament detail page with premium aesthetic and French localization.
+ * Description: Public tournament detail page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   Calendar,
@@ -27,22 +23,14 @@ import { TwitchEmbed } from '@/components/features/stream/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { APP_ROUTES } from '@/lib/config/routes'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import { getSiteSettings } from '@/lib/services/settings.service'
 import { getTournamentBySlug } from '@/lib/services/tournament.service'
 import { formatDateTime } from '@/lib/utils'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const CONFIG = {
+  // TODO: Will be replace by challonge
   CHALLONGE_URL: 'https://challonge.com',
 } as const
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 export const generateMetadata = async ({
   params,
@@ -54,19 +42,15 @@ export const generateMetadata = async ({
 
   if (!tournament) {
     return {
-      title: fr.pages.tournaments.detail.metadata.notFound,
+      title: 'Tournoi introuvable',
     }
   }
 
   return {
-    title: fr.pages.tournaments.detail.metadata.titleTemplate(tournament.title),
+    title: tournament.title,
     description: tournament.description,
   }
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const TournamentPage = async ({
   params,
@@ -110,7 +94,7 @@ const TournamentPage = async ({
         >
           <Link href={APP_ROUTES.TOURNAMENTS}>
             <ChevronRight className="mr-2 size-4 rotate-180" />
-            {fr.pages.tournaments.detail.buttons.back}
+            Retour
           </Link>
         </Button>
 
@@ -120,10 +104,7 @@ const TournamentPage = async ({
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-400 ring-1 ring-blue-500/20">
                 <Trophy className="size-4" />
-                <span>
-                  {fr.pages.tournaments.detail.labels.format}{' '}
-                  {tournament.format}
-                </span>
+                <span>Format {tournament.format}</span>
               </div>
               <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                 {tournament.title}
@@ -142,11 +123,10 @@ const TournamentPage = async ({
               <Users className="size-5 text-green-500" />
               <span className="font-medium text-zinc-300">
                 {tournament.maxParticipants
-                  ? fr.pages.tournaments.detail.labels.maxParticipants(
-                      tournament.maxParticipants,
-                      tournament.format === 'TEAM' ? 'TEAM' : 'PLAYER',
-                    )
-                  : fr.pages.tournaments.detail.labels.unlimited}
+                  ? `Max ${tournament.maxParticipants} ${
+                      tournament.format === 'TEAM' ? 'equipes' : 'joueurs'
+                    }`
+                  : 'Illimité'}
               </span>
             </div>
           </div>
@@ -161,30 +141,26 @@ const TournamentPage = async ({
                   value="details"
                   className="flex-1 min-w-[100px] text-zinc-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:text-white transition-colors"
                 >
-                  <Info className="mr-2 size-4" />{' '}
-                  {fr.pages.tournaments.detail.tabs.details}
+                  <Info className="mr-2 size-4" /> Détails
                 </TabsTrigger>
                 <TabsTrigger
                   value="bracket"
                   className="flex-1 min-w-[100px] text-zinc-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:text-white transition-colors"
                 >
-                  <Trophy className="mr-2 size-4" />{' '}
-                  {fr.pages.tournaments.detail.tabs.bracket}
+                  <Trophy className="mr-2 size-4" /> Bracket
                 </TabsTrigger>
                 <TabsTrigger
                   value="stream"
                   className="flex-1 min-w-[100px] text-zinc-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:text-white transition-colors"
                 >
-                  <Video className="mr-2 size-4" />{' '}
-                  {fr.pages.tournaments.detail.tabs.stream}
+                  <Video className="mr-2 size-4" /> Stream
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="mt-6 space-y-6">
                 <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-sm">
                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Info className="size-6 text-blue-400" />
-                    {fr.pages.tournaments.detail.sections.about}
+                    <Info className="size-6 text-blue-400" />A propos
                   </h3>
                   <div className="prose prose-invert max-w-none text-zinc-300 leading-relaxed">
                     <p className="whitespace-pre-wrap">
@@ -205,7 +181,7 @@ const TournamentPage = async ({
                         frameBorder="0"
                         scrolling="auto"
                         allowTransparency
-                        title={fr.pages.tournaments.detail.bracket.titleIframe}
+                        title="Bracket"
                       ></iframe>
                     </div>
                   </div>
@@ -214,12 +190,8 @@ const TournamentPage = async ({
                     <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-zinc-800/50">
                       <Trophy className="size-8 text-zinc-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">
-                      {fr.pages.tournaments.detail.bracket.emptyTitle}
-                    </h3>
-                    <p className="mt-2 text-zinc-400">
-                      {fr.pages.tournaments.detail.bracket.emptyDesc}
-                    </p>
+                    <h3 className="text-xl font-bold text-white">Bracket</h3>
+                    <p className="mt-2 text-zinc-400">Bracket non disponible</p>
                   </div>
                 )}
               </TabsContent>
@@ -237,11 +209,9 @@ const TournamentPage = async ({
                       <Video className="size-8 text-zinc-600" />
                     </div>
                     <h3 className="text-xl font-bold text-white">
-                      {fr.pages.tournaments.detail.stream.emptyTitle}
+                      Stream non disponible
                     </h3>
-                    <p className="mt-2 text-zinc-400">
-                      {fr.pages.tournaments.detail.stream.emptyDesc}
-                    </p>
+                    <p className="mt-2 text-zinc-400">Stream non disponible</p>
                   </div>
                 )}
               </TabsContent>
@@ -253,18 +223,14 @@ const TournamentPage = async ({
             <div className="sticky top-24 space-y-6">
               <div className="rounded-2xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-xl shadow-2xl">
                 <h3 className="mb-6 text-xl font-bold text-white flex items-center gap-2">
-                  <Users className="size-5 text-blue-400" />
-                  {fr.pages.tournaments.detail.sections.registration}
+                  <Users className="size-5 text-blue-400" /> Inscription
                 </h3>
 
                 {isRegistrationOpen ? (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-orange-500/10 p-4 border border-orange-500/20">
                       <p className="text-sm text-white text-center">
-                        {
-                          fr.pages.tournaments.detail.registration
-                            .closesOnPrefix
-                        }
+                        Inscription
                         <span className="font-bold text-white">
                           {formatDateTime(tournament.registrationClose)}
                         </span>
@@ -279,14 +245,14 @@ const TournamentPage = async ({
                       <Swords className="size-6 text-red-400" />
                     </div>
                     <p className="font-bold text-red-400 mb-2">
-                      {fr.pages.tournaments.detail.registration.closedTitle}
+                      Inscription fermée
                     </p>
                     <p className="text-sm text-zinc-400">
                       {now < registrationOpen
-                        ? fr.pages.tournaments.detail.registration.opensOn(
-                            formatDateTime(tournament.registrationOpen),
-                          )
-                        : fr.pages.tournaments.detail.registration.ended}
+                        ? "Ouverture de l'inscription le " +
+                          formatDateTime(tournament.registrationOpen)
+                        : 'Inscription fermée le ' +
+                          formatDateTime(tournament.registrationClose)}
                     </p>
                   </div>
                 )}
@@ -294,11 +260,10 @@ const TournamentPage = async ({
 
               {/* Help Card */}
               <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
-                <h4 className="font-semibold text-white mb-2">
-                  {fr.pages.tournaments.detail.sections.help}
-                </h4>
+                <h4 className="font-semibold text-white mb-2">Aide</h4>
                 <p className="text-sm text-zinc-400 mb-4">
-                  {fr.pages.tournaments.detail.help.desc}
+                  Si vous avez des questions, n'hésitez pas à nous contacter sur
+                  Discord.
                 </p>
                 <Button
                   asChild
@@ -308,7 +273,7 @@ const TournamentPage = async ({
                     href={settings.socialDiscord ?? '#'}
                     target={settings.socialDiscord ? '_blank' : undefined}
                   >
-                    {fr.pages.tournaments.detail.buttons.joinDiscord}
+                    Rejoindre le serveur Discord
                   </Link>
                 </Button>
               </div>

@@ -2,45 +2,26 @@
  * File: app/(public)/legal/page.tsx
  * Description: Legal mentions page.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import type { Metadata } from 'next'
 import { LegalPageLayout } from '@/components/layout/legal-layout'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 
 export const metadata: Metadata = {
-  title: fr.pages.legal.metaTitle,
-  description: fr.pages.legal.metaDescription,
+  title: 'Legal Mentions',
+  description: 'Legal mentions for Belouga Tournament.',
 }
 
 export default function LegalPage() {
   return (
     <LegalPageLayout
-      title={fr.pages.legal.title}
-      description={fr.pages.legal.description}
+      title="Legal Mentions"
+      description="Legal mentions for Belouga Tournament."
     >
-      <h2>{fr.pages.legal.sections.editor.title}</h2>
-      <p>{fr.pages.legal.sections.editor.content}</p>
-
-      <h2>{fr.pages.legal.sections.hosting.title}</h2>
-      <p>
-        {fr.pages.legal.sections.hosting.contentPrefix}
-        <br />
-        {fr.pages.legal.sections.hosting.address.map(line => (
-          <span key={line}>
-            {line}
-            <br />
-          </span>
-        ))}
-      </p>
-
-      <h2>{fr.pages.legal.sections.intellectualProperty.title}</h2>
-      <p>{fr.pages.legal.sections.intellectualProperty.content}</p>
-
-      <h2>{fr.pages.legal.sections.content.title}</h2>
-      <p>{fr.pages.legal.sections.content.content}</p>
+      <h2>Legal Mentions</h2>
+      <p>Legal mentions for Belouga Tournament.</p>
     </LegalPageLayout>
   )
 }

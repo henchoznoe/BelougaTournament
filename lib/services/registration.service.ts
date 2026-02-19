@@ -1,16 +1,15 @@
 /**
  * File: lib/services/registration.service.ts
  * Description: Data access layer for registrations.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import type { RegistrationInput } from '@/lib/validations/registration'
-import { Prisma, RegistrationStatus } from '@/prisma/generated/prisma/client'
-
-// ----------------------------------------------------------------------
-// READS
-// ----------------------------------------------------------------------
+import { Prisma } from '@/prisma/generated/prisma/client'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 export const getRegistrationById = async (id: string) => {
   return prisma.registration.findUnique({
@@ -32,10 +31,6 @@ export const getRegistrationByEmailAndTournament = async (
     },
   })
 }
-
-// ----------------------------------------------------------------------
-// WRITES
-// ----------------------------------------------------------------------
 
 export const createRegistration = async (
   data: RegistrationInput,
@@ -110,7 +105,7 @@ export const createRegistration = async (
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
-        throw new Error(fr.common.registration.emailAlreadyUsed)
+        throw new Error('Email already used')
       }
     }
     throw error
@@ -138,6 +133,6 @@ export const deleteRegistration = async (id: string) => {
       where: { id },
     })
   } catch (_error) {
-    throw new Error(fr.common.registration.cancelFailed)
+    throw new Error('Failed to delete registration')
   }
 }

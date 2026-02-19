@@ -2,24 +2,15 @@
  * File: components/features/landing/features/features.tsx
  * Description: Features section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import { cn } from "@/lib/utils"
 import { Variants, motion } from "framer-motion"
 import { LucideIcon, Swords, Target, Zap } from "lucide-react"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface FeatureItem {
   title: string
@@ -31,16 +22,6 @@ interface FeatureItem {
     border: string
   }
 }
-
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const FeatureCard = ({
   feature,
@@ -97,7 +78,7 @@ export const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-3xl font-bold text-white sm:text-5xl"
         >
-          {fr.pages.home.features.title}
+          Fonctionnalités
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -106,7 +87,7 @@ export const FeaturesSection = () => {
           transition={{ delay: 0.2 }}
           className="mt-4 text-lg text-zinc-400"
         >
-          {fr.pages.home.features.subtitle}
+          Découvrez les fonctionnalités de Belouga Tournament
         </motion.p>
       </div>
 
@@ -114,8 +95,8 @@ export const FeaturesSection = () => {
       <div className="grid gap-8 md:grid-cols-3">
         {[
           {
-            title: fr.pages.home.features.items.fairPlay.title,
-            description: fr.pages.home.features.items.fairPlay.description,
+            title: "Fair Play",
+            description: "Un système de fair-play pour garantir des matchs équitables",
             icon: Swords,
             styles: {
               iconColor: "text-orange-400",
@@ -124,8 +105,8 @@ export const FeaturesSection = () => {
             },
           },
           {
-            title: fr.pages.home.features.items.proFormat.title,
-            description: fr.pages.home.features.items.proFormat.description,
+            title: "Pro Format",
+            description: "Un format de tournoi professionnel pour garantir des matchs équitables",
             icon: Target,
             styles: {
               iconColor: "text-blue-400",
@@ -134,8 +115,8 @@ export const FeaturesSection = () => {
             },
           },
           {
-            title: fr.pages.home.features.items.liveStream.title,
-            description: fr.pages.home.features.items.liveStream.description,
+            title: "Live Stream",
+            description: "Un format de tournoi professionnel pour garantir des matchs équitables",
             icon: Zap,
             styles: {
               iconColor: "text-purple-400",

@@ -2,13 +2,9 @@
  * File: components/layout/footer.tsx
  * Description: Server Component for the public site footer.
  * Author: Noé Henchoz
- * Date: 2025-12-09
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   Instagram,
@@ -24,12 +20,7 @@ import Link from "next/link"
 import { APP_METADATA } from "@/lib/config/constants"
 import { getSiteSettings } from "@/lib/services/settings.service"
 import { APP_ROUTES } from "@/lib/config/routes"
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import { cn } from "@/lib/utils"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface SocialLink {
   name: string
@@ -48,10 +39,6 @@ interface FooterSection {
   links: FooterLink[]
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const BRAND_COLORS = {
   DISCORD: "hover:text-[#5865F2]",
   TWITCH: "hover:text-[#9146FF]",
@@ -59,10 +46,6 @@ const BRAND_COLORS = {
   TIKTOK: "hover:text-[#00f2ea]",
   INSTAGRAM: "hover:text-[#E1306C]",
 } as const
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const FooterLogo = ({ url }: { url: string | null }) => {
   const src = url || APP_METADATA.DEFAULT_LOGO
@@ -119,32 +102,32 @@ export const Footer = async () => {
 
   const footerSections: FooterSection[] = [
     {
-      title: fr.layout.footer.links.tournaments.title,
+      title: "Tournois",
       links: [
-        { label: fr.layout.footer.links.tournaments.upcoming, href: APP_ROUTES.TOURNAMENTS },
+        { label: "Tournois à venir", href: APP_ROUTES.TOURNAMENTS },
         {
-          label: fr.layout.footer.links.tournaments.archive,
+          label: "Archives des tournois",
           href: APP_ROUTES.TOURNAMENTS_ARCHIVE,
         },
-        { label: fr.layout.footer.links.tournaments.rules, href: APP_ROUTES.RULES },
+        { label: "Règles", href: APP_ROUTES.RULES },
       ],
     },
     {
-      title: fr.layout.footer.links.community.title,
+      title: "Communauté",
       links: [
-        { label: fr.layout.footer.links.community.stream, href: APP_ROUTES.STREAM },
+        { label: "Stream", href: APP_ROUTES.STREAM },
         {
-          label: fr.layout.footer.links.community.discord,
+          label: "Discord",
           href: settings.socialDiscord,
         },
       ],
     },
     {
-      title: fr.layout.footer.links.support.title,
+      title: "Support",
       links: [
-        { label: fr.layout.footer.links.support.contact, href: APP_ROUTES.CONTACT },
-        { label: fr.layout.footer.links.support.admin, href: APP_ROUTES.ADMIN_DASHBOARD },
-        { label: fr.layout.footer.links.support.legal, href: APP_ROUTES.LEGAL },
+        { label: "Contact", href: APP_ROUTES.CONTACT },
+        { label: "Admin", href: APP_ROUTES.ADMIN_DASHBOARD },
+        { label: "Légal", href: APP_ROUTES.LEGAL },
       ],
     },
   ]
@@ -164,7 +147,7 @@ export const Footer = async () => {
         <div className="mb-16 grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-6">
             <p className="leading-relaxed text-zinc-400">
-              {fr.layout.footer.description}
+              Rejoignez la communauté et participez aux tournois
             </p>
             <div className="flex gap-2 lg:gap-3 flex-wrap justify-center md:justify-start">
               {socialLinks.map((social) => (
@@ -207,7 +190,7 @@ export const Footer = async () => {
           <div className="flex flex-col items-center justify-between gap-2 lg:gap-4 lg:flex-row">
               <p className="text-sm text-zinc-500 text-center lg:text-left">
                 &copy; {new Date().getFullYear()} {APP_METADATA.NAME}.{" "}
-                {fr.layout.footer.rightsReserved}
+                Tous droits réservés
               </p>
 
               <div className="flex flex-col items-center gap-2 lg:gap-6 text-sm text-zinc-500 lg:flex-row">
@@ -215,13 +198,13 @@ export const Footer = async () => {
                   href={APP_ROUTES.PRIVACY}
                   className="transition-colors hover:text-white"
                 >
-                  {fr.layout.footer.links.privacy}
+                  Confidentialité
                 </Link>
                 <Link
                   href={APP_ROUTES.TERMS}
                   className="transition-colors hover:text-white"
                 >
-                  {fr.layout.footer.links.terms}
+                  Conditions
                 </Link>
                 <a
                   href={APP_METADATA.AUTHOR_URL}
@@ -229,7 +212,7 @@ export const Footer = async () => {
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-white"
                 >
-                  {fr.layout.footer.developedBy}{' '}{APP_METADATA.AUTHOR_NAME}
+                  Développé par {APP_METADATA.AUTHOR_NAME}
                 </a>
               </div>
           </div>

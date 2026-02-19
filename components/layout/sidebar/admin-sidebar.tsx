@@ -2,15 +2,11 @@
  * File: components/layout/sidebar/admin-sidebar.tsx
  * Description: Client-side sidebar navigation for the admin dashboard.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   Home,
@@ -26,47 +22,34 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/routes"
-import { fr } from "@/lib/i18n/dictionaries/fr"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface AdminSidebarProps {
   userEmail: string
   logoutAction: () => Promise<void>
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const MENU_ITEMS = [
   {
-    label: fr.layout.sidebar.links.dashboard,
+    label: "Dashboard",
     href: APP_ROUTES.ADMIN_DASHBOARD,
     icon: LayoutDashboard,
   },
   {
-    label: fr.layout.sidebar.links.tournaments,
+    label: "Tournois",
     href: APP_ROUTES.ADMIN_TOURNAMENTS,
     icon: Trophy,
   },
   {
-    label: fr.layout.sidebar.links.admins,
+    label: "Admins",
     href: APP_ROUTES.ADMIN_ADMINS,
     icon: Users,
   },
   {
-    label: fr.layout.sidebar.links.settings,
+    label: "Paramètres",
     href: APP_ROUTES.ADMIN_SETTINGS,
     icon: Settings,
   },
 ] as const
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const AdminSidebar = ({
   userEmail,
@@ -85,14 +68,14 @@ export const AdminSidebar = ({
     <aside className="sticky top-0 z-50 flex h-screen w-full flex-col border-r border-white/10 bg-zinc-900/50 backdrop-blur-xl p-6 md:w-72">
       <div className="mb-10 flex items-center gap-2">
         <span className="text-2xl font-black tracking-tighter text-white">
-          {fr.layout.sidebar.brandName}
+          Belouga
           <span className="text-blue-500">.</span>
         </span>
       </div>
 
       <nav className="flex flex-1 flex-col gap-2">
         <p className="mb-2 px-4 text-xs font-medium uppercase tracking-wider text-zinc-500">
-          {fr.layout.sidebar.menuLabel}
+          Menu
         </p>
         {MENU_ITEMS.map((item) => (
           <Link
@@ -114,7 +97,7 @@ export const AdminSidebar = ({
       <div className="mt-auto border-t border-white/10 pt-6">
         <div className="mb-4 rounded-lg border border-white/5 bg-white/5 p-3 px-2">
           <p className="mb-1 text-xs font-medium text-zinc-500">
-            {fr.layout.sidebar.connectedAs}
+            Connecté en tant que
           </p>
           <p
             className="truncate text-sm font-medium text-white"

@@ -2,15 +2,11 @@
  * File: components/features/tournament/actions/visibility-toggle.tsx
  * Description: Client component for toggling tournament visibility (Public/Private).
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useOptimistic, useTransition } from "react"
@@ -25,22 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toggleTournamentVisibility } from "@/lib/actions/tournament"
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import { cn } from "@/lib/utils"
 import { Visibility } from "@/prisma/generated/prisma/enums"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 interface VisibilityToggleProps {
   tournamentId: string
   currentVisibility: Visibility
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 export const VisibilityToggle = ({
   tournamentId,
@@ -65,23 +52,23 @@ export const VisibilityToggle = ({
         if (!result.success) {
           toast.error(
             result.message ||
-              fr.pages.admin.tournaments.detail.visibility.errorUpdate,
+              "Une erreur est survenue lors de la mise à jour de la visibilité",
           )
         } else {
           toast.success(
-            fr.pages.admin.tournaments.detail.visibility.toastSuccess,
+            "La visibilité du tournoi a été mise à jour avec succès",
           )
         }
       } catch (_error) {
-        toast.error(fr.common.errors.generic)
+        toast.error("Une erreur est survenue")
       }
     })
   }
 
   const visibilityLabel =
     optimisticVisibility === Visibility.PUBLIC
-      ? fr.pages.admin.tournaments.detail.visibility.public
-      : fr.pages.admin.tournaments.detail.visibility.private
+      ? "Public"
+      : "Privé"
 
   return (
     <DropdownMenu>
@@ -115,14 +102,14 @@ export const VisibilityToggle = ({
           className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white gap-2"
         >
           <Eye className="h-4 w-4 text-green-500" />
-          <span>{fr.pages.admin.tournaments.detail.visibility.public}</span>
+          <span>Public</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => handleToggle(Visibility.PRIVATE)}
           className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white gap-2"
         >
           <EyeOff className="h-4 w-4 text-zinc-500" />
-          <span>{fr.pages.admin.tournaments.detail.visibility.private}</span>
+          <span>Privé</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

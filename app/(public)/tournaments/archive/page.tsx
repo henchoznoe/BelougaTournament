@@ -2,13 +2,9 @@
  * File: app/(public)/tournaments/archive/page.tsx
  * Description: Public page for archived tournaments.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Archive, ChevronLeft, Gamepad2 } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -18,23 +14,14 @@ import { TournamentCard } from '@/components/features/tournament/card/tournament
 import { Button } from '@/components/ui/button'
 import { APP_METADATA } from '@/lib/config/constants'
 import { APP_ROUTES } from '@/lib/config/routes'
-import prisma from '@/lib/core/db'
-import { fr } from '@/lib/i18n/dictionaries/fr'
+import prisma from '@/lib/core/prisma'
 import type { PublicTournament } from '@/lib/services/tournament.service'
 import { Visibility } from '@/prisma/generated/prisma/enums'
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 export const metadata: Metadata = {
-  title: fr.pages.tournamentsArchive.metaTitle,
-  description: fr.pages.tournamentsArchive.metaDescription,
+  title: 'Archives des tournois',
+  description: 'Archives des tournois',
 }
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const fetchArchivedTournaments = async (): Promise<PublicTournament[]> => {
   const tournaments = await prisma.tournament.findMany({
@@ -53,10 +40,6 @@ const fetchArchivedTournaments = async (): Promise<PublicTournament[]> => {
   // StartDate is guaranteed to be a Date object from Prisma
   return tournaments as PublicTournament[]
 }
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const ArchivePage = async () => {
   const tournaments = await fetchArchivedTournaments()
@@ -83,10 +66,10 @@ const ArchivePage = async () => {
             <Archive className="size-8 text-purple-400" />
           </div>
           <h1 className="font-paladins text-4xl md:text-6xl text-white tracking-wider drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-            {fr.pages.tournamentsArchive.title}
+            Archives des tournois
           </h1>
           <p className="max-w-2xl text-lg text-zinc-400">
-            {fr.pages.tournamentsArchive.subtitle}
+            Voir les tournois passés
           </p>
 
           <div className="pt-4">
@@ -97,7 +80,7 @@ const ArchivePage = async () => {
             >
               <Link href={APP_ROUTES.TOURNAMENTS}>
                 <ChevronLeft className="mr-2 size-4" />
-                {fr.pages.tournamentsArchive.btnBack}
+                Retour aux tournois
               </Link>
             </Button>
           </div>
@@ -121,10 +104,10 @@ const ArchivePage = async () => {
                 <Gamepad2 className="size-10 text-zinc-600" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                {fr.pages.tournamentsArchive.empty.title}
+                Aucun tournoi trouvé
               </h3>
               <p className="text-zinc-500">
-                {fr.pages.tournamentsArchive.empty.desc}
+                Il semble que vous n'ayez pas de tournoi à afficher.
               </p>
             </div>
           )}

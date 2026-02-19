@@ -1,18 +1,13 @@
 /**
- * File: lib/email.ts
+ * File: lib/core/email.ts
  * Description: Email service module to handle transactional emails via Resend.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { Resend } from 'resend'
 import { env } from '@/lib/core/env'
-import { fr } from '@/lib/i18n/dictionaries/fr'
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 type EmailPayload = {
   to: string
@@ -25,10 +20,6 @@ type EmailResponse = {
   data?: unknown
   error?: unknown
 }
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 const getResendClient = (): { client: Resend; fromEmail: string } => {
   return {
@@ -54,11 +45,11 @@ export const sendEmail = async ({
 
     return { success: true, data }
   } catch (error) {
-    console.error(fr.common.email.errorSend, error)
+    console.error('Error sending email:', error)
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : fr.common.email.errorSend,
+      error: error instanceof Error ? error.message : 'Error sending email',
     }
   }
 }
@@ -70,16 +61,11 @@ export const generateRegistrationEmailHtml = (
 ): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
-      <h1>${fr.common.email.registrationReceived.title}</h1>
-      <p>${fr.common.email.registrationReceived.thankYou(tournamentTitle)}</p>
-      <p>${fr.common.email.registrationReceived.currentStatus(status)}</p>
-      <p>${fr.common.email.registrationReceived.notification}</p>
-      <br/>
-      <p>${fr.common.email.registrationReceived.cancelText}</p>
-      <p><a href="${cancellationUrl}" style="color: #ef4444;">${fr.common.email.registrationReceived.cancelLinkText}</a></p>
-      <br/>
-      <p>${fr.common.email.registrationReceived.closing}</p>
-      <p>${fr.common.email.registrationReceived.teamName}</p>
+      <h1>Inscription reçue</h1>
+      <p>Vous avez inscrit votre équipe pour le tournoi ${tournamentTitle}</p>
+      <p>Statut actuel: ${status}</p>
+      <p>Vous pouvez annuler votre inscription en cliquant sur le lien suivant: <a href="${cancellationUrl}">Annuler l'inscription</a></p>
+      <p>Cordialement</p>
     </div>
   `
 }
@@ -90,12 +76,10 @@ export const generateStatusUpdateEmailHtml = (
 ): string => {
   return `
     <div style="font-family: sans-serif; color: #333;">
-      <h1>${fr.common.email.statusUpdate.title}</h1>
-      <p>${fr.common.email.statusUpdate.content(tournamentTitle)}</p>
-      <p>${fr.common.email.statusUpdate.newStatus(status)}</p>
-      <br/>
-      <p>${fr.common.email.registrationReceived.closing}</p>
-      <p>${fr.common.email.registrationReceived.teamName}</p>
+      <h1>Mise à jour du tournoi ${tournamentTitle}</h1>
+      <p>Nous tenons à vous informer que votre inscription pour le tournoi ${tournamentTitle} a été mise à jour.</p>
+      <p>Statut actuel: ${status}</p>
+      <p>Cordialement</p>
     </div>
   `
 }

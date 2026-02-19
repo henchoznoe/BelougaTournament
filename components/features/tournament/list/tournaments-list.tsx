@@ -2,21 +2,15 @@
  * File: components/features/tournament/list/tournaments-list.tsx
  * Description: Tournaments list section of the landing page.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 "use client"
 
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
-
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
 import { Calendar, ChevronLeft, ChevronRight, Gamepad2, Users } from "lucide-react"
-import { useRef } from "react"
-import { fr } from "@/lib/i18n/dictionaries/fr"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -28,10 +22,6 @@ import {
 } from "@/components/ui/card"
 import { formatDateTime } from '@/lib/utils'
 import { APP_ROUTES } from "@/lib/config/routes"
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 export interface Tournament {
   id: string
@@ -47,17 +37,8 @@ interface TournamentsListProps {
   tournaments: Tournament[]
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
-
 const getParticipantLabel = (count: number | null, format: string): string => {
-  if (!count) return fr.components.tournamentsList.labelOpen
+  if (!count) return "Ouvert"
   const type = format === "TEAM" ? "Équipes" : "Joueurs"
   return `Max ${count} ${type}`
 }
@@ -108,7 +89,7 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
           className="w-full bg-zinc-800 font-semibold text-white transition-colors hover:bg-blue-600"
         >
           <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
-            {fr.components.tournamentsList.labelDetails}
+            Détails
           </Link>
         </Button>
       </CardFooter>
@@ -121,9 +102,9 @@ const EmptyState = () => {
     <div className="col-span-full py-12 text-center">
       <Calendar className="mx-auto h-12 w-12 text-zinc-600 mb-4" />
       <h3 className="text-xl font-bold text-white mb-2">
-        {fr.components.tournamentsList.emptyTitle}
+        Aucun tournoi
       </h3>
-      <p className="text-zinc-500">{fr.components.tournamentsList.emptyDesc}</p>
+      <p className="text-zinc-500">Aucun tournoi n'a été trouvé</p>
     </div>
   )
 }
@@ -144,7 +125,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
             viewport={{ once: true }}
             className="text-3xl font-bold text-white sm:text-4xl"
           >
-            {fr.components.tournamentsList.sectionTitle}
+            Tournois
           </motion.h2>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -161,7 +142,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           className="pr-0 text-zinc-400 transition-all hover:bg-white/5 hover:pr-4 hover:text-white"
         >
           <Link href={APP_ROUTES.TOURNAMENTS}>
-            {fr.components.tournamentsList.viewAll} <ChevronRight className="mr-2 size-4" />
+            Voir tout <ChevronRight className="mr-2 size-4" />
           </Link>
         </Button>
       </div>

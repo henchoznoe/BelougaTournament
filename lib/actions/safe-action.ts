@@ -2,24 +2,15 @@
  * File: lib/actions/safe-action.ts
  * Description: Generic wrapper for safe, authenticated server actions.
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { headers } from 'next/headers'
 import type { z } from 'zod'
 import auth from '@/lib/core/auth'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import type { ActionState } from '@/lib/types/actions'
 import type { Role } from '@/prisma/generated/prisma/enums'
-
-// ----------------------------------------------------------------------
-// TYPES & INTERFACES
-// ----------------------------------------------------------------------
 
 // Update ActionHandler to reflect Better-Auth session structure
 type ActionHandler<TInput, TOutput> = (
@@ -35,10 +26,6 @@ type ActionOptions<T extends z.ZodType> = {
   role?: Role | Role[]
   handler: ActionHandler<z.infer<T>, unknown>
 }
-
-// ----------------------------------------------------------------------
-// LOGIC
-// ----------------------------------------------------------------------
 
 /**
  * Wraps a server action with authentication, role checking, and input validation.
@@ -58,7 +45,7 @@ export function authenticatedAction<T extends z.ZodType>({
       if (!session || !session.user) {
         return {
           success: false,
-          message: fr.common.server.actions.auth.unauthorized,
+          message: 'Unauthorized',
         }
       }
 
@@ -70,7 +57,7 @@ export function authenticatedAction<T extends z.ZodType>({
         if (!allowedRoles.includes(session.user.role as Role)) {
           return {
             success: false,
-            message: fr.common.server.actions.auth.unauthorized,
+            message: 'Unauthorized',
           }
         }
       }
@@ -85,7 +72,7 @@ export function authenticatedAction<T extends z.ZodType>({
             string,
             string[]
           >,
-          message: fr.common.server.actions.auth.validation,
+          message: 'Validation error',
         }
       }
 
@@ -96,7 +83,7 @@ export function authenticatedAction<T extends z.ZodType>({
       console.error('Safe Action Error:', error)
       return {
         success: false,
-        message: fr.common.errors.generic,
+        message: 'Internal server error',
       }
     }
   }

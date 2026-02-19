@@ -2,8 +2,8 @@
  * File: components/layout/legal-layout.tsx
  * Description: Reusable layout for legal and content pages (Rules, Terms, Privacy, etc.)
  * Author: Noé Henchoz
- * Date: 2025-12-08
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { APP_METADATA } from '@/lib/config/constants'

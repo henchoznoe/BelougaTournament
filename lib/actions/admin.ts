@@ -9,14 +9,9 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { APP_ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
-import { fr } from '@/lib/i18n/dictionaries/fr'
 import * as UserService from '@/lib/services/user.service'
 import { createAdminSchema, updateAdminSchema } from '@/lib/validations/admin'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-// ----------------------------------------------------------------------
-// TYPES
-// ----------------------------------------------------------------------
 
 type ActionResponse = {
   success: boolean
@@ -24,19 +19,11 @@ type ActionResponse = {
   errors?: Record<string, string[]>
 }
 
-// ----------------------------------------------------------------------
-// CONSTANTS
-// ----------------------------------------------------------------------
-
 const MESSAGES = {
   USER_ALREADY_HAS_ROLE: 'Cet utilisateur a déjà un rôle.',
   USER_PROMOTED: 'Utilisateur promu administrateur avec succès.',
   ADMIN_PENDING_NAME: 'Admin (Pending)',
 }
-
-// ----------------------------------------------------------------------
-// HELPERS
-// ----------------------------------------------------------------------
 
 async function assertSuperAdmin() {
   const session = await auth.api.getSession({
@@ -53,20 +40,16 @@ function handleActionError(error: unknown): ActionResponse {
   if (error instanceof Error && error.message === 'UNAUTHORIZED_SUPERADMIN') {
     return {
       success: false,
-      message: fr.common.server.actions.admin.superAdminOnly,
+      message: 'Vous devez être SuperAdmin pour effectuer cette action.',
     }
   }
 
   console.error('Admin Action Error:', error)
   return {
     success: false,
-    message: fr.common.server.actions.admin.genericError,
+    message: 'Une erreur est survenue.',
   }
 }
-
-// ----------------------------------------------------------------------
-// ACTIONS
-// ----------------------------------------------------------------------
 
 export const promoteUser = async (userId: string): Promise<ActionResponse> => {
   try {
@@ -76,7 +59,7 @@ export const promoteUser = async (userId: string): Promise<ActionResponse> => {
     if (!targetUser) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.userNotFound,
+        message: 'Utilisateur non trouvé.',
       }
     }
 
@@ -115,7 +98,7 @@ export const createAdmin = async (
     if (!validatedFields.success) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.validationError,
+        message: 'Erreur de validation.',
         errors: validatedFields.error.flatten().fieldErrors,
       }
     }
@@ -126,7 +109,7 @@ export const createAdmin = async (
     if (existingUser) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.emailExists,
+        message: 'Email déjà existant.',
       }
     }
 
@@ -135,7 +118,7 @@ export const createAdmin = async (
     revalidatePath(APP_ROUTES.ADMIN_SETTINGS)
     return {
       success: true,
-      message: fr.common.server.actions.admin.successCreate,
+      message: 'Admin créé avec succès.',
     }
   } catch (error) {
     return handleActionError(error)
@@ -159,7 +142,7 @@ export const updateAdmin = async (
     if (!validatedFields.success) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.validationError,
+        message: 'Erreur de validation.',
         errors: validatedFields.error.flatten().fieldErrors,
       }
     }
@@ -168,14 +151,14 @@ export const updateAdmin = async (
     if (!targetUser) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.userNotFound,
+        message: 'Utilisateur non trouvé.',
       }
     }
 
     if (targetUser.role === Role.SUPERADMIN && session.user.id !== userId) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.protectedSuperAdmin,
+        message: 'Vous ne pouvez pas modifier un SuperAdmin.',
       }
     }
 
@@ -184,7 +167,7 @@ export const updateAdmin = async (
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
     return {
       success: true,
-      message: fr.common.server.actions.admin.successUpdate,
+      message: 'Admin modifié avec succès.',
     }
   } catch (error) {
     return handleActionError(error)
@@ -199,14 +182,14 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
     if (!targetUser) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.userNotFound,
+        message: 'Utilisateur non trouvé.',
       }
     }
 
     if (targetUser.role === Role.SUPERADMIN) {
       return {
         success: false,
-        message: fr.common.server.actions.admin.protectedSuperAdmin,
+        message: 'Vous ne pouvez pas supprimer un SuperAdmin.',
       }
     }
 
@@ -215,7 +198,7 @@ export const deleteAdmin = async (userId: string): Promise<ActionResponse> => {
     revalidatePath(APP_ROUTES.ADMIN_ADMINS)
     return {
       success: true,
-      message: fr.common.server.actions.admin.successDelete,
+      message: 'Admin supprimé avec succès.',
     }
   } catch (error) {
     return handleActionError(error)

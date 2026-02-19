@@ -2,21 +2,13 @@
  * File: app/(public)/loading.tsx
  * Description: Loading state for public pages.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { APP_METADATA } from '@/lib/config/constants'
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const PublicLoading = () => {
   return (
