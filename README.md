@@ -7,47 +7,54 @@
 
 ## 📝 Description
 
-**Belouga Tournament** is a robust, full-stack tournament management platform redesigned for modern e-sports communities. Migrated from a legacy stack to **Next.js 16 (App Router)**, it focuses on performance, type safety, and developer experience.
+**Belouga Tournament** is a robust, full-stack tournament management platform redesigned for modern e-sports communities. Migrated from a legacy stack to **Next.js 16 (App Router)**, it focuses on performance, type safety, developer experience, and a premium "Dark Glass" gamer aesthetic.
 
-The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic forms, brackets) while providing a seamless registration experience for players (Solo/Team).
+The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic forms, brackets via Toornament) while providing a frictionless, 1-click Discord registration experience for players (Solo/Team). 
 
 ## 🚀 Tech Stack
 
 - **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, RSC)
-- **Database:** PostgreSQL (via Vercel Postgres)
+- **Database:** PostgreSQL (via [Supabase](https://supabase.com/))
 - **ORM:** [Prisma 7](https://www.prisma.io/)
+- **Authentication:** [BetterAuth](https://better-auth.com/) (Discord OAuth Provider)
+- **Email Engine:** [Resend](https://resend.com/) + [React Email](https://react.email/) (Transactional notifications)
+- **Object Storage:** [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob) (Banners, Sponsor Logos)
 - **Types:** TypeScript (Strict)
-- **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/)
+- **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/) (with Skeleton Loaders for optimal UX)
 - **State/Form:** React Hook Form + Zod v4 + Server Actions
-- **Animations:** Framer Motion + Tailwind Animate
 - **Tooling:** [Biome](https://biomejs.dev/) (Linting/Formatting)
 
 ## ✨ Core Features
 
 ### 🎮 Public Interface
-- **Dynamic Landing Page:** Features "Hero" tournament, live Twitch integration (`quentadoulive`).
-- **Tournament Hub:** Detailed views including rules, cashprize, dynamic format (Solo/Team), and embedded **Toornament** brackets.
+- **Dynamic Landing Page:** Features a "Hero" tournament, sponsor showcases, and live Twitch integration (`quentadoulive`).
+- **1-Click Discord Login:** Frictionless authentication and identity management relying on immutable Discord IDs.
+- **Tournament Hub:** Detailed views including rules, cashprize, and dynamic format (Solo/Team) with real-time status badges (`PRÉVU`, `EN COURS`, `TERMINÉ`).
 - **Registration Engine:**
   - **Dynamic Fields:** Support for admin-defined questions (Riot ID, Rank, etc.).
   - **Team Management:** Built-in support for Captain + Teammates flow.
-  - **Validation:** Real-time checks for quotas (SLOT limits) and dates.
+  - **Validation:** Real-time checks for quotas (SLOT limits) and deadlines.
+- **Optimized UX:** Skeleton loaders via `shadcn/ui` for seamless Twitch embeds and data fetching.
 
-### 🛡️ Admin Dashboard
-- **Secure Access:** JWT-based protection via middleware proxy.
+### 🛡️ Admin & SuperAdmin Dashboard
+- **Secure Access:** Middleware proxy verifying `ADMIN` or `SUPERADMIN` roles.
 - **Tournament CRUD:** Full lifecycle management (Draft -> Published -> Archived).
-- **Form Builder:** intuitive UI to add/remove custom registration fields per tournament.
-- **Registrations:**
-  - Data table export (CSV/Excel).
-  - Moderation capabilities (Delete/Update).
-- **Configuration:** Global site settings (Logo, etc.) and Admin management.
+- **Form Builder:** Intuitive UI to configure custom registration fields per tournament.
+- **Toornament CSV Export:** Intelligent bridge to export registered teams as CSV for 1-click bracket generation in Toornament.
+- **Team & Player Moderation:** Capabilities to kick players or dissolve teams.
+- **Notification Engine:** Automated transactional emails (registration confirmation, kicks, team dissolution, status changes).
+- **SuperAdmin Exclusives:** 
+  - Sponsor management (CRUD with priority sorting).
+  - Global content configuration (Logos, Twitch Stream URL, Social Networks).
+  - Role assignment (Promoting users to Admins).
 
-## � Project Structure
+## 🗂️ Project Structure
 
 ```bash
 ├── app/                  # Next.js App Router
-│   ├── (public)/         # Public facings routes (Landing, Tournaments)
+│   ├── (public)/         # Public facing routes (Landing, Tournaments)
 │   ├── admin/            # Protected Admin Dashboard routes
-│   └── api/              # API endpoints (Webhooks, etc.)
+│   └── api/              # API endpoints (Webhooks, Auth, Exports)
 ├── components/           # React Components
 │   ├── features/         # Domain-specific components (Tournament, Auth, etc.)
 │   ├── layout/           # Layout components (Headers, Footers, Sections)
@@ -57,7 +64,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 │   ├── config/           # Configuration primitives (Routes, Messages)
 │   ├── data/             # Data Access Layer (Queries/Mutations)
 │   ├── validations/      # Zod Schemas
-│   ├── auth.ts           # Authentication logic
+│   ├── auth.ts           # Authentication logic (BetterAuth)
 │   └── env.ts            # Environment verification
 ├── prisma/               # Database Schema & Seeds
 └── public/               # Static Assets
@@ -69,6 +76,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 - Node.js 25+ (tested with 25.6.1)
 - Docker & Docker Compose (for local database)
+- pnpm
 
 ### Installation
 
@@ -84,11 +92,11 @@ The platform enables administrators to host and manage diverse gaming tournament
     ```
 
 3.  **Environment Setup:**
-    Duplicate `.env.example` to `.env` and fill in your secrets.
+    Duplicate `.env.example` to `.env` and fill in your secrets (Discord OAuth, Resend API key, Vercel Blob token).
     ```bash
     cp .env.example .env
     ```
-    *Note: Your local `.env` should point to your Docker PostgreSQL instance (postgresql://postgres:postgres@localhost:5432/belouga_tournament)*
+    *Note: Your local `.env` should point to your Docker PostgreSQL instance (`postgresql://postgres:postgres@localhost:5432/belouga_tournament`).*
 
 4.  **Database Initialization:**
     ```bash
@@ -120,7 +128,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 | `pnpm format` | Formatting fix with Biome. |
 | `pnpm check` | Runs **Biome** to check for linting and formatting errors and applies fixes. |
 | `pnpm generate` | Generates Prisma client. |
-| `pnpm migrate` | Creates and applies local migrations (prisma migrate dev). Use this when altering `schema.prisma`. |
+| `pnpm migrate` | Creates and applies local migrations (`prisma migrate dev`). Use this when altering `schema.prisma`. |
 | `pnpm db:deploy` | Applies pending migrations and seeds the database (used automatically during build). |
 | `pnpm db:reset` | Resets the database (Force). |
 | `pnpm db:studio` | Opens Prisma Studio to visualize data. |
