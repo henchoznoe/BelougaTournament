@@ -57,10 +57,12 @@ export const ModelName = {
   Verification: 'Verification',
   Tournament: 'Tournament',
   TournamentField: 'TournamentField',
-  Registration: 'Registration',
-  Player: 'Player',
-  PlayerData: 'PlayerData',
-  SiteSettings: 'SiteSettings'
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  TournamentRegistration: 'TournamentRegistration',
+  AdminAssignment: 'AdminAssignment',
+  GlobalSettings: 'GlobalSettings',
+  Sponsor: 'Sponsor'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -85,7 +87,6 @@ export const UserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
-  avatar: 'avatar',
   discordId: 'discordId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -148,13 +149,17 @@ export const TournamentScalarFieldEnum = {
   endDate: 'endDate',
   registrationOpen: 'registrationOpen',
   registrationClose: 'registrationClose',
-  maxParticipants: 'maxParticipants',
+  maxTeams: 'maxTeams',
   format: 'format',
   teamSize: 'teamSize',
+  game: 'game',
+  imageUrl: 'imageUrl',
+  rules: 'rules',
+  prize: 'prize',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
   autoApprove: 'autoApprove',
-  visibility: 'visibility',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -174,49 +179,73 @@ export const TournamentFieldScalarFieldEnum = {
 export type TournamentFieldScalarFieldEnum = (typeof TournamentFieldScalarFieldEnum)[keyof typeof TournamentFieldScalarFieldEnum]
 
 
-export const RegistrationScalarFieldEnum = {
+export const TeamScalarFieldEnum = {
   id: 'id',
-  teamName: 'teamName',
-  contactEmail: 'contactEmail',
-  status: 'status',
-  createdAt: 'createdAt',
+  name: 'name',
   tournamentId: 'tournamentId',
-  cancellationToken: 'cancellationToken'
+  captainId: 'captainId',
+  isFull: 'isFull',
+  createdAt: 'createdAt'
 } as const
 
-export type RegistrationScalarFieldEnum = (typeof RegistrationScalarFieldEnum)[keyof typeof RegistrationScalarFieldEnum]
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
 
 
-export const PlayerScalarFieldEnum = {
+export const TeamMemberScalarFieldEnum = {
   id: 'id',
-  nickname: 'nickname',
-  registrationId: 'registrationId'
+  teamId: 'teamId',
+  userId: 'userId',
+  joinedAt: 'joinedAt'
 } as const
 
-export type PlayerScalarFieldEnum = (typeof PlayerScalarFieldEnum)[keyof typeof PlayerScalarFieldEnum]
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
 
 
-export const PlayerDataScalarFieldEnum = {
+export const TournamentRegistrationScalarFieldEnum = {
   id: 'id',
-  value: 'value',
-  playerId: 'playerId',
-  tournamentFieldId: 'tournamentFieldId'
+  tournamentId: 'tournamentId',
+  teamId: 'teamId',
+  userId: 'userId',
+  fieldValues: 'fieldValues',
+  status: 'status',
+  cancellationToken: 'cancellationToken',
+  createdAt: 'createdAt'
 } as const
 
-export type PlayerDataScalarFieldEnum = (typeof PlayerDataScalarFieldEnum)[keyof typeof PlayerDataScalarFieldEnum]
+export type TournamentRegistrationScalarFieldEnum = (typeof TournamentRegistrationScalarFieldEnum)[keyof typeof TournamentRegistrationScalarFieldEnum]
 
 
-export const SiteSettingsScalarFieldEnum = {
+export const AdminAssignmentScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  tournamentId: 'tournamentId',
+  assignedAt: 'assignedAt'
+} as const
+
+export type AdminAssignmentScalarFieldEnum = (typeof AdminAssignmentScalarFieldEnum)[keyof typeof AdminAssignmentScalarFieldEnum]
+
+
+export const GlobalSettingsScalarFieldEnum = {
   id: 'id',
   logoUrl: 'logoUrl',
-  socialDiscord: 'socialDiscord',
-  socialTiktok: 'socialTiktok',
-  socialTwitch: 'socialTwitch',
-  socialInstagram: 'socialInstagram',
-  socialYoutube: 'socialYoutube'
+  streamUrl: 'streamUrl',
+  socials: 'socials'
 } as const
 
-export type SiteSettingsScalarFieldEnum = (typeof SiteSettingsScalarFieldEnum)[keyof typeof SiteSettingsScalarFieldEnum]
+export type GlobalSettingsScalarFieldEnum = (typeof GlobalSettingsScalarFieldEnum)[keyof typeof GlobalSettingsScalarFieldEnum]
+
+
+export const SponsorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  imageUrl: 'imageUrl',
+  url: 'url',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SponsorScalarFieldEnum = (typeof SponsorScalarFieldEnum)[keyof typeof SponsorScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -225,6 +254,13 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -241,4 +277,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

@@ -27,12 +27,12 @@ export type AggregateTournament = {
 }
 
 export type TournamentAvgAggregateOutputType = {
-  maxParticipants: number | null
+  maxTeams: number | null
   teamSize: number | null
 }
 
 export type TournamentSumAggregateOutputType = {
-  maxParticipants: number | null
+  maxTeams: number | null
   teamSize: number | null
 }
 
@@ -45,13 +45,17 @@ export type TournamentMinAggregateOutputType = {
   endDate: Date | null
   registrationOpen: Date | null
   registrationClose: Date | null
-  maxParticipants: number | null
+  maxTeams: number | null
   format: $Enums.TournamentFormat | null
   teamSize: number | null
+  game: string | null
+  imageUrl: string | null
+  rules: string | null
+  prize: string | null
   toornamentId: string | null
   streamUrl: string | null
   autoApprove: boolean | null
-  visibility: $Enums.Visibility | null
+  status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,13 +69,17 @@ export type TournamentMaxAggregateOutputType = {
   endDate: Date | null
   registrationOpen: Date | null
   registrationClose: Date | null
-  maxParticipants: number | null
+  maxTeams: number | null
   format: $Enums.TournamentFormat | null
   teamSize: number | null
+  game: string | null
+  imageUrl: string | null
+  rules: string | null
+  prize: string | null
   toornamentId: string | null
   streamUrl: string | null
   autoApprove: boolean | null
-  visibility: $Enums.Visibility | null
+  status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -85,13 +93,17 @@ export type TournamentCountAggregateOutputType = {
   endDate: number
   registrationOpen: number
   registrationClose: number
-  maxParticipants: number
+  maxTeams: number
   format: number
   teamSize: number
+  game: number
+  imageUrl: number
+  rules: number
+  prize: number
   toornamentId: number
   streamUrl: number
   autoApprove: number
-  visibility: number
+  status: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -99,12 +111,12 @@ export type TournamentCountAggregateOutputType = {
 
 
 export type TournamentAvgAggregateInputType = {
-  maxParticipants?: true
+  maxTeams?: true
   teamSize?: true
 }
 
 export type TournamentSumAggregateInputType = {
-  maxParticipants?: true
+  maxTeams?: true
   teamSize?: true
 }
 
@@ -117,13 +129,17 @@ export type TournamentMinAggregateInputType = {
   endDate?: true
   registrationOpen?: true
   registrationClose?: true
-  maxParticipants?: true
+  maxTeams?: true
   format?: true
   teamSize?: true
+  game?: true
+  imageUrl?: true
+  rules?: true
+  prize?: true
   toornamentId?: true
   streamUrl?: true
   autoApprove?: true
-  visibility?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -137,13 +153,17 @@ export type TournamentMaxAggregateInputType = {
   endDate?: true
   registrationOpen?: true
   registrationClose?: true
-  maxParticipants?: true
+  maxTeams?: true
   format?: true
   teamSize?: true
+  game?: true
+  imageUrl?: true
+  rules?: true
+  prize?: true
   toornamentId?: true
   streamUrl?: true
   autoApprove?: true
-  visibility?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -157,13 +177,17 @@ export type TournamentCountAggregateInputType = {
   endDate?: true
   registrationOpen?: true
   registrationClose?: true
-  maxParticipants?: true
+  maxTeams?: true
   format?: true
   teamSize?: true
+  game?: true
+  imageUrl?: true
+  rules?: true
+  prize?: true
   toornamentId?: true
   streamUrl?: true
   autoApprove?: true
-  visibility?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -264,13 +288,17 @@ export type TournamentGroupByOutputType = {
   endDate: Date
   registrationOpen: Date
   registrationClose: Date
-  maxParticipants: number | null
+  maxTeams: number | null
   format: $Enums.TournamentFormat
   teamSize: number
+  game: string | null
+  imageUrl: string | null
+  rules: string | null
+  prize: string | null
   toornamentId: string | null
-  streamUrl: string
+  streamUrl: string | null
   autoApprove: boolean
-  visibility: $Enums.Visibility
+  status: $Enums.TournamentStatus
   createdAt: Date
   updatedAt: Date
   _count: TournamentCountAggregateOutputType | null
@@ -307,17 +335,23 @@ export type TournamentWhereInput = {
   endDate?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   registrationOpen?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   registrationClose?: Prisma.DateTimeFilter<"Tournament"> | Date | string
-  maxParticipants?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  maxTeams?: Prisma.IntNullableFilter<"Tournament"> | number | null
   format?: Prisma.EnumTournamentFormatFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntFilter<"Tournament"> | number
+  game?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  rules?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringFilter<"Tournament"> | string
+  streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
-  visibility?: Prisma.EnumVisibilityFilter<"Tournament"> | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   fields?: Prisma.TournamentFieldListRelationFilter
-  registrations?: Prisma.RegistrationListRelationFilter
+  teams?: Prisma.TeamListRelationFilter
+  registrations?: Prisma.TournamentRegistrationListRelationFilter
+  adminAssignments?: Prisma.AdminAssignmentListRelationFilter
 }
 
 export type TournamentOrderByWithRelationInput = {
@@ -329,17 +363,23 @@ export type TournamentOrderByWithRelationInput = {
   endDate?: Prisma.SortOrder
   registrationOpen?: Prisma.SortOrder
   registrationClose?: Prisma.SortOrder
-  maxParticipants?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  game?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  rules?: Prisma.SortOrderInput | Prisma.SortOrder
+  prize?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrder
+  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  visibility?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   fields?: Prisma.TournamentFieldOrderByRelationAggregateInput
-  registrations?: Prisma.RegistrationOrderByRelationAggregateInput
+  teams?: Prisma.TeamOrderByRelationAggregateInput
+  registrations?: Prisma.TournamentRegistrationOrderByRelationAggregateInput
+  adminAssignments?: Prisma.AdminAssignmentOrderByRelationAggregateInput
 }
 
 export type TournamentWhereUniqueInput = Prisma.AtLeast<{
@@ -354,17 +394,23 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   endDate?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   registrationOpen?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   registrationClose?: Prisma.DateTimeFilter<"Tournament"> | Date | string
-  maxParticipants?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  maxTeams?: Prisma.IntNullableFilter<"Tournament"> | number | null
   format?: Prisma.EnumTournamentFormatFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntFilter<"Tournament"> | number
+  game?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  rules?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringFilter<"Tournament"> | string
+  streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
-  visibility?: Prisma.EnumVisibilityFilter<"Tournament"> | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   fields?: Prisma.TournamentFieldListRelationFilter
-  registrations?: Prisma.RegistrationListRelationFilter
+  teams?: Prisma.TeamListRelationFilter
+  registrations?: Prisma.TournamentRegistrationListRelationFilter
+  adminAssignments?: Prisma.AdminAssignmentListRelationFilter
 }, "id" | "slug">
 
 export type TournamentOrderByWithAggregationInput = {
@@ -376,13 +422,17 @@ export type TournamentOrderByWithAggregationInput = {
   endDate?: Prisma.SortOrder
   registrationOpen?: Prisma.SortOrder
   registrationClose?: Prisma.SortOrder
-  maxParticipants?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  game?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  rules?: Prisma.SortOrderInput | Prisma.SortOrder
+  prize?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrder
+  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  visibility?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TournamentCountOrderByAggregateInput
@@ -404,13 +454,17 @@ export type TournamentScalarWhereWithAggregatesInput = {
   endDate?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   registrationOpen?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   registrationClose?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
-  maxParticipants?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  maxTeams?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   format?: Prisma.EnumTournamentFormatWithAggregatesFilter<"Tournament"> | $Enums.TournamentFormat
   teamSize?: Prisma.IntWithAggregatesFilter<"Tournament"> | number
+  game?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  rules?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  prize?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
-  streamUrl?: Prisma.StringWithAggregatesFilter<"Tournament"> | string
+  streamUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   autoApprove?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
-  visibility?: Prisma.EnumVisibilityWithAggregatesFilter<"Tournament"> | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
 }
@@ -424,17 +478,23 @@ export type TournamentCreateInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
-  registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentUncheckedCreateInput = {
@@ -446,17 +506,23 @@ export type TournamentUncheckedCreateInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
-  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentUpdateInput = {
@@ -468,17 +534,23 @@ export type TournamentUpdateInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
-  registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUpdateManyWithoutTournamentNestedInput
 }
 
 export type TournamentUncheckedUpdateInput = {
@@ -490,17 +562,23 @@ export type TournamentUncheckedUpdateInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
-  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutTournamentNestedInput
 }
 
 export type TournamentCreateManyInput = {
@@ -512,13 +590,17 @@ export type TournamentCreateManyInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -532,13 +614,17 @@ export type TournamentUpdateManyMutationInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -552,13 +638,17 @@ export type TournamentUncheckedUpdateManyInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -572,19 +662,23 @@ export type TournamentCountOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   registrationOpen?: Prisma.SortOrder
   registrationClose?: Prisma.SortOrder
-  maxParticipants?: Prisma.SortOrder
+  maxTeams?: Prisma.SortOrder
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  game?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  visibility?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TournamentAvgOrderByAggregateInput = {
-  maxParticipants?: Prisma.SortOrder
+  maxTeams?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
 }
 
@@ -597,13 +691,17 @@ export type TournamentMaxOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   registrationOpen?: Prisma.SortOrder
   registrationClose?: Prisma.SortOrder
-  maxParticipants?: Prisma.SortOrder
+  maxTeams?: Prisma.SortOrder
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  game?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  visibility?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -617,19 +715,23 @@ export type TournamentMinOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   registrationOpen?: Prisma.SortOrder
   registrationClose?: Prisma.SortOrder
-  maxParticipants?: Prisma.SortOrder
+  maxTeams?: Prisma.SortOrder
   format?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  game?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   autoApprove?: Prisma.SortOrder
-  visibility?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TournamentSumOrderByAggregateInput = {
-  maxParticipants?: Prisma.SortOrder
+  maxTeams?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
 }
 
@@ -658,8 +760,8 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type EnumVisibilityFieldUpdateOperationsInput = {
-  set?: $Enums.Visibility
+export type EnumTournamentStatusFieldUpdateOperationsInput = {
+  set?: $Enums.TournamentStatus
 }
 
 export type TournamentCreateNestedOneWithoutFieldsInput = {
@@ -676,6 +778,20 @@ export type TournamentUpdateOneRequiredWithoutFieldsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutFieldsInput, Prisma.TournamentUpdateWithoutFieldsInput>, Prisma.TournamentUncheckedUpdateWithoutFieldsInput>
 }
 
+export type TournamentCreateNestedOneWithoutTeamsInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutTeamsInput, Prisma.TournamentUncheckedCreateWithoutTeamsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutTeamsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+}
+
+export type TournamentUpdateOneRequiredWithoutTeamsNestedInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutTeamsInput, Prisma.TournamentUncheckedCreateWithoutTeamsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutTeamsInput
+  upsert?: Prisma.TournamentUpsertWithoutTeamsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutTeamsInput, Prisma.TournamentUpdateWithoutTeamsInput>, Prisma.TournamentUncheckedUpdateWithoutTeamsInput>
+}
+
 export type TournamentCreateNestedOneWithoutRegistrationsInput = {
   create?: Prisma.XOR<Prisma.TournamentCreateWithoutRegistrationsInput, Prisma.TournamentUncheckedCreateWithoutRegistrationsInput>
   connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutRegistrationsInput
@@ -690,6 +806,20 @@ export type TournamentUpdateOneRequiredWithoutRegistrationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutRegistrationsInput, Prisma.TournamentUpdateWithoutRegistrationsInput>, Prisma.TournamentUncheckedUpdateWithoutRegistrationsInput>
 }
 
+export type TournamentCreateNestedOneWithoutAdminAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedCreateWithoutAdminAssignmentsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutAdminAssignmentsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+}
+
+export type TournamentUpdateOneRequiredWithoutAdminAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedCreateWithoutAdminAssignmentsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutAdminAssignmentsInput
+  upsert?: Prisma.TournamentUpsertWithoutAdminAssignmentsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutAdminAssignmentsInput, Prisma.TournamentUpdateWithoutAdminAssignmentsInput>, Prisma.TournamentUncheckedUpdateWithoutAdminAssignmentsInput>
+}
+
 export type TournamentCreateWithoutFieldsInput = {
   id?: string
   title: string
@@ -699,16 +829,22 @@ export type TournamentCreateWithoutFieldsInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentUncheckedCreateWithoutFieldsInput = {
@@ -720,16 +856,22 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentCreateOrConnectWithoutFieldsInput = {
@@ -757,16 +899,22 @@ export type TournamentUpdateWithoutFieldsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUpdateManyWithoutTournamentNestedInput
 }
 
 export type TournamentUncheckedUpdateWithoutFieldsInput = {
@@ -778,16 +926,146 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentCreateWithoutTeamsInput = {
+  id?: string
+  title: string
+  slug: string
+  description: string
+  startDate: Date | string
+  endDate: Date | string
+  registrationOpen: Date | string
+  registrationClose: Date | string
+  maxTeams?: number | null
+  format: $Enums.TournamentFormat
+  teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
+  toornamentId?: string | null
+  streamUrl?: string | null
+  autoApprove?: boolean
+  status?: $Enums.TournamentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentUncheckedCreateWithoutTeamsInput = {
+  id?: string
+  title: string
+  slug: string
+  description: string
+  startDate: Date | string
+  endDate: Date | string
+  registrationOpen: Date | string
+  registrationClose: Date | string
+  maxTeams?: number | null
+  format: $Enums.TournamentFormat
+  teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
+  toornamentId?: string | null
+  streamUrl?: string | null
+  autoApprove?: boolean
+  status?: $Enums.TournamentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentCreateOrConnectWithoutTeamsInput = {
+  where: Prisma.TournamentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutTeamsInput, Prisma.TournamentUncheckedCreateWithoutTeamsInput>
+}
+
+export type TournamentUpsertWithoutTeamsInput = {
+  update: Prisma.XOR<Prisma.TournamentUpdateWithoutTeamsInput, Prisma.TournamentUncheckedUpdateWithoutTeamsInput>
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutTeamsInput, Prisma.TournamentUncheckedCreateWithoutTeamsInput>
+  where?: Prisma.TournamentWhereInput
+}
+
+export type TournamentUpdateToOneWithWhereWithoutTeamsInput = {
+  where?: Prisma.TournamentWhereInput
+  data: Prisma.XOR<Prisma.TournamentUpdateWithoutTeamsInput, Prisma.TournamentUncheckedUpdateWithoutTeamsInput>
+}
+
+export type TournamentUpdateWithoutTeamsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
+  teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentUncheckedUpdateWithoutTeamsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
+  teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutTournamentNestedInput
 }
 
 export type TournamentCreateWithoutRegistrationsInput = {
@@ -799,16 +1077,22 @@ export type TournamentCreateWithoutRegistrationsInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentUncheckedCreateWithoutRegistrationsInput = {
@@ -820,16 +1104,22 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   endDate: Date | string
   registrationOpen: Date | string
   registrationClose: Date | string
-  maxParticipants?: number | null
+  maxTeams?: number | null
   format: $Enums.TournamentFormat
   teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
   toornamentId?: string | null
-  streamUrl: string
+  streamUrl?: string | null
   autoApprove?: boolean
-  visibility?: $Enums.Visibility
+  status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTournamentInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutTournamentInput
 }
 
 export type TournamentCreateOrConnectWithoutRegistrationsInput = {
@@ -857,16 +1147,22 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUpdateManyWithoutTournamentNestedInput
 }
 
 export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
@@ -878,16 +1174,146 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  maxParticipants?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
   teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTournamentNestedInput
+  adminAssignments?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentCreateWithoutAdminAssignmentsInput = {
+  id?: string
+  title: string
+  slug: string
+  description: string
+  startDate: Date | string
+  endDate: Date | string
+  registrationOpen: Date | string
+  registrationClose: Date | string
+  maxTeams?: number | null
+  format: $Enums.TournamentFormat
+  teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
+  toornamentId?: string | null
+  streamUrl?: string | null
+  autoApprove?: boolean
+  status?: $Enums.TournamentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fields?: Prisma.TournamentFieldCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentUncheckedCreateWithoutAdminAssignmentsInput = {
+  id?: string
+  title: string
+  slug: string
+  description: string
+  startDate: Date | string
+  endDate: Date | string
+  registrationOpen: Date | string
+  registrationClose: Date | string
+  maxTeams?: number | null
+  format: $Enums.TournamentFormat
+  teamSize?: number
+  game?: string | null
+  imageUrl?: string | null
+  rules?: string | null
+  prize?: string | null
+  toornamentId?: string | null
+  streamUrl?: string | null
+  autoApprove?: boolean
+  status?: $Enums.TournamentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fields?: Prisma.TournamentFieldUncheckedCreateNestedManyWithoutTournamentInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTournamentInput
+  registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentCreateOrConnectWithoutAdminAssignmentsInput = {
+  where: Prisma.TournamentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedCreateWithoutAdminAssignmentsInput>
+}
+
+export type TournamentUpsertWithoutAdminAssignmentsInput = {
+  update: Prisma.XOR<Prisma.TournamentUpdateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedUpdateWithoutAdminAssignmentsInput>
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedCreateWithoutAdminAssignmentsInput>
+  where?: Prisma.TournamentWhereInput
+}
+
+export type TournamentUpdateToOneWithWhereWithoutAdminAssignmentsInput = {
+  where?: Prisma.TournamentWhereInput
+  data: Prisma.XOR<Prisma.TournamentUpdateWithoutAdminAssignmentsInput, Prisma.TournamentUncheckedUpdateWithoutAdminAssignmentsInput>
+}
+
+export type TournamentUpdateWithoutAdminAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
+  teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.TournamentFieldUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentUncheckedUpdateWithoutAdminAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationOpen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrationClose?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumTournamentFormatFieldUpdateOperationsInput | $Enums.TournamentFormat
+  teamSize?: Prisma.IntFieldUpdateOperationsInput | number
+  game?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.TournamentFieldUncheckedUpdateManyWithoutTournamentNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTournamentNestedInput
+  registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutTournamentNestedInput
 }
 
 
@@ -897,12 +1323,16 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
 
 export type TournamentCountOutputType = {
   fields: number
+  teams: number
   registrations: number
+  adminAssignments: number
 }
 
 export type TournamentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | TournamentCountOutputTypeCountFieldsArgs
+  teams?: boolean | TournamentCountOutputTypeCountTeamsArgs
   registrations?: boolean | TournamentCountOutputTypeCountRegistrationsArgs
+  adminAssignments?: boolean | TournamentCountOutputTypeCountAdminAssignmentsArgs
 }
 
 /**
@@ -925,8 +1355,22 @@ export type TournamentCountOutputTypeCountFieldsArgs<ExtArgs extends runtime.Typ
 /**
  * TournamentCountOutputType without action
  */
+export type TournamentCountOutputTypeCountTeamsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TeamWhereInput
+}
+
+/**
+ * TournamentCountOutputType without action
+ */
 export type TournamentCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.RegistrationWhereInput
+  where?: Prisma.TournamentRegistrationWhereInput
+}
+
+/**
+ * TournamentCountOutputType without action
+ */
+export type TournamentCountOutputTypeCountAdminAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AdminAssignmentWhereInput
 }
 
 
@@ -939,17 +1383,23 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   endDate?: boolean
   registrationOpen?: boolean
   registrationClose?: boolean
-  maxParticipants?: boolean
+  maxTeams?: boolean
   format?: boolean
   teamSize?: boolean
+  game?: boolean
+  imageUrl?: boolean
+  rules?: boolean
+  prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  visibility?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
+  teams?: boolean | Prisma.Tournament$teamsArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
+  adminAssignments?: boolean | Prisma.Tournament$adminAssignmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TournamentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tournament"]>
 
@@ -962,13 +1412,17 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   endDate?: boolean
   registrationOpen?: boolean
   registrationClose?: boolean
-  maxParticipants?: boolean
+  maxTeams?: boolean
   format?: boolean
   teamSize?: boolean
+  game?: boolean
+  imageUrl?: boolean
+  rules?: boolean
+  prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  visibility?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tournament"]>
@@ -982,13 +1436,17 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   endDate?: boolean
   registrationOpen?: boolean
   registrationClose?: boolean
-  maxParticipants?: boolean
+  maxTeams?: boolean
   format?: boolean
   teamSize?: boolean
+  game?: boolean
+  imageUrl?: boolean
+  rules?: boolean
+  prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  visibility?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tournament"]>
@@ -1002,21 +1460,27 @@ export type TournamentSelectScalar = {
   endDate?: boolean
   registrationOpen?: boolean
   registrationClose?: boolean
-  maxParticipants?: boolean
+  maxTeams?: boolean
   format?: boolean
   teamSize?: boolean
+  game?: boolean
+  imageUrl?: boolean
+  rules?: boolean
+  prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   autoApprove?: boolean
-  visibility?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxParticipants" | "format" | "teamSize" | "toornamentId" | "streamUrl" | "autoApprove" | "visibility" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "game" | "imageUrl" | "rules" | "prize" | "toornamentId" | "streamUrl" | "autoApprove" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
+  teams?: boolean | Prisma.Tournament$teamsArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
+  adminAssignments?: boolean | Prisma.Tournament$adminAssignmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TournamentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TournamentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1026,7 +1490,9 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "Tournament"
   objects: {
     fields: Prisma.$TournamentFieldPayload<ExtArgs>[]
-    registrations: Prisma.$RegistrationPayload<ExtArgs>[]
+    teams: Prisma.$TeamPayload<ExtArgs>[]
+    registrations: Prisma.$TournamentRegistrationPayload<ExtArgs>[]
+    adminAssignments: Prisma.$AdminAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1037,13 +1503,17 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     endDate: Date
     registrationOpen: Date
     registrationClose: Date
-    maxParticipants: number | null
+    maxTeams: number | null
     format: $Enums.TournamentFormat
     teamSize: number
+    game: string | null
+    imageUrl: string | null
+    rules: string | null
+    prize: string | null
     toornamentId: string | null
-    streamUrl: string
+    streamUrl: string | null
     autoApprove: boolean
-    visibility: $Enums.Visibility
+    status: $Enums.TournamentStatus
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["tournament"]>
@@ -1441,7 +1911,9 @@ readonly fields: TournamentFieldRefs;
 export interface Prisma__TournamentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   fields<T extends Prisma.Tournament$fieldsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$fieldsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TournamentFieldPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  registrations<T extends Prisma.Tournament$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  teams<T extends Prisma.Tournament$teamsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$teamsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  registrations<T extends Prisma.Tournament$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TournamentRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  adminAssignments<T extends Prisma.Tournament$adminAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$adminAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1479,13 +1951,17 @@ export interface TournamentFieldRefs {
   readonly endDate: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly registrationOpen: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly registrationClose: Prisma.FieldRef<"Tournament", 'DateTime'>
-  readonly maxParticipants: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly maxTeams: Prisma.FieldRef<"Tournament", 'Int'>
   readonly format: Prisma.FieldRef<"Tournament", 'TournamentFormat'>
   readonly teamSize: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly game: Prisma.FieldRef<"Tournament", 'String'>
+  readonly imageUrl: Prisma.FieldRef<"Tournament", 'String'>
+  readonly rules: Prisma.FieldRef<"Tournament", 'String'>
+  readonly prize: Prisma.FieldRef<"Tournament", 'String'>
   readonly toornamentId: Prisma.FieldRef<"Tournament", 'String'>
   readonly streamUrl: Prisma.FieldRef<"Tournament", 'String'>
   readonly autoApprove: Prisma.FieldRef<"Tournament", 'Boolean'>
-  readonly visibility: Prisma.FieldRef<"Tournament", 'Visibility'>
+  readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>
   readonly createdAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tournament", 'DateTime'>
 }
@@ -1900,27 +2376,75 @@ export type Tournament$fieldsArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
+ * Tournament.teams
+ */
+export type Tournament$teamsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Team
+   */
+  select?: Prisma.TeamSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Team
+   */
+  omit?: Prisma.TeamOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamInclude<ExtArgs> | null
+  where?: Prisma.TeamWhereInput
+  orderBy?: Prisma.TeamOrderByWithRelationInput | Prisma.TeamOrderByWithRelationInput[]
+  cursor?: Prisma.TeamWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TeamScalarFieldEnum | Prisma.TeamScalarFieldEnum[]
+}
+
+/**
  * Tournament.registrations
  */
 export type Tournament$registrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Registration
+   * Select specific fields to fetch from the TournamentRegistration
    */
-  select?: Prisma.RegistrationSelect<ExtArgs> | null
+  select?: Prisma.TournamentRegistrationSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Registration
+   * Omit specific fields from the TournamentRegistration
    */
-  omit?: Prisma.RegistrationOmit<ExtArgs> | null
+  omit?: Prisma.TournamentRegistrationOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.RegistrationInclude<ExtArgs> | null
-  where?: Prisma.RegistrationWhereInput
-  orderBy?: Prisma.RegistrationOrderByWithRelationInput | Prisma.RegistrationOrderByWithRelationInput[]
-  cursor?: Prisma.RegistrationWhereUniqueInput
+  include?: Prisma.TournamentRegistrationInclude<ExtArgs> | null
+  where?: Prisma.TournamentRegistrationWhereInput
+  orderBy?: Prisma.TournamentRegistrationOrderByWithRelationInput | Prisma.TournamentRegistrationOrderByWithRelationInput[]
+  cursor?: Prisma.TournamentRegistrationWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.RegistrationScalarFieldEnum | Prisma.RegistrationScalarFieldEnum[]
+  distinct?: Prisma.TournamentRegistrationScalarFieldEnum | Prisma.TournamentRegistrationScalarFieldEnum[]
+}
+
+/**
+ * Tournament.adminAssignments
+ */
+export type Tournament$adminAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AdminAssignment
+   */
+  select?: Prisma.AdminAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AdminAssignment
+   */
+  omit?: Prisma.AdminAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminAssignmentInclude<ExtArgs> | null
+  where?: Prisma.AdminAssignmentWhereInput
+  orderBy?: Prisma.AdminAssignmentOrderByWithRelationInput | Prisma.AdminAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.AdminAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AdminAssignmentScalarFieldEnum | Prisma.AdminAssignmentScalarFieldEnum[]
 }
 
 /**

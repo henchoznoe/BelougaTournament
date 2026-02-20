@@ -48,22 +48,32 @@ export type Tournament = Prisma.TournamentModel
  */
 export type TournamentField = Prisma.TournamentFieldModel
 /**
- * Model Registration
+ * Model Team
  * 
  */
-export type Registration = Prisma.RegistrationModel
+export type Team = Prisma.TeamModel
 /**
- * Model Player
+ * Model TeamMember
  * 
  */
-export type Player = Prisma.PlayerModel
+export type TeamMember = Prisma.TeamMemberModel
 /**
- * Model PlayerData
+ * Model TournamentRegistration
  * 
  */
-export type PlayerData = Prisma.PlayerDataModel
+export type TournamentRegistration = Prisma.TournamentRegistrationModel
 /**
- * Model SiteSettings
+ * Model AdminAssignment
  * 
  */
-export type SiteSettings = Prisma.SiteSettingsModel
+export type AdminAssignment = Prisma.AdminAssignmentModel
+/**
+ * Model GlobalSettings
+ * 
+ */
+export type GlobalSettings = Prisma.GlobalSettingsModel
+/**
+ * Model Sponsor
+ * 
+ */
+export type Sponsor = Prisma.SponsorModel

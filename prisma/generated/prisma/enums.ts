@@ -44,9 +44,10 @@ export const RegistrationStatus = {
 export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
 
 
-export const Visibility = {
-  PUBLIC: 'PUBLIC',
-  PRIVATE: 'PRIVATE'
+export const TournamentStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
 } as const
 
-export type Visibility = (typeof Visibility)[keyof typeof Visibility]
+export type TournamentStatus = (typeof TournamentStatus)[keyof typeof TournamentStatus]

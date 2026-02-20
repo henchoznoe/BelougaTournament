@@ -66,12 +66,17 @@ const auth = betterAuth({
 
             const name = discordProfile.global_name || discordProfile.username
 
-            if (user.name !== name || user.avatar !== avatarUrl) {
+            if (
+              user.name !== name ||
+              user.image !== avatarUrl ||
+              user.discordId !== discordProfile.id
+            ) {
               await prisma.user.update({
                 where: { id: user.id },
                 data: {
                   name: name,
-                  avatar: avatarUrl,
+                  image: avatarUrl,
+                  discordId: discordProfile.id,
                 },
               })
             }
