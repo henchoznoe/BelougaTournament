@@ -11,8 +11,8 @@ import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { ScrollToTop } from '@/components/shared/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
-import { APP_METADATA } from '@/lib/config/constants'
 import { cn } from '@/lib/utils'
+import { METADATA } from '@/lib/config/constants'
 import './globals.css'
 
 interface LayoutProps {
@@ -31,15 +31,15 @@ const paladins = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: APP_METADATA.NAME,
-    template: APP_METADATA.TEMPLATE_TITLE,
+    default: METADATA.NAME,
+    template: METADATA.TEMPLATE_TITLE,
   },
-  description: APP_METADATA.DESCRIPTION,
+  description: METADATA.DESCRIPTION,
 }
 
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
-    <html lang={APP_METADATA.LOCALE} className="scroll-smooth">
+    <html lang="fr-CH" className="scroll-smooth">
       <body
         className={cn(
           inter.variable,

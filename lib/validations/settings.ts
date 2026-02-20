@@ -1,6 +1,6 @@
 /**
  * File: lib/validations/settings.ts
- * Description: Validation schemas for settings
+ * Description: Validation schemas for global application settings
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,15 +8,18 @@
 
 import { z } from 'zod'
 
-const settingString = z.string().optional().or(z.literal(''))
+/** Optional URL-or-empty string for social links and asset URLs. */
+const optionalUrl = z.string().optional().or(z.literal(''))
 
+/** Matches the GlobalSettings model: socials stored as JSON + streamUrl + logoUrl. */
 export const settingsSchema = z.object({
-  logoUrl: settingString,
-  socialDiscord: settingString,
-  socialTwitch: settingString,
-  socialTiktok: settingString,
-  socialInstagram: settingString,
-  socialYoutube: settingString,
+  logoUrl: optionalUrl,
+  streamUrl: optionalUrl,
+  socialDiscord: optionalUrl,
+  socialTwitch: optionalUrl,
+  socialTiktok: optionalUrl,
+  socialInstagram: optionalUrl,
+  socialYoutube: optionalUrl,
 })
 
 export type SettingsInput = z.infer<typeof settingsSchema>

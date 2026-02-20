@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { formatDateTime } from '@/lib/utils'
-import { APP_ROUTES } from "@/lib/config/routes"
+import { ROUTES } from "@/lib/config/routes"
 
 export interface Tournament {
   id: string
@@ -88,7 +88,7 @@ const TournamentCard = ({ tournament }: { tournament: Tournament }) => {
           asChild
           className="w-full bg-zinc-800 font-semibold text-white transition-colors hover:bg-blue-600"
         >
-          <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
+          <Link href={`${ROUTES.TOURNAMENTS}/${tournament.slug}`}>
             Détails
           </Link>
         </Button>
@@ -141,7 +141,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           variant="ghost"
           className="pr-0 text-zinc-400 transition-all hover:bg-white/5 hover:pr-4 hover:text-white"
         >
-          <Link href={APP_ROUTES.TOURNAMENTS}>
+          <Link href={ROUTES.TOURNAMENTS}>
             Voir tout <ChevronRight className="mr-2 size-4" />
           </Link>
         </Button>

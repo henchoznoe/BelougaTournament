@@ -11,21 +11,26 @@ import { redirect } from 'next/navigation'
 import auth from '@/lib/core/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-export default async function AdminGuard({ children }: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+type AuthSession = {
+  session: { id: string; userId: string; expiresAt: Date; token: string }
+  user: { id: string; email: string; name: string; role: Role; image?: string | null; discordId?: string | null }
+}
 
-  if (!session) {
-    redirect('/')
+/** Server component guard: redirects non-admin users before rendering children. */
+export default async function AdminGuard({ children }: { children: React.ReactNode }) {
+  const raw = await auth.api.getSession({ headers: await headers() })
+  const session = raw as AuthSession | null
+
+  if (!session?.user) {
+    redirect('/login')
   }
 
-  const userRole = (session.user as any).role
-
-  if (userRole !== Role.ADMIN && userRole !== Role.SUPERADMIN) {
-    redirect('/')
+  if (session.user.role !== Role.ADMIN && session.user.role !== Role.SUPERADMIN) {
+    redirect('/unauthorized')
   }
 
   return <>{children}</>
 }
+
+
 

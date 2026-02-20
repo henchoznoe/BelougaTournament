@@ -6,13 +6,19 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-export const APP_METADATA = {
-  LOCALE: 'fr-FR',
+export const METADATA = {
   NAME: 'Belouga Tournament',
-  DESCRIPTION: 'La référence des tournois amateurs e-sport.',
+  DESCRIPTION:
+    'La référence des tournois amateurs e-sport, créé par Quentadoulive.',
   TEMPLATE_TITLE: '%s | Belouga Tournament',
-  DEFAULT_LOGO: '/assets/logo-blue.png',
-  DEFAULT_BG_IMG: '/assets/wall.png',
-  AUTHOR_URL: 'https://henchoznoe.ch',
-  AUTHOR_NAME: 'Noé Henchoz',
 } as const
+
+export const DEFAULT_ASSETS = {
+  LOGO: '/assets/logo-blue.png',
+  BG_IMAGE: '/assets/wall.png',
+}
+
+export const AUTHOR = {
+  URL: 'https://henchoznoe.ch',
+  NAME: 'Noé Henchoz',
+}

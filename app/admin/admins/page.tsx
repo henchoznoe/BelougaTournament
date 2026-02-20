@@ -11,7 +11,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { AdminsManager } from '@/components/features/admin/users/admins/admins-manager'
 import { Button } from '@/components/ui/button'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
 import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -46,7 +46,7 @@ const AccessDeniedState = () => {
         variant="outline"
         className="border-white/10 text-white hover:bg-white/5"
       >
-        <Link href={APP_ROUTES.ADMIN_DASHBOARD}>Retour au tableau de bord</Link>
+        <Link href={ROUTES.ADMIN_DASHBOARD}>Retour au tableau de bord</Link>
       </Button>
     </div>
   )

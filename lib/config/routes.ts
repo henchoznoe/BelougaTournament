@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-export const APP_ROUTES = {
+export const ROUTES = {
   HOME: '/',
   ADMIN_DASHBOARD: '/admin',
   ADMIN_ADMINS: '/admin/admins',

@@ -13,8 +13,8 @@ import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { APP_METADATA } from "@/lib/config/constants"
-import { APP_ROUTES } from "@/lib/config/routes"
+import { APP } from "@/lib/config/constants"
+import { ROUTES } from "@/lib/config/routes"
 
 interface HeroSectionProps {
   content: {
@@ -29,7 +29,7 @@ interface HeroSectionProps {
 }
 
 const ROUTES = {
-  TOURNAMENTS: APP_ROUTES.TOURNAMENTS,
+  TOURNAMENTS: ROUTES.TOURNAMENTS,
   STATS_ANCHOR: "#stats",
 } as const
 
@@ -59,7 +59,7 @@ export const HeroSection = ({ content }: HeroSectionProps) => {
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Arena Background"
-          src={APP_METADATA.DEFAULT_BG_IMG}
+          src={APP.DEFAULT_BG_IMG}
           fill
           priority
           className="object-cover opacity-50"

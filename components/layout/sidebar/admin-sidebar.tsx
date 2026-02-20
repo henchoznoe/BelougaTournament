@@ -21,7 +21,7 @@ import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { APP_ROUTES } from "@/lib/config/routes"
+import { ROUTES } from "@/lib/config/routes"
 
 interface AdminSidebarProps {
   userEmail: string
@@ -31,22 +31,22 @@ interface AdminSidebarProps {
 const MENU_ITEMS = [
   {
     label: "Dashboard",
-    href: APP_ROUTES.ADMIN_DASHBOARD,
+    href: ROUTES.ADMIN_DASHBOARD,
     icon: LayoutDashboard,
   },
   {
     label: "Tournois",
-    href: APP_ROUTES.ADMIN_TOURNAMENTS,
+    href: ROUTES.ADMIN_TOURNAMENTS,
     icon: Trophy,
   },
   {
     label: "Admins",
-    href: APP_ROUTES.ADMIN_ADMINS,
+    href: ROUTES.ADMIN_ADMINS,
     icon: Users,
   },
   {
     label: "Paramètres",
-    href: APP_ROUTES.ADMIN_SETTINGS,
+    href: ROUTES.ADMIN_SETTINGS,
     icon: Settings,
   },
 ] as const
@@ -58,8 +58,8 @@ export const AdminSidebar = ({
   const pathname = usePathname()
 
   const isActive = (path: string) => {
-    if (path === APP_ROUTES.ADMIN_DASHBOARD) {
-      return pathname === APP_ROUTES.ADMIN_DASHBOARD
+    if (path === ROUTES.ADMIN_DASHBOARD) {
+      return pathname === ROUTES.ADMIN_DASHBOARD
     }
     return pathname.startsWith(path)
   }

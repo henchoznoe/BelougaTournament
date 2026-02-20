@@ -12,8 +12,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TournamentCard } from '@/components/features/tournament/card/tournament-card'
 import { Button } from '@/components/ui/button'
-import { APP_METADATA } from '@/lib/config/constants'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { APP } from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/core/prisma'
 import type { PublicTournament } from '@/lib/services/tournament.service'
 import { Visibility } from '@/prisma/generated/prisma/enums'
@@ -50,7 +50,7 @@ const ArchivePage = async () => {
       <div className="absolute inset-0 z-0">
         <Image
           alt="Belouga Tournament Arena Background"
-          src={APP_METADATA.DEFAULT_BG_IMG}
+          src={APP.DEFAULT_BG_IMG}
           fill
           priority
           className="object-cover opacity-50"
@@ -78,7 +78,7 @@ const ArchivePage = async () => {
               variant="outline"
               className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all"
             >
-              <Link href={APP_ROUTES.TOURNAMENTS}>
+              <Link href={ROUTES.TOURNAMENTS}>
                 <ChevronLeft className="mr-2 size-4" />
                 Retour aux tournois
               </Link>

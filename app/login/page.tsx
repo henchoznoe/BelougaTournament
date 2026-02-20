@@ -15,8 +15,8 @@ import Link from 'next/link'
 import { LoginCard } from '@/components/features/auth/login-card'
 import SocialLogin from '@/components/features/auth/social-login'
 import { Button } from '@/components/ui/button'
-import { APP_METADATA } from '@/lib/config/constants'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { DEFAULT_ASSETS } from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 
 const LoginPage = () => {
   return (
@@ -25,7 +25,7 @@ const LoginPage = () => {
       <div className="absolute inset-0 z-0">
         <Image
           alt="Belouga Background"
-          src={APP_METADATA.DEFAULT_BG_IMG}
+          src={DEFAULT_ASSETS.BG_IMAGE}
           fill
           priority
           className="object-cover opacity-50 grayscale"
@@ -47,7 +47,7 @@ const LoginPage = () => {
             variant="ghost"
             className="mb-8 text-zinc-400 hover:bg-white/5 hover:text-white"
           >
-            <Link href={APP_ROUTES.HOME}>
+            <Link href={ROUTES.HOME}>
               <ArrowLeft className="mr-2 size-4" />
               Retour à l'accueil
             </Link>

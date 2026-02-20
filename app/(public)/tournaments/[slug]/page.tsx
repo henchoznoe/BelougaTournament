@@ -22,7 +22,7 @@ import { RegistrationForm } from '@/components/features/registration/registratio
 import { TwitchEmbed } from '@/components/features/stream/twitch-embed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { ROUTES } from '@/lib/config/routes'
 import { getSiteSettings } from '@/lib/services/settings.service'
 import { getTournamentBySlug } from '@/lib/services/tournament.service'
 import { formatDateTime } from '@/lib/utils'
@@ -92,7 +92,7 @@ const TournamentPage = async ({
           variant="ghost"
           className="mb-8 text-zinc-400 hover:bg-white/5 hover:text-white pl-0 hover:pl-4 transition-all"
         >
-          <Link href={APP_ROUTES.TOURNAMENTS}>
+          <Link href={ROUTES.TOURNAMENTS}>
             <ChevronRight className="mr-2 size-4 rotate-180" />
             Retour
           </Link>

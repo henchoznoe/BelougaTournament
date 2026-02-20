@@ -8,7 +8,7 @@
 
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { APP_METADATA } from '@/lib/config/constants'
+import { APP } from '@/lib/config/constants'
 
 const PublicLoading = () => {
   return (
@@ -16,8 +16,8 @@ const PublicLoading = () => {
       <div className="relative">
         <div className="absolute inset-0 animate-pulse rounded-full bg-blue-500/20 blur-xl" />
         <Image
-          src={APP_METADATA.DEFAULT_LOGO}
-          alt={APP_METADATA.NAME}
+          src={APP.DEFAULT_LOGO}
+          alt={APP.NAME}
           width={80}
           height={80}
           className="relative z-10 animate-bounce-slow"

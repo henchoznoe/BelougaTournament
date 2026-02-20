@@ -53,33 +53,3 @@ export const sendEmail = async ({
     }
   }
 }
-
-export const generateRegistrationEmailHtml = (
-  tournamentTitle: string,
-  status: string,
-  cancellationUrl: string,
-): string => {
-  return `
-    <div style="font-family: sans-serif; color: #333;">
-      <h1>Inscription reçue</h1>
-      <p>Vous avez inscrit votre équipe pour le tournoi ${tournamentTitle}</p>
-      <p>Statut actuel: ${status}</p>
-      <p>Vous pouvez annuler votre inscription en cliquant sur le lien suivant: <a href="${cancellationUrl}">Annuler l'inscription</a></p>
-      <p>Cordialement</p>
-    </div>
-  `
-}
-
-export const generateStatusUpdateEmailHtml = (
-  tournamentTitle: string,
-  status: string,
-): string => {
-  return `
-    <div style="font-family: sans-serif; color: #333;">
-      <h1>Mise à jour du tournoi ${tournamentTitle}</h1>
-      <p>Nous tenons à vous informer que votre inscription pour le tournoi ${tournamentTitle} a été mise à jour.</p>
-      <p>Statut actuel: ${status}</p>
-      <p>Cordialement</p>
-    </div>
-  `
-}

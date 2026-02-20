@@ -51,7 +51,7 @@ import {
   deleteRegistration,
   updateRegistrationStatus,
 } from '@/lib/actions/registration'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { ROUTES } from '@/lib/config/routes'
 import prisma from '@/lib/core/prisma'
 import { formatDate } from '@/lib/utils'
 
@@ -120,9 +120,7 @@ const TournamentManagerPage = async ({
             variant="outline"
             className="h-12 border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300"
           >
-            <Link
-              href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${tournament.id}/edit`}
-            >
+            <Link href={`${ROUTES.ADMIN_TOURNAMENTS}/${tournament.id}/edit`}>
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Link>

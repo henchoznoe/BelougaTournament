@@ -22,7 +22,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { APP_ROUTES } from '@/lib/config/routes'
+import { ROUTES } from '@/lib/config/routes'
 import auth from '@/lib/core/auth'
 import prisma from '@/lib/core/prisma'
 import { formatDate } from '@/lib/utils'
@@ -265,7 +265,7 @@ const RecentActivityItem = ({
           asChild
         >
           <Link
-            href={`${APP_ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`}
+            href={`${ROUTES.ADMIN_TOURNAMENTS}/${registration.tournamentId}`}
           >
             Voir <ArrowUpRight className="ml-1 size-3" />
           </Link>
@@ -298,7 +298,7 @@ const AdminDashboard = async () => {
           size="lg"
           className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500"
         >
-          <Link href={APP_ROUTES.ADMIN_NEW_TOURNAMENT}>
+          <Link href={ROUTES.ADMIN_NEW_TOURNAMENT}>
             <Trophy className="mr-2 h-5 w-5" />
             Nouveau tournoi
           </Link>
@@ -383,7 +383,7 @@ const AdminDashboard = async () => {
               title="Gestion des tournois"
               description="Gestion des tournois"
               icon={Trophy}
-              href={APP_ROUTES.ADMIN_TOURNAMENTS}
+              href={ROUTES.ADMIN_TOURNAMENTS}
               currentRole={userRole}
               colors={STYLES.BLUE}
             />
@@ -392,7 +392,7 @@ const AdminDashboard = async () => {
               title="Gestion des administrateurs"
               description="Gestion des administrateurs"
               icon={Users}
-              href={APP_ROUTES.ADMIN_ADMINS}
+              href={ROUTES.ADMIN_ADMINS}
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
               colors={STYLES.PURPLE}
@@ -402,7 +402,7 @@ const AdminDashboard = async () => {
               title="Paramètres du site"
               description="Paramètres du site"
               icon={Settings}
-              href={APP_ROUTES.ADMIN_SETTINGS}
+              href={ROUTES.ADMIN_SETTINGS}
               requiredRole={Role.SUPERADMIN}
               currentRole={userRole}
               colors={STYLES.ZINC}

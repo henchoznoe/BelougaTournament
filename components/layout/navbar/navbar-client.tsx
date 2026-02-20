@@ -17,8 +17,8 @@ import { Menu, Trophy, Video, Mail, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
-import { APP_METADATA } from "@/lib/config/constants"
-import { APP_ROUTES } from "@/lib/config/routes"
+import { APP } from "@/lib/config/constants"
+import { ROUTES } from "@/lib/config/routes"
 
 interface NavbarClientProps {
   settings: {
@@ -33,20 +33,20 @@ interface NavLogoProps {
 }
 
 const NAV_LINKS = [
-  { href: APP_ROUTES.HOME, label: "Accueil", icon: Home },
-  { href: APP_ROUTES.TOURNAMENTS, label: "Tournois", icon: Trophy },
-  { href: APP_ROUTES.STREAM, label: "Stream", icon: Video },
-  { href: APP_ROUTES.CONTACT, label: "Contact", icon: Mail },
+  { href: ROUTES.HOME, label: "Accueil", icon: Home },
+  { href: ROUTES.TOURNAMENTS, label: "Tournois", icon: Trophy },
+  { href: ROUTES.STREAM, label: "Stream", icon: Video },
+  { href: ROUTES.CONTACT, label: "Contact", icon: Mail },
 ] as const
 
 const NavLogo = ({ url, size = 48, className }: NavLogoProps) => {
-  const src = url || APP_METADATA.DEFAULT_LOGO
+  const src = url || APP.DEFAULT_LOGO
 
   return (
     <div className="relative">
       <Image
         src={src}
-        alt={APP_METADATA.NAME}
+        alt={APP.NAME}
         width={size}
         height={size}
         className={cn('h-auto w-auto transition-transform duration-300', className)}
@@ -80,7 +80,7 @@ export const NavbarClient = ({ settings }: NavbarClientProps) => {
             />
           </div>
           <span className="whitespace-nowrap font-paladins text-md tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-2xl">
-            {APP_METADATA.NAME}
+            {APP.NAME}
           </span>
         </Link>
 
@@ -138,7 +138,7 @@ export const NavbarClient = ({ settings }: NavbarClientProps) => {
                     <NavLogo url={settings.logoUrl} size={64} />
                   </div>
                   <SheetTitle className="font-paladins text-2xl tracking-wider text-white text-center">
-                    {APP_METADATA.NAME}
+                    {APP.NAME}
                   </SheetTitle>
                 </div>
               </SheetHeader>

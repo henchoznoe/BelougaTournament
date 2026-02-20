@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card"
 import { type PublicTournament } from "@/lib/services/tournament.service"
 import { formatDateTime } from "@/lib/utils"
-import { APP_ROUTES } from "@/lib/config/routes"
+import { ROUTES } from "@/lib/config/routes"
 import { TournamentFormat } from "@/prisma/generated/prisma/enums"
 
 type TournamentCardProps = {
@@ -76,7 +76,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           asChild
           className="w-full bg-zinc-800 font-semibold text-white hover:bg-blue-600 transition-all duration-300"
         >
-          <Link href={`${APP_ROUTES.TOURNAMENTS}/${tournament.slug}`}>
+          <Link href={`${ROUTES.TOURNAMENTS}/${tournament.slug}`}>
             <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
               Voir les détails
               <ArrowRight className="ml-2 h-4 w-4" />

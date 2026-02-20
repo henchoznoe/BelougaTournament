@@ -17,9 +17,9 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 
-import { APP_METADATA } from "@/lib/config/constants"
+import { APP } from "@/lib/config/constants"
 import { getSiteSettings } from "@/lib/services/settings.service"
-import { APP_ROUTES } from "@/lib/config/routes"
+import { ROUTES } from "@/lib/config/routes"
 import { cn } from "@/lib/utils"
 
 interface SocialLink {
@@ -48,13 +48,13 @@ const BRAND_COLORS = {
 } as const
 
 const FooterLogo = ({ url }: { url: string | null }) => {
-  const src = url || APP_METADATA.DEFAULT_LOGO
+  const src = url || APP.DEFAULT_LOGO
 
   return (
     <div className="relative">
       <Image
         src={src}
-        alt={APP_METADATA.NAME}
+        alt={APP.NAME}
         width={120}
         height={120}
         className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
@@ -104,18 +104,18 @@ export const Footer = async () => {
     {
       title: "Tournois",
       links: [
-        { label: "Tournois à venir", href: APP_ROUTES.TOURNAMENTS },
+        { label: "Tournois à venir", href: ROUTES.TOURNAMENTS },
         {
           label: "Archives des tournois",
-          href: APP_ROUTES.TOURNAMENTS_ARCHIVE,
+          href: ROUTES.TOURNAMENTS_ARCHIVE,
         },
-        { label: "Règles", href: APP_ROUTES.RULES },
+        { label: "Règles", href: ROUTES.RULES },
       ],
     },
     {
       title: "Communauté",
       links: [
-        { label: "Stream", href: APP_ROUTES.STREAM },
+        { label: "Stream", href: ROUTES.STREAM },
         {
           label: "Discord",
           href: settings.socialDiscord,
@@ -125,9 +125,9 @@ export const Footer = async () => {
     {
       title: "Support",
       links: [
-        { label: "Contact", href: APP_ROUTES.CONTACT },
-        { label: "Admin", href: APP_ROUTES.ADMIN_DASHBOARD },
-        { label: "Légal", href: APP_ROUTES.LEGAL },
+        { label: "Contact", href: ROUTES.CONTACT },
+        { label: "Admin", href: ROUTES.ADMIN_DASHBOARD },
+        { label: "Légal", href: ROUTES.LEGAL },
       ],
     },
   ]
@@ -139,7 +139,7 @@ export const Footer = async () => {
           <Link href="/" className="group flex flex-col items-center gap-6">
             <FooterLogo url={settings.logoUrl} />
             <span className="font-paladins text-3xl tracking-widest text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] md:text-5xl">
-              {APP_METADATA.NAME}
+              {APP.NAME}
             </span>
           </Link>
         </div>
@@ -189,30 +189,30 @@ export const Footer = async () => {
         <div className="border-t border-zinc-800 pt-8">
           <div className="flex flex-col items-center justify-between gap-2 lg:gap-4 lg:flex-row">
               <p className="text-sm text-zinc-500 text-center lg:text-left">
-                &copy; {new Date().getFullYear()} {APP_METADATA.NAME}.{" "}
+                &copy; {new Date().getFullYear()} {APP.NAME}.{" "}
                 Tous droits réservés
               </p>
 
               <div className="flex flex-col items-center gap-2 lg:gap-6 text-sm text-zinc-500 lg:flex-row">
                 <Link
-                  href={APP_ROUTES.PRIVACY}
+                  href={ROUTES.PRIVACY}
                   className="transition-colors hover:text-white"
                 >
                   Confidentialité
                 </Link>
                 <Link
-                  href={APP_ROUTES.TERMS}
+                  href={ROUTES.TERMS}
                   className="transition-colors hover:text-white"
                 >
                   Conditions
                 </Link>
                 <a
-                  href={APP_METADATA.AUTHOR_URL}
+                  href={APP.AUTHOR_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-white"
                 >
-                  Développé par {APP_METADATA.AUTHOR_NAME}
+                  Développé par {APP.AUTHOR_NAME}
                 </a>
               </div>
           </div>
