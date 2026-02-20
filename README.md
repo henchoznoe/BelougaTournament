@@ -68,7 +68,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 ### Prerequisites
 
 - Node.js 25+ (tested with 25.6.1)
-- A PostgreSQL Database
+- Docker & Docker Compose (for local database)
 
 ### Installation
 
@@ -88,18 +88,15 @@ The platform enables administrators to host and manage diverse gaming tournament
     ```bash
     cp .env.example .env
     ```
-    *Ensure all environment variables are set before running the app. `.env` is used for local development only, while `.env.preview` and `.env.production` are used for preview and production deployments respectively (You must copy the content of these files to the Vercel Project Settings > Environment Variables).*
+    *Note: Your local `.env` should point to your Docker PostgreSQL instance (postgresql://postgres:postgres@localhost:5432/belouga_tournament)*
 
 4.  **Database Initialization:**
     ```bash
-    # Generate Prisma Client
-    pnpm generate
-
-    # Start local infrastructure
+    # Start local Docker infrastructure
     pnpm docker:up
 
-    # Push schema to DB and seed initial Admin users
-    pnpm db:deploy
+    # Generate Prisma Client and apply migrations to local DB
+    pnpm migrate
 
     # Launch Prisma Studio
     pnpm db:studio
@@ -116,11 +113,15 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 | Script | Description |
 | :--- | :--- |
-| `pnpm dev` | Starts the development server with Turbopack. |
-| `pnpm build` | Builds the application for production. |
+| `pnpm dev` | Starts the development server. |
+| `pnpm build` | Generates Prisma client, applies pending migrations, seeds admin data, and builds the app. |
 | `pnpm start` | Starts the production server. |
-| `pnpm check` | Runs **Biome** to check for linting and formatting errors. |
+| `pnpm lint` | Runs **Biome** to check for linting errors. |
 | `pnpm format` | Formatting fix with Biome. |
+| `pnpm check` | Runs **Biome** to check for linting and formatting errors and applies fixes. |
+| `pnpm generate` | Generates Prisma client. |
+| `pnpm migrate` | Creates and applies local migrations (prisma migrate dev). Use this when altering `schema.prisma`. |
+| `pnpm db:deploy` | Applies pending migrations and seeds the database (used automatically during build). |
 | `pnpm db:reset` | Resets the database (Force). |
 | `pnpm db:studio` | Opens Prisma Studio to visualize data. |
 | `pnpm docker:up` | Starts the local infrastructure (PostgreSQL). |
@@ -128,24 +129,25 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 ## 🏗️ Deployment (Vercel)
 
-#### Preview & Production
-The project is deployed on **Vercel**.
+We use a strict 3-tier database architecture to ensure data safety:
 
-1.  **Environment Variables:**
-    - **Do not** check in `.env.preview` or `.env.production`.
-    - Manually copy the content of these files to the **Vercel Project Settings > Environment Variables**.
-    - Assign variables to the specific **Environment** (Preview or Production).
+- **Local**: Docker Container (`belouga_tournament_db`)
+- **Preview**: Supabase Staging Project
+- **Production**: Supabase Production Project
 
-2.  **Database:**
-    - Ensure your Vercel project is connected to a Vercel Postgres instance (or external provider).
-    - The build command `pnpm build` will just build the app.
-    - The `postinstall` script (if configured) or manual `pnpm db:deploy` should be used to apply migrations on promotion.
+### Vercel configuration
 
-## 🔒 Security
+1. Environment variables
 
-- **Authentication:** Custom JWT implementation with secure HTTP-only cookies.
-- **Middleware:** `proxy.ts` protects admin routes at the edge.
-- **Validation:** All inputs are sanitized and validated via Zod schemas.
+- Do not use `.env.preview` or `.env.production` files.
+- Go to **Vercel Project Settings > Environment Variables**.
+- Assign variables to the specific **Environment** (Preview or Production).
+
+2. Automated migrations
+
+- Vercel automatically handles database migrations during deployment.
+- The `build` script in `package.json` (`prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts && next build`) ensures that the target database is always up-to-date before compiling the application.
+- **Important**: Never use `prisma migrate dev` on a remote database. Always use `pnpm migrate` locally and commit the generated SQL files.
 
 ## 📄 License
 

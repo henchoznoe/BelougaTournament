@@ -10,6 +10,8 @@ import Image from 'next/image'
 import { AdminSidebar } from '@/components/layout/sidebar/admin-sidebar'
 import { logoutHandler } from '@/lib/actions/auth'
 import AdminGuard from '@/components/auth/admin-guard'
+import auth from '@/lib/core/auth'
+import { headers } from 'next/headers'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -38,12 +40,19 @@ const AdminBackground = () => {
 }
 
 const AdminLayout = async (props: Readonly<LayoutProps>) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
   return (
     <AdminGuard>
       <div className="flex min-h-screen flex-col md:flex-row bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
         <AdminBackground />
 
-        <AdminSidebar userEmail={'TODO'} logoutAction={logoutHandler} />
+        <AdminSidebar
+          userEmail={session?.user?.email ?? 'Unknown User'}
+          logoutAction={logoutHandler}
+        />
 
         <main className="flex-1 relative overflow-y-auto h-screen z-10">
           <div className="p-8 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">

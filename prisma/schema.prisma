@@ -36,12 +36,15 @@ model User {
   name          String
   email         String       @unique
   emailVerified Boolean
-  image         String?
+  avatar        String?
+  discordId     String?      @unique
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   role          Role         @default(ADMIN)
   sessions      Session[]
   accounts      Account[]
+  registrations Registration[]
+  playerEntries Player[]
 
   @@map("user")
 }
@@ -108,7 +111,7 @@ model Tournament {
   maxParticipants   Int?
   format            TournamentFormat
   teamSize          Int               @default(1)
-  challongeId       String?
+  toornamentId      String?
   streamUrl         String
   autoApprove       Boolean           @default(false)
   visibility        Visibility        @default(PRIVATE)
@@ -132,7 +135,8 @@ model TournamentField {
 model Registration {
   id           String     @id @default(uuid())
   teamName     String?
-  contactEmail String
+  managerId    String
+  manager      User       @relation(fields: [managerId], references: [id], onDelete: Cascade)
   status       RegistrationStatus @default(PENDING)
   createdAt    DateTime   @default(now())
   tournamentId String
@@ -141,12 +145,14 @@ model Registration {
 
   cancellationToken String @default(uuid())
 
-  @@unique([tournamentId, contactEmail])
+  @@unique([tournamentId, managerId])
 }
 
 model Player {
   id             String       @id @default(uuid())
   nickname       String
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   registrationId String
   registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   data           PlayerData[]

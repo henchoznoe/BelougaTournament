@@ -1198,6 +1198,8 @@ export const UserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
+  avatar: 'avatar',
+  discordId: 'discordId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   role: 'role'
@@ -1262,7 +1264,7 @@ export const TournamentScalarFieldEnum = {
   maxParticipants: 'maxParticipants',
   format: 'format',
   teamSize: 'teamSize',
-  challongeId: 'challongeId',
+  toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
   autoApprove: 'autoApprove',
   visibility: 'visibility',
