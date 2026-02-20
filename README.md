@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Belouga Tournament
 
-## Getting Started
+<div align="center">
+  <h3>Modern Tournament Management Platform</h3>
+  <p>Built with Next.js 16, Prisma 7, and TailwindCSS v4.</p>
+</div>
 
-First, run the development server:
+## 📝 Description
+
+**Belouga Tournament** is a robust, full-stack tournament management platform redesigned for modern e-sports communities. Migrated from a legacy stack to **Next.js 16 (App Router)**, it focuses on performance, type safety, developer experience, and a premium "Dark Glass" gamer aesthetic.
+
+The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic forms, brackets via Toornament) while providing a frictionless, 1-click Discord registration experience for players (Solo/Team). 
+
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, RSC)
+- **Database:** PostgreSQL (via [Supabase](https://supabase.com/))
+- **ORM:** [Prisma 7](https://www.prisma.io/)
+- **Authentication:** [BetterAuth](https://better-auth.com/) (Discord OAuth Provider)
+- **Email Engine:** [Resend](https://resend.com/) + [React Email](https://react.email/) (Transactional notifications)
+- **Object Storage:** [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob) (Banners, Sponsor Logos)
+- **Types:** TypeScript (Strict)
+- **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/) (with Skeleton Loaders for optimal UX)
+- **State/Form:** React Hook Form + Zod v4 + Server Actions
+- **Tooling:** [Biome](https://biomejs.dev/) (Linting/Formatting)
+
+## ✨ Core Features
+
+### 🎮 Public Interface
+- **Dynamic Landing Page:** Features a "Hero" tournament, sponsor showcases, and live Twitch integration (`quentadoulive`).
+- **1-Click Discord Login:** Frictionless authentication and identity management relying on immutable Discord IDs.
+- **Tournament Hub:** Detailed views including rules, cashprize, and dynamic format (Solo/Team) with real-time status badges (`PRÉVU`, `EN COURS`, `TERMINÉ`).
+- **Registration Engine:**
+  - **Dynamic Fields:** Support for admin-defined questions (Riot ID, Rank, etc.).
+  - **Team Management:** Built-in support for Captain + Teammates flow.
+  - **Validation:** Real-time checks for quotas (SLOT limits) and deadlines.
+- **Optimized UX:** Skeleton loaders via `shadcn/ui` for seamless Twitch embeds and data fetching.
+
+### 🛡️ Admin & SuperAdmin Dashboard
+- **Secure Access:** Middleware proxy verifying `ADMIN` or `SUPERADMIN` roles.
+- **Tournament CRUD:** Full lifecycle management (Draft -> Published -> Archived).
+- **Form Builder:** Intuitive UI to configure custom registration fields per tournament.
+- **Toornament CSV Export:** Intelligent bridge to export registered teams as CSV for 1-click bracket generation in Toornament.
+- **Team & Player Moderation:** Capabilities to kick players or dissolve teams.
+- **Notification Engine:** Automated transactional emails (registration confirmation, kicks, team dissolution, status changes).
+- **SuperAdmin Exclusives:** 
+  - Sponsor management (CRUD with priority sorting).
+  - Global content configuration (Logos, Twitch Stream URL, Social Networks).
+  - Role assignment (Promoting users to Admins).
+
+## 🗂️ Project Structure
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+├── app/                  # Next.js App Router
+│   ├── (public)/         # Public facing routes (Landing, Tournaments)
+│   ├── admin/            # Protected Admin Dashboard routes
+│   └── api/              # API endpoints (Webhooks, Auth, Exports)
+├── components/           # React Components
+│   ├── features/         # Domain-specific components (Tournament, Auth, etc.)
+│   ├── layout/           # Layout components (Headers, Footers, Sections)
+│   └── ui/               # Reusable primitives (shadcn/ui)
+├── lib/                  # Core Utilities & Business Logic
+│   ├── actions/          # Server Actions
+│   ├── config/           # Configuration primitives (Routes, Messages)
+│   ├── data/             # Data Access Layer (Queries/Mutations)
+│   ├── validations/      # Zod Schemas
+│   ├── auth.ts           # Authentication logic (BetterAuth)
+│   └── env.ts            # Environment verification
+├── prisma/               # Database Schema & Seeds
+└── public/               # Static Assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 25+ (tested with 25.6.1)
+- Docker & Docker Compose (for local database)
+- pnpm
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/henchoznoe/belouga-tournament.git
+    cd belouga-tournament
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3.  **Environment Setup:**
+    Duplicate `.env.example` to `.env` and fill in your secrets (Discord OAuth, Resend API key, Vercel Blob token).
+    ```bash
+    cp .env.example .env
+    ```
+    *Note: Your local `.env` should point to your Docker PostgreSQL instance (`postgresql://postgres:postgres@localhost:5432/belouga_tournament`).*
 
-## Deploy on Vercel
+4.  **Database Initialization:**
+    ```bash
+    # Start local Docker infrastructure
+    pnpm docker:up
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    # Generate Prisma Client and apply migrations to local DB
+    pnpm migrate
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    # Launch Prisma Studio
+    pnpm db:studio
+    ```
+
+5.  **Run Development Server:**
+    ```bash
+    pnpm dev
+    ```
+
+    > Visit [http://localhost:3000](http://localhost:3000).
+
+## 📜 Scripts
+
+| Script | Description |
+| :--- | :--- |
+| `pnpm dev` | Starts the development server. |
+| `pnpm build` | Generates Prisma client, applies pending migrations, seeds admin data, and builds the app. |
+| `pnpm start` | Starts the production server. |
+| `pnpm lint` | Runs **Biome** to check for linting errors. |
+| `pnpm format` | Formatting fix with Biome. |
+| `pnpm check` | Runs **Biome** to check for linting and formatting errors and applies fixes. |
+| `pnpm generate` | Generates Prisma client. |
+| `pnpm migrate` | Creates and applies local migrations (`prisma migrate dev`). Use this when altering `schema.prisma`. |
+| `pnpm db:deploy` | Applies pending migrations and seeds the database (used automatically during build). |
+| `pnpm db:reset` | Resets the database (Force). |
+| `pnpm db:studio` | Opens Prisma Studio to visualize data. |
+| `pnpm docker:up` | Starts the local infrastructure (PostgreSQL). |
+| `pnpm docker:down` | Stops the local infrastructure. |
+
+## 🏗️ Deployment (Vercel)
+
+We use a strict 3-tier database architecture to ensure data safety:
+
+- **Local**: Docker Container (`belouga_tournament_db`)
+- **Preview**: Supabase Staging Project
+- **Production**: Supabase Production Project
+
+### Vercel configuration
+
+1. Environment variables
+
+- Do not use `.env.preview` or `.env.production` files.
+- Go to **Vercel Project Settings > Environment Variables**.
+- Assign variables to the specific **Environment** (Preview or Production).
+
+2. Automated migrations
+
+- Vercel automatically handles database migrations during deployment.
+- The `build` script in `package.json` (`prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts && next build`) ensures that the target database is always up-to-date before compiling the application.
+- **Important**: Never use `prisma migrate dev` on a remote database. Always use `pnpm migrate` locally and commit the generated SQL files.
+
+## 📄 License
+
+This project is licensed under the MIT License.

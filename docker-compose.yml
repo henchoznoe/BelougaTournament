@@ -1,0 +1,22 @@
+# File: docker-compose.yml
+# Description: Docker Compose configuration options.
+# Author: Noé Henchoz
+# License: MIT
+# Copyright (c) 2026 Noé Henchoz
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: always
+    container_name: belouga_tournament_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: belouga_tournament
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

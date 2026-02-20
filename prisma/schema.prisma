@@ -1,0 +1,224 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "./generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum TournamentFormat {
+  SOLO
+  TEAM
+}
+
+enum FieldType {
+  TEXT
+  NUMBER
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WAITLIST
+}
+
+enum TournamentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model User {
+  id            String                   @id @default(uuid())
+  name          String
+  email         String                   @unique
+  emailVerified Boolean
+  image         String?
+  discordId     String?                  @unique
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  role          Role                     @default(USER)
+  sessions      Session[]
+  accounts      Account[]
+  registrations TournamentRegistration[]
+  captainOf     Team[]                   @relation("TeamCaptain")
+  teamMembers   TeamMember[]
+  adminOf       AdminAssignment[]        @relation("AssignedAdmin")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Tournament {
+  id                String                   @id @default(uuid())
+  title             String
+  slug              String                   @unique
+  description       String
+  startDate         DateTime
+  endDate           DateTime
+  registrationOpen  DateTime
+  registrationClose DateTime
+  maxTeams          Int?
+  format            TournamentFormat
+  teamSize          Int                      @default(1)
+  game              String? // ex: Valorant, Rocket League
+  imageUrl          String? // Bannière du tournoi
+  rules             String? // Règlement complet du tournoi
+  prize             String? // Cashprize ou récompenses
+  toornamentId      String?
+  streamUrl         String? // Override du stream global (optionnel)
+  autoApprove       Boolean                  @default(false)
+  status            TournamentStatus         @default(DRAFT)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  fields            TournamentField[]
+  teams             Team[]
+  registrations     TournamentRegistration[]
+  adminAssignments  AdminAssignment[]
+
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model TournamentField {
+  id           String     @id @default(uuid())
+  label        String
+  type         FieldType
+  required     Boolean    @default(true)
+  order        Int        @default(0)
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+  id           String                  @id @default(uuid())
+  name         String
+  tournamentId String
+  tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  captainId    String
+  captain      User                    @relation("TeamCaptain", fields: [captainId], references: [id])
+  isFull       Boolean                 @default(false)
+  createdAt    DateTime                @default(now())
+  members      TeamMember[]
+  registration TournamentRegistration?
+
+  @@unique([name, tournamentId])
+  @@map("team")
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@map("team_member")
+}
+
+model TournamentRegistration {
+  id                String             @id @default(uuid())
+  tournamentId      String
+  tournament        Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId            String?            @unique
+  team              Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fieldValues       Json               @default("{}")
+  status            RegistrationStatus @default(PENDING)
+  cancellationToken String             @default(uuid())
+  createdAt         DateTime           @default(now())
+
+  @@unique([tournamentId, userId])
+  @@index([tournamentId])
+  @@index([createdAt])
+  @@map("tournament_registration")
+}
+
+model AdminAssignment {
+  id           String     @id @default(uuid())
+  adminId      String
+  admin        User       @relation("AssignedAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  assignedAt   DateTime   @default(now())
+
+  @@unique([adminId, tournamentId])
+  @@map("admin_assignment")
+}
+
+model GlobalSettings {
+  id        Int     @id @default(1)
+  logoUrl   String?
+  streamUrl String?
+  socials   Json    @default("{}")
+
+  @@map("global_settings")
+}
+
+model Sponsor {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl  String
+  url       String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sponsor")
+}
