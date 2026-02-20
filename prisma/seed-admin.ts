@@ -10,61 +10,52 @@ import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
 import pg from "pg"
 import { PrismaClient } from "./generated/prisma/client"
-import { Role } from '@/prisma/generated/prisma/enums'
+import { Role } from "@/prisma/generated/prisma/enums"
 import { env } from "@/lib/core/env"
 
-type InitialUser = {
-  email: string
-  name: string
-  role: Role
-}
+const seedDatabase = async () => {
+  // Define initial data within the function scope to avoid global variables
+  const initialUsers = [
+    {
+      email: "henchoznoe@gmail.com",
+      name: "Noé Henchoz",
+      role: Role.SUPERADMIN,
+    },
+    {
+      email: "rutschoquentin@gmail.com",
+      name: "Quentin Rutscho",
+      role: Role.SUPERADMIN,
+    }
+  ]
 
-const INITIAL_USERS: InitialUser[] = [
-  {
-    email: "henchoznoe@gmail.com",
-    name: "Noé Henchoz",
-    role: Role.SUPERADMIN,
-  },
-  {
-    email: "rutschoquentin@gmail.com",
-    name: "Quentin Rutscho",
-    role: Role.SUPERADMIN,
-  }
-]
-
-// Create Prisma client
-const createPrismaClient = (connectionString: string): PrismaClient => {
-  const pool = new pg.Pool({ connectionString })
+  // Setup connection pool and adapter
+  const pool = new pg.Pool({ connectionString: env.DATABASE_URL })
   const adapter = new PrismaPg(pool)
-  return new PrismaClient({ adapter })
-}
+  const prisma = new PrismaClient({ adapter })
 
-// Main function to create the initial admin users
-const main = async () => {
-  console.log("Seeding...")
-  const prisma = createPrismaClient(env.DATABASE_URL)
+  console.log("Starting seed process...")
+  console.log("Connected to the database.")
 
   try {
-    for (const user of INITIAL_USERS) {
+    for (const user of initialUsers) {
+      // Upsert user and log in a single iteration
       await prisma.user.upsert({
         where: { email: user.email },
         update: {
           role: user.role,
-          emailVerified: true
-      },
-      create: {
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        emailVerified: true
-      },
-    })
+          emailVerified: true,
+        },
+        create: {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          emailVerified: true,
+        },
+      })
+
+      console.log(`User ${user.name} (${user.email}) is ready with role ${user.role}`)
     }
-    for (const user of INITIAL_USERS) {
-      console.log(
-        `User ${user.name} (${user.email}) is ready with role ${user.role}`,
-      )
-    }
+
     console.log("Seed completed successfully!")
   } catch (error) {
     console.error("Seed failed:", error)
@@ -72,10 +63,11 @@ const main = async () => {
   } finally {
     console.log("Disconnecting from database...")
     await prisma.$disconnect()
+    await pool.end()
   }
 }
 
-main().catch((e) => {
-  console.error(e)
+seedDatabase().catch((error) => {
+  console.error("Fatal error during seeding:", error)
   process.exit(1)
 })

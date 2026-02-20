@@ -10,6 +10,8 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
+    // To allow belouga logo upload
+    // TODO: Look if this is the best way to do it
     remotePatterns: [
       {
         protocol: 'https',
@@ -20,6 +22,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
+      // To allow belouga logo upload
+      // TODO: Look if this is the best way to do it
       bodySizeLimit: '5mb',
     },
   },
