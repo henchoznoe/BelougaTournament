@@ -8,8 +8,8 @@
 
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import prisma from '@/lib/core/prisma'
 import { env } from '@/lib/core/env'
+import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const auth = betterAuth({
