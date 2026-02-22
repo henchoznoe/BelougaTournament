@@ -6,13 +6,15 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import * as Sentry from '@sentry/nextjs'
 import { headers } from 'next/headers'
 import type { z } from 'zod'
 import auth from '@/lib/core/auth'
+import { logger } from '@/lib/core/logger'
 import type { ActionState } from '@/lib/types/actions'
+import { handlePrismaError } from '@/lib/utils/prisma-error'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
-// Update ActionHandler to reflect Better-Auth session structure
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
   session: {
@@ -28,7 +30,8 @@ type ActionOptions<T extends z.ZodType> = {
 }
 
 /**
- * Wraps a server action with authentication, role checking, and input validation.
+ * Wraps a server action with authentication, role checking, input validation,
+ * structured logging, and Sentry error capturing.
  */
 export function authenticatedAction<T extends z.ZodType>({
   schema,
@@ -43,22 +46,15 @@ export function authenticatedAction<T extends z.ZodType>({
       })
 
       if (!session || !session.user) {
-        return {
-          success: false,
-          message: 'Unauthorized',
-        }
+        return { success: false, message: 'Unauthorized' }
       }
 
       // 2. Role Check
       if (role) {
         const allowedRoles = Array.isArray(role) ? role : [role]
-        // Cast role to Role enum to satisfy TypeScript if needed,
-        // assuming database role matches enum
+        // Cast role to Role enum to satisfy TypeScript if needed
         if (!allowedRoles.includes(session.user.role as Role)) {
-          return {
-            success: false,
-            message: 'Unauthorized',
-          }
+          return { success: false, message: 'Unauthorized' }
         }
       }
 
@@ -80,11 +76,16 @@ export function authenticatedAction<T extends z.ZodType>({
       // biome-ignore lint/suspicious/noExplicitAny: Casting to match ActionHandler type
       return await handler(validatedFields.data, session as any)
     } catch (error) {
-      console.error('Safe Action Error:', error)
-      return {
-        success: false,
-        message: 'Internal server error',
+      const prismaResult = handlePrismaError(error)
+      if (prismaResult) {
+        logger.warn({ error }, 'Prisma error in server action')
+        return prismaResult
       }
+
+      logger.error({ error }, 'Unexpected error in server action')
+      Sentry.captureException(error)
+
+      return { success: false, message: 'Internal server error' }
     }
   }
 }
