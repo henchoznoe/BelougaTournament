@@ -18,7 +18,7 @@ const LandingPage = async () => {
   return (
     <>
       <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-        Belouga Tournament preview
+        Belouga Tournament
       </div>
       <CommitSha />
     </>

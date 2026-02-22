@@ -1,5 +1,5 @@
 /**
- * File: lib/auth.ts
+ * File: lib/core/auth.ts
  * Description: Authentication configuration using Better Auth.
  * Author: Noé Henchoz
  * License: MIT

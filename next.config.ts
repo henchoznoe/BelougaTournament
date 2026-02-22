@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.discordapp.com',
+        port: '',
+      },
     ],
   },
   experimental: {

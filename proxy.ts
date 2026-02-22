@@ -9,23 +9,19 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
+import type { AuthSession } from '@/lib/types/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-type BetterAuthSession = {
-  session: { id: string; userId: string; expiresAt: string }
-  user: { id: string; email: string; name: string; role: Role }
-}
 
 const ADMIN_ROLES = new Set<Role>([Role.ADMIN, Role.SUPERADMIN])
 
 /** Fetch the active session from the BetterAuth session endpoint. */
-const fetchSession = async (request: NextRequest): Promise<BetterAuthSession | null> => {
+const fetchSession = async (request: NextRequest): Promise<AuthSession | null> => {
   try {
     const response = await fetch(new URL('/api/auth/get-session', request.url), {
       headers: { cookie: request.headers.get('cookie') ?? '' },
     })
     if (!response.ok) return null
-    return (await response.json()) as BetterAuthSession
+    return (await response.json()) as AuthSession
   } catch {
     return null
   }
