@@ -46,8 +46,8 @@ export default withSentryConfig(nextConfig, {
   tunnelRoute: '/monitoring',
 
   webpack: {
-    // Instrument Vercel Cron Monitors automatically
-    automaticVercelMonitors: true,
+    // Do not instrument Vercel Cron Monitors automatically to avoid deployment alerts
+    automaticVercelMonitors: false,
 
     // Tree-shake Sentry debug logs in production webpack builds
     treeshake: {
