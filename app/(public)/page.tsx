@@ -7,7 +7,7 @@
  */
 
 import type { Metadata } from 'next'
-import { CommitSha } from '@/components/commit-sha'
+import { getCommitHash } from '@/lib/utils/commit-hash'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -16,12 +16,9 @@ export const metadata: Metadata = {
 
 const LandingPage = async () => {
   return (
-    <>
-      <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-        Belouga Tournament
-      </div>
-      <CommitSha />
-    </>
+    <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
+      Belouga Tournament (build {getCommitHash()})
+    </div>
   )
 }
 
