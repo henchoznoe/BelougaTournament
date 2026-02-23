@@ -31,6 +31,11 @@ const auth = betterAuth({
         defaultValue: Role.USER,
         input: false,
       },
+      discordId: {
+        type: 'string',
+        required: false,
+        input: false,
+      },
     },
   },
   databaseHooks: {

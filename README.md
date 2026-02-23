@@ -53,7 +53,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 ```bash
 ├── app/                  # Next.js App Router
 │   ├── (public)/         # Public facing routes (Landing, Tournaments)
-│   ├── admin/            # Protected Admin Dashboard routes
+│   ├── (admin)/          # Protected Admin Dashboard routes
 │   └── api/              # API endpoints (Webhooks, Auth, Exports)
 ├── components/           # React Components
 │   ├── features/         # Domain-specific components (Tournament, Auth, etc.)
@@ -62,12 +62,15 @@ The platform enables administrators to host and manage diverse gaming tournament
 ├── lib/                  # Core Utilities & Business Logic
 │   ├── actions/          # Server Actions
 │   ├── config/           # Configuration primitives (Routes, Messages)
-│   ├── data/             # Data Access Layer (Queries/Mutations)
-│   ├── validations/      # Zod Schemas
-│   ├── auth.ts           # Authentication logic (BetterAuth)
-│   └── env.ts            # Environment verification
+│   ├── core/             # Core business logic (Tournament, Registration, etc.)
+│   ├── hooks/            # Custom React hooks
+│   ├── services/         # Business logic services
+│   ├── types/            # TypeScript types
+│   ├── utils/            # Utility functions
+│   └── validations/      # Zod Schemas
 ├── prisma/               # Database Schema & Seeds
-└── public/               # Static Assets
+├── public/               # Static Assets
+└── tests/                # Unit tests
 ```
 
 ## 🛠️ Getting Started
