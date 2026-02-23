@@ -10,11 +10,11 @@
 // IMPORTS
 // ----------------------------------------------------------------------
 
-import { Slot } from "@radix-ui/react-slot"
-import { type VariantProps, cva } from "class-variance-authority"
-import * as React from "react"
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+import type * as React from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils/cn'
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -26,27 +26,27 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-blue-600 text-white shadow-[0_0_20px_-5px_rgba(37,99,235,0.3)] hover:bg-blue-500 hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.5)] hover:scale-[1.02] active:scale-[0.98]",
+          'bg-blue-600 text-white shadow-[0_0_20px_-5px_rgba(37,99,235,0.3)] hover:bg-blue-500 hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.5)] hover:scale-[1.02] active:scale-[0.98]',
         destructive:
-          "bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 shadow-sm",
+          'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 shadow-sm',
         outline:
-          "border border-zinc-800 bg-zinc-950/50 text-zinc-300 shadow-sm hover:bg-zinc-900 hover:text-white hover:border-zinc-700",
-        secondary: "bg-zinc-800 text-zinc-100 hover:bg-zinc-700",
-        ghost: "hover:bg-zinc-800/50 hover:text-white text-zinc-400",
-        link: "text-blue-500 underline-offset-4 hover:underline",
+          'border border-zinc-800 bg-zinc-950/50 text-zinc-300 shadow-sm hover:bg-zinc-900 hover:text-white hover:border-zinc-700',
+        secondary: 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700',
+        ghost: 'hover:bg-zinc-800/50 hover:text-white text-zinc-400',
+        link: 'text-blue-500 underline-offset-4 hover:underline',
       },
       size: {
-        default: "h-10 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-9 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-12 rounded-md px-8 has-[>svg]:px-4 text-base",
-        icon: "size-10",
-        "icon-sm": "size-8",
-        "icon-lg": "size-12",
+        default: 'h-10 px-4 py-2 has-[>svg]:px-3',
+        sm: 'h-9 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
+        lg: 'h-12 rounded-md px-8 has-[>svg]:px-4 text-base',
+        icon: 'size-10',
+        'icon-sm': 'size-8',
+        'icon-lg': 'size-12',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   },
 )
@@ -61,11 +61,11 @@ const Button = ({
   size,
   asChild = false,
   ...props
-}: React.ComponentProps<"button"> &
+}: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) => {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : 'button'
 
   return (
     <Comp
