@@ -1,5 +1,5 @@
 /**
- * File: lib/auth.ts
+ * File: lib/core/auth.ts
  * Description: Authentication configuration using Better Auth.
  * Author: Noé Henchoz
  * License: MIT
@@ -29,6 +29,11 @@ const auth = betterAuth({
         type: 'string',
         required: false,
         defaultValue: Role.USER,
+        input: false,
+      },
+      discordId: {
+        type: 'string',
+        required: false,
         input: false,
       },
     },

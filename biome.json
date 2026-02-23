@@ -12,7 +12,9 @@
     "ignoreUnknown": false,
     "includes": [
       "app/**",
+      "components/**",
       "lib/**",
+      "tests/**",
       "next.config.ts",
       "!**/package.json",
       "biome.json",

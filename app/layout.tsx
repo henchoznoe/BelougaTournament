@@ -12,7 +12,7 @@ import localFont from 'next/font/local'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { METADATA } from '@/lib/config/constants'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/cn'
 import './globals.css'
 
 interface LayoutProps {

@@ -1,6 +1,6 @@
 /**
- * File: app/login/page.tsx
- * Description: Login page for admin authentication
+ * File: components/features/auth/login-content.tsx
+ * Description: Client wrapper for the login page with animation and social login.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -18,9 +18,10 @@ import { Button } from '@/components/ui/button'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
-const LoginPage = () => {
+/** Client-side login content with background image, animation, and social login button. */
+export const LoginContent = () => {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 text-zinc-50">
+    <>
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -49,18 +50,16 @@ const LoginPage = () => {
           >
             <Link href={ROUTES.HOME}>
               <ArrowLeft className="mr-2 size-4" />
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </Link>
           </Button>
 
-          {/* Login Card Component */}
+          {/* Login Card with Social Login */}
           <LoginCard>
             <SocialLogin />
           </LoginCard>
         </motion.div>
       </div>
-    </div>
+    </>
   )
 }
-
-export default LoginPage

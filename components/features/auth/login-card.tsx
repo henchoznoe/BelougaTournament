@@ -6,8 +6,8 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import type { ReactNode } from 'react'
 import { Gamepad2 } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 interface LoginCardProps {
   children: ReactNode
@@ -24,7 +24,9 @@ export const LoginCard = ({ children }: LoginCardProps) => {
           <h1 className="font-paladins text-3xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
             Connexion
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">Connectez-vous à votre compte</p>
+          <p className="mt-2 text-sm text-zinc-400">
+            Connectez-vous à votre compte
+          </p>
         </div>
 
         {children}

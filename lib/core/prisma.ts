@@ -15,7 +15,7 @@ const createPrismaClient = () => {
   const adapter = new PrismaPg({ connectionString: env.DATABASE_URL })
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    log: env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   }).$extends(withAccelerate())
 }
 

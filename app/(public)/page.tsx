@@ -7,21 +7,26 @@
  */
 
 import type { Metadata } from 'next'
-import { CommitSha } from '@/components/commit-sha'
+import { SessionInfo } from '@/components/features/auth/session-info'
+import { getCommitHash } from '@/lib/utils/commit-hash'
 
 export const metadata: Metadata = {
   title: 'Accueil',
   description: 'Accueil',
 }
 
+/** Landing page displaying session info and build hash for verification. */
 const LandingPage = async () => {
   return (
-    <>
-      <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-        Belouga Tournament preview
+    <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
+      <div className="flex flex-col items-center gap-6 pt-12">
+        <h1 className="font-paladins text-3xl tracking-wider">
+          Belouga Tournament
+        </h1>
+        <p className="text-xs text-zinc-500">build {getCommitHash()}</p>
+        <SessionInfo />
       </div>
-      <CommitSha />
-    </>
+    </div>
   )
 }
 
