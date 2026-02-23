@@ -9,11 +9,12 @@
  */
 
 import 'server-only'
+import { env } from '@/lib/core/env'
 
 type LogLevel = 'info' | 'warn' | 'error'
 type LogContext = Record<string, unknown>
 
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = env.NODE_ENV === 'development'
 
 /** Formats a log entry as a readable string (dev) or structured JSON (prod). */
 const buildEntry = (

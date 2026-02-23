@@ -1,8 +1,8 @@
-# Belouga Tournament
-
 <div align="center">
+<img src="public/assets/logo-blue.png" alt="Logo" width="auto" height="300">
   <h3>Modern Tournament Management Platform</h3>
   <p>Built with Next.js 16, Prisma 7, and TailwindCSS v4.</p>
+  
 </div>
 
 ## 📝 Description

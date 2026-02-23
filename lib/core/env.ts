@@ -39,6 +39,9 @@ const serverSchema = z.object({
   // Monitoring
   SENTRY_DSN: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
+
+  // Vercel runtime metadata
+  VERCEL_GIT_COMMIT_SHA: z.string().optional(),
 })
 
 const isServer = typeof window === 'undefined'
