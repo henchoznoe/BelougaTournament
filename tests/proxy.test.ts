@@ -7,10 +7,10 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthSession } from '@/lib/types/auth'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -55,7 +55,12 @@ describe('proxy — admin route guard', () => {
 
   it('redirects to /unauthorized when user has role USER', async () => {
     mockSession({
-      session: { id: 's1', userId: 'u1', expiresAt: new Date().toISOString(), token: 'tok' },
+      session: {
+        id: 's1',
+        userId: 'u1',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
       user: { id: 'u1', email: 'user@test.com', name: 'User', role: Role.USER },
     })
     const { proxy } = await import('@/proxy')
@@ -68,8 +73,18 @@ describe('proxy — admin route guard', () => {
 
   it('allows access when user has role ADMIN', async () => {
     mockSession({
-      session: { id: 's2', userId: 'u2', expiresAt: new Date().toISOString(), token: 'tok' },
-      user: { id: 'u2', email: 'admin@test.com', name: 'Admin', role: Role.ADMIN },
+      session: {
+        id: 's2',
+        userId: 'u2',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u2',
+        email: 'admin@test.com',
+        name: 'Admin',
+        role: Role.ADMIN,
+      },
     })
     const { proxy } = await import('@/proxy')
 
@@ -80,8 +95,18 @@ describe('proxy — admin route guard', () => {
 
   it('allows access when user has role SUPERADMIN', async () => {
     mockSession({
-      session: { id: 's3', userId: 'u3', expiresAt: new Date().toISOString(), token: 'tok' },
-      user: { id: 'u3', email: 'superadmin@test.com', name: 'Super', role: Role.SUPERADMIN },
+      session: {
+        id: 's3',
+        userId: 'u3',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u3',
+        email: 'superadmin@test.com',
+        name: 'Super',
+        role: Role.SUPERADMIN,
+      },
     })
     const { proxy } = await import('@/proxy')
 
@@ -91,7 +116,10 @@ describe('proxy — admin route guard', () => {
   })
 
   it('redirects to /login when fetch throws', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new Error('Network error')),
+    )
     const { proxy } = await import('@/proxy')
 
     const response = await proxy(makeRequest())

@@ -8,10 +8,10 @@
 
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { authClient } from '@/lib/core/auth-client'
-import { ROUTES } from '@/lib/config/routes'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/lib/config/routes'
+import { authClient } from '@/lib/core/auth-client'
 
 type SocialProvider = 'discord'
 
@@ -30,7 +30,10 @@ export default function SocialLogin() {
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <Button onClick={() => handleLogin('discord')} className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white">
+      <Button
+        onClick={() => handleLogin('discord')}
+        className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
+      >
         Connexion avec Discord
       </Button>
     </div>
