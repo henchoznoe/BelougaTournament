@@ -6,6 +6,8 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { PublicNavbar } from '@/components/features/layout/public-navbar'
+
 interface LayoutProps {
   children: React.ReactNode
 }
@@ -13,7 +15,7 @@ interface LayoutProps {
 const PublicLayout = (props: Readonly<LayoutProps>) => {
   return (
     <div className="min-h-dvh">
-      {/*<Navbar />*/}
+      <PublicNavbar />
       <main>{props.children}</main>
       {/*<Footer />*/}
     </div>
