@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { ReactLenis } from 'lenis/react'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
@@ -49,6 +50,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
       >
         <ScrollToTop />
         {props.children}
+        <ReactLenis root />
         <Toaster richColors position="bottom-center" />
       </body>
     </html>

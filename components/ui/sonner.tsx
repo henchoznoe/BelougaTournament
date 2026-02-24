@@ -2,15 +2,11 @@
  * File: components/ui/sonner.tsx
  * Description: Sonner toast component logic and UI.
  * Author: Noé Henchoz
- * Date: 2025-12-07
  * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
-
-// ----------------------------------------------------------------------
-// IMPORTS
-// ----------------------------------------------------------------------
 
 import {
   CircleCheckIcon,
@@ -21,10 +17,6 @@ import {
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
-
-// ----------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme()
