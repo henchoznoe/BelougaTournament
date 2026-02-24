@@ -45,6 +45,8 @@ jobs:
       - name: Knip check
         run: pnpm knip
         continue-on-error: true
+        env:
+          DIRECT_URL: ""
 
       - name: Run unit tests
         run: pnpm test
