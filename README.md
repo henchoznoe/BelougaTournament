@@ -17,7 +17,6 @@ The platform enables administrators to host and manage diverse gaming tournament
 - **Database:** PostgreSQL (via [Supabase](https://supabase.com/))
 - **ORM:** [Prisma 7](https://www.prisma.io/)
 - **Authentication:** [BetterAuth](https://better-auth.com/) (Discord OAuth Provider)
-- **Email Engine:** [Resend](https://resend.com/) + [React Email](https://react.email/) (Transactional notifications)
 - **Object Storage:** [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob) (Banners, Sponsor Logos)
 - **Types:** TypeScript (Strict)
 - **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/) (with Skeleton Loaders for optimal UX)
@@ -42,7 +41,6 @@ The platform enables administrators to host and manage diverse gaming tournament
 - **Form Builder:** Intuitive UI to configure custom registration fields per tournament.
 - **Toornament CSV Export:** Intelligent bridge to export registered teams as CSV for 1-click bracket generation in Toornament.
 - **Team & Player Moderation:** Capabilities to kick players or dissolve teams.
-- **Notification Engine:** Automated transactional emails (registration confirmation, kicks, team dissolution, status changes).
 - **SuperAdmin Exclusives:** 
   - Sponsor management (CRUD with priority sorting).
   - Global content configuration (Logos, Twitch Stream URL, Social Networks).
@@ -95,7 +93,7 @@ The platform enables administrators to host and manage diverse gaming tournament
     ```
 
 3.  **Environment Setup:**
-    Duplicate `.env.example` to `.env` and fill in your secrets (Discord OAuth, Resend API key, Vercel Blob token).
+    Duplicate `.env.example` to `.env` and fill in your secrets (Discord OAuth, Vercel Blob token).
     ```bash
     cp .env.example .env
     ```
