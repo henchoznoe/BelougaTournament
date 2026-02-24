@@ -19,7 +19,7 @@ const createPrismaClient = () => {
   }).$extends(withAccelerate())
 }
 
-export type PrismaWithAccelerate = ReturnType<typeof createPrismaClient>
+type PrismaWithAccelerate = ReturnType<typeof createPrismaClient>
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaWithAccelerate | undefined
