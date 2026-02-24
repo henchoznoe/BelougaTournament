@@ -174,10 +174,6 @@ L'approche par "Role Playing" a été déterminante pour simplifier les attentes
     - **Taille Variable :** Configurable par tournoi (ex: 5 pour Valo, 2 pour RL).
     - **Waitlist Intelligente :** Optionnelle. Auto-fill si un slot se libère dans une équipe.
 
-3.  **Notifications :**
-    - **Canal :** Email (idéalement celui du compte Discord).
-    - **Scope :** Validation inscription, etc.
-
 4.  **Cycle de Vie (Archives) :**
     - **Automatisation :** SI date_fin < NOW, ALORS statut = 'ARCHIVED'.
     - **UX :** Filtrage simple sur la page tournois.
@@ -210,7 +206,6 @@ L'approche par "Role Playing" a été déterminante pour simplifier les attentes
 
 **Thème 3 : Expérience Joueur (La Fluidité)**
 *   *Flux Critique :* Inscription + Création d'équipe simplifiée.
-*   *Communication :* Notifs par Email (compte Discord).
 *   *Waitlist (V2) :* Liste d'attente automatisée repoussée.
 
 **Thème 4 : Cycle de Vie (L'Automatisation)**
@@ -376,7 +371,7 @@ Cette session a permis de passer d'une liste de fonctionnalités floue à un pla
      - **Si Tournoi Équipe:** 
        - Option "Créer une équipe" (si premier joueur/capitaine)
        - Option "Rejoindre une équipe" (sélection équipe précréée)
-   - **Confirmation:** Message succès + email de confirmation envoyé
+   - **Confirmation:** Message succès
 
 5. **Page Profil Joueur** (/profil)
    - **Informations Affichées:**
@@ -408,7 +403,7 @@ Cette session a permis de passer d'une liste de fonctionnalités floue à un pla
    - **Si Tournoi Équipe:**
      - **Cas A (Premier joueur/Capitaine):** Nomme son équipe → Remplit champs → Soumet
      - **Cas B (Membre):** Sélectionne équipe précréée → Remplit champs → Soumet
-6. **Confirmation:** Message succès + Email de confirmation
+6. **Confirmation:** Message succès
 7. **Limitation V1:** Joueur ne peut PAS quitter une équipe (uniquement Admin peut kick/dissoudre)
 
 **Embed Twitch - Emplacements:**
@@ -593,7 +588,7 @@ Cette session a permis de passer d'une liste de fonctionnalités floue à un pla
 - **Statut :** ✅ Défini (protection route + 404)
 
 **Scénario 4 : Navigation post-inscription**
-- **Comportement :** Email de confirmation envoyé → **Retour automatique** sur page détail tournoi
+- **Comportement :** **Retour automatique** sur page détail tournoi
 - **UX :** Toast de succès + Highlight tab "Inscriptions" (confirmation visuelle)
 - **Statut :** ✅ Défini (flow de redirection)
 
@@ -634,11 +629,8 @@ Cette session a permis de passer d'une liste de fonctionnalités floue à un pla
 
 #### V1 - Ajouts Critiques Identifiés :
 
-1. **Système de Notifications Email**
-   - Confirmation inscription tournoi
-   - Changement statut tournoi (Annulation, Modification dates)
-   - Kick d'une équipe (notification au joueur)
-   - **Provider :** À définir (Resend, SendGrid, etc.)
+1. **Supprimé**
+  - Ce point a été supprimé car il n'est pas pertinent pour la version 1.
 
 2. **Gestion d'État des Équipes**
    - Flag "Complète" (max joueurs atteint)
@@ -770,7 +762,6 @@ export function middleware(request: NextRequest) {
 - ✅ Gestion SuperAdmin (Sponsors, Contenu, Admins)
 
 **Features Techniques V1 :**
-- ✅ Notifications Email (Inscription, Kick)
 - ✅ Skeleton Loaders (shadcn/ui)
 - ✅ Protection Routes (Middleware)
 - ✅ Modals Confirmation (Admin)
@@ -840,10 +831,6 @@ GlobalContent (stream_url, socials, logo, superadmin_only)
 - [ ] Définir contraintes uniques et cascades
 - [ ] Créer seed SuperAdmins initiaux
 
-**Email Provider :**
-- [ ] Choisir provider (Resend recommandé pour Next.js)
-- [ ] Créer templates email (Confirmation inscription, Kick, etc.)
-
 **UI Components (shadcn/ui) :**
 - [ ] Installer shadcn/ui
 - [ ] Préparer composants : Toast, Modal, Skeleton, Table, Form
@@ -860,7 +847,7 @@ GlobalContent (stream_url, socials, logo, superadmin_only)
 - **Cartographie Exhaustive :** 8 écrans Admin + 7 pages Public + 8 composants UI + 12 interactions clés documentés
 - **20+ Edge Cases Identifiés :** Tous les scénarios d'échec UX anticipés avec solutions
 - **Règles Métier Formalisées :** Gestion équipes, inscriptions, intégrité admin, auth documentées
-- **Features Implicites Révélées :** 15 features techniques identifiées (emails, toasts, skeletons, protection routes...)
+- **Features Implicites Révélées :** 15 features techniques identifiées (toasts, skeletons, protection routes...)
 - **Priorisation V1/V2 Claire :** Scope MVP stabilisé vs extensibilité prévue
 
 **Critical Blockers Identified:**
@@ -920,14 +907,14 @@ Identifier TOUT ce qui pourrait manquer avant de commencer la phase de développ
 13. Un SuperAdmin peut-il révoquer un autre SuperAdmin ?
 14. Comment stocker les secrets (Discord Client Secret, Toornament API key) ? (.env.local, Vercel env vars ?)
 
-#### Catégorie 3 : Emails & Notifications (6 questions)
+#### Catégorie 3 : Supprimée
 
-15. Quel provider email choisir ? (Resend, SendGrid, AWS SES, autre ?)
-16. Quels sont TOUS les emails à envoyer ? (Confirmation inscription, changement statut, kick... autres ?)
-17. Faut-il un système d'unsubscribe pour les emails marketing vs transactionnels ?
-18. Comment gérer les erreurs d'envoi email ? (Retry automatique, log, notification admin ?)
-19. Les templates emails sont-ils en français uniquement ou multi-langues (V2) ?
-20. Faut-il envoyer des notifications Discord (webhook bot) en plus des emails ?
+15. Supprimé
+16. Supprimé
+17. Supprimé
+18. Supprimé
+19. Supprimé
+20. Supprimé
 
 #### Catégorie 4 : Assets & Stockage (6 questions)
 
@@ -990,8 +977,8 @@ Identifier TOUT ce qui pourrait manquer avant de commencer la phase de développ
 | **Q10** | Protection spam | Rate limiting nécessaire ? | **Unique constraint seulement** - 1 user = 1 inscription par tournoi. Pas de cooldown/rate limiting V1 |
 | **Q12** | Sessions | Durée et storage ? | **7 jours, DB storage (BetterAuth)** - Remember me en V2, pas de Redis |
 | **Q14** | Secrets | Où stocker les API keys ? | **`.env.local` (local) + Vercel Environment Variables (Preview/Production)** - 3 Discord redirect URLs (localhost, dev.belougatournament.ch, belougatournament.ch) |
-| **Q15** | Email provider | Quel service ? | **Resend + React Email** - 100 emails/jour gratuit, excellent DX Next.js |
-| **Q16** | Emails V1 | Quels emails envoyer ? | **4 emails transactionnels** : 1) Confirmation inscription, 2) Kick d'équipe, 3) Dissolution équipe, 4) Changement statut tournoi. Emails admin/superadmin → V2 |
+| **Q15** | Supprimé |
+| **Q16** | Supprimé |
 | **Q21-22** | Images | Où stocker bannières/logos ? | **Vercel Blob Storage** - Pour tournois ET sponsors, 500MB gratuit, CDN auto |
 | **Q27** | Fallback Toornament | Si API down ? | **Lien externe** - Afficher "Voir le bracket sur Toornament.com" si iframe fail |
 | **Q29** | Embed Twitch | API key nécessaire ? | **Iframe basique** - Juste URL + paramètre `parent`, pas d'API Twitch V1. Détection online/offline → V2 |
@@ -1008,8 +995,6 @@ Identifier TOUT ce qui pourrait manquer avant de commencer la phase de développ
 | **Q9** | CSRF protection | Oui - Next.js middleware + tokens (standard) |
 | **Q11** | Email Discord vérifié | Non pour V1 - Discord OAuth suffit |
 | **Q13** | SuperAdmin révocation | Oui possible - Mais confirmation modale stricte |
-| **Q17** | Unsubscribe emails | Non V1 - Emails transactionnels uniquement (pas marketing) |
-| **Q18** | Erreurs email | Log dans console + async retry (1 tentative), pas de queue V1 |
 | **Q19** | Multi-langues emails | Français uniquement V1 |
 | **Q23** | Taille max upload | 5MB par image (raisonnable pour bannières/logos) |
 | **Q24** | Formats images | PNG, JPG, WebP acceptés - SVG V2 (sécurité) |
@@ -1237,38 +1222,6 @@ if (request.nextUrl.pathname.startsWith('/admin')) {
 
 ---
 
-### 📧 Emails & Notifications
-
-**Provider :** Resend + React Email  
-**Plan :** Gratuit (100 emails/jour)
-
-**Templates V1 (4 emails transactionnels) :**
-
-1. **Confirmation Inscription**
-   - Trigger : Après inscription réussie
-   - Destinataire : Joueur inscrit
-   - Contenu : Détails tournoi, équipe, date, lien règles
-
-2. **Kick d'Équipe**
-   - Trigger : Admin kick joueur
-   - Destinataire : Joueur kické
-   - Contenu : Nom tournoi, raison (optionnel), contact admin
-
-3. **Dissolution Équipe**
-   - Trigger : Admin dissout équipe complète
-   - Destinataire : Tous les membres
-   - Contenu : Nom tournoi, raison, contact admin
-
-4. **Changement Statut Tournoi**
-   - Trigger : Annulation ou report de dates
-   - Destinataire : Tous les inscrits
-   - Contenu : Nouveau statut, nouvelles dates (si applicable)
-
-**Gestion Erreurs :**
-- Log erreurs envoi dans console
-- 1 retry async automatique
-- Pas de dead letter queue V1
-
 **Multi-langues :** Français uniquement V1
 
 ---
@@ -1349,7 +1302,7 @@ Autorisées, admin décide validation avant tournoi.
 **Critical Decisions Made:**
 
 1. ✅ **Architecture DB complète** : 12 tables Prisma, contraintes, index définis
-2. ✅ **Stack confirmée** : Resend emails, Vercel Blob, BetterAuth 7j sessions
+2. ✅ **Stack confirmée** : Vercel Blob, BetterAuth 7j sessions
 3. ✅ **Sécurité validée** : Middleware auth, Discord ID immuable, unique constraints
 4. ✅ **Intégrations clarifiées** : Toornament fallback, Twitch iframe basique, Export CSV bridge
 5. ✅ **Règles métier formalisées** : Fermeture inscriptions, succession capitaine, verrouillages post-pub
@@ -1368,7 +1321,6 @@ Cette session d'audit a transformé un brainstorming déjà très complet en un 
 
 1. ✅ **Créer le Prisma Schema** basé sur les 12 tables définies
 2. ✅ **Setup BetterAuth** avec Discord provider (3 redirect URLs)
-3. ✅ **Setup Resend** et créer les 4 templates React Email
-4. ✅ **Setup Vercel Blob** pour uploads images
-5. ✅ **Implémenter Middleware** auth dès le début
-6. 🚀 **Lancer le développement** avec confiance totale !
+3. ✅ **Setup Vercel Blob** pour uploads images
+4. ✅ **Implémenter Middleware** auth dès le début
+5. 🚀 **Lancer le développement** avec confiance totale !

@@ -1,31 +1,28 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+/**
+ * File: instrumentation-client.ts
+ * Description: Sentry SDK initialisation for the client (browser).
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
 
 import * as Sentry from "@sentry/nextjs";
 
+const TRACE_RATE_PROD = 0.1;
+const TRACE_RATE_DEFAULT = 1.0;
+
+const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 Sentry.init({
-  dsn: "https://0144a1b814fa5683757e4ea944cfebe7@o4510932065714176.ingest.de.sentry.io/4510932069646416",
-
-  // Add optional integrations for additional features
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   integrations: [Sentry.replayIntegration()],
-
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
+  tracesSampleRate: isProduction ? TRACE_RATE_PROD : TRACE_RATE_DEFAULT,
   enableLogs: true,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+  enabled: !isDevelopment,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
