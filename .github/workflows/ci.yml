@@ -42,12 +42,6 @@ jobs:
       - name: Format check
         run: pnpm exec biome format .
 
-      - name: Knip check
-        run: pnpm knip
-        continue-on-error: true
-        env:
-          DIRECT_URL: ""
-
       - name: Run unit tests
         run: pnpm test
         env:
