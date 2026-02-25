@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from 'next'
+import { FeaturesSection } from '@/components/features/landing/features-section'
 import HeroSection from '@/components/features/landing/hero-section'
 
 export const metadata: Metadata = {
@@ -16,10 +17,10 @@ export const metadata: Metadata = {
 
 const LandingPage = async () => {
   return (
-    <div className="flex flex-col overflow-x-hidden">
+    <div className="flex flex-col overflow-x-hidden gap-12">
       <HeroSection />
-      {/*<FeaturesSection />
-      <Suspense fallback={<TournamentsSkeleton />}>
+      <FeaturesSection />
+      {/*<Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>
       <StreamSection channel={settings.socialTwitch} />
