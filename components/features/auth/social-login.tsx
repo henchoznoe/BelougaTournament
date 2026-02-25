@@ -8,6 +8,9 @@
 
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/config/routes'
@@ -16,25 +19,37 @@ import { authClient } from '@/lib/core/auth-client'
 type SocialProvider = 'discord'
 
 export default function SocialLogin() {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
   const handleLogin = async (provider: SocialProvider) => {
     try {
-      await authClient.signIn.social({
+      setIsLoading(true)
+      const { error } = await authClient.signIn.social({
         provider: provider,
         callbackURL: ROUTES.HOME,
       })
+
+      if (error) {
+        Sentry.captureException(error)
+        toast.error(error.message || 'Erreur lors de la connexion')
+      }
     } catch (error) {
-      console.error(error)
-      toast.error('Erreur de connexion')
+      Sentry.captureException(error)
+      toast.error('Une erreur inattendue est survenue')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex w-full flex-col gap-4">
       <Button
         onClick={() => handleLogin('discord')}
-        className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
+        disabled={isLoading}
+        className="w-full bg-[#5865F2] text-white hover:bg-[#4752C4]"
       >
-        Connexion avec Discord
+        {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+        {isLoading ? 'Connexion...' : 'Connexion avec Discord'}
       </Button>
     </div>
   )

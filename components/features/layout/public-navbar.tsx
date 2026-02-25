@@ -9,6 +9,7 @@
 'use client'
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import * as Sentry from '@sentry/nextjs'
 import { motion } from 'framer-motion'
 import {
   ChevronDown,
@@ -26,6 +27,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -57,14 +59,24 @@ const NavbarProfile = ({
   const router = useRouter()
 
   const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push(ROUTES.HOME)
-          if (onClick) onClick()
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Déconnexion réussie')
+            router.push(ROUTES.HOME)
+            if (onClick) onClick()
+          },
+          onError: ctx => {
+            Sentry.captureException(ctx.error)
+            toast.error('Erreur lors de la déconnexion')
+          },
         },
-      },
-    })
+      })
+    } catch (error) {
+      Sentry.captureException(error)
+      toast.error('Une erreur inattendue est survenue')
+    }
   }
 
   if (isPending) {
