@@ -37,7 +37,7 @@ const itemVariants: Variants = {
   },
 }
 
-const HeroSection = () => {
+export const HeroSection = () => {
   return (
     <section className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-4 text-center">
       <div className="absolute inset-0 z-0 select-none">
@@ -118,5 +118,3 @@ const HeroSection = () => {
     </section>
   )
 }
-
-export default HeroSection

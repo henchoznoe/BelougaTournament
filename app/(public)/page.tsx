@@ -8,7 +8,8 @@
 
 import type { Metadata } from 'next'
 import { FeaturesSection } from '@/components/features/landing/features-section'
-import HeroSection from '@/components/features/landing/hero-section'
+import { HeroSection } from '@/components/features/landing/hero-section'
+import { StreamSection } from '@/components/features/landing/stream-section'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -22,9 +23,10 @@ const LandingPage = async () => {
       <FeaturesSection />
       {/*<Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
-      </Suspense>
-      <StreamSection channel={settings.socialTwitch} />
-      <SponsorsSection />*/}
+      </Suspense>*/}
+      {/* TODO: Fetch channel from settings in database */}
+      <StreamSection channel="quentadoulive" />
+      {/*<SponsorsSection />*/}
     </div>
   )
 }
