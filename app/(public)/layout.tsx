@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { PublicFooter } from '@/components/features/layout/public-footer'
 import { PublicNavbar } from '@/components/features/layout/public-navbar'
 
 interface LayoutProps {
@@ -17,7 +18,7 @@ const PublicLayout = (props: Readonly<LayoutProps>) => {
     <div className="min-h-dvh">
       <PublicNavbar />
       <main>{props.children}</main>
-      {/*<Footer />*/}
+      <PublicFooter />
     </div>
   )
 }

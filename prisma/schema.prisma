@@ -205,8 +205,12 @@ model AdminAssignment {
 model GlobalSettings {
   id        Int     @id @default(1)
   logoUrl   String?
-  streamUrl String?
-  socials   Json    @default("{}")
+  twitchUsername String?
+  twitchUrl String?
+  instagramUrl   String?
+  tiktokUrl String?
+  youtubeUrl String?
+  discordUrl String?
 
   @@map("global_settings")
 }

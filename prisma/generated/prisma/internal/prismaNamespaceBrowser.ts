@@ -228,8 +228,12 @@ export type AdminAssignmentScalarFieldEnum = (typeof AdminAssignmentScalarFieldE
 export const GlobalSettingsScalarFieldEnum = {
   id: 'id',
   logoUrl: 'logoUrl',
-  streamUrl: 'streamUrl',
-  socials: 'socials'
+  twitchUsername: 'twitchUsername',
+  twitchUrl: 'twitchUrl',
+  instagramUrl: 'instagramUrl',
+  tiktokUrl: 'tiktokUrl',
+  youtubeUrl: 'youtubeUrl',
+  discordUrl: 'discordUrl'
 } as const
 
 export type GlobalSettingsScalarFieldEnum = (typeof GlobalSettingsScalarFieldEnum)[keyof typeof GlobalSettingsScalarFieldEnum]

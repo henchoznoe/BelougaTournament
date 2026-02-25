@@ -37,20 +37,34 @@ export type GlobalSettingsSumAggregateOutputType = {
 export type GlobalSettingsMinAggregateOutputType = {
   id: number | null
   logoUrl: string | null
-  streamUrl: string | null
+  twitchUsername: string | null
+  twitchUrl: string | null
+  instagramUrl: string | null
+  tiktokUrl: string | null
+  youtubeUrl: string | null
+  discordUrl: string | null
 }
 
 export type GlobalSettingsMaxAggregateOutputType = {
   id: number | null
   logoUrl: string | null
-  streamUrl: string | null
+  twitchUsername: string | null
+  twitchUrl: string | null
+  instagramUrl: string | null
+  tiktokUrl: string | null
+  youtubeUrl: string | null
+  discordUrl: string | null
 }
 
 export type GlobalSettingsCountAggregateOutputType = {
   id: number
   logoUrl: number
-  streamUrl: number
-  socials: number
+  twitchUsername: number
+  twitchUrl: number
+  instagramUrl: number
+  tiktokUrl: number
+  youtubeUrl: number
+  discordUrl: number
   _all: number
 }
 
@@ -66,20 +80,34 @@ export type GlobalSettingsSumAggregateInputType = {
 export type GlobalSettingsMinAggregateInputType = {
   id?: true
   logoUrl?: true
-  streamUrl?: true
+  twitchUsername?: true
+  twitchUrl?: true
+  instagramUrl?: true
+  tiktokUrl?: true
+  youtubeUrl?: true
+  discordUrl?: true
 }
 
 export type GlobalSettingsMaxAggregateInputType = {
   id?: true
   logoUrl?: true
-  streamUrl?: true
+  twitchUsername?: true
+  twitchUrl?: true
+  instagramUrl?: true
+  tiktokUrl?: true
+  youtubeUrl?: true
+  discordUrl?: true
 }
 
 export type GlobalSettingsCountAggregateInputType = {
   id?: true
   logoUrl?: true
-  streamUrl?: true
-  socials?: true
+  twitchUsername?: true
+  twitchUrl?: true
+  instagramUrl?: true
+  tiktokUrl?: true
+  youtubeUrl?: true
+  discordUrl?: true
   _all?: true
 }
 
@@ -172,8 +200,12 @@ export type GlobalSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type GlobalSettingsGroupByOutputType = {
   id: number
   logoUrl: string | null
-  streamUrl: string | null
-  socials: runtime.JsonValue
+  twitchUsername: string | null
+  twitchUrl: string | null
+  instagramUrl: string | null
+  tiktokUrl: string | null
+  youtubeUrl: string | null
+  discordUrl: string | null
   _count: GlobalSettingsCountAggregateOutputType | null
   _avg: GlobalSettingsAvgAggregateOutputType | null
   _sum: GlobalSettingsSumAggregateOutputType | null
@@ -202,15 +234,23 @@ export type GlobalSettingsWhereInput = {
   NOT?: Prisma.GlobalSettingsWhereInput | Prisma.GlobalSettingsWhereInput[]
   id?: Prisma.IntFilter<"GlobalSettings"> | number
   logoUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
-  streamUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
-  socials?: Prisma.JsonFilter<"GlobalSettings">
+  twitchUsername?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  twitchUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  instagramUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  tiktokUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  youtubeUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  discordUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
 }
 
 export type GlobalSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  socials?: Prisma.SortOrder
+  twitchUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  twitchUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  instagramUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  tiktokUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordUrl?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type GlobalSettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -219,15 +259,23 @@ export type GlobalSettingsWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.GlobalSettingsWhereInput[]
   NOT?: Prisma.GlobalSettingsWhereInput | Prisma.GlobalSettingsWhereInput[]
   logoUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
-  streamUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
-  socials?: Prisma.JsonFilter<"GlobalSettings">
+  twitchUsername?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  twitchUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  instagramUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  tiktokUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  youtubeUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  discordUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
 }, "id">
 
 export type GlobalSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  socials?: Prisma.SortOrder
+  twitchUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  twitchUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  instagramUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  tiktokUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GlobalSettingsCountOrderByAggregateInput
   _avg?: Prisma.GlobalSettingsAvgOrderByAggregateInput
   _max?: Prisma.GlobalSettingsMaxOrderByAggregateInput
@@ -241,64 +289,100 @@ export type GlobalSettingsScalarWhereWithAggregatesInput = {
   NOT?: Prisma.GlobalSettingsScalarWhereWithAggregatesInput | Prisma.GlobalSettingsScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"GlobalSettings"> | number
   logoUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
-  streamUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
-  socials?: Prisma.JsonWithAggregatesFilter<"GlobalSettings">
+  twitchUsername?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  twitchUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  instagramUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  tiktokUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  youtubeUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  discordUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
 }
 
 export type GlobalSettingsCreateInput = {
   id?: number
   logoUrl?: string | null
-  streamUrl?: string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: string | null
+  twitchUrl?: string | null
+  instagramUrl?: string | null
+  tiktokUrl?: string | null
+  youtubeUrl?: string | null
+  discordUrl?: string | null
 }
 
 export type GlobalSettingsUncheckedCreateInput = {
   id?: number
   logoUrl?: string | null
-  streamUrl?: string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: string | null
+  twitchUrl?: string | null
+  instagramUrl?: string | null
+  tiktokUrl?: string | null
+  youtubeUrl?: string | null
+  discordUrl?: string | null
 }
 
 export type GlobalSettingsUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twitchUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twitchUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsCreateManyInput = {
   id?: number
   logoUrl?: string | null
-  streamUrl?: string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: string | null
+  twitchUrl?: string | null
+  instagramUrl?: string | null
+  tiktokUrl?: string | null
+  youtubeUrl?: string | null
+  discordUrl?: string | null
 }
 
 export type GlobalSettingsUpdateManyMutationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twitchUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  socials?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  twitchUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twitchUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
-  streamUrl?: Prisma.SortOrder
-  socials?: Prisma.SortOrder
+  twitchUsername?: Prisma.SortOrder
+  twitchUrl?: Prisma.SortOrder
+  instagramUrl?: Prisma.SortOrder
+  tiktokUrl?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  discordUrl?: Prisma.SortOrder
 }
 
 export type GlobalSettingsAvgOrderByAggregateInput = {
@@ -308,13 +392,23 @@ export type GlobalSettingsAvgOrderByAggregateInput = {
 export type GlobalSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
-  streamUrl?: Prisma.SortOrder
+  twitchUsername?: Prisma.SortOrder
+  twitchUrl?: Prisma.SortOrder
+  instagramUrl?: Prisma.SortOrder
+  tiktokUrl?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  discordUrl?: Prisma.SortOrder
 }
 
 export type GlobalSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
-  streamUrl?: Prisma.SortOrder
+  twitchUsername?: Prisma.SortOrder
+  twitchUrl?: Prisma.SortOrder
+  instagramUrl?: Prisma.SortOrder
+  tiktokUrl?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  discordUrl?: Prisma.SortOrder
 }
 
 export type GlobalSettingsSumOrderByAggregateInput = {
@@ -326,32 +420,48 @@ export type GlobalSettingsSumOrderByAggregateInput = {
 export type GlobalSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   logoUrl?: boolean
-  streamUrl?: boolean
-  socials?: boolean
+  twitchUsername?: boolean
+  twitchUrl?: boolean
+  instagramUrl?: boolean
+  tiktokUrl?: boolean
+  youtubeUrl?: boolean
+  discordUrl?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   logoUrl?: boolean
-  streamUrl?: boolean
-  socials?: boolean
+  twitchUsername?: boolean
+  twitchUrl?: boolean
+  instagramUrl?: boolean
+  tiktokUrl?: boolean
+  youtubeUrl?: boolean
+  discordUrl?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   logoUrl?: boolean
-  streamUrl?: boolean
-  socials?: boolean
+  twitchUsername?: boolean
+  twitchUrl?: boolean
+  instagramUrl?: boolean
+  tiktokUrl?: boolean
+  youtubeUrl?: boolean
+  discordUrl?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectScalar = {
   id?: boolean
   logoUrl?: boolean
-  streamUrl?: boolean
-  socials?: boolean
+  twitchUsername?: boolean
+  twitchUrl?: boolean
+  instagramUrl?: boolean
+  tiktokUrl?: boolean
+  youtubeUrl?: boolean
+  discordUrl?: boolean
 }
 
-export type GlobalSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "streamUrl" | "socials", ExtArgs["result"]["globalSettings"]>
+export type GlobalSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "twitchUsername" | "twitchUrl" | "instagramUrl" | "tiktokUrl" | "youtubeUrl" | "discordUrl", ExtArgs["result"]["globalSettings"]>
 
 export type $GlobalSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSettings"
@@ -359,8 +469,12 @@ export type $GlobalSettingsPayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     logoUrl: string | null
-    streamUrl: string | null
-    socials: runtime.JsonValue
+    twitchUsername: string | null
+    twitchUrl: string | null
+    instagramUrl: string | null
+    tiktokUrl: string | null
+    youtubeUrl: string | null
+    discordUrl: string | null
   }, ExtArgs["result"]["globalSettings"]>
   composites: {}
 }
@@ -786,8 +900,12 @@ export interface Prisma__GlobalSettingsClient<T, Null = never, ExtArgs extends r
 export interface GlobalSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"GlobalSettings", 'Int'>
   readonly logoUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
-  readonly streamUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
-  readonly socials: Prisma.FieldRef<"GlobalSettings", 'Json'>
+  readonly twitchUsername: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly twitchUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly instagramUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly tiktokUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly youtubeUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly discordUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
 }
     
 
