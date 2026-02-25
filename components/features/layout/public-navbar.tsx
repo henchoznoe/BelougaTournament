@@ -10,12 +10,31 @@
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { motion } from 'framer-motion'
-import { Home, Mail, Menu, Trophy, User, Video } from 'lucide-react'
+import {
+  ChevronDown,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  Settings,
+  Trophy,
+  User,
+  Video,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Sheet,
   SheetContent,
@@ -25,9 +44,28 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
+import { Role } from '@/prisma/generated/prisma/enums'
 
-const NavbarProfile = ({ onClick }: { onClick?: () => void }) => {
+const NavbarProfile = ({
+  onClick,
+  mode = 'desktop',
+}: {
+  onClick?: () => void
+  mode?: 'desktop' | 'mobile'
+}) => {
   const { data: session, isPending } = authClient.useSession()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push(ROUTES.HOME)
+          if (onClick) onClick()
+        },
+      },
+    })
+  }
 
   if (isPending) {
     return (
@@ -50,22 +88,148 @@ const NavbarProfile = ({ onClick }: { onClick?: () => void }) => {
     )
   }
 
+  const isAdmin =
+    session.user.role === Role.ADMIN || session.user.role === Role.SUPERADMIN
+
+  // Desktop Dropdown
+  if (mode === 'desktop') {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden cursor-pointer">
+          <Image
+            src={session.user.image ?? ''}
+            alt={session.user.name}
+            width={32}
+            height={32}
+            className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
+          />
+          <div className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-900 border border-white/10">
+            <ChevronDown className="size-2.5 text-zinc-400" />
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 border-white/10 bg-zinc-950/90 text-zinc-200 backdrop-blur-xl"
+        >
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="font-medium text-sm leading-none text-white">
+                {session.user.name}
+              </p>
+              <p className="text-xs leading-none text-zinc-400">
+                {session.user.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
+            <User className="mr-2 size-4" />
+            <span>Mon Profil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
+            <Trophy className="mr-2 size-4" />
+            <span>Mes Inscriptions</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
+            <Settings className="mr-2 size-4" />
+            <span>Paramètres</span>
+          </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem asChild>
+                <Link
+                  href={ROUTES.ADMIN_DASHBOARD}
+                  className="w-full cursor-pointer bg-blue-500/10 text-blue-400 focus:bg-blue-500/20 focus:text-blue-300"
+                >
+                  <LayoutDashboard className="mr-2 size-4" />
+                  <span>Dashboard Admin</span>
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuItem
+            className="cursor-pointer text-red-400 focus:bg-red-500/10 focus:text-red-300"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 size-4" />
+            <span>Déconnexion</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
+
+  // Mobile List
   return (
-    <Link
-      href={ROUTES.ADMIN_DASHBOARD}
-      onClick={onClick}
-      className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
-      title="Profil"
-    >
-      {/* TODO: Add a fallback image instead of '' */}
-      <Image
-        src={session.user.image ?? ''}
-        alt={session.user.name}
-        width={32}
-        height={32}
-        className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:ring-blue-500/30"
-      />
-    </Link>
+    <div className="flex w-full flex-col gap-4 rounded-3xl border border-white/5 bg-white/2 p-4">
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <Image
+            src={session.user.image ?? ''}
+            alt={session.user.name}
+            width={48}
+            height={48}
+            className="rounded-full ring-2 ring-blue-500/20"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-white text-lg">
+            {session.user.name}
+          </span>
+          <span className="text-sm text-zinc-400">{session.user.email}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <Button
+          variant="ghost"
+          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+          onClick={onClick}
+        >
+          <User className="size-4" />
+          Mon Profil
+        </Button>
+        <Button
+          variant="ghost"
+          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+          onClick={onClick}
+        >
+          <Trophy className="size-4" />
+          Mes Inscriptions
+        </Button>
+        <Button
+          variant="ghost"
+          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+          onClick={onClick}
+        >
+          <Settings className="size-4" />
+          Paramètres
+        </Button>
+        {isAdmin && (
+          <Button
+            asChild
+            variant="ghost"
+            className="justify-start gap-3 h-10 px-2 text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-300"
+            onClick={onClick}
+          >
+            <Link href={ROUTES.ADMIN_DASHBOARD}>
+              <LayoutDashboard className="size-4" />
+              Dashboard Admin
+            </Link>
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          className="justify-start gap-3 h-10 px-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 mt-2"
+          onClick={handleLogout}
+        >
+          <LogOut className="size-4" />
+          Déconnexion
+        </Button>
+      </div>
+    </div>
   )
 }
 
@@ -146,7 +310,7 @@ export const PublicNavbar = () => {
             })}
           </nav>
 
-          <NavbarProfile />
+          <NavbarProfile mode="desktop" />
         </div>
 
         <div className="md:hidden">
@@ -173,7 +337,10 @@ export const PublicNavbar = () => {
               <div className="flex flex-col gap-6 px-4 pb-6 pt-16">
                 <div className="flex justify-center">
                   {/* Reuse the matching profile component */}
-                  <NavbarProfile onClick={() => setIsOpen(false)} />
+                  <NavbarProfile
+                    mode="mobile"
+                    onClick={() => setIsOpen(false)}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-2">
