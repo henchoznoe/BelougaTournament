@@ -8,6 +8,7 @@
 
 'use client'
 
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { motion } from 'framer-motion'
 import { Home, Mail, Menu, Trophy, User, Video } from 'lucide-react'
 import Image from 'next/image'
@@ -15,12 +16,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
 
-const NavbarProfile = () => {
+const NavbarProfile = ({ onClick }: { onClick?: () => void }) => {
   const { data: session, isPending } = authClient.useSession()
 
   if (isPending) {
@@ -35,6 +41,7 @@ const NavbarProfile = () => {
     return (
       <Link
         href={ROUTES.LOGIN}
+        onClick={onClick}
         className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
         title="Se connecter"
       >
@@ -46,11 +53,13 @@ const NavbarProfile = () => {
   return (
     <Link
       href={ROUTES.ADMIN_DASHBOARD}
+      onClick={onClick}
       className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
       title="Profil"
     >
+      {/* TODO: Add a fallback image instead of '' */}
       <Image
-        src={session.user.image || ''}
+        src={session.user.image ?? ''}
         alt={session.user.name}
         width={32}
         height={32}
@@ -79,9 +88,9 @@ export const PublicNavbar = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="sticky top-0 z-50 w-full border-b border-white/10 bg-zinc-950/80 backdrop-blur-md supports-backdrop-filter:bg-zinc-950/60"
+      className="fixed top-0 z-50 w-full pt-4"
     >
-      <div className="container relative mx-auto flex h-20 items-center justify-between px-4">
+      <div className="container relative mx-auto flex h-14 items-center justify-between px-4">
         {/* Mobile Left: Text Logo */}
         <Link href="/" className="flex items-center md:hidden">
           <span className="whitespace-nowrap font-paladins text-xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] uppercase">
@@ -157,10 +166,14 @@ export const PublicNavbar = () => {
               side="right"
               className="w-75 border-l border-white/10 bg-zinc-950/95 p-0 backdrop-blur-xl"
             >
+              <VisuallyHidden>
+                <SheetTitle>Menu de navigation mobile</SheetTitle>
+              </VisuallyHidden>
+
               <div className="flex flex-col gap-6 px-4 pb-6 pt-16">
                 <div className="flex justify-center">
                   {/* Reuse the matching profile component */}
-                  <NavbarProfile />
+                  <NavbarProfile onClick={() => setIsOpen(false)} />
                 </div>
 
                 <div className="flex flex-col gap-2">

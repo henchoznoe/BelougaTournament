@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  allowedDevOrigins: ['http://localhost:3000'],
 }
 
 export default withSentryConfig(nextConfig, {
