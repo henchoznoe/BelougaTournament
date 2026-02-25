@@ -51,7 +51,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
         <ScrollToTop />
         {props.children}
         <ReactLenis root />
-        <Toaster richColors position="bottom-center" />
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   )
