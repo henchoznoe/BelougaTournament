@@ -10,12 +10,13 @@
 
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
+import { authClient } from '@/lib/core/auth-client'
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -38,6 +39,8 @@ const itemVariants: Variants = {
 }
 
 export const HeroSection = () => {
+  const { data: session, isPending } = authClient.useSession()
+
   return (
     <section className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-4 text-center">
       <div className="absolute inset-0 z-0 select-none">
@@ -105,14 +108,30 @@ export const HeroSection = () => {
             </Link>
           </Button>
 
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-blue-500/50 hover:bg-white/10 hover:text-blue-400"
-          >
-            <Link href={ROUTES.LOGIN}>Rejoindre l'aventure</Link>
-          </Button>
+          {isPending ? (
+            <div className="h-14 w-57.5 animate-pulse rounded-md bg-white/5" />
+          ) : !session?.user ? (
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-blue-500/50 hover:bg-white/10 hover:text-blue-400"
+            >
+              <Link href={ROUTES.LOGIN}>Rejoindre l'aventure</Link>
+            </Button>
+          ) : (
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="group h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-purple-500/50 hover:bg-white/10 hover:text-purple-400"
+            >
+              <Link href={ROUTES.STREAM}>
+                <Video className="mr-2 size-5 transition-colors group-hover:text-purple-400" />
+                Suivre le stream
+              </Link>
+            </Button>
+          )}
         </motion.div>
       </motion.div>
     </section>

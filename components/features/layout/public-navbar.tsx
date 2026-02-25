@@ -115,9 +115,6 @@ const NavbarProfile = ({
             height={32}
             className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
           />
-          <div className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-900 border border-white/10">
-            <ChevronDown className="size-2.5 text-zinc-400" />
-          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
@@ -142,20 +139,16 @@ const NavbarProfile = ({
             <Trophy className="mr-2 size-4" />
             <span>Mes Inscriptions</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
-            <Settings className="mr-2 size-4" />
-            <span>Paramètres</span>
-          </DropdownMenuItem>
           {isAdmin && (
             <>
               <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem asChild>
                 <Link
                   href={ROUTES.ADMIN_DASHBOARD}
-                  className="w-full cursor-pointer bg-blue-500/10 text-blue-400 focus:bg-blue-500/20 focus:text-blue-300"
+                  className="w-full cursor-pointer focus:bg-white/5 focus:text-white"
                 >
                   <LayoutDashboard className="mr-2 size-4" />
-                  <span>Dashboard Admin</span>
+                  <span>Tableau de bord</span>
                 </Link>
               </DropdownMenuItem>
             </>
