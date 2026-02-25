@@ -20,7 +20,7 @@ export default function SocialLogin() {
     try {
       await authClient.signIn.social({
         provider: provider,
-        callbackURL: ROUTES.ADMIN_DASHBOARD,
+        callbackURL: ROUTES.HOME,
       })
     } catch (error) {
       console.error(error)
