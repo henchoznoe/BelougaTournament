@@ -25,7 +25,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -247,6 +247,14 @@ export const PublicNavbar = () => {
 
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isScrolled, setIsScrolled] = useState<boolean>(false)
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 20)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const isLinkActive = (href: string): boolean =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -256,7 +264,11 @@ export const PublicNavbar = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="fixed top-0 z-50 w-full pt-4"
+      className={cn(
+        'fixed top-0 z-50 w-full py-4 transition-[background-color,backdrop-filter] duration-300',
+        isScrolled &&
+          'bg-zinc-950/80 backdrop-blur-md md:bg-transparent md:backdrop-blur-none',
+      )}
     >
       <div className="container relative mx-auto flex h-14 items-center justify-between px-4">
         {/* Mobile Left: Text Logo */}

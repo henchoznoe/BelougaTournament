@@ -84,7 +84,7 @@ export const TwitchPlayer = ({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 shadow-2xl backdrop-blur-xl aspect-video w-full',
+        'relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 shadow-2xl backdrop-blur-xl aspect-video min-h-70 w-full min-w-0',
         className,
       )}
     >
@@ -122,14 +122,14 @@ export const TwitchPlayer = ({
 
       {/* Offline / No Channel Fallback */}
       {isLive === false && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/80 p-6 text-center backdrop-blur-sm">
-          <div className="mb-6 inline-flex rounded-full bg-white/5 p-6 ring-1 ring-white/10">
-            <VideoOff className="size-12 text-zinc-500" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/80 p-4 text-center backdrop-blur-sm sm:p-6">
+          <div className="mb-4 inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10 sm:mb-6 sm:p-6">
+            <VideoOff className="size-8 text-zinc-500 sm:size-12" />
           </div>
-          <h3 className="font-paladins text-xl tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] mb-2">
+          <h3 className="font-paladins text-base tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] mb-2 sm:text-xl">
             {channel ? 'Le flux est interrompu' : 'Aucune chaîne configurée'}
           </h3>
-          <p className="max-w-md text-sm text-zinc-400 mb-8">
+          <p className="max-w-md text-xs text-zinc-400 mb-4 sm:text-sm sm:mb-8">
             {channel
               ? `Aucune diffusion n'est actuellement en cours sur la chaîne @${channel}. Revenez plus tard pour le prochain tournoi !`
               : "La chaîne Twitch officielle n'a pas encore été configurée pour la diffusion en direct."}

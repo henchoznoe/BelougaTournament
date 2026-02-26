@@ -6,9 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-'use client'
-
-import { motion, type Variants } from 'framer-motion'
 import { type LucideIcon, Swords, Target, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -63,28 +60,9 @@ const FEATURES: FeatureItem[] = [
   },
 ]
 
-const FeatureCard = ({
-  feature,
-  index,
-}: {
-  feature: FeatureItem
-  index: number
-}) => {
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { delay: index * 0.2, duration: 0.5, ease: 'easeOut' },
-    },
-  }
-
+const FeatureCard = ({ feature }: { feature: FeatureItem }) => {
   return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }}
+    <div
       className={cn(
         'group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-8 transition-all duration-300 backdrop-blur-md',
         'hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]',
@@ -127,7 +105,7 @@ const FeatureCard = ({
           feature.styles.bg,
         )}
       />
-    </motion.div>
+    </div>
   )
 }
 
@@ -139,44 +117,26 @@ export const FeaturesSection = () => {
 
       {/* Section Header */}
       <div className="mb-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto mb-6 inline-flex items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5"
-        >
+        <div className="mx-auto mb-6 inline-flex items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5">
           <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">
             Pourquoi nous rejoindre ?
           </span>
-        </motion.div>
+        </div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="font-paladins text-4xl tracking-wider text-white sm:text-5xl lg:text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase"
-        >
+        <h2 className="font-paladins text-4xl tracking-wider text-white sm:text-5xl lg:text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase">
           L'arène ultime
-        </motion.h2>
+        </h2>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400"
-        >
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
           Expérimentez la compétition à son paroxysme. Des tournois conçus par
           des joueurs, pour des joueurs.
-        </motion.p>
+        </p>
       </div>
 
       {/* Grid Layout */}
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3 md:gap-8">
-        {FEATURES.map((feature, index) => (
-          <FeatureCard key={feature.title} feature={feature} index={index} />
+        {FEATURES.map(feature => (
+          <FeatureCard key={feature.title} feature={feature} />
         ))}
       </div>
     </section>

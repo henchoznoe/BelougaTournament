@@ -20,7 +20,7 @@ const StreamPage = async () => {
         description="Retrouvez en direct toutes nos compétitions et événements spéciaux sur notre chaîne officielle."
         className="mb-12"
       />
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-5xl min-w-0 overflow-hidden">
         <TwitchPlayer channel={globalSettings.twitchUsername ?? undefined} />
       </div>
     </div>
