@@ -19,7 +19,7 @@ import { ROUTES } from '@/lib/config/routes'
 
 export const LoginScreen = () => {
   return (
-    <div className="flex min-h-screen w-full bg-zinc-950">
+    <div className="flex h-dvh overflow-hidden w-full bg-zinc-950">
       {/* Left side - Visual (Hidden on mobile) */}
       <div className="relative hidden w-1/2 lg:block">
         <Image
