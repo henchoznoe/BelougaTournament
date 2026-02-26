@@ -21,6 +21,7 @@ import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { cn } from '@/lib/utils/cn'
+import { getCommitHash } from '@/lib/utils/commit-hash'
 
 interface SocialLink {
   name: string
@@ -64,6 +65,7 @@ const FooterLogo = (props: { url: string | null }) => {
 
 export const PublicFooter = async () => {
   const globalSettings = await getGlobalSettings()
+  const commitHash = getCommitHash()
 
   const socialLinks: SocialLink[] = [
     {
@@ -197,10 +199,15 @@ export const PublicFooter = async () => {
 
         <div className="border-t border-white/5 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-            <p className="text-sm text-zinc-500 text-center lg:text-left">
-              &copy; {new Date().getFullYear()} {METADATA.NAME}. Tous droits
-              réservés.
-            </p>
+            <div className="flex flex-col items-center gap-1 lg:items-start">
+              <p className="text-sm text-zinc-500 text-center lg:text-left">
+                &copy; {new Date().getFullYear()} {METADATA.NAME}. Tous droits
+                réservés.
+              </p>
+              <span className="font-mono text-xs text-zinc-600 transition-colors hover:text-zinc-400">
+                build: {commitHash}
+              </span>
+            </div>
 
             <div className="flex flex-col items-center gap-4 text-sm text-zinc-500 sm:flex-row sm:gap-6">
               <Link
