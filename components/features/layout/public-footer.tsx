@@ -7,16 +7,16 @@
  */
 
 import {
-  Instagram,
-  type LucideIcon,
-  MessageSquare,
-  Twitch,
-  Video,
-  Youtube,
-} from 'lucide-react'
+  faDiscord,
+  faInstagram,
+  faTiktok,
+  faTwitch,
+  faYoutube,
+  type IconDefinition,
+} from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
-
 import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getGlobalSettings } from '@/lib/services/settings'
@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils/cn'
 interface SocialLink {
   name: string
   href: string | null
-  icon: LucideIcon
+  icon: IconDefinition
   colorClass: string
 }
 
@@ -69,31 +69,31 @@ export const PublicFooter = async () => {
     {
       name: 'Discord',
       href: globalSettings.discordUrl,
-      icon: MessageSquare,
+      icon: faDiscord,
       colorClass: BRAND_COLORS.DISCORD,
     },
     {
       name: 'Twitch',
       href: globalSettings.twitchUrl,
-      icon: Twitch,
+      icon: faTwitch,
       colorClass: BRAND_COLORS.TWITCH,
     },
     {
       name: 'YouTube',
       href: globalSettings.youtubeUrl,
-      icon: Youtube,
+      icon: faYoutube,
       colorClass: BRAND_COLORS.YOUTUBE,
     },
     {
       name: 'TikTok',
       href: globalSettings.tiktokUrl,
-      icon: Video,
+      icon: faTiktok,
       colorClass: BRAND_COLORS.TIKTOK,
     },
     {
       name: 'Instagram',
       href: globalSettings.instagramUrl,
-      icon: Instagram,
+      icon: faInstagram,
       colorClass: BRAND_COLORS.INSTAGRAM,
     },
   ].filter(link => Boolean(link.href && link.href.trim() !== ''))
@@ -159,12 +159,12 @@ export const PublicFooter = async () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
-                    'flex items-center justify-center rounded-full border border-white/5 bg-white/5 p-2.5 text-zinc-400 transition-all duration-300 hover:scale-110 hover:border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]',
+                    'flex size-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-zinc-400 transition-all duration-300 hover:scale-110 hover:border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]',
                     social.colorClass,
                   )}
                   aria-label={social.name}
                 >
-                  <social.icon className="size-5" />
+                  <FontAwesomeIcon icon={social.icon} className="size-5" />
                 </a>
               ))}
             </div>
