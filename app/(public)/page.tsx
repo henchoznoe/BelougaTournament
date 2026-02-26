@@ -9,8 +9,10 @@
 import type { Metadata } from 'next'
 import { FeaturesSection } from '@/components/features/landing/features-section'
 import { HeroSection } from '@/components/features/landing/hero-section'
+import { SponsorsSection } from '@/components/features/landing/sponsors-section'
 import { StreamSection } from '@/components/features/landing/stream-section'
 import { getGlobalSettings } from '@/lib/services/settings'
+import { getSponsors } from '@/lib/services/sponsors'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -18,7 +20,10 @@ export const metadata: Metadata = {
 }
 
 const LandingPage = async () => {
-  const globalSettings = await getGlobalSettings()
+  const [globalSettings, sponsors] = await Promise.all([
+    getGlobalSettings(),
+    getSponsors(),
+  ])
 
   return (
     <div className="flex flex-col overflow-x-hidden gap-12">
@@ -28,7 +33,7 @@ const LandingPage = async () => {
         <TournamentsSection />
       </Suspense>*/}
       <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
-      {/*<SponsorsSection />*/}
+      <SponsorsSection sponsors={sponsors} />
     </div>
   )
 }
