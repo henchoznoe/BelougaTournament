@@ -52,6 +52,12 @@ export const TwitchPlayer = ({
     const Twitch = (window as any).Twitch
     if (!Twitch || !Twitch.Player) return
 
+    // Fallback: If after 8 seconds we haven't received any state, assume offline
+    // (covers invalid channels and deferred offline events)
+    const fallbackTimeout = setTimeout(() => {
+      setIsLive(prev => (prev === null ? false : prev))
+    }, 8000)
+
     const player = new Twitch.Player(containerId, {
       width: '100%',
       height: '100%',
@@ -65,15 +71,10 @@ export const TwitchPlayer = ({
       // Listen to player state events
       player.addEventListener(Twitch.Player.ONLINE, () => setIsLive(true))
       player.addEventListener(Twitch.Player.OFFLINE, () => setIsLive(false))
-
-      // Fallback: If after 5 seconds we haven't received an explicit ONLINE event,
-      // assume offline (Twitch sometimes defers the offline event).
-      setTimeout(() => {
-        setIsLive(prev => (prev === null ? false : prev))
-      }, 5000)
     })
 
     return () => {
+      clearTimeout(fallbackTimeout)
       if (embedRef.current) {
         embedRef.current.innerHTML = ''
       }
@@ -126,12 +127,12 @@ export const TwitchPlayer = ({
             <VideoOff className="size-12 text-zinc-500" />
           </div>
           <h3 className="font-paladins text-xl tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] mb-2">
-            Le flux est interrompu
+            {channel ? 'Le flux est interrompu' : 'Aucune chaîne configurée'}
           </h3>
           <p className="max-w-md text-sm text-zinc-400 mb-8">
-            Aucune diffusion n'est actuellement en cours sur la chaîne{' '}
-            {channel ? `@${channel}` : 'principale'}. Revenez plus tard pour le
-            prochain tournoi !
+            {channel
+              ? `Aucune diffusion n'est actuellement en cours sur la chaîne @${channel}. Revenez plus tard pour le prochain tournoi !`
+              : "La chaîne Twitch officielle n'a pas encore été configurée pour la diffusion en direct."}
           </p>
           {channel && (
             <Button

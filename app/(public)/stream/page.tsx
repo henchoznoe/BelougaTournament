@@ -7,8 +7,11 @@
  */
 
 import { TwitchPlayer } from '@/components/features/stream/twitch-player'
+import { getGlobalSettings } from '@/lib/services/settings'
 
-const StreamPage = () => {
+const StreamPage = async () => {
+  const globalSettings = await getGlobalSettings()
+
   return (
     <div className="container mx-auto px-4 py-24 flex flex-col items-center">
       <div className="mb-12 text-center">
@@ -21,8 +24,7 @@ const StreamPage = () => {
         </p>
       </div>
       <div className="w-full max-w-5xl">
-        {/* TODO: Fetch channel from settings in database */}
-        <TwitchPlayer channel="quentadoulive" />
+        <TwitchPlayer channel={globalSettings.twitchUsername ?? undefined} />
       </div>
     </div>
   )

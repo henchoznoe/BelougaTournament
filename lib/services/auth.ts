@@ -1,6 +1,6 @@
 /**
- * File: lib/services/auth.service.ts
- * Description: Service for handling authentication logic.
+ * File: lib/services/auth.ts
+ * Description: Services for handling authentication logic.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz

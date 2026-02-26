@@ -8,7 +8,7 @@
 
 import { redirect } from 'next/navigation'
 import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth.service'
+import { getSession } from '@/lib/services/auth'
 import { isAdmin } from '@/lib/utils/auth.helpers'
 
 /** Server component guard: redirects non-admin users before rendering children. */

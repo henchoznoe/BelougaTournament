@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 import { FeaturesSection } from '@/components/features/landing/features-section'
 import { HeroSection } from '@/components/features/landing/hero-section'
 import { StreamSection } from '@/components/features/landing/stream-section'
+import { getGlobalSettings } from '@/lib/services/settings'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
 }
 
 const LandingPage = async () => {
+  const globalSettings = await getGlobalSettings()
+
   return (
     <div className="flex flex-col overflow-x-hidden gap-12">
       <HeroSection />
@@ -24,8 +27,7 @@ const LandingPage = async () => {
       {/*<Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>*/}
-      {/* TODO: Fetch channel from settings in database */}
-      <StreamSection channel="quentadoulive" />
+      <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
       {/*<SponsorsSection />*/}
     </div>
   )

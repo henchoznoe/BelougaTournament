@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { LoginScreen } from '@/components/features/auth/login-screen'
 import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth.service'
+import { getSession } from '@/lib/services/auth'
 
 export const metadata: Metadata = {
   title: 'Connexion',

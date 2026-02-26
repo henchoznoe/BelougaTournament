@@ -11,7 +11,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth.service'
+import { getSession } from '@/lib/services/auth'
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
