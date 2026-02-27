@@ -58,7 +58,7 @@ export const getGlobalSettings = unstable_cache(
   },
   ['global-settings'],
   {
-    revalidate: 5, // Revalidate every hour
+    revalidate: 3600, // Revalidate every hour
     tags: ['settings'], // Allow on-demand revalidation via revalidateTag('settings')
   },
 )
