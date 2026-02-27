@@ -7,20 +7,12 @@
  */
 
 import * as Sentry from '@sentry/nextjs'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import prisma from '@/lib/core/prisma'
-
-export interface GlobalSettings {
-  logoUrl: string | null
-  twitchUsername: string | null
-  twitchUrl: string | null
-  instagramUrl: string | null
-  tiktokUrl: string | null
-  youtubeUrl: string | null
-  discordUrl: string | null
-}
+import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
 const DEFAULT_SETTINGS: GlobalSettings = {
+  id: 1,
   logoUrl: null,
   twitchUsername: null,
   twitchUrl: null,
@@ -30,35 +22,19 @@ const DEFAULT_SETTINGS: GlobalSettings = {
   discordUrl: null,
 }
 
-export const getGlobalSettings = unstable_cache(
-  async (): Promise<GlobalSettings> => {
-    try {
-      const settings = await prisma.globalSettings.findUnique({
-        where: { id: 1 },
-      })
+export const getGlobalSettings = async (): Promise<GlobalSettings> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('settings')
 
-      if (!settings) {
-        return DEFAULT_SETTINGS
-      }
-
-      return {
-        logoUrl: settings.logoUrl ?? null,
-        twitchUsername: settings.twitchUsername ?? null,
-        twitchUrl: settings.twitchUrl ?? null,
-        instagramUrl: settings.instagramUrl ?? null,
-        tiktokUrl: settings.tiktokUrl ?? null,
-        youtubeUrl: settings.youtubeUrl ?? null,
-        discordUrl: settings.discordUrl ?? null,
-      }
-    } catch (error) {
-      console.error('Error fetching global settings:', error)
-      Sentry.captureException(error)
-      return DEFAULT_SETTINGS
-    }
-  },
-  ['global-settings'],
-  {
-    revalidate: 3600, // Revalidate every hour
-    tags: ['settings'], // Allow on-demand revalidation via revalidateTag('settings')
-  },
-)
+  try {
+    const settings = await prisma.globalSettings.findUnique({
+      where: { id: 1 },
+    })
+    return settings ?? DEFAULT_SETTINGS
+  } catch (error) {
+    console.error('Error fetching global settings:', error)
+    Sentry.captureException(error)
+    return DEFAULT_SETTINGS
+  }
+}

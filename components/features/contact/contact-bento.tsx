@@ -19,8 +19,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { motion, type Variants } from 'framer-motion'
 import { ArrowUpRight, MessageSquare } from 'lucide-react'
-import type { GlobalSettings } from '@/lib/services/settings'
 import { cn } from '@/lib/utils/cn'
+import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
 interface ContactBentoProps {
   settings: GlobalSettings

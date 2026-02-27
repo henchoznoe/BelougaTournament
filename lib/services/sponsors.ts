@@ -7,32 +7,22 @@
  */
 
 import * as Sentry from '@sentry/nextjs'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import prisma from '@/lib/core/prisma'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
-export const getSponsors = unstable_cache(
-  async (): Promise<Sponsor[]> => {
-    try {
-      return await prisma.sponsor.findMany({
-        orderBy: { order: 'asc' },
-        select: {
-          id: true,
-          name: true,
-          imageUrl: true,
-          url: true,
-          order: true,
-        },
-      })
-    } catch (error) {
-      console.error('Error fetching sponsors:', error)
-      Sentry.captureException(error)
-      return []
-    }
-  },
-  ['sponsors'],
-  {
-    revalidate: 3600,
-    tags: ['sponsors'],
-  },
-)
+export const getSponsors = async (): Promise<Sponsor[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('sponsors')
+
+  try {
+    return await prisma.sponsor.findMany({
+      orderBy: { order: 'asc' },
+    })
+  } catch (error) {
+    console.error('Error fetching sponsors:', error)
+    Sentry.captureException(error)
+    return []
+  }
+}
