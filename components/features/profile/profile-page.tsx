@@ -168,7 +168,10 @@ export const ProfilePage = async () => {
       </div>
 
       {/* Card 3: Tournament History Teaser */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+      <div
+        id="tournaments-history"
+        className="relative scroll-mt-32 overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8"
+      >
         <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
             <Clock className="size-6 text-zinc-600" />
