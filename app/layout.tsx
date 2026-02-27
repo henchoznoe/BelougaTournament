@@ -16,6 +16,7 @@ import { METADATA } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { config } from '@fortawesome/fontawesome-svg-core'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 interface LayoutProps {
@@ -56,6 +57,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
         {props.children}
         <ReactLenis root />
         <Toaster richColors position="bottom-right" />
+        <Analytics />
       </body>
     </html>
   )
