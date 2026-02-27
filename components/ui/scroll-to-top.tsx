@@ -1,5 +1,5 @@
 /**
- * File: components/shared/ui/scroll-to-top.tsx
+ * File: components/ui/scroll-to-top.tsx
  * Description: Client component to force scroll to top on navigation and refresh.
  * Author: Noé Henchoz
  * License: MIT
@@ -11,17 +11,19 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
-/** Forces the page to scroll to the top whenever the route changes. */
+/**
+ * Force the page to scroll to the top whenever the route changes.
+ */
 export const ScrollToTop = () => {
-  const pathname = usePathname()
-  const previousPathname = useRef(pathname)
+  const path = usePathname()
+  const prevPath = useRef<string>(path)
 
   useEffect(() => {
-    if (pathname !== previousPathname.current) {
+    if (path !== prevPath.current) {
       window.scrollTo(0, 0)
-      previousPathname.current = pathname
+      prevPath.current = path
     }
-  }, [pathname])
+  }, [path])
 
   return null
 }

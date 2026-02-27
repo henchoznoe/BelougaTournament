@@ -13,6 +13,10 @@ import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { METADATA } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+import { config } from '@fortawesome/fontawesome-svg-core'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 interface LayoutProps {
@@ -37,6 +41,8 @@ export const metadata: Metadata = {
   description: METADATA.DESCRIPTION,
 }
 
+config.autoAddCss = false
+
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
     <html lang="fr-CH" className="scroll-smooth">
@@ -49,7 +55,9 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
       >
         <ScrollToTop />
         {props.children}
-        <Toaster richColors position="bottom-center" />
+        <Toaster richColors position="bottom-right" />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

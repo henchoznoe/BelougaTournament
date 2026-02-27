@@ -10,6 +10,7 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
@@ -29,6 +30,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  allowedDevOrigins: ['http://localhost:3000'],
 }
 
 export default withSentryConfig(nextConfig, {

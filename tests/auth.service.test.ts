@@ -31,7 +31,7 @@ vi.mock('next/headers', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getSession } = await import('@/lib/services/auth.service')
+const { getSession } = await import('@/lib/services/auth')
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -7,25 +7,33 @@
  */
 
 import type { Metadata } from 'next'
-import { SessionInfo } from '@/components/features/auth/session-info'
-import { getCommitHash } from '@/lib/utils/commit-hash'
+import { FeaturesSection } from '@/components/features/landing/features-section'
+import { HeroSection } from '@/components/features/landing/hero-section'
+import { SponsorsSection } from '@/components/features/landing/sponsors-section'
+import { StreamSection } from '@/components/features/landing/stream-section'
+import { getGlobalSettings } from '@/lib/services/settings'
+import { getSponsors } from '@/lib/services/sponsors'
 
 export const metadata: Metadata = {
   title: 'Accueil',
   description: 'Accueil',
 }
 
-/** Landing page displaying session info and build hash for verification. */
 const LandingPage = async () => {
+  const [globalSettings, sponsors] = await Promise.all([
+    getGlobalSettings(),
+    getSponsors(),
+  ])
+
   return (
-    <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
-      <div className="flex flex-col items-center gap-6 pt-12">
-        <h1 className="font-paladins text-3xl tracking-wider">
-          Belouga Tournament
-        </h1>
-        <p className="text-xs text-zinc-500">build {getCommitHash()}</p>
-        <SessionInfo />
-      </div>
+    <div className="flex flex-col overflow-x-hidden gap-12">
+      <HeroSection />
+      <FeaturesSection />
+      {/*<Suspense fallback={<TournamentsSkeleton />}>
+        <TournamentsSection />
+      </Suspense>*/}
+      <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
+      <SponsorsSection sponsors={sponsors} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 /**
- * File: lib/services/auth.service.ts
- * Description: Service for handling authentication logic.
+ * File: lib/services/auth.ts
+ * Description: Services for handling authentication logic.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -14,11 +14,4 @@ import type { AuthSession } from '@/lib/types/auth'
 export const getSession = async (): Promise<AuthSession | null> => {
   const session = await auth.api.getSession({ headers: await headers() })
   return (session as AuthSession | null) ?? null
-}
-
-/** Signs out the currently authenticated user. */
-export const logout = async () => {
-  await auth.api.signOut({
-    headers: await headers(),
-  })
 }
