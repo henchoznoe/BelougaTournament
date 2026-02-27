@@ -105,7 +105,7 @@ const NavbarProfile = ({
   // Desktop Dropdown
   if (mode === 'desktop') {
     return (
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden cursor-pointer">
           <Image
             src={session.user.image ?? ''}
