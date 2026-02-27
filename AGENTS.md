@@ -157,7 +157,67 @@ proxy.ts                  # Edge middleware for admin route protection
 
 - **Server-only modules:** import `'server-only'` in modules that must never be bundled client-side (e.g., `logger.ts`)
 - **Prisma singleton:** global caching pattern in `lib/core/prisma.ts` to avoid multiple instances in dev
-- **Auth flow:** BetterAuth with Discord OAuth → session stored in DB → `getAuthSession()` for server-side checks → `authClient.useSession()` for client
-- **Admin protection:** dual-layer — edge `proxy.ts` middleware + `AdminGuard` client component with role check
+- **Auth flow:** BetterAuth with Discord OAuth → session stored in DB → `getSession()` for server-side checks → `authClient.useSession()` for client
+- **Admin protection:** dual-layer — edge `proxy.ts` middleware + `AdminGuard` server component with role check
 - **Env vars:** validated at startup via Zod (`lib/core/env.ts`); never access `process.env` directly elsewhere
 - **Monitoring:** Sentry configured for server, edge, and client (instrumentation files at project root)
+
+### Caching (`'use cache'` + Cache Components)
+
+`cacheComponents: true` is enabled in `next.config.ts`. The project uses the Next.js 16 `'use cache'` directive (NOT the deprecated `unstable_cache`).
+
+**Service layer pattern** (see `lib/services/settings.ts`, `lib/services/sponsors.ts`):
+
+```ts
+import { cacheLife, cacheTag } from 'next/cache'
+
+export const getMyData = async () => {
+  'use cache'
+  cacheLife('hours')        // Built-in profile: stale 5min, revalidate 1h, expire 1d
+  cacheTag('my-data')       // On-demand invalidation via revalidateTag('my-data')
+
+  // ... Prisma query with try/catch + Sentry
+}
+```
+
+**Cache tags in use:**
+
+| Tag          | Service                | Invalidated by                                    |
+|--------------|------------------------|---------------------------------------------------|
+| `settings`   | `getGlobalSettings()`  | `revalidateTag('settings')` in admin actions (TBD) |
+| `sponsors`   | `getSponsors()`        | `revalidateTag('sponsors')` in admin actions (TBD) |
+
+**On-demand revalidation:** when building admin server actions that mutate cached data, call `revalidateTag('<tag>')` from `next/cache` after a successful write:
+
+```ts
+'use server'
+import { revalidateTag } from 'next/cache'
+
+// After updating settings:
+revalidateTag('settings')
+```
+
+### Prerender constraints (`cacheComponents: true`)
+
+With Cache Components enabled, Next.js is strict during static prerendering. The following rules **must** be followed to avoid build errors:
+
+1. **No `new Date()` in components** — neither Server Components nor Client Components can call `new Date()` during prerender. Hardcode values (e.g., copyright year `2026`) or compute them at build time.
+2. **Dynamic APIs (`headers()`, `cookies()`, `connection()`) require `<Suspense>`** — any Server Component that calls these (e.g., `getSession()`) must be wrapped in a `<Suspense>` boundary. This enables Partial Prerendering: the static shell renders immediately, dynamic content streams in.
+3. **Pattern for pages using `getSession()`:**
+
+```tsx
+import { Suspense } from 'react'
+
+const PageContent = async () => {
+  const session = await getSession() // uses headers() — dynamic
+  // ...
+}
+
+const Page = () => (
+  <Suspense>
+    <PageContent />
+  </Suspense>
+)
+
+export default Page
+```
