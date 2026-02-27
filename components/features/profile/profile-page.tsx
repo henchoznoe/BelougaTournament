@@ -13,6 +13,7 @@ import {
   Mail,
   Shield,
   ShieldCheck,
+  Trophy,
   User,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -146,7 +147,27 @@ export const ProfilePage = async () => {
         </div>
       </div>
 
-      {/* Card 2: Tournament History Teaser */}
+      {/* Card 2: Inscriptions Teaser */}
+      <div
+        id="inscriptions"
+        className="relative scroll-mt-32 overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
+          <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
+            <Trophy className="size-6 text-zinc-600" />
+          </div>
+          <h3 className="text-lg font-bold text-white">Mes inscriptions</h3>
+          <p className="max-w-sm text-sm text-zinc-500">
+            Consultez bientôt vos inscriptions aux tournois en cours et gérez
+            vos équipes directement depuis votre profil.
+          </p>
+          <span className="mt-1 inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs font-medium text-blue-400">
+            Bientôt disponible
+          </span>
+        </div>
+      </div>
+
+      {/* Card 3: Tournament History Teaser */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
         <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">

@@ -138,9 +138,14 @@ const NavbarProfile = ({
               <span>Mon Profil</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
-            <Trophy className="mr-2 size-4" />
-            <span>Mes Inscriptions</span>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer focus:bg-white/5 focus:text-white"
+          >
+            <Link href={`${ROUTES.PROFILE}#inscriptions`} className="w-full">
+              <Trophy className="mr-2 size-4" />
+              <span>Mes Inscriptions</span>
+            </Link>
           </DropdownMenuItem>
           {isAdmin && (
             <>
@@ -203,12 +208,15 @@ const NavbarProfile = ({
           </Link>
         </Button>
         <Button
+          asChild
           variant="ghost"
           className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
           onClick={onClick}
         >
-          <Trophy className="size-4" />
-          Mes Inscriptions
+          <Link href={`${ROUTES.PROFILE}#inscriptions`}>
+            <Trophy className="size-4" />
+            Mes Inscriptions
+          </Link>
         </Button>
         {isAdmin && (
           <Button
