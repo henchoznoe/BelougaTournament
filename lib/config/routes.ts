@@ -11,6 +11,7 @@ export const ROUTES = {
   STREAM: '/stream',
   TOURNAMENTS: '/tournaments',
   TOURNAMENTS_ARCHIVE: '/tournaments/archive',
+  LEADERBOARD: '/classement',
   LEGAL: '/legal',
   PRIVACY: '/privacy',
   TERMS: '/terms',

@@ -106,6 +106,7 @@ export const PublicFooter = async () => {
       links: [
         { label: 'Accueil', href: ROUTES.HOME },
         { label: 'Stream', href: ROUTES.STREAM },
+        { label: 'Classement', href: ROUTES.LEADERBOARD },
         { label: 'Contact', href: ROUTES.CONTACT },
       ],
     },
