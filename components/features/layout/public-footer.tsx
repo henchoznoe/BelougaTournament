@@ -17,7 +17,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CurrentYear } from '@/components/ui/current-year'
 import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getGlobalSettings } from '@/lib/services/settings'
@@ -202,7 +201,7 @@ export const PublicFooter = async () => {
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             <div className="flex flex-col items-center gap-1 lg:items-start">
               <p className="text-sm text-zinc-500 text-center lg:text-left">
-                &copy; <CurrentYear /> {METADATA.NAME}. Tous droits réservés.
+                &copy; 2026 {METADATA.NAME}. Tous droits réservés.
               </p>
               <span className="font-mono text-xs text-zinc-600 transition-colors hover:text-zinc-400">
                 build: {commitHash}

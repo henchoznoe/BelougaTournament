@@ -67,7 +67,7 @@ export const HeroSection = () => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex size-2 rounded-full bg-blue-500"></span>
             </span>
-            Saison {new Date().getFullYear()} en préparation
+            Saison 2026 en préparation
           </span>
         </motion.div>
 
