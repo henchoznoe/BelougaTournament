@@ -15,6 +15,7 @@ export const ROUTES = {
   PRIVACY: '/privacy',
   TERMS: '/terms',
   CONTACT: '/contact',
+  PROFILE: '/profil',
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',

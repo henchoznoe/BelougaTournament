@@ -122,7 +122,7 @@ export const PublicFooter = async () => {
     {
       title: 'Espace Joueur',
       links: [
-        { label: 'Mon profil', href: 'TODO' },
+        { label: 'Mon profil', href: ROUTES.PROFILE },
         { label: 'Mes inscriptions', href: 'TODO' },
       ],
     },

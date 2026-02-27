@@ -17,7 +17,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  Settings,
   Trophy,
   User,
   Video,
@@ -130,9 +129,14 @@ const NavbarProfile = ({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-white/10" />
-          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
-            <User className="mr-2 size-4" />
-            <span>Mon Profil</span>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer focus:bg-white/5 focus:text-white"
+          >
+            <Link href={ROUTES.PROFILE} className="w-full">
+              <User className="mr-2 size-4" />
+              <span>Mon Profil</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
             <Trophy className="mr-2 size-4" />
@@ -188,12 +192,15 @@ const NavbarProfile = ({
 
       <div className="flex flex-col gap-1">
         <Button
+          asChild
           variant="ghost"
           className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
           onClick={onClick}
         >
-          <User className="size-4" />
-          Mon Profil
+          <Link href={ROUTES.PROFILE}>
+            <User className="size-4" />
+            Mon Profil
+          </Link>
         </Button>
         <Button
           variant="ghost"
@@ -202,14 +209,6 @@ const NavbarProfile = ({
         >
           <Trophy className="size-4" />
           Mes Inscriptions
-        </Button>
-        <Button
-          variant="ghost"
-          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
-          onClick={onClick}
-        >
-          <Settings className="size-4" />
-          Paramètres
         </Button>
         {isAdmin && (
           <Button
