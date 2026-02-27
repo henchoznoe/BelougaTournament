@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
+import { ProfileEditForm } from '@/components/features/profile/profile-edit-form'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUserProfile } from '@/lib/services/users'
@@ -71,7 +72,7 @@ export const ProfilePage = async () => {
             {dbUser.image ? (
               <Image
                 src={dbUser.image}
-                alt={dbUser.name}
+                alt={dbUser.displayName || dbUser.name}
                 width={96}
                 height={96}
                 className="rounded-full ring-2 ring-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
@@ -89,7 +90,7 @@ export const ProfilePage = async () => {
           <div className="flex min-w-0 flex-1 flex-col items-center gap-4 sm:items-start">
             <div className="text-center sm:text-left">
               <h2 className="font-paladins text-2xl tracking-wider text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">
-                {dbUser.name}
+                {dbUser.displayName || dbUser.name}
               </h2>
               <div
                 className={cn(
@@ -104,10 +105,20 @@ export const ProfilePage = async () => {
 
             {/* Details grid */}
             <div className="grid w-full gap-3">
-              {/* Pseudo */}
+              {/* Display name (editable) */}
+              <ProfileEditForm
+                currentDisplayName={dbUser.displayName || dbUser.name}
+              />
+
+              {/* Discord name (read-only) */}
               <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
                 <User className="size-4 shrink-0 text-zinc-500" />
-                <span className="text-sm text-zinc-300">{dbUser.name}</span>
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                    Discord
+                  </span>
+                  <span className="text-sm text-zinc-300">{dbUser.name}</span>
+                </div>
                 <Lock className="ml-auto size-3.5 shrink-0 text-zinc-600" />
               </div>
 
@@ -135,7 +146,7 @@ export const ProfilePage = async () => {
         </div>
       </div>
 
-      {/* Card 2: Tournament History Teaser (V2) */}
+      {/* Card 2: Tournament History Teaser */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
         <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">

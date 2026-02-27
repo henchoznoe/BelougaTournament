@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-//import 'server-only'
 import * as Sentry from '@sentry/nextjs'
 import prisma from '@/lib/core/prisma'
 
@@ -17,6 +16,7 @@ export const getUserProfile = async (userId: string) => {
       where: { id: userId },
       select: {
         name: true,
+        displayName: true,
         email: true,
         image: true,
         role: true,

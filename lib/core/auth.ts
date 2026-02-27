@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import * as Sentry from '@sentry/nextjs'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { env } from '@/lib/core/env'
@@ -34,6 +35,11 @@ const auth = betterAuth({
       discordId: {
         type: 'string',
         required: false,
+        input: false,
+      },
+      displayName: {
+        type: 'string',
+        required: true,
         input: false,
       },
     },
@@ -71,22 +77,26 @@ const auth = betterAuth({
 
             const name = discordProfile.global_name || discordProfile.username
 
-            if (
-              user.name !== name ||
-              user.image !== avatarUrl ||
-              user.discordId !== discordProfile.id
-            ) {
+            const updateData: Record<string, unknown> = {}
+
+            // Always sync Discord-controlled fields
+            if (user.name !== name) updateData.name = name
+            if (user.image !== avatarUrl) updateData.image = avatarUrl
+            if (user.discordId !== discordProfile.id)
+              updateData.discordId = discordProfile.id
+
+            // On first login, initialize displayName from Discord name
+            if (!user.displayName) updateData.displayName = name
+
+            if (Object.keys(updateData).length > 0) {
               await prisma.user.update({
                 where: { id: user.id },
-                data: {
-                  name: name,
-                  image: avatarUrl,
-                  discordId: discordProfile.id,
-                },
+                data: updateData,
               })
             }
           } catch (error) {
             console.error('Failed to sync Discord profile', error)
+            Sentry.captureException(error)
           }
         },
       },

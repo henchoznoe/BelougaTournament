@@ -19,11 +19,13 @@ const seedDatabase = async () => {
     {
       email: "henchoznoe@gmail.com",
       name: "Noé Henchoz",
+      displayName: "Noé Henchoz",
       role: Role.SUPERADMIN,
     },
     {
       email: "rutschoquentin@gmail.com",
       name: "Quentin Rutscho",
+      displayName: "Quentin Rutscho",
       role: Role.SUPERADMIN,
     }
   ]
@@ -48,6 +50,7 @@ const seedDatabase = async () => {
         create: {
           email: user.email,
           name: user.name,
+          displayName: user.displayName,
           role: user.role,
           emailVerified: true,
         },
