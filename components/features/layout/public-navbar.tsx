@@ -42,6 +42,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
@@ -81,7 +82,7 @@ const NavbarProfile = ({
   if (isPending) {
     return (
       <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
-        <div className="size-5 animate-pulse rounded-full bg-zinc-700" />
+        <Skeleton className="size-5 rounded-full bg-zinc-700" />
       </div>
     )
   }

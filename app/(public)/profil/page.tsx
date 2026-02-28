@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { ProfilePage } from '@/components/features/profile/profile-page'
 import { PageHeader } from '@/components/ui/page-header'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const metadata: Metadata = {
   title: 'Mon Profil',
@@ -27,11 +28,11 @@ const ProfilePageContent = () => {
         fallback={
           <div className="mx-auto w-full max-w-2xl space-y-6">
             {/* Skeleton card 1 */}
-            <div className="h-64 animate-pulse rounded-3xl border border-white/5 bg-white/2" />
+            <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
             {/* Skeleton card 2 */}
-            <div className="h-48 animate-pulse rounded-3xl border border-white/5 bg-white/2" />
+            <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
             {/* Skeleton card 3 */}
-            <div className="h-40 animate-pulse rounded-3xl border border-white/5 bg-white/2" />
+            <Skeleton className="h-40 rounded-3xl border border-white/5 bg-white/2" />
           </div>
         }
       >
