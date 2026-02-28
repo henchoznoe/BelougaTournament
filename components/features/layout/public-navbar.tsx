@@ -122,7 +122,7 @@ const NavbarProfile = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="font-medium text-sm leading-none text-white">
-                {session.user.name}
+                {session.user.displayName}
               </p>
               <p className="text-xs leading-none text-zinc-400">
                 {session.user.email}
@@ -182,18 +182,15 @@ const NavbarProfile = ({
         <div className="relative">
           <Image
             src={session.user.image ?? ''}
-            alt={session.user.name}
+            alt={session.user.displayName}
             width={48}
             height={48}
             className="rounded-full ring-2 ring-blue-500/20"
           />
         </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-white text-lg">
-            {session.user.name}
-          </span>
-          <span className="text-sm text-zinc-400">{session.user.email}</span>
-        </div>
+        <span className="font-bold text-white text-lg">
+          {session.user.displayName}
+        </span>
       </div>
 
       <div className="flex flex-col gap-1">
