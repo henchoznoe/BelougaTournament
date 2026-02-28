@@ -1,6 +1,6 @@
 /**
  * File: lib/validations/settings.ts
- * Description: Validation schemas for global application settings
+ * Description: Validation schema for global application settings.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,18 +8,23 @@
 
 import { z } from 'zod'
 
-/** Optional URL-or-empty string for social links and asset URLs. */
-const optionalUrl = z.string().optional().or(z.literal(''))
+/** Accepts an empty string (field cleared) or a valid URL. */
+const optionalUrl = z
+  .string()
+  .trim()
+  .refine(val => !val || /^https?:\/\/.+/.test(val), {
+    message: 'URL invalide (doit commencer par https://)',
+  })
 
-/** Matches the GlobalSettings model: socials stored as JSON + streamUrl + logoUrl. */
+/** Matches the Prisma GlobalSettings model fields exactly. */
 export const settingsSchema = z.object({
   logoUrl: optionalUrl,
-  streamUrl: optionalUrl,
-  socialDiscord: optionalUrl,
-  socialTwitch: optionalUrl,
-  socialTiktok: optionalUrl,
-  socialInstagram: optionalUrl,
-  socialYoutube: optionalUrl,
+  twitchUsername: z.string().trim(),
+  twitchUrl: optionalUrl,
+  discordUrl: optionalUrl,
+  instagramUrl: optionalUrl,
+  tiktokUrl: optionalUrl,
+  youtubeUrl: optionalUrl,
 })
 
 export type SettingsInput = z.infer<typeof settingsSchema>

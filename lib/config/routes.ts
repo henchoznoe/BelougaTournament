@@ -25,4 +25,5 @@ export const ROUTES = {
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',
   ADMIN_NEW_TOURNAMENT: '/admin/tournaments/new',
+  ADMIN_SPONSORS: '/admin/sponsors',
 } as const

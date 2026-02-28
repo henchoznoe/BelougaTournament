@@ -1,28 +1,57 @@
 /**
  * File: app/admin/page.tsx
- * Description: Admin dashboard placeholder page.
+ * Description: Admin dashboard page with overview stats.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Shield } from 'lucide-react'
+import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard',
+  title: 'Dashboard',
 }
 
 const AdminDashboardPage = () => {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4">
-      <div className="flex size-16 items-center justify-center rounded-full bg-green-500/10 ring-1 ring-green-500/20">
-        <Shield className="size-8 text-green-400" />
+    <div className="space-y-6">
+      {/* Page heading */}
+      <div className="space-y-1">
+        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
+          <LayoutDashboard className="size-6 text-blue-400" />
+          Dashboard
+        </h1>
+        <p className="text-sm text-zinc-400">
+          Vue d'ensemble de la plateforme Belouga Tournament.
+        </p>
       </div>
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Cette page est en cours de construction.
+
+      {/* Placeholder stats grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: 'Tournois actifs', value: '—' },
+          { label: 'Joueurs inscrits', value: '—' },
+          { label: 'Inscriptions en attente', value: '—' },
+          { label: 'Admins', value: '—' },
+        ].map(stat => (
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm"
+          >
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+              {stat.label}
+            </p>
+            <p className="mt-2 text-3xl font-bold text-white">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Placeholder content */}
+      <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+        <p className="text-sm text-zinc-400">
+          Les statistiques détaillées et l'activité récente seront disponibles
+          prochainement.
         </p>
       </div>
     </div>

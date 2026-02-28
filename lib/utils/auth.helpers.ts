@@ -12,3 +12,8 @@ import { Role } from '@/prisma/generated/prisma/enums'
 export const isAdmin = (role: Role): boolean => {
   return role === Role.ADMIN || role === Role.SUPERADMIN
 }
+
+/** Returns true if the given role is SUPERADMIN. */
+export const isSuperAdmin = (role: Role): boolean => {
+  return role === Role.SUPERADMIN
+}
