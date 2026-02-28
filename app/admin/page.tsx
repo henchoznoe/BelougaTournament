@@ -8,12 +8,28 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
+import {
+  DashboardRecentRegistrations,
+  DashboardUpcomingTournaments,
+} from '@/components/features/admin/dashboard-recent'
+import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
+import {
+  getDashboardStats,
+  getRecentRegistrations,
+  getUpcomingTournaments,
+} from '@/lib/services/dashboard'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
 }
 
-const AdminDashboardPage = () => {
+const AdminDashboardPage = async () => {
+  const [stats, upcomingTournaments, recentRegistrations] = await Promise.all([
+    getDashboardStats(),
+    getUpcomingTournaments(),
+    getRecentRegistrations(),
+  ])
+
   return (
     <div className="space-y-6">
       {/* Page heading */}
@@ -27,32 +43,13 @@ const AdminDashboardPage = () => {
         </p>
       </div>
 
-      {/* Placeholder stats grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Tournois actifs', value: '—' },
-          { label: 'Joueurs inscrits', value: '—' },
-          { label: 'Inscriptions en attente', value: '—' },
-          { label: 'Admins', value: '—' },
-        ].map(stat => (
-          <div
-            key={stat.label}
-            className="rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm"
-          >
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              {stat.label}
-            </p>
-            <p className="mt-2 text-3xl font-bold text-white">{stat.value}</p>
-          </div>
-        ))}
-      </div>
+      {/* Stats cards */}
+      <DashboardStatsCards stats={stats} />
 
-      {/* Placeholder content */}
-      <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
-        <p className="text-sm text-zinc-400">
-          Les statistiques détaillées et l'activité récente seront disponibles
-          prochainement.
-        </p>
+      {/* Two-column panels: upcoming tournaments & recent registrations */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DashboardUpcomingTournaments tournaments={upcomingTournaments} />
+        <DashboardRecentRegistrations registrations={recentRegistrations} />
       </div>
     </div>
   )
