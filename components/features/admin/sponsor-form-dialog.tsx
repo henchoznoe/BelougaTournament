@@ -13,6 +13,8 @@ import * as Sentry from '@sentry/nextjs'
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
+  ChevronDown,
   Crown,
   ImagePlus,
   Loader2,
@@ -21,7 +23,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -35,10 +37,18 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSponsor, updateSponsor } from '@/lib/actions/sponsors'
 import { cn } from '@/lib/utils/cn'
 import { type SponsorInput, sponsorSchema } from '@/lib/validations/sponsors'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
+
+interface BlobItem {
+  url: string
+  pathname: string
+  size: number
+  uploadedAt: string
+}
 
 interface SponsorFormDialogProps {
   open: boolean
@@ -54,6 +64,9 @@ export const SponsorFormDialog = ({
   const isEditing = !!sponsor
   const [isPending, startTransition] = useTransition()
   const [isUploading, setIsUploading] = useState(false)
+  const [blobs, setBlobs] = useState<BlobItem[]>([])
+  const [isLoadingBlobs, setIsLoadingBlobs] = useState(false)
+  const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -87,6 +100,28 @@ export const SponsorFormDialog = ({
       })
     }
   }, [open, sponsor, reset])
+
+  /** Fetch existing blobs from the sponsors/ folder. */
+  const fetchBlobs = useCallback(async () => {
+    setIsLoadingBlobs(true)
+    try {
+      const res = await fetch('/api/admin/blobs?folder=sponsors')
+      if (!res.ok) throw new Error('Failed to fetch blobs')
+      const data = (await res.json()) as { blobs: BlobItem[] }
+      setBlobs(data.blobs)
+    } catch (error) {
+      Sentry.captureException(error)
+    } finally {
+      setIsLoadingBlobs(false)
+    }
+  }, [])
+
+  // Fetch blobs when the dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchBlobs()
+    }
+  }, [open, fetchBlobs])
 
   /** Upload one or more images to Vercel Blob and add them to the list. */
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,6 +162,7 @@ export const SponsorFormDialog = ({
           shouldDirty: true,
           shouldValidate: true,
         })
+        await fetchBlobs()
       }
     } catch (error) {
       Sentry.captureException(error)
@@ -171,6 +207,22 @@ export const SponsorFormDialog = ({
       shouldDirty: true,
       shouldValidate: true,
     })
+  }
+
+  /** Toggle an existing blob image in the selected images list. */
+  const handleToggleBlob = (blobUrl: string) => {
+    if (imageUrls.includes(blobUrl)) {
+      setValue(
+        'imageUrls',
+        imageUrls.filter(u => u !== blobUrl),
+        { shouldDirty: true, shouldValidate: true },
+      )
+    } else {
+      setValue('imageUrls', [...imageUrls, blobUrl], {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    }
   }
 
   const onSubmit = (data: SponsorInput) => {
@@ -323,6 +375,72 @@ export const SponsorFormDialog = ({
               className="hidden"
               onChange={handleUpload}
             />
+
+            {/* Existing images gallery */}
+            <div className="space-y-2 rounded-xl border border-white/5 bg-white/2 p-3">
+              <button
+                type="button"
+                onClick={() => setGalleryOpen(prev => !prev)}
+                className="flex w-full items-center justify-between text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
+              >
+                <span>Images existantes</span>
+                <ChevronDown
+                  className={cn(
+                    'size-4 transition-transform duration-200',
+                    galleryOpen && 'rotate-180',
+                  )}
+                />
+              </button>
+
+              {galleryOpen &&
+                (isLoadingBlobs ? (
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                    {['s1', 's2', 's3', 's4', 's5'].map(key => (
+                      <Skeleton
+                        key={key}
+                        className="aspect-square rounded-lg bg-white/5"
+                      />
+                    ))}
+                  </div>
+                ) : blobs.length === 0 ? (
+                  <p className="py-2 text-center text-xs text-zinc-600">
+                    Aucune image dans le dossier sponsors.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                    {blobs.map(blob => {
+                      const isSelected = imageUrls.includes(blob.url)
+
+                      return (
+                        <button
+                          key={blob.url}
+                          type="button"
+                          onClick={() => handleToggleBlob(blob.url)}
+                          className={cn(
+                            'relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border bg-white/5 transition-all duration-200',
+                            isSelected
+                              ? 'border-blue-500/50 ring-2 ring-blue-500/20'
+                              : 'border-white/10 hover:border-white/20',
+                          )}
+                        >
+                          <Image
+                            src={blob.url}
+                            alt={blob.pathname}
+                            width={80}
+                            height={80}
+                            className="size-full object-contain p-1"
+                          />
+                          {isSelected && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-blue-500/10">
+                              <Check className="size-5 text-blue-400" />
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                ))}
+            </div>
 
             {errors.imageUrls?.message && (
               <p className="text-xs text-red-400">{errors.imageUrls.message}</p>
