@@ -19,6 +19,7 @@ const ALLOWED_TYPES = new Set([
   'image/webp',
   'image/svg+xml',
 ])
+const ALLOWED_FOLDERS = new Set(['logos', 'sponsors'])
 
 /** Verifies that the request comes from an authenticated SUPERADMIN. */
 const verifySuperAdmin = async (request: Request) => {
@@ -29,7 +30,7 @@ const verifySuperAdmin = async (request: Request) => {
   return session
 }
 
-/** GET — List all blobs in the store. */
+/** GET — List blobs, optionally filtered by folder prefix. */
 export const GET = async (request: Request) => {
   const session = await verifySuperAdmin(request)
   if (!session) {
@@ -37,7 +38,12 @@ export const GET = async (request: Request) => {
   }
 
   try {
-    const { blobs } = await list()
+    const { searchParams } = new URL(request.url)
+    const folder = searchParams.get('folder')
+
+    const prefix =
+      folder && ALLOWED_FOLDERS.has(folder) ? `${folder}/` : undefined
+    const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
     Sentry.captureException(error)
@@ -48,7 +54,7 @@ export const GET = async (request: Request) => {
   }
 }
 
-/** POST — Upload a file to Vercel Blob. Expects FormData with a "file" field. */
+/** POST — Upload a file to Vercel Blob. Expects FormData with a "file" field and optional "folder" field. */
 export const POST = async (request: Request) => {
   const session = await verifySuperAdmin(request)
   if (!session) {
@@ -58,6 +64,7 @@ export const POST = async (request: Request) => {
   try {
     const formData = await request.formData()
     const file = formData.get('file')
+    const folder = formData.get('folder')
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -80,7 +87,13 @@ export const POST = async (request: Request) => {
       )
     }
 
-    const blob = await put(file.name, file, {
+    // Build the pathname with optional folder prefix
+    const pathname =
+      typeof folder === 'string' && ALLOWED_FOLDERS.has(folder)
+        ? `${folder}/${file.name}`
+        : file.name
+
+    const blob = await put(pathname, file, {
       access: 'public',
       addRandomSuffix: true,
     })

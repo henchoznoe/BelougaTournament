@@ -25,13 +25,15 @@ const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => {
         'hover:border-white/10 hover:bg-white/5 hover:shadow-[0_0_25px_rgba(59,130,246,0.1)]',
       )}
     >
-      <Image
-        src={sponsor.imageUrl}
-        alt={sponsor.name}
-        width={160}
-        height={64}
-        className="max-h-12 w-auto object-contain brightness-75 grayscale transition-all duration-500 group-hover:brightness-100 group-hover:grayscale-0 sm:max-h-14"
-      />
+      {sponsor.imageUrls[0] && (
+        <Image
+          src={sponsor.imageUrls[0]}
+          alt={sponsor.name}
+          width={160}
+          height={64}
+          className="max-h-12 w-auto object-contain brightness-75 grayscale transition-all duration-500 group-hover:brightness-100 group-hover:grayscale-0 sm:max-h-14"
+        />
+      )}
     </div>
   )
 

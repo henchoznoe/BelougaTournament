@@ -39,7 +39,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
   /** Fetch all blobs from the store. */
   const fetchBlobs = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/blobs')
+      const res = await fetch('/api/admin/blobs?folder=logos')
       if (!res.ok) throw new Error('Failed to fetch blobs')
       const data = (await res.json()) as { blobs: BlobItem[] }
       setBlobs(data.blobs)
@@ -64,6 +64,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('folder', 'logos')
 
       const res = await fetch('/api/admin/blobs', {
         method: 'POST',

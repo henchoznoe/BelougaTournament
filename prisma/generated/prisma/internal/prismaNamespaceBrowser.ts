@@ -243,7 +243,7 @@ export type GlobalSettingsScalarFieldEnum = (typeof GlobalSettingsScalarFieldEnu
 export const SponsorScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  imageUrl: 'imageUrl',
+  imageUrls: 'imageUrls',
   url: 'url',
   order: 'order',
   createdAt: 'createdAt',

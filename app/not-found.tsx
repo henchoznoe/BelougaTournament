@@ -6,12 +6,15 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+'use client'
+
 import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ROUTES } from '@/lib/config/routes'
 
 const NotFoundPage = () => {
+  const router = useRouter()
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-zinc-950 px-4 text-zinc-50">
       <p className="select-none font-mono text-8xl font-bold text-zinc-800">
@@ -24,14 +27,12 @@ const NotFoundPage = () => {
         </p>
       </div>
       <Button
-        asChild
         variant="ghost"
         className="text-zinc-400 hover:bg-white/5 hover:text-white"
+        onClick={() => router.back()}
       >
-        <Link href={ROUTES.HOME}>
-          <ArrowLeft className="mr-2 size-4" />
-          Retour à l&apos;accueil
-        </Link>
+        <ArrowLeft className="mr-2 size-4" />
+        Retour
       </Button>
     </div>
   )

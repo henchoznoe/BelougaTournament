@@ -8,6 +8,7 @@
 
 import { Suspense } from 'react'
 import { AdminShell } from '@/components/features/admin/admin-shell'
+import { AdminShellSkeleton } from '@/components/features/admin/admin-shell-skeleton'
 import AdminGuard from '@/components/features/auth/admin-guard'
 
 interface AdminLayoutProps {
@@ -17,7 +18,7 @@ interface AdminLayoutProps {
 /** Wraps all admin routes with authentication, role-based access control, and admin shell. */
 const AdminLayout = ({ children }: Readonly<AdminLayoutProps>) => {
   return (
-    <Suspense>
+    <Suspense fallback={<AdminShellSkeleton />}>
       <AdminGuard>
         <AdminShell>{children}</AdminShell>
       </AdminGuard>

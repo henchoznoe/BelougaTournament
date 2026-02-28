@@ -219,7 +219,7 @@ model GlobalSettings {
 model Sponsor {
   id        String   @id @default(uuid())
   name      String
-  imageUrl  String
+  imageUrls String[]
   url       String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
