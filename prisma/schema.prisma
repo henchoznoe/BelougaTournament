@@ -48,6 +48,8 @@ model User {
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
   role          Role                     @default(USER)
+  bannedUntil   DateTime?
+  banReason     String?
   sessions      Session[]
   accounts      Account[]
   registrations TournamentRegistration[]

@@ -17,3 +17,9 @@ export const isAdmin = (role: Role): boolean => {
 export const isSuperAdmin = (role: Role): boolean => {
   return role === Role.SUPERADMIN
 }
+
+/** Returns true if the user is currently banned (bannedUntil is in the future). */
+export const isBanned = (bannedUntil: Date | string | null): boolean => {
+  if (!bannedUntil) return false
+  return new Date(bannedUntil) > new Date()
+}

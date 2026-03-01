@@ -1352,7 +1352,9 @@ export const UserScalarFieldEnum = {
   discordId: 'discordId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  role: 'role'
+  role: 'role',
+  bannedUntil: 'bannedUntil',
+  banReason: 'banReason'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
