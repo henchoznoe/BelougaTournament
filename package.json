@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts && next build",
+    "build": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build",
     "start": "next start",
     "prepare": "husky",
     "lint": "biome lint .",
@@ -16,7 +16,7 @@
     "test:coverage": "vitest run --coverage",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
-    "db:deploy": "prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts",
+    "db:deploy": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "docker:up": "docker-compose up -d",

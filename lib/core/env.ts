@@ -37,6 +37,7 @@ const serverSchema = z.object({
   SENTRY_AUTH_TOKEN: z.string().optional(),
 
   // Vercel runtime metadata
+  VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
 })
 
