@@ -21,4 +21,5 @@ export const DEFAULT_ASSETS = {
 export const AUTHOR = {
   URL: 'https://henchoznoe.ch',
   NAME: 'Noé Henchoz',
+  EMAIL: 'henchoznoe@gmail.com',
 }

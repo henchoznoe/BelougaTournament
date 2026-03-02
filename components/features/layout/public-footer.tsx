@@ -218,6 +218,12 @@ export const PublicFooter = async () => {
 
             <div className="flex flex-col items-center gap-4 text-sm text-zinc-500 sm:flex-row sm:gap-6">
               <Link
+                href={ROUTES.LEGAL}
+                className="transition-colors hover:text-white"
+              >
+                Mentions légales
+              </Link>
+              <Link
                 href={ROUTES.PRIVACY}
                 className="transition-colors hover:text-white"
               >
