@@ -8,7 +8,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -30,11 +29,11 @@ export default function SocialLogin() {
       })
 
       if (error) {
-        Sentry.captureException(error)
+        console.error('Social login error:', error)
         toast.error(error.message || 'Erreur lors de la connexion')
       }
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Unexpected social login error:', error)
       toast.error('Une erreur inattendue est survenue')
     } finally {
       setIsLoading(false)

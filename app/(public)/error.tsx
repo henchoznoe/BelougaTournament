@@ -8,7 +8,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
@@ -23,7 +22,7 @@ interface ErrorPageProps {
 /** Public-segment error boundary — retry or navigate home. */
 const PublicErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
-    Sentry.captureException(error)
+    console.error(error)
   }, [error])
 
   return (

@@ -7,7 +7,6 @@
  */
 
 import 'server-only'
-import * as Sentry from '@sentry/nextjs'
 import { cacheLife, cacheTag } from 'next/cache'
 import prisma from '@/lib/core/prisma'
 import type { PlayerRow } from '@/lib/types/player'
@@ -42,7 +41,7 @@ export const getPlayers = async (): Promise<PlayerRow[]> => {
     })
     return rows as unknown as PlayerRow[]
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error fetching players:', error)
     return []
   }
 }

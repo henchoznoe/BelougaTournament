@@ -83,9 +83,9 @@ Every `.ts`/`.tsx` file starts with:
 
 ### Error Handling
 
-- **Server actions**: `authenticatedAction` wrapper (auth + role + Zod + Prisma error mapping + Sentry)
-- **Services**: `try/catch` + `Sentry.captureException()` + fallback return
-- **Client-side**: `try/catch` + `Sentry.captureException()` + `toast.error()` (Sonner)
+- **Server actions**: `authenticatedAction` wrapper (auth + role + Zod + Prisma error mapping + logger)
+- **Services**: `try/catch` + `console.error()` + fallback return
+- **Client-side**: `try/catch` + `console.error()` + `toast.error()` (Sonner)
 - **Prisma errors**: `handlePrismaError()` from `lib/utils/prisma-error.ts`
 
 ### Styling
@@ -149,7 +149,7 @@ export const getData = async () => {
   'use cache'
   cacheLife('hours')
   cacheTag('my-tag')
-  // Prisma query with try/catch + Sentry
+  // Prisma query with try/catch + console.error
 }
 ```
 
@@ -202,4 +202,3 @@ Pass `folder` field in FormData on POST, `?folder=` query param on GET. Allowed 
 - **Prisma singleton** with global caching in `lib/core/prisma.ts`
 - **Auth**: BetterAuth + Discord OAuth → `getSession()` server-side, `authClient.useSession()` client-side
 - **Admin protection**: dual-layer — edge `proxy.ts` + `AdminGuard` server component
-- **Sentry**: configured for server, edge, client; tunnel at `/monitoring`

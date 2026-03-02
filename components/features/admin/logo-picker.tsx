@@ -8,7 +8,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { Check, ImagePlus, Loader2, Trash2, X } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -44,7 +43,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
       const data = (await res.json()) as { blobs: BlobItem[] }
       setBlobs(data.blobs)
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Error fetching blobs:', error)
       toast.error('Erreur lors du chargement des images.')
     } finally {
       setIsLoading(false)
@@ -82,7 +81,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
       onChange(data.url)
       await fetchBlobs()
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Error uploading logo:', error)
       toast.error('Une erreur inattendue est survenue.')
     } finally {
       setIsUploading(false)
@@ -111,7 +110,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
       if (value === url) onChange('')
       setBlobs(prev => prev.filter(b => b.url !== url))
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Error deleting blob:', error)
       toast.error('Une erreur inattendue est survenue.')
     } finally {
       setDeletingUrl(null)

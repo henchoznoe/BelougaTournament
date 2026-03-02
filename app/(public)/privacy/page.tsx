@@ -114,10 +114,6 @@ const PrivacyPage = () => {
                 la Plateforme (États-Unis)
               </li>
               <li>
-                <span className="text-zinc-300">Sentry :</span> Monitoring des
-                erreurs (États-Unis)
-              </li>
-              <li>
                 <span className="text-zinc-300">Discord :</span>{' '}
                 Authentification OAuth (États-Unis)
               </li>

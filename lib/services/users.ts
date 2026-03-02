@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import prisma from '@/lib/core/prisma'
 
 /** Fetches the profile data for a given user ID. Returns null if not found. */
@@ -24,7 +23,7 @@ export const getUserProfile = async (userId: string) => {
       },
     })
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error fetching user profile:', error)
     return null
   }
 }

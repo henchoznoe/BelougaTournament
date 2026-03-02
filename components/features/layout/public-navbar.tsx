@@ -9,7 +9,6 @@
 'use client'
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import * as Sentry from '@sentry/nextjs'
 import { motion } from 'framer-motion'
 import {
   BarChart3,
@@ -68,13 +67,13 @@ const NavbarProfile = ({
             if (onClick) onClick()
           },
           onError: ctx => {
-            Sentry.captureException(ctx.error)
+            console.error('Logout error:', ctx.error)
             toast.error('Erreur lors de la déconnexion')
           },
         },
       })
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Unexpected logout error:', error)
       toast.error('Une erreur inattendue est survenue')
     }
   }

@@ -1,7 +1,7 @@
 /**
  * File: app/error.tsx
  * Description: Root-level React error boundary for unexpected runtime errors.
- *   Reports the error to Sentry and provides a user-friendly recovery option.
+ *   Logs the error and provides a user-friendly recovery option.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -9,7 +9,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -19,10 +18,10 @@ interface ErrorPageProps {
   reset: () => void
 }
 
-/** Root error boundary — captures the error in Sentry and lets the user retry. */
+/** Root error boundary — logs the error and lets the user retry. */
 const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
-    Sentry.captureException(error)
+    console.error(error)
   }, [error])
 
   return (

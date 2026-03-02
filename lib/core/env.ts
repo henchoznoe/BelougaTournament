@@ -10,7 +10,6 @@ import { z } from 'zod'
 
 const clientSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL must be a valid URL'),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
 })
 
 const serverSchema = z.object({
@@ -32,10 +31,6 @@ const serverSchema = z.object({
   // Storage
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
 
-  // Monitoring
-  SENTRY_DSN: z.string().optional(),
-  SENTRY_AUTH_TOKEN: z.string().optional(),
-
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
@@ -46,7 +41,6 @@ const isServer = typeof window === 'undefined'
 // Parse client-side
 const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 })
 
 // Parse server-side

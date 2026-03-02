@@ -7,7 +7,6 @@
  */
 
 import 'server-only'
-import * as Sentry from '@sentry/nextjs'
 import { cacheLife, cacheTag } from 'next/cache'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -55,7 +54,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       sponsors,
     }
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error fetching dashboard stats:', error)
     return {
       tournaments: {
         total: 0,
@@ -103,7 +102,7 @@ export const getUpcomingTournaments = async (
     })
     return rows as unknown as UpcomingTournament[]
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error fetching upcoming tournaments:', error)
     return []
   }
 }
@@ -145,7 +144,7 @@ export const getRecentRegistrations = async (
     })
     return rows as unknown as RecentRegistration[]
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error fetching recent registrations:', error)
     return []
   }
 }

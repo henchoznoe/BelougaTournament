@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { env } from '@/lib/core/env'
@@ -96,7 +95,6 @@ const auth = betterAuth({
             }
           } catch (error) {
             console.error('Failed to sync Discord profile', error)
-            Sentry.captureException(error)
           }
         },
       },

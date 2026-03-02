@@ -9,7 +9,6 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as Sentry from '@sentry/nextjs'
 import {
   ArrowLeft,
   ArrowRight,
@@ -110,7 +109,7 @@ export const SponsorFormDialog = ({
       const data = (await res.json()) as { blobs: BlobItem[] }
       setBlobs(data.blobs)
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Error fetching blobs:', error)
     } finally {
       setIsLoadingBlobs(false)
     }
@@ -165,7 +164,7 @@ export const SponsorFormDialog = ({
         await fetchBlobs()
       }
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Error uploading sponsor images:', error)
       toast.error('Une erreur inattendue est survenue.')
     } finally {
       setIsUploading(false)

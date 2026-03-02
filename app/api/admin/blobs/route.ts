@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import auth from '@/lib/core/auth'
@@ -46,7 +45,7 @@ export const GET = async (request: Request) => {
     const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error listing blobs:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des fichiers.' },
       { status: 500 },
@@ -100,7 +99,7 @@ export const POST = async (request: Request) => {
 
     return NextResponse.json({ url: blob.url })
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error uploading blob:', error)
     return NextResponse.json(
       { error: "Erreur lors de l'upload du fichier." },
       { status: 500 },
@@ -129,7 +128,7 @@ export const DELETE = async (request: Request) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    Sentry.captureException(error)
+    console.error('Error deleting blob:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du fichier.' },
       { status: 500 },
