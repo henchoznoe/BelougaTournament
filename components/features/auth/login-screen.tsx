@@ -86,8 +86,15 @@ export const LoginScreen = () => {
             </div>
 
             <p className="mt-8 text-center text-xs text-zinc-600">
-              En vous connectant, vous acceptez nos conditions d'utilisation et
-              notre politique de confidentialité.
+              En vous connectant, vous acceptez nos{' '}
+              <Link href={ROUTES.TERMS} className="text-blue-400">
+                conditions d'utilisation
+              </Link>{' '}
+              et notre{' '}
+              <Link href={ROUTES.PRIVACY} className="text-blue-400">
+                politique de confidentialité
+              </Link>
+              .
             </p>
           </motion.div>
         </div>
