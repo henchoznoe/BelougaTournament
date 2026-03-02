@@ -93,11 +93,11 @@ The platform enables administrators to host and manage diverse gaming tournament
     ```
 
 3.  **Environment Setup:**
-    Duplicate `.env.example` to `.env` and fill in your secrets (Discord OAuth, Vercel Blob token).
+    Duplicate `.env.example` to `.env.local` and fill in your secrets (Discord OAuth, Vercel Blob token).
     ```bash
-    cp .env.example .env
+    cp .env.example .env.local
     ```
-    *Note: Your local `.env` should point to your Docker PostgreSQL instance (`postgresql://postgres:postgres@localhost:5432/belouga_tournament`).*
+    *Note: Your local `.env.local` should point to your Docker PostgreSQL instance (`postgresql://postgres:postgres@localhost:5432/belouga_tournament`).*
 
 4.  **Database Initialization:**
     ```bash
