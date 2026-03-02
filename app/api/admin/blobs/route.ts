@@ -9,6 +9,7 @@
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import auth from '@/lib/core/auth'
+import { logger } from '@/lib/core/logger'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
@@ -45,7 +46,7 @@ export const GET = async (request: Request) => {
     const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
-    console.error('Error listing blobs:', error)
+    logger.error({ error }, 'Error listing blobs')
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des fichiers.' },
       { status: 500 },
@@ -99,7 +100,7 @@ export const POST = async (request: Request) => {
 
     return NextResponse.json({ url: blob.url })
   } catch (error) {
-    console.error('Error uploading blob:', error)
+    logger.error({ error }, 'Error uploading blob')
     return NextResponse.json(
       { error: "Erreur lors de l'upload du fichier." },
       { status: 500 },
@@ -128,7 +129,7 @@ export const DELETE = async (request: Request) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting blob:', error)
+    logger.error({ error }, 'Error deleting blob')
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du fichier.' },
       { status: 500 },

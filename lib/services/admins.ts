@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
 
@@ -48,7 +49,7 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
     })
     return rows as unknown as AdminUser[]
   } catch (error) {
-    console.error('Error fetching admins:', error)
+    logger.error({ error }, 'Error fetching admins')
     return []
   }
 }
@@ -71,7 +72,7 @@ export const getTournamentOptions = async (): Promise<TournamentOption[]> => {
     })
     return rows as unknown as TournamentOption[]
   } catch (error) {
-    console.error('Error fetching tournament options:', error)
+    logger.error({ error }, 'Error fetching tournament options')
     return []
   }
 }
@@ -109,7 +110,7 @@ export const searchUsers = async (
       image: string | null
     }[]
   } catch (error) {
-    console.error('Error searching users:', error)
+    logger.error({ error }, 'Error searching users')
     return []
   }
 }

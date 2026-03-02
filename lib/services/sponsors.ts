@@ -7,6 +7,7 @@
  */
 
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
@@ -20,7 +21,7 @@ export const getSponsors = async (): Promise<Sponsor[]> => {
       orderBy: { order: 'asc' },
     })
   } catch (error) {
-    console.error('Error fetching sponsors:', error)
+    logger.error({ error }, 'Error fetching sponsors')
     return []
   }
 }

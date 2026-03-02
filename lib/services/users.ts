@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 
 /** Fetches the profile data for a given user ID. Returns null if not found. */
@@ -23,7 +24,7 @@ export const getUserProfile = async (userId: string) => {
       },
     })
   } catch (error) {
-    console.error('Error fetching user profile:', error)
+    logger.error({ error }, 'Error fetching user profile')
     return null
   }
 }

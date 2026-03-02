@@ -9,6 +9,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { env } from '@/lib/core/env'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
@@ -94,7 +95,10 @@ const auth = betterAuth({
               })
             }
           } catch (error) {
-            console.error('Failed to sync Discord profile', error)
+            logger.error(
+              { error, userId: session.userId },
+              'Failed to sync Discord profile',
+            )
           }
         },
       },

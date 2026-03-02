@@ -84,9 +84,11 @@ Every `.ts`/`.tsx` file starts with:
 ### Error Handling
 
 - **Server actions**: `authenticatedAction` wrapper (auth + role + Zod + Prisma error mapping + logger)
-- **Services**: `try/catch` + `console.error()` + fallback return
-- **Client-side**: `try/catch` + `console.error()` + `toast.error()` (Sonner)
+- **Services**: `try/catch` + `logger.error({ error }, 'message')` + fallback return
+- **API routes**: `try/catch` + `logger.error({ error }, 'message')` + JSON error response
+- **Client-side**: `try/catch` + `console.error()` + `toast.error()` (Sonner) — `logger` is `server-only`
 - **Prisma errors**: `handlePrismaError()` from `lib/utils/prisma-error.ts`
+- **Never** use bare `console.log/warn/error` in server-side runtime code — use `logger.*` instead
 
 ### Styling
 
@@ -149,7 +151,7 @@ export const getData = async () => {
   'use cache'
   cacheLife('hours')
   cacheTag('my-tag')
-  // Prisma query with try/catch + console.error
+  // Prisma query with try/catch + logger.error({ error }, 'message')
 }
 ```
 

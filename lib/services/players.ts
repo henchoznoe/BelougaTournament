@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { PlayerRow } from '@/lib/types/player'
 
@@ -41,7 +42,7 @@ export const getPlayers = async (): Promise<PlayerRow[]> => {
     })
     return rows as unknown as PlayerRow[]
   } catch (error) {
-    console.error('Error fetching players:', error)
+    logger.error({ error }, 'Error fetching players')
     return []
   }
 }

@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
   DashboardStats,
@@ -54,7 +55,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       sponsors,
     }
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error)
+    logger.error({ error }, 'Error fetching dashboard stats')
     return {
       tournaments: {
         total: 0,
@@ -102,7 +103,7 @@ export const getUpcomingTournaments = async (
     })
     return rows as unknown as UpcomingTournament[]
   } catch (error) {
-    console.error('Error fetching upcoming tournaments:', error)
+    logger.error({ error }, 'Error fetching upcoming tournaments')
     return []
   }
 }
@@ -144,7 +145,7 @@ export const getRecentRegistrations = async (
     })
     return rows as unknown as RecentRegistration[]
   } catch (error) {
-    console.error('Error fetching recent registrations:', error)
+    logger.error({ error }, 'Error fetching recent registrations')
     return []
   }
 }
