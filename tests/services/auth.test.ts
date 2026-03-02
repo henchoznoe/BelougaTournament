@@ -1,5 +1,5 @@
 /**
- * File: tests/auth.service.test.ts
+ * File: tests/services/auth.test.ts
  * Description: Unit tests for the auth service (getSession).
  * Author: Noé Henchoz
  * License: MIT

@@ -1,5 +1,5 @@
 /**
- * File: lib/utils/__tests__/prisma-error.test.ts
+ * File: tests/utils/prisma-error.test.ts
  * Description: Unit tests for the Prisma error handler utility.
  * Author: Noé Henchoz
  * License: MIT

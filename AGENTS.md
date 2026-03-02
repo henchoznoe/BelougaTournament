@@ -26,7 +26,16 @@ pnpm vitest run tests/path/to/file.test.ts
 pnpm vitest run -t "test name pattern"
 ```
 
-Tests live in the top-level `tests/` directory (not colocated). Vitest `globals: true`.
+Tests live in the top-level `tests/` directory (not colocated), organized into subdirectories by layer. Vitest `globals: true`.
+
+```
+tests/
+├── utils/          # lib/utils/* helpers (cn, auth.helpers, prisma-error, formatting, commit-hash)
+├── validations/    # lib/validations/* Zod schemas (admins, players, profile, settings, sponsors)
+├── services/       # lib/services/* data-access functions (auth, admins, dashboard, players, settings, sponsors, users)
+├── actions/        # lib/actions/* server actions (safe-action, admins, players, profile, settings, sponsors)
+└── proxy.test.ts   # Edge middleware guard
+```
 
 **CI** (`.github/workflows/ci.yml`): Node 22 + pnpm 10 → `tsc --noEmit` → `biome lint` → `biome format` → `vitest run`.
 **Pre-commit**: Husky + lint-staged runs `biome check --write` on staged `*.{ts,tsx,css}`.
