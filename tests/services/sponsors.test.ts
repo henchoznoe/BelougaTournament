@@ -40,14 +40,14 @@ const MOCK_SPONSORS = [
     name: 'Sponsor A',
     imageUrls: ['https://a.com/logo.png'],
     url: null,
-    order: 1,
+    supportedSince: new Date('2023-01-15T12:00:00.000Z'),
   },
   {
     id: 'uuid-2',
     name: 'Sponsor B',
     imageUrls: ['https://b.com/logo.png'],
     url: 'https://b.com',
-    order: 2,
+    supportedSince: new Date('2024-03-10T12:00:00.000Z'),
   },
 ]
 
@@ -60,13 +60,15 @@ describe('getSponsors', () => {
     vi.clearAllMocks()
   })
 
-  it('returns sponsors ordered by the order field', async () => {
+  it('returns sponsors ordered by supportedSince field', async () => {
     mockFindMany.mockResolvedValue(MOCK_SPONSORS)
 
     const result = await getSponsors()
 
     expect(result).toEqual(MOCK_SPONSORS)
-    expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { order: 'asc' } })
+    expect(mockFindMany).toHaveBeenCalledWith({
+      orderBy: { supportedSince: 'asc' },
+    })
   })
 
   it('returns an empty array when no sponsors exist', async () => {

@@ -31,7 +31,7 @@ export const createSponsor = authenticatedAction({
         name: data.name,
         imageUrls: data.imageUrls,
         url: toNullable(data.url),
-        order: data.order,
+        supportedSince: new Date(`${data.supportedSince}T12:00:00.000Z`),
       },
     })
 
@@ -51,7 +51,7 @@ export const updateSponsor = authenticatedAction({
         name: data.name,
         imageUrls: data.imageUrls,
         url: toNullable(data.url),
-        order: data.order,
+        supportedSince: new Date(`${data.supportedSince}T12:00:00.000Z`),
       },
     })
 

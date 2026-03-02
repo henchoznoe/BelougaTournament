@@ -20,7 +20,7 @@ const VALID_SPONSOR = {
   name: 'Belouga Corp',
   imageUrls: ['https://example.com/logo.png'],
   url: 'https://example.com',
-  order: 1,
+  supportedSince: '2024-03-15',
 }
 
 // ---------------------------------------------------------------------------
@@ -78,22 +78,36 @@ describe('sponsorSchema', () => {
     ).toBe(true)
   })
 
-  it('rejects a negative order', () => {
+  it('accepts a valid ISO date string', () => {
     expect(
-      sponsorSchema.safeParse({ ...VALID_SPONSOR, order: -1 }).success,
-    ).toBe(false)
-  })
-
-  it('accepts order = 0', () => {
-    expect(
-      sponsorSchema.safeParse({ ...VALID_SPONSOR, order: 0 }).success,
+      sponsorSchema.safeParse({
+        ...VALID_SPONSOR,
+        supportedSince: '2023-01-01',
+      }).success,
     ).toBe(true)
   })
 
-  it('rejects a non-integer order', () => {
+  it('rejects an invalid date string', () => {
     expect(
-      sponsorSchema.safeParse({ ...VALID_SPONSOR, order: 1.5 }).success,
+      sponsorSchema.safeParse({
+        ...VALID_SPONSOR,
+        supportedSince: 'not-a-date',
+      }).success,
     ).toBe(false)
+  })
+
+  it('rejects a date in wrong format (dd.MM.yyyy)', () => {
+    expect(
+      sponsorSchema.safeParse({
+        ...VALID_SPONSOR,
+        supportedSince: '15.03.2024',
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a missing supportedSince', () => {
+    const { supportedSince: _, ...withoutDate } = VALID_SPONSOR
+    expect(sponsorSchema.safeParse(withoutDate).success).toBe(false)
   })
 })
 

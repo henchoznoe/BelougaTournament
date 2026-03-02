@@ -27,10 +27,7 @@ export const sponsorSchema = z.object({
     .array(z.url("URL d'image invalide."))
     .min(1, 'Au moins une image est requise.'),
   url: optionalUrl,
-  order: z
-    .number()
-    .int("L'ordre doit être un nombre entier.")
-    .min(0, "L'ordre doit être positif."),
+  supportedSince: z.string().date('Date invalide.'),
 })
 
 export type SponsorInput = z.infer<typeof sponsorSchema>

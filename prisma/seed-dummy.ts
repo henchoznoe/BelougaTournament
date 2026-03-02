@@ -196,9 +196,9 @@ const TOURNAMENTS: TournamentConfig[] = [
 ]
 
 const SPONSORS = [
-  { name: 'GameZone', url: 'https://gamezone.demo.test', order: 0 },
-  { name: 'SwissGaming', url: 'https://swissgaming.demo.test', order: 1 },
-  { name: 'PixelForge', url: 'https://pixelforge.demo.test', order: 2 },
+  { name: 'GameZone', url: 'https://gamezone.demo.test', supportedSince: new Date('2023-01-15T12:00:00.000Z') },
+  { name: 'SwissGaming', url: 'https://swissgaming.demo.test', supportedSince: new Date('2023-06-01T12:00:00.000Z') },
+  { name: 'PixelForge', url: 'https://pixelforge.demo.test', supportedSince: new Date('2024-03-10T12:00:00.000Z') },
 ]
 
 // Team names for team-based tournaments
@@ -487,7 +487,7 @@ export const seedDummy = async (prisma: PrismaClient) => {
         name: sponsor.name,
         imageUrls: [],
         url: sponsor.url,
-        order: sponsor.order,
+        supportedSince: sponsor.supportedSince,
       },
     })
   }

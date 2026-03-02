@@ -9,6 +9,7 @@
 import { Handshake } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
+import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
 interface SponsorsSectionProps {
@@ -34,6 +35,12 @@ const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => {
           className="max-h-12 w-auto object-contain brightness-75 grayscale transition-all duration-500 group-hover:brightness-100 group-hover:grayscale-0 sm:max-h-14"
         />
       )}
+      {/* Date overlay — slides up from bottom on hover */}
+      <div className="absolute inset-x-0 bottom-0 translate-y-full bg-zinc-950/90 py-1.5 text-center backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
+        <span className="text-[10px] text-zinc-400">
+          Partenaire depuis le {formatShortDate(sponsor.supportedSince)}
+        </span>
+      </div>
     </div>
   )
 

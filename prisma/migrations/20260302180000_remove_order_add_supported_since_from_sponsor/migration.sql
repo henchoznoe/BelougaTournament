@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "sponsor" DROP COLUMN "order";
+ALTER TABLE "sponsor" ADD COLUMN "supportedSince" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

@@ -18,7 +18,7 @@ export const getSponsors = async (): Promise<Sponsor[]> => {
 
   try {
     return await prisma.sponsor.findMany({
-      orderBy: { order: 'asc' },
+      orderBy: { supportedSince: 'asc' },
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching sponsors')

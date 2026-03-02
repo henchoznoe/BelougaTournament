@@ -83,7 +83,7 @@ const VALID_SPONSOR_INPUT = {
   name: 'Acme Corp',
   imageUrls: ['https://example.com/logo.png'],
   url: 'https://acme.com',
-  order: 1,
+  supportedSince: '2024-03-15',
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ describe('createSponsor', () => {
         name: 'Acme Corp',
         imageUrls: ['https://example.com/logo.png'],
         url: 'https://acme.com',
-        order: 1,
+        supportedSince: new Date('2024-03-15T12:00:00.000Z'),
       },
     })
   })
@@ -209,7 +209,7 @@ describe('updateSponsor', () => {
         name: 'Acme Corp',
         imageUrls: ['https://example.com/logo.png'],
         url: 'https://acme.com',
-        order: 1,
+        supportedSince: new Date('2024-03-15T12:00:00.000Z'),
       },
     })
   })

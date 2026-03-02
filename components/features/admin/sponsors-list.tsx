@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
 interface SponsorsListProps {
@@ -80,8 +81,8 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                 <TableHead className="hidden text-xs font-semibold tracking-wider text-zinc-500 uppercase sm:table-cell">
                   Lien
                 </TableHead>
-                <TableHead className="text-center text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-                  Ordre
+                <TableHead className="hidden text-xs font-semibold tracking-wider text-zinc-500 uppercase sm:table-cell">
+                  Depuis
                 </TableHead>
                 <TableHead className="text-right text-xs font-semibold tracking-wider text-zinc-500 uppercase">
                   Actions
@@ -132,8 +133,8 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                       <span className="text-xs text-zinc-600">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-center text-zinc-400">
-                    {sponsor.order}
+                  <TableCell className="hidden text-sm text-zinc-400 sm:table-cell">
+                    {formatShortDate(sponsor.supportedSince)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

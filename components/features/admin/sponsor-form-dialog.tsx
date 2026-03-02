@@ -82,7 +82,9 @@ export const SponsorFormDialog = ({
       name: sponsor?.name ?? '',
       imageUrls: sponsor?.imageUrls ?? [],
       url: sponsor?.url ?? '',
-      order: sponsor?.order ?? 0,
+      supportedSince: sponsor?.supportedSince
+        ? new Date(sponsor.supportedSince).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
     },
   })
 
@@ -95,7 +97,9 @@ export const SponsorFormDialog = ({
         name: sponsor?.name ?? '',
         imageUrls: sponsor?.imageUrls ?? [],
         url: sponsor?.url ?? '',
-        order: sponsor?.order ?? 0,
+        supportedSince: sponsor?.supportedSince
+          ? new Date(sponsor.supportedSince).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
       })
     }
   }, [open, sponsor, reset])
@@ -484,24 +488,24 @@ export const SponsorFormDialog = ({
             )}
           </div>
 
-          {/* Order */}
+          {/* Supported Since */}
           <div className="space-y-1.5">
             <Label
-              htmlFor="sponsor-order"
+              htmlFor="sponsor-supported-since"
               className="text-xs font-medium text-zinc-400"
             >
-              Ordre d'affichage
+              Partenaire depuis
             </Label>
             <Input
-              id="sponsor-order"
-              type="number"
-              min={0}
-              placeholder="0"
-              className="h-10 w-24 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
-              {...register('order', { valueAsNumber: true })}
+              id="sponsor-supported-since"
+              type="date"
+              className="h-10 w-44 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+              {...register('supportedSince')}
             />
-            {errors.order?.message && (
-              <p className="text-xs text-red-400">{errors.order.message}</p>
+            {errors.supportedSince?.message && (
+              <p className="text-xs text-red-400">
+                {errors.supportedSince.message}
+              </p>
             )}
           </div>
 

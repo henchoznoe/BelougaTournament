@@ -247,7 +247,7 @@ export const SponsorScalarFieldEnum = {
   name: 'name',
   imageUrls: 'imageUrls',
   url: 'url',
-  order: 'order',
+  supportedSince: 'supportedSince',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

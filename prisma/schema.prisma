@@ -219,13 +219,13 @@ model GlobalSettings {
 }
 
 model Sponsor {
-  id        String   @id @default(uuid())
-  name      String
-  imageUrls String[]
-  url       String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String
+  imageUrls      String[]
+  url            String?
+  supportedSince DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("sponsor")
 }
