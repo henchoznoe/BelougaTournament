@@ -1,6 +1,6 @@
 /**
  * File: components/features/profile/profile-page.tsx
- * Description: Server Component displaying user profile information.
+ * Description: Server Component displaying user profile information, inscriptions, and history.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -9,22 +9,30 @@
 import {
   Calendar,
   Clock,
+  Gamepad2,
   Lock,
   Mail,
   Shield,
   ShieldCheck,
+  Swords,
   Trophy,
   User,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/features/profile/profile-edit-form'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
+import {
+  getUserPastRegistrations,
+  getUserRegistrations,
+} from '@/lib/services/tournaments'
 import { getUserProfile } from '@/lib/services/users'
+import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
 
 const ROLE_CONFIG = {
   [Role.USER]: {
@@ -44,6 +52,66 @@ const ROLE_CONFIG = {
   },
 } as const
 
+const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
+  PENDING: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+  APPROVED: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+  REJECTED: 'border-red-500/30 bg-red-500/10 text-red-400',
+  WAITLIST: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+} as const
+
+const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
+  PENDING: 'En attente',
+  APPROVED: 'Approuvée',
+  REJECTED: 'Refusée',
+  WAITLIST: "Liste d'attente",
+} as const
+
+/** Renders a single registration row as a link to the tournament detail page. */
+const RegistrationRow = ({
+  registration,
+}: {
+  registration: UserRegistrationItem
+}) => {
+  const { tournament } = registration
+
+  return (
+    <Link
+      href={`${ROUTES.TOURNAMENTS}/${tournament.slug}`}
+      className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-colors duration-200 hover:border-white/10 hover:bg-white/4"
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="truncate text-sm font-medium text-white">
+          {tournament.title}
+        </span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          {tournament.game && (
+            <span className="inline-flex items-center gap-1">
+              <Gamepad2 className="size-3" />
+              {tournament.game}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">
+            <Swords className="size-3" />
+            {tournament.format === 'SOLO' ? 'Solo' : 'Équipe'}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="size-3" />
+            {formatDate(tournament.startDate)}
+          </span>
+        </div>
+      </div>
+      <span
+        className={cn(
+          'shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
+          REGISTRATION_STATUS_STYLES[registration.status],
+        )}
+      >
+        {REGISTRATION_STATUS_LABELS[registration.status]}
+      </span>
+    </Link>
+  )
+}
+
 export const ProfilePage = async () => {
   const session = await getSession()
 
@@ -51,7 +119,11 @@ export const ProfilePage = async () => {
     redirect(ROUTES.LOGIN)
   }
 
-  const dbUser = await getUserProfile(session.user.id)
+  const [dbUser, registrations, pastRegistrations] = await Promise.all([
+    getUserProfile(session.user.id),
+    getUserRegistrations(session.user.id),
+    getUserPastRegistrations(session.user.id),
+  ])
 
   if (!dbUser) {
     redirect(ROUTES.LOGIN)
@@ -147,45 +219,89 @@ export const ProfilePage = async () => {
         </div>
       </div>
 
-      {/* Card 2: Inscriptions Teaser */}
+      {/* Card 2: Mes inscriptions */}
       <div
         id="inscriptions"
         className="relative scroll-mt-32 overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8"
       >
-        <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
-            <Trophy className="size-6 text-zinc-600" />
+        <div className="relative z-10">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
+              <Trophy className="size-5 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Mes inscriptions</h3>
+              <p className="text-xs text-zinc-500">
+                {registrations.length > 0
+                  ? `${registrations.length} tournoi${registrations.length > 1 ? 's' : ''} en cours`
+                  : 'Aucune inscription active'}
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-bold text-white">Mes inscriptions</h3>
-          <p className="max-w-sm text-sm text-zinc-500">
-            Consultez bientôt vos inscriptions aux tournois en cours et gérez
-            vos équipes directement depuis votre profil.
-          </p>
-          <span className="mt-1 inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs font-medium text-blue-400">
-            Bientôt disponible
-          </span>
+
+          {registrations.length > 0 ? (
+            <div className="space-y-2">
+              {registrations.map(registration => (
+                <RegistrationRow
+                  key={registration.id}
+                  registration={registration}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <p className="max-w-sm text-sm text-zinc-500">
+                Vous n'êtes inscrit à aucun tournoi pour le moment.
+              </p>
+              <Link
+                href={ROUTES.TOURNAMENTS}
+                className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/10"
+              >
+                Voir les tournois
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Card 3: Tournament History Teaser */}
+      {/* Card 3: Historique des tournois */}
       <div
         id="tournaments-history"
         className="relative scroll-mt-32 overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8"
       >
-        <div className="relative z-10 flex flex-col items-center gap-3 py-4 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
-            <Clock className="size-6 text-zinc-600" />
+        <div className="relative z-10">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
+              <Clock className="size-5 text-zinc-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">
+                Historique des tournois
+              </h3>
+              <p className="text-xs text-zinc-500">
+                {pastRegistrations.length > 0
+                  ? `${pastRegistrations.length} participation${pastRegistrations.length > 1 ? 's' : ''}`
+                  : 'Aucun historique'}
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-bold text-white">
-            Historique des tournois
-          </h3>
-          <p className="max-w-sm text-sm text-zinc-500">
-            Retrouvez bientôt l'historique de vos participations et résultats de
-            tournois directement sur votre profil.
-          </p>
-          <span className="mt-1 inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs font-medium text-blue-400">
-            Bientôt disponible
-          </span>
+
+          {pastRegistrations.length > 0 ? (
+            <div className="space-y-2">
+              {pastRegistrations.map(registration => (
+                <RegistrationRow
+                  key={registration.id}
+                  registration={registration}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <p className="max-w-sm text-sm text-zinc-500">
+                Aucune participation passée à afficher pour le moment.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

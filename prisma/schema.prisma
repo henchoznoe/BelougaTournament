@@ -184,7 +184,6 @@ model TournamentRegistration {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldValues       Json               @default("{}")
   status            RegistrationStatus @default(PENDING)
-  cancellationToken String             @default(uuid())
   createdAt         DateTime           @default(now())
 
   @@unique([tournamentId, userId])
