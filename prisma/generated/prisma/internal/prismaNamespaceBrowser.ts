@@ -211,7 +211,6 @@ export const TournamentRegistrationScalarFieldEnum = {
   userId: 'userId',
   fieldValues: 'fieldValues',
   status: 'status',
-  cancellationToken: 'cancellationToken',
   createdAt: 'createdAt'
 } as const
 

@@ -127,6 +127,9 @@ export const tournamentSchema = z
 
 export type TournamentInput = z.infer<typeof tournamentSchema>
 
+/** Form-level input type (before Zod defaults are applied). */
+export type TournamentFormInput = z.input<typeof tournamentSchema>
+
 /** Schema for deleting a tournament (just the ID). */
 export const deleteTournamentSchema = z.object({
   id: z.uuid('ID de tournoi invalide.'),

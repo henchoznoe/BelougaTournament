@@ -48,6 +48,7 @@ const MOCK_LIST_ITEM = {
   game: 'Valorant',
   format: 'TEAM',
   teamSize: 5,
+  maxTeams: 16,
   status: 'PUBLISHED',
   startDate: new Date('2026-06-15T10:00:00.000Z'),
   endDate: new Date('2026-06-17T18:00:00.000Z'),
@@ -60,7 +61,6 @@ const MOCK_LIST_ITEM = {
 const MOCK_DETAIL = {
   ...MOCK_LIST_ITEM,
   description: 'Tournoi Valorant 5v5.',
-  maxTeams: 16,
   imageUrl: null,
   rules: 'Double élimination.',
   prize: '500 CHF',
@@ -103,6 +103,7 @@ describe('getTournaments', () => {
         game: true,
         format: true,
         teamSize: true,
+        maxTeams: true,
         status: true,
         startDate: true,
         endDate: true,

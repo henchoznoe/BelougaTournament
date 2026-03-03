@@ -21,6 +21,7 @@ export type TournamentListItem = {
   game: string | null
   format: TournamentFormat
   teamSize: number
+  maxTeams: number | null
   status: TournamentStatus
   startDate: Date
   endDate: Date
