@@ -84,13 +84,16 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  displayName: 'displayName',
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
   discordId: 'discordId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  role: 'role'
+  role: 'role',
+  bannedUntil: 'bannedUntil',
+  banReason: 'banReason'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -208,7 +211,6 @@ export const TournamentRegistrationScalarFieldEnum = {
   userId: 'userId',
   fieldValues: 'fieldValues',
   status: 'status',
-  cancellationToken: 'cancellationToken',
   createdAt: 'createdAt'
 } as const
 
@@ -242,9 +244,9 @@ export type GlobalSettingsScalarFieldEnum = (typeof GlobalSettingsScalarFieldEnu
 export const SponsorScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  imageUrl: 'imageUrl',
+  imageUrls: 'imageUrls',
   url: 'url',
-  order: 'order',
+  supportedSince: 'supportedSince',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

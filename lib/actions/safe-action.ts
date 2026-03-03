@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import { headers } from 'next/headers'
 import type { z } from 'zod'
 import auth from '@/lib/core/auth'
@@ -31,7 +30,7 @@ type ActionOptions<T extends z.ZodType> = {
 
 /**
  * Wraps a server action with authentication, role checking, input validation,
- * structured logging, and Sentry error capturing.
+ * structured logging, and error capturing.
  */
 export function authenticatedAction<T extends z.ZodType>({
   schema,
@@ -83,7 +82,6 @@ export function authenticatedAction<T extends z.ZodType>({
       }
 
       logger.error({ error }, 'Unexpected error in server action')
-      Sentry.captureException(error)
 
       return { success: false, message: 'Internal server error' }
     }

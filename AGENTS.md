@@ -2,57 +2,53 @@
 
 ## Project Overview
 
-Belouga Tournament — a full-stack e-sports tournament management platform.
-Next.js 16 (App Router, RSC, Server Actions), React 19, TypeScript (strict), Prisma 7 (PostgreSQL), BetterAuth (Discord OAuth), TailwindCSS v4, shadcn/ui. Hosted on Vercel. UI text is in French; code and comments are in English.
+Belouga Tournament — full-stack e-sports tournament management platform.
+Next.js 16 (App Router, RSC, Server Actions), React 19, TypeScript (strict), Prisma 7 (PostgreSQL), BetterAuth (Discord OAuth), TailwindCSS v4, shadcn/ui. Hosted on Vercel. **UI text is in French; code and comments are in English.**
 
-## Build / Lint / Test Commands
+## Commands
 
-| Command                | Description                                      |
-|------------------------|--------------------------------------------------|
-| `pnpm dev`             | Start the dev server                             |
-| `pnpm build`           | Prisma generate + migrate + seed + Next.js build |
-| `pnpm lint`            | Run Biome linter                                 |
-| `pnpm format`          | Run Biome formatter (write mode)                 |
-| `pnpm check`           | Run Biome check (lint + format, write mode)      |
-| `pnpm test`            | Run all tests (Vitest)                           |
-| `pnpm test:coverage`   | Run tests with v8 coverage                       |
-| `pnpm knip`            | Detect dead/unused code                          |
-| `pnpm docker:up`       | Start local PostgreSQL container                 |
-| `pnpm docker:down`     | Stop local PostgreSQL container                  |
-| `npx tsc --noEmit`     | Type-check without emitting                      |
-
-### Running a single test
+| Command              | Purpose                                          |
+|----------------------|--------------------------------------------------|
+| `pnpm dev`           | Start dev server                                 |
+| `pnpm build`         | Prisma generate + migrate + seed + Next.js build |
+| `pnpm lint`          | Biome lint                                       |
+| `pnpm format`        | Biome format (write)                             |
+| `pnpm check`         | Biome check (lint + format, write)               |
+| `pnpm test`          | Vitest (all tests)                               |
+| `pnpm test:coverage` | Vitest with v8 coverage                          |
+| `pnpm knip`          | Detect dead/unused code                          |
+| `npx tsc --noEmit`   | Type-check only                                  |
+| `pnpm docker:up`     | Start local PostgreSQL                           |
 
 ```bash
-pnpm vitest run tests/path/to/file.test.ts          # run one file
-pnpm vitest run -t "test name pattern"               # run by name
+# Single test
+pnpm vitest run tests/path/to/file.test.ts
+pnpm vitest run -t "test name pattern"
 ```
 
-Tests live in the top-level `tests/` directory (not colocated with source). Pattern: `tests/**/*.test.ts`. Vitest is configured with `globals: true` (no need to import `describe`/`it`/`expect`).
+Tests live in the top-level `tests/` directory (not colocated), organized into subdirectories by layer. Vitest `globals: true`.
 
-### CI Pipeline (.github/workflows/ci.yml)
+```
+tests/
+├── utils/          # lib/utils/* helpers (cn, auth.helpers, prisma-error, formatting, commit-hash)
+├── validations/    # lib/validations/* Zod schemas (admins, players, profile, settings, sponsors)
+├── services/       # lib/services/* data-access functions (auth, admins, dashboard, players, settings, sponsors, users)
+├── actions/        # lib/actions/* server actions (safe-action, admins, players, profile, settings, sponsors)
+└── proxy.test.ts   # Edge middleware guard
+```
 
-Runs on push/PR to `main` and `develop`: pnpm install → `tsc --noEmit` → `biome lint` → `biome format --check` → `vitest run`.
-
-### Pre-commit Hook
-
-Husky + lint-staged runs `biome check --write` on staged `*.{ts,tsx,css}` files.
+**CI** (`.github/workflows/ci.yml`): Node 22 + pnpm 10 → `tsc --noEmit` → `biome lint` → `biome format` → `vitest run`.
+**Pre-commit**: Husky + lint-staged runs `biome check --write` on staged `*.{ts,tsx,css}`.
 
 ## Code Style
 
-### Formatter / Linter: Biome (NOT ESLint/Prettier)
+### Biome (NOT ESLint/Prettier)
 
-- **Quotes:** single quotes
-- **Semicolons:** as needed (omitted where possible)
-- **Trailing commas:** all
-- **Arrow function parens:** as needed
-- **Indent:** 2 spaces (`.editorconfig`: UTF-8, LF, max 120 chars)
-- `noExplicitAny: error` — avoid `any`; use Biome ignore comment only when truly unavoidable
-- `useNodejsImportProtocol: error` — use `node:` prefix for Node.js built-ins
+Single quotes, semicolons as-needed, trailing commas all, arrow parens as-needed, 2-space indent, 120 char max line (`.editorconfig`). `noExplicitAny: error`, `useNodejsImportProtocol: error`.
 
 ### File Headers
 
-Every `.ts`/`.tsx` file must have this JSDoc block at the top:
+Every `.ts`/`.tsx` file starts with:
 
 ```ts
 /**
@@ -66,158 +62,154 @@ Every `.ts`/`.tsx` file must have this JSDoc block at the top:
 
 ### Imports
 
-1. External/third-party packages first
-2. Internal imports using the `@/` path alias second
-3. No blank lines between groups (Biome enforces order)
-
-```ts
-import { motion } from 'framer-motion'
-import { Swords } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
-import { ROUTES } from '@/lib/config/routes'
-```
+1. External packages first, then internal `@/` imports. No blank lines between groups.
 
 ### Components
 
-- **Arrow functions only** — `const MyComponent = () => { ... }`
+- **Arrow functions only**: `const MyComponent = () => { ... }`
 - **Named exports** for feature/UI components: `export const MyComponent = ...`
-- **Default exports** for pages/layouts only — on a separate final line: `export default MyPage`
-- `'use client'` directive goes **after** the file header comment
-- Props are destructured in parameters
-- Use `interface` for component props; use `type` for unions/aliases
+- **Default exports** for pages/layouts only, on a separate final line
+- `'use client'` / `'use server'` goes **after** the file header
+- Props destructured in parameters; use `interface` for props, `type` for unions
 
-### Naming Conventions
+### Naming
 
-| Kind              | Convention          | Example                            |
-|-------------------|---------------------|------------------------------------|
-| Files             | kebab-case          | `public-navbar.tsx`, `safe-action.ts` |
-| Components        | PascalCase          | `PublicNavbar`, `HeroSection`      |
-| Variables/funcs   | camelCase           | `isScrolled`, `handleLogout`       |
-| Constants (objects)| UPPER_SNAKE_CASE   | `ROUTES`, `METADATA`               |
-| Types/Interfaces  | PascalCase          | `AuthSession`, `ActionState`       |
-| Prisma enums      | UPPER_SNAKE_CASE    | `ADMIN`, `SUPERADMIN`, `DRAFT`     |
+| Kind               | Convention       | Example                          |
+|--------------------|------------------|----------------------------------|
+| Files              | kebab-case       | `safe-action.ts`                 |
+| Components         | PascalCase       | `PublicNavbar`                   |
+| Variables/funcs    | camelCase        | `handleLogout`                   |
+| Constants (objects)| UPPER_SNAKE_CASE | `ROUTES`, `ADMIN_NAV`            |
+| Types/Interfaces   | PascalCase       | `AuthSession`, `ActionState`     |
+| Prisma enums       | UPPER_SNAKE_CASE | `SUPERADMIN`, `DRAFT`            |
 
-### Types and Validation
+### Types & Validation
 
-- Type definitions go in `lib/types/`
-- Zod schemas go in `lib/validations/`
-- Prisma-generated types are imported from `@/prisma/generated/prisma/`
-- Use `as const` assertions on constant objects
-- Environment variables are validated with Zod at startup (`lib/core/env.ts`)
+- Type definitions: `lib/types/`. Zod schemas: `lib/validations/`. Prisma types: `@/prisma/generated/prisma/`.
+- **Zod v4** (`^4.3.6`) — uses `z.url()`, `z.uuid()`.
+- Env vars validated at startup via Zod (`lib/core/env.ts`); never access `process.env` directly.
+- Use `as const` on constant objects.
 
 ### Error Handling
 
-- **Server actions:** wrap with `authenticatedAction` helper (auth + role check + Zod validation + Prisma error mapping + Sentry capture)
-- **Prisma errors:** use `handlePrismaError()` from `lib/utils/prisma-error.ts` to map to user-friendly `ActionState` responses
-- **Client-side:** `try/catch` blocks with `Sentry.captureException()` and `toast.error()` (Sonner)
-- **Error boundaries:** `app/error.tsx` (root) and segment-level `error.tsx` files
+- **Server actions**: `authenticatedAction` wrapper (auth + role + Zod + Prisma error mapping + logger)
+- **Services**: `try/catch` + `logger.error({ error }, 'message')` + fallback return
+- **API routes**: `try/catch` + `logger.error({ error }, 'message')` + JSON error response
+- **Client-side**: `try/catch` + `console.error()` + `toast.error()` (Sonner) — `logger` is `server-only`
+- **Prisma errors**: `handlePrismaError()` from `lib/utils/prisma-error.ts`
+- **Never** use bare `console.log/warn/error` in server-side runtime code — use `logger.*` instead
 
 ### Styling
 
-- TailwindCSS v4 with CSS variables — configured in `app/globals.css`
-- `cn()` utility (clsx + tailwind-merge) for conditional class merging — import from `@/lib/utils/cn`
-- shadcn/ui components in `components/ui/` (new-york style, zinc base color, lucide icons)
-- Icons: Lucide React for UI icons, FontAwesome for brand icons
+- TailwindCSS v4, CSS variables in `app/globals.css`
+- `cn()` from `@/lib/utils/cn` (clsx + tailwind-merge) — **not** `@/lib/utils`
+- shadcn/ui: new-york style, zinc base, lucide icons. Install: `pnpm dlx shadcn@latest add <name> -y`
+- After install, fix imports to `@/lib/utils/cn`, add file header, convert to arrow functions
 
 ## Project Structure
 
 ```
 app/
-├── (public)/             # Public pages (landing, tournaments, stream, contact)
-├── admin/                # Protected admin routes (RBAC via AdminGuard + proxy)
-├── api/auth/             # BetterAuth API handler
-├── login/                # Login page
-└── layout.tsx            # Root layout (fonts, Lenis, Toaster, ErrorBoundary)
+├── (public)/             # Public pages (landing, tournaments, stream, contact, profile)
+├── admin/                # Protected admin (AdminGuard + proxy.ts edge middleware)
+│   ├── settings/         # Global settings (SUPERADMIN)
+│   └── sponsors/         # Sponsors CRUD (SUPERADMIN)
+├── api/admin/blobs/      # Vercel Blob upload/list/delete API
+├── api/auth/[...all]/    # BetterAuth handler
+├── login/                # Discord OAuth login
+└── not-found.tsx         # 404 page
 
 components/
-├── features/             # Domain components (auth/, contact/, landing/, layout/, stream/)
-└── ui/                   # Reusable primitives (shadcn/ui + custom)
+├── features/             # Domain components (admin/, auth/, landing/, layout/, etc.)
+└── ui/                   # shadcn/ui primitives
 
 lib/
-├── actions/              # Server action helpers (authenticatedAction)
-├── config/               # Routes, constants
-├── core/                 # Auth, Prisma client, env validation, logger, auth-client
-├── hooks/                # Custom React hooks
-├── services/             # Business logic (auth session, settings)
-├── types/                # TypeScript type definitions
-├── utils/                # Utilities (cn, formatting, prisma-error, auth helpers)
+├── actions/              # Server actions (authenticatedAction wrapper)
+├── config/               # Routes, constants, admin-nav
+├── core/                 # Auth, Prisma client, env validation, logger
+├── services/             # Data access with caching (settings, sponsors, users)
+├── types/                # TypeScript types (ActionState, AuthSession)
+├── utils/                # cn, formatting, prisma-error, auth helpers
 └── validations/          # Zod schemas
 
-prisma/
-├── schema.prisma         # Database schema
-├── generated/            # Generated Prisma client (gitignored)
-├── migrations/           # SQL migrations
-└── seed-admin.ts         # Admin seed script
-
+prisma/                   # Schema, migrations, seed, generated client (gitignored)
 tests/                    # Unit tests (top-level, NOT colocated)
-proxy.ts                  # Edge middleware for admin route protection
+proxy.ts                  # Edge middleware for /admin/* route protection
 ```
 
 ## Key Patterns
 
-- **Server-only modules:** import `'server-only'` in modules that must never be bundled client-side (e.g., `logger.ts`)
-- **Prisma singleton:** global caching pattern in `lib/core/prisma.ts` to avoid multiple instances in dev
-- **Auth flow:** BetterAuth with Discord OAuth → session stored in DB → `getSession()` for server-side checks → `authClient.useSession()` for client
-- **Admin protection:** dual-layer — edge `proxy.ts` middleware + `AdminGuard` server component with role check
-- **Env vars:** validated at startup via Zod (`lib/core/env.ts`); never access `process.env` directly elsewhere
-- **Monitoring:** Sentry configured for server, edge, and client (instrumentation files at project root)
-
-### Caching (`'use cache'` + Cache Components)
-
-`cacheComponents: true` is enabled in `next.config.ts`. The project uses the Next.js 16 `'use cache'` directive (NOT the deprecated `unstable_cache`).
-
-**Service layer pattern** (see `lib/services/settings.ts`, `lib/services/sponsors.ts`):
+### Server Actions
 
 ```ts
-import { cacheLife, cacheTag } from 'next/cache'
+export const myAction = authenticatedAction({
+  schema: myZodSchema,
+  role: Role.SUPERADMIN,
+  handler: async (data, session): Promise<ActionState> => {
+    await prisma.model.create({ data })
+    revalidateTag('tag-name', 'hours') // 2nd arg must match cacheLife profile
+    return { success: true, message: 'French message.' }
+  },
+})
+```
 
-export const getMyData = async () => {
+### Cached Services
+
+```ts
+export const getData = async () => {
   'use cache'
-  cacheLife('hours')        // Built-in profile: stale 5min, revalidate 1h, expire 1d
-  cacheTag('my-data')       // On-demand invalidation via revalidateTag('my-data')
-
-  // ... Prisma query with try/catch + Sentry
+  cacheLife('hours')
+  cacheTag('my-tag')
+  // Prisma query with try/catch + logger.error({ error }, 'message')
 }
 ```
 
-**Cache tags in use:**
+`revalidateTag(tag, profile)` requires **two arguments** — the profile must match the `cacheLife()` used.
 
-| Tag          | Service                | Invalidated by                                    |
-|--------------|------------------------|---------------------------------------------------|
-| `settings`   | `getGlobalSettings()`  | `revalidateTag('settings')` in admin actions (TBD) |
-| `sponsors`   | `getSponsors()`        | `revalidateTag('sponsors')` in admin actions (TBD) |
+### Prerender Rules (`cacheComponents: true`)
 
-**On-demand revalidation:** when building admin server actions that mutate cached data, call `revalidateTag('<tag>')` from `next/cache` after a successful write:
-
-```ts
-'use server'
-import { revalidateTag } from 'next/cache'
-
-// After updating settings:
-revalidateTag('settings')
-```
-
-### Prerender constraints (`cacheComponents: true`)
-
-With Cache Components enabled, Next.js is strict during static prerendering. The following rules **must** be followed to avoid build errors:
-
-1. **No `new Date()` in components** — neither Server Components nor Client Components can call `new Date()` during prerender. Hardcode values (e.g., copyright year `2026`) or compute them at build time.
-2. **Dynamic APIs (`headers()`, `cookies()`, `connection()`) require `<Suspense>`** — any Server Component that calls these (e.g., `getSession()`) must be wrapped in a `<Suspense>` boundary. This enables Partial Prerendering: the static shell renders immediately, dynamic content streams in.
-3. **Pattern for pages using `getSession()`:**
+1. **No `new Date()` in components** — hardcode or compute at build time
+2. **Dynamic APIs** (`headers()`, `cookies()`) **require `<Suspense>`**:
 
 ```tsx
-import { Suspense } from 'react'
-
-const PageContent = async () => {
-  const session = await getSession() // uses headers() — dynamic
-  // ...
-}
-
-const Page = () => (
-  <Suspense>
-    <PageContent />
-  </Suspense>
-)
-
+const Dynamic = async () => { const session = await getSession(); /* ... */ }
+const Page = () => <Suspense fallback={<Skeleton />}><Dynamic /></Suspense>
 export default Page
 ```
+
+### Forms (Client Components)
+
+`react-hook-form` + `zodResolver` + `useTransition` + server action + `toast`:
+
+```ts
+const { register, handleSubmit, formState: { errors } } = useForm<Input>({
+  resolver: zodResolver(schema),
+  defaultValues: { ... },
+})
+const onSubmit = (data: Input) => {
+  startTransition(async () => {
+    const result = await serverAction(data)
+    result.success ? toast.success(result.message) : toast.error(result.message)
+  })
+}
+```
+
+Use `z.number()` + `register('field', { valueAsNumber: true })` for numeric fields (not `z.coerce.number()`).
+
+### Vercel Blob Uploads
+
+Images are stored in Vercel Blob via `/api/admin/blobs`. Uploads are organized by folder prefix:
+
+| Folder     | Usage                    |
+|------------|--------------------------|
+| `logos/`   | Site logo (LogoPicker)   |
+| `sponsors/`| Sponsor images           |
+
+Pass `folder` field in FormData on POST, `?folder=` query param on GET. Allowed folders are validated server-side against `ALLOWED_FOLDERS`.
+
+### Other
+
+- **`server-only`** import in modules that must not be bundled client-side
+- **Prisma singleton** with global caching in `lib/core/prisma.ts`
+- **Auth**: BetterAuth + Discord OAuth → `getSession()` server-side, `authClient.useSession()` client-side
+- **Admin protection**: dual-layer — edge `proxy.ts` + `AdminGuard` server component

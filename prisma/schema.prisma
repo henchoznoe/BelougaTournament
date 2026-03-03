@@ -40,6 +40,7 @@ enum TournamentStatus {
 model User {
   id            String                   @id @default(uuid())
   name          String
+  displayName   String                   @default("")
   email         String                   @unique
   emailVerified Boolean
   image         String?
@@ -47,6 +48,8 @@ model User {
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
   role          Role                     @default(USER)
+  bannedUntil   DateTime?
+  banReason     String?
   sessions      Session[]
   accounts      Account[]
   registrations TournamentRegistration[]
@@ -181,7 +184,6 @@ model TournamentRegistration {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldValues       Json               @default("{}")
   status            RegistrationStatus @default(PENDING)
-  cancellationToken String             @default(uuid())
   createdAt         DateTime           @default(now())
 
   @@unique([tournamentId, userId])
@@ -216,13 +218,13 @@ model GlobalSettings {
 }
 
 model Sponsor {
-  id        String   @id @default(uuid())
-  name      String
-  imageUrl  String
-  url       String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String
+  imageUrls      String[]
+  url            String?
+  supportedSince DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("sponsor")
 }

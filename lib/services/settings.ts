@@ -6,8 +6,8 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
@@ -33,8 +33,7 @@ export const getGlobalSettings = async (): Promise<GlobalSettings> => {
     })
     return settings ?? DEFAULT_SETTINGS
   } catch (error) {
-    console.error('Error fetching global settings:', error)
-    Sentry.captureException(error)
+    logger.error({ error }, 'Error fetching global settings')
     return DEFAULT_SETTINGS
   }
 }

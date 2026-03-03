@@ -1,29 +1,55 @@
 /**
  * File: app/admin/page.tsx
- * Description: Admin dashboard placeholder page.
+ * Description: Admin dashboard page with overview stats.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Shield } from 'lucide-react'
+import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
+import {
+  DashboardRecentRegistrations,
+  DashboardUpcomingTournaments,
+} from '@/components/features/admin/dashboard-recent'
+import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
+import {
+  getDashboardStats,
+  getRecentRegistrations,
+  getUpcomingTournaments,
+} from '@/lib/services/dashboard'
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard',
+  title: 'Dashboard',
 }
 
-const AdminDashboardPage = () => {
+const AdminDashboardPage = async () => {
+  const [stats, upcomingTournaments, recentRegistrations] = await Promise.all([
+    getDashboardStats(),
+    getUpcomingTournaments(),
+    getRecentRegistrations(),
+  ])
+
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4">
-      <div className="flex size-16 items-center justify-center rounded-full bg-green-500/10 ring-1 ring-green-500/20">
-        <Shield className="size-8 text-green-400" />
-      </div>
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Cette page est en cours de construction.
+    <div className="space-y-6">
+      {/* Page heading */}
+      <div className="space-y-1">
+        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
+          <LayoutDashboard className="size-6 text-blue-400" />
+          Dashboard
+        </h1>
+        <p className="text-sm text-zinc-400">
+          Vue d'ensemble de la plateforme Belouga Tournament.
         </p>
+      </div>
+
+      {/* Stats cards */}
+      <DashboardStatsCards stats={stats} />
+
+      {/* Two-column panels: upcoming tournaments & recent registrations */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DashboardUpcomingTournaments tournaments={upcomingTournaments} />
+        <DashboardRecentRegistrations registrations={recentRegistrations} />
       </div>
     </div>
   )

@@ -18,7 +18,8 @@
       "next.config.ts",
       "!**/package.json",
       "biome.json",
-      "tsconfig.json"
+      "tsconfig.json",
+      "prisma.config.ts"
     ]
   },
   "formatter": {

@@ -9,7 +9,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useEffect } from 'react'
 
@@ -21,7 +20,7 @@ interface GlobalErrorProps {
 /** Catches errors thrown by the root layout. Minimal HTML — no layout context available. */
 const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
-    Sentry.captureException(error)
+    console.error(error)
   }, [error])
 
   return (

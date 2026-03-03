@@ -9,15 +9,14 @@
 'use client'
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import * as Sentry from '@sentry/nextjs'
 import { motion } from 'framer-motion'
 import {
+  BarChart3,
   Home,
   LayoutDashboard,
   LogOut,
   Mail,
   Menu,
-  Settings,
   Trophy,
   User,
   Video,
@@ -42,6 +41,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
@@ -67,13 +67,13 @@ const NavbarProfile = ({
             if (onClick) onClick()
           },
           onError: ctx => {
-            Sentry.captureException(ctx.error)
+            console.error('Logout error:', ctx.error)
             toast.error('Erreur lors de la déconnexion')
           },
         },
       })
     } catch (error) {
-      Sentry.captureException(error)
+      console.error('Unexpected logout error:', error)
       toast.error('Une erreur inattendue est survenue')
     }
   }
@@ -81,7 +81,7 @@ const NavbarProfile = ({
   if (isPending) {
     return (
       <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
-        <div className="size-5 animate-pulse rounded-full bg-zinc-700" />
+        <Skeleton className="size-5 rounded-full bg-zinc-700" />
       </div>
     )
   }
@@ -122,7 +122,7 @@ const NavbarProfile = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="font-medium text-sm leading-none text-white">
-                {session.user.name}
+                {session.user.displayName}
               </p>
               <p className="text-xs leading-none text-zinc-400">
                 {session.user.email}
@@ -130,13 +130,23 @@ const NavbarProfile = ({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-white/10" />
-          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
-            <User className="mr-2 size-4" />
-            <span>Mon Profil</span>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer focus:bg-white/5 focus:text-white"
+          >
+            <Link href={ROUTES.PROFILE} className="w-full">
+              <User className="mr-2 size-4" />
+              <span>Mon Profil</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-white">
-            <Trophy className="mr-2 size-4" />
-            <span>Mes Inscriptions</span>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer focus:bg-white/5 focus:text-white"
+          >
+            <Link href={`${ROUTES.PROFILE}#inscriptions`} className="w-full">
+              <Trophy className="mr-2 size-4" />
+              <span>Mes Inscriptions</span>
+            </Link>
           </DropdownMenuItem>
           {isAdmin && (
             <>
@@ -172,44 +182,39 @@ const NavbarProfile = ({
         <div className="relative">
           <Image
             src={session.user.image ?? ''}
-            alt={session.user.name}
+            alt={session.user.displayName}
             width={48}
             height={48}
             className="rounded-full ring-2 ring-blue-500/20"
           />
         </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-white text-lg">
-            {session.user.name}
-          </span>
-          <span className="text-sm text-zinc-400">{session.user.email}</span>
-        </div>
+        <span className="font-bold text-white text-lg">
+          {session.user.displayName}
+        </span>
       </div>
 
       <div className="flex flex-col gap-1">
         <Button
+          asChild
           variant="ghost"
           className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
           onClick={onClick}
         >
-          <User className="size-4" />
-          Mon Profil
+          <Link href={ROUTES.PROFILE}>
+            <User className="size-4" />
+            Mon Profil
+          </Link>
         </Button>
         <Button
+          asChild
           variant="ghost"
           className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
           onClick={onClick}
         >
-          <Trophy className="size-4" />
-          Mes Inscriptions
-        </Button>
-        <Button
-          variant="ghost"
-          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
-          onClick={onClick}
-        >
-          <Settings className="size-4" />
-          Paramètres
+          <Link href={`${ROUTES.PROFILE}#inscriptions`}>
+            <Trophy className="size-4" />
+            Mes Inscriptions
+          </Link>
         </Button>
         {isAdmin && (
           <Button
@@ -241,6 +246,7 @@ export const PublicNavbar = () => {
   const NAV_LINKS = [
     { href: ROUTES.HOME, label: 'Accueil', icon: Home },
     { href: ROUTES.TOURNAMENTS, label: 'Tournois', icon: Trophy },
+    { href: ROUTES.LEADERBOARD, label: 'Classement', icon: BarChart3 },
     { href: ROUTES.STREAM, label: 'Stream', icon: Video },
     { href: ROUTES.CONTACT, label: 'Contact', icon: Mail },
   ] as const
@@ -287,7 +293,7 @@ export const PublicNavbar = () => {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'group relative flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300',
+                    'group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300',
                     isActive
                       ? 'text-white'
                       : 'text-zinc-400 hover:bg-white/4 hover:text-white',

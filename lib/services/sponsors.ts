@@ -6,8 +6,8 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import * as Sentry from '@sentry/nextjs'
 import { cacheLife, cacheTag } from 'next/cache'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
@@ -18,11 +18,10 @@ export const getSponsors = async (): Promise<Sponsor[]> => {
 
   try {
     return await prisma.sponsor.findMany({
-      orderBy: { order: 'asc' },
+      orderBy: { supportedSince: 'asc' },
     })
   } catch (error) {
-    console.error('Error fetching sponsors:', error)
-    Sentry.captureException(error)
+    logger.error({ error }, 'Error fetching sponsors')
     return []
   }
 }

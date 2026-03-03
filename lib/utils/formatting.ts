@@ -16,3 +16,7 @@ export const formatDate = (date: Date | string | number) => {
 export const formatDateTime = (date: Date | string | number) => {
   return format(new Date(date), "PPP 'à' p", { locale: fr })
 }
+
+export const formatShortDate = (date: Date | string | number) => {
+  return format(new Date(date), 'dd.MM.yyyy')
+}

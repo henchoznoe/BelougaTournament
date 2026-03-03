@@ -14,6 +14,7 @@ import { ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
@@ -109,7 +110,7 @@ export const HeroSection = () => {
           </Button>
 
           {isPending ? (
-            <div className="h-14 w-57.5 animate-pulse rounded-md bg-white/5" />
+            <Skeleton className="h-14 w-57.5 rounded-md bg-white/5" />
           ) : !session?.user ? (
             <Button
               asChild

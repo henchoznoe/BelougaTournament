@@ -1,4 +1,3 @@
-import { withSentryConfig } from '@sentry/nextjs'
 /**
  * File: next.config.ts
  * Description: Next.js configuration options.
@@ -25,25 +24,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '5mb',
-    },
-  },
   allowedDevOrigins: ['http://localhost:3000'],
 }
 
-export default withSentryConfig(nextConfig, {
-  org: 'noe-henchoz',
-  project: 'belouga-tournament',
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  tunnelRoute: '/monitoring',
-
-  webpack: {
-    automaticVercelMonitors: true,
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-})
+export default nextConfig

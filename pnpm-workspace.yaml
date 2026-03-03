@@ -1,6 +1,5 @@
 onlyBuiltDependencies:
   - '@prisma/engines'
-  - '@sentry/cli'
   - esbuild
   - prisma
   - sharp

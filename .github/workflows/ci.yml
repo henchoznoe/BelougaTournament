@@ -46,4 +46,3 @@ jobs:
         run: pnpm test
         env:
           NODE_ENV: test
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

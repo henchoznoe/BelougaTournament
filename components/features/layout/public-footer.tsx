@@ -105,13 +105,14 @@ export const PublicFooter = async () => {
       title: 'Navigation',
       links: [
         { label: 'Accueil', href: ROUTES.HOME },
-        { label: 'Stream', href: ROUTES.STREAM },
+        { label: 'Classement', href: ROUTES.LEADERBOARD },
         { label: 'Contact', href: ROUTES.CONTACT },
       ],
     },
     {
       title: 'Tournois',
       links: [
+        { label: 'Stream', href: ROUTES.STREAM },
         { label: 'Tournois à venir', href: ROUTES.TOURNAMENTS },
         {
           label: 'Archives des tournois',
@@ -122,8 +123,12 @@ export const PublicFooter = async () => {
     {
       title: 'Espace Joueur',
       links: [
-        { label: 'Mon profil', href: 'TODO' },
-        { label: 'Mes inscriptions', href: 'TODO' },
+        { label: 'Mon profil', href: ROUTES.PROFILE },
+        { label: 'Mes inscriptions', href: `${ROUTES.PROFILE}#inscriptions` },
+        {
+          label: 'Historique des tournois',
+          href: `${ROUTES.PROFILE}#tournaments-history`,
+        },
       ],
     },
   ]
@@ -148,30 +153,6 @@ export const PublicFooter = async () => {
         </div>
 
         <div className="mb-16 grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-6">
-            <p className="leading-relaxed text-zinc-400">
-              Rejoignez la communauté et participez aux futurs tournois de la
-              structure.
-            </p>
-            <div className="flex gap-3 flex-wrap justify-center sm:justify-start">
-              {socialLinks.map(social => (
-                <a
-                  key={social.name}
-                  href={social.href || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    'flex size-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-zinc-400 transition-all duration-300 hover:scale-110 hover:border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]',
-                    social.colorClass,
-                  )}
-                  aria-label={social.name}
-                >
-                  <FontAwesomeIcon icon={social.icon} className="size-5" />
-                </a>
-              ))}
-            </div>
-          </div>
-
           {footerSections.map(section => (
             <div key={section.title}>
               <h3 className="mb-6 font-bold text-white uppercase tracking-wider text-sm">
@@ -195,6 +176,33 @@ export const PublicFooter = async () => {
               </ul>
             </div>
           ))}
+
+          {/* Social links */}
+          <div>
+            <h3 className="mb-6 font-bold text-white uppercase tracking-wider text-sm">
+              Réseaux sociaux
+            </h3>
+            <p className="mb-4 leading-relaxed text-zinc-400">
+              Rejoignez la communauté et participez aux futurs tournois.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {socialLinks.map(social => (
+                <a
+                  key={social.name}
+                  href={social.href || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex size-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-zinc-400 transition-all duration-300 hover:scale-110 hover:border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]',
+                    social.colorClass,
+                  )}
+                  aria-label={social.name}
+                >
+                  <FontAwesomeIcon icon={social.icon} className="size-5" />
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="border-t border-white/5 pt-8">
@@ -209,6 +217,12 @@ export const PublicFooter = async () => {
             </div>
 
             <div className="flex flex-col items-center gap-4 text-sm text-zinc-500 sm:flex-row sm:gap-6">
+              <Link
+                href={ROUTES.LEGAL}
+                className="transition-colors hover:text-white"
+              >
+                Mentions légales
+              </Link>
               <Link
                 href={ROUTES.PRIVACY}
                 className="transition-colors hover:text-white"
