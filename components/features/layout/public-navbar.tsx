@@ -220,7 +220,7 @@ const NavbarProfile = ({
           <Button
             asChild
             variant="ghost"
-            className="justify-start gap-3 h-10 px-2 text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-300"
+            className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
             onClick={onClick}
           >
             <Link href={ROUTES.ADMIN_DASHBOARD}>
