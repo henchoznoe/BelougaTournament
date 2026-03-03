@@ -23,7 +23,8 @@ const getSafeRedirectUrl = (from?: string): string => {
   return ROUTES.HOME
 }
 
-const LoginPage = async ({
+/** If already authenticated, redirects to the origin page (or home). Otherwise renders the login form. */
+const LoginContent = async ({
   searchParams,
 }: {
   searchParams: Promise<{ from?: string }>
@@ -35,9 +36,17 @@ const LoginPage = async ({
     redirect(redirectTo)
   }
 
+  return <LoginScreen redirectTo={redirectTo} />
+}
+
+const LoginPage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) => {
   return (
     <Suspense>
-      <LoginScreen redirectTo={redirectTo} />
+      <LoginContent searchParams={searchParams} />
     </Suspense>
   )
 }
