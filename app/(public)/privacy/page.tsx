@@ -7,9 +7,11 @@
  */
 
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { LegalSection } from '@/components/features/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { METADATA } from '@/lib/config/constants'
+import { AUTHOR, METADATA } from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité',
@@ -36,35 +38,64 @@ const PrivacyPage = () => {
                 <span className="text-zinc-300">Nom :</span> Noé Henchoz
               </li>
               <li>
-                <span className="text-zinc-300">Contact :</span> Via Discord ou
-                formulaire de contact
+                <span className="text-zinc-300">Domicile :</span> Canton de
+                Vaud, Suisse
               </li>
               <li>
-                <span className="text-zinc-300">Localisation :</span> Suisse
+                <span className="text-zinc-300">Contact :</span>{' '}
+                <Link
+                  href={`mailto:${AUTHOR.EMAIL}`}
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  {AUTHOR.EMAIL}
+                </Link>
               </li>
             </ul>
+            <p className="text-sm text-zinc-400">
+              En tant que projet non commercial géré par une personne physique,{' '}
+              {METADATA.NAME} n'est pas tenu de désigner un Délégué à la
+              Protection des Données (DPO). Pour toute question relative à vos
+              données, contactez directement le responsable du traitement à
+              l'adresse ci-dessus.
+            </p>
           </LegalSection>
 
           <LegalSection title="2. Données collectées">
             <p>
-              Lors de votre inscription et utilisation de la Plateforme, nous
-              collectons les données suivantes :
+              Lors de votre inscription et de votre utilisation de la
+              Plateforme, nous collectons les données suivantes :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Données Discord :</span>{' '}
-                Identifiant Discord, nom d'utilisateur, adresse e-mail, avatar
+                <span className="text-zinc-300">
+                  Données d'identification Discord :
+                </span>{' '}
+                Identifiant Discord (snowflake), nom d'utilisateur, adresse
+                e-mail, URL de l'avatar — transmises par Discord lors de
+                l'authentification OAuth 2.0
               </li>
               <li>
                 <span className="text-zinc-300">Données de session :</span>{' '}
-                Adresse IP, user agent, dates de connexion
+                Adresse IP, user-agent (navigateur / système d'exploitation),
+                jetons de session chiffrés, dates et heures de connexion
               </li>
               <li>
                 <span className="text-zinc-300">Données de tournoi :</span>{' '}
-                Inscriptions, compositions d'équipe, champs personnalisés
-                remplis lors de l'inscription
+                Inscriptions aux tournois, compositions d'équipe, classements,
+                éventuels champs personnalisés remplis lors de l'inscription
+                (dont le contenu dépend de chaque tournoi)
+              </li>
+              <li>
+                <span className="text-zinc-300">Données de profil :</span> Photo
+                de profil personnalisée le cas échéant (stockée via Vercel Blob)
               </li>
             </ul>
+            <p>
+              Nous ne collectons aucune donnée de paiement, aucun document
+              d'identité officiel, et n'effectuons aucun profilage ni prise de
+              décision automatisée produisant des effets juridiques sur les
+              utilisateurs.
+            </p>
           </LegalSection>
 
           <LegalSection title="3. Finalités du traitement">
@@ -73,146 +104,324 @@ const PrivacyPage = () => {
               suivantes :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>Gestion de votre compte utilisateur et authentification</li>
-              <li>Organisation et administration des tournois</li>
               <li>
-                Communication relative aux tournois (inscriptions, résultats)
+                Gestion de votre compte utilisateur et authentification
+                sécurisée
               </li>
-              <li>Modération de la communauté et application des sanctions</li>
+              <li>Organisation, administration et archivage des tournois</li>
               <li>
-                Amélioration de la Plateforme et statistiques d'utilisation
+                Communication relative aux tournois (confirmations
+                d'inscription, résultats, annonces)
               </li>
+              <li>
+                Modération de la communauté et application des sanctions prévues
+                aux CGU
+              </li>
+              <li>
+                Amélioration de la Plateforme et mesure d'audience (via Vercel
+                Analytics — données anonymes et agrégées uniquement)
+              </li>
+              <li>Prévention de la fraude et sécurité de la Plateforme</li>
             </ul>
           </LegalSection>
 
           <LegalSection title="4. Base légale">
-            <p>Le traitement de vos données repose sur :</p>
+            <p>
+              Le traitement de vos données repose sur les bases légales
+              suivantes :
+            </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Consentement :</span> Lors de
-                votre inscription via Discord OAuth
+                <span className="text-zinc-300">
+                  Consentement (art. 6.1.a RGPD / LPD) :
+                </span>{' '}
+                Lors de votre inscription via Discord OAuth — vous consentez
+                explicitement à transmettre vos données Discord à la Plateforme
               </li>
               <li>
-                <span className="text-zinc-300">Intérêt légitime :</span> Pour
-                la sécurité et la modération de la Plateforme
+                <span className="text-zinc-300">
+                  Exécution d'un contrat (art. 6.1.b RGPD / LPD) :
+                </span>{' '}
+                Pour la gestion de votre participation aux tournois et
+                l'exécution des CGU
               </li>
               <li>
-                <span className="text-zinc-300">Exécution contractuelle :</span>{' '}
-                Pour la gestion de votre participation aux tournois
+                <span className="text-zinc-300">
+                  Intérêt légitime (art. 6.1.f RGPD / LPD) :
+                </span>{' '}
+                Pour la sécurité, la modération et la prévention de la fraude
+                sur la Plateforme
               </li>
             </ul>
           </LegalSection>
 
-          <LegalSection title="5. Partage des données">
+          <LegalSection title="5. Sous-traitants et transferts de données">
             <p>
               Vos données personnelles ne sont jamais vendues à des tiers. Elles
-              peuvent être partagées avec :
+              peuvent être partagées avec les sous-traitants suivants, dans la
+              stricte mesure nécessaire à la fourniture du service :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Vercel :</span> Hébergement de
-                la Plateforme (États-Unis)
+                <span className="text-zinc-300">
+                  Vercel Inc. (États-Unis) :
+                </span>{' '}
+                Hébergement de la Plateforme, stockage des fichiers (Vercel
+                Blob), et services d'infrastructure. Vercel est certifié
+                conforme au EU-U.S. Data Privacy Framework. Politique de
+                confidentialité :{' '}
+                <a
+                  href="https://vercel.com/legal/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  vercel.com/legal/privacy-policy
+                </a>
               </li>
               <li>
-                <span className="text-zinc-300">Discord :</span>{' '}
-                Authentification OAuth (États-Unis)
+                <span className="text-zinc-300">
+                  Discord Inc. (États-Unis) :
+                </span>{' '}
+                Service d'authentification OAuth 2.0. Seules les données que
+                vous autorisez via Discord sont transmises. Politique de
+                confidentialité :{' '}
+                <a
+                  href="https://discord.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  discord.com/privacy
+                </a>
               </li>
             </ul>
             <p>
-              Ces prestataires sont soumis à des clauses contractuelles
-              garantissant la protection de vos données conformément aux
-              standards suisses et européens.
+              Ces transferts vers des pays tiers (États-Unis) sont encadrés par
+              des garanties appropriées (clauses contractuelles types de la
+              Commission européenne, EU-U.S. Data Privacy Framework) assurant un
+              niveau de protection équivalent aux standards suisses et
+              européens.
             </p>
           </LegalSection>
 
           <LegalSection title="6. Durée de conservation">
-            <p>Vos données sont conservées selon les durées suivantes :</p>
+            <p>Vos données sont conservées pendant les durées suivantes :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Compte utilisateur :</span> Tant
-                que le compte est actif, puis 1 an après la dernière connexion
+                que le compte est actif. En cas d'inactivité, les données
+                peuvent être supprimées 1 an après la dernière connexion, après
+                notification préalable
               </li>
               <li>
                 <span className="text-zinc-300">Données de tournoi :</span> 2
-                ans après la fin du tournoi
+                ans après la fin du tournoi, à des fins d'archivage et de
+                résolution de litiges
               </li>
               <li>
                 <span className="text-zinc-300">Logs de session :</span> 6 mois
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données de modération (sanctions) :
+                </span>{' '}
+                Durée du bannissement, puis 1 an supplémentaire
+              </li>
             </ul>
+            <p>
+              À l'issue de ces délais, vos données sont supprimées ou
+              anonymisées de manière irréversible.
+            </p>
           </LegalSection>
 
           <LegalSection title="7. Vos droits">
             <p>
-              Conformément à la Loi fédérale sur la protection des données (LPD)
-              et au RGPD, vous disposez des droits suivants :
+              Conformément à la Loi fédérale sur la protection des données (LPD
+              nLPD en vigueur depuis le 1er septembre 2023) et au Règlement
+              Général sur la Protection des Données (RGPD), vous disposez des
+              droits suivants :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Droit d'accès :</span> Obtenir
-                une copie de vos données personnelles
+                une copie de vos données personnelles et des informations sur
+                leur traitement
               </li>
               <li>
                 <span className="text-zinc-300">Droit de rectification :</span>{' '}
-                Corriger des données inexactes
+                Corriger des données inexactes ou incomplètes
               </li>
               <li>
-                <span className="text-zinc-300">Droit à l'effacement :</span>{' '}
-                Demander la suppression de vos données
+                <span className="text-zinc-300">
+                  Droit à l'effacement (« droit à l'oubli ») :
+                </span>{' '}
+                Demander la suppression de vos données dans les cas prévus par
+                la loi
               </li>
               <li>
                 <span className="text-zinc-300">Droit à la portabilité :</span>{' '}
-                Recevoir vos données dans un format structuré
+                Recevoir vos données dans un format structuré, couramment
+                utilisé et lisible par machine
               </li>
               <li>
                 <span className="text-zinc-300">Droit d'opposition :</span> Vous
-                opposer au traitement de vos données
+                opposer au traitement de vos données fondé sur l'intérêt
+                légitime
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Droit à la limitation du traitement :
+                </span>{' '}
+                Demander la suspension du traitement dans certaines
+                circonstances
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Droit de retrait du consentement :
+                </span>{' '}
+                Retirer votre consentement à tout moment, sans que cela
+                n'affecte la licéité du traitement antérieur
               </li>
             </ul>
             <p>
-              Pour exercer vos droits, contactez-nous via Discord ou le
-              formulaire de contact.
+              Pour exercer vos droits, adressez votre demande par e-mail à{' '}
+              <Link
+                href={`mailto:${AUTHOR.EMAIL}`}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {AUTHOR.EMAIL}
+              </Link>{' '}
+              ou via le{' '}
+              <Link
+                href={ROUTES.CONTACT}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                formulaire de contact
+              </Link>
+              . Nous nous engageons à répondre dans un délai de 30 jours.
             </p>
+            <p>
+              Vous avez également le droit de déposer une réclamation auprès de
+              l'autorité de contrôle compétente :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                En Suisse :{' '}
+                <a
+                  href="https://www.edoeb.admin.ch"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  Préposé fédéral à la protection des données et à la
+                  transparence (PFPDT)
+                </a>
+              </li>
+              <li>
+                En France :{' '}
+                <a
+                  href="https://www.cnil.fr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  Commission nationale de l'informatique et des libertés (CNIL)
+                </a>
+              </li>
+            </ul>
           </LegalSection>
 
           <LegalSection title="8. Cookies et analytics">
-            <p>La Plateforme utilise :</p>
+            <p>La Plateforme utilise uniquement :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Cookies de session :</span>{' '}
-                Nécessaires au fonctionnement de l'authentification
+                Strictement nécessaires au fonctionnement de l'authentification.
+                Ces cookies ne peuvent pas être désactivés sans empêcher
+                l'utilisation de la Plateforme. Ils sont supprimés
+                automatiquement à la déconnexion ou à expiration de la session.
               </li>
               <li>
-                <span className="text-zinc-300">Vercel Analytics :</span>{' '}
-                Collecte anonyme de données de performance (sans cookies)
+                <span className="text-zinc-300">Vercel Analytics :</span> Mesure
+                d'audience entièrement anonyme, <strong>sans cookies</strong>,
+                sans suivi inter-sites, sans collecte d'identifiants personnels.
+                Conforme au RGPD et à la LPD sans consentement requis.
               </li>
               <li>
                 <span className="text-zinc-300">Vercel Speed Insights :</span>{' '}
-                Mesure de performance anonyme
+                Mesure de performance web anonyme, <strong>sans cookies</strong>
+                , sans identification des utilisateurs.
               </li>
             </ul>
-            <p>Aucun cookie publicitaire ou de tracking tiers n'est utilisé.</p>
+            <p>
+              Aucun cookie publicitaire, de profilage ou de tracking tiers n'est
+              déposé sur votre terminal. Aucun consentement aux cookies n'est
+              requis pour l'utilisation de la Plateforme.
+            </p>
           </LegalSection>
 
           <LegalSection title="9. Sécurité">
             <p>
               Nous mettons en œuvre des mesures techniques et organisationnelles
-              appropriées pour protéger vos données, notamment :
+              appropriées pour protéger vos données contre tout accès non
+              autorisé, perte, altération ou divulgation :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>Chiffrement des communications (HTTPS/TLS)</li>
-              <li>Authentification sécurisée via OAuth 2.0</li>
-              <li>Accès restreint aux données par rôle (ADMIN, SUPERADMIN)</li>
-              <li>Monitoring des erreurs et alertes de sécurité</li>
+              <li>
+                Chiffrement des communications en transit (HTTPS / TLS 1.3)
+              </li>
+              <li>
+                Authentification sécurisée via OAuth 2.0 — aucun mot de passe
+                stocké sur la Plateforme
+              </li>
+              <li>
+                Accès aux données restreint par rôle (USER, ADMIN, SUPERADMIN)
+              </li>
+              <li>Surveillance des erreurs et alertes de sécurité</li>
+              <li>
+                Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et
+                ISO 27001
+              </li>
             </ul>
+            <p>
+              En cas de violation de données à caractère personnel susceptible
+              d'engendrer un risque pour vos droits et libertés, nous nous
+              engageons à notifier l'autorité de contrôle compétente dans les
+              délais légaux prévus (72 heures pour le RGPD), et à vous en
+              informer directement si le risque est élevé.
+            </p>
           </LegalSection>
 
-          <LegalSection title="10. Modifications">
+          <LegalSection title="10. Mineurs">
+            <p>
+              La Plateforme est accessible aux personnes âgées d'au moins 16
+              ans. Nous ne collectons pas sciemment de données personnelles
+              concernant des enfants de moins de 16 ans. Si vous êtes parent ou
+              tuteur légal et que vous pensez que votre enfant nous a fourni des
+              données personnelles sans votre consentement, contactez-nous à{' '}
+              <Link
+                href={`mailto:${AUTHOR.EMAIL}`}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {AUTHOR.EMAIL}
+              </Link>{' '}
+              afin que nous puissions prendre les mesures nécessaires.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="11. Modifications">
             <p>
               Cette politique de confidentialité peut être modifiée à tout
-              moment. En cas de modification substantielle, les utilisateurs
-              seront informés via la Plateforme. La date de dernière mise à jour
-              est indiquée en haut de cette page.
+              moment pour refléter des évolutions légales, réglementaires ou
+              techniques. En cas de modification substantielle affectant vos
+              droits, les utilisateurs en seront informés via la Plateforme. La
+              date de dernière mise à jour est indiquée en haut de cette page.
+            </p>
+            <p>
+              Nous vous encourageons à consulter régulièrement cette page. La
+              poursuite de l'utilisation de la Plateforme après une modification
+              vaut acceptation de la politique mise à jour.
             </p>
           </LegalSection>
         </div>

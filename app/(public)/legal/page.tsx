@@ -28,18 +28,28 @@ const LegalPage = () => {
         />
 
         <div className="space-y-6">
-          <LegalSection title="Éditeur du site">
-            <p>La plateforme {METADATA.NAME} est éditée par :</p>
+          <LegalSection title="1. Éditeur du site">
+            <p>
+              Conformément aux obligations légales applicables, la plateforme{' '}
+              {METADATA.NAME} est éditée par une personne physique :
+            </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Nom :</span> Noé Henchoz
               </li>
               <li>
                 <span className="text-zinc-300">Statut :</span> Personne
-                physique — projet associatif e-sport
+                physique — projet e-sport amateur non commercial
               </li>
               <li>
-                <span className="text-zinc-300">Localisation :</span> Suisse
+                <span className="text-zinc-300">Domicile :</span> Canton de
+                Vaud, Suisse
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Directeur de la publication :
+                </span>{' '}
+                Noé Henchoz
               </li>
               <li>
                 <span className="text-zinc-300">Contact :</span>{' '}
@@ -51,7 +61,7 @@ const LegalPage = () => {
                 </Link>
               </li>
               <li>
-                <span className="text-zinc-300">Site web :</span>{' '}
+                <span className="text-zinc-300">Site web de l'éditeur :</span>{' '}
                 <a
                   href={AUTHOR.URL}
                   target="_blank"
@@ -62,9 +72,15 @@ const LegalPage = () => {
                 </a>
               </li>
             </ul>
+            <p className="text-sm text-zinc-400">
+              En tant que personne physique domiciliée en Suisse, l'éditeur
+              n'est pas soumis à immatriculation au Registre du commerce ni à
+              l'obligation de détenir un numéro de TVA pour ce projet non
+              commercial.
+            </p>
           </LegalSection>
 
-          <LegalSection title="Hébergement">
+          <LegalSection title="2. Hébergement">
             <p>La Plateforme est hébergée par :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
@@ -86,28 +102,41 @@ const LegalPage = () => {
                 </a>
               </li>
             </ul>
+            <p>
+              Le stockage des fichiers (images, logos) est assuré par le service{' '}
+              <strong>Vercel Blob</strong>, également opéré par Vercel Inc. Les
+              données hébergées peuvent être stockées sur des serveurs situés
+              aux États-Unis ou dans d'autres pays. Des garanties contractuelles
+              sont en place pour assurer la protection des données conformément
+              aux standards suisses et européens (clauses contractuelles types).
+            </p>
           </LegalSection>
 
-          <LegalSection title="Propriété intellectuelle">
+          <LegalSection title="3. Propriété intellectuelle">
             <p>
               L'ensemble du contenu de la Plateforme (textes, images, logos,
-              design, code source) est protégé par le droit d'auteur. Le code
-              source est publié sous licence MIT.
+              design, code source) est protégé par le droit d'auteur suisse et
+              international. Le code source est publié sous licence MIT.
             </p>
             <p>
               Le nom « Belouga Tournament », le logo et l'identité visuelle
-              associée sont la propriété de l'éditeur. Toute reproduction non
-              autorisée est interdite.
+              associée sont la propriété exclusive de l'éditeur. Toute
+              reproduction, représentation, modification, publication ou
+              adaptation de tout ou partie des éléments du site, quel que soit
+              le moyen ou le procédé utilisé, est interdite sans autorisation
+              écrite préalable de l'éditeur.
             </p>
             <p>
               Les noms de jeux vidéo, logos et marques mentionnés sur la
               Plateforme (Valorant, League of Legends, Counter-Strike, Rocket
-              League, Fortnite, etc.) sont la propriété de leurs éditeurs
-              respectifs et sont utilisés à des fins informatives uniquement.
+              League, Fortnite, etc.) sont la propriété exclusive de leurs
+              éditeurs respectifs et sont utilisés à des fins informatives
+              uniquement. Cette Plateforme n'est affiliée à aucun de ces
+              éditeurs.
             </p>
           </LegalSection>
 
-          <LegalSection title="Données personnelles">
+          <LegalSection title="4. Données personnelles">
             <p>
               Pour toute information sur la collecte et le traitement de vos
               données personnelles, veuillez consulter notre{' '}
@@ -121,12 +150,13 @@ const LegalPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="Cookies">
+          <LegalSection title="5. Cookies">
             <p>
               La Plateforme utilise uniquement des cookies techniques
-              nécessaires au fonctionnement de l'authentification. Aucun cookie
-              publicitaire ou de tracking n'est déposé. Pour plus de détails,
-              consultez notre{' '}
+              strictement nécessaires au fonctionnement de l'authentification
+              (cookies de session). Aucun cookie publicitaire, de profilage ou
+              de tracking tiers n'est déposé sur votre terminal. Pour plus de
+              détails, consultez notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
                 className="text-blue-400 transition-colors hover:text-blue-300"
@@ -137,43 +167,58 @@ const LegalPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="Limitation de responsabilité">
+          <LegalSection title="6. Limitation de responsabilité">
             <p>
               L'éditeur s'efforce de fournir des informations exactes et à jour
               sur la Plateforme. Toutefois, il ne peut garantir l'exactitude, la
               complétude ou l'actualité des informations diffusées.
             </p>
             <p>
-              La Plateforme est fournie « en l'état ». L'éditeur ne pourra être
-              tenu responsable des dommages directs ou indirects résultant de
-              l'utilisation de la Plateforme, incluant mais sans s'y limiter :
-              les pertes de données, l'indisponibilité du service, ou les
-              litiges entre utilisateurs.
+              La Plateforme est fournie « en l'état » et « selon disponibilité
+              », sans garantie d'aucune sorte. L'éditeur ne pourra être tenu
+              responsable des dommages directs ou indirects résultant de
+              l'utilisation ou de l'impossibilité d'utiliser la Plateforme,
+              incluant notamment : les pertes de données, l'indisponibilité du
+              service, ou les litiges entre utilisateurs.
+            </p>
+            <p>
+              L'éditeur ne saurait être tenu responsable du contenu des sites
+              tiers vers lesquels la Plateforme renvoie par des liens
+              hypertextes.
             </p>
           </LegalSection>
 
-          <LegalSection title="Liens externes">
+          <LegalSection title="7. Liens externes">
             <p>
               La Plateforme peut contenir des liens vers des sites tiers
               (Discord, Twitch, sponsors, etc.). L'éditeur n'exerce aucun
               contrôle sur ces sites et décline toute responsabilité quant à
-              leur contenu ou leurs pratiques en matière de protection des
-              données.
+              leur contenu, leur disponibilité ou leurs pratiques en matière de
+              protection des données. La mise en place d'un lien hypertexte vers
+              la Plateforme nécessite l'autorisation préalable écrite de
+              l'éditeur.
             </p>
           </LegalSection>
 
-          <LegalSection title="Droit applicable">
+          <LegalSection title="8. Droit applicable et juridiction">
             <p>
-              Les présentes mentions légales sont soumises au droit suisse. En
-              cas de litige, les tribunaux du canton de Vaud seront seuls
-              compétents, sauf disposition légale contraire.
+              Les présentes mentions légales sont soumises au droit suisse,
+              notamment à la Loi fédérale contre la concurrence déloyale (LCD),
+              à la Loi sur le droit d'auteur (LDA) et à la Loi fédérale sur la
+              protection des données (LPD).
+            </p>
+            <p>
+              En cas de litige relatif à l'interprétation ou à l'exécution des
+              présentes, et à défaut de résolution amiable, les tribunaux du
+              canton de Vaud (Suisse) seront seuls compétents, sauf disposition
+              légale impérative contraire.
             </p>
           </LegalSection>
 
-          <LegalSection title="Crédits">
+          <LegalSection title="9. Crédits">
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Développement :</span>{' '}
+                <span className="text-zinc-300">Développement et design :</span>{' '}
                 <a
                   href={AUTHOR.URL}
                   target="_blank"
@@ -184,19 +229,12 @@ const LegalPage = () => {
                 </a>
               </li>
               <li>
-                <span className="text-zinc-300">Framework :</span> Next.js,
-                React, TailwindCSS
+                <span className="text-zinc-300">Icônes :</span> Lucide Icons
+                (ISC), Font Awesome (CC BY 4.0)
               </li>
               <li>
-                <span className="text-zinc-300">Hébergement :</span> Vercel
-              </li>
-              <li>
-                <span className="text-zinc-300">Authentification :</span>{' '}
-                BetterAuth + Discord OAuth
-              </li>
-              <li>
-                <span className="text-zinc-300">Icônes :</span> Lucide Icons,
-                Font Awesome
+                <span className="text-zinc-300">Polices :</span> Google Fonts
+                (SIL Open Font License)
               </li>
             </ul>
           </LegalSection>

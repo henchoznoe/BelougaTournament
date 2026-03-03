@@ -7,9 +7,11 @@
  */
 
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { LegalSection } from '@/components/features/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { METADATA } from '@/lib/config/constants'
+import { AUTHOR, METADATA } from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
@@ -26,76 +28,183 @@ const TermsPage = () => {
         />
 
         <div className="space-y-6">
-          <LegalSection title="1. Objet">
+          <LegalSection title="1. Objet et acceptation">
             <p>
               Les présentes Conditions Générales d'Utilisation (ci-après « CGU
               ») régissent l'accès et l'utilisation de la plateforme{' '}
               {METADATA.NAME} (ci-après « la Plateforme »), accessible à
-              l'adresse belougatournament.ch.
+              l'adresse{' '}
+              <a
+                href="https://belougatournament.ch"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                belougatournament.ch
+              </a>
+              .
             </p>
             <p>
               La Plateforme permet l'organisation, la gestion et la
-              participation à des tournois e-sport amateurs. En accédant à la
-              Plateforme, vous acceptez sans réserve les présentes CGU.
+              participation à des tournois e-sport amateurs, et est fournie à
+              titre <strong>entièrement gratuit</strong> par l'éditeur, personne
+              physique, à des fins non commerciales.
+            </p>
+            <p>
+              En accédant à la Plateforme ou en créant un compte, vous
+              reconnaissez avoir lu, compris et accepté sans réserve les
+              présentes CGU dans leur intégralité. Si vous n'acceptez pas ces
+              CGU, vous ne devez pas utiliser la Plateforme.
             </p>
           </LegalSection>
 
           <LegalSection title="2. Inscription et compte utilisateur">
             <p>
               L'inscription sur la Plateforme s'effectue exclusivement via
-              l'authentification Discord (OAuth 2.0). En vous inscrivant, vous
+              l'authentification Discord (OAuth 2.0). Aucune autre méthode
+              d'inscription n'est disponible. En vous inscrivant, vous
               garantissez que :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                Vous êtes âgé(e) d'au moins 16 ans ou disposez de l'autorisation
-                d'un représentant légal
+                Vous êtes âgé(e) d'au moins 16 ans ; si vous êtes mineur(e),
+                vous disposez de l'autorisation préalable et expresse de votre
+                représentant légal pour utiliser la Plateforme
               </li>
               <li>
-                Les informations fournies via votre compte Discord sont exactes
+                Les informations associées à votre compte Discord (nom
+                d'utilisateur, adresse e-mail, avatar) sont exactes et vous
+                appartiennent
               </li>
               <li>
-                Vous êtes responsable de la sécurité de votre compte Discord
+                Vous êtes seul(e) responsable de la sécurité et de la
+                confidentialité de votre compte Discord
+              </li>
+              <li>
+                Vous n'utiliserez pas la Plateforme au nom d'une tierce personne
+                sans son autorisation explicite
               </li>
             </ul>
             <p>
-              La Plateforme se réserve le droit de suspendre ou supprimer tout
-              compte ne respectant pas les présentes CGU.
+              Chaque utilisateur ne peut posséder qu'un seul compte. La création
+              de comptes multiples aux fins de contournement de sanctions est
+              interdite. La Plateforme se réserve le droit de suspendre ou
+              supprimer tout compte ne respectant pas les présentes CGU, sans
+              préavis ni indemnité.
+            </p>
+            <p>
+              Pour demander la suppression de votre compte, contactez l'éditeur
+              à l'adresse{' '}
+              <Link
+                href={`mailto:${AUTHOR.EMAIL}`}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {AUTHOR.EMAIL}
+              </Link>
+              . Les données seront traitées conformément à la{' '}
+              <Link
+                href={ROUTES.PRIVACY}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                politique de confidentialité
+              </Link>
+              .
             </p>
           </LegalSection>
 
-          <LegalSection title="3. Participation aux tournois">
+          <LegalSection title="3. Gratuité du service">
+            <p>
+              L'accès à la Plateforme et la participation aux tournois sont
+              entièrement <strong>gratuits</strong>. Aucun frais d'inscription,
+              d'abonnement ou de participation n'est perçu par l'éditeur.
+            </p>
+            <p>
+              Certains tournois peuvent prévoir des dotations ou récompenses
+              (prix, lots, trophées). Le cas échéant, les modalités de remise
+              des récompenses sont précisées dans le règlement spécifique du
+              tournoi concerné. L'éditeur ne saurait être tenu responsable en
+              cas d'impossibilité de verser une récompense due à des
+              circonstances indépendantes de sa volonté.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="4. Participation aux tournois">
             <p>
               La participation aux tournois est soumise aux conditions suivantes
               :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
+                Disposer d'un compte actif sur la Plateforme et sur le jeu
+                concerné
+              </li>
+              <li>
                 L'inscription à un tournoi vaut acceptation du règlement
-                spécifique de ce tournoi
+                spécifique de ce tournoi, qui prévaut sur les présentes CGU en
+                cas de conflit
               </li>
               <li>
-                Les joueurs doivent respecter les règles du jeu concerné et le
-                fair-play
+                Les joueurs doivent respecter les règles du jeu concerné, les
+                conditions d'utilisation de l'éditeur du jeu, et les principes
+                du fair-play
               </li>
               <li>
-                Toute forme de triche, d'exploit ou de comportement toxique est
-                strictement interdite
+                Toute forme de triche, d'exploitation de failles (exploit), de
+                comportement toxique, de harcèlement ou d'utilisation de
+                logiciels tiers non autorisés est strictement interdite
               </li>
               <li>
                 Les décisions des administrateurs et arbitres sont définitives
+                et sans appel, sauf procédure de contestation prévue dans le
+                règlement du tournoi
+              </li>
+              <li>
+                L'éditeur se réserve le droit d'annuler, de reporter ou de
+                modifier un tournoi en cas de force majeure ou de circonstances
+                exceptionnelles
               </li>
             </ul>
           </LegalSection>
 
-          <LegalSection title="4. Sanctions et bannissement">
+          <LegalSection title="5. Comportement et règles de conduite">
             <p>
-              En cas de non-respect des CGU ou du règlement d'un tournoi, les
-              administrateurs peuvent appliquer des sanctions incluant :
+              Les utilisateurs s'engagent à adopter un comportement respectueux
+              envers les autres participants, les administrateurs et l'éditeur.
+              Sont notamment interdits :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>Un avertissement</li>
-              <li>La disqualification d'un tournoi en cours</li>
+              <li>
+                Tout propos haineux, discriminatoires, menaçants ou à caractère
+                illicite
+              </li>
+              <li>
+                La publication de contenus portant atteinte aux droits d'un
+                tiers
+              </li>
+              <li>
+                Toute tentative d'atteinte à la sécurité ou au bon
+                fonctionnement de la Plateforme
+              </li>
+              <li>L'usurpation d'identité</li>
+              <li>
+                Toute activité commerciale ou publicitaire non autorisée sur la
+                Plateforme
+              </li>
+            </ul>
+          </LegalSection>
+
+          <LegalSection title="6. Sanctions">
+            <p>
+              En cas de non-respect des présentes CGU ou du règlement d'un
+              tournoi, les administrateurs peuvent appliquer des sanctions
+              graduées selon la gravité de l'infraction :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>Un avertissement formel</li>
+              <li>
+                La disqualification d'un tournoi en cours, avec perte des
+                éventuelles récompenses associées
+              </li>
               <li>Un bannissement temporaire de la Plateforme</li>
               <li>
                 Un bannissement permanent en cas de récidive ou de faute grave
@@ -103,53 +212,139 @@ const TermsPage = () => {
             </ul>
             <p>
               Les sanctions sont appliquées à la discrétion des administrateurs.
-              Un motif est systématiquement communiqué.
+              Un motif est systématiquement communiqué à l'utilisateur concerné.
+              L'utilisateur peut contester une sanction en contactant l'éditeur
+              à l'adresse{' '}
+              <Link
+                href={`mailto:${AUTHOR.EMAIL}`}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {AUTHOR.EMAIL}
+              </Link>
+              .
             </p>
           </LegalSection>
 
-          <LegalSection title="5. Propriété intellectuelle">
+          <LegalSection title="7. Propriété intellectuelle">
             <p>
               L'ensemble des éléments de la Plateforme (design, code, textes,
-              logos) est la propriété de {METADATA.NAME} ou de ses partenaires.
-              Toute reproduction, distribution ou utilisation non autorisée est
-              interdite.
+              logos, graphismes) est la propriété de l'éditeur ou de ses
+              partenaires et est protégé par le droit de la propriété
+              intellectuelle. Toute reproduction, distribution, modification ou
+              utilisation non autorisée est interdite.
             </p>
             <p>
-              Les noms de jeux, logos et marques associés sont la propriété de
-              leurs détenteurs respectifs et sont utilisés à titre informatif
-              uniquement.
+              Les noms de jeux, logos et marques associés sont la propriété
+              exclusive de leurs détenteurs respectifs et sont utilisés à titre
+              informatif uniquement.
+            </p>
+            <p>
+              En publiant du contenu sur la Plateforme (pseudonymes,
+              compositions d'équipe, etc.), l'utilisateur accorde à l'éditeur un
+              droit d'utilisation non exclusif pour les besoins du
+              fonctionnement et de la promotion de la Plateforme.
             </p>
           </LegalSection>
 
-          <LegalSection title="6. Limitation de responsabilité">
+          <LegalSection title="8. Disponibilité du service">
             <p>
-              La Plateforme est fournie « en l'état ». {METADATA.NAME} ne
-              garantit pas un fonctionnement ininterrompu ou exempt d'erreurs.
-              En aucun cas {METADATA.NAME} ne pourra être tenu responsable de :
+              L'éditeur s'efforce de maintenir la Plateforme accessible en
+              continu, mais ne garantit pas une disponibilité ininterrompue. La
+              Plateforme peut être temporairement indisponible pour cause de
+              maintenance, mise à jour, ou incident technique.
+            </p>
+            <p>
+              L'éditeur ne saurait être tenu responsable des interruptions de
+              service, qu'elles soient planifiées ou non, ni de leurs
+              conséquences sur la participation aux tournois. Aucune indemnité
+              ne pourra être réclamée à ce titre.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="9. Limitation de responsabilité">
+            <p>
+              La Plateforme est fournie « en l'état » et « selon disponibilité
+              ». {METADATA.NAME} ne garantit pas un fonctionnement ininterrompu
+              ou exempt d'erreurs. En aucun cas {METADATA.NAME} ne pourra être
+              tenu responsable de :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>Pertes de données liées à l'utilisation de la Plateforme</li>
-              <li>Interruptions de service indépendantes de notre volonté</li>
+              <li>Interruptions de service indépendantes de sa volonté</li>
               <li>Litiges entre participants lors des tournois</li>
-              <li>Problèmes techniques liés aux jeux ou services tiers</li>
+              <li>
+                Problèmes techniques liés aux jeux ou services tiers (Discord,
+                serveurs de jeux, etc.)
+              </li>
+              <li>
+                Pertes de gains espérés ou préjudices indirects de quelque
+                nature que ce soit
+              </li>
             </ul>
           </LegalSection>
 
-          <LegalSection title="7. Modification des CGU">
+          <LegalSection title="10. Force majeure">
             <p>
-              {METADATA.NAME} se réserve le droit de modifier les présentes CGU
-              à tout moment. Les utilisateurs seront informés de toute
-              modification substantielle. L'utilisation continue de la
-              Plateforme après modification vaut acceptation des nouvelles CGU.
+              L'éditeur ne pourra être tenu responsable de l'inexécution totale
+              ou partielle de ses obligations au titre des présentes CGU,
+              lorsque cette inexécution est due à un événement de force majeure,
+              entendu comme tout événement imprévisible, irrésistible et
+              extérieur à la volonté de l'éditeur, incluant notamment :
+              catastrophes naturelles, pannes d'infrastructure, actes de
+              cybermalveillance, décisions gouvernementales, ou défaillance de
+              services tiers essentiels.
             </p>
           </LegalSection>
 
-          <LegalSection title="8. Contact">
+          <LegalSection title="11. Modification des CGU">
             <p>
-              Pour toute question relative aux présentes CGU, vous pouvez nous
-              contacter via notre serveur Discord ou par le formulaire de
-              contact disponible sur la Plateforme.
+              {METADATA.NAME} se réserve le droit de modifier les présentes CGU
+              à tout moment. Les utilisateurs seront informés de toute
+              modification substantielle via la Plateforme. La date de dernière
+              mise à jour est indiquée en haut de cette page. L'utilisation
+              continue de la Plateforme après modification vaut acceptation des
+              nouvelles CGU.
             </p>
+          </LegalSection>
+
+          <LegalSection title="12. Divisibilité">
+            <p>
+              Si l'une quelconque des dispositions des présentes CGU était
+              déclarée nulle ou non applicable par une juridiction compétente,
+              les autres dispositions resteraient en vigueur et de plein effet.
+              La disposition nulle serait alors remplacée par une disposition
+              valide se rapprochant au plus de l'intention des parties.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="13. Droit applicable">
+            <p>
+              Les présentes CGU sont soumises au droit suisse. En cas de litige
+              relatif à leur interprétation ou leur exécution, et à défaut de
+              résolution amiable, les tribunaux du canton de Vaud (Suisse)
+              seront seuls compétents, sauf disposition légale impérative
+              contraire.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="14. Contact">
+            <p>
+              Pour toute question relative aux présentes CGU, ou pour exercer
+              vos droits, vous pouvez nous contacter :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                Par e-mail :{' '}
+                <Link
+                  href={`mailto:${AUTHOR.EMAIL}`}
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  {AUTHOR.EMAIL}
+                </Link>
+              </li>
+              <li>Via le formulaire de contact disponible sur la Plateforme</li>
+              <li>Via notre serveur Discord officiel</li>
+            </ul>
           </LegalSection>
         </div>
       </div>
