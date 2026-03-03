@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/tournaments.ts
- * Description: Server actions for tournament CRUD operations (ADMIN + SUPERADMIN).
+ * Description: Server actions for tournament CRUD and registration management (ADMIN + SUPERADMIN).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -15,6 +15,7 @@ import type { ActionState } from '@/lib/types/actions'
 import {
   deleteTournamentSchema,
   tournamentSchema,
+  updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
@@ -209,5 +210,37 @@ export const updateTournamentStatus = authenticatedAction({
     revalidateTag('dashboard-upcoming', 'minutes')
 
     return { success: true, message: 'Le statut du tournoi a été mis à jour.' }
+  },
+})
+
+/** Updates a registration's status (approve / reject / waitlist). */
+export const updateRegistrationStatus = authenticatedAction({
+  schema: updateRegistrationStatusSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async (data, session): Promise<ActionState> => {
+    const hasAccess = await checkAdminAssignment(
+      session.user.id as string,
+      session.user.role as string,
+      data.tournamentId,
+    )
+    if (!hasAccess) {
+      return {
+        success: false,
+        message: "Vous n'avez pas accès à ce tournoi.",
+      }
+    }
+
+    await prisma.tournamentRegistration.update({
+      where: { id: data.id },
+      data: { status: data.status },
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+
+    return {
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    }
   },
 })

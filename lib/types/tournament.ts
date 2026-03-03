@@ -1,6 +1,6 @@
 /**
  * File: lib/types/tournament.ts
- * Description: Types for tournament management (admin list, detail, fields).
+ * Description: Types for tournament management (admin list, detail, fields, registrations, teams).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -88,5 +88,36 @@ export type TournamentRegistrationItem = {
   team: {
     id: string
     name: string
+  } | null
+}
+
+/** A team member with user info for the admin teams table. */
+export type TeamMemberItem = {
+  id: string
+  joinedAt: Date
+  user: {
+    id: string
+    name: string
+    displayName: string
+    image: string | null
+  }
+}
+
+/** Team row for the admin teams table. */
+export type TeamItem = {
+  id: string
+  name: string
+  isFull: boolean
+  createdAt: Date
+  captain: {
+    id: string
+    name: string
+    displayName: string
+    image: string | null
+  }
+  members: TeamMemberItem[]
+  registration: {
+    id: string
+    status: RegistrationStatus
   } | null
 }

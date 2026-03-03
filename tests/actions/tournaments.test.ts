@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/tournaments.test.ts
- * Description: Unit tests for tournament CRUD server actions (ADMIN + SUPERADMIN).
+ * Description: Unit tests for tournament CRUD and registration server actions (ADMIN + SUPERADMIN).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -42,6 +42,7 @@ const mockTournamentUpdate = vi.fn()
 const mockTournamentDelete = vi.fn()
 const mockFieldDeleteMany = vi.fn()
 const mockAssignmentFindUnique = vi.fn()
+const mockRegistrationUpdate = vi.fn()
 const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -56,6 +57,9 @@ vi.mock('@/lib/core/prisma', () => ({
     adminAssignment: {
       findUnique: (...args: unknown[]) => mockAssignmentFindUnique(...args),
     },
+    tournamentRegistration: {
+      update: (...args: unknown[]) => mockRegistrationUpdate(...args),
+    },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
 }))
@@ -69,6 +73,7 @@ const {
   updateTournament,
   deleteTournament,
   updateTournamentStatus,
+  updateRegistrationStatus,
 } = await import('@/lib/actions/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -76,6 +81,7 @@ const {
 // ---------------------------------------------------------------------------
 
 const VALID_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+const VALID_UUID_2 = 'b1ffcd00-0d1c-4fa9-ac7e-7cc0ce491b22'
 
 const SUPERADMIN_SESSION = {
   user: {
@@ -680,5 +686,216 @@ describe('updateTournamentStatus', () => {
     })
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateRegistrationStatus
+// ---------------------------------------------------------------------------
+
+describe('updateRegistrationStatus', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockRegistrationUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(
+      await updateRegistrationStatus({
+        id: VALID_UUID,
+        tournamentId: VALID_UUID_2,
+        status: 'APPROVED',
+      }),
+    ).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns Unauthorized for USER role', async () => {
+    mockGetSession.mockResolvedValue(USER_SESSION)
+
+    expect(
+      await updateRegistrationStatus({
+        id: VALID_UUID,
+        tournamentId: VALID_UUID_2,
+        status: 'APPROVED',
+      }),
+    ).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('updates registration status to APPROVED as SUPERADMIN', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { status: 'APPROVED' },
+    })
+  })
+
+  it('updates registration status to REJECTED', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'REJECTED',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    })
+  })
+
+  it('updates registration status to WAITLIST', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'WAITLIST',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    })
+  })
+
+  it('updates registration status to PENDING', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'PENDING',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    })
+  })
+
+  it('allows ADMIN with assignment to update registration status', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockAssignmentFindUnique.mockResolvedValue({
+      id: 'assign-1',
+      adminId: 'admin-1',
+      tournamentId: VALID_UUID_2,
+    })
+
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: "Le statut de l'inscription a été mis à jour.",
+    })
+  })
+
+  it('rejects ADMIN without assignment', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockAssignmentFindUnique.mockResolvedValue(null)
+
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: "Vous n'avez pas accès à ce tournoi.",
+    })
+  })
+
+  it('calls revalidateTag for tournaments and dashboard-registrations', async () => {
+    await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+  })
+
+  it('returns validation error for invalid registration id', async () => {
+    const result = await updateRegistrationStatus({
+      id: 'bad-id',
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error for invalid tournamentId', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: 'bad-id',
+      status: 'APPROVED',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error for invalid status', async () => {
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'CANCELLED' as 'APPROVED',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns Internal server error when prisma update throws', async () => {
+    mockRegistrationUpdate.mockRejectedValue(new Error('DB error'))
+
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+
+  it('returns a Prisma error message for P2025 (record not found)', async () => {
+    const { Prisma } = await import('@/prisma/generated/prisma/client')
+    mockRegistrationUpdate.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('not found', {
+        code: 'P2025',
+        clientVersion: '7.0.0',
+      }),
+    )
+
+    const result = await updateRegistrationStatus({
+      id: VALID_UUID,
+      tournamentId: VALID_UUID_2,
+      status: 'APPROVED',
+    })
+
+    expect(result).toEqual({ success: false, message: 'Record not found.' })
   })
 })

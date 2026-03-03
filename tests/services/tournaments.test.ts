@@ -20,11 +20,19 @@ vi.mock('@/lib/core/logger', () => ({
 
 const mockFindMany = vi.fn()
 const mockFindUnique = vi.fn()
+const mockRegistrationFindMany = vi.fn()
+const mockTeamFindMany = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
     tournament: {
       findMany: (...args: unknown[]) => mockFindMany(...args),
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
+    },
+    tournamentRegistration: {
+      findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
+    },
+    team: {
+      findMany: (...args: unknown[]) => mockTeamFindMany(...args),
     },
   },
 }))
@@ -33,9 +41,13 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getTournaments, getTournamentBySlug, getTournamentById } = await import(
-  '@/lib/services/tournaments'
-)
+const {
+  getTournaments,
+  getTournamentBySlug,
+  getTournamentById,
+  getRegistrations,
+  getTeams,
+} = await import('@/lib/services/tournaments')
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -230,5 +242,186 @@ describe('getTournamentById', () => {
     const result = await getTournamentById('uuid-1')
 
     expect(result).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixtures — registrations & teams
+// ---------------------------------------------------------------------------
+
+const MOCK_REGISTRATION = {
+  id: 'reg-1',
+  status: 'PENDING',
+  fieldValues: { 'Riot ID': 'Player#1234' },
+  createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  user: {
+    id: 'user-1',
+    name: 'player1',
+    displayName: 'Player One',
+    image: null,
+  },
+  team: {
+    id: 'team-1',
+    name: 'Alpha Squad',
+  },
+}
+
+const MOCK_TEAM = {
+  id: 'team-1',
+  name: 'Alpha Squad',
+  isFull: false,
+  createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  captain: {
+    id: 'user-1',
+    name: 'captain1',
+    displayName: 'Captain One',
+    image: null,
+  },
+  members: [
+    {
+      id: 'member-1',
+      joinedAt: new Date('2026-05-10T10:00:00.000Z'),
+      user: {
+        id: 'user-1',
+        name: 'captain1',
+        displayName: 'Captain One',
+        image: null,
+      },
+    },
+  ],
+  registration: {
+    id: 'reg-1',
+    status: 'PENDING',
+  },
+}
+
+// ---------------------------------------------------------------------------
+// getRegistrations
+// ---------------------------------------------------------------------------
+
+describe('getRegistrations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns registrations for a tournament', async () => {
+    mockRegistrationFindMany.mockResolvedValue([MOCK_REGISTRATION])
+
+    const result = await getRegistrations('tournament-1')
+
+    expect(result).toEqual([MOCK_REGISTRATION])
+    expect(mockRegistrationFindMany).toHaveBeenCalledWith({
+      where: { tournamentId: 'tournament-1' },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        fieldValues: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+          },
+        },
+        team: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns an empty array when no registrations exist', async () => {
+    mockRegistrationFindMany.mockResolvedValue([])
+
+    const result = await getRegistrations('tournament-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getRegistrations('tournament-1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getTeams
+// ---------------------------------------------------------------------------
+
+describe('getTeams', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns teams for a tournament', async () => {
+    mockTeamFindMany.mockResolvedValue([MOCK_TEAM])
+
+    const result = await getTeams('tournament-1')
+
+    expect(result).toEqual([MOCK_TEAM])
+    expect(mockTeamFindMany).toHaveBeenCalledWith({
+      where: { tournamentId: 'tournament-1' },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        isFull: true,
+        createdAt: true,
+        captain: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+          },
+        },
+        members: {
+          orderBy: { joinedAt: 'asc' },
+          select: {
+            id: true,
+            joinedAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                image: true,
+              },
+            },
+          },
+        },
+        registration: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns an empty array when no teams exist', async () => {
+    mockTeamFindMany.mockResolvedValue([])
+
+    const result = await getTeams('tournament-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockTeamFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getTeams('tournament-1')
+
+    expect(result).toEqual([])
   })
 })

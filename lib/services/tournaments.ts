@@ -1,6 +1,6 @@
 /**
  * File: lib/services/tournaments.ts
- * Description: Services for fetching tournaments (admin list, detail, by ID).
+ * Description: Services for fetching tournaments, registrations, and teams (admin).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -11,8 +11,10 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
+  TeamItem,
   TournamentDetail,
   TournamentListItem,
+  TournamentRegistrationItem,
 } from '@/lib/types/tournament'
 
 /** Fetches all tournaments for the admin list table. */
@@ -110,5 +112,98 @@ export const getTournamentById = async (
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament by ID')
     return null
+  }
+}
+
+/** Fetches all registrations for a tournament (admin registrations tab). */
+export const getRegistrations = async (
+  tournamentId: string,
+): Promise<TournamentRegistrationItem[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.tournamentRegistration.findMany({
+      where: { tournamentId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        fieldValues: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+          },
+        },
+        team: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+    return rows as unknown as TournamentRegistrationItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching registrations')
+    return []
+  }
+}
+
+/** Fetches all teams for a tournament (admin teams tab). */
+export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.team.findMany({
+      where: { tournamentId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        isFull: true,
+        createdAt: true,
+        captain: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+          },
+        },
+        members: {
+          orderBy: { joinedAt: 'asc' },
+          select: {
+            id: true,
+            joinedAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                image: true,
+              },
+            },
+          },
+        },
+        registration: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
+      },
+    })
+    return rows as unknown as TeamItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching teams')
+    return []
   }
 }

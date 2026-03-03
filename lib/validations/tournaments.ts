@@ -1,6 +1,6 @@
 /**
  * File: lib/validations/tournaments.ts
- * Description: Validation schemas for tournament CRUD operations.
+ * Description: Validation schemas for tournament CRUD and registration operations.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -242,4 +242,17 @@ export const updateTournamentStatusSchema = z.object({
 
 export type UpdateTournamentStatusInput = z.infer<
   typeof updateTournamentStatusSchema
+>
+
+/** Schema for updating a registration's status (approve / reject / waitlist). */
+export const updateRegistrationStatusSchema = z.object({
+  id: z.uuid("ID d'inscription invalide."),
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'WAITLIST'], {
+    message: 'Le statut doit être PENDING, APPROVED, REJECTED ou WAITLIST.',
+  }),
+})
+
+export type UpdateRegistrationStatusInput = z.infer<
+  typeof updateRegistrationStatusSchema
 >
