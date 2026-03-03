@@ -7,10 +7,13 @@
  */
 
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { FeaturesSection } from '@/components/features/landing/features-section'
 import { HeroSection } from '@/components/features/landing/hero-section'
 import { SponsorsSection } from '@/components/features/landing/sponsors-section'
 import { StreamSection } from '@/components/features/landing/stream-section'
+import { TournamentsSection } from '@/components/features/landing/tournaments-section'
+import { TournamentsSkeleton } from '@/components/features/landing/tournaments-skeleton'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
 
@@ -29,9 +32,9 @@ const LandingPage = async () => {
     <div className="flex flex-col overflow-x-hidden gap-12">
       <HeroSection />
       <FeaturesSection />
-      {/*<Suspense fallback={<TournamentsSkeleton />}>
+      <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
-      </Suspense>*/}
+      </Suspense>
       <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
       <SponsorsSection sponsors={sponsors} />
     </div>

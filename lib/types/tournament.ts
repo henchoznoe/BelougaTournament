@@ -13,6 +13,25 @@ import type {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
+// ---------------------------------------------------------------------------
+// User registration types (profile page)
+// ---------------------------------------------------------------------------
+
+/** A user's registration with nested tournament info (for profile inscriptions). */
+export type UserRegistrationItem = {
+  id: string
+  status: RegistrationStatus
+  createdAt: Date
+  tournament: {
+    title: string
+    slug: string
+    game: string | null
+    format: TournamentFormat
+    startDate: Date
+    status: TournamentStatus
+  }
+}
+
 /** Tournament as displayed in the admin list table. */
 export type TournamentListItem = {
   id: string

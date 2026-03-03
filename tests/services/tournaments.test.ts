@@ -52,6 +52,8 @@ const {
   getPublishedTournaments,
   getArchivedTournaments,
   getPublicTournamentBySlug,
+  getUserRegistrations,
+  getUserPastRegistrations,
 } = await import('@/lib/services/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -640,5 +642,137 @@ describe('getPublicTournamentBySlug', () => {
     const result = await getPublicTournamentBySlug('valorant-cup')
 
     expect(result).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixtures — user registrations
+// ---------------------------------------------------------------------------
+
+const MOCK_USER_REGISTRATION = {
+  id: 'reg-user-1',
+  status: 'PENDING',
+  createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  tournament: {
+    title: 'Valorant Cup',
+    slug: 'valorant-cup',
+    game: 'Valorant',
+    format: 'TEAM',
+    startDate: new Date('2026-06-15T10:00:00.000Z'),
+    status: 'PUBLISHED',
+  },
+}
+
+const MOCK_USER_PAST_REGISTRATION = {
+  id: 'reg-user-2',
+  status: 'APPROVED',
+  createdAt: new Date('2025-11-10T10:00:00.000Z'),
+  tournament: {
+    title: 'CS2 Winter Cup',
+    slug: 'cs2-winter-cup',
+    game: 'CS2',
+    format: 'TEAM',
+    startDate: new Date('2025-12-01T10:00:00.000Z'),
+    status: 'ARCHIVED',
+  },
+}
+
+const USER_REGISTRATION_SELECT = {
+  id: true,
+  status: true,
+  createdAt: true,
+  tournament: {
+    select: {
+      title: true,
+      slug: true,
+      game: true,
+      format: true,
+      startDate: true,
+      status: true,
+    },
+  },
+}
+
+// ---------------------------------------------------------------------------
+// getUserRegistrations
+// ---------------------------------------------------------------------------
+
+describe('getUserRegistrations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns active registrations for a user', async () => {
+    mockRegistrationFindMany.mockResolvedValue([MOCK_USER_REGISTRATION])
+
+    const result = await getUserRegistrations('user-1')
+
+    expect(result).toEqual([MOCK_USER_REGISTRATION])
+    expect(mockRegistrationFindMany).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        tournament: { status: 'PUBLISHED' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: USER_REGISTRATION_SELECT,
+    })
+  })
+
+  it('returns an empty array when user has no active registrations', async () => {
+    mockRegistrationFindMany.mockResolvedValue([])
+
+    const result = await getUserRegistrations('user-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getUserRegistrations('user-1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getUserPastRegistrations
+// ---------------------------------------------------------------------------
+
+describe('getUserPastRegistrations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns past registrations for a user', async () => {
+    mockRegistrationFindMany.mockResolvedValue([MOCK_USER_PAST_REGISTRATION])
+
+    const result = await getUserPastRegistrations('user-1')
+
+    expect(result).toEqual([MOCK_USER_PAST_REGISTRATION])
+    expect(mockRegistrationFindMany).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        tournament: { status: 'ARCHIVED' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: USER_REGISTRATION_SELECT,
+    })
+  })
+
+  it('returns an empty array when user has no past registrations', async () => {
+    mockRegistrationFindMany.mockResolvedValue([])
+
+    const result = await getUserPastRegistrations('user-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getUserPastRegistrations('user-1')
+
+    expect(result).toEqual([])
   })
 })

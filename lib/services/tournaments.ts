@@ -17,6 +17,7 @@ import type {
   TournamentDetail,
   TournamentListItem,
   TournamentRegistrationItem,
+  UserRegistrationItem,
 } from '@/lib/types/tournament'
 
 /** Fetches all tournaments for the admin list table. */
@@ -307,5 +308,74 @@ export const getPublicTournamentBySlug = async (
   } catch (error) {
     logger.error({ error }, 'Error fetching public tournament by slug')
     return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// User registration services (profile page)
+// ---------------------------------------------------------------------------
+
+/** Shared select for user registration items. */
+const USER_REGISTRATION_SELECT = {
+  id: true,
+  status: true,
+  createdAt: true,
+  tournament: {
+    select: {
+      title: true,
+      slug: true,
+      game: true,
+      format: true,
+      startDate: true,
+      status: true,
+    },
+  },
+} as const
+
+/** Fetches a user's registrations for PUBLISHED tournaments (active inscriptions). */
+export const getUserRegistrations = async (
+  userId: string,
+): Promise<UserRegistrationItem[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.tournamentRegistration.findMany({
+      where: {
+        userId,
+        tournament: { status: 'PUBLISHED' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: USER_REGISTRATION_SELECT,
+    })
+    return rows as unknown as UserRegistrationItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching user registrations')
+    return []
+  }
+}
+
+/** Fetches a user's registrations for ARCHIVED tournaments (history). */
+export const getUserPastRegistrations = async (
+  userId: string,
+): Promise<UserRegistrationItem[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.tournamentRegistration.findMany({
+      where: {
+        userId,
+        tournament: { status: 'ARCHIVED' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: USER_REGISTRATION_SELECT,
+    })
+    return rows as unknown as UserRegistrationItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching user past registrations')
+    return []
   }
 }
