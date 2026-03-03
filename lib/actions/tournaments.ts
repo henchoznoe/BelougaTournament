@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/tournaments.ts
- * Description: Server actions for tournament CRUD and registration management (ADMIN + SUPERADMIN).
+ * Description: Server actions for tournament CRUD, registration management, and user registration.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -14,6 +14,7 @@ import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import {
   deleteTournamentSchema,
+  registerForTournamentSchema,
   tournamentSchema,
   updateRegistrationStatusSchema,
   updateTournamentSchema,
@@ -242,5 +243,108 @@ export const updateRegistrationStatus = authenticatedAction({
       success: true,
       message: "Le statut de l'inscription a été mis à jour.",
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Public registration
+// ---------------------------------------------------------------------------
+
+// biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+type TournamentWithFields = any
+
+/** Registers the current user for a tournament (solo format). */
+export const registerForTournament = authenticatedAction({
+  schema: registerForTournamentSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    // 1. Fetch tournament with fields
+    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
+      {
+        where: { id: data.tournamentId },
+        include: { fields: { orderBy: { order: 'asc' } } },
+      },
+    )
+
+    if (!tournament || tournament.status !== 'PUBLISHED') {
+      return {
+        success: false,
+        message: 'Ce tournoi est introuvable ou indisponible.',
+      }
+    }
+
+    // 2. Check registration window
+    const now = new Date()
+    if (
+      now < tournament.registrationOpen ||
+      now > tournament.registrationClose
+    ) {
+      return {
+        success: false,
+        message: 'Les inscriptions ne sont pas ouvertes.',
+      }
+    }
+
+    // 3. Check maxTeams limit (registrations count as "slots" for solo)
+    if (tournament.maxTeams !== null) {
+      const count = await prisma.tournamentRegistration.count({
+        where: {
+          tournamentId: data.tournamentId,
+          status: { in: ['PENDING', 'APPROVED'] },
+        },
+      })
+      if (count >= tournament.maxTeams) {
+        return { success: false, message: 'Le tournoi est complet.' }
+      }
+    }
+
+    // 4. Check user hasn't already registered
+    const existing = await prisma.tournamentRegistration.findUnique({
+      where: {
+        tournamentId_userId: {
+          tournamentId: data.tournamentId,
+          userId: session.user.id as string,
+        },
+      },
+    })
+    if (existing) {
+      return {
+        success: false,
+        message: 'Vous êtes déjà inscrit à ce tournoi.',
+      }
+    }
+
+    // 5. Validate dynamic field values
+    for (const field of tournament.fields) {
+      const value = data.fieldValues[field.label]
+      if (field.required && (value === undefined || value === '')) {
+        return {
+          success: false,
+          message: `Le champ « ${field.label} » est requis.`,
+        }
+      }
+      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+          return {
+            success: false,
+            message: `Le champ « ${field.label} » doit être un nombre.`,
+          }
+        }
+      }
+    }
+
+    // 6. Create the registration
+    await prisma.tournamentRegistration.create({
+      data: {
+        tournamentId: data.tournamentId,
+        userId: session.user.id as string,
+        fieldValues: data.fieldValues,
+        status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+      },
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+
+    return { success: true, message: 'Votre inscription a été enregistrée.' }
   },
 })

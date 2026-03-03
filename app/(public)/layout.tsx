@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { Suspense } from 'react'
 import { PublicFooter } from '@/components/features/layout/public-footer'
 import { PublicNavbar } from '@/components/features/layout/public-navbar'
 
@@ -16,9 +17,13 @@ interface LayoutProps {
 const PublicLayout = (props: Readonly<LayoutProps>) => {
   return (
     <div className="min-h-dvh">
-      <PublicNavbar />
+      <Suspense>
+        <PublicNavbar />
+      </Suspense>
       <main>{props.children}</main>
-      <PublicFooter />
+      <Suspense>
+        <PublicFooter />
+      </Suspense>
     </div>
   )
 }

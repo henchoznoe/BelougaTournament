@@ -1,6 +1,6 @@
 /**
  * File: lib/types/tournament.ts
- * Description: Types for tournament management (admin list, detail, fields, registrations, teams).
+ * Description: Types for tournament management (admin, public, fields, registrations, teams).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -120,4 +120,58 @@ export type TeamItem = {
     id: string
     status: RegistrationStatus
   } | null
+}
+
+// ---------------------------------------------------------------------------
+// Public types
+// ---------------------------------------------------------------------------
+
+/** Tournament card for the public list pages (published & archived). */
+export type PublicTournamentListItem = {
+  id: string
+  title: string
+  slug: string
+  description: string
+  game: string | null
+  imageUrl: string | null
+  format: TournamentFormat
+  teamSize: number
+  maxTeams: number | null
+  status: TournamentStatus
+  startDate: Date
+  endDate: Date
+  registrationOpen: Date
+  registrationClose: Date
+  _count: {
+    registrations: number
+    teams: number
+  }
+}
+
+/** Full tournament detail for the public detail page. */
+export type PublicTournamentDetail = {
+  id: string
+  title: string
+  slug: string
+  description: string
+  game: string | null
+  imageUrl: string | null
+  format: TournamentFormat
+  teamSize: number
+  maxTeams: number | null
+  status: TournamentStatus
+  startDate: Date
+  endDate: Date
+  registrationOpen: Date
+  registrationClose: Date
+  rules: string | null
+  prize: string | null
+  toornamentId: string | null
+  streamUrl: string | null
+  autoApprove: boolean
+  fields: TournamentFieldItem[]
+  _count: {
+    registrations: number
+    teams: number
+  }
 }

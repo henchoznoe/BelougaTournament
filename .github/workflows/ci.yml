@@ -46,3 +46,6 @@ jobs:
         run: pnpm test
         env:
           NODE_ENV: test
+
+      - name: Run build
+        run: pnpm build

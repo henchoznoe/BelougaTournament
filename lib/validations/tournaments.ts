@@ -1,6 +1,6 @@
 /**
  * File: lib/validations/tournaments.ts
- * Description: Validation schemas for tournament CRUD and registration operations.
+ * Description: Validation schemas for tournament CRUD, registration management, and user registration.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -255,4 +255,18 @@ export const updateRegistrationStatusSchema = z.object({
 
 export type UpdateRegistrationStatusInput = z.infer<
   typeof updateRegistrationStatusSchema
+>
+
+// ---------------------------------------------------------------------------
+// Public registration
+// ---------------------------------------------------------------------------
+
+/** Schema for a user registering for a tournament (solo). */
+export const registerForTournamentSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type RegisterForTournamentInput = z.infer<
+  typeof registerForTournamentSchema
 >

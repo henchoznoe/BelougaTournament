@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/tournaments.test.ts
- * Description: Unit tests for tournament CRUD and registration server actions (ADMIN + SUPERADMIN).
+ * Description: Unit tests for tournament CRUD, registration management, and user registration server actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -40,9 +40,13 @@ vi.mock('next/cache', () => ({
 const mockTournamentCreate = vi.fn()
 const mockTournamentUpdate = vi.fn()
 const mockTournamentDelete = vi.fn()
+const mockTournamentFindUnique = vi.fn()
 const mockFieldDeleteMany = vi.fn()
 const mockAssignmentFindUnique = vi.fn()
 const mockRegistrationUpdate = vi.fn()
+const mockRegistrationCreate = vi.fn()
+const mockRegistrationFindUnique = vi.fn()
+const mockRegistrationCount = vi.fn()
 const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -50,6 +54,7 @@ vi.mock('@/lib/core/prisma', () => ({
       create: (...args: unknown[]) => mockTournamentCreate(...args),
       update: (...args: unknown[]) => mockTournamentUpdate(...args),
       delete: (...args: unknown[]) => mockTournamentDelete(...args),
+      findUnique: (...args: unknown[]) => mockTournamentFindUnique(...args),
     },
     tournamentField: {
       deleteMany: (...args: unknown[]) => mockFieldDeleteMany(...args),
@@ -59,6 +64,9 @@ vi.mock('@/lib/core/prisma', () => ({
     },
     tournamentRegistration: {
       update: (...args: unknown[]) => mockRegistrationUpdate(...args),
+      create: (...args: unknown[]) => mockRegistrationCreate(...args),
+      findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
+      count: (...args: unknown[]) => mockRegistrationCount(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -74,6 +82,7 @@ const {
   deleteTournament,
   updateTournamentStatus,
   updateRegistrationStatus,
+  registerForTournament,
 } = await import('@/lib/actions/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -897,5 +906,275 @@ describe('updateRegistrationStatus', () => {
     })
 
     expect(result).toEqual({ success: false, message: 'Record not found.' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// registerForTournament
+// ---------------------------------------------------------------------------
+
+const MOCK_TOURNAMENT = {
+  id: VALID_UUID,
+  title: 'Valorant Cup',
+  status: 'PUBLISHED',
+  registrationOpen: new Date('2025-01-01T00:00:00.000Z'),
+  registrationClose: new Date('2027-12-31T23:59:00.000Z'),
+  maxTeams: 16,
+  autoApprove: false,
+  fields: [
+    { id: 'f1', label: 'Riot ID', type: 'TEXT', required: true, order: 0 },
+    { id: 'f2', label: 'MMR', type: 'NUMBER', required: false, order: 1 },
+  ],
+}
+
+const VALID_REGISTRATION_INPUT = {
+  tournamentId: VALID_UUID,
+  fieldValues: { 'Riot ID': 'Player#1234' },
+}
+
+describe('registerForTournament', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockTournamentFindUnique.mockResolvedValue(MOCK_TOURNAMENT)
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationCount.mockResolvedValue(0)
+    mockRegistrationCreate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await registerForTournament(VALID_REGISTRATION_INPUT)).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('allows USER role to register', async () => {
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été enregistrée.',
+    })
+  })
+
+  it('returns error when tournament is not found', async () => {
+    mockTournamentFindUnique.mockResolvedValue(null)
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est introuvable ou indisponible.',
+    })
+  })
+
+  it('returns error when tournament is not PUBLISHED', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      status: 'DRAFT',
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est introuvable ou indisponible.',
+    })
+  })
+
+  it('returns error when registration is not yet open', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      registrationOpen: new Date('2099-01-01T00:00:00.000Z'),
+      registrationClose: new Date('2099-12-31T23:59:00.000Z'),
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Les inscriptions ne sont pas ouvertes.',
+    })
+  })
+
+  it('returns error when registration is closed', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      registrationOpen: new Date('2020-01-01T00:00:00.000Z'),
+      registrationClose: new Date('2020-12-31T23:59:00.000Z'),
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Les inscriptions ne sont pas ouvertes.',
+    })
+  })
+
+  it('returns error when tournament is full', async () => {
+    mockRegistrationCount.mockResolvedValue(16)
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le tournoi est complet.',
+    })
+  })
+
+  it('skips maxTeams check when maxTeams is null', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      maxTeams: null,
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result.success).toBe(true)
+    expect(mockRegistrationCount).not.toHaveBeenCalled()
+  })
+
+  it('returns error when user is already registered', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({ id: 'existing-reg' })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Vous êtes déjà inscrit à ce tournoi.',
+    })
+  })
+
+  it('returns error when a required field is missing', async () => {
+    const result = await registerForTournament({
+      tournamentId: VALID_UUID,
+      fieldValues: {},
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('returns error when a required field is empty string', async () => {
+    const result = await registerForTournament({
+      tournamentId: VALID_UUID,
+      fieldValues: { 'Riot ID': '' },
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('returns error when a NUMBER field has a non-number value', async () => {
+    const result = await registerForTournament({
+      tournamentId: VALID_UUID,
+      fieldValues: { 'Riot ID': 'Player#1234', MMR: 'not-a-number' },
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « MMR » doit être un nombre.',
+    })
+  })
+
+  it('creates registration with PENDING status when autoApprove is false', async () => {
+    await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(mockRegistrationCreate).toHaveBeenCalledWith({
+      data: {
+        tournamentId: VALID_UUID,
+        userId: 'user-1',
+        fieldValues: { 'Riot ID': 'Player#1234' },
+        status: 'PENDING',
+      },
+    })
+  })
+
+  it('creates registration with APPROVED status when autoApprove is true', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      autoApprove: true,
+    })
+
+    await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(mockRegistrationCreate).toHaveBeenCalledWith({
+      data: {
+        tournamentId: VALID_UUID,
+        userId: 'user-1',
+        fieldValues: { 'Riot ID': 'Player#1234' },
+        status: 'APPROVED',
+      },
+    })
+  })
+
+  it('calls revalidateTag for tournaments and dashboard-registrations', async () => {
+    await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+  })
+
+  it('returns validation error for invalid tournamentId UUID', async () => {
+    const result = await registerForTournament({
+      tournamentId: 'bad-id',
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns Internal server error when prisma create throws', async () => {
+    mockRegistrationCreate.mockRejectedValue(new Error('DB error'))
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+
+  it('returns a Prisma error message for P2002 (unique constraint — already registered)', async () => {
+    const { Prisma } = await import('@/prisma/generated/prisma/client')
+    mockRegistrationCreate.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('unique constraint', {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+      }),
+    )
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'This value already exists.',
+    })
+  })
+
+  it('accepts optional NUMBER field with a valid number', async () => {
+    const result = await registerForTournament({
+      tournamentId: VALID_UUID,
+      fieldValues: { 'Riot ID': 'Player#1234', MMR: 2500 },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('allows ADMIN role to register', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result.success).toBe(true)
   })
 })

@@ -1,6 +1,6 @@
 /**
  * File: tests/services/tournaments.test.ts
- * Description: Unit tests for the tournaments service.
+ * Description: Unit tests for the tournaments service (admin + public).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -20,6 +20,7 @@ vi.mock('@/lib/core/logger', () => ({
 
 const mockFindMany = vi.fn()
 const mockFindUnique = vi.fn()
+const mockFindFirst = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockTeamFindMany = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
@@ -27,6 +28,7 @@ vi.mock('@/lib/core/prisma', () => ({
     tournament: {
       findMany: (...args: unknown[]) => mockFindMany(...args),
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
+      findFirst: (...args: unknown[]) => mockFindFirst(...args),
     },
     tournamentRegistration: {
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
@@ -47,6 +49,9 @@ const {
   getTournamentById,
   getRegistrations,
   getTeams,
+  getPublishedTournaments,
+  getArchivedTournaments,
+  getPublicTournamentBySlug,
 } = await import('@/lib/services/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -423,5 +428,217 @@ describe('getTeams', () => {
     const result = await getTeams('tournament-1')
 
     expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixtures — public tournaments
+// ---------------------------------------------------------------------------
+
+const MOCK_PUBLIC_LIST_ITEM = {
+  id: 'uuid-1',
+  title: 'Valorant Cup',
+  slug: 'valorant-cup',
+  description: 'Tournoi Valorant 5v5.',
+  game: 'Valorant',
+  imageUrl: null,
+  format: 'TEAM',
+  teamSize: 5,
+  maxTeams: 16,
+  status: 'PUBLISHED',
+  startDate: new Date('2026-06-15T10:00:00.000Z'),
+  endDate: new Date('2026-06-17T18:00:00.000Z'),
+  registrationOpen: new Date('2026-05-01T00:00:00.000Z'),
+  registrationClose: new Date('2026-06-14T23:59:00.000Z'),
+  _count: { registrations: 12, teams: 4 },
+}
+
+const MOCK_PUBLIC_DETAIL = {
+  ...MOCK_PUBLIC_LIST_ITEM,
+  rules: 'Double élimination.',
+  prize: '500 CHF',
+  toornamentId: null,
+  streamUrl: null,
+  autoApprove: false,
+  fields: [
+    {
+      id: 'field-1',
+      label: 'Riot ID',
+      type: 'TEXT',
+      required: true,
+      order: 0,
+    },
+  ],
+}
+
+// ---------------------------------------------------------------------------
+// getPublishedTournaments
+// ---------------------------------------------------------------------------
+
+describe('getPublishedTournaments', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns published tournaments ordered by startDate ascending', async () => {
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getPublishedTournaments()
+
+    expect(result).toEqual([MOCK_PUBLIC_LIST_ITEM])
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { status: 'PUBLISHED' },
+      orderBy: { startDate: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        game: true,
+        imageUrl: true,
+        format: true,
+        teamSize: true,
+        maxTeams: true,
+        status: true,
+        startDate: true,
+        endDate: true,
+        registrationOpen: true,
+        registrationClose: true,
+        _count: {
+          select: {
+            registrations: true,
+            teams: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns an empty array when no published tournaments exist', async () => {
+    mockFindMany.mockResolvedValue([])
+
+    const result = await getPublishedTournaments()
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getPublishedTournaments()
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getArchivedTournaments
+// ---------------------------------------------------------------------------
+
+describe('getArchivedTournaments', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns archived tournaments ordered by startDate descending', async () => {
+    const archivedItem = { ...MOCK_PUBLIC_LIST_ITEM, status: 'ARCHIVED' }
+    mockFindMany.mockResolvedValue([archivedItem])
+
+    const result = await getArchivedTournaments()
+
+    expect(result).toEqual([archivedItem])
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { status: 'ARCHIVED' },
+      orderBy: { startDate: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        game: true,
+        imageUrl: true,
+        format: true,
+        teamSize: true,
+        maxTeams: true,
+        status: true,
+        startDate: true,
+        endDate: true,
+        registrationOpen: true,
+        registrationClose: true,
+        _count: {
+          select: {
+            registrations: true,
+            teams: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns an empty array when no archived tournaments exist', async () => {
+    mockFindMany.mockResolvedValue([])
+
+    const result = await getArchivedTournaments()
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getArchivedTournaments()
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getPublicTournamentBySlug
+// ---------------------------------------------------------------------------
+
+describe('getPublicTournamentBySlug', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns tournament detail for a published slug', async () => {
+    mockFindFirst.mockResolvedValue(MOCK_PUBLIC_DETAIL)
+
+    const result = await getPublicTournamentBySlug('valorant-cup')
+
+    expect(result).toEqual(MOCK_PUBLIC_DETAIL)
+    expect(mockFindFirst).toHaveBeenCalledWith({
+      where: {
+        slug: 'valorant-cup',
+        status: { in: ['PUBLISHED', 'ARCHIVED'] },
+      },
+      include: {
+        fields: {
+          orderBy: { order: 'asc' },
+        },
+        _count: {
+          select: {
+            registrations: true,
+            teams: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns null when tournament is not found', async () => {
+    mockFindFirst.mockResolvedValue(null)
+
+    const result = await getPublicTournamentBySlug('nonexistent')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null on database error', async () => {
+    mockFindFirst.mockRejectedValue(new Error('DB error'))
+
+    const result = await getPublicTournamentBySlug('valorant-cup')
+
+    expect(result).toBeNull()
   })
 })

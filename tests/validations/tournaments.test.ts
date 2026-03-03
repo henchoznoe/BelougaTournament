@@ -9,6 +9,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   deleteTournamentSchema,
+  registerForTournamentSchema,
   tournamentFieldSchema,
   tournamentSchema,
   updateRegistrationStatusSchema,
@@ -553,5 +554,71 @@ describe('updateRegistrationStatusSchema', () => {
         tournamentId: VALID_UUID,
       }).success,
     ).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// registerForTournamentSchema
+// ---------------------------------------------------------------------------
+
+describe('registerForTournamentSchema', () => {
+  const VALID_REGISTRATION = {
+    tournamentId: VALID_UUID,
+    fieldValues: { 'Riot ID': 'Player#1234', Rank: 'Diamond' },
+  }
+
+  it('accepts a valid registration with string field values', () => {
+    expect(
+      registerForTournamentSchema.safeParse(VALID_REGISTRATION).success,
+    ).toBe(true)
+  })
+
+  it('accepts a registration with numeric field values', () => {
+    const result = registerForTournamentSchema.safeParse({
+      tournamentId: VALID_UUID,
+      fieldValues: { 'Riot ID': 'Player#1234', MMR: 2500 },
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a registration with empty fieldValues', () => {
+    const result = registerForTournamentSchema.safeParse({
+      tournamentId: VALID_UUID,
+      fieldValues: {},
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects an invalid tournamentId UUID', () => {
+    expect(
+      registerForTournamentSchema.safeParse({
+        ...VALID_REGISTRATION,
+        tournamentId: INVALID_UUID,
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects missing tournamentId', () => {
+    expect(
+      registerForTournamentSchema.safeParse({
+        fieldValues: { 'Riot ID': 'Player#1234' },
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects missing fieldValues', () => {
+    expect(
+      registerForTournamentSchema.safeParse({
+        tournamentId: VALID_UUID,
+      }).success,
+    ).toBe(false)
+  })
+
+  it('accepts mixed string and number values in fieldValues', () => {
+    const result = registerForTournamentSchema.safeParse({
+      tournamentId: VALID_UUID,
+      fieldValues: { Name: 'John', Age: 25, Score: 100 },
+    })
+    expect(result.success).toBe(true)
   })
 })

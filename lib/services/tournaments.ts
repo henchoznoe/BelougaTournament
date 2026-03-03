@@ -1,6 +1,6 @@
 /**
  * File: lib/services/tournaments.ts
- * Description: Services for fetching tournaments, registrations, and teams (admin).
+ * Description: Services for fetching tournaments, registrations, and teams (admin + public).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -11,6 +11,8 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
+  PublicTournamentDetail,
+  PublicTournamentListItem,
   TeamItem,
   TournamentDetail,
   TournamentListItem,
@@ -205,5 +207,105 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   } catch (error) {
     logger.error({ error }, 'Error fetching teams')
     return []
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public services
+// ---------------------------------------------------------------------------
+
+/** Shared select for public tournament list items. */
+const PUBLIC_LIST_SELECT = {
+  id: true,
+  title: true,
+  slug: true,
+  description: true,
+  game: true,
+  imageUrl: true,
+  format: true,
+  teamSize: true,
+  maxTeams: true,
+  status: true,
+  startDate: true,
+  endDate: true,
+  registrationOpen: true,
+  registrationClose: true,
+  _count: {
+    select: {
+      registrations: true,
+      teams: true,
+    },
+  },
+} as const
+
+/** Fetches all PUBLISHED tournaments for the public list page. */
+export const getPublishedTournaments = async (): Promise<
+  PublicTournamentListItem[]
+> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.tournament.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { startDate: 'asc' },
+      select: PUBLIC_LIST_SELECT,
+    })
+    return rows as unknown as PublicTournamentListItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching published tournaments')
+    return []
+  }
+}
+
+/** Fetches all ARCHIVED tournaments for the public archive page. */
+export const getArchivedTournaments = async (): Promise<
+  PublicTournamentListItem[]
+> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.tournament.findMany({
+      where: { status: 'ARCHIVED' },
+      orderBy: { startDate: 'desc' },
+      select: PUBLIC_LIST_SELECT,
+    })
+    return rows as unknown as PublicTournamentListItem[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching archived tournaments')
+    return []
+  }
+}
+
+/** Fetches a single PUBLISHED tournament by slug (public detail page). */
+export const getPublicTournamentBySlug = async (
+  slug: string,
+): Promise<PublicTournamentDetail | null> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const row = await prisma.tournament.findFirst({
+      where: { slug, status: { in: ['PUBLISHED', 'ARCHIVED'] } },
+      include: {
+        fields: {
+          orderBy: { order: 'asc' },
+        },
+        _count: {
+          select: {
+            registrations: true,
+            teams: true,
+          },
+        },
+      },
+    })
+    return row as unknown as PublicTournamentDetail | null
+  } catch (error) {
+    logger.error({ error }, 'Error fetching public tournament by slug')
+    return null
   }
 }
