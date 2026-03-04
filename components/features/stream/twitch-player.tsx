@@ -115,7 +115,7 @@ export const TwitchPlayer = ({
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-sm">
           <Wifi className="size-10 animate-pulse text-zinc-600 mb-4" />
           <p className="font-mono text-sm uppercase tracking-widest text-zinc-500">
-            Connexion au flux...
+            Connexion au stream...
           </p>
         </div>
       )}
@@ -127,7 +127,7 @@ export const TwitchPlayer = ({
             <VideoOff className="size-8 text-zinc-500 sm:size-12" />
           </div>
           <h3 className="font-paladins text-base tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] mb-2 sm:text-xl">
-            {channel ? 'Le flux est interrompu' : 'Aucune chaîne configurée'}
+            {channel ? 'Le stream est interrompu' : 'Aucune chaîne configurée'}
           </h3>
           <p className="max-w-md text-xs text-zinc-400 mb-4 sm:text-sm sm:mb-8">
             {channel

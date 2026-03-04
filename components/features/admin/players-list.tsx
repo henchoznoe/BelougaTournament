@@ -8,10 +8,11 @@
 
 'use client'
 
-import { Ban, ClipboardList, Search, ShieldOff } from 'lucide-react'
+import { Ban, ClipboardList, Pencil, Search, ShieldOff } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import { PlayerBanDialog } from '@/components/features/admin/player-ban-dialog'
+import { PlayerEditDialog } from '@/components/features/admin/player-edit-dialog'
 import { PlayerUnbanDialog } from '@/components/features/admin/player-unban-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
   const [unbanningPlayer, setUnbanningPlayer] = useState<
     PlayerRow | undefined
   >()
+  const [editingPlayer, setEditingPlayer] = useState<PlayerRow | undefined>()
 
   const filtered = useMemo(() => {
     if (!search) return players
@@ -213,27 +215,38 @@ export const PlayersList = ({ players }: PlayersListProps) => {
 
                     {/* Actions */}
                     <TableCell className="text-right">
-                      {banned ? (
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => setUnbanningPlayer(player)}
-                          className="text-zinc-400 hover:text-emerald-400"
-                          title="Débannir"
+                          onClick={() => setEditingPlayer(player)}
+                          className="text-zinc-400 hover:text-white"
+                          title="Modifier"
                         >
-                          <ShieldOff className="size-4" />
+                          <Pencil className="size-4" />
                         </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => setBanningPlayer(player)}
-                          className="text-zinc-400 hover:text-red-400"
-                          title="Bannir"
-                        >
-                          <Ban className="size-4" />
-                        </Button>
-                      )}
+                        {banned ? (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setUnbanningPlayer(player)}
+                            className="text-zinc-400 hover:text-emerald-400"
+                            title="Débannir"
+                          >
+                            <ShieldOff className="size-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setBanningPlayer(player)}
+                            className="text-zinc-400 hover:text-red-400"
+                            title="Bannir"
+                          >
+                            <Ban className="size-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
@@ -262,6 +275,17 @@ export const PlayersList = ({ players }: PlayersListProps) => {
             if (!open) setUnbanningPlayer(undefined)
           }}
           player={unbanningPlayer}
+        />
+      )}
+
+      {/* Edit dialog */}
+      {editingPlayer && (
+        <PlayerEditDialog
+          open={!!editingPlayer}
+          onOpenChange={open => {
+            if (!open) setEditingPlayer(undefined)
+          }}
+          player={editingPlayer}
         />
       )}
     </>

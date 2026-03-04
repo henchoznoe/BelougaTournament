@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/players.test.ts
- * Description: Unit tests for player ban/unban server actions.
+ * Description: Unit tests for player ban/unban/update server actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -52,7 +52,9 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { banPlayer, unbanPlayer } = await import('@/lib/actions/players')
+const { banPlayer, unbanPlayer, updatePlayer } = await import(
+  '@/lib/actions/players'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -239,6 +241,112 @@ describe('unbanPlayer', () => {
 
   it('returns validation error for invalid UUID', async () => {
     const result = await unbanPlayer({ userId: 'not-valid' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updatePlayer
+// ---------------------------------------------------------------------------
+
+describe('updatePlayer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockUserUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(
+      await updatePlayer({ userId: VALID_UUID, displayName: 'PlayerXYZ' }),
+    ).toEqual({ success: false, message: 'Unauthorized' })
+  })
+
+  it('returns Unauthorized when caller is a plain USER', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'u-1', role: Role.USER },
+      session: {},
+    })
+
+    expect(
+      await updatePlayer({ userId: VALID_UUID, displayName: 'PlayerXYZ' }),
+    ).toEqual({ success: false, message: 'Unauthorized' })
+  })
+
+  it('returns error when target user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(
+      await updatePlayer({ userId: VALID_UUID, displayName: 'PlayerXYZ' }),
+    ).toEqual({ success: false, message: 'Utilisateur introuvable.' })
+  })
+
+  it('returns error when trying to update an admin', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.ADMIN,
+      name: 'AdminUser',
+    })
+
+    expect(
+      await updatePlayer({ userId: VALID_UUID, displayName: 'PlayerXYZ' }),
+    ).toEqual({
+      success: false,
+      message: 'Impossible de modifier un administrateur.',
+    })
+  })
+
+  it('updates displayName and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
+
+    const result = await updatePlayer({
+      userId: VALID_UUID,
+      displayName: 'AliceXYZ',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le pseudo de Alice a été mis à jour.',
+    })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { displayName: 'AliceXYZ' },
+    })
+  })
+
+  it('allows SUPERADMIN to update a player', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'sa-1', role: Role.SUPERADMIN },
+      session: {},
+    })
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Bob' })
+
+    const result = await updatePlayer({
+      userId: VALID_UUID,
+      displayName: 'BobXYZ',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le pseudo de Bob a été mis à jour.',
+    })
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await updatePlayer({
+      userId: 'bad-id',
+      displayName: 'PlayerXYZ',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error when displayName is too short', async () => {
+    const result = await updatePlayer({ userId: VALID_UUID, displayName: 'A' })
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Validation error')

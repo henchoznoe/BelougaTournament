@@ -11,7 +11,7 @@
 import { Crown, Pencil, Plus, ShieldCheck, Trash2, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
-import { AdminAssignmentDialog } from '@/components/features/admin/admin-assignment-dialog'
+import { AdminEditDialog } from '@/components/features/admin/admin-assignment-dialog'
 import { AdminDemoteDialog } from '@/components/features/admin/admin-demote-dialog'
 import { AdminPromoteDialog } from '@/components/features/admin/admin-promote-dialog'
 import { Button } from '@/components/ui/button'
@@ -38,7 +38,7 @@ interface AdminsListProps {
 
 export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
   const [promoteOpen, setPromoteOpen] = useState(false)
-  const [assigningAdmin, setAssigningAdmin] = useState<AdminUser | undefined>()
+  const [editingAdmin, setEditingAdmin] = useState<AdminUser | undefined>()
   const [demotingAdmin, setDemotingAdmin] = useState<AdminUser | undefined>()
 
   return (
@@ -170,7 +170,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => setAssigningAdmin(admin)}
+                            onClick={() => setEditingAdmin(admin)}
                             className="text-zinc-400 hover:text-white"
                             title="Gérer les tournois"
                           >
@@ -202,14 +202,14 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
       {/* Promote dialog */}
       <AdminPromoteDialog open={promoteOpen} onOpenChange={setPromoteOpen} />
 
-      {/* Assignment dialog */}
-      {assigningAdmin && (
-        <AdminAssignmentDialog
-          open={!!assigningAdmin}
+      {/* Edit dialog */}
+      {editingAdmin && (
+        <AdminEditDialog
+          open={!!editingAdmin}
           onOpenChange={open => {
-            if (!open) setAssigningAdmin(undefined)
+            if (!open) setEditingAdmin(undefined)
           }}
-          admin={assigningAdmin}
+          admin={editingAdmin}
           tournaments={tournaments}
         />
       )}
