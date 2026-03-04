@@ -233,7 +233,7 @@ export const TournamentRegistrationsList = ({
                           {STATUS_LABELS[registration.status]}
                         </span>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" sideOffset={4}>
                         <SelectItem value="PENDING">En attente</SelectItem>
                         <SelectItem value="APPROVED">Approuvée</SelectItem>
                         <SelectItem value="REJECTED">Refusée</SelectItem>

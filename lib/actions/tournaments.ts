@@ -16,6 +16,7 @@ import {
   deleteTournamentSchema,
   registerForTournamentSchema,
   tournamentSchema,
+  updateRegistrationFieldsSchema,
   updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
@@ -238,6 +239,7 @@ export const updateRegistrationStatus = authenticatedAction({
 
     revalidateTag('tournaments', 'hours')
     revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
 
     return {
       success: true,
@@ -252,6 +254,92 @@ export const updateRegistrationStatus = authenticatedAction({
 
 // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
 type TournamentWithFields = any
+
+/** Updates a user's own registration field values. Resets status to PENDING if it was APPROVED. */
+export const updateRegistrationFields = authenticatedAction({
+  schema: updateRegistrationFieldsSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    // 1. Fetch existing registration and verify ownership
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const registration: any = await prisma.tournamentRegistration.findUnique({
+      where: { id: data.registrationId },
+      include: {
+        tournament: {
+          include: { fields: { orderBy: { order: 'asc' } } },
+        },
+      },
+    })
+
+    if (!registration) {
+      return { success: false, message: 'Inscription introuvable.' }
+    }
+
+    if (registration.userId !== (session.user.id as string)) {
+      return {
+        success: false,
+        message: "Vous ne pouvez pas modifier l'inscription d'un autre joueur.",
+      }
+    }
+
+    if (registration.tournamentId !== data.tournamentId) {
+      return { success: false, message: 'ID de tournoi invalide.' }
+    }
+
+    // 2. Check tournament is still PUBLISHED
+    if (registration.tournament.status !== 'PUBLISHED') {
+      return {
+        success: false,
+        message: 'Ce tournoi est introuvable ou indisponible.',
+      }
+    }
+
+    // 3. Validate dynamic field values
+    const tournament: TournamentWithFields = registration.tournament
+    for (const field of tournament.fields) {
+      const value = data.fieldValues[field.label]
+      if (field.required && (value === undefined || value === '')) {
+        return {
+          success: false,
+          message: `Le champ « ${field.label} » est requis.`,
+        }
+      }
+      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+          return {
+            success: false,
+            message: `Le champ « ${field.label} » doit être un nombre.`,
+          }
+        }
+      }
+    }
+
+    // 4. Update field values; reset to PENDING if status was APPROVED
+    const newStatus =
+      registration.status === 'APPROVED' ? 'PENDING' : registration.status
+
+    await prisma.tournamentRegistration.update({
+      where: { id: data.registrationId },
+      data: {
+        fieldValues: data.fieldValues,
+        status: newStatus,
+      },
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
+
+    const statusMessage =
+      registration.status === 'APPROVED'
+        ? ' Votre inscription a été remise en attente de validation.'
+        : ''
+
+    return {
+      success: true,
+      message: `Votre inscription a été mise à jour.${statusMessage}`,
+    }
+  },
+})
 
 /** Registers the current user for a tournament (solo format). */
 export const registerForTournament = authenticatedAction({

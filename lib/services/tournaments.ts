@@ -319,15 +319,28 @@ export const getPublicTournamentBySlug = async (
 const USER_REGISTRATION_SELECT = {
   id: true,
   status: true,
+  fieldValues: true,
   createdAt: true,
   tournament: {
     select: {
+      id: true,
       title: true,
       slug: true,
       game: true,
       format: true,
       startDate: true,
       status: true,
+      autoApprove: true,
+      fields: {
+        orderBy: { order: 'asc' as const },
+        select: {
+          id: true,
+          label: true,
+          type: true,
+          required: true,
+          order: true,
+        },
+      },
     },
   },
 } as const

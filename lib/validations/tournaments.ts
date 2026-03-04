@@ -270,3 +270,14 @@ export const registerForTournamentSchema = z.object({
 export type RegisterForTournamentInput = z.infer<
   typeof registerForTournamentSchema
 >
+
+/** Schema for a user editing their existing registration field values. */
+export const updateRegistrationFieldsSchema = z.object({
+  registrationId: z.uuid("ID d'inscription invalide."),
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type UpdateRegistrationFieldsInput = z.infer<
+  typeof updateRegistrationFieldsSchema
+>

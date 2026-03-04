@@ -21,14 +21,18 @@ import type {
 export type UserRegistrationItem = {
   id: string
   status: RegistrationStatus
+  fieldValues: Record<string, string | number>
   createdAt: Date
   tournament: {
+    id: string
     title: string
     slug: string
     game: string | null
     format: TournamentFormat
     startDate: Date
     status: TournamentStatus
+    autoApprove: boolean
+    fields: TournamentFieldItem[]
   }
 }
 

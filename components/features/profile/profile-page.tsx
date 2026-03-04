@@ -22,6 +22,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/features/profile/profile-edit-form'
+import { ProfileRegistrations } from '@/components/features/profile/profile-registrations'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import {
@@ -240,14 +241,7 @@ export const ProfilePage = async () => {
           </div>
 
           {registrations.length > 0 ? (
-            <div className="space-y-2">
-              {registrations.map(registration => (
-                <RegistrationRow
-                  key={registration.id}
-                  registration={registration}
-                />
-              ))}
-            </div>
+            <ProfileRegistrations registrations={registrations} />
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <p className="max-w-sm text-sm text-zinc-500">
