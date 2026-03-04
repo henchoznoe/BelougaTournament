@@ -16,6 +16,9 @@ const optionalUrl = z
     message: 'URL invalide (doit commencer par https://)',
   })
 
+/** Optional trimmed text field with a max length. */
+const optionalText = (max: number) => z.string().trim().max(max)
+
 /** Matches the Prisma GlobalSettings model fields exactly. */
 export const settingsSchema = z.object({
   logoUrl: optionalUrl,
@@ -25,6 +28,12 @@ export const settingsSchema = z.object({
   instagramUrl: optionalUrl,
   tiktokUrl: optionalUrl,
   youtubeUrl: optionalUrl,
+  feature1Title: optionalText(50),
+  feature1Description: optionalText(200),
+  feature2Title: optionalText(50),
+  feature2Description: optionalText(200),
+  feature3Title: optionalText(50),
+  feature3Description: optionalText(200),
 })
 
 export type SettingsInput = z.infer<typeof settingsSchema>

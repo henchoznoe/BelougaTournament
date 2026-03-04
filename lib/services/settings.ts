@@ -20,6 +20,12 @@ const DEFAULT_SETTINGS: GlobalSettings = {
   tiktokUrl: null,
   youtubeUrl: null,
   discordUrl: null,
+  feature1Title: null,
+  feature1Description: null,
+  feature2Title: null,
+  feature2Description: null,
+  feature3Title: null,
+  feature3Description: null,
 }
 
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {

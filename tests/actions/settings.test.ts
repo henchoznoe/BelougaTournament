@@ -79,6 +79,12 @@ const VALID_SETTINGS = {
   instagramUrl: '',
   tiktokUrl: '',
   youtubeUrl: '',
+  feature1Title: 'Matchmaking Équitable',
+  feature1Description: 'Affrontez des joueurs de votre niveau.',
+  feature2Title: 'Format Compétitif',
+  feature2Description: 'Arbre de tournoi professionnel.',
+  feature3Title: 'Diffusion en Direct',
+  feature3Description: 'Les phases finales sont diffusées sur Twitch.',
 }
 
 // ---------------------------------------------------------------------------
@@ -157,5 +163,53 @@ describe('updateSettings', () => {
     const result = await updateSettings(VALID_SETTINGS)
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+
+  it('persists feature titles and descriptions in the upsert call', async () => {
+    await updateSettings(VALID_SETTINGS)
+
+    const upsertArg = mockGlobalSettingsUpsert.mock.calls[0][0]
+    expect(upsertArg.update.feature1Title).toBe('Matchmaking Équitable')
+    expect(upsertArg.update.feature2Title).toBe('Format Compétitif')
+    expect(upsertArg.update.feature3Title).toBe('Diffusion en Direct')
+    expect(upsertArg.update.feature1Description).toBe(
+      'Affrontez des joueurs de votre niveau.',
+    )
+    expect(upsertArg.update.feature2Description).toBe(
+      'Arbre de tournoi professionnel.',
+    )
+    expect(upsertArg.update.feature3Description).toBe(
+      'Les phases finales sont diffusées sur Twitch.',
+    )
+  })
+
+  it('converts empty feature fields to null in the upsert call', async () => {
+    await updateSettings({
+      ...VALID_SETTINGS,
+      feature1Title: '',
+      feature1Description: '',
+      feature2Title: '',
+      feature2Description: '',
+      feature3Title: '',
+      feature3Description: '',
+    })
+
+    const upsertArg = mockGlobalSettingsUpsert.mock.calls[0][0]
+    expect(upsertArg.update.feature1Title).toBeNull()
+    expect(upsertArg.update.feature1Description).toBeNull()
+    expect(upsertArg.update.feature2Title).toBeNull()
+    expect(upsertArg.update.feature2Description).toBeNull()
+    expect(upsertArg.update.feature3Title).toBeNull()
+    expect(upsertArg.update.feature3Description).toBeNull()
+  })
+
+  it('returns validation error for feature title exceeding 50 characters', async () => {
+    const result = await updateSettings({
+      ...VALID_SETTINGS,
+      feature1Title: 'A'.repeat(51),
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
   })
 })

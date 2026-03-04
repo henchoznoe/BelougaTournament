@@ -45,6 +45,12 @@ const MOCK_SETTINGS = {
   tiktokUrl: null,
   youtubeUrl: null,
   discordUrl: 'https://discord.gg/belouga',
+  feature1Title: 'Matchmaking Équitable',
+  feature1Description: 'Affrontez des joueurs de votre niveau.',
+  feature2Title: 'Format Compétitif',
+  feature2Description: 'Arbre de tournoi professionnel.',
+  feature3Title: 'Diffusion en Direct',
+  feature3Description: 'Les phases finales sont diffusées sur Twitch.',
 }
 
 const DEFAULT_SETTINGS = {
@@ -56,6 +62,12 @@ const DEFAULT_SETTINGS = {
   tiktokUrl: null,
   youtubeUrl: null,
   discordUrl: null,
+  feature1Title: null,
+  feature1Description: null,
+  feature2Title: null,
+  feature2Description: null,
+  feature3Title: null,
+  feature3Description: null,
 }
 
 // ---------------------------------------------------------------------------
@@ -90,5 +102,28 @@ describe('getGlobalSettings', () => {
     const result = await getGlobalSettings()
 
     expect(result).toEqual(DEFAULT_SETTINGS)
+  })
+
+  it('returns feature fields from the database when present', async () => {
+    mockFindUnique.mockResolvedValue(MOCK_SETTINGS)
+
+    const result = await getGlobalSettings()
+
+    expect(result.feature1Title).toBe('Matchmaking Équitable')
+    expect(result.feature2Title).toBe('Format Compétitif')
+    expect(result.feature3Title).toBe('Diffusion en Direct')
+  })
+
+  it('returns null feature fields in default settings', async () => {
+    mockFindUnique.mockResolvedValue(null)
+
+    const result = await getGlobalSettings()
+
+    expect(result.feature1Title).toBeNull()
+    expect(result.feature1Description).toBeNull()
+    expect(result.feature2Title).toBeNull()
+    expect(result.feature2Description).toBeNull()
+    expect(result.feature3Title).toBeNull()
+    expect(result.feature3Description).toBeNull()
   })
 })
