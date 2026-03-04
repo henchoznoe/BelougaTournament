@@ -1,6 +1,6 @@
 /**
  * File: components/features/tournaments/tournament-detail.tsx
- * Description: Client component displaying full tournament detail (info, rules, prizes, dates).
+ * Description: Client component displaying full tournament detail with tabs (details, stream, bracket).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -11,16 +11,18 @@
 import {
   Calendar,
   Clock,
-  ExternalLink,
   Gamepad2,
   ScrollText,
   Swords,
   Trophy,
+  Tv,
   Users,
   Video,
 } from 'lucide-react'
 import Link from 'next/link'
+import { TwitchPlayer } from '@/components/features/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/features/tournaments/tournament-registration-form'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
@@ -28,6 +30,7 @@ import { formatDate, formatDateTime } from '@/lib/utils/formatting'
 
 interface TournamentDetailProps {
   tournament: PublicTournamentDetail
+  twitchUsername?: string
 }
 
 /** Determines the registration status label and color. */
@@ -69,9 +72,33 @@ const isRegistrationOpen = (tournament: PublicTournamentDetail) => {
   return now >= open && now <= close
 }
 
-export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
+/** Extracts a Twitch channel name from a full URL, or returns the value as-is if not a URL. */
+const extractTwitchChannel = (streamUrl: string): string => {
+  try {
+    const url = new URL(streamUrl)
+    // Handle twitch.tv URLs like https://twitch.tv/channelname or https://www.twitch.tv/channelname
+    if (url.hostname.includes('twitch.tv')) {
+      const parts = url.pathname.split('/').filter(Boolean)
+      return parts[0] ?? streamUrl
+    }
+    return streamUrl
+  } catch {
+    // Not a valid URL, treat as channel name directly
+    return streamUrl
+  }
+}
+
+export const TournamentDetail = ({
+  tournament,
+  twitchUsername,
+}: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
+
+  // Determine the effective Twitch channel: tournament-specific stream > global setting
+  const twitchChannel = tournament.streamUrl
+    ? extractTwitchChannel(tournament.streamUrl)
+    : twitchUsername
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -86,12 +113,12 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
         Retour aux tournois
       </Link>
 
-      {/* Card 1: Main info */}
+      {/* Heading section: essential info */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
 
-        <div className="relative z-10 space-y-6">
-          {/* Title + status */}
+        <div className="relative z-10 space-y-5">
+          {/* Title + status badge */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <h2 className="font-paladins text-2xl tracking-wider text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">
               {tournament.title}
@@ -106,21 +133,11 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
             </span>
           </div>
 
-          {/* Description */}
-          {tournament.description && (
-            <p className="text-sm leading-relaxed text-zinc-400">
-              {tournament.description}
-            </p>
-          )}
-
           {/* Info grid */}
           <div className="grid gap-3 sm:grid-cols-2">
-            {/* Game */}
             {tournament.game && (
               <InfoRow icon={Gamepad2} label="Jeu" value={tournament.game} />
             )}
-
-            {/* Format */}
             <InfoRow
               icon={Swords}
               label="Format"
@@ -130,8 +147,6 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
                   : `Équipe de ${tournament.teamSize}`
               }
             />
-
-            {/* Spots */}
             <InfoRow
               icon={Users}
               label="Inscrits"
@@ -141,8 +156,6 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
                   : `${tournament._count.registrations}`
               }
             />
-
-            {/* Teams (only for TEAM format) */}
             {tournament.format === 'TEAM' && (
               <InfoRow
                 icon={Trophy}
@@ -150,116 +163,183 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
                 value={`${tournament._count.teams}`}
               />
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Card 2: Dates */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
-
-        <div className="relative z-10 space-y-4">
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-            <Calendar className="size-4 text-blue-400" />
-            Dates
-          </h3>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <DateRow
-              label="Début du tournoi"
+            <InfoRow
+              icon={Calendar}
+              label="Début"
               value={formatDateTime(tournament.startDate)}
             />
-            <DateRow
-              label="Fin du tournoi"
+            <InfoRow
+              icon={Calendar}
+              label="Fin"
               value={formatDateTime(tournament.endDate)}
-            />
-            <DateRow
-              label="Ouverture des inscriptions"
-              value={formatDateTime(tournament.registrationOpen)}
-            />
-            <DateRow
-              label="Fermeture des inscriptions"
-              value={formatDateTime(tournament.registrationClose)}
             />
           </div>
         </div>
       </div>
 
-      {/* Card 3: Rules (if present) */}
-      {tournament.rules && (
-        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
-
-          <div className="relative z-10 space-y-4">
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-              <ScrollText className="size-4 text-blue-400" />
-              Règlement
-            </h3>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
-              {tournament.rules}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Card 4: Prize (if present) */}
+      {/* Prize banner (conditional) */}
       {tournament.prize && (
-        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
 
-          <div className="relative z-10 space-y-4">
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-              <Trophy className="size-4 text-blue-400" />
+          <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+            <div className="inline-flex rounded-full bg-amber-500/10 p-3 ring-1 ring-amber-500/20">
+              <Trophy className="size-6 text-amber-400" />
+            </div>
+            <h3 className="font-paladins text-lg tracking-wider text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
               Récompenses
             </h3>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
+            <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-amber-200/80">
               {tournament.prize}
             </p>
           </div>
         </div>
       )}
 
-      {/* Card 5: External links (if present) */}
-      {(tournament.toornamentId || tournament.streamUrl) && (
-        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+      {/* Tabbed content block */}
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="w-full bg-white/5 border border-white/5 rounded-2xl p-1">
+          <TabsTrigger
+            value="details"
+            className="flex-1 gap-1.5 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
+          >
+            <ScrollText className="size-4" />
+            Détails
+          </TabsTrigger>
+          <TabsTrigger
+            value="stream"
+            className="flex-1 gap-1.5 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
+          >
+            <Tv className="size-4" />
+            Stream
+          </TabsTrigger>
+          <TabsTrigger
+            value="bracket"
+            className="flex-1 gap-1.5 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
+          >
+            <Swords className="size-4" />
+            Bracket
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="relative z-10 space-y-4">
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-              <ExternalLink className="size-4 text-blue-400" />
-              Liens
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {tournament.toornamentId && (
-                <a
-                  href={`https://www.toornament.com/tournaments/${tournament.toornamentId}/information`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-4 py-2 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
-                >
-                  <Swords className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
-                  Toornament
-                  <ExternalLink className="size-3 text-zinc-600" />
-                </a>
+        {/* Tab: Détails */}
+        <TabsContent value="details">
+          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+
+            <div className="relative z-10 space-y-6">
+              {/* Description */}
+              {tournament.description && (
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                    <ScrollText className="size-4 text-blue-400" />
+                    Description
+                  </h3>
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
+                    {tournament.description}
+                  </p>
+                </div>
               )}
-              {tournament.streamUrl && (
-                <a
-                  href={tournament.streamUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-4 py-2 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
-                >
-                  <Video className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
-                  Stream
-                  <ExternalLink className="size-3 text-zinc-600" />
-                </a>
+
+              {/* Rules */}
+              {tournament.rules && (
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                    <ScrollText className="size-4 text-blue-400" />
+                    Règlement
+                  </h3>
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
+                    {tournament.rules}
+                  </p>
+                </div>
+              )}
+
+              {/* Dates */}
+              <div className="space-y-3">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                  <Calendar className="size-4 text-blue-400" />
+                  Dates
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DateRow
+                    label="Début du tournoi"
+                    value={formatDateTime(tournament.startDate)}
+                  />
+                  <DateRow
+                    label="Fin du tournoi"
+                    value={formatDateTime(tournament.endDate)}
+                  />
+                  <DateRow
+                    label="Ouverture des inscriptions"
+                    value={formatDateTime(tournament.registrationOpen)}
+                  />
+                  <DateRow
+                    label="Fermeture des inscriptions"
+                    value={formatDateTime(tournament.registrationClose)}
+                  />
+                </div>
+              </div>
+
+              {/* Fallback when no description and no rules */}
+              {!tournament.description && !tournament.rules && (
+                <p className="py-4 text-center text-sm text-zinc-500">
+                  Aucun détail supplémentaire pour ce tournoi.
+                </p>
               )}
             </div>
           </div>
-        </div>
-      )}
+        </TabsContent>
 
-      {/* Card 6: Registration */}
+        {/* Tab: Stream */}
+        <TabsContent value="stream">
+          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+
+            <div className="relative z-10 space-y-4">
+              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                <Video className="size-4 text-blue-400" />
+                Stream en direct
+              </h3>
+              <TwitchPlayer channel={twitchChannel} />
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Bracket */}
+        <TabsContent value="bracket">
+          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+
+            <div className="relative z-10 space-y-4">
+              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                <Swords className="size-4 text-blue-400" />
+                Bracket Toornament
+              </h3>
+
+              {tournament.toornamentId ? (
+                <div className="overflow-hidden rounded-2xl border border-white/10">
+                  <iframe
+                    src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/?_locale=fr&theme=dark`}
+                    className="h-[500px] w-full border-0"
+                    allow="fullscreen"
+                    title="Bracket Toornament"
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-8 text-center">
+                  <div className="inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10">
+                    <Swords className="size-8 text-zinc-500" />
+                  </div>
+                  <p className="text-sm text-zinc-500">Pas encore disponible</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Registration section */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
 
@@ -288,9 +368,21 @@ export const TournamentDetail = ({ tournament }: TournamentDetailProps) => {
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               {tournament.status === 'ARCHIVED' ? (
                 <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
+              ) : new Date() < new Date(tournament.registrationOpen) ? (
+                <p className="text-sm text-zinc-500">
+                  Les inscriptions ouvriront le{' '}
+                  <span className="font-medium text-zinc-400">
+                    {formatDate(tournament.registrationOpen)}
+                  </span>
+                  .
+                </p>
               ) : (
                 <p className="text-sm text-zinc-500">
-                  Les inscriptions ne sont pas ouvertes pour le moment.
+                  Les inscriptions sont fermées depuis le{' '}
+                  <span className="font-medium text-zinc-400">
+                    {formatDate(tournament.registrationClose)}
+                  </span>
+                  .
                 </p>
               )}
             </div>
