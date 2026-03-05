@@ -946,19 +946,6 @@ describe('updateRegistrationStatus', () => {
     })
   })
 
-  it('updates registration status to WAITLIST', async () => {
-    const result = await updateRegistrationStatus({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID_2,
-      status: 'WAITLIST',
-    })
-
-    expect(result).toEqual({
-      success: true,
-      message: "Le statut de l'inscription a été mis à jour.",
-    })
-  })
-
   it('updates registration status to PENDING', async () => {
     const result = await updateRegistrationStatus({
       id: VALID_UUID,

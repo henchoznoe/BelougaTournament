@@ -28,7 +28,6 @@ enum RegistrationStatus {
   PENDING
   APPROVED
   REJECTED
-  WAITLIST
 }
 
 enum TournamentStatus {

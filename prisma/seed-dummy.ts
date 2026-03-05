@@ -15,7 +15,7 @@ import type { PrismaClient } from './generated/prisma/client'
 type TournamentFormat = 'SOLO' | 'TEAM'
 type TournamentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 type FieldType = 'TEXT' | 'NUMBER'
-type RegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'WAITLIST'
+type RegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 interface TournamentField {
   label: string
@@ -376,7 +376,7 @@ export const seedDummy = async (prisma: PrismaClient) => {
     return !isBanned && !isAdmin
   })
 
-  const statuses: RegistrationStatus[] = ['PENDING', 'APPROVED', 'REJECTED', 'WAITLIST']
+  const statuses: RegistrationStatus[] = ['PENDING', 'APPROVED', 'REJECTED']
 
   for (let tIdx = 0; tIdx < createdTournaments.length; tIdx++) {
     const tournament = createdTournaments[tIdx]

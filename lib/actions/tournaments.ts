@@ -290,7 +290,7 @@ export const updateTournamentStatus = authenticatedAction({
   },
 })
 
-/** Updates a registration's status (approve / reject / waitlist). */
+/** Updates a registration's status (approve / reject). */
 export const updateRegistrationStatus = authenticatedAction({
   schema: updateRegistrationStatusSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],

@@ -244,12 +244,12 @@ export type UpdateTournamentStatusInput = z.infer<
   typeof updateTournamentStatusSchema
 >
 
-/** Schema for updating a registration's status (approve / reject / waitlist). */
+/** Schema for updating a registration's status (approve / reject). */
 export const updateRegistrationStatusSchema = z.object({
   id: z.uuid("ID d'inscription invalide."),
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'WAITLIST'], {
-    message: 'Le statut doit être PENDING, APPROVED, REJECTED ou WAITLIST.',
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED'], {
+    message: 'Le statut doit être PENDING, APPROVED ou REJECTED.',
   }),
 })
 

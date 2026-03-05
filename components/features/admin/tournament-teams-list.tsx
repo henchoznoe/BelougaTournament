@@ -49,14 +49,12 @@ const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'bg-amber-500/10 text-amber-400',
   APPROVED: 'bg-emerald-500/10 text-emerald-400',
   REJECTED: 'bg-red-500/10 text-red-400',
-  WAITLIST: 'bg-blue-500/10 text-blue-400',
 } as const
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 interface TournamentTeamsListProps {

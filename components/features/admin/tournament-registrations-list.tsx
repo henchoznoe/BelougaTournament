@@ -39,14 +39,12 @@ const STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'bg-amber-500/10 text-amber-400',
   APPROVED: 'bg-emerald-500/10 text-emerald-400',
   REJECTED: 'bg-red-500/10 text-red-400',
-  WAITLIST: 'bg-blue-500/10 text-blue-400',
 } as const
 
 const STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 interface TournamentRegistrationsListProps {
@@ -137,11 +135,6 @@ export const TournamentRegistrationsList = ({
           {statusCount('PENDING') > 0 && (
             <span className="text-amber-400">
               {statusCount('PENDING')} en attente
-            </span>
-          )}
-          {statusCount('WAITLIST') > 0 && (
-            <span className="text-blue-400">
-              {statusCount('WAITLIST')} en liste d'attente
             </span>
           )}
         </div>
@@ -252,9 +245,6 @@ export const TournamentRegistrationsList = ({
                         <SelectItem value="PENDING">En attente</SelectItem>
                         <SelectItem value="APPROVED">Approuvée</SelectItem>
                         <SelectItem value="REJECTED">Refusée</SelectItem>
-                        <SelectItem value="WAITLIST">
-                          Liste d'attente
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

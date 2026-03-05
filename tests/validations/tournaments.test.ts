@@ -490,15 +490,6 @@ describe('updateRegistrationStatusSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('accepts WAITLIST status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'WAITLIST',
-    })
-    expect(result.success).toBe(true)
-  })
-
   it('rejects an invalid status', () => {
     expect(
       updateRegistrationStatusSchema.safeParse({

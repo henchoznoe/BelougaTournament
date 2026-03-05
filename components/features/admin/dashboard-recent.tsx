@@ -39,14 +39,12 @@ const STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'bg-amber-500/10 text-amber-400',
   APPROVED: 'bg-emerald-500/10 text-emerald-400',
   REJECTED: 'bg-red-500/10 text-red-400',
-  WAITLIST: 'bg-zinc-500/10 text-zinc-400',
 } as const
 
 const STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 export const DashboardUpcomingTournaments = ({
@@ -186,7 +184,6 @@ export const DashboardRecentRegistrations = ({
                     <SelectItem value="PENDING">En attente</SelectItem>
                     <SelectItem value="APPROVED">Approuvée</SelectItem>
                     <SelectItem value="REJECTED">Refusée</SelectItem>
-                    <SelectItem value="WAITLIST">Liste d'attente</SelectItem>
                   </SelectContent>
                 </Select>
                 <span className="text-[10px] text-zinc-600">
