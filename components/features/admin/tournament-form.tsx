@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   ArrowLeft,
   GripVertical,
+  Info,
   Loader2,
   Plus,
   Save,
@@ -75,6 +76,10 @@ const slugify = (text: string): string => {
 
 export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isEditing = !!tournament
+  const fieldsLocked =
+    isEditing &&
+    tournament.status === 'PUBLISHED' &&
+    tournament._count.registrations > 0
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -285,7 +290,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   setValue('teamSize', 1, { shouldDirty: true })
                 }
               }}
-              disabled={isPending}
+              disabled={isPending || isEditing}
             >
               <SelectTrigger className="h-10 w-full rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200">
                 <SelectValue />
@@ -295,6 +300,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <SelectItem value="TEAM">Équipe</SelectItem>
               </SelectContent>
             </Select>
+            {isEditing && (
+              <p className="text-xs text-zinc-500">
+                Le format ne peut pas être modifié après la création.
+              </p>
+            )}
             {errors.format?.message && (
               <p className="text-xs text-red-400">{errors.format.message}</p>
             )}
@@ -460,13 +470,23 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             variant="ghost"
             size="sm"
             onClick={addField}
-            disabled={isPending}
+            disabled={isPending || fieldsLocked}
             className="gap-1 text-xs text-blue-400 hover:text-blue-300"
           >
             <Plus className="size-3.5" />
             Ajouter
           </Button>
         </div>
+
+        {fieldsLocked && (
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+            <Info className="size-4 shrink-0 text-amber-400" />
+            <p className="text-xs text-amber-300">
+              Les champs personnalisés ne peuvent pas être modifiés car le
+              tournoi est publié et a des inscriptions.
+            </p>
+          </div>
+        )}
 
         {fields.length === 0 && (
           <p className="text-sm text-zinc-600">
@@ -485,7 +505,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <button
                   type="button"
                   onClick={() => moveField(index, index - 1)}
-                  disabled={index === 0 || isPending}
+                  disabled={index === 0 || isPending || fieldsLocked}
                   className="text-zinc-600 hover:text-zinc-400 disabled:opacity-30"
                   title="Monter"
                 >
@@ -498,7 +518,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <div className="sm:col-span-2">
                   <Input
                     placeholder="Libellé du champ"
-                    disabled={isPending}
+                    disabled={isPending || fieldsLocked}
                     className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
                     {...register(`fields.${index}.label`)}
                   />
@@ -519,7 +539,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                         { shouldDirty: true },
                       )
                     }
-                    disabled={isPending}
+                    disabled={isPending || fieldsLocked}
                   >
                     <SelectTrigger className="h-9 w-full rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200">
                       <SelectValue />
@@ -539,7 +559,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                         shouldDirty: true,
                       })
                     }
-                    disabled={isPending}
+                    disabled={isPending || fieldsLocked}
                     size="sm"
                   />
                   <span className="text-xs text-zinc-400">Requis</span>
@@ -564,7 +584,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                     setValue(`fields.${i}.order`, i)
                   }
                 }}
-                disabled={isPending}
+                disabled={isPending || fieldsLocked}
                 className="mt-0.5 text-zinc-500 hover:text-red-400"
               >
                 <Trash2 className="size-3.5" />

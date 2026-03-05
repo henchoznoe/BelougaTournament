@@ -324,6 +324,14 @@ describe('updateTournament', () => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
     mockTransaction.mockResolvedValue([])
+    // Default: existing tournament matches VALID_TOURNAMENT_INPUT
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'TEAM',
+      status: 'DRAFT',
+      fields: [{ label: 'Riot ID', type: 'TEXT', required: true, order: 0 }],
+      _count: { registrations: 0 },
+    })
   })
 
   it('returns Unauthorized when not authenticated', async () => {
@@ -431,6 +439,153 @@ describe('updateTournament', () => {
     })
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+
+  it('returns error when tournament is not found', async () => {
+    mockTournamentFindUnique.mockResolvedValue(null)
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Tournoi introuvable.',
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('rejects format change (TEAM to SOLO)', async () => {
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+      format: 'SOLO',
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message:
+        'Le format du tournoi ne peut pas être modifié après la création.',
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('rejects format change (SOLO to TEAM)', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'SOLO',
+      status: 'DRAFT',
+      fields: [],
+      _count: { registrations: 0 },
+    })
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+      format: 'TEAM',
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message:
+        'Le format du tournoi ne peut pas être modifié après la création.',
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('rejects field changes when PUBLISHED with registrations', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'TEAM',
+      status: 'PUBLISHED',
+      fields: [{ label: 'Riot ID', type: 'TEXT', required: true, order: 0 }],
+      _count: { registrations: 5 },
+    })
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+      fields: [
+        { label: 'Discord Tag', type: 'TEXT', required: true, order: 0 },
+      ],
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message:
+        'Les champs personnalisés ne peuvent pas être modifiés lorsque le tournoi est publié et a des inscriptions.',
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('allows field changes when DRAFT', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'TEAM',
+      status: 'DRAFT',
+      fields: [{ label: 'Riot ID', type: 'TEXT', required: true, order: 0 }],
+      _count: { registrations: 0 },
+    })
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+      fields: [
+        { label: 'Discord Tag', type: 'TEXT', required: true, order: 0 },
+      ],
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le tournoi a été mis à jour.',
+    })
+    expect(mockTransaction).toHaveBeenCalled()
+  })
+
+  it('allows field changes when PUBLISHED but zero registrations', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'TEAM',
+      status: 'PUBLISHED',
+      fields: [{ label: 'Riot ID', type: 'TEXT', required: true, order: 0 }],
+      _count: { registrations: 0 },
+    })
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+      fields: [
+        { label: 'Discord Tag', type: 'TEXT', required: true, order: 0 },
+      ],
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le tournoi a été mis à jour.',
+    })
+    expect(mockTransaction).toHaveBeenCalled()
+  })
+
+  it('allows unchanged fields when PUBLISHED with registrations', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: VALID_UUID,
+      format: 'TEAM',
+      status: 'PUBLISHED',
+      fields: [{ label: 'Riot ID', type: 'TEXT', required: true, order: 0 }],
+      _count: { registrations: 5 },
+    })
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: VALID_UUID,
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le tournoi a été mis à jour.',
+    })
+    expect(mockTransaction).toHaveBeenCalled()
   })
 })
 

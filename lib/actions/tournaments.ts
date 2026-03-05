@@ -108,6 +108,61 @@ export const updateTournament = authenticatedAction({
       }
     }
 
+    // Fetch existing tournament to enforce immutability rules
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const existing: any = await prisma.tournament.findUnique({
+      where: { id: data.id },
+      include: {
+        fields: { orderBy: { order: 'asc' } },
+        _count: { select: { registrations: true } },
+      },
+    })
+
+    if (!existing) {
+      return { success: false, message: 'Tournoi introuvable.' }
+    }
+
+    // Format is immutable after creation
+    if (data.format !== existing.format) {
+      return {
+        success: false,
+        message:
+          'Le format du tournoi ne peut pas être modifié après la création.',
+      }
+    }
+
+    // Dynamic fields are locked when tournament is PUBLISHED with registrations
+    if (existing.status === 'PUBLISHED' && existing._count.registrations > 0) {
+      const existingFields = existing.fields.map(
+        (f: {
+          label: string
+          type: string
+          required: boolean
+          order: number
+        }) => ({
+          label: f.label,
+          type: f.type,
+          required: f.required,
+          order: f.order,
+        }),
+      )
+      const submittedFields = data.fields.map(f => ({
+        label: f.label,
+        type: f.type,
+        required: f.required,
+        order: f.order,
+      }))
+      const fieldsChanged =
+        JSON.stringify(existingFields) !== JSON.stringify(submittedFields)
+      if (fieldsChanged) {
+        return {
+          success: false,
+          message:
+            'Les champs personnalisés ne peuvent pas être modifiés lorsque le tournoi est publié et a des inscriptions.',
+        }
+      }
+    }
+
     await prisma.$transaction([
       // Delete existing fields and re-create them
       prisma.tournamentField.deleteMany({
