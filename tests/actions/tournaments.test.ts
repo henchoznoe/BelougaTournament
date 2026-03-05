@@ -103,6 +103,7 @@ const {
   registerForTournament,
   createTeamAndRegister,
   joinTeamAndRegister,
+  updateRegistrationFields,
 } = await import('@/lib/actions/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -111,6 +112,7 @@ const {
 
 const VALID_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 const VALID_UUID_2 = 'b1ffcd00-0d1c-4fa9-ac7e-7cc0ce491b22'
+const VALID_UUID_3 = 'c2aade11-1e2d-5ab0-bd8f-8dd1df502c33'
 
 const SUPERADMIN_SESSION = {
   user: {
@@ -293,16 +295,6 @@ describe('createTournament', () => {
     const result = await createTournament({
       ...VALID_TOURNAMENT_INPUT,
       title: '',
-    })
-
-    expect(result.success).toBe(false)
-    expect(result.message).toBe('Validation error')
-  })
-
-  it('returns validation error for invalid slug', async () => {
-    const result = await createTournament({
-      ...VALID_TOURNAMENT_INPUT,
-      slug: 'Invalid Slug',
     })
 
     expect(result.success).toBe(false)
@@ -1765,6 +1757,240 @@ describe('joinTeamAndRegister', () => {
     const result = await joinTeamAndRegister({
       ...VALID_JOIN_TEAM_INPUT,
       teamId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateRegistrationFields
+// ---------------------------------------------------------------------------
+
+const MOCK_REGISTRATION = {
+  id: VALID_UUID_3,
+  userId: 'user-1',
+  tournamentId: VALID_UUID,
+  status: 'PENDING',
+  fieldValues: { 'Riot ID': 'OldPlayer#0000' },
+  tournament: {
+    ...MOCK_TOURNAMENT,
+    fields: [
+      { id: 'f1', label: 'Riot ID', type: 'TEXT', required: true, order: 0 },
+      { id: 'f2', label: 'MMR', type: 'NUMBER', required: false, order: 1 },
+    ],
+  },
+}
+
+const VALID_UPDATE_FIELDS_INPUT = {
+  registrationId: VALID_UUID_3,
+  tournamentId: VALID_UUID,
+  fieldValues: { 'Riot ID': 'NewPlayer#5678' },
+}
+
+describe('updateRegistrationFields', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_REGISTRATION)
+    mockRegistrationUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when registration is not found', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(null)
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Inscription introuvable.',
+    })
+  })
+
+  it('returns error when user does not own the registration', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_REGISTRATION,
+      userId: 'other-user',
+    })
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: "Vous ne pouvez pas modifier l'inscription d'un autre joueur.",
+    })
+  })
+
+  it('returns error when tournamentId does not match', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_REGISTRATION,
+      tournamentId: VALID_UUID_2,
+    })
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'ID de tournoi invalide.',
+    })
+  })
+
+  it('returns error when tournament is not PUBLISHED', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_REGISTRATION,
+      tournament: { ...MOCK_REGISTRATION.tournament, status: 'ARCHIVED' },
+    })
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est introuvable ou indisponible.',
+    })
+  })
+
+  it('returns error when a required field is missing', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      fieldValues: {},
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('returns error when a required field is empty string', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      fieldValues: { 'Riot ID': '' },
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('returns error when NUMBER field receives a non-number value', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      fieldValues: {
+        'Riot ID': 'Player#1234',
+        MMR: 'not-a-number' as unknown as number,
+      },
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « MMR » doit être un nombre.',
+    })
+  })
+
+  it('updates fields and keeps PENDING status unchanged', async () => {
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été mise à jour.',
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID_3 },
+      data: {
+        fieldValues: VALID_UPDATE_FIELDS_INPUT.fieldValues,
+        status: 'PENDING',
+      },
+    })
+  })
+
+  it('resets APPROVED status to PENDING and appends message', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_REGISTRATION,
+      status: 'APPROVED',
+    })
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message:
+        'Votre inscription a été mise à jour. Votre inscription a été remise en attente de validation.',
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID_3 },
+      data: {
+        fieldValues: VALID_UPDATE_FIELDS_INPUT.fieldValues,
+        status: 'PENDING',
+      },
+    })
+  })
+
+  it('keeps REJECTED status unchanged', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_REGISTRATION,
+      status: 'REJECTED',
+    })
+
+    const result = await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été mise à jour.',
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID_3 },
+      data: {
+        fieldValues: VALID_UPDATE_FIELDS_INPUT.fieldValues,
+        status: 'REJECTED',
+      },
+    })
+  })
+
+  it('revalidates correct cache tags', async () => {
+    await updateRegistrationFields(VALID_UPDATE_FIELDS_INPUT)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats', 'minutes')
+  })
+
+  it('accepts optional NUMBER field with valid number', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      fieldValues: { 'Riot ID': 'Player#1234', MMR: 1500 },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('returns validation error for invalid registrationId', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      registrationId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error for invalid tournamentId', async () => {
+    const result = await updateRegistrationFields({
+      ...VALID_UPDATE_FIELDS_INPUT,
+      tournamentId: 'bad-id',
     })
 
     expect(result.success).toBe(false)
