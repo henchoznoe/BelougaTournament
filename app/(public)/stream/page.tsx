@@ -6,9 +6,16 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import type { Metadata } from 'next'
 import { TwitchPlayer } from '@/components/features/stream/twitch-player'
 import { PageHeader } from '@/components/ui/page-header'
 import { getGlobalSettings } from '@/lib/services/settings'
+
+export const metadata: Metadata = {
+  title: 'Stream',
+  description:
+    'Retrouvez en direct toutes nos compétitions et événements spéciaux sur notre chaîne officielle.',
+}
 
 const StreamPage = async () => {
   const globalSettings = await getGlobalSettings()
