@@ -309,6 +309,19 @@ export const joinTeamSchema = z.object({
 export type JoinTeamInput = z.infer<typeof joinTeamSchema>
 
 // ---------------------------------------------------------------------------
+// Player unregistration
+// ---------------------------------------------------------------------------
+
+/** Schema for a player cancelling their own registration. */
+export const unregisterFromTournamentSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+})
+
+export type UnregisterFromTournamentInput = z.infer<
+  typeof unregisterFromTournamentSchema
+>
+
+// ---------------------------------------------------------------------------
 // Admin team management
 // ---------------------------------------------------------------------------
 

@@ -57,6 +57,8 @@ const mockTeamMemberDeleteMany = vi.fn()
 const mockRegistrationDeleteMany = vi.fn()
 const mockRegistrationUpdateMany = vi.fn()
 const mockUserFindUnique = vi.fn()
+const mockRegistrationDelete = vi.fn()
+const mockTeamMemberFindFirst = vi.fn()
 const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -80,6 +82,7 @@ vi.mock('@/lib/core/prisma', () => ({
       create: (...args: unknown[]) => mockRegistrationCreate(...args),
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       count: (...args: unknown[]) => mockRegistrationCount(...args),
+      delete: (...args: unknown[]) => mockRegistrationDelete(...args),
       deleteMany: (...args: unknown[]) => mockRegistrationDeleteMany(...args),
       updateMany: (...args: unknown[]) => mockRegistrationUpdateMany(...args),
     },
@@ -93,6 +96,7 @@ vi.mock('@/lib/core/prisma', () => ({
     teamMember: {
       create: (...args: unknown[]) => mockTeamMemberCreate(...args),
       deleteMany: (...args: unknown[]) => mockTeamMemberDeleteMany(...args),
+      findFirst: (...args: unknown[]) => mockTeamMemberFindFirst(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -114,6 +118,7 @@ const {
   updateRegistrationFields,
   kickPlayer,
   dissolveTeam,
+  unregisterFromTournament,
 } = await import('@/lib/actions/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -2327,6 +2332,239 @@ describe('dissolveTeam', () => {
     const result = await dissolveTeam({
       ...VALID_DISSOLVE_INPUT,
       teamId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// unregisterFromTournament
+// ---------------------------------------------------------------------------
+
+const VALID_UNREGISTER_INPUT = { tournamentId: VALID_UUID }
+
+const MOCK_SOLO_REGISTRATION = {
+  id: 'reg-1',
+  tournamentId: VALID_UUID,
+  userId: 'user-1',
+  tournament: { status: 'PUBLISHED', format: 'SOLO' },
+}
+
+const MOCK_TEAM_REGISTRATION = {
+  id: 'reg-1',
+  tournamentId: VALID_UUID,
+  userId: 'user-1',
+  tournament: { status: 'PUBLISHED', format: 'TEAM' },
+}
+
+const MOCK_TEAM_MEMBER_AS_CAPTAIN = {
+  userId: 'user-1',
+  teamId: 'team-1',
+  team: {
+    id: 'team-1',
+    captainId: 'user-1',
+    members: [
+      { userId: 'user-1', joinedAt: new Date('2026-01-01') },
+      { userId: 'user-2', joinedAt: new Date('2026-01-02') },
+    ],
+  },
+}
+
+const MOCK_TEAM_MEMBER_AS_NON_CAPTAIN = {
+  userId: 'user-1',
+  teamId: 'team-1',
+  team: {
+    id: 'team-1',
+    captainId: 'other-captain',
+    members: [
+      { userId: 'other-captain', joinedAt: new Date('2026-01-01') },
+      { userId: 'user-1', joinedAt: new Date('2026-01-02') },
+    ],
+  },
+}
+
+const MOCK_TEAM_MEMBER_LAST = {
+  userId: 'user-1',
+  teamId: 'team-1',
+  team: {
+    id: 'team-1',
+    captainId: 'user-1',
+    members: [{ userId: 'user-1', joinedAt: new Date('2026-01-01') }],
+  },
+}
+
+describe('unregisterFromTournament', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockUserFindUnique.mockResolvedValue({ bannedUntil: null })
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_SOLO_REGISTRATION)
+    mockRegistrationDelete.mockResolvedValue({})
+    mockTeamMemberFindFirst.mockResolvedValue(null)
+    mockTransaction.mockImplementation(
+      // biome-ignore lint/complexity/noBannedTypes: test mock callback requires generic function type
+      async (fn: Function) =>
+        fn({
+          teamMember: {
+            deleteMany: mockTeamMemberDeleteMany.mockResolvedValue({}),
+          },
+          tournamentRegistration: {
+            delete: mockRegistrationDelete,
+            updateMany: mockRegistrationUpdateMany.mockResolvedValue({}),
+          },
+          team: {
+            update: mockTeamUpdate.mockResolvedValue({}),
+            delete: mockTeamDelete.mockResolvedValue({}),
+          },
+        }),
+    )
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await unregisterFromTournament(VALID_UNREGISTER_INPUT)).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when user is banned', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedUntil: new Date('2099-12-31T23:59:59.000Z'),
+    })
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre compte est banni.',
+    })
+    expect(mockRegistrationFindUnique).not.toHaveBeenCalled()
+  })
+
+  it('returns error when registration not found', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(null)
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Inscription introuvable.',
+    })
+  })
+
+  it('returns error when tournament is not PUBLISHED', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      ...MOCK_SOLO_REGISTRATION,
+      tournament: { status: 'DRAFT', format: 'SOLO' },
+    })
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi ne permet plus de désinscription.',
+    })
+  })
+
+  it('deletes registration for SOLO tournaments', async () => {
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été annulée.',
+    })
+    expect(mockRegistrationDelete).toHaveBeenCalledWith({
+      where: { id: 'reg-1' },
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('handles TEAM non-captain leaving', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_TEAM_REGISTRATION)
+    mockTeamMemberFindFirst.mockResolvedValue(MOCK_TEAM_MEMBER_AS_NON_CAPTAIN)
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été annulée.',
+    })
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(mockTeamUpdate).toHaveBeenCalledWith({
+      where: { id: 'team-1' },
+      data: { isFull: false },
+    })
+  })
+
+  it('handles TEAM captain leaving with other members (promotes next)', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_TEAM_REGISTRATION)
+    mockTeamMemberFindFirst.mockResolvedValue(MOCK_TEAM_MEMBER_AS_CAPTAIN)
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été annulée.',
+    })
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(mockRegistrationUpdateMany).toHaveBeenCalledWith({
+      where: { tournamentId: VALID_UUID, userId: 'user-2' },
+      data: { teamId: 'team-1' },
+    })
+    expect(mockTeamUpdate).toHaveBeenCalledWith({
+      where: { id: 'team-1' },
+      data: { captainId: 'user-2', isFull: false },
+    })
+  })
+
+  it('handles TEAM last member leaving (dissolves team)', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_TEAM_REGISTRATION)
+    mockTeamMemberFindFirst.mockResolvedValue(MOCK_TEAM_MEMBER_LAST)
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été annulée.',
+    })
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(mockTeamDelete).toHaveBeenCalledWith({ where: { id: 'team-1' } })
+  })
+
+  it('handles TEAM registration without team membership (edge case)', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(MOCK_TEAM_REGISTRATION)
+    mockTeamMemberFindFirst.mockResolvedValue(null)
+
+    const result = await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été annulée.',
+    })
+    expect(mockRegistrationDelete).toHaveBeenCalledWith({
+      where: { id: 'reg-1' },
+    })
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
+  it('revalidates correct cache tags', async () => {
+    await unregisterFromTournament(VALID_UNREGISTER_INPUT)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats', 'minutes')
+  })
+
+  it('returns validation error for invalid tournamentId', async () => {
+    const result = await unregisterFromTournament({
+      tournamentId: 'bad-id',
     })
 
     expect(result.success).toBe(false)

@@ -151,7 +151,7 @@ model Team {
   tournamentId String
   tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   captainId    String
-  captain      User                    @relation("TeamCaptain", fields: [captainId], references: [id])
+  captain      User                    @relation("TeamCaptain", fields: [captainId], references: [id], onDelete: Cascade)
   isFull       Boolean                 @default(false)
   createdAt    DateTime                @default(now())
   members      TeamMember[]

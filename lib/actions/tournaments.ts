@@ -21,6 +21,7 @@ import {
   kickPlayerSchema,
   registerForTournamentSchema,
   tournamentSchema,
+  unregisterFromTournamentSchema,
   updateRegistrationFieldsSchema,
   updateRegistrationStatusSchema,
   updateTournamentSchema,
@@ -789,6 +790,135 @@ export const joinTeamAndRegister = authenticatedAction({
       message:
         "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Player unregistration
+// ---------------------------------------------------------------------------
+
+/** Cancels a player's own registration. For team tournaments, handles captain succession or team dissolution. */
+export const unregisterFromTournament = authenticatedAction({
+  schema: unregisterFromTournamentSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    const userId = session.user.id as string
+
+    // 1. Check ban status
+    const banResult = await checkBanStatus(userId)
+    if (banResult) return banResult
+
+    // 2. Fetch the registration with tournament info
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const registration: any = await prisma.tournamentRegistration.findUnique({
+      where: {
+        tournamentId_userId: {
+          tournamentId: data.tournamentId,
+          userId,
+        },
+      },
+      include: {
+        tournament: { select: { status: true, format: true } },
+      },
+    })
+
+    if (!registration) {
+      return { success: false, message: 'Inscription introuvable.' }
+    }
+
+    if (registration.tournament.status !== 'PUBLISHED') {
+      return {
+        success: false,
+        message: 'Ce tournoi ne permet plus de désinscription.',
+      }
+    }
+
+    // 3. SOLO format — just delete the registration
+    if (registration.tournament.format === 'SOLO') {
+      await prisma.tournamentRegistration.delete({
+        where: { id: registration.id },
+      })
+
+      revalidateTag('tournaments', 'hours')
+      revalidateTag('dashboard-registrations', 'minutes')
+      revalidateTag('dashboard-stats', 'minutes')
+
+      return { success: true, message: 'Votre inscription a été annulée.' }
+    }
+
+    // 4. TEAM format — find the user's team membership
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const teamMember: any = await prisma.teamMember.findFirst({
+      where: { userId, team: { tournamentId: data.tournamentId } },
+      include: {
+        team: {
+          include: { members: { orderBy: { joinedAt: 'asc' } } },
+        },
+      },
+    })
+
+    if (!teamMember) {
+      // Edge case: has a registration but no team membership (shouldn't happen, but clean up)
+      await prisma.tournamentRegistration.delete({
+        where: { id: registration.id },
+      })
+
+      revalidateTag('tournaments', 'hours')
+      revalidateTag('dashboard-registrations', 'minutes')
+      revalidateTag('dashboard-stats', 'minutes')
+
+      return { success: true, message: 'Votre inscription a été annulée.' }
+    }
+
+    const team = teamMember.team
+    const isCaptain = team.captainId === userId
+    const otherMembers = team.members.filter(
+      (m: { userId: string }) => m.userId !== userId,
+    )
+
+    await prisma.$transaction(async tx => {
+      // a. Remove team member record
+      await tx.teamMember.deleteMany({
+        where: { teamId: team.id, userId },
+      })
+
+      // b. Remove tournament registration
+      await tx.tournamentRegistration.delete({
+        where: { id: registration.id },
+      })
+
+      if (isCaptain && otherMembers.length > 0) {
+        // c. Promote next member to captain
+        const newCaptain = otherMembers[0]
+
+        await tx.tournamentRegistration.updateMany({
+          where: {
+            tournamentId: data.tournamentId,
+            userId: newCaptain.userId,
+          },
+          data: { teamId: team.id },
+        })
+
+        await tx.team.update({
+          where: { id: team.id },
+          data: { captainId: newCaptain.userId, isFull: false },
+        })
+      } else if (otherMembers.length === 0) {
+        // d. Last member — dissolve the team
+        await tx.team.delete({ where: { id: team.id } })
+      } else {
+        // e. Non-captain leaving — mark team as not full
+        await tx.team.update({
+          where: { id: team.id },
+          data: { isFull: false },
+        })
+      }
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
+
+    return { success: true, message: 'Votre inscription a été annulée.' }
   },
 })
 

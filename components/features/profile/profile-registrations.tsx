@@ -1,6 +1,6 @@
 /**
  * File: components/features/profile/profile-registrations.tsx
- * Description: Client component rendering active registrations with edit functionality.
+ * Description: Client component rendering active registrations with edit and unregister functionality.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,10 +8,23 @@
 
 'use client'
 
-import { Calendar, Gamepad2, Pencil, Swords } from 'lucide-react'
+import { Calendar, Gamepad2, Loader2, Pencil, Swords, X } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { RegistrationEditDialog } from '@/components/features/profile/registration-edit-dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { unregisterFromTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
@@ -39,6 +52,28 @@ export const ProfileRegistrations = ({
 }: ProfileRegistrationsProps) => {
   const [editingRegistration, setEditingRegistration] =
     useState<UserRegistrationItem | null>(null)
+  const [unregisterTarget, setUnregisterTarget] =
+    useState<UserRegistrationItem | null>(null)
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  const handleUnregister = () => {
+    if (!unregisterTarget) return
+
+    startTransition(async () => {
+      const result = await unregisterFromTournament({
+        tournamentId: unregisterTarget.tournament.id,
+      })
+
+      if (result.success) {
+        toast.success(result.message)
+        setUnregisterTarget(null)
+        router.refresh()
+      } else {
+        toast.error(result.message)
+      }
+    })
+  }
 
   return (
     <>
@@ -92,6 +127,14 @@ export const ProfileRegistrations = ({
                 >
                   <Pencil className="size-3.5" />
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setUnregisterTarget(registration)}
+                  className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  title="Se désinscrire"
+                >
+                  <X className="size-3.5" />
+                </button>
               </div>
             </div>
           ))}
@@ -119,6 +162,52 @@ export const ProfileRegistrations = ({
           registration={editingRegistration}
         />
       )}
+
+      <AlertDialog
+        open={!!unregisterTarget}
+        onOpenChange={open => {
+          if (!open) setUnregisterTarget(null)
+        }}
+      >
+        <AlertDialogContent className="border-zinc-800 bg-zinc-950">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              Confirmer la désinscription
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Voulez-vous vraiment annuler votre inscription au tournoi{' '}
+              <span className="font-semibold text-white">
+                {unregisterTarget?.tournament.title}
+              </span>
+              &nbsp;?
+              {unregisterTarget?.tournament.format === 'TEAM' && (
+                <span className="mt-2 block text-amber-400">
+                  Si vous êtes le dernier membre de votre équipe, celle-ci sera
+                  dissoute.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={isPending}
+              className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnregister}
+              disabled={isPending}
+              className="border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+            >
+              {isPending ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : null}
+              Se désinscrire
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
