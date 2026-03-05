@@ -47,6 +47,11 @@ const mockRegistrationUpdate = vi.fn()
 const mockRegistrationCreate = vi.fn()
 const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationCount = vi.fn()
+const mockTeamCreate = vi.fn()
+const mockTeamCount = vi.fn()
+const mockTeamFindUnique = vi.fn()
+const mockTeamUpdate = vi.fn()
+const mockTeamMemberCreate = vi.fn()
 const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -68,6 +73,15 @@ vi.mock('@/lib/core/prisma', () => ({
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       count: (...args: unknown[]) => mockRegistrationCount(...args),
     },
+    team: {
+      create: (...args: unknown[]) => mockTeamCreate(...args),
+      count: (...args: unknown[]) => mockTeamCount(...args),
+      findUnique: (...args: unknown[]) => mockTeamFindUnique(...args),
+      update: (...args: unknown[]) => mockTeamUpdate(...args),
+    },
+    teamMember: {
+      create: (...args: unknown[]) => mockTeamMemberCreate(...args),
+    },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
 }))
@@ -83,6 +97,8 @@ const {
   updateTournamentStatus,
   updateRegistrationStatus,
   registerForTournament,
+  createTeamAndRegister,
+  joinTeamAndRegister,
 } = await import('@/lib/actions/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -1072,6 +1088,8 @@ const MOCK_TOURNAMENT = {
   id: VALID_UUID,
   title: 'Valorant Cup',
   status: 'PUBLISHED',
+  format: 'SOLO',
+  teamSize: 1,
   registrationOpen: new Date('2025-01-01T00:00:00.000Z'),
   registrationClose: new Date('2027-12-31T23:59:00.000Z'),
   maxTeams: 16,
@@ -1331,5 +1349,363 @@ describe('registerForTournament', () => {
     const result = await registerForTournament(VALID_REGISTRATION_INPUT)
 
     expect(result.success).toBe(true)
+  })
+
+  it('rejects TEAM format tournaments', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TOURNAMENT,
+      format: 'TEAM',
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message:
+        'Ce tournoi est en format équipe. Utilisez le formulaire équipe.',
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// createTeamAndRegister
+// ---------------------------------------------------------------------------
+
+const MOCK_TEAM_TOURNAMENT = {
+  id: VALID_UUID,
+  title: 'Valorant Cup',
+  status: 'PUBLISHED',
+  format: 'TEAM',
+  teamSize: 5,
+  registrationOpen: new Date('2025-01-01T00:00:00.000Z'),
+  registrationClose: new Date('2027-12-31T23:59:00.000Z'),
+  maxTeams: 16,
+  autoApprove: false,
+  fields: [
+    { id: 'f1', label: 'Riot ID', type: 'TEXT', required: true, order: 0 },
+  ],
+}
+
+const VALID_CREATE_TEAM_INPUT = {
+  tournamentId: VALID_UUID,
+  teamName: 'Team Alpha',
+  fieldValues: { 'Riot ID': 'Player#1234' },
+}
+
+describe('createTeamAndRegister', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockTournamentFindUnique.mockResolvedValue(MOCK_TEAM_TOURNAMENT)
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockTeamCount.mockResolvedValue(0)
+    mockTransaction.mockResolvedValue(undefined)
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when tournament is not found', async () => {
+    mockTournamentFindUnique.mockResolvedValue(null)
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est introuvable ou indisponible.',
+    })
+  })
+
+  it('rejects SOLO format tournaments', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TEAM_TOURNAMENT,
+      format: 'SOLO',
+    })
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
+    })
+  })
+
+  it('returns error when registration is closed', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TEAM_TOURNAMENT,
+      registrationOpen: new Date('2020-01-01T00:00:00.000Z'),
+      registrationClose: new Date('2020-12-31T23:59:00.000Z'),
+    })
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Les inscriptions ne sont pas ouvertes.',
+    })
+  })
+
+  it('returns error when maxTeams is reached', async () => {
+    mockTeamCount.mockResolvedValue(16)
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: "Le nombre maximum d'équipes est atteint.",
+    })
+  })
+
+  it('returns error when user is already registered', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({ id: 'existing-reg' })
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Vous êtes déjà inscrit à ce tournoi.',
+    })
+  })
+
+  it('returns error when required field is missing', async () => {
+    const result = await createTeamAndRegister({
+      tournamentId: VALID_UUID,
+      teamName: 'Team Alpha',
+      fieldValues: {},
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('creates team and registration successfully', async () => {
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre équipe a été créée et votre inscription enregistrée.',
+    })
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls revalidateTag for tournaments, dashboard-registrations, and dashboard-stats', async () => {
+    await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats', 'minutes')
+  })
+
+  it('returns validation error for invalid tournamentId', async () => {
+    const result = await createTeamAndRegister({
+      ...VALID_CREATE_TEAM_INPUT,
+      tournamentId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error when team name is too short', async () => {
+    const result = await createTeamAndRegister({
+      ...VALID_CREATE_TEAM_INPUT,
+      teamName: 'A',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// joinTeamAndRegister
+// ---------------------------------------------------------------------------
+
+const MOCK_TEAM = {
+  id: VALID_UUID_2,
+  tournamentId: VALID_UUID,
+  isFull: false,
+  _count: { members: 2 },
+}
+
+const VALID_JOIN_TEAM_INPUT = {
+  tournamentId: VALID_UUID,
+  teamId: VALID_UUID_2,
+  fieldValues: { 'Riot ID': 'Player#5678' },
+}
+
+describe('joinTeamAndRegister', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockTournamentFindUnique.mockResolvedValue(MOCK_TEAM_TOURNAMENT)
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockTeamFindUnique.mockResolvedValue(MOCK_TEAM)
+    mockTransaction.mockResolvedValue(undefined)
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when tournament is not found', async () => {
+    mockTournamentFindUnique.mockResolvedValue(null)
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est introuvable ou indisponible.',
+    })
+  })
+
+  it('rejects SOLO format tournaments', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TEAM_TOURNAMENT,
+      format: 'SOLO',
+    })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
+    })
+  })
+
+  it('returns error when registration is closed', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...MOCK_TEAM_TOURNAMENT,
+      registrationOpen: new Date('2020-01-01T00:00:00.000Z'),
+      registrationClose: new Date('2020-12-31T23:59:00.000Z'),
+    })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Les inscriptions ne sont pas ouvertes.',
+    })
+  })
+
+  it('returns error when user is already registered', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({ id: 'existing-reg' })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Vous êtes déjà inscrit à ce tournoi.',
+    })
+  })
+
+  it('returns error when team is not found', async () => {
+    mockTeamFindUnique.mockResolvedValue(null)
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Équipe introuvable.',
+    })
+  })
+
+  it('returns error when team belongs to a different tournament', async () => {
+    mockTeamFindUnique.mockResolvedValue({
+      ...MOCK_TEAM,
+      tournamentId: 'c2ggde11-1e2d-5gb0-bd8f-8dd1df602c33',
+    })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Équipe introuvable.',
+    })
+  })
+
+  it('returns error when team is full', async () => {
+    mockTeamFindUnique.mockResolvedValue({
+      ...MOCK_TEAM,
+      isFull: true,
+    })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Cette équipe est complète.',
+    })
+  })
+
+  it('returns error when required field is missing', async () => {
+    const result = await joinTeamAndRegister({
+      tournamentId: VALID_UUID,
+      teamId: VALID_UUID_2,
+      fieldValues: {},
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Riot ID » est requis.',
+    })
+  })
+
+  it('joins team and registers successfully', async () => {
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message:
+        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
+    })
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls revalidateTag for tournaments, dashboard-registrations, and dashboard-stats', async () => {
+    await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('tournaments', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith(
+      'dashboard-registrations',
+      'minutes',
+    )
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats', 'minutes')
+  })
+
+  it('returns validation error for invalid tournamentId', async () => {
+    const result = await joinTeamAndRegister({
+      ...VALID_JOIN_TEAM_INPUT,
+      tournamentId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error for invalid teamId', async () => {
+    const result = await joinTeamAndRegister({
+      ...VALID_JOIN_TEAM_INPUT,
+      teamId: 'bad-id',
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
   })
 })

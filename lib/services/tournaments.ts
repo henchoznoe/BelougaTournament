@@ -11,6 +11,7 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
+  AvailableTeam,
   PublicTournamentDetail,
   PublicTournamentListItem,
   TeamItem,
@@ -308,6 +309,40 @@ export const getPublicTournamentBySlug = async (
   } catch (error) {
     logger.error({ error }, 'Error fetching public tournament by slug')
     return null
+  }
+}
+
+/** Fetches non-full teams for a tournament (public registration dropdown). */
+export const getAvailableTeams = async (
+  tournamentId: string,
+): Promise<AvailableTeam[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.team.findMany({
+      where: { tournamentId, isFull: false },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        captain: {
+          select: {
+            displayName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    })
+    return rows as unknown as AvailableTeam[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching available teams')
+    return []
   }
 }
 

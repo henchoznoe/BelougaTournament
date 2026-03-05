@@ -198,3 +198,15 @@ export type PublicTournamentDetail = {
     teams: number
   }
 }
+
+/** A non-full team available for joining in the public registration dropdown. */
+export type AvailableTeam = {
+  id: string
+  name: string
+  captain: {
+    displayName: string
+  }
+  _count: {
+    members: number
+  }
+}

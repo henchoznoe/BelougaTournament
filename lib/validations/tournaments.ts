@@ -281,3 +281,29 @@ export const updateRegistrationFieldsSchema = z.object({
 export type UpdateRegistrationFieldsInput = z.infer<
   typeof updateRegistrationFieldsSchema
 >
+
+// ---------------------------------------------------------------------------
+// Team registration (public)
+// ---------------------------------------------------------------------------
+
+/** Schema for creating a team and registering as captain. */
+export const createTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamName: z
+    .string()
+    .trim()
+    .min(2, "Le nom de l'équipe doit contenir au moins 2 caractères.")
+    .max(30, "Le nom de l'équipe ne peut pas dépasser 30 caractères."),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type CreateTeamInput = z.infer<typeof createTeamSchema>
+
+/** Schema for joining an existing team and registering. */
+export const joinTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type JoinTeamInput = z.infer<typeof joinTeamSchema>

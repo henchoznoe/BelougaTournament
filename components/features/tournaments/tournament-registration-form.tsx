@@ -1,31 +1,48 @@
 /**
  * File: components/features/tournaments/tournament-registration-form.tsx
- * Description: Client-side registration form for public tournament pages (solo format).
+ * Description: Client-side registration form for public tournament pages (solo and team formats).
  * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noé Henchoz
+ * Copyright (c) 2026 Noe Henchoz
  */
 
 'use client'
 
-import { CheckCircle, Loader2, LogIn, Send } from 'lucide-react'
+import { CheckCircle, Loader2, LogIn, Send, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { registerForTournament } from '@/lib/actions/tournaments'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  createTeamAndRegister,
+  joinTeamAndRegister,
+  registerForTournament,
+} from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
-import type { TournamentFieldItem } from '@/lib/types/tournament'
+import type { ActionState } from '@/lib/types/actions'
+import type { AvailableTeam, TournamentFieldItem } from '@/lib/types/tournament'
+import { cn } from '@/lib/utils/cn'
+import type { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentRegistrationFormProps {
   tournamentId: string
   fields: TournamentFieldItem[]
   autoApprove: boolean
+  format: TournamentFormat
+  teamSize: number
+  availableTeams: AvailableTeam[]
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -49,10 +66,18 @@ export const TournamentRegistrationForm = ({
   tournamentId,
   fields,
   autoApprove,
+  format,
+  teamSize,
+  availableTeams,
 }: TournamentRegistrationFormProps) => {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  // Team-specific state
+  const [teamMode, setTeamMode] = useState<'create' | 'join'>('create')
+  const [teamName, setTeamName] = useState('')
+  const [selectedTeamId, setSelectedTeamId] = useState('')
 
   const {
     register,
@@ -63,9 +88,46 @@ export const TournamentRegistrationForm = ({
   })
 
   const onSubmit = (data: Record<string, string>) => {
+    // Client-side team field validation
+    if (format === 'TEAM') {
+      if (teamMode === 'create') {
+        const trimmed = teamName.trim()
+        if (trimmed.length < 2 || trimmed.length > 30) {
+          toast.error(
+            "Le nom de l'équipe doit contenir entre 2 et 30 caractères.",
+          )
+          return
+        }
+      } else {
+        if (!selectedTeamId) {
+          toast.error('Veuillez sélectionner une équipe.')
+          return
+        }
+      }
+    }
+
     startTransition(async () => {
       const fieldValues = buildFieldValues(data, fields)
-      const result = await registerForTournament({ tournamentId, fieldValues })
+
+      let result: ActionState
+
+      if (format === 'TEAM') {
+        if (teamMode === 'create') {
+          result = await createTeamAndRegister({
+            tournamentId,
+            teamName: teamName.trim(),
+            fieldValues,
+          })
+        } else {
+          result = await joinTeamAndRegister({
+            tournamentId,
+            teamId: selectedTeamId,
+            fieldValues,
+          })
+        }
+      } else {
+        result = await registerForTournament({ tournamentId, fieldValues })
+      }
 
       if (result.success) {
         toast.success(result.message)
@@ -105,6 +167,101 @@ export const TournamentRegistrationForm = ({
   // Registration form
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* Team mode selector (TEAM format only) */}
+      {format === 'TEAM' && (
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant={teamMode === 'create' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                'flex-1 gap-2',
+                teamMode !== 'create' &&
+                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
+              )}
+              onClick={() => setTeamMode('create')}
+              disabled={isPending}
+            >
+              <Users className="size-4" />
+              Créer une équipe
+            </Button>
+            <Button
+              type="button"
+              variant={teamMode === 'join' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                'flex-1 gap-2',
+                teamMode !== 'join' &&
+                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
+              )}
+              onClick={() => setTeamMode('join')}
+              disabled={isPending}
+            >
+              <Users className="size-4" />
+              Rejoindre une équipe
+            </Button>
+          </div>
+
+          {/* Create mode: team name input */}
+          {teamMode === 'create' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="team-name" className="text-xs text-zinc-400">
+                Nom de l'équipe
+                <span className="ml-0.5 text-red-400">*</span>
+              </Label>
+              <Input
+                id="team-name"
+                type="text"
+                value={teamName}
+                onChange={e => setTeamName(e.target.value)}
+                disabled={isPending}
+                placeholder="Entrez le nom de votre équipe"
+                maxLength={30}
+                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+              />
+            </div>
+          )}
+
+          {/* Join mode: team select dropdown */}
+          {teamMode === 'join' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="team-select" className="text-xs text-zinc-400">
+                Équipe
+                <span className="ml-0.5 text-red-400">*</span>
+              </Label>
+              {availableTeams.length > 0 ? (
+                <Select
+                  value={selectedTeamId}
+                  onValueChange={setSelectedTeamId}
+                  disabled={isPending}
+                >
+                  <SelectTrigger
+                    id="team-select"
+                    className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus:border-blue-500/30 focus:ring-blue-500/20"
+                  >
+                    <SelectValue placeholder="Sélectionnez une équipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTeams.map(team => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name} — Capitaine: {team.captain.displayName} (
+                        {team._count.members}/{teamSize} membres)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-zinc-500">
+                  Aucune équipe disponible. Créez la vôtre !
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Dynamic fields */}
       {fields.length > 0 ? (
         <div className="space-y-4">
           {fields.map(field => (
@@ -161,7 +318,11 @@ export const TournamentRegistrationForm = ({
         ) : (
           <Send className="size-4" />
         )}
-        S'inscrire
+        {format === 'TEAM'
+          ? teamMode === 'create'
+            ? "Créer et s'inscrire"
+            : "Rejoindre et s'inscrire"
+          : "S'inscrire"}
       </Button>
     </form>
   )

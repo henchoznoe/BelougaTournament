@@ -13,7 +13,9 @@ import { authenticatedAction } from '@/lib/actions/safe-action'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import {
+  createTeamSchema,
   deleteTournamentSchema,
+  joinTeamSchema,
   registerForTournamentSchema,
   tournamentSchema,
   updateRegistrationFieldsSchema,
@@ -415,7 +417,16 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 2. Check registration window
+    // 2. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
+    if (tournament.format === 'TEAM') {
+      return {
+        success: false,
+        message:
+          'Ce tournoi est en format équipe. Utilisez le formulaire équipe.',
+      }
+    }
+
+    // 3. Check registration window
     const now = new Date()
     if (
       now < tournament.registrationOpen ||
@@ -427,7 +438,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 3. Check maxTeams limit (registrations count as "slots" for solo)
+    // 4. Check maxTeams limit (registrations count as "slots" for solo)
     if (tournament.maxTeams !== null) {
       const count = await prisma.tournamentRegistration.count({
         where: {
@@ -437,6 +448,240 @@ export const registerForTournament = authenticatedAction({
       })
       if (count >= tournament.maxTeams) {
         return { success: false, message: 'Le tournoi est complet.' }
+      }
+    }
+
+    // 5. Check user hasn't already registered
+    const existing = await prisma.tournamentRegistration.findUnique({
+      where: {
+        tournamentId_userId: {
+          tournamentId: data.tournamentId,
+          userId: session.user.id as string,
+        },
+      },
+    })
+    if (existing) {
+      return {
+        success: false,
+        message: 'Vous êtes déjà inscrit à ce tournoi.',
+      }
+    }
+
+    // 6. Validate dynamic field values
+    for (const field of tournament.fields) {
+      const value = data.fieldValues[field.label]
+      if (field.required && (value === undefined || value === '')) {
+        return {
+          success: false,
+          message: `Le champ « ${field.label} » est requis.`,
+        }
+      }
+      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+          return {
+            success: false,
+            message: `Le champ « ${field.label} » doit être un nombre.`,
+          }
+        }
+      }
+    }
+
+    // 7. Create the registration
+    await prisma.tournamentRegistration.create({
+      data: {
+        tournamentId: data.tournamentId,
+        userId: session.user.id as string,
+        fieldValues: data.fieldValues,
+        status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+      },
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+
+    return { success: true, message: 'Votre inscription a été enregistrée.' }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Team registration (public)
+// ---------------------------------------------------------------------------
+
+/** Validates dynamic field values against tournament field definitions. */
+const validateFieldValues = (
+  fields: { label: string; type: string; required: boolean }[],
+  fieldValues: Record<string, string | number>,
+): { valid: true } | { valid: false; message: string } => {
+  for (const field of fields) {
+    const value = fieldValues[field.label]
+    if (field.required && (value === undefined || value === '')) {
+      return {
+        valid: false,
+        message: `Le champ « ${field.label} » est requis.`,
+      }
+    }
+    if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return {
+          valid: false,
+          message: `Le champ « ${field.label} » doit être un nombre.`,
+        }
+      }
+    }
+  }
+  return { valid: true }
+}
+
+/** Creates a team and registers the current user as captain. */
+export const createTeamAndRegister = authenticatedAction({
+  schema: createTeamSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    // 1. Fetch tournament with fields
+    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
+      {
+        where: { id: data.tournamentId },
+        include: { fields: { orderBy: { order: 'asc' } } },
+      },
+    )
+
+    if (!tournament || tournament.status !== 'PUBLISHED') {
+      return {
+        success: false,
+        message: 'Ce tournoi est introuvable ou indisponible.',
+      }
+    }
+
+    // 2. Reject SOLO format
+    if (tournament.format !== 'TEAM') {
+      return {
+        success: false,
+        message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
+      }
+    }
+
+    // 3. Check registration window
+    const now = new Date()
+    if (
+      now < tournament.registrationOpen ||
+      now > tournament.registrationClose
+    ) {
+      return {
+        success: false,
+        message: 'Les inscriptions ne sont pas ouvertes.',
+      }
+    }
+
+    // 4. Check maxTeams limit (count teams, not registrations)
+    if (tournament.maxTeams !== null) {
+      const teamCount = await prisma.team.count({
+        where: { tournamentId: data.tournamentId },
+      })
+      if (teamCount >= tournament.maxTeams) {
+        return {
+          success: false,
+          message: "Le nombre maximum d'équipes est atteint.",
+        }
+      }
+    }
+
+    // 5. Check user hasn't already registered
+    const existing = await prisma.tournamentRegistration.findUnique({
+      where: {
+        tournamentId_userId: {
+          tournamentId: data.tournamentId,
+          userId: session.user.id as string,
+        },
+      },
+    })
+    if (existing) {
+      return {
+        success: false,
+        message: 'Vous êtes déjà inscrit à ce tournoi.',
+      }
+    }
+
+    // 6. Validate dynamic field values
+    const validation = validateFieldValues(tournament.fields, data.fieldValues)
+    if (!validation.valid) {
+      return { success: false, message: validation.message }
+    }
+
+    // 7. Create team + member + registration in a single transaction
+    await prisma.$transaction(async tx => {
+      const team = await tx.team.create({
+        data: {
+          name: data.teamName,
+          captainId: session.user.id as string,
+          tournamentId: data.tournamentId,
+          isFull: tournament.teamSize <= 1,
+        },
+      })
+
+      await tx.teamMember.create({
+        data: {
+          teamId: team.id,
+          userId: session.user.id as string,
+        },
+      })
+
+      await tx.tournamentRegistration.create({
+        data: {
+          tournamentId: data.tournamentId,
+          userId: session.user.id as string,
+          fieldValues: data.fieldValues,
+          status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+          teamId: team.id,
+        },
+      })
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
+
+    return {
+      success: true,
+      message: 'Votre équipe a été créée et votre inscription enregistrée.',
+    }
+  },
+})
+
+/** Joins an existing team and registers the current user. */
+export const joinTeamAndRegister = authenticatedAction({
+  schema: joinTeamSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    // 1. Fetch tournament with fields
+    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
+      {
+        where: { id: data.tournamentId },
+        include: { fields: { orderBy: { order: 'asc' } } },
+      },
+    )
+
+    if (!tournament || tournament.status !== 'PUBLISHED') {
+      return {
+        success: false,
+        message: 'Ce tournoi est introuvable ou indisponible.',
+      }
+    }
+
+    // 2. Reject SOLO format
+    if (tournament.format !== 'TEAM') {
+      return {
+        success: false,
+        message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
+      }
+    }
+
+    // 3. Check registration window
+    const now = new Date()
+    if (
+      now < tournament.registrationOpen ||
+      now > tournament.registrationClose
+    ) {
+      return {
+        success: false,
+        message: 'Les inscriptions ne sont pas ouvertes.',
       }
     }
 
@@ -456,38 +701,63 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 5. Validate dynamic field values
-    for (const field of tournament.fields) {
-      const value = data.fieldValues[field.label]
-      if (field.required && (value === undefined || value === '')) {
-        return {
-          success: false,
-          message: `Le champ « ${field.label} » est requis.`,
-        }
-      }
-      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
-        if (typeof value !== 'number' || Number.isNaN(value)) {
-          return {
-            success: false,
-            message: `Le champ « ${field.label} » doit être un nombre.`,
-          }
-        }
-      }
+    // 5. Fetch team and verify it belongs to the tournament and is not full
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const team: any = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      include: { _count: { select: { members: true } } },
+    })
+
+    if (!team || team.tournamentId !== data.tournamentId) {
+      return { success: false, message: 'Équipe introuvable.' }
     }
 
-    // 6. Create the registration
-    await prisma.tournamentRegistration.create({
-      data: {
-        tournamentId: data.tournamentId,
-        userId: session.user.id as string,
-        fieldValues: data.fieldValues,
-        status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
-      },
+    if (team.isFull) {
+      return { success: false, message: 'Cette équipe est complète.' }
+    }
+
+    // 6. Validate dynamic field values
+    const validation = validateFieldValues(tournament.fields, data.fieldValues)
+    if (!validation.valid) {
+      return { success: false, message: validation.message }
+    }
+
+    // 7. Create member + registration, conditionally mark team as full
+    await prisma.$transaction(async tx => {
+      await tx.teamMember.create({
+        data: {
+          teamId: data.teamId,
+          userId: session.user.id as string,
+        },
+      })
+
+      // Mark team as full if member count reaches teamSize
+      const newMemberCount = team._count.members + 1
+      if (newMemberCount >= tournament.teamSize) {
+        await tx.team.update({
+          where: { id: data.teamId },
+          data: { isFull: true },
+        })
+      }
+
+      await tx.tournamentRegistration.create({
+        data: {
+          tournamentId: data.tournamentId,
+          userId: session.user.id as string,
+          fieldValues: data.fieldValues,
+          status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+        },
+      })
     })
 
     revalidateTag('tournaments', 'hours')
     revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
 
-    return { success: true, message: 'Votre inscription a été enregistrée.' }
+    return {
+      success: true,
+      message:
+        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
+    }
   },
 })

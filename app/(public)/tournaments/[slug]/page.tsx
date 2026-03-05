@@ -13,7 +13,10 @@ import { TournamentDetail } from '@/components/features/tournaments/tournament-d
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getGlobalSettings } from '@/lib/services/settings'
-import { getPublicTournamentBySlug } from '@/lib/services/tournaments'
+import {
+  getAvailableTeams,
+  getPublicTournamentBySlug,
+} from '@/lib/services/tournaments'
 
 interface TournamentPageProps {
   params: Promise<{ slug: string }>
@@ -47,6 +50,10 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
     notFound()
   }
 
+  // Fetch available teams for TEAM format tournaments
+  const availableTeams =
+    tournament.format === 'TEAM' ? await getAvailableTeams(tournament.id) : []
+
   return (
     <>
       <PageHeader
@@ -56,6 +63,7 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
       <TournamentDetail
         tournament={tournament}
         twitchUsername={settings.twitchUsername ?? undefined}
+        availableTeams={availableTeams}
       />
     </>
   )

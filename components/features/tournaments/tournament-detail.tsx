@@ -24,13 +24,17 @@ import { TwitchPlayer } from '@/components/features/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/features/tournaments/tournament-registration-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
-import type { PublicTournamentDetail } from '@/lib/types/tournament'
+import type {
+  AvailableTeam,
+  PublicTournamentDetail,
+} from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate, formatDateTime } from '@/lib/utils/formatting'
 
 interface TournamentDetailProps {
   tournament: PublicTournamentDetail
   twitchUsername?: string
+  availableTeams: AvailableTeam[]
 }
 
 /** Determines the registration status label and color. */
@@ -91,6 +95,7 @@ const extractTwitchChannel = (streamUrl: string): string => {
 export const TournamentDetail = ({
   tournament,
   twitchUsername,
+  availableTeams,
 }: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
@@ -362,6 +367,9 @@ export const TournamentDetail = ({
                 tournamentId={tournament.id}
                 fields={tournament.fields}
                 autoApprove={tournament.autoApprove}
+                format={tournament.format}
+                teamSize={tournament.teamSize}
+                availableTeams={availableTeams}
               />
             </>
           ) : (
