@@ -307,3 +307,24 @@ export const joinTeamSchema = z.object({
 })
 
 export type JoinTeamInput = z.infer<typeof joinTeamSchema>
+
+// ---------------------------------------------------------------------------
+// Admin team management
+// ---------------------------------------------------------------------------
+
+/** Schema for kicking a player from a team. */
+export const kickPlayerSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+  userId: z.uuid("ID d'utilisateur invalide."),
+})
+
+export type KickPlayerInput = z.infer<typeof kickPlayerSchema>
+
+/** Schema for dissolving a team entirely. */
+export const dissolveTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+})
+
+export type DissolveTeamInput = z.infer<typeof dissolveTeamSchema>

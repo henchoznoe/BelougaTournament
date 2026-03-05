@@ -16,7 +16,9 @@ import { isBanned } from '@/lib/utils/auth.helpers'
 import {
   createTeamSchema,
   deleteTournamentSchema,
+  dissolveTeamSchema,
   joinTeamSchema,
+  kickPlayerSchema,
   registerForTournamentSchema,
   tournamentSchema,
   updateRegistrationFieldsSchema,
@@ -787,5 +789,155 @@ export const joinTeamAndRegister = authenticatedAction({
       message:
         "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Admin team management
+// ---------------------------------------------------------------------------
+
+/** Kicks a player from a team. If the player is captain, promotes the next member or dissolves the team. */
+export const kickPlayer = authenticatedAction({
+  schema: kickPlayerSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async (data, session): Promise<ActionState> => {
+    const hasAccess = await checkAdminAssignment(
+      session.user.id as string,
+      session.user.role as string,
+      data.tournamentId,
+    )
+    if (!hasAccess) {
+      return {
+        success: false,
+        message: "Vous n'avez pas accès à ce tournoi.",
+      }
+    }
+
+    // Fetch team with members ordered by join date
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const team: any = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      include: {
+        members: { orderBy: { joinedAt: 'asc' } },
+      },
+    })
+
+    if (!team || team.tournamentId !== data.tournamentId) {
+      return { success: false, message: 'Équipe introuvable.' }
+    }
+
+    const isMember = team.members.some(
+      (m: { userId: string }) => m.userId === data.userId,
+    )
+    if (!isMember) {
+      return {
+        success: false,
+        message: "Ce joueur ne fait pas partie de l'équipe.",
+      }
+    }
+
+    const isCaptain = team.captainId === data.userId
+    const otherMembers = team.members.filter(
+      (m: { userId: string }) => m.userId !== data.userId,
+    )
+
+    await prisma.$transaction(async tx => {
+      // 1. Remove team member record
+      await tx.teamMember.deleteMany({
+        where: { teamId: data.teamId, userId: data.userId },
+      })
+
+      // 2. Remove tournament registration
+      await tx.tournamentRegistration.deleteMany({
+        where: { tournamentId: data.tournamentId, userId: data.userId },
+      })
+
+      if (isCaptain && otherMembers.length > 0) {
+        // 3a. Promote next member to captain
+        const newCaptain = otherMembers[0]
+
+        // Transfer the team's registration link to the new captain
+        // First, unlink the old captain's registration (already deleted above)
+        // Then set the new captain's registration to reference this team
+        await tx.tournamentRegistration.updateMany({
+          where: {
+            tournamentId: data.tournamentId,
+            userId: newCaptain.userId,
+          },
+          data: { teamId: data.teamId },
+        })
+
+        await tx.team.update({
+          where: { id: data.teamId },
+          data: { captainId: newCaptain.userId, isFull: false },
+        })
+      } else if (isCaptain && otherMembers.length === 0) {
+        // 3b. Last member — dissolve the team
+        await tx.team.delete({ where: { id: data.teamId } })
+      } else {
+        // 3c. Non-captain kicked — just mark team as not full
+        await tx.team.update({
+          where: { id: data.teamId },
+          data: { isFull: false },
+        })
+      }
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
+
+    return { success: true, message: "Le joueur a été retiré de l'équipe." }
+  },
+})
+
+/** Dissolves a team and removes all member registrations. */
+export const dissolveTeam = authenticatedAction({
+  schema: dissolveTeamSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async (data, session): Promise<ActionState> => {
+    const hasAccess = await checkAdminAssignment(
+      session.user.id as string,
+      session.user.role as string,
+      data.tournamentId,
+    )
+    if (!hasAccess) {
+      return {
+        success: false,
+        message: "Vous n'avez pas accès à ce tournoi.",
+      }
+    }
+
+    // Fetch team with members to get all user IDs
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
+    const team: any = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      include: { members: true },
+    })
+
+    if (!team || team.tournamentId !== data.tournamentId) {
+      return { success: false, message: 'Équipe introuvable.' }
+    }
+
+    const memberUserIds = team.members.map((m: { userId: string }) => m.userId)
+
+    await prisma.$transaction(async tx => {
+      // 1. Delete all member registrations for this tournament
+      await tx.tournamentRegistration.deleteMany({
+        where: {
+          tournamentId: data.tournamentId,
+          userId: { in: memberUserIds },
+        },
+      })
+
+      // 2. Delete the team (cascades to TeamMember records)
+      await tx.team.delete({ where: { id: data.teamId } })
+    })
+
+    revalidateTag('tournaments', 'hours')
+    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag('dashboard-stats', 'minutes')
+
+    return { success: true, message: "L'équipe a été dissoute." }
   },
 })
