@@ -52,9 +52,13 @@ const mockTeamCount = vi.fn()
 const mockTeamFindUnique = vi.fn()
 const mockTeamUpdate = vi.fn()
 const mockTeamMemberCreate = vi.fn()
+const mockUserFindUnique = vi.fn()
 const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
+    user: {
+      findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
+    },
     tournament: {
       create: (...args: unknown[]) => mockTournamentCreate(...args),
       update: (...args: unknown[]) => mockTournamentUpdate(...args),
@@ -1109,6 +1113,7 @@ describe('registerForTournament', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(USER_SESSION)
+    mockUserFindUnique.mockResolvedValue({ bannedUntil: null })
     mockTournamentFindUnique.mockResolvedValue(MOCK_TOURNAMENT)
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationCount.mockResolvedValue(0)
@@ -1121,6 +1126,33 @@ describe('registerForTournament', () => {
     expect(await registerForTournament(VALID_REGISTRATION_INPUT)).toEqual({
       success: false,
       message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when user is banned', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedUntil: new Date('2099-12-31T23:59:59.000Z'),
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre compte est banni.',
+    })
+    expect(mockTournamentFindUnique).not.toHaveBeenCalled()
+  })
+
+  it('allows registration when ban has expired', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedUntil: new Date('2020-01-01T00:00:00.000Z'),
+    })
+
+    const result = await registerForTournament(VALID_REGISTRATION_INPUT)
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre inscription a été enregistrée.',
     })
   })
 
@@ -1396,6 +1428,7 @@ describe('createTeamAndRegister', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(USER_SESSION)
+    mockUserFindUnique.mockResolvedValue({ bannedUntil: null })
     mockTournamentFindUnique.mockResolvedValue(MOCK_TEAM_TOURNAMENT)
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockTeamCount.mockResolvedValue(0)
@@ -1409,6 +1442,20 @@ describe('createTeamAndRegister', () => {
       success: false,
       message: 'Unauthorized',
     })
+  })
+
+  it('returns error when user is banned', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedUntil: new Date('2099-12-31T23:59:59.000Z'),
+    })
+
+    const result = await createTeamAndRegister(VALID_CREATE_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre compte est banni.',
+    })
+    expect(mockTournamentFindUnique).not.toHaveBeenCalled()
   })
 
   it('returns error when tournament is not found', async () => {
@@ -1549,6 +1596,7 @@ describe('joinTeamAndRegister', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(USER_SESSION)
+    mockUserFindUnique.mockResolvedValue({ bannedUntil: null })
     mockTournamentFindUnique.mockResolvedValue(MOCK_TEAM_TOURNAMENT)
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockTeamFindUnique.mockResolvedValue(MOCK_TEAM)
@@ -1562,6 +1610,20 @@ describe('joinTeamAndRegister', () => {
       success: false,
       message: 'Unauthorized',
     })
+  })
+
+  it('returns error when user is banned', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedUntil: new Date('2099-12-31T23:59:59.000Z'),
+    })
+
+    const result = await joinTeamAndRegister(VALID_JOIN_TEAM_INPUT)
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre compte est banni.',
+    })
+    expect(mockTournamentFindUnique).not.toHaveBeenCalled()
   })
 
   it('returns error when tournament is not found', async () => {

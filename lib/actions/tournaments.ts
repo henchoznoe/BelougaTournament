@@ -12,6 +12,7 @@ import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { isBanned } from '@/lib/utils/auth.helpers'
 import {
   createTeamSchema,
   deleteTournamentSchema,
@@ -48,6 +49,21 @@ const checkAdminAssignment = async (
     },
   })
   return !!assignment
+}
+
+/**
+ * Checks whether a user is currently banned.
+ * Returns an ActionState error if banned, or null if not banned.
+ */
+const checkBanStatus = async (userId: string): Promise<ActionState | null> => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { bannedUntil: true },
+  })
+  if (user && isBanned(user.bannedUntil)) {
+    return { success: false, message: 'Votre compte est banni.' }
+  }
+  return null
 }
 
 /** Creates a new tournament with its dynamic fields. */
@@ -402,7 +418,11 @@ export const updateRegistrationFields = authenticatedAction({
 export const registerForTournament = authenticatedAction({
   schema: registerForTournamentSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Fetch tournament with fields
+    // 1. Check ban status
+    const banResult = await checkBanStatus(session.user.id as string)
+    if (banResult) return banResult
+
+    // 2. Fetch tournament with fields
     const tournament: TournamentWithFields = await prisma.tournament.findUnique(
       {
         where: { id: data.tournamentId },
@@ -417,7 +437,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 2. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
+    // 3. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
     if (tournament.format === 'TEAM') {
       return {
         success: false,
@@ -426,7 +446,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 3. Check registration window
+    // 4. Check registration window
     const now = new Date()
     if (
       now < tournament.registrationOpen ||
@@ -438,7 +458,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 4. Check maxTeams limit (registrations count as "slots" for solo)
+    // 5. Check maxTeams limit (registrations count as "slots" for solo)
     if (tournament.maxTeams !== null) {
       const count = await prisma.tournamentRegistration.count({
         where: {
@@ -451,7 +471,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 5. Check user hasn't already registered
+    // 6. Check user hasn't already registered
     const existing = await prisma.tournamentRegistration.findUnique({
       where: {
         tournamentId_userId: {
@@ -467,7 +487,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 6. Validate dynamic field values
+    // 7. Validate dynamic field values
     for (const field of tournament.fields) {
       const value = data.fieldValues[field.label]
       if (field.required && (value === undefined || value === '')) {
@@ -486,7 +506,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 7. Create the registration
+    // 8. Create the registration
     await prisma.tournamentRegistration.create({
       data: {
         tournamentId: data.tournamentId,
@@ -536,7 +556,11 @@ const validateFieldValues = (
 export const createTeamAndRegister = authenticatedAction({
   schema: createTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Fetch tournament with fields
+    // 1. Check ban status
+    const banResult = await checkBanStatus(session.user.id as string)
+    if (banResult) return banResult
+
+    // 2. Fetch tournament with fields
     const tournament: TournamentWithFields = await prisma.tournament.findUnique(
       {
         where: { id: data.tournamentId },
@@ -551,7 +575,7 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 2. Reject SOLO format
+    // 3. Reject SOLO format
     if (tournament.format !== 'TEAM') {
       return {
         success: false,
@@ -559,7 +583,7 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 3. Check registration window
+    // 4. Check registration window
     const now = new Date()
     if (
       now < tournament.registrationOpen ||
@@ -571,7 +595,7 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 4. Check maxTeams limit (count teams, not registrations)
+    // 5. Check maxTeams limit (count teams, not registrations)
     if (tournament.maxTeams !== null) {
       const teamCount = await prisma.team.count({
         where: { tournamentId: data.tournamentId },
@@ -584,7 +608,7 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 5. Check user hasn't already registered
+    // 6. Check user hasn't already registered
     const existing = await prisma.tournamentRegistration.findUnique({
       where: {
         tournamentId_userId: {
@@ -600,13 +624,13 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 6. Validate dynamic field values
+    // 7. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    // 7. Create team + member + registration in a single transaction
+    // 8. Create team + member + registration in a single transaction
     await prisma.$transaction(async tx => {
       const team = await tx.team.create({
         data: {
@@ -650,7 +674,11 @@ export const createTeamAndRegister = authenticatedAction({
 export const joinTeamAndRegister = authenticatedAction({
   schema: joinTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Fetch tournament with fields
+    // 1. Check ban status
+    const banResult = await checkBanStatus(session.user.id as string)
+    if (banResult) return banResult
+
+    // 2. Fetch tournament with fields
     const tournament: TournamentWithFields = await prisma.tournament.findUnique(
       {
         where: { id: data.tournamentId },
@@ -665,7 +693,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 2. Reject SOLO format
+    // 3. Reject SOLO format
     if (tournament.format !== 'TEAM') {
       return {
         success: false,
@@ -673,7 +701,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 3. Check registration window
+    // 4. Check registration window
     const now = new Date()
     if (
       now < tournament.registrationOpen ||
@@ -685,7 +713,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 4. Check user hasn't already registered
+    // 5. Check user hasn't already registered
     const existing = await prisma.tournamentRegistration.findUnique({
       where: {
         tournamentId_userId: {
@@ -701,7 +729,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 5. Fetch team and verify it belongs to the tournament and is not full
+    // 6. Fetch team and verify it belongs to the tournament and is not full
     // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
     const team: any = await prisma.team.findUnique({
       where: { id: data.teamId },
@@ -716,13 +744,13 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: 'Cette équipe est complète.' }
     }
 
-    // 6. Validate dynamic field values
+    // 7. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    // 7. Create member + registration, conditionally mark team as full
+    // 8. Create member + registration, conditionally mark team as full
     await prisma.$transaction(async tx => {
       await tx.teamMember.create({
         data: {
