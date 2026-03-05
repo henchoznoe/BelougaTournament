@@ -28,7 +28,6 @@ enum RegistrationStatus {
   PENDING
   APPROVED
   REJECTED
-  WAITLIST
 }
 
 enum TournamentStatus {
@@ -152,7 +151,7 @@ model Team {
   tournamentId String
   tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   captainId    String
-  captain      User                    @relation("TeamCaptain", fields: [captainId], references: [id])
+  captain      User                    @relation("TeamCaptain", fields: [captainId], references: [id], onDelete: Cascade)
   isFull       Boolean                 @default(false)
   createdAt    DateTime                @default(now())
   members      TeamMember[]
@@ -213,6 +212,12 @@ model GlobalSettings {
   tiktokUrl String?
   youtubeUrl String?
   discordUrl String?
+  feature1Title       String?
+  feature1Description String?
+  feature2Title       String?
+  feature2Description String?
+  feature3Title       String?
+  feature3Description String?
 
   @@map("global_settings")
 }

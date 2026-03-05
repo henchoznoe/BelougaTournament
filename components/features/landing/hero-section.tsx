@@ -39,7 +39,11 @@ const itemVariants: Variants = {
   },
 }
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  twitchUrl?: string
+}
+
+export const HeroSection = ({ twitchUrl }: HeroSectionProps) => {
   const { data: session, isPending } = authClient.useSession()
 
   return (
@@ -87,8 +91,19 @@ export const HeroSection = () => {
           className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl"
         >
           L'expérience compétitive ultime fondée par{' '}
-          {/* TODO: Add link to Quentadoulive's Twitch channel */}
-          <span className="font-semibold text-blue-400">Quentadoulive</span>.
+          {twitchUrl ? (
+            <a
+              href={twitchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-blue-400 underline decoration-blue-400/30 underline-offset-2 transition-colors hover:text-blue-300 hover:decoration-blue-300/50"
+            >
+              Quentadoulive
+            </a>
+          ) : (
+            <span className="font-semibold text-blue-400">Quentadoulive</span>
+          )}
+          .
           <br />
           Affrontez les meilleurs, suivez l'action en direct sur Twitch et
           forgez votre légende.

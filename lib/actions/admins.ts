@@ -16,6 +16,7 @@ import type { ActionState } from '@/lib/types/actions'
 import {
   demoteAdminSchema,
   promoteAdminSchema,
+  updateAdminSchema,
   updateAssignmentsSchema,
 } from '@/lib/validations/admins'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -149,3 +150,53 @@ export const updateAdminAssignments = authenticatedAction({
 export const searchUsersAction = async (query: string) => {
   return searchUsers(query)
 }
+
+/** Updates an admin's display name and tournament assignments atomically. */
+export const updateAdmin = authenticatedAction({
+  schema: updateAdminSchema,
+  role: Role.SUPERADMIN,
+  handler: async (data): Promise<ActionState> => {
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { role: true, name: true },
+    })
+
+    if (!user) {
+      return { success: false, message: 'Utilisateur introuvable.' }
+    }
+
+    if (user.role === 'SUPERADMIN') {
+      return {
+        success: false,
+        message: 'Impossible de modifier un super admin.',
+      }
+    }
+
+    if (user.role !== 'ADMIN') {
+      return { success: false, message: `${user.name} n'est pas admin.` }
+    }
+
+    // Update display name and replace all assignments in a single transaction
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: data.userId },
+        data: { displayName: data.displayName },
+      }),
+      prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
+      ...(data.tournamentIds.length > 0
+        ? [
+            prisma.adminAssignment.createMany({
+              data: data.tournamentIds.map(tournamentId => ({
+                adminId: data.userId,
+                tournamentId,
+              })),
+            }),
+          ]
+        : []),
+    ])
+
+    revalidateTag('admins', 'minutes')
+
+    return { success: true, message: `${user.name} a été mis à jour.` }
+  },
+})

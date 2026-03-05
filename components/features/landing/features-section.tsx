@@ -7,6 +7,7 @@
  */
 
 import { type LucideIcon, Swords, Target, Zap } from 'lucide-react'
+import { getGlobalSettings } from '@/lib/services/settings'
 import { cn } from '@/lib/utils/cn'
 
 interface FeatureItem {
@@ -21,7 +22,8 @@ interface FeatureItem {
   }
 }
 
-const FEATURES: FeatureItem[] = [
+/** Hardcoded defaults used when the DB value is null or empty. */
+const FEATURE_DEFAULTS = [
   {
     title: 'Matchmaking Équitable',
     description:
@@ -58,7 +60,7 @@ const FEATURES: FeatureItem[] = [
       glow: 'group-hover:bg-purple-500/10',
     },
   },
-]
+] as const
 
 const FeatureCard = ({ feature }: { feature: FeatureItem }) => {
   return (
@@ -109,7 +111,33 @@ const FeatureCard = ({ feature }: { feature: FeatureItem }) => {
   )
 }
 
-export const FeaturesSection = () => {
+export const FeaturesSection = async () => {
+  const settings = await getGlobalSettings()
+
+  const features: FeatureItem[] = [
+    {
+      title: settings.feature1Title || FEATURE_DEFAULTS[0].title,
+      description:
+        settings.feature1Description || FEATURE_DEFAULTS[0].description,
+      icon: FEATURE_DEFAULTS[0].icon,
+      styles: FEATURE_DEFAULTS[0].styles,
+    },
+    {
+      title: settings.feature2Title || FEATURE_DEFAULTS[1].title,
+      description:
+        settings.feature2Description || FEATURE_DEFAULTS[1].description,
+      icon: FEATURE_DEFAULTS[1].icon,
+      styles: FEATURE_DEFAULTS[1].styles,
+    },
+    {
+      title: settings.feature3Title || FEATURE_DEFAULTS[2].title,
+      description:
+        settings.feature3Description || FEATURE_DEFAULTS[2].description,
+      icon: FEATURE_DEFAULTS[2].icon,
+      styles: FEATURE_DEFAULTS[2].styles,
+    },
+  ]
+
   return (
     <section className="relative container mx-auto px-4 py-24">
       {/* Decorative Top Line */}
@@ -135,7 +163,7 @@ export const FeaturesSection = () => {
 
       {/* Grid Layout */}
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3 md:gap-8">
-        {FEATURES.map(feature => (
+        {features.map(feature => (
           <FeatureCard key={feature.title} feature={feature} />
         ))}
       </div>

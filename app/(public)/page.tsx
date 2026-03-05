@@ -30,7 +30,7 @@ const LandingPage = async () => {
 
   return (
     <div className="flex flex-col overflow-x-hidden gap-12">
-      <HeroSection />
+      <HeroSection twitchUrl={globalSettings.twitchUrl ?? undefined} />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />

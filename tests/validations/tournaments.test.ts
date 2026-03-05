@@ -12,6 +12,7 @@ import {
   registerForTournamentSchema,
   tournamentFieldSchema,
   tournamentSchema,
+  unregisterFromTournamentSchema,
   updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
@@ -490,15 +491,6 @@ describe('updateRegistrationStatusSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('accepts WAITLIST status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'WAITLIST',
-    })
-    expect(result.success).toBe(true)
-  })
-
   it('rejects an invalid status', () => {
     expect(
       updateRegistrationStatusSchema.safeParse({
@@ -620,5 +612,36 @@ describe('registerForTournamentSchema', () => {
       fieldValues: { Name: 'John', Age: 25, Score: 100 },
     })
     expect(result.success).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// unregisterFromTournamentSchema
+// ---------------------------------------------------------------------------
+
+describe('unregisterFromTournamentSchema', () => {
+  it('accepts a valid tournamentId UUID', () => {
+    const result = unregisterFromTournamentSchema.safeParse({
+      tournamentId: VALID_UUID,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects an invalid tournamentId', () => {
+    expect(
+      unregisterFromTournamentSchema.safeParse({
+        tournamentId: INVALID_UUID,
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects missing tournamentId', () => {
+    expect(unregisterFromTournamentSchema.safeParse({}).success).toBe(false)
+  })
+
+  it('rejects empty tournamentId', () => {
+    expect(
+      unregisterFromTournamentSchema.safeParse({ tournamentId: '' }).success,
+    ).toBe(false)
   })
 })

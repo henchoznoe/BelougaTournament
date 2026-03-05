@@ -21,6 +21,12 @@ const VALID_SETTINGS = {
   instagramUrl: 'https://instagram.com/belouga',
   tiktokUrl: 'https://tiktok.com/@belouga',
   youtubeUrl: 'https://youtube.com/@belouga',
+  feature1Title: 'Matchmaking Équitable',
+  feature1Description: 'Affrontez des joueurs de votre niveau.',
+  feature2Title: 'Format Compétitif',
+  feature2Description: 'Arbre de tournoi professionnel.',
+  feature3Title: 'Diffusion en Direct',
+  feature3Description: 'Les phases finales sont diffusées sur Twitch.',
 }
 
 const EMPTY_SETTINGS = {
@@ -31,6 +37,12 @@ const EMPTY_SETTINGS = {
   instagramUrl: '',
   tiktokUrl: '',
   youtubeUrl: '',
+  feature1Title: '',
+  feature1Description: '',
+  feature2Title: '',
+  feature2Description: '',
+  feature3Title: '',
+  feature3Description: '',
 }
 
 // ---------------------------------------------------------------------------
@@ -92,5 +104,53 @@ describe('settingsSchema', () => {
 
   it('rejects missing required fields', () => {
     expect(settingsSchema.safeParse({}).success).toBe(false)
+  })
+
+  it('accepts valid feature titles and descriptions', () => {
+    const result = settingsSchema.safeParse(VALID_SETTINGS)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.feature1Title).toBe('Matchmaking Équitable')
+      expect(result.data.feature2Title).toBe('Format Compétitif')
+      expect(result.data.feature3Title).toBe('Diffusion en Direct')
+    }
+  })
+
+  it('accepts empty feature titles and descriptions (fallback to defaults)', () => {
+    const result = settingsSchema.safeParse(EMPTY_SETTINGS)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.feature1Title).toBe('')
+      expect(result.data.feature1Description).toBe('')
+    }
+  })
+
+  it('rejects a feature title exceeding 50 characters', () => {
+    const result = settingsSchema.safeParse({
+      ...EMPTY_SETTINGS,
+      feature1Title: 'A'.repeat(51),
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a feature description exceeding 200 characters', () => {
+    const result = settingsSchema.safeParse({
+      ...EMPTY_SETTINGS,
+      feature2Description: 'A'.repeat(201),
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('trims whitespace from feature fields', () => {
+    const result = settingsSchema.safeParse({
+      ...EMPTY_SETTINGS,
+      feature3Title: '  Diffusion en Direct  ',
+      feature3Description: '  Les phases finales.  ',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.feature3Title).toBe('Diffusion en Direct')
+      expect(result.data.feature3Description).toBe('Les phases finales.')
+    }
   })
 })

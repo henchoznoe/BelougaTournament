@@ -12,7 +12,11 @@ import { Suspense } from 'react'
 import { TournamentDetail } from '@/components/features/tournaments/tournament-detail'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getPublicTournamentBySlug } from '@/lib/services/tournaments'
+import { getGlobalSettings } from '@/lib/services/settings'
+import {
+  getAvailableTeams,
+  getPublicTournamentBySlug,
+} from '@/lib/services/tournaments'
 
 interface TournamentPageProps {
   params: Promise<{ slug: string }>
@@ -37,11 +41,18 @@ export const generateMetadata = async ({
 
 const TournamentContent = async ({ params }: TournamentPageProps) => {
   const { slug } = await params
-  const tournament = await getPublicTournamentBySlug(slug)
+  const [tournament, settings] = await Promise.all([
+    getPublicTournamentBySlug(slug),
+    getGlobalSettings(),
+  ])
 
   if (!tournament) {
     notFound()
   }
+
+  // Fetch available teams for TEAM format tournaments
+  const availableTeams =
+    tournament.format === 'TEAM' ? await getAvailableTeams(tournament.id) : []
 
   return (
     <>
@@ -49,7 +60,11 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
         title={tournament.title}
         description={tournament.game ?? undefined}
       />
-      <TournamentDetail tournament={tournament} />
+      <TournamentDetail
+        tournament={tournament}
+        twitchUsername={settings.twitchUsername ?? undefined}
+        availableTeams={availableTeams}
+      />
     </>
   )
 }
@@ -60,7 +75,10 @@ const TournamentPage = (props: TournamentPageProps) => {
       <Suspense
         fallback={
           <div className="mx-auto w-full max-w-3xl space-y-6">
-            <Skeleton className="mx-auto h-16 w-64 rounded-xl" />
+            <div className="mb-16 flex flex-col items-center gap-3">
+              <Skeleton className="h-10 w-56 rounded-lg md:h-12 md:w-72 bg-white/2" />
+              <Skeleton className="h-5 w-32 rounded-md bg-white/2" />
+            </div>
             <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
             <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
             <Skeleton className="h-40 rounded-3xl border border-white/5 bg-white/2" />

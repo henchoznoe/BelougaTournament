@@ -17,7 +17,11 @@ import { Button } from '@/components/ui/button'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
-export const LoginScreen = () => {
+interface LoginScreenProps {
+  redirectTo: string
+}
+
+export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
   return (
     <div className="flex h-dvh overflow-hidden w-full bg-zinc-950">
       {/* Left side - Visual (Hidden on mobile) */}
@@ -63,7 +67,7 @@ export const LoginScreen = () => {
               variant="ghost"
               className="mb-12 text-zinc-400 hover:bg-white/5 hover:text-white"
             >
-              <Link href={ROUTES.HOME}>
+              <Link href={redirectTo}>
                 <ArrowLeft className="mr-2 size-4" />
                 Retour à l'accueil
               </Link>
@@ -82,7 +86,7 @@ export const LoginScreen = () => {
             </div>
 
             <div className="rounded-2xl border border-white/5 bg-white/2 p-6 shadow-2xl backdrop-blur-xl">
-              <SocialLogin />
+              <SocialLogin redirectTo={redirectTo} />
             </div>
 
             <p className="mt-8 text-center text-xs text-zinc-600">

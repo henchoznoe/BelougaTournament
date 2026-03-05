@@ -17,21 +17,36 @@ export const metadata: Metadata = {
   title: 'Connexion',
 }
 
-/** If already authenticated, redirects to home. Otherwise renders the login form. */
-const LoginContent = async () => {
-  const session = await getSession()
-
-  if (session?.user) {
-    redirect(ROUTES.HOME)
-  }
-
-  return <LoginScreen />
+/** Returns a safe relative redirect URL from the `from` query param, falling back to home. */
+const getSafeRedirectUrl = (from?: string): string => {
+  if (from?.startsWith('/') && !from?.startsWith('//')) return from
+  return ROUTES.HOME
 }
 
-const LoginPage = () => {
+/** If already authenticated, redirects to the origin page (or home). Otherwise renders the login form. */
+const LoginContent = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) => {
+  const [{ from }, session] = await Promise.all([searchParams, getSession()])
+  const redirectTo = getSafeRedirectUrl(from)
+
+  if (session?.user) {
+    redirect(redirectTo)
+  }
+
+  return <LoginScreen redirectTo={redirectTo} />
+}
+
+const LoginPage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) => {
   return (
     <Suspense>
-      <LoginContent />
+      <LoginContent searchParams={searchParams} />
     </Suspense>
   )
 }

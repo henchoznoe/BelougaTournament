@@ -56,6 +56,7 @@ const NavbarProfile = ({
 }) => {
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleLogout = async () => {
     try {
@@ -63,7 +64,7 @@ const NavbarProfile = ({
         fetchOptions: {
           onSuccess: () => {
             toast.success('Déconnexion réussie')
-            router.push(ROUTES.HOME)
+            router.refresh()
             if (onClick) onClick()
           },
           onError: ctx => {
@@ -89,7 +90,7 @@ const NavbarProfile = ({
   if (!session?.user) {
     return (
       <Link
-        href={ROUTES.LOGIN}
+        href={`${ROUTES.LOGIN}?from=${encodeURIComponent(pathname)}`}
         onClick={onClick}
         className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
         title="Se connecter"
@@ -220,7 +221,7 @@ const NavbarProfile = ({
           <Button
             asChild
             variant="ghost"
-            className="justify-start gap-3 h-10 px-2 text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-300"
+            className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
             onClick={onClick}
           >
             <Link href={ROUTES.ADMIN_DASHBOARD}>

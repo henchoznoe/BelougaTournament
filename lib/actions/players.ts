@@ -12,7 +12,11 @@ import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
-import { banPlayerSchema, unbanPlayerSchema } from '@/lib/validations/players'
+import {
+  banPlayerSchema,
+  unbanPlayerSchema,
+  updatePlayerSchema,
+} from '@/lib/validations/players'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 /** Bans a player until the specified date. */
@@ -81,5 +85,40 @@ export const unbanPlayer = authenticatedAction({
     revalidateTag('dashboard-stats', 'minutes')
 
     return { success: true, message: `${user.name} a été débanni.` }
+  },
+})
+
+/** Updates a player's display name. */
+export const updatePlayer = authenticatedAction({
+  schema: updatePlayerSchema,
+  role: [Role.ADMIN, Role.SUPERADMIN],
+  handler: async (data): Promise<ActionState> => {
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { role: true, name: true },
+    })
+
+    if (!user) {
+      return { success: false, message: 'Utilisateur introuvable.' }
+    }
+
+    if (user.role !== Role.USER) {
+      return {
+        success: false,
+        message: 'Impossible de modifier un administrateur.',
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: data.userId },
+      data: { displayName: data.displayName },
+    })
+
+    revalidateTag('players', 'minutes')
+
+    return {
+      success: true,
+      message: `Le pseudo de ${user.name} a été mis à jour.`,
+    }
   },
 })

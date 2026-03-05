@@ -46,6 +46,7 @@ export type RecentRegistration = {
     image: string | null
   }
   tournament: {
+    id: string
     title: string
     slug: string
   }

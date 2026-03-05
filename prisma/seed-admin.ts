@@ -11,30 +11,41 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
 
-// Initial admin users
-const INITIAL_USERS = [
-  {
-    email: 'henchoznoe@gmail.com',
-    name: 'Noé Henchoz',
-    displayName: 'Noé Henchoz',
-    role: 'SUPERADMIN' as const,
-  },
-  {
-    email: 'rutschoquentin@gmail.com',
-    name: 'Quentin Rutscho',
-    displayName: 'Quentin Rutscho',
-    role: 'SUPERADMIN' as const,
-  },
-] as const
+/**
+ * Parse the SUPERADMIN_EMAILS env var (comma-separated list of emails)
+ * and derive a placeholder name from the local part of each address.
+ * The name is overwritten on first Discord OAuth login.
+ */
+const parseSuperadminEmails = () => {
+  const raw = process.env.SUPERADMIN_EMAILS?.trim()
+  if (!raw) return []
+
+  return raw
+    .split(',')
+    .map(e => e.trim())
+    .filter(Boolean)
+    .map(email => {
+      const localPart = email.split('@')[0]
+      const name = localPart.charAt(0).toUpperCase() + localPart.slice(1)
+      return { email, name, displayName: name, role: 'SUPERADMIN' as const }
+    })
+}
 
 /**
  * Seed admin users into the database.
  * Accepts an existing PrismaClient instance (used by the orchestrator).
  */
 export const seedAdmins = async (prisma: PrismaClient) => {
+  const users = parseSuperadminEmails()
+
+  if (users.length === 0) {
+    console.log('No SUPERADMIN_EMAILS configured — skipping admin seed.')
+    return
+  }
+
   console.log('Seeding admin users...')
 
-  for (const user of INITIAL_USERS) {
+  for (const user of users) {
     await prisma.user.upsert({
       where: { email: user.email },
       update: {
@@ -50,7 +61,7 @@ export const seedAdmins = async (prisma: PrismaClient) => {
       },
     })
 
-    console.log(`  User ${user.name} (${user.email}) is ready with role ${user.role}`)
+    console.log(`  User ${user.email} is ready with role ${user.role}`)
   }
 
   console.log('Admin users seeded successfully!')

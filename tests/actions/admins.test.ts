@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/admins.test.ts
- * Description: Unit tests for admin server actions (promote, demote, updateAssignments, searchUsersAction).
+ * Description: Unit tests for admin server actions (promote, demote, updateAssignments, updateAdmin, searchUsersAction).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -71,6 +71,7 @@ const {
   promoteToAdmin,
   demoteAdmin,
   updateAdminAssignments,
+  updateAdmin,
   searchUsersAction,
 } = await import('@/lib/actions/admins')
 
@@ -300,5 +301,122 @@ describe('searchUsersAction', () => {
 
     expect(result).toEqual(mockResults)
     expect(mockSearchUsers).toHaveBeenCalledWith('alice')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateAdmin
+// ---------------------------------------------------------------------------
+
+describe('updateAdmin', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockTransaction.mockResolvedValue([])
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(
+      await updateAdmin({
+        userId: VALID_UUID,
+        displayName: 'AdminXYZ',
+        tournamentIds: [],
+      }),
+    ).toEqual({ success: false, message: 'Unauthorized' })
+  })
+
+  it('returns error when user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(
+      await updateAdmin({
+        userId: VALID_UUID,
+        displayName: 'AdminXYZ',
+        tournamentIds: [],
+      }),
+    ).toEqual({ success: false, message: 'Utilisateur introuvable.' })
+  })
+
+  it('returns error when user is SUPERADMIN', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: 'SUPERADMIN', name: 'Super' })
+
+    expect(
+      await updateAdmin({
+        userId: VALID_UUID,
+        displayName: 'AdminXYZ',
+        tournamentIds: [],
+      }),
+    ).toEqual({
+      success: false,
+      message: 'Impossible de modifier un super admin.',
+    })
+  })
+
+  it('returns error when user is not an admin', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Alice' })
+
+    expect(
+      await updateAdmin({
+        userId: VALID_UUID,
+        displayName: 'AdminXYZ',
+        tournamentIds: [],
+      }),
+    ).toEqual({ success: false, message: "Alice n'est pas admin." })
+  })
+
+  it('updates displayName and assignments and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
+
+    const result = await updateAdmin({
+      userId: VALID_UUID,
+      displayName: 'CarolXYZ',
+      tournamentIds: [TOURN_UUID],
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Carol a été mis à jour.',
+    })
+    expect(mockTransaction).toHaveBeenCalledOnce()
+  })
+
+  it('handles empty tournamentIds without createMany call', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
+
+    await updateAdmin({
+      userId: VALID_UUID,
+      displayName: 'CarolXYZ',
+      tournamentIds: [],
+    })
+
+    expect(mockTransaction).toHaveBeenCalledOnce()
+    // With no tournamentIds: user.update + deleteMany = 2 items
+    const transactionArg = mockTransaction.mock.calls[0][0]
+    expect(Array.isArray(transactionArg)).toBe(true)
+    expect(transactionArg).toHaveLength(2)
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await updateAdmin({
+      userId: 'bad-id',
+      displayName: 'AdminXYZ',
+      tournamentIds: [],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns validation error when displayName is too short', async () => {
+    const result = await updateAdmin({
+      userId: VALID_UUID,
+      displayName: 'A',
+      tournamentIds: [],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
   })
 })

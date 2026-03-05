@@ -43,6 +43,12 @@ export type GlobalSettingsMinAggregateOutputType = {
   tiktokUrl: string | null
   youtubeUrl: string | null
   discordUrl: string | null
+  feature1Title: string | null
+  feature1Description: string | null
+  feature2Title: string | null
+  feature2Description: string | null
+  feature3Title: string | null
+  feature3Description: string | null
 }
 
 export type GlobalSettingsMaxAggregateOutputType = {
@@ -54,6 +60,12 @@ export type GlobalSettingsMaxAggregateOutputType = {
   tiktokUrl: string | null
   youtubeUrl: string | null
   discordUrl: string | null
+  feature1Title: string | null
+  feature1Description: string | null
+  feature2Title: string | null
+  feature2Description: string | null
+  feature3Title: string | null
+  feature3Description: string | null
 }
 
 export type GlobalSettingsCountAggregateOutputType = {
@@ -65,6 +77,12 @@ export type GlobalSettingsCountAggregateOutputType = {
   tiktokUrl: number
   youtubeUrl: number
   discordUrl: number
+  feature1Title: number
+  feature1Description: number
+  feature2Title: number
+  feature2Description: number
+  feature3Title: number
+  feature3Description: number
   _all: number
 }
 
@@ -86,6 +104,12 @@ export type GlobalSettingsMinAggregateInputType = {
   tiktokUrl?: true
   youtubeUrl?: true
   discordUrl?: true
+  feature1Title?: true
+  feature1Description?: true
+  feature2Title?: true
+  feature2Description?: true
+  feature3Title?: true
+  feature3Description?: true
 }
 
 export type GlobalSettingsMaxAggregateInputType = {
@@ -97,6 +121,12 @@ export type GlobalSettingsMaxAggregateInputType = {
   tiktokUrl?: true
   youtubeUrl?: true
   discordUrl?: true
+  feature1Title?: true
+  feature1Description?: true
+  feature2Title?: true
+  feature2Description?: true
+  feature3Title?: true
+  feature3Description?: true
 }
 
 export type GlobalSettingsCountAggregateInputType = {
@@ -108,6 +138,12 @@ export type GlobalSettingsCountAggregateInputType = {
   tiktokUrl?: true
   youtubeUrl?: true
   discordUrl?: true
+  feature1Title?: true
+  feature1Description?: true
+  feature2Title?: true
+  feature2Description?: true
+  feature3Title?: true
+  feature3Description?: true
   _all?: true
 }
 
@@ -206,6 +242,12 @@ export type GlobalSettingsGroupByOutputType = {
   tiktokUrl: string | null
   youtubeUrl: string | null
   discordUrl: string | null
+  feature1Title: string | null
+  feature1Description: string | null
+  feature2Title: string | null
+  feature2Description: string | null
+  feature3Title: string | null
+  feature3Description: string | null
   _count: GlobalSettingsCountAggregateOutputType | null
   _avg: GlobalSettingsAvgAggregateOutputType | null
   _sum: GlobalSettingsSumAggregateOutputType | null
@@ -240,6 +282,12 @@ export type GlobalSettingsWhereInput = {
   tiktokUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
   youtubeUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
   discordUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature1Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature1Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature2Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature2Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature3Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature3Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
 }
 
 export type GlobalSettingsOrderByWithRelationInput = {
@@ -251,6 +299,12 @@ export type GlobalSettingsOrderByWithRelationInput = {
   tiktokUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   discordUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature1Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature1Description?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature2Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature2Description?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature3Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature3Description?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type GlobalSettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -265,6 +319,12 @@ export type GlobalSettingsWhereUniqueInput = Prisma.AtLeast<{
   tiktokUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
   youtubeUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
   discordUrl?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature1Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature1Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature2Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature2Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature3Title?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
+  feature3Description?: Prisma.StringNullableFilter<"GlobalSettings"> | string | null
 }, "id">
 
 export type GlobalSettingsOrderByWithAggregationInput = {
@@ -276,6 +336,12 @@ export type GlobalSettingsOrderByWithAggregationInput = {
   tiktokUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   discordUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature1Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature1Description?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature2Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature2Description?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature3Title?: Prisma.SortOrderInput | Prisma.SortOrder
+  feature3Description?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GlobalSettingsCountOrderByAggregateInput
   _avg?: Prisma.GlobalSettingsAvgOrderByAggregateInput
   _max?: Prisma.GlobalSettingsMaxOrderByAggregateInput
@@ -295,6 +361,12 @@ export type GlobalSettingsScalarWhereWithAggregatesInput = {
   tiktokUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
   youtubeUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
   discordUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature1Title?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature1Description?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature2Title?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature2Description?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature3Title?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
+  feature3Description?: Prisma.StringNullableWithAggregatesFilter<"GlobalSettings"> | string | null
 }
 
 export type GlobalSettingsCreateInput = {
@@ -306,6 +378,12 @@ export type GlobalSettingsCreateInput = {
   tiktokUrl?: string | null
   youtubeUrl?: string | null
   discordUrl?: string | null
+  feature1Title?: string | null
+  feature1Description?: string | null
+  feature2Title?: string | null
+  feature2Description?: string | null
+  feature3Title?: string | null
+  feature3Description?: string | null
 }
 
 export type GlobalSettingsUncheckedCreateInput = {
@@ -317,6 +395,12 @@ export type GlobalSettingsUncheckedCreateInput = {
   tiktokUrl?: string | null
   youtubeUrl?: string | null
   discordUrl?: string | null
+  feature1Title?: string | null
+  feature1Description?: string | null
+  feature2Title?: string | null
+  feature2Description?: string | null
+  feature3Title?: string | null
+  feature3Description?: string | null
 }
 
 export type GlobalSettingsUpdateInput = {
@@ -328,6 +412,12 @@ export type GlobalSettingsUpdateInput = {
   tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsUncheckedUpdateInput = {
@@ -339,6 +429,12 @@ export type GlobalSettingsUncheckedUpdateInput = {
   tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsCreateManyInput = {
@@ -350,6 +446,12 @@ export type GlobalSettingsCreateManyInput = {
   tiktokUrl?: string | null
   youtubeUrl?: string | null
   discordUrl?: string | null
+  feature1Title?: string | null
+  feature1Description?: string | null
+  feature2Title?: string | null
+  feature2Description?: string | null
+  feature3Title?: string | null
+  feature3Description?: string | null
 }
 
 export type GlobalSettingsUpdateManyMutationInput = {
@@ -361,6 +463,12 @@ export type GlobalSettingsUpdateManyMutationInput = {
   tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsUncheckedUpdateManyInput = {
@@ -372,6 +480,12 @@ export type GlobalSettingsUncheckedUpdateManyInput = {
   tiktokUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature1Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature2Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  feature3Description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GlobalSettingsCountOrderByAggregateInput = {
@@ -383,6 +497,12 @@ export type GlobalSettingsCountOrderByAggregateInput = {
   tiktokUrl?: Prisma.SortOrder
   youtubeUrl?: Prisma.SortOrder
   discordUrl?: Prisma.SortOrder
+  feature1Title?: Prisma.SortOrder
+  feature1Description?: Prisma.SortOrder
+  feature2Title?: Prisma.SortOrder
+  feature2Description?: Prisma.SortOrder
+  feature3Title?: Prisma.SortOrder
+  feature3Description?: Prisma.SortOrder
 }
 
 export type GlobalSettingsAvgOrderByAggregateInput = {
@@ -398,6 +518,12 @@ export type GlobalSettingsMaxOrderByAggregateInput = {
   tiktokUrl?: Prisma.SortOrder
   youtubeUrl?: Prisma.SortOrder
   discordUrl?: Prisma.SortOrder
+  feature1Title?: Prisma.SortOrder
+  feature1Description?: Prisma.SortOrder
+  feature2Title?: Prisma.SortOrder
+  feature2Description?: Prisma.SortOrder
+  feature3Title?: Prisma.SortOrder
+  feature3Description?: Prisma.SortOrder
 }
 
 export type GlobalSettingsMinOrderByAggregateInput = {
@@ -409,6 +535,12 @@ export type GlobalSettingsMinOrderByAggregateInput = {
   tiktokUrl?: Prisma.SortOrder
   youtubeUrl?: Prisma.SortOrder
   discordUrl?: Prisma.SortOrder
+  feature1Title?: Prisma.SortOrder
+  feature1Description?: Prisma.SortOrder
+  feature2Title?: Prisma.SortOrder
+  feature2Description?: Prisma.SortOrder
+  feature3Title?: Prisma.SortOrder
+  feature3Description?: Prisma.SortOrder
 }
 
 export type GlobalSettingsSumOrderByAggregateInput = {
@@ -426,6 +558,12 @@ export type GlobalSettingsSelect<ExtArgs extends runtime.Types.Extensions.Intern
   tiktokUrl?: boolean
   youtubeUrl?: boolean
   discordUrl?: boolean
+  feature1Title?: boolean
+  feature1Description?: boolean
+  feature2Title?: boolean
+  feature2Description?: boolean
+  feature3Title?: boolean
+  feature3Description?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -437,6 +575,12 @@ export type GlobalSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   tiktokUrl?: boolean
   youtubeUrl?: boolean
   discordUrl?: boolean
+  feature1Title?: boolean
+  feature1Description?: boolean
+  feature2Title?: boolean
+  feature2Description?: boolean
+  feature3Title?: boolean
+  feature3Description?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -448,6 +592,12 @@ export type GlobalSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   tiktokUrl?: boolean
   youtubeUrl?: boolean
   discordUrl?: boolean
+  feature1Title?: boolean
+  feature1Description?: boolean
+  feature2Title?: boolean
+  feature2Description?: boolean
+  feature3Title?: boolean
+  feature3Description?: boolean
 }, ExtArgs["result"]["globalSettings"]>
 
 export type GlobalSettingsSelectScalar = {
@@ -459,9 +609,15 @@ export type GlobalSettingsSelectScalar = {
   tiktokUrl?: boolean
   youtubeUrl?: boolean
   discordUrl?: boolean
+  feature1Title?: boolean
+  feature1Description?: boolean
+  feature2Title?: boolean
+  feature2Description?: boolean
+  feature3Title?: boolean
+  feature3Description?: boolean
 }
 
-export type GlobalSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "twitchUsername" | "twitchUrl" | "instagramUrl" | "tiktokUrl" | "youtubeUrl" | "discordUrl", ExtArgs["result"]["globalSettings"]>
+export type GlobalSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "logoUrl" | "twitchUsername" | "twitchUrl" | "instagramUrl" | "tiktokUrl" | "youtubeUrl" | "discordUrl" | "feature1Title" | "feature1Description" | "feature2Title" | "feature2Description" | "feature3Title" | "feature3Description", ExtArgs["result"]["globalSettings"]>
 
 export type $GlobalSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSettings"
@@ -475,6 +631,12 @@ export type $GlobalSettingsPayload<ExtArgs extends runtime.Types.Extensions.Inte
     tiktokUrl: string | null
     youtubeUrl: string | null
     discordUrl: string | null
+    feature1Title: string | null
+    feature1Description: string | null
+    feature2Title: string | null
+    feature2Description: string | null
+    feature3Title: string | null
+    feature3Description: string | null
   }, ExtArgs["result"]["globalSettings"]>
   composites: {}
 }
@@ -906,6 +1068,12 @@ export interface GlobalSettingsFieldRefs {
   readonly tiktokUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
   readonly youtubeUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
   readonly discordUrl: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature1Title: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature1Description: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature2Title: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature2Description: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature3Title: Prisma.FieldRef<"GlobalSettings", 'String'>
+  readonly feature3Description: Prisma.FieldRef<"GlobalSettings", 'String'>
 }
     
 

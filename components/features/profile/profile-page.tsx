@@ -22,6 +22,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/features/profile/profile-edit-form'
+import { ProfileRegistrations } from '@/components/features/profile/profile-registrations'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import {
@@ -56,14 +57,12 @@ const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
   APPROVED: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
   REJECTED: 'border-red-500/30 bg-red-500/10 text-red-400',
-  WAITLIST: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
 } as const
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 /** Renders a single registration row as a link to the tournament detail page. */
@@ -240,14 +239,7 @@ export const ProfilePage = async () => {
           </div>
 
           {registrations.length > 0 ? (
-            <div className="space-y-2">
-              {registrations.map(registration => (
-                <RegistrationRow
-                  key={registration.id}
-                  registration={registration}
-                />
-              ))}
-            </div>
+            <ProfileRegistrations registrations={registrations} />
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <p className="max-w-sm text-sm text-zinc-500">

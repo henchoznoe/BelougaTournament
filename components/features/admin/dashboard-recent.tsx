@@ -1,17 +1,31 @@
 /**
  * File: components/features/admin/dashboard-recent.tsx
- * Description: Dashboard panels showing upcoming tournaments and recent registrations.
+ * Description: Dashboard panels showing upcoming tournaments and recent registrations with status management.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
+'use client'
+
 import { Calendar, ClipboardList, Gamepad2, Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
+import { toast } from 'sonner'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select'
+import { updateRegistrationStatus } from '@/lib/actions/tournaments'
 import type {
   RecentRegistration,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
+import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
+import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 interface UpcomingTournamentsProps {
   tournaments: UpcomingTournament[]
@@ -21,21 +35,17 @@ interface RecentRegistrationsProps {
   registrations: RecentRegistration[]
 }
 
-const REGISTRATION_STATUS_LABELS: Record<
-  string,
-  { label: string; className: string }
-> = {
-  PENDING: { label: 'En attente', className: 'bg-amber-500/10 text-amber-400' },
-  APPROVED: {
-    label: 'Approuvée',
-    className: 'bg-emerald-500/10 text-emerald-400',
-  },
-  REJECTED: { label: 'Refusée', className: 'bg-red-500/10 text-red-400' },
-  WAITLIST: {
-    label: "Liste d'attente",
-    className: 'bg-zinc-500/10 text-zinc-400',
-  },
-}
+const STATUS_STYLES: Record<RegistrationStatus, string> = {
+  PENDING: 'bg-amber-500/10 text-amber-400',
+  APPROVED: 'bg-emerald-500/10 text-emerald-400',
+  REJECTED: 'bg-red-500/10 text-red-400',
+} as const
+
+const STATUS_LABELS: Record<RegistrationStatus, string> = {
+  PENDING: 'En attente',
+  APPROVED: 'Approuvée',
+  REJECTED: 'Refusée',
+} as const
 
 export const DashboardUpcomingTournaments = ({
   tournaments,
@@ -100,6 +110,29 @@ export const DashboardUpcomingTournaments = ({
 export const DashboardRecentRegistrations = ({
   registrations,
 }: RecentRegistrationsProps) => {
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  const handleStatusChange = (
+    reg: RecentRegistration,
+    newStatus: RegistrationStatus,
+  ) => {
+    if (newStatus === reg.status) return
+    startTransition(async () => {
+      const result = await updateRegistrationStatus({
+        id: reg.id,
+        tournamentId: reg.tournament.id,
+        status: newStatus,
+      })
+      if (result.success) {
+        toast.success(result.message)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
+
   return (
     <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
@@ -115,39 +148,50 @@ export const DashboardRecentRegistrations = ({
         </p>
       ) : (
         <div className="space-y-3">
-          {registrations.map(reg => {
-            const statusInfo = REGISTRATION_STATUS_LABELS[reg.status] ?? {
-              label: reg.status,
-              className: 'bg-zinc-500/10 text-zinc-400',
-            }
-
-            return (
-              <div
-                key={reg.id}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">
-                    {reg.user.name}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-zinc-500">
-                    {reg.tournament.title}
-                    {reg.team && ` · ${reg.team.name}`}
-                  </p>
-                </div>
-                <div className="ml-4 flex flex-col items-end gap-1">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusInfo.className}`}
-                  >
-                    {statusInfo.label}
-                  </span>
-                  <span className="text-[10px] text-zinc-600">
-                    {formatDate(reg.createdAt)}
-                  </span>
-                </div>
+          {registrations.map(reg => (
+            <div
+              key={reg.id}
+              className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-white">
+                  {reg.user.name}
+                </p>
+                <p className="mt-0.5 truncate text-xs text-zinc-500">
+                  {reg.tournament.title}
+                  {reg.team && ` · ${reg.team.name}`}
+                </p>
               </div>
-            )
-          })}
+              <div className="ml-4 flex flex-col items-end gap-1">
+                <Select
+                  value={reg.status}
+                  onValueChange={val =>
+                    handleStatusChange(reg, val as RegistrationStatus)
+                  }
+                  disabled={isPending}
+                >
+                  <SelectTrigger className="h-auto w-auto gap-1 rounded-full border-none bg-transparent p-0 shadow-none">
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                        STATUS_STYLES[reg.status],
+                      )}
+                    >
+                      {STATUS_LABELS[reg.status]}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent position="popper" sideOffset={4}>
+                    <SelectItem value="PENDING">En attente</SelectItem>
+                    <SelectItem value="APPROVED">Approuvée</SelectItem>
+                    <SelectItem value="REJECTED">Refusée</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-zinc-600">
+                  {formatDate(reg.createdAt)}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

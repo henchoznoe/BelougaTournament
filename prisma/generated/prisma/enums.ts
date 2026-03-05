@@ -37,8 +37,7 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 export const RegistrationStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  WAITLIST: 'WAITLIST'
+  REJECTED: 'REJECTED'
 } as const
 
 export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]

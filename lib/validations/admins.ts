@@ -29,3 +29,16 @@ export const updateAssignmentsSchema = z.object({
 })
 
 export type UpdateAssignmentsInput = z.infer<typeof updateAssignmentsSchema>
+
+/** Schema for updating an admin's display name and tournament assignments. */
+export const updateAdminSchema = z.object({
+  userId: z.uuid('ID utilisateur invalide.'),
+  displayName: z
+    .string()
+    .trim()
+    .min(2, 'Le pseudo doit contenir au moins 2 caractères.')
+    .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.'),
+  tournamentIds: z.array(z.uuid('ID tournoi invalide.')),
+})
+
+export type UpdateAdminInput = z.infer<typeof updateAdminSchema>

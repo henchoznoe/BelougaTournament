@@ -1,13 +1,16 @@
 /**
  * File: components/features/landing/sponsors-section.tsx
- * Description: Sponsors section with infinite marquee and glassmorphism cards.
+ * Description: Sponsors showcase wall — large cards with image carousel, name and partnership date always visible.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Handshake } from 'lucide-react'
+'use client'
+
+import { ExternalLink, Handshake } from 'lucide-react'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
@@ -16,30 +19,97 @@ interface SponsorsSectionProps {
   sponsors: Sponsor[]
 }
 
-const MARQUEE_THRESHOLD = 3
+/** How long each image is shown before cycling to the next one (ms). */
+const IMAGE_CYCLE_MS = 4000
 
 const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => {
-  const content = (
+  const [activeIndex, setActiveIndex] = useState(0)
+  const imageCount = sponsor.imageUrls.length
+  const hasMultipleImages = imageCount > 1
+
+  // Auto-cycle images when there are multiple.
+  useEffect(() => {
+    if (!hasMultipleImages) return
+    const id = setInterval(
+      () => setActiveIndex(i => (i + 1) % imageCount),
+      IMAGE_CYCLE_MS,
+    )
+    return () => clearInterval(id)
+  }, [hasMultipleImages, imageCount])
+
+  const card = (
     <div
       className={cn(
-        'group relative flex h-24 w-48 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/2 px-6 backdrop-blur-md transition-all duration-500 sm:h-28 sm:w-56',
-        'hover:border-white/10 hover:bg-white/5 hover:shadow-[0_0_25px_rgba(59,130,246,0.1)]',
+        'group relative flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/2 backdrop-blur-md transition-all duration-500',
+        'hover:-translate-y-1 hover:border-blue-500/20 hover:bg-white/4 hover:shadow-[0_8px_40px_rgba(59,130,246,0.12)]',
       )}
     >
-      {sponsor.imageUrls[0] && (
-        <Image
-          src={sponsor.imageUrls[0]}
-          alt={sponsor.name}
-          width={160}
-          height={64}
-          className="max-h-12 w-auto object-contain brightness-75 grayscale transition-all duration-500 group-hover:brightness-100 group-hover:grayscale-0 sm:max-h-14"
-        />
-      )}
-      {/* Date overlay — slides up from bottom on hover */}
-      <div className="absolute inset-x-0 bottom-0 translate-y-full bg-zinc-950/90 py-1.5 text-center backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
-        <span className="text-[10px] text-zinc-400">
-          Partenaire depuis le {formatShortDate(sponsor.supportedSince)}
-        </span>
+      {/* Background hover glow */}
+      <div className="absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-blue-500/5" />
+
+      {/* Image zone — large, centered */}
+      <div className="relative z-10 flex h-40 items-center justify-center overflow-hidden bg-white/2 px-8 sm:h-48">
+        {sponsor.imageUrls.map((url, i) => (
+          <Image
+            key={url}
+            src={url}
+            alt={i === 0 ? sponsor.name : `${sponsor.name} — image ${i + 1}`}
+            width={280}
+            height={160}
+            className={cn(
+              'absolute max-h-28 w-auto max-w-[80%] object-contain brightness-[0.8] grayscale transition-all duration-700 group-hover:brightness-100 group-hover:grayscale-0 sm:max-h-32',
+              i === activeIndex
+                ? 'scale-100 opacity-100'
+                : 'scale-95 opacity-0',
+            )}
+          />
+        ))}
+
+        {/* Subtle gradient overlay at the bottom of the image zone */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-linear-to-t from-zinc-950/20 to-transparent" />
+      </div>
+
+      {/* Info bar */}
+      <div className="relative z-10 flex items-center justify-between gap-3 border-t border-white/5 px-5 py-4">
+        <div className="flex flex-col gap-1 overflow-hidden">
+          <span className="truncate text-sm font-semibold text-zinc-100 transition-colors duration-300 group-hover:text-white">
+            {sponsor.name}
+          </span>
+          <span className="text-xs text-zinc-500">
+            Partenaire depuis le {formatShortDate(sponsor.supportedSince)}
+          </span>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2.5">
+          {/* Dot indicators */}
+          {hasMultipleImages && (
+            <div className="flex items-center gap-1">
+              {sponsor.imageUrls.map((url, i) => (
+                <button
+                  key={url}
+                  type="button"
+                  onClick={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setActiveIndex(i)
+                  }}
+                  aria-label={`Image ${i + 1}`}
+                  className={cn(
+                    'size-1.5 rounded-full transition-all duration-300',
+                    i === activeIndex
+                      ? 'scale-125 bg-blue-400'
+                      : 'bg-zinc-600 hover:bg-zinc-400',
+                  )}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* External link indicator */}
+          {sponsor.url && (
+            <ExternalLink className="size-3.5 text-zinc-600 transition-colors duration-300 group-hover:text-blue-400" />
+          )}
+        </div>
       </div>
     </div>
   )
@@ -52,55 +122,12 @@ const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => {
         rel="noopener noreferrer"
         aria-label={sponsor.name}
       >
-        {content}
+        {card}
       </a>
     )
   }
 
-  return content
-}
-
-const SponsorMarquee = ({ sponsors }: { sponsors: Sponsor[] }) => {
-  // Each card ≈ 240px (w-56 on sm + gap-4). Repeat sponsors so one set
-  // is always wider than the widest viewport (~2160px) → need ≥ 9 cards/set.
-  const minCardsPerSet = 9
-  const repeatCount = Math.max(1, Math.ceil(minCardsPerSet / sponsors.length))
-  const set = Array.from({ length: repeatCount }, () => sponsors).flat()
-
-  // Scale duration with card count so scroll speed stays constant
-  const duration = `${set.length * 10}s`
-
-  return (
-    <div
-      className="group/marquee relative overflow-hidden"
-      style={{ '--marquee-duration': duration } as React.CSSProperties}
-    >
-      {/* Fade edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-linear-to-r from-zinc-950 to-transparent sm:w-32" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-linear-to-l from-zinc-950 to-transparent sm:w-32" />
-
-      {/* Marquee track — two identical sets; translates by -50% for seamless loop */}
-      <div className="flex w-max animate-[marquee_var(--marquee-duration)_linear_infinite] gap-4 group-hover/marquee:paused">
-        {set.map((sponsor, i) => (
-          <SponsorCard key={`a-${sponsor.id}-${i}`} sponsor={sponsor} />
-        ))}
-        {/* Duplicate set for seamless loop */}
-        {set.map((sponsor, i) => (
-          <SponsorCard key={`b-${sponsor.id}-${i}`} sponsor={sponsor} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const SponsorGrid = ({ sponsors }: { sponsors: Sponsor[] }) => {
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-4">
-      {sponsors.map(sponsor => (
-        <SponsorCard key={sponsor.id} sponsor={sponsor} />
-      ))}
-    </div>
-  )
+  return card
 }
 
 export const SponsorsSection = ({ sponsors }: SponsorsSectionProps) => {
@@ -108,10 +135,10 @@ export const SponsorsSection = ({ sponsors }: SponsorsSectionProps) => {
 
   return (
     <section className="relative container mx-auto px-4 py-24">
-      {/* Decorative Top Line */}
+      {/* Decorative top line */}
       <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
 
-      {/* Section Header */}
+      {/* Section header */}
       <div className="mb-16 text-center">
         <div className="mx-auto mb-6 inline-flex items-center justify-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5">
           <Handshake className="size-4 text-blue-400" />
@@ -120,7 +147,7 @@ export const SponsorsSection = ({ sponsors }: SponsorsSectionProps) => {
           </span>
         </div>
 
-        <h2 className="font-paladins text-4xl tracking-wider text-white sm:text-5xl lg:text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase">
+        <h2 className="font-paladins text-4xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase sm:text-5xl lg:text-6xl">
           Ils nous font confiance
         </h2>
 
@@ -130,12 +157,12 @@ export const SponsorsSection = ({ sponsors }: SponsorsSectionProps) => {
         </p>
       </div>
 
-      {/* Sponsors Display */}
-      {sponsors.length >= MARQUEE_THRESHOLD ? (
-        <SponsorMarquee sponsors={sponsors} />
-      ) : (
-        <SponsorGrid sponsors={sponsors} />
-      )}
+      {/* Showcase wall */}
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {sponsors.map(sponsor => (
+          <SponsorCard key={sponsor.id} sponsor={sponsor} />
+        ))}
+      </div>
     </section>
   )
 }

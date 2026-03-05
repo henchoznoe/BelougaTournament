@@ -21,14 +21,18 @@ import type {
 export type UserRegistrationItem = {
   id: string
   status: RegistrationStatus
+  fieldValues: Record<string, string | number>
   createdAt: Date
   tournament: {
+    id: string
     title: string
     slug: string
     game: string | null
     format: TournamentFormat
     startDate: Date
     status: TournamentStatus
+    autoApprove: boolean
+    fields: TournamentFieldItem[]
   }
 }
 
@@ -192,5 +196,17 @@ export type PublicTournamentDetail = {
   _count: {
     registrations: number
     teams: number
+  }
+}
+
+/** A non-full team available for joining in the public registration dropdown. */
+export type AvailableTeam = {
+  id: string
+  name: string
+  captain: {
+    displayName: string
+  }
+  _count: {
+    members: number
   }
 }

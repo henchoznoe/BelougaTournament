@@ -1496,7 +1496,13 @@ export const GlobalSettingsScalarFieldEnum = {
   instagramUrl: 'instagramUrl',
   tiktokUrl: 'tiktokUrl',
   youtubeUrl: 'youtubeUrl',
-  discordUrl: 'discordUrl'
+  discordUrl: 'discordUrl',
+  feature1Title: 'feature1Title',
+  feature1Description: 'feature1Description',
+  feature2Title: 'feature2Title',
+  feature2Description: 'feature2Description',
+  feature3Title: 'feature3Title',
+  feature3Description: 'feature3Description'
 } as const
 
 export type GlobalSettingsScalarFieldEnum = (typeof GlobalSettingsScalarFieldEnum)[keyof typeof GlobalSettingsScalarFieldEnum]

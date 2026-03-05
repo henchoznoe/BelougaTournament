@@ -12,12 +12,15 @@ import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 
 type SocialProvider = 'discord'
 
-export default function SocialLogin() {
+interface SocialLoginProps {
+  redirectTo: string
+}
+
+export default function SocialLogin({ redirectTo }: SocialLoginProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleLogin = async (provider: SocialProvider) => {
@@ -25,7 +28,7 @@ export default function SocialLogin() {
       setIsLoading(true)
       const { error } = await authClient.signIn.social({
         provider: provider,
-        callbackURL: ROUTES.HOME,
+        callbackURL: redirectTo,
       })
 
       if (error) {

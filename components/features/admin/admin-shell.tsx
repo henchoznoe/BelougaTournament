@@ -9,7 +9,7 @@
 'use client'
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AdminSidebar } from '@/components/features/admin/admin-sidebar'
 import { AdminTopbar } from '@/components/features/admin/admin-topbar'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
@@ -20,18 +20,29 @@ interface AdminShellProps {
 }
 
 export const AdminShell = ({ children }: AdminShellProps) => {
-  const [collapsed, setCollapsed] = useState<boolean>(false)
+  const [collapsed, setCollapsed] = useState<boolean>(true)
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
+
+  // Restore persisted sidebar preference; default is collapsed (true).
+  useEffect(() => {
+    const stored = localStorage.getItem('admin-sidebar-collapsed')
+    if (stored !== null) setCollapsed(stored === 'true')
+  }, [])
+
+  const handleToggle = () => {
+    setCollapsed(prev => {
+      const next = !prev
+      localStorage.setItem('admin-sidebar-collapsed', String(next))
+      return next
+    })
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex h-dvh bg-zinc-950">
         {/* Desktop sidebar */}
         <div className="hidden md:flex">
-          <AdminSidebar
-            collapsed={collapsed}
-            onToggle={() => setCollapsed(prev => !prev)}
-          />
+          <AdminSidebar collapsed={collapsed} onToggle={handleToggle} />
         </div>
 
         {/* Mobile sidebar (Sheet) */}

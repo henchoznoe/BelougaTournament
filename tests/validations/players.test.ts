@@ -7,7 +7,11 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { banPlayerSchema, unbanPlayerSchema } from '@/lib/validations/players'
+import {
+  banPlayerSchema,
+  unbanPlayerSchema,
+  updatePlayerSchema,
+} from '@/lib/validations/players'
 
 const VALID_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 const INVALID_UUID = 'not-a-uuid'
@@ -104,5 +108,78 @@ describe('unbanPlayerSchema', () => {
 
   it('rejects missing userId', () => {
     expect(unbanPlayerSchema.safeParse({}).success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updatePlayerSchema
+// ---------------------------------------------------------------------------
+
+describe('updatePlayerSchema', () => {
+  it('accepts a valid userId and displayName', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: 'PlayerXYZ',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts displayName of exactly 2 characters', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: 'AB',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts displayName of exactly 32 characters', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: 'A'.repeat(32),
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects displayName shorter than 2 characters', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: 'A',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects displayName longer than 32 characters', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: 'A'.repeat(33),
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('trims whitespace before validation', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: '  A  ',
+    })
+    // After trim "A" has length 1 — should fail min(2)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects an invalid userId', () => {
+    const result = updatePlayerSchema.safeParse({
+      userId: INVALID_UUID,
+      displayName: 'PlayerXYZ',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing displayName', () => {
+    const result = updatePlayerSchema.safeParse({ userId: VALID_UUID })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing userId', () => {
+    const result = updatePlayerSchema.safeParse({ displayName: 'PlayerXYZ' })
+    expect(result.success).toBe(false)
   })
 })

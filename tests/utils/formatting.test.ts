@@ -7,7 +7,11 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  formatDate,
+  formatDateTime,
+  formatShortDate,
+} from '@/lib/utils/formatting'
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -60,5 +64,28 @@ describe('formatDateTime', () => {
     const result = formatDateTime(new Date(2026, 11, 25, 18, 0))
     expect(result).toContain('décembre')
     expect(result).toContain('2026')
+  })
+})
+
+describe('formatShortDate', () => {
+  it('formats as dd.MM.yyyy', () => {
+    expect(formatShortDate(new Date(2026, 2, 15))).toBe('15.03.2026')
+  })
+
+  it('zero-pads single-digit day and month', () => {
+    expect(formatShortDate(new Date(2026, 0, 5))).toBe('05.01.2026')
+  })
+
+  it('accepts a numeric timestamp', () => {
+    expect(formatShortDate(new Date(2026, 11, 25).getTime())).toBe('25.12.2026')
+  })
+
+  it('accepts a string date', () => {
+    const result = formatShortDate('2026-06-21T10:00:00.000Z')
+    expect(result).toMatch(/^\d{2}\.\d{2}\.\d{4}$/)
+  })
+
+  it('formats last day of year correctly', () => {
+    expect(formatShortDate(new Date(2026, 11, 31))).toBe('31.12.2026')
   })
 })

@@ -224,7 +224,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                       <SelectTrigger className="h-7 w-auto gap-1.5 rounded-full border-none bg-transparent p-0 shadow-none">
                         <TournamentStatusBadge status={tournament.status} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" sideOffset={4}>
                         <SelectItem value="DRAFT">Brouillon</SelectItem>
                         <SelectItem value="PUBLISHED">Publié</SelectItem>
                         <SelectItem value="ARCHIVED">Archivé</SelectItem>

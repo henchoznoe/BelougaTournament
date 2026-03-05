@@ -244,12 +244,12 @@ export type UpdateTournamentStatusInput = z.infer<
   typeof updateTournamentStatusSchema
 >
 
-/** Schema for updating a registration's status (approve / reject / waitlist). */
+/** Schema for updating a registration's status (approve / reject). */
 export const updateRegistrationStatusSchema = z.object({
   id: z.uuid("ID d'inscription invalide."),
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'WAITLIST'], {
-    message: 'Le statut doit être PENDING, APPROVED, REJECTED ou WAITLIST.',
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED'], {
+    message: 'Le statut doit être PENDING, APPROVED ou REJECTED.',
   }),
 })
 
@@ -270,3 +270,74 @@ export const registerForTournamentSchema = z.object({
 export type RegisterForTournamentInput = z.infer<
   typeof registerForTournamentSchema
 >
+
+/** Schema for a user editing their existing registration field values. */
+export const updateRegistrationFieldsSchema = z.object({
+  registrationId: z.uuid("ID d'inscription invalide."),
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type UpdateRegistrationFieldsInput = z.infer<
+  typeof updateRegistrationFieldsSchema
+>
+
+// ---------------------------------------------------------------------------
+// Team registration (public)
+// ---------------------------------------------------------------------------
+
+/** Schema for creating a team and registering as captain. */
+export const createTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamName: z
+    .string()
+    .trim()
+    .min(2, "Le nom de l'équipe doit contenir au moins 2 caractères.")
+    .max(30, "Le nom de l'équipe ne peut pas dépasser 30 caractères."),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type CreateTeamInput = z.infer<typeof createTeamSchema>
+
+/** Schema for joining an existing team and registering. */
+export const joinTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+})
+
+export type JoinTeamInput = z.infer<typeof joinTeamSchema>
+
+// ---------------------------------------------------------------------------
+// Player unregistration
+// ---------------------------------------------------------------------------
+
+/** Schema for a player cancelling their own registration. */
+export const unregisterFromTournamentSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+})
+
+export type UnregisterFromTournamentInput = z.infer<
+  typeof unregisterFromTournamentSchema
+>
+
+// ---------------------------------------------------------------------------
+// Admin team management
+// ---------------------------------------------------------------------------
+
+/** Schema for kicking a player from a team. */
+export const kickPlayerSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+  userId: z.uuid("ID d'utilisateur invalide."),
+})
+
+export type KickPlayerInput = z.infer<typeof kickPlayerSchema>
+
+/** Schema for dissolving a team entirely. */
+export const dissolveTeamSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+  teamId: z.uuid("ID d'équipe invalide."),
+})
+
+export type DissolveTeamInput = z.infer<typeof dissolveTeamSchema>

@@ -132,6 +132,7 @@ export const getRecentRegistrations = async (
         },
         tournament: {
           select: {
+            id: true,
             title: true,
             slug: true,
           },

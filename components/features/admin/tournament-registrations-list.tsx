@@ -8,11 +8,12 @@
 
 'use client'
 
-import { Search } from 'lucide-react'
+import { Download, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -38,14 +39,12 @@ const STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'bg-amber-500/10 text-amber-400',
   APPROVED: 'bg-emerald-500/10 text-emerald-400',
   REJECTED: 'bg-red-500/10 text-red-400',
-  WAITLIST: 'bg-blue-500/10 text-blue-400',
 } as const
 
 const STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 interface TournamentRegistrationsListProps {
@@ -92,6 +91,10 @@ export const TournamentRegistrationsList = ({
     })
   }
 
+  const handleExportCsv = () => {
+    window.open(`/api/admin/tournaments/${tournamentId}/export-csv`)
+  }
+
   const statusCount = (status: RegistrationStatus) =>
     registrations.filter(r => r.status === status).length
 
@@ -99,14 +102,24 @@ export const TournamentRegistrationsList = ({
     <>
       {/* Search + stats */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-xs flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
-          <Input
-            placeholder="Rechercher une inscription..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative max-w-xs flex-1">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+            <Input
+              placeholder="Rechercher une inscription..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
+            />
+          </div>
+          <Button
+            className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+            onClick={handleExportCsv}
+            disabled={registrations.length === 0}
+          >
+            <Download className="size-4" />
+            <span className="hidden sm:inline">Exporter CSV</span>
+          </Button>
         </div>
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span>
@@ -122,11 +135,6 @@ export const TournamentRegistrationsList = ({
           {statusCount('PENDING') > 0 && (
             <span className="text-amber-400">
               {statusCount('PENDING')} en attente
-            </span>
-          )}
-          {statusCount('WAITLIST') > 0 && (
-            <span className="text-blue-400">
-              {statusCount('WAITLIST')} en liste d'attente
             </span>
           )}
         </div>
@@ -233,13 +241,10 @@ export const TournamentRegistrationsList = ({
                           {STATUS_LABELS[registration.status]}
                         </span>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" sideOffset={4}>
                         <SelectItem value="PENDING">En attente</SelectItem>
                         <SelectItem value="APPROVED">Approuvée</SelectItem>
                         <SelectItem value="REJECTED">Refusée</SelectItem>
-                        <SelectItem value="WAITLIST">
-                          Liste d'attente
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

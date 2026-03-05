@@ -18,6 +18,7 @@ import { LogoPicker } from '@/components/features/admin/logo-picker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { updateSettings } from '@/lib/actions/settings'
 import { type SettingsInput, settingsSchema } from '@/lib/validations/settings'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
@@ -49,6 +50,12 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
       instagramUrl: fromNullable(settings.instagramUrl),
       tiktokUrl: fromNullable(settings.tiktokUrl),
       youtubeUrl: fromNullable(settings.youtubeUrl),
+      feature1Title: fromNullable(settings.feature1Title),
+      feature1Description: fromNullable(settings.feature1Description),
+      feature2Title: fromNullable(settings.feature2Title),
+      feature2Description: fromNullable(settings.feature2Description),
+      feature3Title: fromNullable(settings.feature3Title),
+      feature3Description: fromNullable(settings.feature3Description),
     },
   })
 
@@ -159,6 +166,96 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
 
       <div className="h-px bg-white/5" />
 
+      {/* Features section */}
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase">
+            Fonctionnalités
+          </h3>
+          <p className="mt-1 text-xs text-zinc-600">
+            Titre et description des 3 cartes affichées sur la page d'accueil.
+            Laissez vide pour utiliser les valeurs par défaut.
+          </p>
+        </div>
+
+        {/* Feature 1 — orange */}
+        <div className="space-y-3 rounded-xl border border-orange-500/10 bg-orange-500/5 p-4">
+          <p className="text-xs font-medium text-orange-400/80">
+            Fonctionnalité 1
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SettingsField
+              id="feature1Title"
+              label="Titre"
+              placeholder="Matchmaking Équitable"
+              error={errors.feature1Title?.message}
+              disabled={isPending}
+              {...register('feature1Title')}
+            />
+            <SettingsTextareaField
+              id="feature1Description"
+              label="Description"
+              placeholder="Affrontez des joueurs de votre niveau grâce à notre système de rangs strict. Pas de smurfs, juste du pur talent."
+              error={errors.feature1Description?.message}
+              disabled={isPending}
+              {...register('feature1Description')}
+            />
+          </div>
+        </div>
+
+        {/* Feature 2 — blue */}
+        <div className="space-y-3 rounded-xl border border-blue-500/10 bg-blue-500/5 p-4">
+          <p className="text-xs font-medium text-blue-400/80">
+            Fonctionnalité 2
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SettingsField
+              id="feature2Title"
+              label="Titre"
+              placeholder="Format Compétitif"
+              error={errors.feature2Title?.message}
+              disabled={isPending}
+              {...register('feature2Title')}
+            />
+            <SettingsTextareaField
+              id="feature2Description"
+              label="Description"
+              placeholder="Arbre de tournoi professionnel, phases de poules et playoffs. Vivez la pression des grandes ligues e-sport."
+              error={errors.feature2Description?.message}
+              disabled={isPending}
+              {...register('feature2Description')}
+            />
+          </div>
+        </div>
+
+        {/* Feature 3 — purple */}
+        <div className="space-y-3 rounded-xl border border-purple-500/10 bg-purple-500/5 p-4">
+          <p className="text-xs font-medium text-purple-400/80">
+            Fonctionnalité 3
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SettingsField
+              id="feature3Title"
+              label="Titre"
+              placeholder="Diffusion en Direct"
+              error={errors.feature3Title?.message}
+              disabled={isPending}
+              {...register('feature3Title')}
+            />
+            <SettingsTextareaField
+              id="feature3Description"
+              label="Description"
+              placeholder="Les phases finales sont commentées et diffusées sur notre chaîne Twitch. Montrez votre talent à toute la communauté."
+              error={errors.feature3Description?.message}
+              disabled={isPending}
+              {...register('feature3Description')}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px bg-white/5" />
+
       {/* Submit */}
       <div className="flex justify-end">
         <Button
@@ -200,6 +297,34 @@ const SettingsField = ({
         id={id}
         className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
         {...inputProps}
+      />
+      {error && <p className="text-xs text-red-400">{error}</p>}
+    </div>
+  )
+}
+
+/** Internal reusable textarea field component for settings multi-line inputs. */
+interface SettingsTextareaFieldProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string
+  error?: string
+}
+
+const SettingsTextareaField = ({
+  id,
+  label,
+  error,
+  ...textareaProps
+}: SettingsTextareaFieldProps) => {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-xs font-medium text-zinc-400">
+        {label}
+      </Label>
+      <Textarea
+        id={id}
+        className="min-h-20 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+        {...textareaProps}
       />
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>

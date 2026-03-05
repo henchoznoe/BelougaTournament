@@ -11,6 +11,7 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
+  AvailableTeam,
   PublicTournamentDetail,
   PublicTournamentListItem,
   TeamItem,
@@ -311,6 +312,40 @@ export const getPublicTournamentBySlug = async (
   }
 }
 
+/** Fetches non-full teams for a tournament (public registration dropdown). */
+export const getAvailableTeams = async (
+  tournamentId: string,
+): Promise<AvailableTeam[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('tournaments')
+
+  try {
+    const rows = await prisma.team.findMany({
+      where: { tournamentId, isFull: false },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        captain: {
+          select: {
+            displayName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    })
+    return rows as unknown as AvailableTeam[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching available teams')
+    return []
+  }
+}
+
 // ---------------------------------------------------------------------------
 // User registration services (profile page)
 // ---------------------------------------------------------------------------
@@ -319,15 +354,28 @@ export const getPublicTournamentBySlug = async (
 const USER_REGISTRATION_SELECT = {
   id: true,
   status: true,
+  fieldValues: true,
   createdAt: true,
   tournament: {
     select: {
+      id: true,
       title: true,
       slug: true,
       game: true,
       format: true,
       startDate: true,
       status: true,
+      autoApprove: true,
+      fields: {
+        orderBy: { order: 'asc' as const },
+        select: {
+          id: true,
+          label: true,
+          type: true,
+          required: true,
+          order: true,
+        },
+      },
     },
   },
 } as const

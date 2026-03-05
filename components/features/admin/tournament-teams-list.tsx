@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/tournament-teams-list.tsx
- * Description: Client component displaying tournament teams with members and registration status.
+ * Description: Client component displaying tournament teams with members, registration status, and admin actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,9 +8,22 @@
 
 'use client'
 
-import { Crown, Search } from 'lucide-react'
+import { Crown, Loader2, Search, Trash2, UserMinus } from 'lucide-react'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -26,7 +39,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { TeamItem } from '@/lib/types/tournament'
+import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
+import type { TeamItem, TeamMemberItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
 import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
@@ -35,22 +49,35 @@ const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
   PENDING: 'bg-amber-500/10 text-amber-400',
   APPROVED: 'bg-emerald-500/10 text-emerald-400',
   REJECTED: 'bg-red-500/10 text-red-400',
-  WAITLIST: 'bg-blue-500/10 text-blue-400',
 } as const
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
   PENDING: 'En attente',
   APPROVED: 'Approuvée',
   REJECTED: 'Refusée',
-  WAITLIST: "Liste d'attente",
 } as const
 
 interface TournamentTeamsListProps {
   teams: TeamItem[]
+  tournamentId: string
 }
 
-export const TournamentTeamsList = ({ teams }: TournamentTeamsListProps) => {
+export const TournamentTeamsList = ({
+  teams,
+  tournamentId,
+}: TournamentTeamsListProps) => {
   const [search, setSearch] = useState('')
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  // State for kick member dialog
+  const [kickingTeam, setKickingTeam] = useState<TeamItem | undefined>()
+  const [kickingMember, setKickingMember] = useState<
+    (TeamMemberItem & { teamId: string }) | undefined
+  >()
+
+  // State for dissolve team dialog
+  const [dissolvingTeam, setDissolvingTeam] = useState<TeamItem | undefined>()
 
   const filtered = useMemo(() => {
     if (!search) return teams
@@ -69,6 +96,42 @@ export const TournamentTeamsList = ({ teams }: TournamentTeamsListProps) => {
   }, [teams, search])
 
   const fullCount = teams.filter(t => t.isFull).length
+
+  const handleKick = () => {
+    if (!kickingMember) return
+    startTransition(async () => {
+      const result = await kickPlayer({
+        tournamentId,
+        teamId: kickingMember.teamId,
+        userId: kickingMember.user.id,
+      })
+      if (result.success) {
+        toast.success(result.message)
+        setKickingMember(undefined)
+        setKickingTeam(undefined)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
+
+  const handleDissolve = () => {
+    if (!dissolvingTeam) return
+    startTransition(async () => {
+      const result = await dissolveTeam({
+        tournamentId,
+        teamId: dissolvingTeam.id,
+      })
+      if (result.success) {
+        toast.success(result.message)
+        setDissolvingTeam(undefined)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
 
   return (
     <>
@@ -120,6 +183,9 @@ export const TournamentTeamsList = ({ teams }: TournamentTeamsListProps) => {
                 </TableHead>
                 <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Inscription
+                </TableHead>
+                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -231,11 +297,206 @@ export const TournamentTeamsList = ({ teams }: TournamentTeamsListProps) => {
                       <span className="text-xs text-zinc-600">—</span>
                     )}
                   </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setKickingTeam(team)}
+                        className="text-zinc-400 hover:text-amber-400"
+                        title="Retirer un membre"
+                      >
+                        <UserMinus className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setDissolvingTeam(team)}
+                        className="text-zinc-400 hover:text-red-400"
+                        title="Dissoudre l'équipe"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+      )}
+
+      {/* Kick member dialog — step 1: select member */}
+      {kickingTeam && !kickingMember && (
+        <AlertDialog
+          open={!!kickingTeam}
+          onOpenChange={open => {
+            if (!open) setKickingTeam(undefined)
+          }}
+        >
+          <AlertDialogContent className="border-white/10 bg-zinc-950">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">
+                Retirer un membre
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-400">
+                Sélectionnez le membre à retirer de l'équipe{' '}
+                <span className="font-medium text-zinc-200">
+                  {kickingTeam.name}
+                </span>
+                .
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-1">
+              {kickingTeam.members.map(member => (
+                <button
+                  key={member.id}
+                  type="button"
+                  onClick={() =>
+                    setKickingMember({
+                      ...member,
+                      teamId: kickingTeam.id,
+                    })
+                  }
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-white/5"
+                >
+                  <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+                    {member.user.image ? (
+                      <Image
+                        src={member.user.image}
+                        alt={member.user.name}
+                        width={32}
+                        height={32}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs font-medium text-zinc-400">
+                        {member.user.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-zinc-200">
+                      {member.user.displayName}
+                    </p>
+                  </div>
+                  {member.user.id === kickingTeam.captain.id && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-amber-400">
+                      <Crown className="size-3" />
+                      Capitaine
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white">
+                Annuler
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Kick member dialog — step 2: confirm */}
+      {kickingMember && (
+        <AlertDialog
+          open={!!kickingMember}
+          onOpenChange={open => {
+            if (!open) {
+              setKickingMember(undefined)
+              setKickingTeam(undefined)
+            }
+          }}
+        >
+          <AlertDialogContent className="border-white/10 bg-zinc-950">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">
+                Confirmer le retrait
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-400">
+                Êtes-vous sûr de vouloir retirer{' '}
+                <span className="font-medium text-zinc-200">
+                  {kickingMember.user.displayName}
+                </span>{' '}
+                de l'équipe{' '}
+                <span className="font-medium text-zinc-200">
+                  {kickingTeam?.name}
+                </span>
+                ? Son inscription au tournoi sera également supprimée.
+                {kickingTeam &&
+                  kickingMember.user.id === kickingTeam.captain.id && (
+                    <span className="mt-1 block text-amber-400">
+                      Ce joueur est capitaine. Le membre suivant deviendra
+                      capitaine automatiquement.
+                    </span>
+                  )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={isPending}
+                className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
+              >
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isPending}
+                variant="destructive"
+                className="bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                onClick={handleKick}
+              >
+                {isPending && <Loader2 className="size-4 animate-spin" />}
+                Retirer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Dissolve team dialog */}
+      {dissolvingTeam && (
+        <AlertDialog
+          open={!!dissolvingTeam}
+          onOpenChange={open => {
+            if (!open) setDissolvingTeam(undefined)
+          }}
+        >
+          <AlertDialogContent className="border-white/10 bg-zinc-950">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">
+                Dissoudre l'équipe
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-400">
+                Êtes-vous sûr de vouloir dissoudre l'équipe{' '}
+                <span className="font-medium text-zinc-200">
+                  {dissolvingTeam.name}
+                </span>
+                ? Tous les membres ({dissolvingTeam.members.length}) seront
+                désinscris du tournoi. Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={isPending}
+                className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
+              >
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isPending}
+                variant="destructive"
+                className="bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                onClick={handleDissolve}
+              >
+                {isPending && <Loader2 className="size-4 animate-spin" />}
+                Dissoudre
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </>
   )
