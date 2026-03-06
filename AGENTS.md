@@ -14,37 +14,42 @@ Next.js 16 (App Router, RSC, Server Actions), React 19, TypeScript (strict), Pri
 | `pnpm lint`          | Biome lint                                       |
 | `pnpm format`        | Biome format (write)                             |
 | `pnpm check`         | Biome check (lint + format, write)               |
-| `pnpm test`          | Vitest (all tests)                               |
+| `pnpm test`          | Vitest run (all tests)                           |
 | `pnpm test:coverage` | Vitest with v8 coverage                          |
 | `pnpm knip`          | Detect dead/unused code                          |
 | `npx tsc --noEmit`   | Type-check only                                  |
 | `pnpm docker:up`     | Start local PostgreSQL                           |
 
 ```bash
-# Single test
+# Run a single test file
 pnpm vitest run tests/path/to/file.test.ts
+# Run tests matching a name pattern
 pnpm vitest run -t "test name pattern"
-```
-
-Tests live in the top-level `tests/` directory (not colocated), organized into subdirectories by layer. Vitest `globals: true`.
-
-```
-tests/
-├── utils/          # lib/utils/* helpers (cn, auth.helpers, prisma-error, formatting, commit-hash)
-├── validations/    # lib/validations/* Zod schemas (admins, players, profile, settings, sponsors)
-├── services/       # lib/services/* data-access functions (auth, admins, dashboard, players, settings, sponsors, users)
-├── actions/        # lib/actions/* server actions (safe-action, admins, players, profile, settings, sponsors)
-└── proxy.test.ts   # Edge middleware guard
 ```
 
 **CI** (`.github/workflows/ci.yml`): Node 22 + pnpm 10 → `tsc --noEmit` → `biome lint` → `biome format` → `vitest run`.
 **Pre-commit**: Husky + lint-staged runs `biome check --write` on staged `*.{ts,tsx,css}`.
 
+## Tests
+
+Tests live in the top-level `tests/` directory (NOT colocated), organized by layer. Vitest `globals: true` (no need to import `describe`/`it`/`expect`). Environment: `node`.
+
+```
+tests/
+├── utils/          # lib/utils/* helpers
+├── validations/    # lib/validations/* Zod schemas
+├── services/       # lib/services/* data-access functions
+├── actions/        # lib/actions/* server actions
+├── api/            # app/api/* route handlers
+├── seo/            # robots.ts, sitemap.ts
+└── proxy.test.ts   # Edge middleware guard
+```
+
 ## Code Style
 
 ### Biome (NOT ESLint/Prettier)
 
-Single quotes, semicolons as-needed, trailing commas all, arrow parens as-needed, 2-space indent, 120 char max line (`.editorconfig`). `noExplicitAny: error`, `useNodejsImportProtocol: error`.
+Single quotes, semicolons as-needed, trailing commas all, arrow parens as-needed, 2-space indent, 120 char max line. `noExplicitAny: error`, `useNodejsImportProtocol: error`.
 
 ### File Headers
 
@@ -62,13 +67,12 @@ Every `.ts`/`.tsx` file starts with:
 
 ### Imports
 
-1. External packages first, then internal `@/` imports. No blank lines between groups.
+External packages first, then internal `@/` imports. No blank lines between groups.
 
 ### Components
 
 - **Arrow functions only**: `const MyComponent = () => { ... }`
-- **Named exports** for feature/UI components: `export const MyComponent = ...`
-- **Default exports** for pages/layouts only, on a separate final line
+- **Named exports** for feature/UI components; **default exports** only for pages/layouts (separate final line)
 - `'use client'` / `'use server'` goes **after** the file header
 - Props destructured in parameters; use `interface` for props, `type` for unions
 
@@ -79,15 +83,15 @@ Every `.ts`/`.tsx` file starts with:
 | Files              | kebab-case       | `safe-action.ts`                 |
 | Components         | PascalCase       | `PublicNavbar`                   |
 | Variables/funcs    | camelCase        | `handleLogout`                   |
-| Constants (objects)| UPPER_SNAKE_CASE | `ROUTES`, `ADMIN_NAV`            |
+| Constants (objects)| UPPER_SNAKE_CASE | `ROUTES`, `CACHE_TAGS`           |
 | Types/Interfaces   | PascalCase       | `AuthSession`, `ActionState`     |
 | Prisma enums       | UPPER_SNAKE_CASE | `SUPERADMIN`, `DRAFT`            |
 
 ### Types & Validation
 
-- Type definitions: `lib/types/`. Zod schemas: `lib/validations/`. Prisma types: `@/prisma/generated/prisma/`.
-- **Zod v4** (`^4.3.6`) — uses `z.url()`, `z.uuid()`.
-- Env vars validated at startup via Zod (`lib/core/env.ts`); never access `process.env` directly.
+- Type definitions in `lib/types/`, Zod schemas in `lib/validations/`, Prisma types from `@/prisma/generated/prisma/`.
+- **Zod v4** — uses `z.url()`, `z.uuid()`. Use `z.number()` + `register('field', { valueAsNumber: true })` for numeric fields (not `z.coerce.number()`).
+- Env vars validated at startup via Zod (`lib/core/env.ts`); **never** access `process.env` directly.
 - Use `as const` on constant objects.
 
 ### Error Handling
@@ -104,7 +108,7 @@ Every `.ts`/`.tsx` file starts with:
 - TailwindCSS v4, CSS variables in `app/globals.css`
 - `cn()` from `@/lib/utils/cn` (clsx + tailwind-merge) — **not** `@/lib/utils`
 - shadcn/ui: new-york style, zinc base, lucide icons. Install: `pnpm dlx shadcn@latest add <name> -y`
-- After install, fix imports to `@/lib/utils/cn`, add file header, convert to arrow functions
+- After install: fix import to `@/lib/utils/cn`, add file header, convert to arrow functions
 
 ## Project Structure
 
@@ -112,24 +116,22 @@ Every `.ts`/`.tsx` file starts with:
 app/
 ├── (public)/             # Public pages (landing, tournaments, stream, contact, profile)
 ├── admin/                # Protected admin (AdminGuard + proxy.ts edge middleware)
-│   ├── settings/         # Global settings (SUPERADMIN)
-│   └── sponsors/         # Sponsors CRUD (SUPERADMIN)
 ├── api/admin/blobs/      # Vercel Blob upload/list/delete API
 ├── api/auth/[...all]/    # BetterAuth handler
 ├── login/                # Discord OAuth login
 └── not-found.tsx         # 404 page
 
 components/
-├── features/             # Domain components (admin/, auth/, landing/, layout/, etc.)
+├── features/             # Domain components (admin/, auth/, landing/, layout/, profile/)
 └── ui/                   # shadcn/ui primitives
 
 lib/
 ├── actions/              # Server actions (authenticatedAction wrapper)
-├── config/               # Routes, constants, admin-nav
+├── config/               # Routes, constants (CACHE_TAGS, METADATA), admin-nav
 ├── core/                 # Auth, Prisma client, env validation, logger
-├── services/             # Data access with caching (settings, sponsors, users)
+├── services/             # Data access with 'use cache' + cacheTag/cacheLife
 ├── types/                # TypeScript types (ActionState, AuthSession)
-├── utils/                # cn, formatting, prisma-error, auth helpers
+├── utils/                # cn, formatting, prisma-error, auth helpers, toNullable
 └── validations/          # Zod schemas
 
 prisma/                   # Schema, migrations, seed, generated client (gitignored)
@@ -147,7 +149,7 @@ export const myAction = authenticatedAction({
   role: Role.SUPERADMIN,
   handler: async (data, session): Promise<ActionState> => {
     await prisma.model.create({ data })
-    revalidateTag('tag-name', 'hours') // 2nd arg must match cacheLife profile
+    revalidateTag(CACHE_TAGS.MY_TAG, 'hours') // 2nd arg must match cacheLife profile
     return { success: true, message: 'French message.' }
   },
 })
@@ -159,53 +161,21 @@ export const myAction = authenticatedAction({
 export const getData = async () => {
   'use cache'
   cacheLife('hours')
-  cacheTag('my-tag')
+  cacheTag(CACHE_TAGS.MY_TAG)
   // Prisma query with try/catch + logger.error({ error }, 'message')
 }
 ```
 
-`revalidateTag(tag, profile)` requires **two arguments** — the profile must match the `cacheLife()` used.
+Cache tags are centralized in `CACHE_TAGS` from `lib/config/constants.ts`. `revalidateTag(tag, profile)` requires **two arguments** — the profile must match the `cacheLife()` used in the service.
 
 ### Prerender Rules (`cacheComponents: true`)
 
 1. **No `new Date()` in components** — hardcode or compute at build time
-2. **Dynamic APIs** (`headers()`, `cookies()`) **require `<Suspense>`**:
-
-```tsx
-const Dynamic = async () => { const session = await getSession(); /* ... */ }
-const Page = () => <Suspense fallback={<Skeleton />}><Dynamic /></Suspense>
-export default Page
-```
+2. **Dynamic APIs** (`headers()`, `cookies()`) **require `<Suspense>`** wrapping the component that calls them
 
 ### Forms (Client Components)
 
-`react-hook-form` + `zodResolver` + `useTransition` + server action + `toast`:
-
-```ts
-const { register, handleSubmit, formState: { errors } } = useForm<Input>({
-  resolver: zodResolver(schema),
-  defaultValues: { ... },
-})
-const onSubmit = (data: Input) => {
-  startTransition(async () => {
-    const result = await serverAction(data)
-    result.success ? toast.success(result.message) : toast.error(result.message)
-  })
-}
-```
-
-Use `z.number()` + `register('field', { valueAsNumber: true })` for numeric fields (not `z.coerce.number()`).
-
-### Vercel Blob Uploads
-
-Images are stored in Vercel Blob via `/api/admin/blobs`. Uploads are organized by folder prefix:
-
-| Folder     | Usage                    |
-|------------|--------------------------|
-| `logos/`   | Site logo (LogoPicker)   |
-| `sponsors/`| Sponsor images           |
-
-Pass `folder` field in FormData on POST, `?folder=` query param on GET. Allowed folders are validated server-side against `ALLOWED_FOLDERS`.
+`react-hook-form` + `zodResolver` + `useTransition` + server action + `toast.success()`/`toast.error()` (Sonner).
 
 ### Other
 
@@ -213,3 +183,5 @@ Pass `folder` field in FormData on POST, `?folder=` query param on GET. Allowed 
 - **Prisma singleton** with global caching in `lib/core/prisma.ts`
 - **Auth**: BetterAuth + Discord OAuth → `getSession()` server-side, `authClient.useSession()` client-side
 - **Admin protection**: dual-layer — edge `proxy.ts` + `AdminGuard` server component
+- **Accessibility**: all icon-only buttons use `aria-label` (not `title`); all `<nav>` elements have `aria-label`; search inputs have `aria-label`
+- **Vercel Blob**: images stored via `/api/admin/blobs` with folder prefix (`logos/`, `sponsors/`). Allowed types: PNG, JPEG, WebP (no SVG). Blob DELETE validates URL domain.
