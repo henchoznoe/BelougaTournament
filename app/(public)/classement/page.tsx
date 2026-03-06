@@ -39,9 +39,9 @@ const LeaderboardPage = () => {
                 Classement des joueurs
               </h2>
               <p className="mx-auto max-w-md text-sm text-zinc-500">
-                Le classement des joueurs sera bientôt disponible. Suivez vos
-                performances, comparez-vous aux autres membres de la communauté
-                et grimpez dans le classement.
+                Le classement des joueurs sera prochainement disponible. Suivez
+                vos performances, comparez-vous aux autres membres de la
+                communauté et grimpez dans le classement.
               </p>
             </div>
 
@@ -62,7 +62,7 @@ const LeaderboardPage = () => {
             </div>
 
             <span className="mt-2 inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs font-medium text-blue-400">
-              Bientôt disponible
+              Prochainement disponible
             </span>
           </div>
         </div>

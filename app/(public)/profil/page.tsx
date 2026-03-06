@@ -31,8 +31,8 @@ const ProfilePageContent = () => {
             <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
             {/* Skeleton card 2 */}
             <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
-            {/* Skeleton card 3 */}
-            <Skeleton className="h-40 rounded-3xl border border-white/5 bg-white/2" />
+            {/* Skeleton link */}
+            <Skeleton className="h-16 rounded-3xl border border-white/5 bg-white/2" />
           </div>
         }
       >

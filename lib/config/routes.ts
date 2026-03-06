@@ -17,6 +17,7 @@ export const ROUTES = {
   TERMS: '/terms',
   CONTACT: '/contact',
   PROFILE: '/profil',
+  PROFILE_TOURNAMENTS: '/profil/tournois',
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',

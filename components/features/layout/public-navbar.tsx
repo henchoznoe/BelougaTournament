@@ -151,9 +151,9 @@ const NavbarProfile = ({
             asChild
             className="cursor-pointer focus:bg-white/5 focus:text-white"
           >
-            <Link href={`${ROUTES.PROFILE}#inscriptions`} className="w-full">
+            <Link href={ROUTES.PROFILE_TOURNAMENTS} className="w-full">
               <Trophy className="mr-2 size-4" />
-              <span>Mes Inscriptions</span>
+              <span>Mes Tournois</span>
             </Link>
           </DropdownMenuItem>
           {isAdmin && (
@@ -227,9 +227,9 @@ const NavbarProfile = ({
           className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
           onClick={onClick}
         >
-          <Link href={`${ROUTES.PROFILE}#inscriptions`}>
+          <Link href={ROUTES.PROFILE_TOURNAMENTS}>
             <Trophy className="size-4" />
-            Mes Inscriptions
+            Mes Tournois
           </Link>
         </Button>
         {isAdmin && (
