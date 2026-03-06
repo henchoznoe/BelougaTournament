@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 1er mars 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 6 mars 2026."
         />
 
         <div className="space-y-6">
@@ -39,7 +39,7 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">Domicile :</span> Canton de
-                Vaud, Suisse
+                Fribourg, Suisse
               </li>
               <li>
                 <span className="text-zinc-300">Contact :</span>{' '}
@@ -84,10 +84,6 @@ const PrivacyPage = () => {
                 Inscriptions aux tournois, compositions d'équipe, classements,
                 éventuels champs personnalisés remplis lors de l'inscription
                 (dont le contenu dépend de chaque tournoi)
-              </li>
-              <li>
-                <span className="text-zinc-300">Données de profil :</span> Photo
-                de profil personnalisée le cas échéant (stockée via Vercel Blob)
               </li>
             </ul>
             <p>
@@ -340,7 +336,8 @@ const PrivacyPage = () => {
                 Strictement nécessaires au fonctionnement de l'authentification.
                 Ces cookies ne peuvent pas être désactivés sans empêcher
                 l'utilisation de la Plateforme. Ils sont supprimés
-                automatiquement à la déconnexion ou à expiration de la session.
+                automatiquement à la déconnexion ou à expiration de la session
+                (7 jours).
               </li>
               <li>
                 <span className="text-zinc-300">Vercel Analytics :</span> Mesure
@@ -355,9 +352,28 @@ const PrivacyPage = () => {
               </li>
             </ul>
             <p>
-              Aucun cookie publicitaire, de profilage ou de tracking tiers n'est
-              déposé sur votre terminal. Aucun consentement aux cookies n'est
-              requis pour l'utilisation de la Plateforme.
+              Aucun cookie publicitaire ou de profilage n'est déposé par la
+              Plateforme.
+            </p>
+            <p>
+              <span className="text-zinc-300">
+                Cookies tiers (lecteur Twitch) :
+              </span>{' '}
+              La page de streaming intègre un lecteur fourni par Twitch (Amazon
+              / Twitch Interactive, Inc.). Ce lecteur, chargé dans une iframe,
+              est susceptible de déposer ses propres cookies sur votre terminal
+              (session, analytics, publicité). Ces cookies sont régis par la{' '}
+              <a
+                href="https://www.twitch.tv/p/legal/privacy-notice/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                politique de confidentialité de Twitch
+              </a>
+              . La Plateforme n'a aucun contrôle sur ces cookies tiers et ne les
+              utilise pas. Vous pouvez les bloquer via les paramètres de votre
+              navigateur sans affecter le reste de la Plateforme.
             </p>
           </LegalSection>
 
@@ -395,9 +411,9 @@ const PrivacyPage = () => {
 
           <LegalSection title="10. Mineurs">
             <p>
-              La Plateforme est accessible aux personnes âgées d'au moins 16
+              La Plateforme est accessible aux personnes âgées d'au moins 13
               ans. Nous ne collectons pas sciemment de données personnelles
-              concernant des enfants de moins de 16 ans. Si vous êtes parent ou
+              concernant des enfants de moins de 13 ans. Si vous êtes parent ou
               tuteur légal et que vous pensez que votre enfant nous a fourni des
               données personnelles sans votre consentement, contactez-nous à{' '}
               <Link

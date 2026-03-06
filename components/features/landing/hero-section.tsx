@@ -72,7 +72,8 @@ export const HeroSection = ({ twitchUrl }: HeroSectionProps) => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex size-2 rounded-full bg-blue-500"></span>
             </span>
-            Saison 2026 en préparation
+            {/* TODO: add new Date().getFullYear() (warning: client component)*/}
+            Saison 2026{' '}
           </span>
         </motion.div>
 

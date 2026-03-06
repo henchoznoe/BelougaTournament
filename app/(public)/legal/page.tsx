@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 1er mars 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 6 mars 2026."
         />
 
         <div className="space-y-6">
@@ -43,7 +43,7 @@ const LegalPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">Domicile :</span> Canton de
-                Vaud, Suisse
+                Fribourg, Suisse
               </li>
               <li>
                 <span className="text-zinc-300">
@@ -154,9 +154,26 @@ const LegalPage = () => {
             <p>
               La Plateforme utilise uniquement des cookies techniques
               strictement nécessaires au fonctionnement de l'authentification
-              (cookies de session). Aucun cookie publicitaire, de profilage ou
-              de tracking tiers n'est déposé sur votre terminal. Pour plus de
-              détails, consultez notre{' '}
+              (cookies de session). Aucun cookie publicitaire ou de profilage
+              n'est déposé par la Plateforme.
+            </p>
+            <p>
+              La page de streaming intègre un lecteur Twitch (service tiers
+              opéré par Amazon / Twitch Interactive, Inc.) qui est susceptible
+              de déposer ses propres cookies sur votre terminal (session Twitch,
+              analytics, publicité). Ces cookies tiers sont régis par la{' '}
+              <a
+                href="https://www.twitch.tv/p/legal/privacy-notice/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                politique de confidentialité de Twitch
+              </a>
+              . La Plateforme n'a aucun contrôle sur ces cookies.
+            </p>
+            <p>
+              Pour plus de détails, consultez notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
                 className="text-blue-400 transition-colors hover:text-blue-300"
@@ -168,11 +185,6 @@ const LegalPage = () => {
           </LegalSection>
 
           <LegalSection title="6. Limitation de responsabilité">
-            <p>
-              L'éditeur s'efforce de fournir des informations exactes et à jour
-              sur la Plateforme. Toutefois, il ne peut garantir l'exactitude, la
-              complétude ou l'actualité des informations diffusées.
-            </p>
             <p>
               La Plateforme est fournie « en l'état » et « selon disponibilité
               », sans garantie d'aucune sorte. L'éditeur ne pourra être tenu
@@ -210,8 +222,8 @@ const LegalPage = () => {
             <p>
               En cas de litige relatif à l'interprétation ou à l'exécution des
               présentes, et à défaut de résolution amiable, les tribunaux du
-              canton de Vaud (Suisse) seront seuls compétents, sauf disposition
-              légale impérative contraire.
+              canton de Fribourg (Suisse) seront seuls compétents, sauf
+              disposition légale impérative contraire.
             </p>
           </LegalSection>
 
