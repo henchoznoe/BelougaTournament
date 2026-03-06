@@ -156,21 +156,34 @@ export const TournamentDetail = ({
                   : `Équipe de ${tournament.teamSize}`
               }
             />
-            <InfoRow
-              icon={Users}
-              label="Inscrits"
-              value={
-                tournament.maxTeams
-                  ? `${tournament._count.registrations} / ${tournament.maxTeams}`
-                  : `${tournament._count.registrations}`
-              }
-            />
-            {tournament.format === TournamentFormat.TEAM && (
+            {/* Registration / team counts — differs by format */}
+            {tournament.format === TournamentFormat.SOLO ? (
               <InfoRow
-                icon={Trophy}
-                label="Équipes"
-                value={`${tournament._count.teams}`}
+                icon={Users}
+                label="Inscrits"
+                value={
+                  tournament.maxTeams
+                    ? `${tournament._count.registrations} / ${tournament.maxTeams}`
+                    : `${tournament._count.registrations}`
+                }
               />
+            ) : (
+              <>
+                <InfoRow
+                  icon={Users}
+                  label="Joueurs"
+                  value={`${tournament._count.registrations}`}
+                />
+                <InfoRow
+                  icon={Trophy}
+                  label="Équipes"
+                  value={
+                    tournament.maxTeams
+                      ? `${tournament._count.teams} / ${tournament.maxTeams}`
+                      : `${tournament._count.teams}`
+                  }
+                />
+              </>
             )}
             <InfoRow
               icon={Calendar}
