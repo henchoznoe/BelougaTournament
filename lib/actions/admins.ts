@@ -9,8 +9,10 @@
 'use server'
 
 import { revalidateTag } from 'next/cache'
+import { headers } from 'next/headers'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import auth from '@/lib/core/auth'
 import prisma from '@/lib/core/prisma'
 import { searchUsers } from '@/lib/services/admins'
 import type { ActionState } from '@/lib/types/actions'
@@ -147,8 +149,14 @@ export const updateAdminAssignments = authenticatedAction({
   },
 })
 
-/** Server action wrapper for user search (usable from client components). */
+/** Server action wrapper for user search (SUPERADMIN only, usable from client components). */
 export const searchUsersAction = async (query: string) => {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session?.user || (session.user.role as Role) !== Role.SUPERADMIN) {
+    return []
+  }
+
   return searchUsers(query)
 }
 

@@ -6,20 +6,12 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import {
+  TOURNAMENT_STATUS_LABELS,
+  TOURNAMENT_STATUS_STYLES,
+} from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
-
-const STATUS_STYLES: Record<TournamentStatus, string> = {
-  [TournamentStatus.DRAFT]: 'bg-amber-500/10 text-amber-400',
-  [TournamentStatus.PUBLISHED]: 'bg-emerald-500/10 text-emerald-400',
-  [TournamentStatus.ARCHIVED]: 'bg-zinc-500/10 text-zinc-400',
-} as const
-
-const STATUS_LABELS: Record<TournamentStatus, string> = {
-  [TournamentStatus.DRAFT]: 'Brouillon',
-  [TournamentStatus.PUBLISHED]: 'Publié',
-  [TournamentStatus.ARCHIVED]: 'Archivé',
-} as const
+import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface TournamentStatusBadgeProps {
   status: TournamentStatus
@@ -34,11 +26,11 @@ export const TournamentStatusBadge = ({
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-        STATUS_STYLES[status],
+        TOURNAMENT_STATUS_STYLES[status],
         className,
       )}
     >
-      {STATUS_LABELS[status]}
+      {TOURNAMENT_STATUS_LABELS[status]}
     </span>
   )
 }

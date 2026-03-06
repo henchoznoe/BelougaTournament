@@ -7,14 +7,8 @@
  */
 
 import { z } from 'zod'
-
-/** Accepts an empty string (field cleared) or a valid URL. */
-const optionalUrl = z
-  .string()
-  .trim()
-  .refine(val => !val || /^https?:\/\/.+/.test(val), {
-    message: 'URL invalide (doit commencer par https://)',
-  })
+import { TWITCH_USERNAME_MAX_LENGTH } from '@/lib/config/constants'
+import { optionalUrl } from '@/lib/validations/shared'
 
 /** Optional trimmed text field with a max length. */
 const optionalText = (max: number) => z.string().trim().max(max)
@@ -22,7 +16,7 @@ const optionalText = (max: number) => z.string().trim().max(max)
 /** Matches the Prisma GlobalSettings model fields exactly. */
 export const settingsSchema = z.object({
   logoUrl: optionalUrl,
-  twitchUsername: z.string().trim(),
+  twitchUsername: z.string().trim().max(TWITCH_USERNAME_MAX_LENGTH),
   twitchUrl: optionalUrl,
   discordUrl: optionalUrl,
   instagramUrl: optionalUrl,

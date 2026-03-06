@@ -30,22 +30,15 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { updateRegistrationStatus } from '@/lib/actions/tournaments'
+import {
+  REGISTRATION_STATUS_LABELS,
+  REGISTRATION_STATUS_STYLES,
+} from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
 import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
-
-const STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
-} as const
-
-const STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
-} as const
 
 interface TournamentRegistrationsListProps {
   registrations: TournamentRegistrationItem[]
@@ -92,7 +85,7 @@ export const TournamentRegistrationsList = ({
   }
 
   const handleExportCsv = () => {
-    window.open(`/api/admin/tournaments/${tournamentId}/export-csv`)
+    window.open(ROUTES.API_TOURNAMENT_EXPORT_CSV(tournamentId))
   }
 
   const statusCount = (status: RegistrationStatus) =>
@@ -236,10 +229,10 @@ export const TournamentRegistrationsList = ({
                         <span
                           className={cn(
                             'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                            STATUS_STYLES[registration.status],
+                            REGISTRATION_STATUS_STYLES[registration.status],
                           )}
                         >
-                          {STATUS_LABELS[registration.status]}
+                          {REGISTRATION_STATUS_LABELS[registration.status]}
                         </span>
                       </SelectTrigger>
                       <SelectContent position="popper" sideOffset={4}>

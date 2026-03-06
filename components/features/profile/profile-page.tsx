@@ -23,6 +23,10 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/features/profile/profile-edit-form'
 import { ProfileRegistrations } from '@/components/features/profile/profile-registrations'
+import {
+  REGISTRATION_STATUS_BADGE_STYLES,
+  REGISTRATION_STATUS_LABELS,
+} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import {
@@ -33,11 +37,7 @@ import { getUserProfile } from '@/lib/services/users'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import {
-  RegistrationStatus,
-  Role,
-  TournamentFormat,
-} from '@/prisma/generated/prisma/enums'
+import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 const ROLE_CONFIG = {
   [Role.USER]: {
@@ -55,20 +55,6 @@ const ROLE_CONFIG = {
     icon: ShieldCheck,
     className: 'border-purple-500/30 bg-purple-500/10 text-purple-400',
   },
-} as const
-
-const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]:
-    'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]:
-    'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'border-red-500/30 bg-red-500/10 text-red-400',
-} as const
-
-const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
 } as const
 
 /** Renders a single registration row as a link to the tournament detail page. */
@@ -108,7 +94,7 @@ const RegistrationRow = ({
       <span
         className={cn(
           'shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
-          REGISTRATION_STATUS_STYLES[registration.status],
+          REGISTRATION_STATUS_BADGE_STYLES[registration.status],
         )}
       >
         {REGISTRATION_STATUS_LABELS[registration.status]}

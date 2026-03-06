@@ -10,7 +10,7 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, SETTINGS_SINGLETON_ID } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { toNullable } from '@/lib/utils/formatting'
@@ -38,9 +38,9 @@ export const updateSettings = authenticatedAction({
     }
 
     await prisma.globalSettings.upsert({
-      where: { id: 1 },
+      where: { id: SETTINGS_SINGLETON_ID },
       update: payload,
-      create: { id: 1, ...payload },
+      create: { id: SETTINGS_SINGLETON_ID, ...payload },
     })
 
     revalidateTag(CACHE_TAGS.SETTINGS, 'hours')

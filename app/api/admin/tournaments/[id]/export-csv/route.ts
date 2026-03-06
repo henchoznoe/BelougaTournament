@@ -27,17 +27,26 @@ type RegistrationExportRow = {
   team: { name: string } | null
 }
 
-/** Escapes a CSV field value: wraps in quotes if it contains commas, quotes, or newlines. */
+/** Characters that spreadsheet apps interpret as formula triggers. */
+const FORMULA_TRIGGERS = new Set(['=', '+', '-', '@'])
+
+/** Escapes a CSV field value: wraps in quotes if it contains commas, quotes, or newlines. Prefixes formula triggers with a tab to prevent spreadsheet injection. */
 const escapeCsvField = (value: string): string => {
-  if (
-    value.includes(',') ||
-    value.includes('"') ||
-    value.includes('\n') ||
-    value.includes('\r')
-  ) {
-    return `"${value.replace(/"/g, '""')}"`
+  // Guard against CSV formula injection for user-supplied data
+  let safe = value
+  if (safe.length > 0 && FORMULA_TRIGGERS.has(safe[0])) {
+    safe = `\t${safe}`
   }
-  return value
+
+  if (
+    safe.includes(',') ||
+    safe.includes('"') ||
+    safe.includes('\n') ||
+    safe.includes('\r')
+  ) {
+    return `"${safe.replace(/"/g, '""')}"`
+  }
+  return safe
 }
 
 /** Builds a CSV row from an array of field values. */
@@ -52,7 +61,7 @@ const verifyAdminAccess = async (request: Request, tournamentId: string) => {
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session?.user) return null
 
-  const role = session.user.role as string
+  const role = session.user.role as Role
   if (role === Role.SUPERADMIN) return session
 
   if (role === Role.ADMIN) {

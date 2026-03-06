@@ -69,7 +69,11 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     return {
       tournaments: {
         total: 0,
-        byStatus: { DRAFT: 0, PUBLISHED: 0, ARCHIVED: 0 },
+        byStatus: {
+          [TournamentStatus.DRAFT]: 0,
+          [TournamentStatus.PUBLISHED]: 0,
+          [TournamentStatus.ARCHIVED]: 0,
+        },
       },
       players: 0,
       pendingRegistrations: 0,

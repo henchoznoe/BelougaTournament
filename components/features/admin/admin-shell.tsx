@@ -25,14 +25,22 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 
   // Restore persisted sidebar preference; default is collapsed (true).
   useEffect(() => {
-    const stored = localStorage.getItem('admin-sidebar-collapsed')
-    if (stored !== null) setCollapsed(stored === 'true')
+    try {
+      const stored = localStorage.getItem('admin-sidebar-collapsed')
+      if (stored !== null) setCollapsed(stored === 'true')
+    } catch {
+      // localStorage unavailable in restricted environments (e.g. incognito/iframe)
+    }
   }, [])
 
   const handleToggle = () => {
     setCollapsed(prev => {
       const next = !prev
-      localStorage.setItem('admin-sidebar-collapsed', String(next))
+      try {
+        localStorage.setItem('admin-sidebar-collapsed', String(next))
+      } catch {
+        // localStorage unavailable in restricted environments
+      }
       return next
     })
   }

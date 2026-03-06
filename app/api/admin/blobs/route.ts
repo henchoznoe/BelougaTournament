@@ -8,6 +8,7 @@
 
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -116,6 +117,11 @@ export const POST = async (request: Request) => {
   }
 }
 
+/** Schema for blob DELETE request body. */
+const deleteBlobSchema = z.object({
+  url: z.url('URL du fichier invalide.'),
+})
+
 /** DELETE — Remove a blob by URL. Expects JSON body with { url: string }. */
 export const DELETE = async (request: Request) => {
   const session = await verifySuperAdmin(request)
@@ -124,20 +130,20 @@ export const DELETE = async (request: Request) => {
   }
 
   try {
-    const { url } = (await request.json()) as { url: string }
+    const parsed = deleteBlobSchema.safeParse(await request.json())
 
-    if (!url) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'URL du fichier manquante.' },
+        { error: 'URL du fichier manquante ou invalide.' },
         { status: 400 },
       )
     }
 
-    if (!isValidBlobUrl(url)) {
+    if (!isValidBlobUrl(parsed.data.url)) {
       return NextResponse.json({ error: 'URL invalide.' }, { status: 400 })
     }
 
-    await del(url)
+    await del(parsed.data.url)
 
     return NextResponse.json({ success: true })
   } catch (error) {

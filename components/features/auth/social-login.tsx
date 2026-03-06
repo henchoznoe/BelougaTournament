@@ -20,7 +20,7 @@ interface SocialLoginProps {
   redirectTo: string
 }
 
-export default function SocialLogin({ redirectTo }: SocialLoginProps) {
+const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleLogin = async (provider: SocialProvider) => {
@@ -56,3 +56,5 @@ export default function SocialLogin({ redirectTo }: SocialLoginProps) {
     </div>
   )
 }
+
+export default SocialLogin

@@ -70,13 +70,21 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             >
               {session.user.displayName}
             </span>
-            <Image
-              src={session.user.image ?? ''}
-              alt={session.user.displayName}
-              width={32}
-              height={32}
-              className="rounded-full ring-2 ring-white/10"
-            />
+            {session.user.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.displayName}
+                width={32}
+                height={32}
+                className="rounded-full ring-2 ring-white/10"
+              />
+            ) : (
+              <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10">
+                <span className="text-xs font-medium text-zinc-300">
+                  {session.user.displayName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
           </div>
         ) : null}
       </div>

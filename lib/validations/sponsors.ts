@@ -7,14 +7,7 @@
  */
 
 import { z } from 'zod'
-
-/** Accepts an empty string (field cleared) or a valid URL. */
-const optionalUrl = z
-  .string()
-  .trim()
-  .refine(val => !val || /^https?:\/\/.+/.test(val), {
-    message: 'URL invalide (doit commencer par https://)',
-  })
+import { optionalUrl } from '@/lib/validations/shared'
 
 /** Schema for creating or updating a sponsor. */
 export const sponsorSchema = z.object({

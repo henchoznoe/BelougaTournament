@@ -122,6 +122,25 @@ const checkAdminAssignment = async (
 }
 
 /**
+ * Verifies that an admin has access to a tournament.
+ * Returns an ActionState error if denied, or null if access is granted.
+ */
+const requireAdminAccess = async (
+  userId: string,
+  userRole: Role,
+  tournamentId: string,
+): Promise<ActionState | null> => {
+  const hasAccess = await checkAdminAssignment(userId, userRole, tournamentId)
+  if (!hasAccess) {
+    return {
+      success: false,
+      message: "Vous n'avez pas accès à ce tournoi.",
+    }
+  }
+  return null
+}
+
+/**
  * Checks whether a user is currently banned.
  * Returns an ActionState error if banned, or null if not banned.
  */
@@ -163,6 +182,63 @@ const validateFieldValues = (
     }
   }
   return { valid: true }
+}
+
+/**
+ * Shared pre-checks for all registration actions.
+ * Verifies: ban status, tournament exists & PUBLISHED, registration window open, no duplicate registration.
+ * Returns the tournament on success, or an ActionState error on failure.
+ */
+const fetchTournamentForRegistration = async (
+  userId: string,
+  tournamentId: string,
+): Promise<{ error: ActionState } | { tournament: TournamentWithFields }> => {
+  // 1. Check ban status
+  const banResult = await checkBanStatus(userId)
+  if (banResult) return { error: banResult }
+
+  // 2. Fetch tournament with fields
+  const tournament = (await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    include: { fields: { orderBy: { order: 'asc' } } },
+  })) as TournamentWithFields | null
+
+  if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
+    return {
+      error: {
+        success: false,
+        message: 'Ce tournoi est introuvable ou indisponible.',
+      },
+    }
+  }
+
+  // 3. Check registration window
+  const now = new Date()
+  if (now < tournament.registrationOpen || now > tournament.registrationClose) {
+    return {
+      error: {
+        success: false,
+        message: 'Les inscriptions ne sont pas ouvertes.',
+      },
+    }
+  }
+
+  // 4. Check user hasn't already registered
+  const existing = await prisma.tournamentRegistration.findUnique({
+    where: {
+      tournamentId_userId: { tournamentId, userId },
+    },
+  })
+  if (existing) {
+    return {
+      error: {
+        success: false,
+        message: 'Vous êtes déjà inscrit à ce tournoi.',
+      },
+    }
+  }
+
+  return { tournament }
 }
 
 /** Creates a new tournament with its dynamic fields. */
@@ -213,17 +289,12 @@ export const updateTournament = authenticatedAction({
   schema: updateTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.id,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     // Fetch existing tournament to enforce immutability rules
     const existing = (await prisma.tournament.findUnique({
@@ -325,17 +396,12 @@ export const deleteTournament = authenticatedAction({
   schema: deleteTournamentSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.id,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     await prisma.tournament.delete({
       where: { id: data.id },
@@ -356,17 +422,12 @@ export const updateTournamentStatus = authenticatedAction({
   schema: updateTournamentStatusSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.id,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     await prisma.tournament.update({
       where: { id: data.id },
@@ -387,17 +448,12 @@ export const updateRegistrationStatus = authenticatedAction({
   schema: updateRegistrationStatusSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.tournamentId,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     await prisma.tournamentRegistration.update({
       where: { id: data.id },
@@ -500,24 +556,15 @@ export const updateRegistrationFields = authenticatedAction({
 export const registerForTournament = authenticatedAction({
   schema: registerForTournamentSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id)
-    if (banResult) return banResult
+    // 1. Shared pre-checks (ban, tournament, window, duplicate)
+    const result = await fetchTournamentForRegistration(
+      session.user.id,
+      data.tournamentId,
+    )
+    if ('error' in result) return result.error
+    const { tournament } = result
 
-    // 2. Fetch tournament with fields
-    const tournament = (await prisma.tournament.findUnique({
-      where: { id: data.tournamentId },
-      include: { fields: { orderBy: { order: 'asc' } } },
-    })) as TournamentWithFields | null
-
-    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
-      return {
-        success: false,
-        message: 'Ce tournoi est introuvable ou indisponible.',
-      }
-    }
-
-    // 3. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
+    // 2. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
     if (tournament.format === TournamentFormat.TEAM) {
       return {
         success: false,
@@ -526,19 +573,7 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 4. Check registration window
-    const now = new Date()
-    if (
-      now < tournament.registrationOpen ||
-      now > tournament.registrationClose
-    ) {
-      return {
-        success: false,
-        message: 'Les inscriptions ne sont pas ouvertes.',
-      }
-    }
-
-    // 5. Check maxTeams limit (registrations count as "slots" for solo)
+    // 3. Check maxTeams limit (registrations count as "slots" for solo)
     if (tournament.maxTeams !== null) {
       const count = await prisma.tournamentRegistration.count({
         where: {
@@ -553,29 +588,13 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 6. Check user hasn't already registered
-    const existing = await prisma.tournamentRegistration.findUnique({
-      where: {
-        tournamentId_userId: {
-          tournamentId: data.tournamentId,
-          userId: session.user.id,
-        },
-      },
-    })
-    if (existing) {
-      return {
-        success: false,
-        message: 'Vous êtes déjà inscrit à ce tournoi.',
-      }
-    }
-
-    // 7. Validate dynamic field values
+    // 4. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    // 8. Create the registration
+    // 5. Create the registration
     await prisma.tournamentRegistration.create({
       data: {
         tournamentId: data.tournamentId,
@@ -602,24 +621,15 @@ export const registerForTournament = authenticatedAction({
 export const createTeamAndRegister = authenticatedAction({
   schema: createTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id)
-    if (banResult) return banResult
+    // 1. Shared pre-checks (ban, tournament, window, duplicate)
+    const result = await fetchTournamentForRegistration(
+      session.user.id,
+      data.tournamentId,
+    )
+    if ('error' in result) return result.error
+    const { tournament } = result
 
-    // 2. Fetch tournament with fields
-    const tournament = (await prisma.tournament.findUnique({
-      where: { id: data.tournamentId },
-      include: { fields: { orderBy: { order: 'asc' } } },
-    })) as TournamentWithFields | null
-
-    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
-      return {
-        success: false,
-        message: 'Ce tournoi est introuvable ou indisponible.',
-      }
-    }
-
-    // 3. Reject SOLO format
+    // 2. Reject SOLO format
     if (tournament.format !== TournamentFormat.TEAM) {
       return {
         success: false,
@@ -627,19 +637,7 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 4. Check registration window
-    const now = new Date()
-    if (
-      now < tournament.registrationOpen ||
-      now > tournament.registrationClose
-    ) {
-      return {
-        success: false,
-        message: 'Les inscriptions ne sont pas ouvertes.',
-      }
-    }
-
-    // 5. Check maxTeams limit (count teams, not registrations)
+    // 3. Check maxTeams limit (count teams, not registrations)
     if (tournament.maxTeams !== null) {
       const teamCount = await prisma.team.count({
         where: { tournamentId: data.tournamentId },
@@ -652,29 +650,13 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 6. Check user hasn't already registered
-    const existing = await prisma.tournamentRegistration.findUnique({
-      where: {
-        tournamentId_userId: {
-          tournamentId: data.tournamentId,
-          userId: session.user.id,
-        },
-      },
-    })
-    if (existing) {
-      return {
-        success: false,
-        message: 'Vous êtes déjà inscrit à ce tournoi.',
-      }
-    }
-
-    // 7. Validate dynamic field values
+    // 4. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    // 8. Create team + member + registration in a single transaction
+    // 5. Create team + member + registration in a single transaction
     await prisma.$transaction(async tx => {
       const team = await tx.team.create({
         data: {
@@ -720,24 +702,15 @@ export const createTeamAndRegister = authenticatedAction({
 export const joinTeamAndRegister = authenticatedAction({
   schema: joinTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
-    // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id)
-    if (banResult) return banResult
+    // 1. Shared pre-checks (ban, tournament, window, duplicate)
+    const result = await fetchTournamentForRegistration(
+      session.user.id,
+      data.tournamentId,
+    )
+    if ('error' in result) return result.error
+    const { tournament } = result
 
-    // 2. Fetch tournament with fields
-    const tournament = (await prisma.tournament.findUnique({
-      where: { id: data.tournamentId },
-      include: { fields: { orderBy: { order: 'asc' } } },
-    })) as TournamentWithFields | null
-
-    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
-      return {
-        success: false,
-        message: 'Ce tournoi est introuvable ou indisponible.',
-      }
-    }
-
-    // 3. Reject SOLO format
+    // 2. Reject SOLO format
     if (tournament.format !== TournamentFormat.TEAM) {
       return {
         success: false,
@@ -745,35 +718,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 4. Check registration window
-    const now = new Date()
-    if (
-      now < tournament.registrationOpen ||
-      now > tournament.registrationClose
-    ) {
-      return {
-        success: false,
-        message: 'Les inscriptions ne sont pas ouvertes.',
-      }
-    }
-
-    // 5. Check user hasn't already registered
-    const existing = await prisma.tournamentRegistration.findUnique({
-      where: {
-        tournamentId_userId: {
-          tournamentId: data.tournamentId,
-          userId: session.user.id,
-        },
-      },
-    })
-    if (existing) {
-      return {
-        success: false,
-        message: 'Vous êtes déjà inscrit à ce tournoi.',
-      }
-    }
-
-    // 6. Fetch team and verify it belongs to the tournament and is not full
+    // 3. Fetch team and verify it belongs to the tournament and is not full
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: { _count: { select: { members: true } } },
@@ -787,13 +732,13 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: 'Cette équipe est complète.' }
     }
 
-    // 7. Validate dynamic field values
+    // 4. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    // 8. Create member + registration, conditionally mark team as full
+    // 5. Create member + registration, conditionally mark team as full
     await prisma.$transaction(async tx => {
       await tx.teamMember.create({
         data: {
@@ -969,17 +914,12 @@ export const kickPlayer = authenticatedAction({
   schema: kickPlayerSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.tournamentId,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     // Fetch team with members ordered by join date
     const team = (await prisma.team.findUnique({
@@ -1059,17 +999,12 @@ export const dissolveTeam = authenticatedAction({
   schema: dissolveTeamSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
-    const hasAccess = await checkAdminAssignment(
+    const denied = await requireAdminAccess(
       session.user.id,
       session.user.role,
       data.tournamentId,
     )
-    if (!hasAccess) {
-      return {
-        success: false,
-        message: "Vous n'avez pas accès à ce tournoi.",
-      }
-    }
+    if (denied) return denied
 
     // Fetch team with members to get all user IDs
     const team = (await prisma.team.findUnique({

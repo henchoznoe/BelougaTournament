@@ -8,10 +8,19 @@
 
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { AUTH_CONFIG, DISCORD } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
+
+/** Shape of the Discord /users/@me API response (relevant fields only). */
+interface DiscordProfile {
+  id: string
+  username: string
+  global_name: string | null
+  avatar: string | null
+}
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -29,17 +38,17 @@ const auth = betterAuth({
     },
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 24 hours
+    expiresIn: AUTH_CONFIG.SESSION_EXPIRES_IN,
+    updateAge: AUTH_CONFIG.SESSION_UPDATE_AGE,
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // 5 minutes
+      maxAge: AUTH_CONFIG.COOKIE_CACHE_MAX_AGE,
     },
   },
   rateLimit: {
     enabled: true,
-    window: 60, // 60 seconds
-    max: 30, // 30 requests per window
+    window: AUTH_CONFIG.RATE_LIMIT_WINDOW,
+    max: AUTH_CONFIG.RATE_LIMIT_MAX,
   },
   trustedOrigins: [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL],
   socialProviders: {
@@ -85,7 +94,7 @@ const auth = betterAuth({
             )
             if (!discordAccount?.accessToken) return
 
-            const response = await fetch('https://discord.com/api/users/@me', {
+            const response = await fetch(DISCORD.API_USER_URL, {
               headers: {
                 Authorization: `Bearer ${discordAccount.accessToken}`,
               },
@@ -93,10 +102,10 @@ const auth = betterAuth({
 
             if (!response.ok) return
 
-            const discordProfile = await response.json()
+            const discordProfile: DiscordProfile = await response.json()
 
             const avatarUrl = discordProfile.avatar
-              ? `https://cdn.discordapp.com/avatars/${discordProfile.id}/${discordProfile.avatar}.png`
+              ? DISCORD.AVATAR_CDN_URL(discordProfile.id, discordProfile.avatar)
               : null
 
             const name = discordProfile.global_name || discordProfile.username

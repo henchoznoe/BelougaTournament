@@ -7,20 +7,13 @@
  */
 
 import { z } from 'zod'
+import { optionalUrl } from '@/lib/validations/shared'
 import {
   FieldType,
   RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
-
-/** Accepts an empty string (field cleared) or a valid URL. */
-const optionalUrl = z
-  .string()
-  .trim()
-  .refine(val => !val || /^https?:\/\/.+/.test(val), {
-    message: 'URL invalide (doit commencer par https://)',
-  })
 
 /** Schema for a single dynamic tournament field. */
 export const tournamentFieldSchema = z.object({
@@ -37,78 +30,81 @@ export const tournamentFieldSchema = z.object({
   order: z.number().int().min(0, "L'ordre doit être positif."),
 })
 
+/** Base shape shared by create and update tournament schemas. */
+const baseTournamentFields = {
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Le titre est requis.')
+    .max(200, 'Le titre ne peut pas dépasser 200 caractères.'),
+  slug: z
+    .string()
+    .trim()
+    .min(1, 'Le slug est requis.')
+    .max(200, 'Le slug ne peut pas dépasser 200 caractères.')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
+    ),
+  description: z
+    .string()
+    .trim()
+    .min(1, 'La description est requise.')
+    .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
+  startDate: z.string().datetime({ message: 'Date de début invalide.' }),
+  endDate: z.string().datetime({ message: 'Date de fin invalide.' }),
+  registrationOpen: z.string().datetime({
+    message: "Date d'ouverture des inscriptions invalide.",
+  }),
+  registrationClose: z.string().datetime({
+    message: 'Date de fermeture des inscriptions invalide.',
+  }),
+  maxTeams: z
+    .number()
+    .int()
+    .min(2, 'Le nombre maximum doit être au moins 2.')
+    .nullable(),
+  format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
+    message: 'Le format doit être SOLO ou TEAM.',
+  }),
+  teamSize: z
+    .number()
+    .int()
+    .min(1, 'La taille doit être au moins 1.')
+    .max(20, 'La taille ne peut pas dépasser 20.'),
+  game: z
+    .string()
+    .trim()
+    .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
+    .optional()
+    .default(''),
+  imageUrl: optionalUrl,
+  rules: z
+    .string()
+    .trim()
+    .max(10000, 'Les règles ne peuvent pas dépasser 10000 caractères.')
+    .optional()
+    .default(''),
+  prize: z
+    .string()
+    .trim()
+    .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
+    .optional()
+    .default(''),
+  toornamentId: z
+    .string()
+    .trim()
+    .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
+    .optional()
+    .default(''),
+  streamUrl: optionalUrl,
+  autoApprove: z.boolean(),
+  fields: z.array(tournamentFieldSchema),
+} as const
+
 /** Schema for creating a tournament. */
 export const tournamentSchema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(1, 'Le titre est requis.')
-      .max(200, 'Le titre ne peut pas dépasser 200 caractères.'),
-    slug: z
-      .string()
-      .trim()
-      .min(1, 'Le slug est requis.')
-      .max(200, 'Le slug ne peut pas dépasser 200 caractères.')
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
-      ),
-    description: z
-      .string()
-      .trim()
-      .min(1, 'La description est requise.')
-      .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
-    startDate: z.string().datetime({ message: 'Date de début invalide.' }),
-    endDate: z.string().datetime({ message: 'Date de fin invalide.' }),
-    registrationOpen: z.string().datetime({
-      message: "Date d'ouverture des inscriptions invalide.",
-    }),
-    registrationClose: z.string().datetime({
-      message: 'Date de fermeture des inscriptions invalide.',
-    }),
-    maxTeams: z
-      .number()
-      .int()
-      .min(2, 'Le nombre maximum doit être au moins 2.')
-      .nullable(),
-    format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
-      message: 'Le format doit être SOLO ou TEAM.',
-    }),
-    teamSize: z
-      .number()
-      .int()
-      .min(1, 'La taille doit être au moins 1.')
-      .max(20, 'La taille ne peut pas dépasser 20.'),
-    game: z
-      .string()
-      .trim()
-      .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
-      .optional()
-      .default(''),
-    imageUrl: optionalUrl,
-    rules: z
-      .string()
-      .trim()
-      .max(10000, 'Les règles ne peuvent pas dépasser 10000 caractères.')
-      .optional()
-      .default(''),
-    prize: z
-      .string()
-      .trim()
-      .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
-      .optional()
-      .default(''),
-    toornamentId: z
-      .string()
-      .trim()
-      .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
-      .optional()
-      .default(''),
-    streamUrl: optionalUrl,
-    autoApprove: z.boolean(),
-    fields: z.array(tournamentFieldSchema),
-  })
+  .object(baseTournamentFields)
   .refine(data => new Date(data.endDate) > new Date(data.startDate), {
     message: 'La date de fin doit être après la date de début.',
     path: ['endDate'],
@@ -143,74 +139,7 @@ export const deleteTournamentSchema = z.object({
 export const updateTournamentSchema = z
   .object({
     id: z.uuid('ID de tournoi invalide.'),
-    title: z
-      .string()
-      .trim()
-      .min(1, 'Le titre est requis.')
-      .max(200, 'Le titre ne peut pas dépasser 200 caractères.'),
-    slug: z
-      .string()
-      .trim()
-      .min(1, 'Le slug est requis.')
-      .max(200, 'Le slug ne peut pas dépasser 200 caractères.')
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
-      ),
-    description: z
-      .string()
-      .trim()
-      .min(1, 'La description est requise.')
-      .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
-    startDate: z.string().datetime({ message: 'Date de début invalide.' }),
-    endDate: z.string().datetime({ message: 'Date de fin invalide.' }),
-    registrationOpen: z.string().datetime({
-      message: "Date d'ouverture des inscriptions invalide.",
-    }),
-    registrationClose: z.string().datetime({
-      message: 'Date de fermeture des inscriptions invalide.',
-    }),
-    maxTeams: z
-      .number()
-      .int()
-      .min(2, 'Le nombre maximum doit être au moins 2.')
-      .nullable(),
-    format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
-      message: 'Le format doit être SOLO ou TEAM.',
-    }),
-    teamSize: z
-      .number()
-      .int()
-      .min(1, 'La taille doit être au moins 1.')
-      .max(20, 'La taille ne peut pas dépasser 20.'),
-    game: z
-      .string()
-      .trim()
-      .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
-      .optional()
-      .default(''),
-    imageUrl: optionalUrl,
-    rules: z
-      .string()
-      .trim()
-      .max(10000, 'Les règles ne peuvent pas dépasser 10000 caractères.')
-      .optional()
-      .default(''),
-    prize: z
-      .string()
-      .trim()
-      .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
-      .optional()
-      .default(''),
-    toornamentId: z
-      .string()
-      .trim()
-      .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
-      .optional()
-      .default(''),
-    streamUrl: optionalUrl,
-    autoApprove: z.boolean(),
-    fields: z.array(tournamentFieldSchema),
+    ...baseTournamentFields,
   })
   .refine(data => new Date(data.endDate) > new Date(data.startDate), {
     message: 'La date de fin doit être après la date de début.',

@@ -25,28 +25,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { unregisterFromTournament } from '@/lib/actions/tournaments'
+import {
+  REGISTRATION_STATUS_BADGE_STYLES,
+  REGISTRATION_STATUS_LABELS,
+} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import {
-  RegistrationStatus,
-  TournamentFormat,
-} from '@/prisma/generated/prisma/enums'
-
-const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]:
-    'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]:
-    'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'border-red-500/30 bg-red-500/10 text-red-400',
-} as const
-
-const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
-} as const
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface ProfileRegistrationsProps {
   registrations: UserRegistrationItem[]
@@ -119,7 +106,7 @@ export const ProfileRegistrations = ({
                 <span
                   className={cn(
                     'rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
-                    REGISTRATION_STATUS_STYLES[registration.status],
+                    REGISTRATION_STATUS_BADGE_STYLES[registration.status],
                   )}
                 >
                   {REGISTRATION_STATUS_LABELS[registration.status]}

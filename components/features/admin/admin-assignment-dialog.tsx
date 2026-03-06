@@ -26,10 +26,14 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { updateAdmin } from '@/lib/actions/admins'
+import {
+  TOURNAMENT_STATUS_LABELS,
+  TOURNAMENT_STATUS_STYLES,
+} from '@/lib/config/constants'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
 import { cn } from '@/lib/utils/cn'
 import { updateAdminSchema } from '@/lib/validations/admins'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface AdminEditDialogProps {
   open: boolean
@@ -39,21 +43,6 @@ interface AdminEditDialogProps {
 }
 
 type FormInput = { displayName: string }
-
-const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  [TournamentStatus.DRAFT]: {
-    label: 'Brouillon',
-    className: 'bg-zinc-500/10 text-zinc-400',
-  },
-  [TournamentStatus.PUBLISHED]: {
-    label: 'Publié',
-    className: 'bg-emerald-500/10 text-emerald-400',
-  },
-  [TournamentStatus.ARCHIVED]: {
-    label: 'Archivé',
-    className: 'bg-amber-500/10 text-amber-400',
-  },
-}
 
 export const AdminEditDialog = ({
   open,
@@ -174,10 +163,12 @@ export const AdminEditDialog = ({
               <div className="max-h-60 space-y-1 overflow-y-auto">
                 {tournaments.map(tournament => {
                   const isChecked = selectedIds.has(tournament.id)
-                  const statusInfo = STATUS_LABELS[tournament.status] ?? {
-                    label: tournament.status,
-                    className: 'bg-zinc-500/10 text-zinc-400',
-                  }
+                  const status = tournament.status as TournamentStatus
+                  const statusLabel =
+                    TOURNAMENT_STATUS_LABELS[status] ?? tournament.status
+                  const statusClassName =
+                    TOURNAMENT_STATUS_STYLES[status] ??
+                    'bg-zinc-500/10 text-zinc-400'
 
                   return (
                     <button
@@ -205,9 +196,9 @@ export const AdminEditDialog = ({
                         </div>
                       </div>
                       <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusInfo.className}`}
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusClassName}`}
                       >
-                        {statusInfo.label}
+                        {statusLabel}
                       </span>
                     </button>
                   )

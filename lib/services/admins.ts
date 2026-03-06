@@ -8,7 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, SEARCH_CONFIG } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
@@ -85,7 +85,7 @@ export const searchUsers = async (
 ): Promise<
   { id: string; name: string; email: string; image: string | null }[]
 > => {
-  if (!query || query.length < 2) return []
+  if (!query || query.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) return []
 
   try {
     const rows = await prisma.user.findMany({
@@ -96,7 +96,7 @@ export const searchUsers = async (
           { email: { contains: query, mode: 'insensitive' } },
         ],
       },
-      take: 10,
+      take: SEARCH_CONFIG.MAX_RESULTS,
       orderBy: { name: 'asc' },
       select: {
         id: true,

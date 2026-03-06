@@ -24,12 +24,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { banPlayer } from '@/lib/actions/players'
-import type { PlayerRow } from '@/lib/types/player'
 import {
   BAN_DURATION_OPTIONS,
-  type BanDurationValue,
   PERMANENT_BAN_DATE,
-} from '@/lib/types/player'
+} from '@/lib/config/constants'
+import type { BanDurationValue, PlayerRow } from '@/lib/types/player'
 import { cn } from '@/lib/utils/cn'
 
 interface PlayerBanDialogProps {

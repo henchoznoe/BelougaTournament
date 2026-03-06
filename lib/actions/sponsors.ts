@@ -10,7 +10,7 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, NOON_UTC_SUFFIX } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { toNullable } from '@/lib/utils/formatting'
@@ -30,7 +30,7 @@ export const createSponsor = authenticatedAction({
         name: data.name,
         imageUrls: data.imageUrls,
         url: toNullable(data.url),
-        supportedSince: new Date(`${data.supportedSince}T12:00:00.000Z`),
+        supportedSince: new Date(`${data.supportedSince}${NOON_UTC_SUFFIX}`),
       },
     })
 
@@ -50,7 +50,7 @@ export const updateSponsor = authenticatedAction({
         name: data.name,
         imageUrls: data.imageUrls,
         url: toNullable(data.url),
-        supportedSince: new Date(`${data.supportedSince}T12:00:00.000Z`),
+        supportedSince: new Date(`${data.supportedSince}${NOON_UTC_SUFFIX}`),
       },
     })
 

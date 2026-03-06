@@ -20,15 +20,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { updateSettings } from '@/lib/actions/settings'
+import { fromNullable } from '@/lib/utils/formatting'
 import { type SettingsInput, settingsSchema } from '@/lib/validations/settings'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
 interface SettingsFormProps {
   settings: GlobalSettings
 }
-
-/** Converts null to empty string for form default values. */
-const fromNullable = (val: string | null): string => val ?? ''
 
 export const SettingsForm = ({ settings }: SettingsFormProps) => {
   const [isPending, startTransition] = useTransition()

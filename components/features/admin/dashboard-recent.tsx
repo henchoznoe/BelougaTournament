@@ -19,6 +19,10 @@ import {
   SelectTrigger,
 } from '@/components/ui/select'
 import { updateRegistrationStatus } from '@/lib/actions/tournaments'
+import {
+  REGISTRATION_STATUS_LABELS,
+  REGISTRATION_STATUS_STYLES,
+} from '@/lib/config/constants'
 import type {
   RecentRegistration,
   UpcomingTournament,
@@ -37,18 +41,6 @@ interface UpcomingTournamentsProps {
 interface RecentRegistrationsProps {
   registrations: RecentRegistration[]
 }
-
-const STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
-} as const
-
-const STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
-} as const
 
 export const DashboardUpcomingTournaments = ({
   tournaments,
@@ -177,10 +169,10 @@ export const DashboardRecentRegistrations = ({
                     <span
                       className={cn(
                         'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                        STATUS_STYLES[reg.status],
+                        REGISTRATION_STATUS_STYLES[reg.status],
                       )}
                     >
-                      {STATUS_LABELS[reg.status]}
+                      {REGISTRATION_STATUS_LABELS[reg.status]}
                     </span>
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>

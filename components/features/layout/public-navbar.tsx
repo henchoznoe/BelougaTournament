@@ -109,13 +109,19 @@ const NavbarProfile = ({
     return (
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden cursor-pointer">
-          <Image
-            src={session.user.image ?? ''}
-            alt={session.user.name}
-            width={32}
-            height={32}
-            className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
-          />
+          {session.user.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name}
+              width={32}
+              height={32}
+              className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <span className="text-sm font-medium text-zinc-300">
+              {session.user.name.charAt(0).toUpperCase()}
+            </span>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
@@ -182,13 +188,21 @@ const NavbarProfile = ({
     <div className="flex w-full flex-col gap-4 rounded-3xl border border-white/5 bg-white/2 p-4">
       <div className="flex items-center gap-4">
         <div className="relative">
-          <Image
-            src={session.user.image ?? ''}
-            alt={session.user.displayName}
-            width={48}
-            height={48}
-            className="rounded-full ring-2 ring-blue-500/20"
-          />
+          {session.user.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.displayName}
+              width={48}
+              height={48}
+              className="rounded-full ring-2 ring-blue-500/20"
+            />
+          ) : (
+            <div className="flex size-12 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-blue-500/20">
+              <span className="text-lg font-medium text-zinc-300">
+                {session.user.displayName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
         </div>
         <span className="font-bold text-white text-lg">
           {session.user.displayName}

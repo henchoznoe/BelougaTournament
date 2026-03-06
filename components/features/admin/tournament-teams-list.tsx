@@ -40,22 +40,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
+import {
+  REGISTRATION_STATUS_LABELS,
+  REGISTRATION_STATUS_STYLES,
+} from '@/lib/config/constants'
 import type { TeamItem, TeamMemberItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
-import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
-
-const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
-} as const
-
-const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
-} as const
 
 interface TournamentTeamsListProps {
   teams: TeamItem[]

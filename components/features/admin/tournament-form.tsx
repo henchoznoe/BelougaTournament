@@ -39,6 +39,7 @@ import { createTournament, updateTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
+import { fromNullable } from '@/lib/utils/formatting'
 import {
   type TournamentFormInput,
   type TournamentInput,
@@ -65,9 +66,6 @@ const toDateTimeLocal = (date: Date): string => {
 const toISOString = (dateTimeLocal: string): string => {
   return new Date(dateTimeLocal).toISOString()
 }
-
-/** Converts null to empty string for form default values. */
-const fromNullable = (val: string | null): string => val ?? ''
 
 /** Generates a slug from a title. */
 const slugify = (text: string): string => {

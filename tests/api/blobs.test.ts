@@ -428,7 +428,7 @@ describe('DELETE /api/admin/blobs', () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: 'URL du fichier manquante.',
+      error: 'URL du fichier manquante ou invalide.',
     })
   })
 
@@ -437,7 +437,7 @@ describe('DELETE /api/admin/blobs', () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: 'URL du fichier manquante.',
+      error: 'URL du fichier manquante ou invalide.',
     })
   })
 
@@ -477,7 +477,9 @@ describe('DELETE /api/admin/blobs', () => {
     const response = await DELETE(makeDeleteRequest({ url: 'not-a-url' }))
 
     expect(response.status).toBe(400)
-    expect(await response.json()).toEqual({ error: 'URL invalide.' })
+    expect(await response.json()).toEqual({
+      error: 'URL du fichier manquante ou invalide.',
+    })
     expect(mockDel).not.toHaveBeenCalled()
   })
 
