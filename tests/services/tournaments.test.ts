@@ -49,6 +49,7 @@ const {
   getTournamentById,
   getRegistrations,
   getTeams,
+  getAvailableTeams,
   getPublishedTournaments,
   getArchivedTournaments,
   getPublicTournamentBySlug,
@@ -428,6 +429,69 @@ describe('getTeams', () => {
     mockTeamFindMany.mockRejectedValue(new Error('DB error'))
 
     const result = await getTeams('tournament-1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixtures — available teams
+// ---------------------------------------------------------------------------
+
+const MOCK_AVAILABLE_TEAM = {
+  id: 'team-1',
+  name: 'Alpha Squad',
+  captain: { displayName: 'Captain One' },
+  _count: { members: 3 },
+}
+
+// ---------------------------------------------------------------------------
+// getAvailableTeams
+// ---------------------------------------------------------------------------
+
+describe('getAvailableTeams', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns non-full teams for a tournament', async () => {
+    mockTeamFindMany.mockResolvedValue([MOCK_AVAILABLE_TEAM])
+
+    const result = await getAvailableTeams('tournament-1')
+
+    expect(result).toEqual([MOCK_AVAILABLE_TEAM])
+    expect(mockTeamFindMany).toHaveBeenCalledWith({
+      where: { tournamentId: 'tournament-1', isFull: false },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        captain: {
+          select: {
+            displayName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns empty array when no teams available', async () => {
+    mockTeamFindMany.mockResolvedValue([])
+
+    const result = await getAvailableTeams('tournament-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns empty array on database error', async () => {
+    mockTeamFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getAvailableTeams('tournament-1')
 
     expect(result).toEqual([])
   })

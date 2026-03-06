@@ -171,7 +171,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp"
           className="hidden"
           onChange={handleUpload}
         />
@@ -205,6 +205,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
                   <button
                     type="button"
                     onClick={() => onChange(blob.url)}
+                    aria-label={`Sélectionner ${blob.pathname}`}
                     className={cn(
                       'relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border bg-white/5 transition-all duration-200',
                       isSelected
@@ -234,6 +235,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
                       handleDelete(blob.url)
                     }}
                     disabled={isDeleting}
+                    aria-label={`Supprimer ${blob.pathname}`}
                     className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full border border-white/10 bg-zinc-900 text-zinc-400 opacity-0 transition-opacity hover:bg-red-500/20 hover:text-red-400 group-hover:opacity-100"
                   >
                     {isDeleting ? (

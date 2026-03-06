@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -20,7 +21,7 @@ import type {
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-stats')
+  cacheTag(CACHE_TAGS.DASHBOARD_STATS)
 
   try {
     const [
@@ -74,7 +75,7 @@ export const getUpcomingTournaments = async (
 ): Promise<UpcomingTournament[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-upcoming')
+  cacheTag(CACHE_TAGS.DASHBOARD_UPCOMING)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -114,7 +115,7 @@ export const getRecentRegistrations = async (
 ): Promise<RecentRegistration[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-registrations')
+  cacheTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({

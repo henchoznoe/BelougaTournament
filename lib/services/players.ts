@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { PlayerRow } from '@/lib/types/player'
@@ -16,7 +17,7 @@ import type { PlayerRow } from '@/lib/types/player'
 export const getPlayers = async (): Promise<PlayerRow[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('players')
+  cacheTag(CACHE_TAGS.PLAYERS)
 
   try {
     const rows = await prisma.user.findMany({

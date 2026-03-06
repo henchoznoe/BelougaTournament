@@ -10,6 +10,7 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import {
@@ -48,8 +49,8 @@ export const banPlayer = authenticatedAction({
       },
     })
 
-    revalidateTag('players', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.PLAYERS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été banni.` }
   },
@@ -81,8 +82,8 @@ export const unbanPlayer = authenticatedAction({
       },
     })
 
-    revalidateTag('players', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.PLAYERS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été débanni.` }
   },
@@ -114,7 +115,7 @@ export const updatePlayer = authenticatedAction({
       data: { displayName: data.displayName },
     })
 
-    revalidateTag('players', 'minutes')
+    revalidateTag(CACHE_TAGS.PLAYERS, 'minutes')
 
     return {
       success: true,

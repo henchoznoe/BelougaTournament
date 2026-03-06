@@ -76,7 +76,10 @@ export const AdminSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+      <nav
+        aria-label="Navigation admin"
+        className="flex-1 space-y-1 overflow-y-auto px-2 py-4"
+      >
         {ADMIN_NAV.map(group => {
           // Filter items by role
           const visibleItems = group.items.filter(
@@ -153,6 +156,7 @@ export const AdminSidebar = ({
           <button
             type="button"
             onClick={onToggle}
+            aria-label={collapsed ? 'Étendre le menu' : 'Réduire le menu'}
             className={cn(
               'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-400 transition-all duration-200 hover:bg-white/5 hover:text-white',
               collapsed && 'justify-center px-0',

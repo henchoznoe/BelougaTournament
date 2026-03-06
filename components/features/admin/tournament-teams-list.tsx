@@ -141,6 +141,7 @@ export const TournamentTeamsList = ({
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Rechercher une équipe..."
+            aria-label="Rechercher une équipe"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
@@ -306,7 +307,7 @@ export const TournamentTeamsList = ({
                         size="icon-sm"
                         onClick={() => setKickingTeam(team)}
                         className="text-zinc-400 hover:text-amber-400"
-                        title="Retirer un membre"
+                        aria-label="Retirer un membre"
                       >
                         <UserMinus className="size-4" />
                       </Button>
@@ -315,7 +316,7 @@ export const TournamentTeamsList = ({
                         size="icon-sm"
                         onClick={() => setDissolvingTeam(team)}
                         className="text-zinc-400 hover:text-red-400"
-                        title="Dissoudre l'équipe"
+                        aria-label="Dissoudre l'équipe"
                       >
                         <Trash2 className="size-4" />
                       </Button>

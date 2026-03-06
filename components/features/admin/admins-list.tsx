@@ -172,7 +172,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                             size="icon-sm"
                             onClick={() => setEditingAdmin(admin)}
                             className="text-zinc-400 hover:text-white"
-                            title="Gérer les tournois"
+                            aria-label="Gérer les tournois"
                           >
                             <Pencil className="size-4" />
                           </Button>
@@ -181,7 +181,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                             size="icon-sm"
                             onClick={() => setDemotingAdmin(admin)}
                             className="text-zinc-400 hover:text-red-400"
-                            title="Rétrograder"
+                            aria-label="Rétrograder"
                           >
                             <Trash2 className="size-4" />
                           </Button>

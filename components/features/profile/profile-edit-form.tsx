@@ -73,6 +73,7 @@ export const ProfileEditForm = ({
           size="icon-sm"
           className="ml-auto"
           onClick={() => setIsEditing(true)}
+          aria-label="Modifier le nom d'affichage"
         >
           <Pencil className="size-3.5 text-zinc-400" />
         </Button>
@@ -100,6 +101,7 @@ export const ProfileEditForm = ({
           size="icon-sm"
           disabled={isPending || !isDirty}
           className="shrink-0"
+          aria-label="Enregistrer"
         >
           {isPending ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -114,6 +116,7 @@ export const ProfileEditForm = ({
           disabled={isPending}
           className="shrink-0"
           onClick={onCancel}
+          aria-label="Annuler"
         >
           <X className="size-3.5" />
         </Button>

@@ -7,6 +7,7 @@
  */
 
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
@@ -31,7 +32,7 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('settings')
+  cacheTag(CACHE_TAGS.SETTINGS)
 
   try {
     const settings = await prisma.globalSettings.findUnique({

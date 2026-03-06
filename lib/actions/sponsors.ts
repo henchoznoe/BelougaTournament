@@ -10,17 +10,16 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { toNullable } from '@/lib/utils/formatting'
 import {
   deleteSponsorSchema,
   sponsorSchema,
   updateSponsorSchema,
 } from '@/lib/validations/sponsors'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-/** Converts empty strings to null for nullable Prisma fields. */
-const toNullable = (val: string): string | null => val || null
 
 export const createSponsor = authenticatedAction({
   schema: sponsorSchema,
@@ -35,7 +34,7 @@ export const createSponsor = authenticatedAction({
       },
     })
 
-    revalidateTag('sponsors', 'hours')
+    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
 
     return { success: true, message: 'Le sponsor a été créé.' }
   },
@@ -55,7 +54,7 @@ export const updateSponsor = authenticatedAction({
       },
     })
 
-    revalidateTag('sponsors', 'hours')
+    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
 
     return { success: true, message: 'Le sponsor a été mis à jour.' }
   },
@@ -69,7 +68,7 @@ export const deleteSponsor = authenticatedAction({
       where: { id: data.id },
     })
 
-    revalidateTag('sponsors', 'hours')
+    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
 
     return { success: true, message: 'Le sponsor a été supprimé.' }
   },

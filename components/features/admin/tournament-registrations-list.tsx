@@ -107,6 +107,7 @@ export const TournamentRegistrationsList = ({
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
             <Input
               placeholder="Rechercher une inscription..."
+              aria-label="Rechercher une inscription"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"

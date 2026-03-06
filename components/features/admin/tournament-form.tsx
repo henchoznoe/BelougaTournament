@@ -507,7 +507,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   onClick={() => moveField(index, index - 1)}
                   disabled={index === 0 || isPending || fieldsLocked}
                   className="text-zinc-600 hover:text-zinc-400 disabled:opacity-30"
-                  title="Monter"
+                  aria-label={`Monter le champ ${(index + 1).toString()}`}
                 >
                   <GripVertical className="size-4" />
                 </button>
@@ -518,6 +518,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <div className="sm:col-span-2">
                   <Input
                     placeholder="Libellé du champ"
+                    aria-label={`Libellé du champ ${(index + 1).toString()}`}
                     disabled={isPending || fieldsLocked}
                     className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
                     {...register(`fields.${index}.label`)}
@@ -586,6 +587,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 }}
                 disabled={isPending || fieldsLocked}
                 className="mt-0.5 text-zinc-500 hover:text-red-400"
+                aria-label={`Supprimer le champ ${(index + 1).toString()}`}
               >
                 <Trash2 className="size-3.5" />
               </Button>

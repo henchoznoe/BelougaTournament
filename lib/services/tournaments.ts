@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -25,7 +26,7 @@ import type {
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -65,7 +66,7 @@ export const getTournamentBySlug = async (
 ): Promise<TournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -95,7 +96,7 @@ export const getTournamentById = async (
 ): Promise<TournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -125,7 +126,7 @@ export const getRegistrations = async (
 ): Promise<TournamentRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -163,7 +164,7 @@ export const getRegistrations = async (
 export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.team.findMany({
@@ -246,7 +247,7 @@ export const getPublishedTournaments = async (): Promise<
 > => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -267,7 +268,7 @@ export const getArchivedTournaments = async (): Promise<
 > => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -288,7 +289,7 @@ export const getPublicTournamentBySlug = async (
 ): Promise<PublicTournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findFirst({
@@ -318,7 +319,7 @@ export const getAvailableTeams = async (
 ): Promise<AvailableTeam[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.team.findMany({
@@ -386,7 +387,7 @@ export const getUserRegistrations = async (
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -410,7 +411,7 @@ export const getUserPastRegistrations = async (
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({

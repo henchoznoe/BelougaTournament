@@ -11,15 +11,13 @@ import type { z } from 'zod'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import type { ActionState } from '@/lib/types/actions'
+import type { AuthSession } from '@/lib/types/auth'
 import { handlePrismaError } from '@/lib/utils/prisma-error'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
-  session: {
-    user: { role: Role; [key: string]: unknown }
-    session: Record<string, unknown>
-  },
+  session: AuthSession,
 ) => Promise<ActionState<TOutput>>
 
 type ActionOptions<T extends z.ZodType> = {
@@ -51,7 +49,7 @@ export function authenticatedAction<T extends z.ZodType>({
       // 2. Role Check
       if (role) {
         const allowedRoles = Array.isArray(role) ? role : [role]
-        // Cast role to Role enum to satisfy TypeScript if needed
+        // BetterAuth types role as string; cast to Role for enum comparison
         if (!allowedRoles.includes(session.user.role as Role)) {
           return { success: false, message: 'Unauthorized' }
         }
@@ -72,8 +70,7 @@ export function authenticatedAction<T extends z.ZodType>({
       }
 
       // 4. Execute Handler
-      // biome-ignore lint/suspicious/noExplicitAny: Casting to match ActionHandler type
-      return await handler(validatedFields.data, session as any)
+      return await handler(validatedFields.data, session as AuthSession)
     } catch (error) {
       const prismaResult = handlePrismaError(error)
       if (prismaResult) {

@@ -143,6 +143,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                         size="icon-sm"
                         onClick={() => handleEdit(sponsor)}
                         className="text-zinc-400 hover:text-white"
+                        aria-label="Modifier"
                       >
                         <Pencil className="size-4" />
                       </Button>
@@ -151,6 +152,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                         size="icon-sm"
                         onClick={() => handleDelete(sponsor)}
                         className="text-zinc-400 hover:text-red-400"
+                        aria-label="Supprimer"
                       >
                         <Trash2 className="size-4" />
                       </Button>

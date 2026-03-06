@@ -115,12 +115,12 @@ model Tournament {
   maxTeams          Int?
   format            TournamentFormat
   teamSize          Int                      @default(1)
-  game              String? // ex: Valorant, Rocket League
-  imageUrl          String? // Bannière du tournoi
-  rules             String? // Règlement complet du tournoi
-  prize             String? // Cashprize ou récompenses
+  game              String? // e.g. Valorant, Rocket League
+  imageUrl          String? // Tournament banner image
+  rules             String? // Full tournament ruleset
+  prize             String? // Cash prize or rewards
   toornamentId      String?
-  streamUrl         String? // Override du stream global (optionnel)
+  streamUrl         String? // Optional per-tournament stream URL override
   autoApprove       Boolean                  @default(false)
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())

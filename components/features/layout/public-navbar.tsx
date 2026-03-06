@@ -94,6 +94,7 @@ const NavbarProfile = ({
         onClick={onClick}
         className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
         title="Se connecter"
+        aria-label="Se connecter"
       >
         <User className="size-5 text-zinc-400 transition-colors duration-300 group-hover:text-white" />
       </Link>
@@ -285,7 +286,10 @@ export const PublicNavbar = () => {
           </span>
         </Link>
         <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 md:flex">
-          <nav className="flex items-center gap-1 rounded-full border border-white/5 bg-white/2 p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
+          <nav
+            aria-label="Navigation principale"
+            className="flex items-center gap-1 rounded-full border border-white/5 bg-white/2 p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md"
+          >
             {NAV_LINKS.map(link => {
               const isActive = isLinkActive(link.href)
 

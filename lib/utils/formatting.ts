@@ -1,6 +1,6 @@
 /**
  * File: lib/utils/formatting.ts
- * Description: Utility functions for date formatting
+ * Description: Utility functions for date formatting and data normalization.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -20,3 +20,7 @@ export const formatDateTime = (date: Date | string | number) => {
 export const formatShortDate = (date: Date | string | number) => {
   return format(new Date(date), 'dd.MM.yyyy')
 }
+
+/** Converts empty strings to null for nullable Prisma fields. */
+export const toNullable = (val: string | undefined): string | null =>
+  val || null

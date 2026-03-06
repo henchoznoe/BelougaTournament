@@ -21,6 +21,25 @@ const auth = betterAuth({
     database: {
       generateId: 'uuid',
     },
+    cookiePrefix: 'belouga',
+    defaultCookieAttributes: {
+      secure: true,
+      httpOnly: true,
+      sameSite: 'lax' as const,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 24 hours
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
+  rateLimit: {
+    enabled: true,
+    window: 60, // 60 seconds
+    max: 30, // 30 requests per window
   },
   trustedOrigins: [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL],
   socialProviders: {

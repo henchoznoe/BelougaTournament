@@ -50,6 +50,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
           <Link href={ROUTES.HOME}>
             <ArrowLeft className="size-4" />
             <span className="hidden sm:inline">Retour au site</span>
+            <span className="sr-only sm:hidden">Retour au site</span>
           </Link>
         </Button>
 

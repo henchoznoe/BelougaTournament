@@ -123,7 +123,7 @@ export const ProfileRegistrations = ({
                   type="button"
                   onClick={() => setEditingRegistration(registration)}
                   className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
-                  title="Modifier l'inscription"
+                  aria-label="Modifier l'inscription"
                 >
                   <Pencil className="size-3.5" />
                 </button>
@@ -131,7 +131,7 @@ export const ProfileRegistrations = ({
                   type="button"
                   onClick={() => setUnregisterTarget(registration)}
                   className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  title="Se désinscrire"
+                  aria-label="Se désinscrire"
                 >
                   <X className="size-3.5" />
                 </button>

@@ -7,6 +7,7 @@
  */
 
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
@@ -14,7 +15,7 @@ import type { Sponsor } from '@/prisma/generated/prisma/client'
 export const getSponsors = async (): Promise<Sponsor[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('sponsors')
+  cacheTag(CACHE_TAGS.SPONSORS)
 
   try {
     return await prisma.sponsor.findMany({

@@ -10,9 +10,11 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { isBanned } from '@/lib/utils/auth.helpers'
+import { toNullable } from '@/lib/utils/formatting'
 import {
   createTeamSchema,
   deleteTournamentSchema,
@@ -27,10 +29,75 @@ import {
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
+import type {
+  FieldType,
+  RegistrationStatus,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-/** Converts empty strings to null for nullable Prisma fields. */
-const toNullable = (val: string | undefined): string | null => val || null
+// ---------------------------------------------------------------------------
+// Local query result types (narrow shapes matching Prisma includes)
+// ---------------------------------------------------------------------------
+
+/** Tournament with its dynamic fields and a registration count. Used by updateTournament. */
+type TournamentWithFieldsAndCount = {
+  id: string
+  format: TournamentFormat
+  status: TournamentStatus
+  fields: { label: string; type: FieldType; required: boolean; order: number }[]
+  _count: { registrations: number }
+}
+
+/** Tournament with its dynamic fields and registration-relevant scalars. Used by registration actions. */
+type TournamentWithFields = {
+  id: string
+  status: TournamentStatus
+  format: TournamentFormat
+  registrationOpen: Date
+  registrationClose: Date
+  maxTeams: number | null
+  teamSize: number
+  autoApprove: boolean
+  fields: { label: string; type: FieldType; required: boolean; order: number }[]
+}
+
+/** Registration with nested tournament (including fields). Used by updateRegistrationFields. */
+type RegistrationWithTournament = {
+  id: string
+  userId: string
+  tournamentId: string
+  status: RegistrationStatus
+  tournament: TournamentWithFields
+}
+
+/** Registration with minimal tournament info. Used by unregisterFromTournament. */
+type RegistrationWithTournamentInfo = {
+  id: string
+  tournament: { status: TournamentStatus; format: TournamentFormat }
+}
+
+/** Team with a member count. Used by joinTeamAndRegister. */
+type TeamWithMemberCount = {
+  id: string
+  tournamentId: string
+  isFull: boolean
+  _count: { members: number }
+}
+
+/** Team with ordered members list. Used by kickPlayer and unregisterFromTournament. */
+type TeamWithMembers = {
+  id: string
+  tournamentId: string
+  captainId: string
+  members: { userId: string }[]
+}
+
+/** Team member with nested team (including members). Used by unregisterFromTournament. */
+type TeamMemberWithTeam = {
+  team: TeamWithMembers
+}
 
 /**
  * Checks whether an ADMIN user is assigned to a given tournament.
@@ -38,7 +105,7 @@ const toNullable = (val: string | undefined): string | null => val || null
  */
 const checkAdminAssignment = async (
   userId: string,
-  userRole: string,
+  userRole: Role,
   tournamentId: string,
 ): Promise<boolean> => {
   if (userRole === Role.SUPERADMIN) return true
@@ -67,6 +134,31 @@ const checkBanStatus = async (userId: string): Promise<ActionState | null> => {
     return { success: false, message: 'Votre compte est banni.' }
   }
   return null
+}
+
+/** Validates dynamic field values against tournament field definitions. */
+const validateFieldValues = (
+  fields: { label: string; type: string; required: boolean }[],
+  fieldValues: Record<string, string | number>,
+): { valid: true } | { valid: false; message: string } => {
+  for (const field of fields) {
+    const value = fieldValues[field.label]
+    if (field.required && (value === undefined || value === '')) {
+      return {
+        valid: false,
+        message: `Le champ « ${field.label} » est requis.`,
+      }
+    }
+    if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return {
+          valid: false,
+          message: `Le champ « ${field.label} » doit être un nombre.`,
+        }
+      }
+    }
+  }
+  return { valid: true }
 }
 
 /** Creates a new tournament with its dynamic fields. */
@@ -104,9 +196,9 @@ export const createTournament = authenticatedAction({
       },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('tournament-options', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: 'Le tournoi a été créé.' }
   },
@@ -118,8 +210,8 @@ export const updateTournament = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.id,
     )
     if (!hasAccess) {
@@ -130,14 +222,13 @@ export const updateTournament = authenticatedAction({
     }
 
     // Fetch existing tournament to enforce immutability rules
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const existing: any = await prisma.tournament.findUnique({
+    const existing = (await prisma.tournament.findUnique({
       where: { id: data.id },
       include: {
         fields: { orderBy: { order: 'asc' } },
         _count: { select: { registrations: true } },
       },
-    })
+    })) as TournamentWithFieldsAndCount | null
 
     if (!existing) {
       return { success: false, message: 'Tournoi introuvable.' }
@@ -154,19 +245,12 @@ export const updateTournament = authenticatedAction({
 
     // Dynamic fields are locked when tournament is PUBLISHED with registrations
     if (existing.status === 'PUBLISHED' && existing._count.registrations > 0) {
-      const existingFields = existing.fields.map(
-        (f: {
-          label: string
-          type: string
-          required: boolean
-          order: number
-        }) => ({
-          label: f.label,
-          type: f.type,
-          required: f.required,
-          order: f.order,
-        }),
-      )
+      const existingFields = existing.fields.map(f => ({
+        label: f.label,
+        type: f.type,
+        required: f.required,
+        order: f.order,
+      }))
       const submittedFields = data.fields.map(f => ({
         label: f.label,
         type: f.type,
@@ -221,9 +305,9 @@ export const updateTournament = authenticatedAction({
       }),
     ])
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('tournament-options', 'minutes')
-    revalidateTag('dashboard-upcoming', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
     return { success: true, message: 'Le tournoi a été mis à jour.' }
   },
@@ -235,8 +319,8 @@ export const deleteTournament = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.id,
     )
     if (!hasAccess) {
@@ -250,11 +334,11 @@ export const deleteTournament = authenticatedAction({
       where: { id: data.id },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('tournament-options', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
-    revalidateTag('dashboard-upcoming', 'minutes')
-    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
 
     return { success: true, message: 'Le tournoi a été supprimé.' }
   },
@@ -266,8 +350,8 @@ export const updateTournamentStatus = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.id,
     )
     if (!hasAccess) {
@@ -282,10 +366,10 @@ export const updateTournamentStatus = authenticatedAction({
       data: { status: data.status },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('tournament-options', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
-    revalidateTag('dashboard-upcoming', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
     return { success: true, message: 'Le statut du tournoi a été mis à jour.' }
   },
@@ -297,8 +381,8 @@ export const updateRegistrationStatus = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.tournamentId,
     )
     if (!hasAccess) {
@@ -313,9 +397,9 @@ export const updateRegistrationStatus = authenticatedAction({
       data: { status: data.status },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
       success: true,
@@ -328,29 +412,25 @@ export const updateRegistrationStatus = authenticatedAction({
 // Public registration
 // ---------------------------------------------------------------------------
 
-// biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-type TournamentWithFields = any
-
 /** Updates a user's own registration field values. Resets status to PENDING if it was APPROVED. */
 export const updateRegistrationFields = authenticatedAction({
   schema: updateRegistrationFieldsSchema,
   handler: async (data, session): Promise<ActionState> => {
     // 1. Fetch existing registration and verify ownership
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const registration: any = await prisma.tournamentRegistration.findUnique({
+    const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
       include: {
         tournament: {
           include: { fields: { orderBy: { order: 'asc' } } },
         },
       },
-    })
+    })) as RegistrationWithTournament | null
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
     }
 
-    if (registration.userId !== (session.user.id as string)) {
+    if (registration.userId !== session.user.id) {
       return {
         success: false,
         message: "Vous ne pouvez pas modifier l'inscription d'un autre joueur.",
@@ -371,22 +451,12 @@ export const updateRegistrationFields = authenticatedAction({
 
     // 3. Validate dynamic field values
     const tournament: TournamentWithFields = registration.tournament
-    for (const field of tournament.fields) {
-      const value = data.fieldValues[field.label]
-      if (field.required && (value === undefined || value === '')) {
-        return {
-          success: false,
-          message: `Le champ « ${field.label} » est requis.`,
-        }
-      }
-      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
-        if (typeof value !== 'number' || Number.isNaN(value)) {
-          return {
-            success: false,
-            message: `Le champ « ${field.label} » doit être un nombre.`,
-          }
-        }
-      }
+    const fieldValidation = validateFieldValues(
+      tournament.fields,
+      data.fieldValues,
+    )
+    if (!fieldValidation.valid) {
+      return { success: false, message: fieldValidation.message }
     }
 
     // 4. Update field values; reset to PENDING if status was APPROVED
@@ -401,9 +471,9 @@ export const updateRegistrationFields = authenticatedAction({
       },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     const statusMessage =
       registration.status === 'APPROVED'
@@ -422,16 +492,14 @@ export const registerForTournament = authenticatedAction({
   schema: registerForTournamentSchema,
   handler: async (data, session): Promise<ActionState> => {
     // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id as string)
+    const banResult = await checkBanStatus(session.user.id)
     if (banResult) return banResult
 
     // 2. Fetch tournament with fields
-    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
-      {
-        where: { id: data.tournamentId },
-        include: { fields: { orderBy: { order: 'asc' } } },
-      },
-    )
+    const tournament = (await prisma.tournament.findUnique({
+      where: { id: data.tournamentId },
+      include: { fields: { orderBy: { order: 'asc' } } },
+    })) as TournamentWithFields | null
 
     if (!tournament || tournament.status !== 'PUBLISHED') {
       return {
@@ -479,7 +547,7 @@ export const registerForTournament = authenticatedAction({
       where: {
         tournamentId_userId: {
           tournamentId: data.tournamentId,
-          userId: session.user.id as string,
+          userId: session.user.id,
         },
       },
     })
@@ -491,36 +559,23 @@ export const registerForTournament = authenticatedAction({
     }
 
     // 7. Validate dynamic field values
-    for (const field of tournament.fields) {
-      const value = data.fieldValues[field.label]
-      if (field.required && (value === undefined || value === '')) {
-        return {
-          success: false,
-          message: `Le champ « ${field.label} » est requis.`,
-        }
-      }
-      if (field.type === 'NUMBER' && value !== undefined && value !== '') {
-        if (typeof value !== 'number' || Number.isNaN(value)) {
-          return {
-            success: false,
-            message: `Le champ « ${field.label} » doit être un nombre.`,
-          }
-        }
-      }
+    const validation = validateFieldValues(tournament.fields, data.fieldValues)
+    if (!validation.valid) {
+      return { success: false, message: validation.message }
     }
 
     // 8. Create the registration
     await prisma.tournamentRegistration.create({
       data: {
         tournamentId: data.tournamentId,
-        userId: session.user.id as string,
+        userId: session.user.id,
         fieldValues: data.fieldValues,
         status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
       },
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
 
     return { success: true, message: 'Votre inscription a été enregistrée.' }
   },
@@ -530,46 +585,19 @@ export const registerForTournament = authenticatedAction({
 // Team registration (public)
 // ---------------------------------------------------------------------------
 
-/** Validates dynamic field values against tournament field definitions. */
-const validateFieldValues = (
-  fields: { label: string; type: string; required: boolean }[],
-  fieldValues: Record<string, string | number>,
-): { valid: true } | { valid: false; message: string } => {
-  for (const field of fields) {
-    const value = fieldValues[field.label]
-    if (field.required && (value === undefined || value === '')) {
-      return {
-        valid: false,
-        message: `Le champ « ${field.label} » est requis.`,
-      }
-    }
-    if (field.type === 'NUMBER' && value !== undefined && value !== '') {
-      if (typeof value !== 'number' || Number.isNaN(value)) {
-        return {
-          valid: false,
-          message: `Le champ « ${field.label} » doit être un nombre.`,
-        }
-      }
-    }
-  }
-  return { valid: true }
-}
-
 /** Creates a team and registers the current user as captain. */
 export const createTeamAndRegister = authenticatedAction({
   schema: createTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
     // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id as string)
+    const banResult = await checkBanStatus(session.user.id)
     if (banResult) return banResult
 
     // 2. Fetch tournament with fields
-    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
-      {
-        where: { id: data.tournamentId },
-        include: { fields: { orderBy: { order: 'asc' } } },
-      },
-    )
+    const tournament = (await prisma.tournament.findUnique({
+      where: { id: data.tournamentId },
+      include: { fields: { orderBy: { order: 'asc' } } },
+    })) as TournamentWithFields | null
 
     if (!tournament || tournament.status !== 'PUBLISHED') {
       return {
@@ -616,7 +644,7 @@ export const createTeamAndRegister = authenticatedAction({
       where: {
         tournamentId_userId: {
           tournamentId: data.tournamentId,
-          userId: session.user.id as string,
+          userId: session.user.id,
         },
       },
     })
@@ -638,7 +666,7 @@ export const createTeamAndRegister = authenticatedAction({
       const team = await tx.team.create({
         data: {
           name: data.teamName,
-          captainId: session.user.id as string,
+          captainId: session.user.id,
           tournamentId: data.tournamentId,
           isFull: tournament.teamSize <= 1,
         },
@@ -647,14 +675,14 @@ export const createTeamAndRegister = authenticatedAction({
       await tx.teamMember.create({
         data: {
           teamId: team.id,
-          userId: session.user.id as string,
+          userId: session.user.id,
         },
       })
 
       await tx.tournamentRegistration.create({
         data: {
           tournamentId: data.tournamentId,
-          userId: session.user.id as string,
+          userId: session.user.id,
           fieldValues: data.fieldValues,
           status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
           teamId: team.id,
@@ -662,9 +690,9 @@ export const createTeamAndRegister = authenticatedAction({
       })
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
       success: true,
@@ -678,16 +706,14 @@ export const joinTeamAndRegister = authenticatedAction({
   schema: joinTeamSchema,
   handler: async (data, session): Promise<ActionState> => {
     // 1. Check ban status
-    const banResult = await checkBanStatus(session.user.id as string)
+    const banResult = await checkBanStatus(session.user.id)
     if (banResult) return banResult
 
     // 2. Fetch tournament with fields
-    const tournament: TournamentWithFields = await prisma.tournament.findUnique(
-      {
-        where: { id: data.tournamentId },
-        include: { fields: { orderBy: { order: 'asc' } } },
-      },
-    )
+    const tournament = (await prisma.tournament.findUnique({
+      where: { id: data.tournamentId },
+      include: { fields: { orderBy: { order: 'asc' } } },
+    })) as TournamentWithFields | null
 
     if (!tournament || tournament.status !== 'PUBLISHED') {
       return {
@@ -721,7 +747,7 @@ export const joinTeamAndRegister = authenticatedAction({
       where: {
         tournamentId_userId: {
           tournamentId: data.tournamentId,
-          userId: session.user.id as string,
+          userId: session.user.id,
         },
       },
     })
@@ -733,11 +759,10 @@ export const joinTeamAndRegister = authenticatedAction({
     }
 
     // 6. Fetch team and verify it belongs to the tournament and is not full
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const team: any = await prisma.team.findUnique({
+    const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: { _count: { select: { members: true } } },
-    })
+    })) as TeamWithMemberCount | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
       return { success: false, message: 'Équipe introuvable.' }
@@ -758,7 +783,7 @@ export const joinTeamAndRegister = authenticatedAction({
       await tx.teamMember.create({
         data: {
           teamId: data.teamId,
-          userId: session.user.id as string,
+          userId: session.user.id,
         },
       })
 
@@ -774,16 +799,16 @@ export const joinTeamAndRegister = authenticatedAction({
       await tx.tournamentRegistration.create({
         data: {
           tournamentId: data.tournamentId,
-          userId: session.user.id as string,
+          userId: session.user.id,
           fieldValues: data.fieldValues,
           status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
         },
       })
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
       success: true,
@@ -801,15 +826,14 @@ export const joinTeamAndRegister = authenticatedAction({
 export const unregisterFromTournament = authenticatedAction({
   schema: unregisterFromTournamentSchema,
   handler: async (data, session): Promise<ActionState> => {
-    const userId = session.user.id as string
+    const userId = session.user.id
 
     // 1. Check ban status
     const banResult = await checkBanStatus(userId)
     if (banResult) return banResult
 
     // 2. Fetch the registration with tournament info
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const registration: any = await prisma.tournamentRegistration.findUnique({
+    const registration = (await prisma.tournamentRegistration.findUnique({
       where: {
         tournamentId_userId: {
           tournamentId: data.tournamentId,
@@ -819,7 +843,7 @@ export const unregisterFromTournament = authenticatedAction({
       include: {
         tournament: { select: { status: true, format: true } },
       },
-    })
+    })) as RegistrationWithTournamentInfo | null
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
@@ -838,23 +862,22 @@ export const unregisterFromTournament = authenticatedAction({
         where: { id: registration.id },
       })
 
-      revalidateTag('tournaments', 'hours')
-      revalidateTag('dashboard-registrations', 'minutes')
-      revalidateTag('dashboard-stats', 'minutes')
+      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return { success: true, message: 'Votre inscription a été annulée.' }
     }
 
     // 4. TEAM format — find the user's team membership
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const teamMember: any = await prisma.teamMember.findFirst({
+    const teamMember = (await prisma.teamMember.findFirst({
       where: { userId, team: { tournamentId: data.tournamentId } },
       include: {
         team: {
           include: { members: { orderBy: { joinedAt: 'asc' } } },
         },
       },
-    })
+    })) as TeamMemberWithTeam | null
 
     if (!teamMember) {
       // Edge case: has a registration but no team membership (shouldn't happen, but clean up)
@@ -862,18 +885,16 @@ export const unregisterFromTournament = authenticatedAction({
         where: { id: registration.id },
       })
 
-      revalidateTag('tournaments', 'hours')
-      revalidateTag('dashboard-registrations', 'minutes')
-      revalidateTag('dashboard-stats', 'minutes')
+      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return { success: true, message: 'Votre inscription a été annulée.' }
     }
 
     const team = teamMember.team
     const isCaptain = team.captainId === userId
-    const otherMembers = team.members.filter(
-      (m: { userId: string }) => m.userId !== userId,
-    )
+    const otherMembers = team.members.filter(m => m.userId !== userId)
 
     await prisma.$transaction(async tx => {
       // a. Remove team member record
@@ -914,9 +935,9 @@ export const unregisterFromTournament = authenticatedAction({
       }
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: 'Votre inscription a été annulée.' }
   },
@@ -932,8 +953,8 @@ export const kickPlayer = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.tournamentId,
     )
     if (!hasAccess) {
@@ -944,21 +965,18 @@ export const kickPlayer = authenticatedAction({
     }
 
     // Fetch team with members ordered by join date
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const team: any = await prisma.team.findUnique({
+    const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: {
         members: { orderBy: { joinedAt: 'asc' } },
       },
-    })
+    })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
       return { success: false, message: 'Équipe introuvable.' }
     }
 
-    const isMember = team.members.some(
-      (m: { userId: string }) => m.userId === data.userId,
-    )
+    const isMember = team.members.some(m => m.userId === data.userId)
     if (!isMember) {
       return {
         success: false,
@@ -967,9 +985,7 @@ export const kickPlayer = authenticatedAction({
     }
 
     const isCaptain = team.captainId === data.userId
-    const otherMembers = team.members.filter(
-      (m: { userId: string }) => m.userId !== data.userId,
-    )
+    const otherMembers = team.members.filter(m => m.userId !== data.userId)
 
     await prisma.$transaction(async tx => {
       // 1. Remove team member record
@@ -1013,9 +1029,9 @@ export const kickPlayer = authenticatedAction({
       }
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: "Le joueur a été retiré de l'équipe." }
   },
@@ -1027,8 +1043,8 @@ export const dissolveTeam = authenticatedAction({
   role: [Role.ADMIN, Role.SUPERADMIN],
   handler: async (data, session): Promise<ActionState> => {
     const hasAccess = await checkAdminAssignment(
-      session.user.id as string,
-      session.user.role as string,
+      session.user.id,
+      session.user.role,
       data.tournamentId,
     )
     if (!hasAccess) {
@@ -1039,17 +1055,16 @@ export const dissolveTeam = authenticatedAction({
     }
 
     // Fetch team with members to get all user IDs
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma include result needs explicit field typing
-    const team: any = await prisma.team.findUnique({
+    const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: { members: true },
-    })
+    })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
       return { success: false, message: 'Équipe introuvable.' }
     }
 
-    const memberUserIds = team.members.map((m: { userId: string }) => m.userId)
+    const memberUserIds = team.members.map(m => m.userId)
 
     await prisma.$transaction(async tx => {
       // 1. Delete all member registrations for this tournament
@@ -1064,9 +1079,9 @@ export const dissolveTeam = authenticatedAction({
       await tx.team.delete({ where: { id: data.teamId } })
     })
 
-    revalidateTag('tournaments', 'hours')
-    revalidateTag('dashboard-registrations', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: "L'équipe a été dissoute." }
   },

@@ -95,6 +95,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Rechercher un tournoi..."
+            aria-label="Rechercher un tournoi"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
@@ -243,6 +244,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                       >
                         <Link
                           href={`${ROUTES.ADMIN_TOURNAMENTS}/${tournament.slug}`}
+                          aria-label="Modifier"
                         >
                           <Pencil className="size-4" />
                         </Link>
@@ -252,6 +254,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         size="icon-sm"
                         onClick={() => setDeletingTournament(tournament)}
                         className="text-zinc-400 hover:text-red-400"
+                        aria-label="Supprimer"
                       >
                         <Trash2 className="size-4" />
                       </Button>

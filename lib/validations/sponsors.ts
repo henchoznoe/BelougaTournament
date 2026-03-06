@@ -37,11 +37,7 @@ export const deleteSponsorSchema = z.object({
   id: z.uuid('ID de sponsor invalide.'),
 })
 
-export type DeleteSponsorInput = z.infer<typeof deleteSponsorSchema>
-
 /** Schema for updating a sponsor (includes the ID). */
 export const updateSponsorSchema = sponsorSchema.extend({
   id: z.uuid('ID de sponsor invalide.'),
 })
-
-export type UpdateSponsorInput = z.infer<typeof updateSponsorSchema>

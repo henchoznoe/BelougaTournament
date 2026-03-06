@@ -10,6 +10,7 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import { searchUsers } from '@/lib/services/admins'
 import type { ActionState } from '@/lib/types/actions'
@@ -44,8 +45,8 @@ export const promoteToAdmin = authenticatedAction({
       data: { role: 'ADMIN' },
     })
 
-    revalidateTag('admins', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été promu admin.` }
   },
@@ -90,8 +91,8 @@ export const demoteAdmin = authenticatedAction({
       }),
     ])
 
-    revalidateTag('admins', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été rétrogradé.` }
   },
@@ -137,7 +138,7 @@ export const updateAdminAssignments = authenticatedAction({
         : []),
     ])
 
-    revalidateTag('admins', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
 
     return {
       success: true,
@@ -195,7 +196,7 @@ export const updateAdmin = authenticatedAction({
         : []),
     ])
 
-    revalidateTag('admins', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
 
     return { success: true, message: `${user.name} a été mis à jour.` }
   },
