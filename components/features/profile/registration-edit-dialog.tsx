@@ -29,6 +29,7 @@ import type {
   TournamentFieldItem,
   UserRegistrationItem,
 } from '@/lib/types/tournament'
+import { FieldType, RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 interface RegistrationEditDialogProps {
   open: boolean
@@ -44,7 +45,7 @@ const buildFieldValues = (
   const result: Record<string, string | number> = {}
   for (const field of fields) {
     const raw = formData[field.label] ?? ''
-    if (field.type === 'NUMBER' && raw !== '') {
+    if (field.type === FieldType.NUMBER && raw !== '') {
       result[field.label] = Number(raw)
     } else {
       result[field.label] = raw
@@ -108,7 +109,7 @@ export const RegistrationEditDialog = ({
     })
   }
 
-  const willResetStatus = registration.status === 'APPROVED'
+  const willResetStatus = registration.status === RegistrationStatus.APPROVED
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,7 +149,7 @@ export const RegistrationEditDialog = ({
                   </Label>
                   <Input
                     id={`edit-field-${field.id}`}
-                    type={field.type === 'NUMBER' ? 'number' : 'text'}
+                    type={field.type === FieldType.NUMBER ? 'number' : 'text'}
                     disabled={isPending}
                     className="h-9 border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
                     {...register(field.label, {

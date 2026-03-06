@@ -10,6 +10,7 @@ import type { MetadataRoute } from 'next'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const baseUrl = env.NEXT_PUBLIC_APP_URL
@@ -35,7 +36,9 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   let tournamentRoutes: MetadataRoute.Sitemap = []
   try {
     const tournaments = await prisma.tournament.findMany({
-      where: { status: { in: ['PUBLISHED', 'ARCHIVED'] } },
+      where: {
+        status: { in: [TournamentStatus.PUBLISHED, TournamentStatus.ARCHIVED] },
+      },
       select: { slug: true, updatedAt: true },
     })
 

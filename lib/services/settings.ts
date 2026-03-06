@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'

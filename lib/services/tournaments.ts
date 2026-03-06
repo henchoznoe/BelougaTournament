@@ -21,6 +21,7 @@ import type {
   TournamentRegistrationItem,
   UserRegistrationItem,
 } from '@/lib/types/tournament'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** Fetches all tournaments for the admin list table. */
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
@@ -251,7 +252,7 @@ export const getPublishedTournaments = async (): Promise<
 
   try {
     const rows = await prisma.tournament.findMany({
-      where: { status: 'PUBLISHED' },
+      where: { status: TournamentStatus.PUBLISHED },
       orderBy: { startDate: 'asc' },
       select: PUBLIC_LIST_SELECT,
     })
@@ -272,7 +273,7 @@ export const getArchivedTournaments = async (): Promise<
 
   try {
     const rows = await prisma.tournament.findMany({
-      where: { status: 'ARCHIVED' },
+      where: { status: TournamentStatus.ARCHIVED },
       orderBy: { startDate: 'desc' },
       select: PUBLIC_LIST_SELECT,
     })
@@ -293,7 +294,10 @@ export const getPublicTournamentBySlug = async (
 
   try {
     const row = await prisma.tournament.findFirst({
-      where: { slug, status: { in: ['PUBLISHED', 'ARCHIVED'] } },
+      where: {
+        slug,
+        status: { in: [TournamentStatus.PUBLISHED, TournamentStatus.ARCHIVED] },
+      },
       include: {
         fields: {
           orderBy: { order: 'asc' },
@@ -393,7 +397,7 @@ export const getUserRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        tournament: { status: 'PUBLISHED' },
+        tournament: { status: TournamentStatus.PUBLISHED },
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,
@@ -417,7 +421,7 @@ export const getUserPastRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        tournament: { status: 'ARCHIVED' },
+        tournament: { status: TournamentStatus.ARCHIVED },
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,

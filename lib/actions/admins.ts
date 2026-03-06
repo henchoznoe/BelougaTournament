@@ -36,13 +36,13 @@ export const promoteToAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role !== 'USER') {
+    if (user.role !== Role.USER) {
       return { success: false, message: `${user.name} est déjà admin.` }
     }
 
     await prisma.user.update({
       where: { id: data.userId },
-      data: { role: 'ADMIN' },
+      data: { role: Role.ADMIN },
     })
 
     revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
@@ -66,14 +66,14 @@ export const demoteAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Impossible de rétrograder un super admin.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 
@@ -87,7 +87,7 @@ export const demoteAdmin = authenticatedAction({
       prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
       prisma.user.update({
         where: { id: data.userId },
-        data: { role: 'USER' },
+        data: { role: Role.USER },
       }),
     ])
 
@@ -112,14 +112,14 @@ export const updateAdminAssignments = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Les super admins ont accès à tous les tournois.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 
@@ -166,14 +166,14 @@ export const updateAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Impossible de modifier un super admin.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 

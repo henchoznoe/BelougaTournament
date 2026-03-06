@@ -12,6 +12,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 /** Fetches all users with ADMIN or SUPERADMIN role, including tournament assignments. */
 export const getAdmins = async (): Promise<AdminUser[]> => {
@@ -22,7 +23,7 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
   try {
     const rows = await prisma.user.findMany({
       where: {
-        role: { in: ['ADMIN', 'SUPERADMIN'] },
+        role: { in: [Role.ADMIN, Role.SUPERADMIN] },
       },
       orderBy: [{ role: 'desc' }, { name: 'asc' }],
       select: {
@@ -89,7 +90,7 @@ export const searchUsers = async (
   try {
     const rows = await prisma.user.findMany({
       where: {
-        role: 'USER',
+        role: Role.USER,
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
           { email: { contains: query, mode: 'insensitive' } },

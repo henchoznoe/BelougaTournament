@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 interface AdminsListProps {
   admins: AdminUser[]
@@ -116,7 +117,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
 
                   {/* Role badge */}
                   <TableCell className="hidden sm:table-cell">
-                    {admin.role === 'SUPERADMIN' ? (
+                    {admin.role === Role.SUPERADMIN ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
                         <Crown className="size-3" />
                         Super Admin
@@ -131,7 +132,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
 
                   {/* Tournament assignments */}
                   <TableCell className="hidden md:table-cell">
-                    {admin.role === 'SUPERADMIN' ? (
+                    {admin.role === Role.SUPERADMIN ? (
                       <span className="text-xs text-zinc-500 italic">
                         Accès total
                       </span>
@@ -165,7 +166,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                   {/* Actions */}
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      {admin.role === 'ADMIN' && (
+                      {admin.role === Role.ADMIN && (
                         <>
                           <Button
                             variant="ghost"
@@ -187,7 +188,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                           </Button>
                         </>
                       )}
-                      {admin.role === 'SUPERADMIN' && (
+                      {admin.role === Role.SUPERADMIN && (
                         <span className="px-2 text-xs text-zinc-600">—</span>
                       )}
                     </div>

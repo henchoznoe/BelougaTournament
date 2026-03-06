@@ -29,13 +29,13 @@ import {
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
-import type {
+import {
   FieldType,
   RegistrationStatus,
+  Role,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
-import { Role } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Local query result types (narrow shapes matching Prisma includes)
@@ -149,7 +149,11 @@ const validateFieldValues = (
         message: `Le champ « ${field.label} » est requis.`,
       }
     }
-    if (field.type === 'NUMBER' && value !== undefined && value !== '') {
+    if (
+      field.type === FieldType.NUMBER &&
+      value !== undefined &&
+      value !== ''
+    ) {
       if (typeof value !== 'number' || Number.isNaN(value)) {
         return {
           valid: false,
@@ -244,7 +248,10 @@ export const updateTournament = authenticatedAction({
     }
 
     // Dynamic fields are locked when tournament is PUBLISHED with registrations
-    if (existing.status === 'PUBLISHED' && existing._count.registrations > 0) {
+    if (
+      existing.status === TournamentStatus.PUBLISHED &&
+      existing._count.registrations > 0
+    ) {
       const existingFields = existing.fields.map(f => ({
         label: f.label,
         type: f.type,
@@ -442,7 +449,7 @@ export const updateRegistrationFields = authenticatedAction({
     }
 
     // 2. Check tournament is still PUBLISHED
-    if (registration.tournament.status !== 'PUBLISHED') {
+    if (registration.tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
         message: 'Ce tournoi est introuvable ou indisponible.',
@@ -461,7 +468,9 @@ export const updateRegistrationFields = authenticatedAction({
 
     // 4. Update field values; reset to PENDING if status was APPROVED
     const newStatus =
-      registration.status === 'APPROVED' ? 'PENDING' : registration.status
+      registration.status === RegistrationStatus.APPROVED
+        ? RegistrationStatus.PENDING
+        : registration.status
 
     await prisma.tournamentRegistration.update({
       where: { id: data.registrationId },
@@ -476,7 +485,7 @@ export const updateRegistrationFields = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     const statusMessage =
-      registration.status === 'APPROVED'
+      registration.status === RegistrationStatus.APPROVED
         ? ' Votre inscription a été remise en attente de validation.'
         : ''
 
@@ -501,7 +510,7 @@ export const registerForTournament = authenticatedAction({
       include: { fields: { orderBy: { order: 'asc' } } },
     })) as TournamentWithFields | null
 
-    if (!tournament || tournament.status !== 'PUBLISHED') {
+    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
         message: 'Ce tournoi est introuvable ou indisponible.',
@@ -509,7 +518,7 @@ export const registerForTournament = authenticatedAction({
     }
 
     // 3. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
-    if (tournament.format === 'TEAM') {
+    if (tournament.format === TournamentFormat.TEAM) {
       return {
         success: false,
         message:
@@ -534,7 +543,9 @@ export const registerForTournament = authenticatedAction({
       const count = await prisma.tournamentRegistration.count({
         where: {
           tournamentId: data.tournamentId,
-          status: { in: ['PENDING', 'APPROVED'] },
+          status: {
+            in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
+          },
         },
       })
       if (count >= tournament.maxTeams) {
@@ -570,7 +581,9 @@ export const registerForTournament = authenticatedAction({
         tournamentId: data.tournamentId,
         userId: session.user.id,
         fieldValues: data.fieldValues,
-        status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+        status: tournament.autoApprove
+          ? RegistrationStatus.APPROVED
+          : RegistrationStatus.PENDING,
       },
     })
 
@@ -599,7 +612,7 @@ export const createTeamAndRegister = authenticatedAction({
       include: { fields: { orderBy: { order: 'asc' } } },
     })) as TournamentWithFields | null
 
-    if (!tournament || tournament.status !== 'PUBLISHED') {
+    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
         message: 'Ce tournoi est introuvable ou indisponible.',
@@ -607,7 +620,7 @@ export const createTeamAndRegister = authenticatedAction({
     }
 
     // 3. Reject SOLO format
-    if (tournament.format !== 'TEAM') {
+    if (tournament.format !== TournamentFormat.TEAM) {
       return {
         success: false,
         message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
@@ -684,7 +697,9 @@ export const createTeamAndRegister = authenticatedAction({
           tournamentId: data.tournamentId,
           userId: session.user.id,
           fieldValues: data.fieldValues,
-          status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+          status: tournament.autoApprove
+            ? RegistrationStatus.APPROVED
+            : RegistrationStatus.PENDING,
           teamId: team.id,
         },
       })
@@ -715,7 +730,7 @@ export const joinTeamAndRegister = authenticatedAction({
       include: { fields: { orderBy: { order: 'asc' } } },
     })) as TournamentWithFields | null
 
-    if (!tournament || tournament.status !== 'PUBLISHED') {
+    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
         message: 'Ce tournoi est introuvable ou indisponible.',
@@ -723,7 +738,7 @@ export const joinTeamAndRegister = authenticatedAction({
     }
 
     // 3. Reject SOLO format
-    if (tournament.format !== 'TEAM') {
+    if (tournament.format !== TournamentFormat.TEAM) {
       return {
         success: false,
         message: 'Ce tournoi est en format solo. Utilisez le formulaire solo.',
@@ -801,7 +816,9 @@ export const joinTeamAndRegister = authenticatedAction({
           tournamentId: data.tournamentId,
           userId: session.user.id,
           fieldValues: data.fieldValues,
-          status: tournament.autoApprove ? 'APPROVED' : 'PENDING',
+          status: tournament.autoApprove
+            ? RegistrationStatus.APPROVED
+            : RegistrationStatus.PENDING,
         },
       })
     })
@@ -849,7 +866,7 @@ export const unregisterFromTournament = authenticatedAction({
       return { success: false, message: 'Inscription introuvable.' }
     }
 
-    if (registration.tournament.status !== 'PUBLISHED') {
+    if (registration.tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
         message: 'Ce tournoi ne permet plus de désinscription.',
@@ -857,7 +874,7 @@ export const unregisterFromTournament = authenticatedAction({
     }
 
     // 3. SOLO format — just delete the registration
-    if (registration.tournament.format === 'SOLO') {
+    if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.tournamentRegistration.delete({
         where: { id: registration.id },
       })

@@ -29,6 +29,7 @@ import { updateAdmin } from '@/lib/actions/admins'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
 import { cn } from '@/lib/utils/cn'
 import { updateAdminSchema } from '@/lib/validations/admins'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface AdminEditDialogProps {
   open: boolean
@@ -40,12 +41,18 @@ interface AdminEditDialogProps {
 type FormInput = { displayName: string }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  DRAFT: { label: 'Brouillon', className: 'bg-zinc-500/10 text-zinc-400' },
-  PUBLISHED: {
+  [TournamentStatus.DRAFT]: {
+    label: 'Brouillon',
+    className: 'bg-zinc-500/10 text-zinc-400',
+  },
+  [TournamentStatus.PUBLISHED]: {
     label: 'Publié',
     className: 'bg-emerald-500/10 text-emerald-400',
   },
-  ARCHIVED: { label: 'Archivé', className: 'bg-amber-500/10 text-amber-400' },
+  [TournamentStatus.ARCHIVED]: {
+    label: 'Archivé',
+    className: 'bg-amber-500/10 text-amber-400',
+  },
 }
 
 export const AdminEditDialog = ({

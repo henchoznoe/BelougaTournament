@@ -7,18 +7,18 @@
  */
 
 import { cn } from '@/lib/utils/cn'
-import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 const STATUS_STYLES: Record<TournamentStatus, string> = {
-  DRAFT: 'bg-amber-500/10 text-amber-400',
-  PUBLISHED: 'bg-emerald-500/10 text-emerald-400',
-  ARCHIVED: 'bg-zinc-500/10 text-zinc-400',
+  [TournamentStatus.DRAFT]: 'bg-amber-500/10 text-amber-400',
+  [TournamentStatus.PUBLISHED]: 'bg-emerald-500/10 text-emerald-400',
+  [TournamentStatus.ARCHIVED]: 'bg-zinc-500/10 text-zinc-400',
 } as const
 
 const STATUS_LABELS: Record<TournamentStatus, string> = {
-  DRAFT: 'Brouillon',
-  PUBLISHED: 'Publié',
-  ARCHIVED: 'Archivé',
+  [TournamentStatus.DRAFT]: 'Brouillon',
+  [TournamentStatus.PUBLISHED]: 'Publié',
+  [TournamentStatus.ARCHIVED]: 'Archivé',
 } as const
 
 interface TournamentStatusBadgeProps {

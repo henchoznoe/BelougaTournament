@@ -13,6 +13,7 @@ import { TournamentDetailTabs } from '@/components/features/admin/tournament-det
 import { TournamentStatusBadge } from '@/components/features/admin/tournament-status-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTournamentBySlug } from '@/lib/services/tournaments'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface AdminTournamentLayoutProps {
   params: Promise<{ slug: string }>
@@ -49,7 +50,7 @@ const TournamentHeader = async ({
       {/* Tab navigation */}
       <TournamentDetailTabs
         slug={slug}
-        showTeamsTab={tournament.format === 'TEAM'}
+        showTeamsTab={tournament.format === TournamentFormat.TEAM}
       />
     </>
   )

@@ -29,18 +29,23 @@ import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  APPROVED: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'border-red-500/30 bg-red-500/10 text-red-400',
+  [RegistrationStatus.PENDING]:
+    'border-amber-500/30 bg-amber-500/10 text-amber-400',
+  [RegistrationStatus.APPROVED]:
+    'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+  [RegistrationStatus.REJECTED]: 'border-red-500/30 bg-red-500/10 text-red-400',
 } as const
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
+  [RegistrationStatus.PENDING]: 'En attente',
+  [RegistrationStatus.APPROVED]: 'Approuvée',
+  [RegistrationStatus.REJECTED]: 'Refusée',
 } as const
 
 interface ProfileRegistrationsProps {
@@ -100,7 +105,7 @@ export const ProfileRegistrations = ({
                   )}
                   <span className="inline-flex items-center gap-1">
                     <Swords className="size-3" />
-                    {registration.tournament.format === 'SOLO'
+                    {registration.tournament.format === TournamentFormat.SOLO
                       ? 'Solo'
                       : 'Équipe'}
                   </span>
@@ -180,7 +185,8 @@ export const ProfileRegistrations = ({
                 {unregisterTarget?.tournament.title}
               </span>
               &nbsp;?
-              {unregisterTarget?.tournament.format === 'TEAM' && (
+              {unregisterTarget?.tournament.format ===
+                TournamentFormat.TEAM && (
                 <span className="mt-2 block text-amber-400">
                   Si vous êtes le dernier membre de votre équipe, celle-ci sera
                   dissoute.

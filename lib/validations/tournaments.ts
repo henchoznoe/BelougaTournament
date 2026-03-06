@@ -7,6 +7,12 @@
  */
 
 import { z } from 'zod'
+import {
+  FieldType,
+  RegistrationStatus,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Accepts an empty string (field cleared) or a valid URL. */
 const optionalUrl = z
@@ -24,7 +30,7 @@ export const tournamentFieldSchema = z.object({
     .trim()
     .min(1, 'Le libellé est requis.')
     .max(100, 'Le libellé ne peut pas dépasser 100 caractères.'),
-  type: z.enum(['TEXT', 'NUMBER'], {
+  type: z.enum([FieldType.TEXT, FieldType.NUMBER], {
     message: 'Le type doit être TEXT ou NUMBER.',
   }),
   required: z.boolean(),
@@ -66,7 +72,7 @@ export const tournamentSchema = z
       .int()
       .min(2, 'Le nombre maximum doit être au moins 2.')
       .nullable(),
-    format: z.enum(['SOLO', 'TEAM'], {
+    format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
       message: 'Le format doit être SOLO ou TEAM.',
     }),
     teamSize: z
@@ -169,7 +175,7 @@ export const updateTournamentSchema = z
       .int()
       .min(2, 'Le nombre maximum doit être au moins 2.')
       .nullable(),
-    format: z.enum(['SOLO', 'TEAM'], {
+    format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
       message: 'Le format doit être SOLO ou TEAM.',
     }),
     teamSize: z
@@ -229,18 +235,32 @@ export const updateTournamentSchema = z
 /** Schema for updating a tournament's status. */
 export const updateTournamentStatusSchema = z.object({
   id: z.uuid('ID de tournoi invalide.'),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'], {
-    message: 'Le statut doit être DRAFT, PUBLISHED ou ARCHIVED.',
-  }),
+  status: z.enum(
+    [
+      TournamentStatus.DRAFT,
+      TournamentStatus.PUBLISHED,
+      TournamentStatus.ARCHIVED,
+    ],
+    {
+      message: 'Le statut doit être DRAFT, PUBLISHED ou ARCHIVED.',
+    },
+  ),
 })
 
 /** Schema for updating a registration's status (approve / reject). */
 export const updateRegistrationStatusSchema = z.object({
   id: z.uuid("ID d'inscription invalide."),
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED'], {
-    message: 'Le statut doit être PENDING, APPROVED ou REJECTED.',
-  }),
+  status: z.enum(
+    [
+      RegistrationStatus.PENDING,
+      RegistrationStatus.APPROVED,
+      RegistrationStatus.REJECTED,
+    ],
+    {
+      message: 'Le statut doit être PENDING, APPROVED ou REJECTED.',
+    },
+  ),
 })
 
 // ---------------------------------------------------------------------------

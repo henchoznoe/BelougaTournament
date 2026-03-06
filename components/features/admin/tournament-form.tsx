@@ -44,6 +44,11 @@ import {
   type TournamentInput,
   tournamentSchema,
 } from '@/lib/validations/tournaments'
+import {
+  FieldType,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentFormProps {
   tournament?: TournamentDetail
@@ -78,7 +83,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isEditing = !!tournament
   const fieldsLocked =
     isEditing &&
-    tournament.status === 'PUBLISHED' &&
+    tournament.status === TournamentStatus.PUBLISHED &&
     tournament._count.registrations > 0
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -128,7 +133,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           registrationOpen: '',
           registrationClose: '',
           maxTeams: null,
-          format: 'SOLO',
+          format: TournamentFormat.SOLO,
           teamSize: 1,
           game: '',
           imageUrl: '',
@@ -187,7 +192,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const addField = () => {
     append({
       label: '',
-      type: 'TEXT',
+      type: FieldType.TEXT,
       required: false,
       order: fields.length,
     })
@@ -283,10 +288,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             <Select
               value={format}
               onValueChange={val => {
-                setValue('format', val as 'SOLO' | 'TEAM', {
+                setValue('format', val as TournamentFormat, {
                   shouldDirty: true,
                 })
-                if (val === 'SOLO') {
+                if (val === TournamentFormat.SOLO) {
                   setValue('teamSize', 1, { shouldDirty: true })
                 }
               }}
@@ -296,8 +301,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SOLO">Solo</SelectItem>
-                <SelectItem value="TEAM">Équipe</SelectItem>
+                <SelectItem value={TournamentFormat.SOLO}>Solo</SelectItem>
+                <SelectItem value={TournamentFormat.TEAM}>Équipe</SelectItem>
               </SelectContent>
             </Select>
             {isEditing && (
@@ -315,7 +320,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             type="number"
             placeholder="1"
             error={errors.teamSize?.message}
-            disabled={isPending || format === 'SOLO'}
+            disabled={isPending || format === TournamentFormat.SOLO}
             {...register('teamSize', { valueAsNumber: true })}
           />
           <FormField
@@ -534,11 +539,9 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   <Select
                     value={watch(`fields.${index}.type`)}
                     onValueChange={val =>
-                      setValue(
-                        `fields.${index}.type`,
-                        val as 'TEXT' | 'NUMBER',
-                        { shouldDirty: true },
-                      )
+                      setValue(`fields.${index}.type`, val as FieldType, {
+                        shouldDirty: true,
+                      })
                     }
                     disabled={isPending || fieldsLocked}
                   >
@@ -546,8 +549,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TEXT">Texte</SelectItem>
-                      <SelectItem value="NUMBER">Nombre</SelectItem>
+                      <SelectItem value={FieldType.TEXT}>Texte</SelectItem>
+                      <SelectItem value={FieldType.NUMBER}>Nombre</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

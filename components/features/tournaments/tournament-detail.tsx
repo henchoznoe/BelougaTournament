@@ -30,6 +30,10 @@ import type {
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentDetailProps {
   tournament: PublicTournamentDetail
@@ -43,7 +47,7 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
   const open = new Date(tournament.registrationOpen)
   const close = new Date(tournament.registrationClose)
 
-  if (tournament.status === 'ARCHIVED') {
+  if (tournament.status === TournamentStatus.ARCHIVED) {
     return {
       label: 'Tournoi terminé',
       className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
@@ -69,7 +73,7 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
 
 /** Checks if registration is currently open. */
 const isRegistrationOpen = (tournament: PublicTournamentDetail) => {
-  if (tournament.status === 'ARCHIVED') return false
+  if (tournament.status === TournamentStatus.ARCHIVED) return false
   const now = new Date()
   const open = new Date(tournament.registrationOpen)
   const close = new Date(tournament.registrationClose)
@@ -147,7 +151,7 @@ export const TournamentDetail = ({
               icon={Swords}
               label="Format"
               value={
-                tournament.format === 'SOLO'
+                tournament.format === TournamentFormat.SOLO
                   ? 'Solo'
                   : `Équipe de ${tournament.teamSize}`
               }
@@ -161,7 +165,7 @@ export const TournamentDetail = ({
                   : `${tournament._count.registrations}`
               }
             />
-            {tournament.format === 'TEAM' && (
+            {tournament.format === TournamentFormat.TEAM && (
               <InfoRow
                 icon={Trophy}
                 label="Équipes"
@@ -374,7 +378,7 @@ export const TournamentDetail = ({
             </>
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
-              {tournament.status === 'ARCHIVED' ? (
+              {tournament.status === TournamentStatus.ARCHIVED ? (
                 <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
               ) : new Date() < new Date(tournament.registrationOpen) ? (
                 <p className="text-sm text-zinc-500">

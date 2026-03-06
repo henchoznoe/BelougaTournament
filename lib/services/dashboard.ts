@@ -16,6 +16,11 @@ import type {
   RecentRegistration,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
+import {
+  RegistrationStatus,
+  Role,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
@@ -34,11 +39,15 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       sponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
-      prisma.tournament.count({ where: { status: 'DRAFT' } }),
-      prisma.tournament.count({ where: { status: 'PUBLISHED' } }),
-      prisma.tournament.count({ where: { status: 'ARCHIVED' } }),
-      prisma.user.count({ where: { role: 'USER' } }),
-      prisma.tournamentRegistration.count({ where: { status: 'PENDING' } }),
+      prisma.tournament.count({ where: { status: TournamentStatus.DRAFT } }),
+      prisma.tournament.count({
+        where: { status: TournamentStatus.PUBLISHED },
+      }),
+      prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
+      prisma.user.count({ where: { role: Role.USER } }),
+      prisma.tournamentRegistration.count({
+        where: { status: RegistrationStatus.PENDING },
+      }),
       prisma.sponsor.count(),
     ])
 
@@ -46,9 +55,9 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       tournaments: {
         total: tournaments,
         byStatus: {
-          DRAFT: draftCount,
-          PUBLISHED: publishedCount,
-          ARCHIVED: archivedCount,
+          [TournamentStatus.DRAFT]: draftCount,
+          [TournamentStatus.PUBLISHED]: publishedCount,
+          [TournamentStatus.ARCHIVED]: archivedCount,
         },
       },
       players,
@@ -80,7 +89,7 @@ export const getUpcomingTournaments = async (
   try {
     const rows = await prisma.tournament.findMany({
       where: {
-        status: 'PUBLISHED',
+        status: TournamentStatus.PUBLISHED,
         startDate: { gte: new Date() },
       },
       orderBy: { startDate: 'asc' },

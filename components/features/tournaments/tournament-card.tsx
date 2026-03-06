@@ -15,6 +15,10 @@ import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
+import {
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentCardProps {
   tournament: PublicTournamentListItem
@@ -26,7 +30,7 @@ const getRegistrationInfo = (tournament: PublicTournamentListItem) => {
   const open = new Date(tournament.registrationOpen)
   const close = new Date(tournament.registrationClose)
 
-  if (tournament.status === 'ARCHIVED') {
+  if (tournament.status === TournamentStatus.ARCHIVED) {
     return {
       label: 'Terminé',
       className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
@@ -123,7 +127,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
             {/* Format */}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/2 px-3 py-1.5 text-xs text-zinc-400">
               <Swords className="size-3" />
-              {tournament.format === 'SOLO'
+              {tournament.format === TournamentFormat.SOLO
                 ? 'Solo'
                 : `Équipe (${tournament.teamSize})`}
             </span>
@@ -142,7 +146,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
               {spotsLabel} inscrit
               {tournament._count.registrations !== 1 ? 's' : ''}
             </span>
-            {tournament.format === 'TEAM' && (
+            {tournament.format === TournamentFormat.TEAM && (
               <span className="inline-flex items-center gap-1.5">
                 <Trophy className="size-3.5" />
                 {tournament._count.teams} équipe

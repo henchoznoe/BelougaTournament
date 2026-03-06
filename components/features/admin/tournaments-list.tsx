@@ -35,11 +35,14 @@ import { updateTournamentStatus } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
 import { formatShortDate } from '@/lib/utils/formatting'
-import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 const FORMAT_LABELS = {
-  SOLO: 'Solo',
-  TEAM: 'Équipe',
+  [TournamentFormat.SOLO]: 'Solo',
+  [TournamentFormat.TEAM]: 'Équipe',
 } as const
 
 interface TournamentsListProps {
@@ -106,16 +109,16 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
             <span>
               {tournaments.length} tournoi{tournaments.length !== 1 ? 's' : ''}
             </span>
-            {statusCount('PUBLISHED') > 0 && (
+            {statusCount(TournamentStatus.PUBLISHED) > 0 && (
               <span className="text-emerald-400">
-                {statusCount('PUBLISHED')} publié
-                {statusCount('PUBLISHED') !== 1 ? 's' : ''}
+                {statusCount(TournamentStatus.PUBLISHED)} publié
+                {statusCount(TournamentStatus.PUBLISHED) !== 1 ? 's' : ''}
               </span>
             )}
-            {statusCount('DRAFT') > 0 && (
+            {statusCount(TournamentStatus.DRAFT) > 0 && (
               <span className="text-amber-400">
-                {statusCount('DRAFT')} brouillon
-                {statusCount('DRAFT') !== 1 ? 's' : ''}
+                {statusCount(TournamentStatus.DRAFT)} brouillon
+                {statusCount(TournamentStatus.DRAFT) !== 1 ? 's' : ''}
               </span>
             )}
           </div>
@@ -189,7 +192,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   <TableCell className="hidden sm:table-cell">
                     <span className="text-xs text-zinc-400">
                       {FORMAT_LABELS[tournament.format]}
-                      {tournament.format === 'TEAM' &&
+                      {tournament.format === TournamentFormat.TEAM &&
                         ` (${tournament.teamSize.toString()})`}
                     </span>
                   </TableCell>
@@ -226,9 +229,15 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         <TournamentStatusBadge status={tournament.status} />
                       </SelectTrigger>
                       <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value="DRAFT">Brouillon</SelectItem>
-                        <SelectItem value="PUBLISHED">Publié</SelectItem>
-                        <SelectItem value="ARCHIVED">Archivé</SelectItem>
+                        <SelectItem value={TournamentStatus.DRAFT}>
+                          Brouillon
+                        </SelectItem>
+                        <SelectItem value={TournamentStatus.PUBLISHED}>
+                          Publié
+                        </SelectItem>
+                        <SelectItem value={TournamentStatus.ARCHIVED}>
+                          Archivé
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

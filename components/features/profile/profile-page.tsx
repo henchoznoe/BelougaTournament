@@ -33,7 +33,11 @@ import { getUserProfile } from '@/lib/services/users'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import { type RegistrationStatus, Role } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  Role,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 const ROLE_CONFIG = {
   [Role.USER]: {
@@ -54,15 +58,17 @@ const ROLE_CONFIG = {
 } as const
 
 const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  APPROVED: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'border-red-500/30 bg-red-500/10 text-red-400',
+  [RegistrationStatus.PENDING]:
+    'border-amber-500/30 bg-amber-500/10 text-amber-400',
+  [RegistrationStatus.APPROVED]:
+    'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+  [RegistrationStatus.REJECTED]: 'border-red-500/30 bg-red-500/10 text-red-400',
 } as const
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
+  [RegistrationStatus.PENDING]: 'En attente',
+  [RegistrationStatus.APPROVED]: 'Approuvée',
+  [RegistrationStatus.REJECTED]: 'Refusée',
 } as const
 
 /** Renders a single registration row as a link to the tournament detail page. */
@@ -91,7 +97,7 @@ const RegistrationRow = ({
           )}
           <span className="inline-flex items-center gap-1">
             <Swords className="size-3" />
-            {tournament.format === 'SOLO' ? 'Solo' : 'Équipe'}
+            {tournament.format === TournamentFormat.SOLO ? 'Solo' : 'Équipe'}
           </span>
           <span className="inline-flex items-center gap-1">
             <Calendar className="size-3" />

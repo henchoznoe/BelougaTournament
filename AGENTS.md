@@ -94,6 +94,34 @@ External packages first, then internal `@/` imports. No blank lines between grou
 - Env vars validated at startup via Zod (`lib/core/env.ts`); **never** access `process.env` directly.
 - Use `as const` on constant objects.
 
+### Prisma Enum Imports
+
+**Never** use hardcoded string literals for Prisma enum values. Always import and use the enum objects from `@/prisma/generated/prisma/enums`.
+
+Available enums: `Role`, `TournamentFormat`, `FieldType`, `RegistrationStatus`, `TournamentStatus`.
+
+```ts
+// GOOD — use enum imports everywhere
+import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
+
+if (user.role === Role.SUPERADMIN) { ... }
+await prisma.tournament.findMany({ where: { status: TournamentStatus.PUBLISHED } })
+<SelectItem value={TournamentStatus.DRAFT}>Brouillon</SelectItem>
+
+// Record object keys use computed property syntax
+const STATUS_STYLES: Record<TournamentStatus, string> = {
+  [TournamentStatus.DRAFT]: 'text-amber-400',
+  [TournamentStatus.PUBLISHED]: 'text-emerald-400',
+  [TournamentStatus.ARCHIVED]: 'text-zinc-400',
+} as const
+
+// BAD — never use string literals
+if (user.role === 'SUPERADMIN') { ... }
+<SelectItem value="DRAFT">Brouillon</SelectItem>
+```
+
+**Import as values, not types.** Use `import { Role } from '...'`, not `import type { Role } from '...'`. Biome's `useImportType` rule may auto-add `type` if it detects type-only usage — ensure the import stays as a value import when the enum is used in comparisons, assignments, Record keys, or JSX attributes.
+
 ### Error Handling
 
 - **Server actions**: `authenticatedAction` wrapper (auth + role + Zod + Prisma error mapping + logger)

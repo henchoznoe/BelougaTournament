@@ -25,7 +25,10 @@ import type {
 } from '@/lib/types/dashboard'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 interface UpcomingTournamentsProps {
   tournaments: UpcomingTournament[]
@@ -36,15 +39,15 @@ interface RecentRegistrationsProps {
 }
 
 const STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  APPROVED: 'bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'bg-red-500/10 text-red-400',
+  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
+  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
+  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
 } as const
 
 const STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
+  [RegistrationStatus.PENDING]: 'En attente',
+  [RegistrationStatus.APPROVED]: 'Approuvée',
+  [RegistrationStatus.REJECTED]: 'Refusée',
 } as const
 
 export const DashboardUpcomingTournaments = ({
@@ -81,7 +84,7 @@ export const DashboardUpcomingTournaments = ({
                   )}
                   <span>{formatDate(tournament.startDate)}</span>
                   <span className="capitalize">
-                    {tournament.format === 'SOLO'
+                    {tournament.format === TournamentFormat.SOLO
                       ? 'Solo'
                       : `${tournament.teamSize}v${tournament.teamSize}`}
                   </span>
@@ -92,7 +95,7 @@ export const DashboardUpcomingTournaments = ({
                   <ClipboardList className="size-3" />
                   {tournament._count.registrations}
                 </span>
-                {tournament.format === 'TEAM' && (
+                {tournament.format === TournamentFormat.TEAM && (
                   <span className="flex items-center gap-1" title="Équipes">
                     <Users className="size-3" />
                     {tournament._count.teams}
@@ -181,9 +184,15 @@ export const DashboardRecentRegistrations = ({
                     </span>
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
-                    <SelectItem value="PENDING">En attente</SelectItem>
-                    <SelectItem value="APPROVED">Approuvée</SelectItem>
-                    <SelectItem value="REJECTED">Refusée</SelectItem>
+                    <SelectItem value={RegistrationStatus.PENDING}>
+                      En attente
+                    </SelectItem>
+                    <SelectItem value={RegistrationStatus.APPROVED}>
+                      Approuvée
+                    </SelectItem>
+                    <SelectItem value={RegistrationStatus.REJECTED}>
+                      Refusée
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <span className="text-[10px] text-zinc-600">

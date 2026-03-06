@@ -33,18 +33,18 @@ import { updateRegistrationStatus } from '@/lib/actions/tournaments'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 const STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  APPROVED: 'bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'bg-red-500/10 text-red-400',
+  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
+  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
+  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
 } as const
 
 const STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
+  [RegistrationStatus.PENDING]: 'En attente',
+  [RegistrationStatus.APPROVED]: 'Approuvée',
+  [RegistrationStatus.REJECTED]: 'Refusée',
 } as const
 
 interface TournamentRegistrationsListProps {
@@ -127,15 +127,15 @@ export const TournamentRegistrationsList = ({
             {registrations.length} inscription
             {registrations.length !== 1 ? 's' : ''}
           </span>
-          {statusCount('APPROVED') > 0 && (
+          {statusCount(RegistrationStatus.APPROVED) > 0 && (
             <span className="text-emerald-400">
-              {statusCount('APPROVED')} approuvée
-              {statusCount('APPROVED') !== 1 ? 's' : ''}
+              {statusCount(RegistrationStatus.APPROVED)} approuvée
+              {statusCount(RegistrationStatus.APPROVED) !== 1 ? 's' : ''}
             </span>
           )}
-          {statusCount('PENDING') > 0 && (
+          {statusCount(RegistrationStatus.PENDING) > 0 && (
             <span className="text-amber-400">
-              {statusCount('PENDING')} en attente
+              {statusCount(RegistrationStatus.PENDING)} en attente
             </span>
           )}
         </div>
@@ -243,9 +243,15 @@ export const TournamentRegistrationsList = ({
                         </span>
                       </SelectTrigger>
                       <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value="PENDING">En attente</SelectItem>
-                        <SelectItem value="APPROVED">Approuvée</SelectItem>
-                        <SelectItem value="REJECTED">Refusée</SelectItem>
+                        <SelectItem value={RegistrationStatus.PENDING}>
+                          En attente
+                        </SelectItem>
+                        <SelectItem value={RegistrationStatus.APPROVED}>
+                          Approuvée
+                        </SelectItem>
+                        <SelectItem value={RegistrationStatus.REJECTED}>
+                          Refusée
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
