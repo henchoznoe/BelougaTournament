@@ -21,9 +21,10 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { useFieldArray, useForm, useWatch } from 'react-hook-form'
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -53,18 +54,6 @@ import {
 
 interface TournamentFormProps {
   tournament?: TournamentDetail
-}
-
-/** Formats a Date to a datetime-local input value (YYYY-MM-DDTHH:MM). */
-const toDateTimeLocal = (date: Date): string => {
-  const d = new Date(date)
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-/** Converts a datetime-local value to ISO string. */
-const toISOString = (dateTimeLocal: string): string => {
-  return new Date(dateTimeLocal).toISOString()
 }
 
 /** Generates a slug from a title. */
@@ -100,10 +89,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           title: tournament.title,
           slug: tournament.slug,
           description: tournament.description,
-          startDate: toDateTimeLocal(tournament.startDate),
-          endDate: toDateTimeLocal(tournament.endDate),
-          registrationOpen: toDateTimeLocal(tournament.registrationOpen),
-          registrationClose: toDateTimeLocal(tournament.registrationClose),
+          startDate: new Date(tournament.startDate).toISOString(),
+          endDate: new Date(tournament.endDate).toISOString(),
+          registrationOpen: new Date(tournament.registrationOpen).toISOString(),
+          registrationClose: new Date(
+            tournament.registrationClose,
+          ).toISOString(),
           maxTeams: tournament.maxTeams,
           format: tournament.format,
           teamSize: tournament.teamSize,
@@ -152,15 +143,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const format = useWatch({ control, name: 'format' })
 
   const onSubmit = (data: TournamentFormInput) => {
-    // Convert datetime-local values to ISO strings and cast to action input type
-    // (Zod defaults are applied server-side by authenticatedAction)
-    const payload = {
-      ...data,
-      startDate: toISOString(data.startDate),
-      endDate: toISOString(data.endDate),
-      registrationOpen: toISOString(data.registrationOpen),
-      registrationClose: toISOString(data.registrationClose),
-    } as TournamentInput
+    // Date fields are already ISO strings from the DateTimePicker
+    const payload = data as TournamentInput
 
     startTransition(async () => {
       const result = isEditing
@@ -344,38 +328,102 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           Dates
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            id="startDate"
-            label="Date de début"
-            type="datetime-local"
-            error={errors.startDate?.message}
-            disabled={isPending}
-            {...register('startDate')}
-          />
-          <FormField
-            id="endDate"
-            label="Date de fin"
-            type="datetime-local"
-            error={errors.endDate?.message}
-            disabled={isPending}
-            {...register('endDate')}
-          />
-          <FormField
-            id="registrationOpen"
-            label="Ouverture des inscriptions"
-            type="datetime-local"
-            error={errors.registrationOpen?.message}
-            disabled={isPending}
-            {...register('registrationOpen')}
-          />
-          <FormField
-            id="registrationClose"
-            label="Fermeture des inscriptions"
-            type="datetime-local"
-            error={errors.registrationClose?.message}
-            disabled={isPending}
-            {...register('registrationClose')}
-          />
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="startDate"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Date de début
+            </Label>
+            <Controller
+              control={control}
+              name="startDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Date de début"
+                />
+              )}
+            />
+            {errors.startDate?.message && (
+              <p className="text-xs text-red-400">{errors.startDate.message}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="endDate"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Date de fin
+            </Label>
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Date de fin"
+                />
+              )}
+            />
+            {errors.endDate?.message && (
+              <p className="text-xs text-red-400">{errors.endDate.message}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="registrationOpen"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Ouverture des inscriptions
+            </Label>
+            <Controller
+              control={control}
+              name="registrationOpen"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Ouverture des inscriptions"
+                />
+              )}
+            />
+            {errors.registrationOpen?.message && (
+              <p className="text-xs text-red-400">
+                {errors.registrationOpen.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="registrationClose"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Fermeture des inscriptions
+            </Label>
+            <Controller
+              control={control}
+              name="registrationClose"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Fermeture des inscriptions"
+                />
+              )}
+            />
+            {errors.registrationClose?.message && (
+              <p className="text-xs text-red-400">
+                {errors.registrationClose.message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
