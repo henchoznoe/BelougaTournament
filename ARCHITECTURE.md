@@ -37,7 +37,6 @@
 │   ├── actions/            # Server actions (authenticatedAction wrapper)
 │   ├── config/             # Routes, constants (CACHE_TAGS, METADATA), admin sidebar nav
 │   ├── core/               # Auth, Prisma client, env validation, structured logger
-│   ├── hooks/              # Custom React hooks (reserved)
 │   ├── services/           # Data access with 'use cache' + cacheTag + cacheLife
 │   ├── types/              # TypeScript types (ActionState, AuthSession, domain types)
 │   ├── utils/              # cn, formatting, prisma-error, auth helpers, toNullable
@@ -68,7 +67,8 @@ Wrapped in `PublicNavbar` + `PublicFooter` layout.
 | `/tournaments/:slug` | Tournament detail (info, stream embed, bracket, registration) |
 | `/stream` | Twitch stream embed |
 | `/classement` | Leaderboard |
-| `/profil` | User profile (registrations, history, edit display name) |
+| `/profil` | User profile (active registrations, edit display name) |
+| `/profil/tournois` | Tournament history |
 | `/contact` | Contact page |
 | `/legal` | Legal notice |
 | `/privacy` | Privacy policy |
@@ -85,7 +85,7 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 | `/admin/tournaments` | Tournament list (CRUD, status management) | ADMIN+ |
 | `/admin/tournaments/new` | Create tournament | ADMIN+ |
 | `/admin/tournaments/:slug` | Edit tournament (tabbed: general, registrations, teams) | ADMIN+ |
-| `/admin/tournaments/:slug/registrations` | Manage registrations (approve/reject) | ADMIN+ |
+| `/admin/tournaments/:slug/registrations` | Manage registrations (view, CSV export) | ADMIN+ |
 | `/admin/tournaments/:slug/teams` | Manage teams (dissolve, kick) | ADMIN+ |
 | `/admin/players` | Player management (edit, ban/unban) | ADMIN+ |
 | `/admin/admins` | Admin management (promote/demote, tournament assignments) | SUPERADMIN |
@@ -118,7 +118,6 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 | `Role` | `USER`, `ADMIN`, `SUPERADMIN` |
 | `TournamentFormat` | `SOLO`, `TEAM` |
 | `FieldType` | `TEXT`, `NUMBER` |
-| `RegistrationStatus` | `PENDING`, `APPROVED`, `REJECTED` |
 | `TournamentStatus` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
 
 ### Models & Relationships
@@ -251,12 +250,12 @@ components/
 │   ├── auth/           # AdminGuard (RSC), LoginScreen, SocialLogin
 │   ├── landing/        # Hero, features, sponsors, stream, tournaments sections
 │   ├── layout/         # PublicNavbar, PublicFooter
-│   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
+│   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, ProfileTournamentHistory, RegistrationEditDialog
 │   ├── tournaments/    # TournamentCard, TournamentDetail, TournamentRegistrationForm
 │   ├── contact/        # ContactBento
 │   ├── legal/          # LegalSection
 │   └── stream/         # TwitchPlayer
-└── ui/                 # 18 shadcn/ui primitives (new-york style, zinc base, lucide icons)
+└── ui/                 # 21 shadcn/ui primitives (new-york style, zinc base, lucide icons)
 ```
 
 ---
@@ -280,7 +279,7 @@ components/
 
 | Action File | Operations |
 |---|---|
-| `tournaments.ts` | Create, update, delete tournament; update status; register/unregister; manage registrations; create/join/dissolve team; kick player; update fields |
+| `tournaments.ts` | Create, update, delete tournament; update status; register/unregister; create/join/dissolve team; kick player; update fields |
 | `admins.ts` | Promote, demote, update admin (display name + tournament assignments) |
 | `players.ts` | Update display name, ban/unban |
 | `sponsors.ts` | Create, update, delete sponsor |
@@ -358,7 +357,7 @@ Node 22 + pnpm 10
 
 **Pre-commit** (Husky + lint-staged): `biome check --write` on staged `*.{ts,tsx,css}`.
 
-**Deployment:** Vercel (auto-deploy from Git). Build command: `prisma generate && prisma migrate deploy && prisma db seed && next build`.
+**Deployment:** Vercel (auto-deploy from Git). Build command: `prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build`.
 
 ---
 

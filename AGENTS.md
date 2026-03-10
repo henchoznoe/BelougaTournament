@@ -98,7 +98,7 @@ External packages first, then internal `@/` imports. No blank lines between grou
 
 **Never** use hardcoded string literals for Prisma enum values. Always import and use the enum objects from `@/prisma/generated/prisma/enums`.
 
-Available enums: `Role`, `TournamentFormat`, `FieldType`, `RegistrationStatus`, `TournamentStatus`.
+Available enums: `Role`, `TournamentFormat`, `FieldType`, `TournamentStatus`.
 
 ```ts
 // GOOD — use enum imports everywhere
@@ -142,7 +142,7 @@ if (user.role === 'SUPERADMIN') { ... }
 
 ```
 app/
-├── (public)/             # Public pages (landing, tournaments, stream, contact, profile)
+├── (public)/             # Public pages (landing, tournaments, stream, classement, profile, contact, legal)
 ├── admin/                # Protected admin (AdminGuard + proxy.ts edge middleware)
 ├── api/admin/blobs/      # Vercel Blob upload/list/delete API
 ├── api/auth/[...all]/    # BetterAuth handler
@@ -150,7 +150,7 @@ app/
 └── not-found.tsx         # 404 page
 
 components/
-├── features/             # Domain components (admin/, auth/, landing/, layout/, profile/)
+├── features/             # Domain components (admin/, auth/, contact/, landing/, layout/, legal/, profile/, stream/, tournaments/)
 └── ui/                   # shadcn/ui primitives
 
 lib/
