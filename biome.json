@@ -20,7 +20,8 @@
       "biome.json",
       "tsconfig.json",
       "prisma.config.ts",
-      "prisma/seed-admin.ts"
+      "prisma/seed-admin.ts",
+      "prisma/seed.ts"
     ]
   },
   "formatter": {
