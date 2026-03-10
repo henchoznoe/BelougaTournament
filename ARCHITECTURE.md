@@ -66,9 +66,9 @@ Wrapped in `PublicNavbar` + `PublicFooter` layout.
 | `/tournaments/archive` | Archived tournament list |
 | `/tournaments/:slug` | Tournament detail (info, stream embed, bracket, registration) |
 | `/stream` | Twitch stream embed |
-| `/classement` | Leaderboard |
-| `/profil` | User profile (active registrations, edit display name) |
-| `/profil/tournois` | Tournament history |
+| `/leaderboard` | Leaderboard |
+| `/profile` | User profile (active registrations, edit display name) |
+| `/profile/tournaments` | Tournament history |
 | `/contact` | Contact page |
 | `/legal` | Legal notice |
 | `/privacy` | Privacy policy |
@@ -104,7 +104,7 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 
 | File | Output |
 |---|---|
-| `app/robots.ts` | Dynamic `robots.txt` — disallows `/admin/`, `/login`, `/profil`, `/api/` |
+| `app/robots.ts` | Dynamic `robots.txt` — disallows `/admin/`, `/login`, `/profile`, `/api/` |
 | `app/sitemap.ts` | Dynamic sitemap — static routes + published/archived tournaments |
 
 ---

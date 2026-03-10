@@ -142,7 +142,7 @@ if (user.role === 'SUPERADMIN') { ... }
 
 ```
 app/
-├── (public)/             # Public pages (landing, tournaments, stream, classement, profile, contact, legal)
+├── (public)/             # Public pages (landing, tournaments, stream, leaderboard, profile, contact, legal)
 ├── admin/                # Protected admin (AdminGuard + proxy.ts edge middleware)
 ├── api/admin/blobs/      # Vercel Blob upload/list/delete API
 ├── api/auth/[...all]/    # BetterAuth handler

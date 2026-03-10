@@ -26,8 +26,8 @@ describe('ROUTES', () => {
     expect(ROUTES.ADMIN_DASHBOARD).toBe('/admin')
   })
 
-  it('PROFILE_TOURNAMENTS is /profil/tournois', () => {
-    expect(ROUTES.PROFILE_TOURNAMENTS).toBe('/profil/tournois')
+  it('PROFILE_TOURNAMENTS is /profile/tournaments', () => {
+    expect(ROUTES.PROFILE_TOURNAMENTS).toBe('/profile/tournaments')
   })
 
   it('ADMIN_EDIT_TOURNAMENT builds slug-based path', () => {

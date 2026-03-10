@@ -1,5 +1,5 @@
 /**
- * File: app/(public)/classement/page.tsx
+ * File: app/(public)/leaderboard/page.tsx
  * Description: Public leaderboard page (placeholder for future implementation).
  * Author: Noé Henchoz
  * License: MIT

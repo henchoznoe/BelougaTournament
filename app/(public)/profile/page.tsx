@@ -1,5 +1,5 @@
 /**
- * File: app/(public)/profil/page.tsx
+ * File: app/(public)/profile/page.tsx
  * Description: User profile page with account info and pseudo editing.
  * Author: Noé Henchoz
  * License: MIT

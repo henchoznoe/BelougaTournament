@@ -25,7 +25,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
       priority: 0.6,
     },
     { url: `${baseUrl}/stream`, changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/classement`, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${baseUrl}/leaderboard`, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/contact`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/legal`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3 },

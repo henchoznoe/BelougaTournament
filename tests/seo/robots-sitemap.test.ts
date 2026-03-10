@@ -49,7 +49,7 @@ describe('robots', () => {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/login', '/profil', '/unauthorized', '/api/'],
+        disallow: ['/admin/', '/login', '/profile', '/unauthorized', '/api/'],
       },
     ])
   })
@@ -79,7 +79,7 @@ describe('sitemap', () => {
     expect(urls).toContain('https://belouga.test/tournaments')
     expect(urls).toContain('https://belouga.test/tournaments/archive')
     expect(urls).toContain('https://belouga.test/stream')
-    expect(urls).toContain('https://belouga.test/classement')
+    expect(urls).toContain('https://belouga.test/leaderboard')
     expect(urls).toContain('https://belouga.test/contact')
     expect(urls).toContain('https://belouga.test/legal')
     expect(urls).toContain('https://belouga.test/privacy')

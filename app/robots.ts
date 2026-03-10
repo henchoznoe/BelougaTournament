@@ -14,7 +14,7 @@ const robots = (): MetadataRoute.Robots => ({
     {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin/', '/login', '/profil', '/unauthorized', '/api/'],
+      disallow: ['/admin/', '/login', '/profile', '/unauthorized', '/api/'],
     },
   ],
   sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`,

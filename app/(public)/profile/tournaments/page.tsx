@@ -1,5 +1,5 @@
 /**
- * File: app/(public)/profil/tournois/page.tsx
+ * File: app/(public)/profile/tournaments/page.tsx
  * Description: Dedicated page for the user's tournament history.
  * Author: Noé Henchoz
  * License: MIT
