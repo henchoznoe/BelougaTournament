@@ -54,7 +54,6 @@ export type TournamentMinAggregateOutputType = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
-  autoApprove: boolean | null
   status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -78,7 +77,6 @@ export type TournamentMaxAggregateOutputType = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
-  autoApprove: boolean | null
   status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -102,7 +100,6 @@ export type TournamentCountAggregateOutputType = {
   prize: number
   toornamentId: number
   streamUrl: number
-  autoApprove: number
   status: number
   createdAt: number
   updatedAt: number
@@ -138,7 +135,6 @@ export type TournamentMinAggregateInputType = {
   prize?: true
   toornamentId?: true
   streamUrl?: true
-  autoApprove?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -162,7 +158,6 @@ export type TournamentMaxAggregateInputType = {
   prize?: true
   toornamentId?: true
   streamUrl?: true
-  autoApprove?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -186,7 +181,6 @@ export type TournamentCountAggregateInputType = {
   prize?: true
   toornamentId?: true
   streamUrl?: true
-  autoApprove?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -297,7 +291,6 @@ export type TournamentGroupByOutputType = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
-  autoApprove: boolean
   status: $Enums.TournamentStatus
   createdAt: Date
   updatedAt: Date
@@ -344,7 +337,6 @@ export type TournamentWhereInput = {
   prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -373,7 +365,6 @@ export type TournamentOrderByWithRelationInput = {
   prize?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoApprove?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -405,7 +396,6 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  autoApprove?: Prisma.BoolFilter<"Tournament"> | boolean
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -434,7 +424,6 @@ export type TournamentOrderByWithAggregationInput = {
   prize?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoApprove?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -466,7 +455,6 @@ export type TournamentScalarWhereWithAggregatesInput = {
   prize?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   toornamentId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
-  autoApprove?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
   status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
@@ -490,7 +478,6 @@ export type TournamentCreateInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -519,7 +506,6 @@ export type TournamentUncheckedCreateInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -548,7 +534,6 @@ export type TournamentUpdateInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -577,7 +562,6 @@ export type TournamentUncheckedUpdateInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -606,7 +590,6 @@ export type TournamentCreateManyInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -630,7 +613,6 @@ export type TournamentUpdateManyMutationInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -654,7 +636,6 @@ export type TournamentUncheckedUpdateManyInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -678,7 +659,6 @@ export type TournamentCountOrderByAggregateInput = {
   prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
-  autoApprove?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -707,7 +687,6 @@ export type TournamentMaxOrderByAggregateInput = {
   prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
-  autoApprove?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -731,7 +710,6 @@ export type TournamentMinOrderByAggregateInput = {
   prize?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
-  autoApprove?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -859,7 +837,6 @@ export type TournamentCreateWithoutToornamentStagesInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -887,7 +864,6 @@ export type TournamentUncheckedCreateWithoutToornamentStagesInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -931,7 +907,6 @@ export type TournamentUpdateWithoutToornamentStagesInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -959,7 +934,6 @@ export type TournamentUncheckedUpdateWithoutToornamentStagesInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -987,7 +961,6 @@ export type TournamentCreateWithoutFieldsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1015,7 +988,6 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1059,7 +1031,6 @@ export type TournamentUpdateWithoutFieldsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1087,7 +1058,6 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1115,7 +1085,6 @@ export type TournamentCreateWithoutTeamsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1143,7 +1112,6 @@ export type TournamentUncheckedCreateWithoutTeamsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1187,7 +1155,6 @@ export type TournamentUpdateWithoutTeamsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1215,7 +1182,6 @@ export type TournamentUncheckedUpdateWithoutTeamsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1243,7 +1209,6 @@ export type TournamentCreateWithoutRegistrationsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1271,7 +1236,6 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1315,7 +1279,6 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1343,7 +1306,6 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1371,7 +1333,6 @@ export type TournamentCreateWithoutAdminAssignmentsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1399,7 +1360,6 @@ export type TournamentUncheckedCreateWithoutAdminAssignmentsInput = {
   prize?: string | null
   toornamentId?: string | null
   streamUrl?: string | null
-  autoApprove?: boolean
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1443,7 +1403,6 @@ export type TournamentUpdateWithoutAdminAssignmentsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1471,7 +1430,6 @@ export type TournamentUncheckedUpdateWithoutAdminAssignmentsInput = {
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoApprove?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1566,7 +1524,6 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
-  autoApprove?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1596,7 +1553,6 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
-  autoApprove?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1620,7 +1576,6 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
-  autoApprove?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1644,13 +1599,12 @@ export type TournamentSelectScalar = {
   prize?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
-  autoApprove?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "game" | "imageUrl" | "rules" | "prize" | "toornamentId" | "streamUrl" | "autoApprove" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "game" | "imageUrl" | "rules" | "prize" | "toornamentId" | "streamUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
   toornamentStages?: boolean | Prisma.Tournament$toornamentStagesArgs<ExtArgs>
@@ -1689,7 +1643,6 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     prize: string | null
     toornamentId: string | null
     streamUrl: string | null
-    autoApprove: boolean
     status: $Enums.TournamentStatus
     createdAt: Date
     updatedAt: Date
@@ -2138,7 +2091,6 @@ export interface TournamentFieldRefs {
   readonly prize: Prisma.FieldRef<"Tournament", 'String'>
   readonly toornamentId: Prisma.FieldRef<"Tournament", 'String'>
   readonly streamUrl: Prisma.FieldRef<"Tournament", 'String'>
-  readonly autoApprove: Prisma.FieldRef<"Tournament", 'Boolean'>
   readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>
   readonly createdAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tournament", 'DateTime'>

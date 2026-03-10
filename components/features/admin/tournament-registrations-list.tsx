@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/tournament-registrations-list.tsx
- * Description: Client component displaying tournament registrations with search and status management.
+ * Description: Client component displaying tournament registrations with search.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -10,17 +10,9 @@
 
 import { Download, Search } from 'lucide-react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useMemo, useState, useTransition } from 'react'
-import { toast } from 'sonner'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -29,16 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { updateRegistrationStatus } from '@/lib/actions/tournaments'
-import {
-  REGISTRATION_STATUS_LABELS,
-  REGISTRATION_STATUS_STYLES,
-} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
-import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 interface TournamentRegistrationsListProps {
   registrations: TournamentRegistrationItem[]
@@ -50,8 +35,6 @@ export const TournamentRegistrationsList = ({
   tournamentId,
 }: TournamentRegistrationsListProps) => {
   const [search, setSearch] = useState('')
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
 
   const filtered = useMemo(() => {
     if (!search) return registrations
@@ -64,32 +47,9 @@ export const TournamentRegistrationsList = ({
     )
   }, [registrations, search])
 
-  const handleStatusChange = (
-    registration: TournamentRegistrationItem,
-    newStatus: RegistrationStatus,
-  ) => {
-    if (newStatus === registration.status) return
-    startTransition(async () => {
-      const result = await updateRegistrationStatus({
-        id: registration.id,
-        tournamentId,
-        status: newStatus,
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-    })
-  }
-
   const handleExportCsv = () => {
     window.open(ROUTES.API_TOURNAMENT_EXPORT_CSV(tournamentId))
   }
-
-  const statusCount = (status: RegistrationStatus) =>
-    registrations.filter(r => r.status === status).length
 
   return (
     <>
@@ -120,17 +80,6 @@ export const TournamentRegistrationsList = ({
             {registrations.length} inscription
             {registrations.length !== 1 ? 's' : ''}
           </span>
-          {statusCount(RegistrationStatus.APPROVED) > 0 && (
-            <span className="text-emerald-400">
-              {statusCount(RegistrationStatus.APPROVED)} approuvée
-              {statusCount(RegistrationStatus.APPROVED) !== 1 ? 's' : ''}
-            </span>
-          )}
-          {statusCount(RegistrationStatus.PENDING) > 0 && (
-            <span className="text-amber-400">
-              {statusCount(RegistrationStatus.PENDING)} en attente
-            </span>
-          )}
         </div>
       </div>
 
@@ -156,9 +105,6 @@ export const TournamentRegistrationsList = ({
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
                   Date
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Statut
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -211,42 +157,6 @@ export const TournamentRegistrationsList = ({
                   {/* Date */}
                   <TableCell className="hidden text-xs text-zinc-500 md:table-cell">
                     {formatDateTime(registration.createdAt)}
-                  </TableCell>
-
-                  {/* Status */}
-                  <TableCell>
-                    <Select
-                      value={registration.status}
-                      onValueChange={val =>
-                        handleStatusChange(
-                          registration,
-                          val as RegistrationStatus,
-                        )
-                      }
-                      disabled={isPending}
-                    >
-                      <SelectTrigger className="h-7 w-auto gap-1.5 rounded-full border-none bg-transparent p-0 shadow-none">
-                        <span
-                          className={cn(
-                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                            REGISTRATION_STATUS_STYLES[registration.status],
-                          )}
-                        >
-                          {REGISTRATION_STATUS_LABELS[registration.status]}
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value={RegistrationStatus.PENDING}>
-                          En attente
-                        </SelectItem>
-                        <SelectItem value={RegistrationStatus.APPROVED}>
-                          Approuvée
-                        </SelectItem>
-                        <SelectItem value={RegistrationStatus.REJECTED}>
-                          Refusée
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
                   </TableCell>
                 </TableRow>
               ))}

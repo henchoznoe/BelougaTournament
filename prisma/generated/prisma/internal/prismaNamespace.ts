@@ -1497,7 +1497,6 @@ export const TournamentScalarFieldEnum = {
   prize: 'prize',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
-  autoApprove: 'autoApprove',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1557,7 +1556,6 @@ export const TournamentRegistrationScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   fieldValues: 'fieldValues',
-  status: 'status',
   createdAt: 'createdAt'
 } as const
 
@@ -1769,20 +1767,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'RegistrationStatus'
- */
-export type EnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus'>
-    
-
-
-/**
- * Reference to a field of type 'RegistrationStatus[]'
- */
-export type ListEnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus[]'>
     
 
 

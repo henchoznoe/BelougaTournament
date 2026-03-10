@@ -74,7 +74,6 @@ const MOCK_LIST_ITEM = {
   endDate: new Date('2026-06-17T18:00:00.000Z'),
   registrationOpen: new Date('2026-05-01T00:00:00.000Z'),
   registrationClose: new Date('2026-06-14T23:59:00.000Z'),
-  autoApprove: false,
   _count: { registrations: 12, teams: 4 },
 }
 
@@ -129,7 +128,6 @@ describe('getTournaments', () => {
         endDate: true,
         registrationOpen: true,
         registrationClose: true,
-        autoApprove: true,
         _count: {
           select: {
             registrations: true,
@@ -265,7 +263,6 @@ describe('getTournamentById', () => {
 
 const MOCK_REGISTRATION = {
   id: 'reg-1',
-  status: 'PENDING',
   fieldValues: { 'Riot ID': 'Player#1234' },
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   user: {
@@ -305,7 +302,6 @@ const MOCK_TEAM = {
   ],
   registration: {
     id: 'reg-1',
-    status: 'PENDING',
   },
 }
 
@@ -329,7 +325,6 @@ describe('getRegistrations', () => {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        status: true,
         fieldValues: true,
         createdAt: true,
         user: {
@@ -416,7 +411,6 @@ describe('getTeams', () => {
         registration: {
           select: {
             id: true,
-            status: true,
           },
         },
       },
@@ -531,7 +525,6 @@ const MOCK_PUBLIC_DETAIL = {
   prize: '500 CHF',
   toornamentId: null,
   streamUrl: null,
-  autoApprove: false,
   fields: [
     {
       id: 'field-1',
@@ -724,7 +717,6 @@ describe('getPublicTournamentBySlug', () => {
 
 const MOCK_USER_REGISTRATION = {
   id: 'reg-user-1',
-  status: 'PENDING',
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   tournament: {
     title: 'Valorant Cup',
@@ -738,7 +730,6 @@ const MOCK_USER_REGISTRATION = {
 
 const MOCK_USER_PAST_REGISTRATION = {
   id: 'reg-user-2',
-  status: 'APPROVED',
   createdAt: new Date('2025-11-10T10:00:00.000Z'),
   tournament: {
     title: 'CS2 Winter Cup',
@@ -752,7 +743,6 @@ const MOCK_USER_PAST_REGISTRATION = {
 
 const USER_REGISTRATION_SELECT = {
   id: true,
-  status: true,
   fieldValues: true,
   createdAt: true,
   tournament: {
@@ -764,7 +754,6 @@ const USER_REGISTRATION_SELECT = {
       format: true,
       startDate: true,
       status: true,
-      autoApprove: true,
       fields: {
         orderBy: { order: 'asc' },
         select: {

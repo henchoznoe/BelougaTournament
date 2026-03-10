@@ -45,7 +45,7 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
         endDate: true,
         registrationOpen: true,
         registrationClose: true,
-        autoApprove: true,
+
         _count: {
           select: {
             registrations: true,
@@ -141,7 +141,6 @@ export const getRegistrations = async (
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        status: true,
         fieldValues: true,
         createdAt: true,
         user: {
@@ -208,7 +207,6 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
         registration: {
           select: {
             id: true,
-            status: true,
           },
         },
       },
@@ -367,7 +365,6 @@ export const getAvailableTeams = async (
 /** Shared select for user registration items. */
 const USER_REGISTRATION_SELECT = {
   id: true,
-  status: true,
   fieldValues: true,
   createdAt: true,
   tournament: {
@@ -379,7 +376,6 @@ const USER_REGISTRATION_SELECT = {
       format: true,
       startDate: true,
       status: true,
-      autoApprove: true,
       fields: {
         orderBy: { order: 'asc' as const },
         select: {

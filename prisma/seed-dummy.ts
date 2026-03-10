@@ -15,7 +15,6 @@ import type { PrismaClient } from './generated/prisma/client'
 type TournamentFormat = 'SOLO' | 'TEAM'
 type TournamentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 type FieldType = 'TEXT' | 'NUMBER'
-type RegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 interface TournamentField {
   label: string
@@ -33,7 +32,6 @@ interface TournamentConfig {
   game: string
   prize: string
   status: TournamentStatus
-  autoApprove: boolean
   startDate: Date
   endDate: Date
   registrationOpen: Date
@@ -98,7 +96,6 @@ const TOURNAMENTS: TournamentConfig[] = [
     game: 'Valorant',
     prize: '500 CHF',
     status: 'PUBLISHED',
-    autoApprove: false,
     startDate: daysFromNow(14),
     endDate: daysFromNow(16),
     registrationOpen: daysFromNow(-7),
@@ -119,7 +116,6 @@ const TOURNAMENTS: TournamentConfig[] = [
     game: 'Rocket League',
     prize: '200 CHF',
     status: 'PUBLISHED',
-    autoApprove: true,
     startDate: daysFromNow(21),
     endDate: daysFromNow(21),
     registrationOpen: daysFromNow(-3),
@@ -139,7 +135,6 @@ const TOURNAMENTS: TournamentConfig[] = [
     game: 'Counter-Strike 2',
     prize: '150 CHF',
     status: 'PUBLISHED',
-    autoApprove: false,
     startDate: daysFromNow(30),
     endDate: daysFromNow(31),
     registrationOpen: daysFromNow(-1),
@@ -160,7 +155,6 @@ const TOURNAMENTS: TournamentConfig[] = [
     game: 'League of Legends',
     prize: '1000 CHF',
     status: 'DRAFT',
-    autoApprove: false,
     startDate: daysFromNow(60),
     endDate: daysFromNow(62),
     registrationOpen: daysFromNow(30),
@@ -182,7 +176,6 @@ const TOURNAMENTS: TournamentConfig[] = [
     game: 'Fortnite',
     prize: '300 CHF',
     status: 'ARCHIVED',
-    autoApprove: true,
     startDate: daysFromNow(-30),
     endDate: daysFromNow(-29),
     registrationOpen: daysFromNow(-60),
@@ -376,7 +369,6 @@ export const seedDummy = async (prisma: PrismaClient) => {
     return !isBanned && !isAdmin
   })
 
-  const statuses: RegistrationStatus[] = ['PENDING', 'APPROVED', 'REJECTED']
 
   for (let tIdx = 0; tIdx < createdTournaments.length; tIdx++) {
     const tournament = createdTournaments[tIdx]
@@ -404,13 +396,6 @@ export const seedDummy = async (prisma: PrismaClient) => {
         const members = regularUsers.slice(userIndex, userIndex + teamSize)
         userIndex += teamSize
 
-        // Pick a status — favor APPROVED for published, mix for archived
-        const status = tournamentConfig.status === 'ARCHIVED'
-          ? statuses[t % statuses.length]
-          : t < 2
-            ? 'APPROVED'
-            : statuses[t % statuses.length]
-
         // Create team
         const team = await prisma.team.create({
           data: {
@@ -437,7 +422,6 @@ export const seedDummy = async (prisma: PrismaClient) => {
             tournamentId: tournament.id,
             teamId: team.id,
             userId: captain.id,
-            status,
             fieldValues: JSON.stringify(fieldValues),
           },
         })
@@ -452,13 +436,6 @@ export const seedDummy = async (prisma: PrismaClient) => {
       for (let r = 0; r < maxRegs; r++) {
         const user = regularUsers[r]
 
-        // Pick a status
-        const status = tournamentConfig.status === 'ARCHIVED'
-          ? statuses[r % statuses.length]
-          : r < 3
-            ? 'APPROVED'
-            : statuses[r % statuses.length]
-
         const fieldValues: Record<string, string> = {}
         for (const field of tournamentConfig.fields) {
           fieldValues[field.label] = field.type === 'NUMBER' ? `${500 + r * 200}` : `demo-${user.displayName}`
@@ -468,7 +445,6 @@ export const seedDummy = async (prisma: PrismaClient) => {
           data: {
             tournamentId: tournament.id,
             userId: user.id,
-            status,
             fieldValues: JSON.stringify(fieldValues),
           },
         })

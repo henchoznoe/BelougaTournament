@@ -39,7 +39,6 @@ import { FieldType, TournamentFormat } from '@/prisma/generated/prisma/enums'
 interface TournamentRegistrationFormProps {
   tournamentId: string
   fields: TournamentFieldItem[]
-  autoApprove: boolean
   format: TournamentFormat
   teamSize: number
   availableTeams: AvailableTeam[]
@@ -65,7 +64,6 @@ const buildFieldValues = (
 export const TournamentRegistrationForm = ({
   tournamentId,
   fields,
-  autoApprove,
   format,
   teamSize,
   availableTeams,
@@ -303,16 +301,10 @@ export const TournamentRegistrationForm = ({
         </p>
       )}
 
-      {autoApprove ? (
-        <p className="text-center text-xs text-zinc-500">
-          <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
-          Votre inscription sera automatiquement acceptée.
-        </p>
-      ) : (
-        <p className="text-center text-xs text-zinc-500">
-          Votre inscription sera soumise à validation par un administrateur.
-        </p>
-      )}
+      <p className="text-center text-xs text-zinc-500">
+        <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
+        Votre inscription sera enregistrée.
+      </p>
 
       <Button type="submit" disabled={isPending} className="w-full gap-2">
         {isPending ? (

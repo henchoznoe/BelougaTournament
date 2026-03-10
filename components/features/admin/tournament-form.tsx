@@ -104,7 +104,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: fromNullable(tournament.prize),
           toornamentId: fromNullable(tournament.toornamentId),
           streamUrl: fromNullable(tournament.streamUrl),
-          autoApprove: tournament.autoApprove,
           fields: tournament.fields.map(f => ({
             id: f.id,
             label: f.label,
@@ -136,7 +135,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: '',
           toornamentId: '',
           streamUrl: '',
-          autoApprove: false,
           fields: [],
           toornamentStages: [],
         },
@@ -629,28 +627,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="h-px bg-white/5" />
-
-      {/* Registration settings */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase">
-          Inscriptions
-        </h3>
-        <div className="flex items-center gap-3">
-          <Switch
-            id="autoApprove"
-            checked={useWatch({ control, name: 'autoApprove' })}
-            onCheckedChange={checked =>
-              setValue('autoApprove', checked, { shouldDirty: true })
-            }
-            disabled={isPending}
-          />
-          <Label htmlFor="autoApprove" className="text-sm text-zinc-300">
-            Approuver automatiquement les inscriptions
-          </Label>
-        </div>
       </div>
 
       <div className="h-px bg-white/5" />

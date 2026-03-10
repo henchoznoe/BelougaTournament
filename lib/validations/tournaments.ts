@@ -10,7 +10,6 @@ import { z } from 'zod'
 import { optionalUrl } from '@/lib/validations/shared'
 import {
   FieldType,
-  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -114,7 +113,6 @@ const baseTournamentFields = {
     .optional()
     .default(''),
   streamUrl: optionalUrl,
-  autoApprove: z.boolean(),
   fields: z.array(tournamentFieldSchema),
   toornamentStages: z.array(toornamentStageSchema),
 } as const
@@ -207,22 +205,6 @@ export const updateTournamentStatusSchema = z.object({
     ],
     {
       message: 'Le statut doit être DRAFT, PUBLISHED ou ARCHIVED.',
-    },
-  ),
-})
-
-/** Schema for updating a registration's status (approve / reject). */
-export const updateRegistrationStatusSchema = z.object({
-  id: z.uuid("ID d'inscription invalide."),
-  tournamentId: z.uuid('ID de tournoi invalide.'),
-  status: z.enum(
-    [
-      RegistrationStatus.PENDING,
-      RegistrationStatus.APPROVED,
-      RegistrationStatus.REJECTED,
-    ],
-    {
-      message: 'Le statut doit être PENDING, APPROVED ou REJECTED.',
     },
   ),
 })

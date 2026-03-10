@@ -40,12 +40,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
-import {
-  REGISTRATION_STATUS_LABELS,
-  REGISTRATION_STATUS_STYLES,
-} from '@/lib/config/constants'
 import type { TeamItem, TeamMemberItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
 
 interface TournamentTeamsListProps {
@@ -173,9 +168,6 @@ export const TournamentTeamsList = ({
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
                   Créée le
                 </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Inscription
-                </TableHead>
                 <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Actions
                 </TableHead>
@@ -272,22 +264,6 @@ export const TournamentTeamsList = ({
                   {/* Created at */}
                   <TableCell className="hidden text-xs text-zinc-500 md:table-cell">
                     {formatDateTime(team.createdAt)}
-                  </TableCell>
-
-                  {/* Registration status */}
-                  <TableCell>
-                    {team.registration ? (
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                          REGISTRATION_STATUS_STYLES[team.registration.status],
-                        )}
-                      >
-                        {REGISTRATION_STATUS_LABELS[team.registration.status]}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">—</span>
-                    )}
                   </TableCell>
 
                   {/* Actions */}

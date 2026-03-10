@@ -17,19 +17,13 @@ import {
   METADATA,
   NOON_UTC_SUFFIX,
   PERMANENT_BAN_DATE,
-  REGISTRATION_STATUS_BADGE_STYLES,
-  REGISTRATION_STATUS_LABELS,
-  REGISTRATION_STATUS_STYLES,
   SEARCH_CONFIG,
   SETTINGS_SINGLETON_ID,
   TOURNAMENT_STATUS_LABELS,
   TOURNAMENT_STATUS_STYLES,
   TWITCH_USERNAME_MAX_LENGTH,
 } from '@/lib/config/constants'
-import {
-  RegistrationStatus,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -115,30 +109,6 @@ describe('SEARCH_CONFIG', () => {
 describe('TWITCH_USERNAME_MAX_LENGTH', () => {
   it('is 25', () => {
     expect(TWITCH_USERNAME_MAX_LENGTH).toBe(25)
-  })
-})
-
-describe('REGISTRATION_STATUS_LABELS', () => {
-  it('has a label for every RegistrationStatus', () => {
-    for (const status of Object.values(RegistrationStatus)) {
-      expect(REGISTRATION_STATUS_LABELS[status]).toBeTypeOf('string')
-    }
-  })
-})
-
-describe('REGISTRATION_STATUS_STYLES', () => {
-  it('has a style for every RegistrationStatus', () => {
-    for (const status of Object.values(RegistrationStatus)) {
-      expect(REGISTRATION_STATUS_STYLES[status]).toBeTypeOf('string')
-    }
-  })
-})
-
-describe('REGISTRATION_STATUS_BADGE_STYLES', () => {
-  it('includes border classes (profile variant)', () => {
-    for (const status of Object.values(RegistrationStatus)) {
-      expect(REGISTRATION_STATUS_BADGE_STYLES[status]).toContain('border-')
-    }
   })
 })
 

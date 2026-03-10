@@ -162,7 +162,6 @@ export const TournamentScalarFieldEnum = {
   prize: 'prize',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
-  autoApprove: 'autoApprove',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -222,7 +221,6 @@ export const TournamentRegistrationScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   fieldValues: 'fieldValues',
-  status: 'status',
   createdAt: 'createdAt'
 } as const
 

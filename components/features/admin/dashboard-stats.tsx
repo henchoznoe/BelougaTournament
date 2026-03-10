@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Clock, Handshake, Swords, Users } from 'lucide-react'
+import { ClipboardList, Handshake, Swords, Users } from 'lucide-react'
 import type { DashboardStats } from '@/lib/types/dashboard'
 
 interface DashboardStatsProps {
@@ -42,13 +42,13 @@ const STAT_CARDS = [
     bg: 'bg-emerald-500/10',
   },
   {
-    key: 'pending',
-    label: 'En attente',
-    icon: Clock,
-    getValue: (s: DashboardStats) => s.pendingRegistrations,
-    getDetail: () => 'Inscriptions à traiter',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
+    key: 'registrations',
+    label: 'Inscriptions',
+    icon: ClipboardList,
+    getValue: (s: DashboardStats) => s.totalRegistrations,
+    getDetail: () => 'Total des inscriptions',
+    color: 'text-sky-400',
+    bg: 'bg-sky-500/10',
   },
   {
     key: 'sponsors',

@@ -443,7 +443,6 @@ export const TournamentDetail = ({
               <TournamentRegistrationForm
                 tournamentId={tournament.id}
                 fields={tournament.fields}
-                autoApprove={tournament.autoApprove}
                 format={tournament.format}
                 teamSize={tournament.teamSize}
                 availableTeams={availableTeams}

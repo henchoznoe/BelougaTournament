@@ -114,13 +114,11 @@ const MOCK_TOURNAMENT_TEAM = {
 
 const MOCK_REGISTRATIONS_SOLO = [
   {
-    status: 'APPROVED',
     fieldValues: { Rang: 'Diamond', 'Agent principal': 'Jett' },
     user: { name: 'player1', displayName: 'Player One', email: 'p1@test.com' },
     team: null,
   },
   {
-    status: 'PENDING',
     fieldValues: { Rang: 'Gold', 'Agent principal': 'Sage' },
     user: { name: 'player2', displayName: 'Player Two', email: 'p2@test.com' },
     team: null,
@@ -129,7 +127,6 @@ const MOCK_REGISTRATIONS_SOLO = [
 
 const MOCK_REGISTRATIONS_TEAM = [
   {
-    status: 'APPROVED',
     fieldValues: { Rang: 'GC1' },
     user: {
       name: 'captain1',
@@ -139,7 +136,6 @@ const MOCK_REGISTRATIONS_TEAM = [
     team: { name: 'Team Alpha' },
   },
   {
-    status: 'APPROVED',
     fieldValues: { Rang: 'C3' },
     user: { name: 'member1', displayName: 'Member One', email: 'm1@test.com' },
     team: { name: 'Team Alpha' },
@@ -274,9 +270,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const text = await response.text()
       const headerRow = text.replace('\uFEFF', '').split('\r\n')[0]
 
-      expect(headerRow).toBe(
-        'Pseudo,Nom Discord,Email,Statut,Rang,Agent principal',
-      )
+      expect(headerRow).toBe('Pseudo,Nom Discord,Email,Rang,Agent principal')
     })
 
     it('includes all registration rows with correct data', async () => {
@@ -285,10 +279,8 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const lines = text.replace('\uFEFF', '').split('\r\n')
 
       expect(lines).toHaveLength(3) // header + 2 registrations
-      expect(lines[1]).toBe(
-        'Player One,player1,p1@test.com,APPROVED,Diamond,Jett',
-      )
-      expect(lines[2]).toBe('Player Two,player2,p2@test.com,PENDING,Gold,Sage')
+      expect(lines[1]).toBe('Player One,player1,p1@test.com,Diamond,Jett')
+      expect(lines[2]).toBe('Player Two,player2,p2@test.com,Gold,Sage')
     })
   })
 
@@ -308,7 +300,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const text = await response.text()
       const headerRow = text.replace('\uFEFF', '').split('\r\n')[0]
 
-      expect(headerRow).toBe('Equipe,Pseudo,Nom Discord,Email,Statut,Rang')
+      expect(headerRow).toBe('Equipe,Pseudo,Nom Discord,Email,Rang')
     })
 
     it('includes team name in each row', async () => {
@@ -317,12 +309,8 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const lines = text.replace('\uFEFF', '').split('\r\n')
 
       expect(lines).toHaveLength(3)
-      expect(lines[1]).toBe(
-        'Team Alpha,Captain One,captain1,c1@test.com,APPROVED,GC1',
-      )
-      expect(lines[2]).toBe(
-        'Team Alpha,Member One,member1,m1@test.com,APPROVED,C3',
-      )
+      expect(lines[1]).toBe('Team Alpha,Captain One,captain1,c1@test.com,GC1')
+      expect(lines[2]).toBe('Team Alpha,Member One,member1,m1@test.com,C3')
     })
 
     it('uses slug for filename', async () => {
@@ -348,7 +336,6 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       })
       mockRegistrationFindMany.mockResolvedValue([
         {
-          status: 'APPROVED',
           fieldValues: {},
           user: {
             name: 'user,name',
@@ -363,7 +350,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const text = await response.text()
       const dataRow = text.replace('\uFEFF', '').split('\r\n')[1]
 
-      expect(dataRow).toBe('"Display, Name","user,name",a@b.com,APPROVED')
+      expect(dataRow).toBe('"Display, Name","user,name",a@b.com')
     })
 
     it('escapes field values containing double quotes', async () => {
@@ -375,7 +362,6 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       })
       mockRegistrationFindMany.mockResolvedValue([
         {
-          status: 'APPROVED',
           fieldValues: {},
           user: { name: 'user"name', displayName: 'Display', email: 'a@b.com' },
           team: null,
@@ -386,7 +372,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const text = await response.text()
       const dataRow = text.replace('\uFEFF', '').split('\r\n')[1]
 
-      expect(dataRow).toBe('Display,"user""name",a@b.com,APPROVED')
+      expect(dataRow).toBe('Display,"user""name",a@b.com')
     })
   })
 
@@ -412,7 +398,6 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       mockTournamentFindUnique.mockResolvedValue(MOCK_TOURNAMENT_SOLO)
       mockRegistrationFindMany.mockResolvedValue([
         {
-          status: 'PENDING',
           fieldValues: { Rang: 'Silver' },
           user: { name: 'player', displayName: 'Player', email: 'p@test.com' },
           team: null,
@@ -424,7 +409,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const dataRow = text.replace('\uFEFF', '').split('\r\n')[1]
 
       // "Agent principal" field is missing from fieldValues, should be empty string
-      expect(dataRow).toBe('Player,player,p@test.com,PENDING,Silver,')
+      expect(dataRow).toBe('Player,player,p@test.com,Silver,')
     })
 
     it('handles null fieldValues gracefully', async () => {
@@ -436,7 +421,6 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       })
       mockRegistrationFindMany.mockResolvedValue([
         {
-          status: 'PENDING',
           fieldValues: null,
           user: { name: 'player', displayName: 'Player', email: 'p@test.com' },
           team: null,
@@ -447,7 +431,7 @@ describe('GET /api/admin/tournaments/[id]/export-csv', () => {
       const text = await response.text()
       const dataRow = text.replace('\uFEFF', '').split('\r\n')[1]
 
-      expect(dataRow).toBe('Player,player,p@test.com,PENDING,')
+      expect(dataRow).toBe('Player,player,p@test.com,')
     })
 
     it('returns 500 when Prisma throws', async () => {

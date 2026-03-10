@@ -294,13 +294,6 @@ export type JsonFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
-export type EnumRegistrationStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.RegistrationStatus | Prisma.EnumRegistrationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel> | $Enums.RegistrationStatus
-}
-
 export type JsonWithAggregatesFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
@@ -326,16 +319,6 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
-}
-
-export type EnumRegistrationStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.RegistrationStatus | Prisma.EnumRegistrationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRegistrationStatusWithAggregatesFilter<$PrismaModel> | $Enums.RegistrationStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -607,13 +590,6 @@ export type NestedEnumFieldTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumFieldTypeFilter<$PrismaModel>
 }
 
-export type NestedEnumRegistrationStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.RegistrationStatus | Prisma.EnumRegistrationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel> | $Enums.RegistrationStatus
-}
-
 export type NestedJsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -636,16 +612,6 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
-}
-
-export type NestedEnumRegistrationStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.RegistrationStatus | Prisma.EnumRegistrationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RegistrationStatus[] | Prisma.ListEnumRegistrationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRegistrationStatusWithAggregatesFilter<$PrismaModel> | $Enums.RegistrationStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumRegistrationStatusFilter<$PrismaModel>
 }
 
 

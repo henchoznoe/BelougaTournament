@@ -25,13 +25,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { unregisterFromTournament } from '@/lib/actions/tournaments'
-import {
-  REGISTRATION_STATUS_BADGE_STYLES,
-  REGISTRATION_STATUS_LABELS,
-} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -103,14 +98,6 @@ export const ProfileRegistrations = ({
                 </div>
               </Link>
               <div className="flex shrink-0 items-center gap-2">
-                <span
-                  className={cn(
-                    'rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
-                    REGISTRATION_STATUS_BADGE_STYLES[registration.status],
-                  )}
-                >
-                  {REGISTRATION_STATUS_LABELS[registration.status]}
-                </span>
                 <button
                   type="button"
                   onClick={() => setEditingRegistration(registration)}

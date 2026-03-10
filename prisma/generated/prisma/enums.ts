@@ -34,15 +34,6 @@ export const FieldType = {
 export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 
 
-export const RegistrationStatus = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
-} as const
-
-export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
-
-
 export const TournamentStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',

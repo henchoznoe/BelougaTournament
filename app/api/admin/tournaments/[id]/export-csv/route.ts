@@ -21,7 +21,6 @@ type TournamentExportData = {
 
 /** A single registration row with user and team data for CSV export. */
 type RegistrationExportRow = {
-  status: string
   fieldValues: Record<string, string | number> | null
   user: { name: string; displayName: string; email: string }
   team: { name: string } | null
@@ -135,7 +134,7 @@ export const GET = async (
 
     const headers: string[] = []
     if (isTeamFormat) headers.push('Equipe')
-    headers.push('Pseudo', 'Nom Discord', 'Email', 'Statut')
+    headers.push('Pseudo', 'Nom Discord', 'Email')
     for (const label of fieldLabels) {
       headers.push(label)
     }
@@ -151,7 +150,7 @@ export const GET = async (
 
       const row: string[] = []
       if (isTeamFormat) row.push(reg.team?.name ?? '')
-      row.push(reg.user.displayName, reg.user.name, reg.user.email, reg.status)
+      row.push(reg.user.displayName, reg.user.name, reg.user.email)
 
       for (const label of fieldLabels) {
         const value = fieldValues[label]

@@ -24,12 +24,6 @@ enum FieldType {
   NUMBER
 }
 
-enum RegistrationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum TournamentStatus {
   DRAFT
   PUBLISHED
@@ -121,7 +115,6 @@ model Tournament {
   prize             String? // Cash prize or rewards
   toornamentId      String?
   streamUrl         String? // Optional per-tournament stream URL override
-  autoApprove       Boolean                  @default(false)
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
@@ -192,7 +185,6 @@ model TournamentRegistration {
   userId            String
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldValues       Json               @default("{}")
-  status            RegistrationStatus @default(PENDING)
   createdAt         DateTime           @default(now())
 
   @@unique([tournamentId, userId])

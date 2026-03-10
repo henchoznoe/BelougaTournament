@@ -9,15 +9,10 @@
 import { Calendar, ChevronLeft, Gamepad2, Swords } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import {
-  REGISTRATION_STATUS_BADGE_STYLES,
-  REGISTRATION_STATUS_LABELS,
-} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUserPastRegistrations } from '@/lib/services/tournaments'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -55,13 +50,8 @@ const RegistrationRow = ({
           </span>
         </div>
       </div>
-      <span
-        className={cn(
-          'shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
-          REGISTRATION_STATUS_BADGE_STYLES[registration.status],
-        )}
-      >
-        {REGISTRATION_STATUS_LABELS[registration.status]}
+      <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+        Participé
       </span>
     </Link>
   )

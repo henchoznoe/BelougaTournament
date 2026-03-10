@@ -16,11 +16,7 @@ import type {
   RecentRegistration,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
-import {
-  RegistrationStatus,
-  Role,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
@@ -35,7 +31,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       publishedCount,
       archivedCount,
       players,
-      pendingRegistrations,
+      totalRegistrations,
       sponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
@@ -45,9 +41,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       }),
       prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
       prisma.user.count({ where: { role: Role.USER } }),
-      prisma.tournamentRegistration.count({
-        where: { status: RegistrationStatus.PENDING },
-      }),
+      prisma.tournamentRegistration.count(),
       prisma.sponsor.count(),
     ])
 
@@ -61,7 +55,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         },
       },
       players,
-      pendingRegistrations,
+      totalRegistrations,
       sponsors,
     }
   } catch (error) {
@@ -76,7 +70,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         },
       },
       players: 0,
-      pendingRegistrations: 0,
+      totalRegistrations: 0,
       sponsors: 0,
     }
   }
@@ -136,7 +130,6 @@ export const getRecentRegistrations = async (
       take: limit,
       select: {
         id: true,
-        status: true,
         createdAt: true,
         user: {
           select: {

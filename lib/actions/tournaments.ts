@@ -25,13 +25,11 @@ import {
   tournamentSchema,
   unregisterFromTournamentSchema,
   updateRegistrationFieldsSchema,
-  updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
 import {
   FieldType,
-  RegistrationStatus,
   Role,
   TournamentFormat,
   TournamentStatus,
@@ -59,7 +57,6 @@ type TournamentWithFields = {
   registrationClose: Date
   maxTeams: number | null
   teamSize: number
-  autoApprove: boolean
   fields: { label: string; type: FieldType; required: boolean; order: number }[]
 }
 
@@ -68,7 +65,6 @@ type RegistrationWithTournament = {
   id: string
   userId: string
   tournamentId: string
-  status: RegistrationStatus
   tournament: TournamentWithFields
 }
 
@@ -165,7 +161,7 @@ const validateFieldValues = (
     if (field.required && (value === undefined || value === '')) {
       return {
         valid: false,
-        message: `Le champ « ${field.label} » est requis.`,
+        message: `Le champ \u00ab ${field.label} \u00bb est requis.`,
       }
     }
     if (
@@ -176,7 +172,7 @@ const validateFieldValues = (
       if (typeof value !== 'number' || Number.isNaN(value)) {
         return {
           valid: false,
-          message: `Le champ « ${field.label} » doit être un nombre.`,
+          message: `Le champ \u00ab ${field.label} \u00bb doit \u00eatre un nombre.`,
         }
       }
     }
@@ -233,7 +229,7 @@ const fetchTournamentForRegistration = async (
     return {
       error: {
         success: false,
-        message: 'Vous êtes déjà inscrit à ce tournoi.',
+        message: 'Vous \u00eates d\u00e9j\u00e0 inscrit \u00e0 ce tournoi.',
       },
     }
   }
@@ -264,7 +260,6 @@ export const createTournament = authenticatedAction({
         prize: toNullable(data.prize),
         toornamentId: toNullable(data.toornamentId),
         streamUrl: toNullable(data.streamUrl),
-        autoApprove: data.autoApprove,
         fields: {
           create: data.fields.map(field => ({
             label: field.label,
@@ -287,7 +282,10 @@ export const createTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-    return { success: true, message: 'Le tournoi a été créé.' }
+    return {
+      success: true,
+      message: 'Le tournoi a \u00e9t\u00e9 cr\u00e9\u00e9.',
+    }
   },
 })
 
@@ -321,7 +319,7 @@ export const updateTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'Le format du tournoi ne peut pas être modifié après la création.',
+          'Le format du tournoi ne peut pas \u00eatre modifi\u00e9 apr\u00e8s la cr\u00e9ation.',
       }
     }
 
@@ -348,7 +346,7 @@ export const updateTournament = authenticatedAction({
         return {
           success: false,
           message:
-            'Les champs personnalisés ne peuvent pas être modifiés lorsque le tournoi est publié et a des inscriptions.',
+            'Les champs personnalis\u00e9s ne peuvent pas \u00eatre modifi\u00e9s lorsque le tournoi est publi\u00e9 et a des inscriptions.',
         }
       }
     }
@@ -380,7 +378,6 @@ export const updateTournament = authenticatedAction({
           prize: toNullable(data.prize),
           toornamentId: toNullable(data.toornamentId),
           streamUrl: toNullable(data.streamUrl),
-          autoApprove: data.autoApprove,
           fields: {
             create: data.fields.map(field => ({
               label: field.label,
@@ -404,7 +401,10 @@ export const updateTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
-    return { success: true, message: 'Le tournoi a été mis à jour.' }
+    return {
+      success: true,
+      message: 'Le tournoi a \u00e9t\u00e9 mis \u00e0 jour.',
+    }
   },
 })
 
@@ -430,7 +430,10 @@ export const deleteTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
 
-    return { success: true, message: 'Le tournoi a été supprimé.' }
+    return {
+      success: true,
+      message: 'Le tournoi a \u00e9t\u00e9 supprim\u00e9.',
+    }
   },
 })
 
@@ -456,34 +459,9 @@ export const updateTournamentStatus = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
-    return { success: true, message: 'Le statut du tournoi a été mis à jour.' }
-  },
-})
-
-/** Updates a registration's status (approve / reject). */
-export const updateRegistrationStatus = authenticatedAction({
-  schema: updateRegistrationStatusSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.tournamentId,
-    )
-    if (denied) return denied
-
-    await prisma.tournamentRegistration.update({
-      where: { id: data.id },
-      data: { status: data.status },
-    })
-
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-
     return {
       success: true,
-      message: "Le statut de l'inscription a été mis à jour.",
+      message: 'Le statut du tournoi a \u00e9t\u00e9 mis \u00e0 jour.',
     }
   },
 })
@@ -492,7 +470,7 @@ export const updateRegistrationStatus = authenticatedAction({
 // Public registration
 // ---------------------------------------------------------------------------
 
-/** Updates a user's own registration field values. Resets status to PENDING if it was APPROVED. */
+/** Updates a user's own registration field values. */
 export const updateRegistrationFields = authenticatedAction({
   schema: updateRegistrationFieldsSchema,
   handler: async (data, session): Promise<ActionState> => {
@@ -539,32 +517,20 @@ export const updateRegistrationFields = authenticatedAction({
       return { success: false, message: fieldValidation.message }
     }
 
-    // 4. Update field values; reset to PENDING if status was APPROVED
-    const newStatus =
-      registration.status === RegistrationStatus.APPROVED
-        ? RegistrationStatus.PENDING
-        : registration.status
-
+    // 4. Update field values
     await prisma.tournamentRegistration.update({
       where: { id: data.registrationId },
       data: {
         fieldValues: data.fieldValues,
-        status: newStatus,
       },
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-
-    const statusMessage =
-      registration.status === RegistrationStatus.APPROVED
-        ? ' Votre inscription a été remise en attente de validation.'
-        : ''
 
     return {
       success: true,
-      message: `Votre inscription a été mise à jour.${statusMessage}`,
+      message: 'Votre inscription a \u00e9t\u00e9 mise \u00e0 jour.',
     }
   },
 })
@@ -586,19 +552,14 @@ export const registerForTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'Ce tournoi est en format équipe. Utilisez le formulaire équipe.',
+          'Ce tournoi est en format \u00e9quipe. Utilisez le formulaire \u00e9quipe.',
       }
     }
 
     // 3. Check maxTeams limit (registrations count as "slots" for solo)
     if (tournament.maxTeams !== null) {
       const count = await prisma.tournamentRegistration.count({
-        where: {
-          tournamentId: data.tournamentId,
-          status: {
-            in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
-          },
-        },
+        where: { tournamentId: data.tournamentId },
       })
       if (count >= tournament.maxTeams) {
         return { success: false, message: 'Le tournoi est complet.' }
@@ -617,16 +578,16 @@ export const registerForTournament = authenticatedAction({
         tournamentId: data.tournamentId,
         userId: session.user.id,
         fieldValues: data.fieldValues,
-        status: tournament.autoApprove
-          ? RegistrationStatus.APPROVED
-          : RegistrationStatus.PENDING,
       },
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
 
-    return { success: true, message: 'Votre inscription a été enregistrée.' }
+    return {
+      success: true,
+      message: 'Votre inscription a \u00e9t\u00e9 enregistr\u00e9e.',
+    }
   },
 })
 
@@ -662,7 +623,7 @@ export const createTeamAndRegister = authenticatedAction({
       if (teamCount >= tournament.maxTeams) {
         return {
           success: false,
-          message: "Le nombre maximum d'équipes est atteint.",
+          message: "Le nombre maximum d'\u00e9quipes est atteint.",
         }
       }
     }
@@ -696,9 +657,6 @@ export const createTeamAndRegister = authenticatedAction({
           tournamentId: data.tournamentId,
           userId: session.user.id,
           fieldValues: data.fieldValues,
-          status: tournament.autoApprove
-            ? RegistrationStatus.APPROVED
-            : RegistrationStatus.PENDING,
           teamId: team.id,
         },
       })
@@ -710,7 +668,8 @@ export const createTeamAndRegister = authenticatedAction({
 
     return {
       success: true,
-      message: 'Votre équipe a été créée et votre inscription enregistrée.',
+      message:
+        'Votre \u00e9quipe a \u00e9t\u00e9 cr\u00e9\u00e9e et votre inscription enregistr\u00e9e.',
     }
   },
 })
@@ -742,11 +701,11 @@ export const joinTeamAndRegister = authenticatedAction({
     })) as TeamWithMemberCount | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: 'Équipe introuvable.' }
+      return { success: false, message: '\u00c9quipe introuvable.' }
     }
 
     if (team.isFull) {
-      return { success: false, message: 'Cette équipe est complète.' }
+      return { success: false, message: 'Cette \u00e9quipe est compl\u00e8te.' }
     }
 
     // 4. Validate dynamic field values
@@ -778,9 +737,6 @@ export const joinTeamAndRegister = authenticatedAction({
           tournamentId: data.tournamentId,
           userId: session.user.id,
           fieldValues: data.fieldValues,
-          status: tournament.autoApprove
-            ? RegistrationStatus.APPROVED
-            : RegistrationStatus.PENDING,
         },
       })
     })
@@ -792,7 +748,7 @@ export const joinTeamAndRegister = authenticatedAction({
     return {
       success: true,
       message:
-        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
+        "Vous avez rejoint l'\u00e9quipe et votre inscription a \u00e9t\u00e9 enregistr\u00e9e.",
     }
   },
 })
@@ -831,7 +787,7 @@ export const unregisterFromTournament = authenticatedAction({
     if (registration.tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
-        message: 'Ce tournoi ne permet plus de désinscription.',
+        message: 'Ce tournoi ne permet plus de d\u00e9sinscription.',
       }
     }
 
@@ -845,7 +801,10 @@ export const unregisterFromTournament = authenticatedAction({
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-      return { success: true, message: 'Votre inscription a été annulée.' }
+      return {
+        success: true,
+        message: 'Votre inscription a \u00e9t\u00e9 annul\u00e9e.',
+      }
     }
 
     // 4. TEAM format — find the user's team membership
@@ -868,7 +827,10 @@ export const unregisterFromTournament = authenticatedAction({
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-      return { success: true, message: 'Votre inscription a été annulée.' }
+      return {
+        success: true,
+        message: 'Votre inscription a \u00e9t\u00e9 annul\u00e9e.',
+      }
     }
 
     const team = teamMember.team
@@ -918,7 +880,10 @@ export const unregisterFromTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-    return { success: true, message: 'Votre inscription a été annulée.' }
+    return {
+      success: true,
+      message: 'Votre inscription a \u00e9t\u00e9 annul\u00e9e.',
+    }
   },
 })
 
@@ -947,14 +912,14 @@ export const kickPlayer = authenticatedAction({
     })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: 'Équipe introuvable.' }
+      return { success: false, message: '\u00c9quipe introuvable.' }
     }
 
     const isMember = team.members.some(m => m.userId === data.userId)
     if (!isMember) {
       return {
         success: false,
-        message: "Ce joueur ne fait pas partie de l'équipe.",
+        message: "Ce joueur ne fait pas partie de l'\u00e9quipe.",
       }
     }
 
@@ -1007,7 +972,10 @@ export const kickPlayer = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-    return { success: true, message: "Le joueur a été retiré de l'équipe." }
+    return {
+      success: true,
+      message: "Le joueur a \u00e9t\u00e9 retir\u00e9 de l'\u00e9quipe.",
+    }
   },
 })
 
@@ -1030,7 +998,7 @@ export const dissolveTeam = authenticatedAction({
     })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: 'Équipe introuvable.' }
+      return { success: false, message: '\u00c9quipe introuvable.' }
     }
 
     const memberUserIds = team.members.map(m => m.userId)
@@ -1052,6 +1020,6 @@ export const dissolveTeam = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-    return { success: true, message: "L'équipe a été dissoute." }
+    return { success: true, message: "L'\u00e9quipe a \u00e9t\u00e9 dissoute." }
   },
 })

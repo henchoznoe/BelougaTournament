@@ -6,10 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import {
-  RegistrationStatus,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 export const METADATA = {
   NAME: 'Belouga Tournament',
@@ -62,32 +59,6 @@ export const SEARCH_CONFIG = {
 
 /** Maximum length for Twitch username. */
 export const TWITCH_USERNAME_MAX_LENGTH = 25
-
-/** French labels for registration statuses. */
-export const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.APPROVED]: 'Approuvée',
-  [RegistrationStatus.REJECTED]: 'Refusée',
-} as const
-
-/** Compact styles for registration statuses (used in admin tables/selects). */
-export const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  [RegistrationStatus.PENDING]: 'bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]: 'bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'bg-red-500/10 text-red-400',
-} as const
-
-/** Badge styles for registration statuses with border (used in profile pages). */
-export const REGISTRATION_STATUS_BADGE_STYLES: Record<
-  RegistrationStatus,
-  string
-> = {
-  [RegistrationStatus.PENDING]:
-    'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  [RegistrationStatus.APPROVED]:
-    'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  [RegistrationStatus.REJECTED]: 'border-red-500/30 bg-red-500/10 text-red-400',
-} as const
 
 /** French labels for tournament statuses. */
 export const TOURNAMENT_STATUS_LABELS: Record<TournamentStatus, string> = {

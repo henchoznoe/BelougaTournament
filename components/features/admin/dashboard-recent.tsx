@@ -1,38 +1,18 @@
 /**
  * File: components/features/admin/dashboard-recent.tsx
- * Description: Dashboard panels showing upcoming tournaments and recent registrations with status management.
+ * Description: Dashboard panels showing upcoming tournaments and recent registrations.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-'use client'
-
 import { Calendar, ClipboardList, Gamepad2, Users } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
-import { toast } from 'sonner'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
-import { updateRegistrationStatus } from '@/lib/actions/tournaments'
-import {
-  REGISTRATION_STATUS_LABELS,
-  REGISTRATION_STATUS_STYLES,
-} from '@/lib/config/constants'
 import type {
   RecentRegistration,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
-import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import {
-  RegistrationStatus,
-  TournamentFormat,
-} from '@/prisma/generated/prisma/enums'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface UpcomingTournamentsProps {
   tournaments: UpcomingTournament[]
@@ -105,29 +85,6 @@ export const DashboardUpcomingTournaments = ({
 export const DashboardRecentRegistrations = ({
   registrations,
 }: RecentRegistrationsProps) => {
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
-
-  const handleStatusChange = (
-    reg: RecentRegistration,
-    newStatus: RegistrationStatus,
-  ) => {
-    if (newStatus === reg.status) return
-    startTransition(async () => {
-      const result = await updateRegistrationStatus({
-        id: reg.id,
-        tournamentId: reg.tournament.id,
-        status: newStatus,
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-    })
-  }
-
   return (
     <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
@@ -157,40 +114,9 @@ export const DashboardRecentRegistrations = ({
                   {reg.team && ` · ${reg.team.name}`}
                 </p>
               </div>
-              <div className="ml-4 flex flex-col items-end gap-1">
-                <Select
-                  value={reg.status}
-                  onValueChange={val =>
-                    handleStatusChange(reg, val as RegistrationStatus)
-                  }
-                  disabled={isPending}
-                >
-                  <SelectTrigger className="h-auto w-auto gap-1 rounded-full border-none bg-transparent p-0 shadow-none">
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                        REGISTRATION_STATUS_STYLES[reg.status],
-                      )}
-                    >
-                      {REGISTRATION_STATUS_LABELS[reg.status]}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent position="popper" sideOffset={4}>
-                    <SelectItem value={RegistrationStatus.PENDING}>
-                      En attente
-                    </SelectItem>
-                    <SelectItem value={RegistrationStatus.APPROVED}>
-                      Approuvée
-                    </SelectItem>
-                    <SelectItem value={RegistrationStatus.REJECTED}>
-                      Refusée
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-[10px] text-zinc-600">
-                  {formatDate(reg.createdAt)}
-                </span>
-              </div>
+              <span className="ml-4 text-[10px] text-zinc-600">
+                {formatDate(reg.createdAt)}
+              </span>
             </div>
           ))}
         </div>

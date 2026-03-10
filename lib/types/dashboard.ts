@@ -7,7 +7,6 @@
  */
 
 import type {
-  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -18,7 +17,7 @@ export type DashboardStats = {
     byStatus: Record<TournamentStatus, number>
   }
   players: number
-  pendingRegistrations: number
+  totalRegistrations: number
   sponsors: number
 }
 
@@ -39,7 +38,6 @@ export type UpcomingTournament = {
 
 export type RecentRegistration = {
   id: string
-  status: RegistrationStatus
   createdAt: Date
   user: {
     name: string

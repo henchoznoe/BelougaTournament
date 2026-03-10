@@ -14,7 +14,6 @@ import {
   tournamentFieldSchema,
   tournamentSchema,
   unregisterFromTournamentSchema,
-  updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
@@ -46,7 +45,6 @@ const VALID_TOURNAMENT = {
   prize: '500 CHF',
   toornamentId: '',
   streamUrl: '',
-  autoApprove: false,
   fields: [VALID_FIELD],
   toornamentStages: [],
 }
@@ -553,96 +551,6 @@ describe('updateTournamentStatusSchema', () => {
   it('rejects missing id', () => {
     expect(
       updateTournamentStatusSchema.safeParse({ status: 'DRAFT' }).success,
-    ).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// updateRegistrationStatusSchema
-// ---------------------------------------------------------------------------
-
-describe('updateRegistrationStatusSchema', () => {
-  it('accepts PENDING status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'PENDING',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts APPROVED status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'APPROVED',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts REJECTED status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'REJECTED',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('rejects an invalid status', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: VALID_UUID,
-        status: 'CANCELLED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects an invalid id UUID', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: INVALID_UUID,
-        tournamentId: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects an invalid tournamentId UUID', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: INVALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing id', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        tournamentId: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing tournamentId', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing status', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: VALID_UUID,
-      }).success,
     ).toBe(false)
   })
 })
