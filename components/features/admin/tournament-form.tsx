@@ -112,6 +112,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             required: f.required,
             order: f.order,
           })),
+          toornamentStages: tournament.toornamentStages.map(s => ({
+            id: s.id,
+            name: s.name,
+            stageId: s.stageId,
+            number: s.number,
+          })),
         }
       : {
           title: '',
@@ -132,6 +138,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           streamUrl: '',
           autoApprove: false,
           fields: [],
+          toornamentStages: [],
         },
   })
 
@@ -140,7 +147,18 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     name: 'fields',
   })
 
+  const {
+    fields: stageFields,
+    append: appendStage,
+    remove: removeStage,
+    move: moveStage,
+  } = useFieldArray({
+    control,
+    name: 'toornamentStages',
+  })
+
   const format = useWatch({ control, name: 'format' })
+  const toornamentIdValue = useWatch({ control, name: 'toornamentId' }) ?? ''
 
   const onSubmit = (data: TournamentFormInput) => {
     // Date fields are already ISO strings from the DateTimePicker
@@ -186,6 +204,23 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     // Update order values after move
     for (let i = 0; i < fields.length; i++) {
       setValue(`fields.${i}.order`, i)
+    }
+  }
+
+  const addStage = () => {
+    appendStage({
+      name: '',
+      stageId: '',
+      number: stageFields.length,
+    })
+  }
+
+  const moveStageItem = (from: number, to: number) => {
+    if (to < 0 || to >= stageFields.length) return
+    moveStage(from, to)
+    // Update number values after move
+    for (let i = 0; i < stageFields.length; i++) {
+      setValue(`toornamentStages.${i}.number`, i)
     }
   }
 
@@ -484,6 +519,116 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             {...register('streamUrl')}
           />
         </div>
+
+        {/* Toornament stages (only visible when toornamentId is set) */}
+        {toornamentIdValue.trim() !== '' && (
+          <div className="space-y-3 rounded-xl border border-white/5 bg-white/2 p-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
+                Stages Toornament
+              </h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={addStage}
+                disabled={isPending}
+                className="gap-1 text-xs text-blue-400 hover:text-blue-300"
+              >
+                <Plus className="size-3.5" />
+                Ajouter
+              </Button>
+            </div>
+
+            {stageFields.length === 0 && (
+              <p className="text-xs text-zinc-600">
+                Aucun stage configuré. Seuls le widget principal et le
+                calendrier seront affichés.
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {stageFields.map((stage, index) => (
+                <div
+                  key={stage.id}
+                  className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-2.5"
+                >
+                  {/* Reorder button */}
+                  <div className="flex flex-col gap-0.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => moveStageItem(index, index - 1)}
+                      disabled={index === 0 || isPending}
+                      className="text-zinc-600 hover:text-zinc-400 disabled:opacity-30"
+                      aria-label={`Monter le stage ${(index + 1).toString()}`}
+                    >
+                      <GripVertical className="size-4" />
+                    </button>
+                  </div>
+
+                  {/* Stage inputs */}
+                  <div className="grid flex-1 gap-2 sm:grid-cols-2">
+                    <div>
+                      <Input
+                        placeholder="Nom du stage (ex: Poules)"
+                        aria-label={`Nom du stage ${(index + 1).toString()}`}
+                        disabled={isPending}
+                        className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
+                        {...register(`toornamentStages.${index}.name`)}
+                      />
+                      {errors.toornamentStages?.[index]?.name?.message && (
+                        <p className="mt-1 text-xs text-red-400">
+                          {errors.toornamentStages[index].name.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        placeholder="ID du stage (ex: 618983668512789184)"
+                        aria-label={`ID du stage ${(index + 1).toString()}`}
+                        disabled={isPending}
+                        className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
+                        {...register(`toornamentStages.${index}.stageId`)}
+                      />
+                      {errors.toornamentStages?.[index]?.stageId?.message && (
+                        <p className="mt-1 text-xs text-red-400">
+                          {errors.toornamentStages[index].stageId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hidden number field */}
+                  <input
+                    type="hidden"
+                    {...register(`toornamentStages.${index}.number`, {
+                      valueAsNumber: true,
+                    })}
+                  />
+
+                  {/* Delete stage button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      removeStage(index)
+                      // Re-index remaining stages
+                      for (let i = index; i < stageFields.length - 1; i++) {
+                        setValue(`toornamentStages.${i}.number`, i)
+                      }
+                    }}
+                    disabled={isPending}
+                    className="mt-0.5 text-zinc-500 hover:text-red-400"
+                    aria-label={`Supprimer le stage ${(index + 1).toString()}`}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-white/5" />

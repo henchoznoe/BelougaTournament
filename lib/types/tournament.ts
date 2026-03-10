@@ -81,6 +81,7 @@ export type TournamentDetail = {
   createdAt: Date
   updatedAt: Date
   fields: TournamentFieldItem[]
+  toornamentStages: ToornamentStageItem[]
   _count: {
     registrations: number
     teams: number
@@ -94,6 +95,14 @@ export type TournamentFieldItem = {
   type: FieldType
   required: boolean
   order: number
+}
+
+/** A Toornament stage linked to a tournament. */
+export type ToornamentStageItem = {
+  id: string
+  name: string
+  stageId: string
+  number: number
 }
 
 /** Registration row for the admin inscriptions table. */
@@ -193,6 +202,7 @@ export type PublicTournamentDetail = {
   streamUrl: string | null
   autoApprove: boolean
   fields: TournamentFieldItem[]
+  toornamentStages: ToornamentStageItem[]
   _count: {
     registrations: number
     teams: number

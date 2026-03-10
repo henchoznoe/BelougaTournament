@@ -15,7 +15,7 @@ const CSP_DIRECTIVES = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://*.public.blob.vercel-storage.com https://cdn.discordapp.com",
   "font-src 'self'",
-  'frame-src https://player.twitch.tv',
+  'frame-src https://player.twitch.tv https://widget.toornament.com',
   "connect-src 'self' https://discord.com https://player.twitch.tv",
   "object-src 'none'",
   "base-uri 'self'",

@@ -56,6 +56,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Tournament: 'Tournament',
+  ToornamentStage: 'ToornamentStage',
   TournamentField: 'TournamentField',
   Team: 'Team',
   TeamMember: 'TeamMember',
@@ -168,6 +169,17 @@ export const TournamentScalarFieldEnum = {
 } as const
 
 export type TournamentScalarFieldEnum = (typeof TournamentScalarFieldEnum)[keyof typeof TournamentScalarFieldEnum]
+
+
+export const ToornamentStageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  stageId: 'stageId',
+  number: 'number',
+  tournamentId: 'tournamentId'
+} as const
+
+export type ToornamentStageScalarFieldEnum = (typeof ToornamentStageScalarFieldEnum)[keyof typeof ToornamentStageScalarFieldEnum]
 
 
 export const TournamentFieldScalarFieldEnum = {

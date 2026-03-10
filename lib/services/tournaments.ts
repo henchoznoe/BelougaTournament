@@ -76,6 +76,9 @@ export const getTournamentBySlug = async (
         fields: {
           orderBy: { order: 'asc' },
         },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
+        },
         _count: {
           select: {
             registrations: true,
@@ -105,6 +108,9 @@ export const getTournamentById = async (
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -301,6 +307,9 @@ export const getPublicTournamentBySlug = async (
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {

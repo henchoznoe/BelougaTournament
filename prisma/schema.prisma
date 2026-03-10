@@ -126,6 +126,7 @@ model Tournament {
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   fields            TournamentField[]
+  toornamentStages  ToornamentStage[]
   teams             Team[]
   registrations     TournamentRegistration[]
   adminAssignments  AdminAssignment[]
@@ -133,6 +134,15 @@ model Tournament {
   @@index([status])
   @@index([startDate])
   @@index([endDate])
+}
+
+model ToornamentStage {
+  id           String     @id @default(uuid())
+  name         String // Display label (e.g. "Poules", "Playoffs")
+  stageId      String // Toornament stage ID (e.g. "618983668512789184")
+  number       Int        @default(0) // Display order
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 }
 
 model TournamentField {

@@ -74,6 +74,9 @@ vi.mock('@/lib/core/prisma', () => ({
     tournamentField: {
       deleteMany: (...args: unknown[]) => mockFieldDeleteMany(...args),
     },
+    toornamentStage: {
+      deleteMany: (...args: unknown[]) => mockFieldDeleteMany(...args),
+    },
     adminAssignment: {
       findUnique: (...args: unknown[]) => mockAssignmentFindUnique(...args),
     },
@@ -195,6 +198,7 @@ const VALID_TOURNAMENT_INPUT = {
   fields: [
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
+  toornamentStages: [],
 }
 
 // ---------------------------------------------------------------------------
@@ -267,6 +271,9 @@ describe('createTournament', () => {
           create: [
             { label: 'Riot ID', type: 'TEXT', required: true, order: 0 },
           ],
+        },
+        toornamentStages: {
+          create: [],
         },
       },
     })

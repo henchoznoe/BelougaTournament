@@ -273,6 +273,13 @@ export const createTournament = authenticatedAction({
             order: field.order,
           })),
         },
+        toornamentStages: {
+          create: data.toornamentStages.map(stage => ({
+            name: stage.name,
+            stageId: stage.stageId,
+            number: stage.number,
+          })),
+        },
       },
     })
 
@@ -347,8 +354,11 @@ export const updateTournament = authenticatedAction({
     }
 
     await prisma.$transaction([
-      // Delete existing fields and re-create them
+      // Delete existing fields and stages, then re-create them
       prisma.tournamentField.deleteMany({
+        where: { tournamentId: data.id },
+      }),
+      prisma.toornamentStage.deleteMany({
         where: { tournamentId: data.id },
       }),
       prisma.tournament.update({
@@ -377,6 +387,13 @@ export const updateTournament = authenticatedAction({
               type: field.type,
               required: field.required,
               order: field.order,
+            })),
+          },
+          toornamentStages: {
+            create: data.toornamentStages.map(stage => ({
+              name: stage.name,
+              stageId: stage.stageId,
+              number: stage.number,
             })),
           },
         },

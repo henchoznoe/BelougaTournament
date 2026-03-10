@@ -43,6 +43,11 @@ export type Verification = Prisma.VerificationModel
  */
 export type Tournament = Prisma.TournamentModel
 /**
+ * Model ToornamentStage
+ * 
+ */
+export type ToornamentStage = Prisma.ToornamentStageModel
+/**
  * Model TournamentField
  * 
  */

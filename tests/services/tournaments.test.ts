@@ -178,6 +178,9 @@ describe('getTournamentBySlug', () => {
         fields: {
           orderBy: { order: 'asc' },
         },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
+        },
         _count: {
           select: {
             registrations: true,
@@ -225,6 +228,9 @@ describe('getTournamentById', () => {
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -681,6 +687,9 @@ describe('getPublicTournamentBySlug', () => {
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {

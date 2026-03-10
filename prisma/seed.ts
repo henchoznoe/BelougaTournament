@@ -6,12 +6,14 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import 'dotenv/config'
+import { config } from 'dotenv'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
 import { seedAdmins } from './seed-admin'
 import { seedDummy } from './seed-dummy'
+
+config({ path: '.env.local' })
 
 const main = async () => {
   const nodeEnv = process.env.NODE_ENV
@@ -35,10 +37,10 @@ const main = async () => {
     // Always seed admin users
     await seedAdmins(prisma)
 
-    // Seed dummy data only in development or Vercel preview
-    const shouldSeedDummy = nodeEnv === 'development' || vercelEnv === 'preview'
+    // Seed dummy data unless we are in production
+    const isProduction = nodeEnv === 'production' || vercelEnv === 'production'
 
-    if (shouldSeedDummy) {
+    if (!isProduction) {
       console.log('\nDummy data seeding enabled for this environment.')
       await seedDummy(prisma)
     } else {

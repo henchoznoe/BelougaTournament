@@ -10,8 +10,10 @@
 
 import {
   Calendar,
+  CalendarDays,
   Clock,
   Gamepad2,
+  Layers,
   ScrollText,
   Swords,
   Trophy,
@@ -340,14 +342,72 @@ export const TournamentDetail = ({
               </h3>
 
               {tournament.toornamentId ? (
-                <div className="overflow-hidden rounded-2xl border border-white/10">
-                  <iframe
-                    src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/?_locale=fr&theme=dark`}
-                    className="h-[500px] w-full border-0"
-                    allow="fullscreen"
-                    title="Bracket Toornament"
-                  />
-                </div>
+                <Tabs defaultValue="tournament" className="space-y-4">
+                  <TabsList className="w-full flex-wrap justify-start gap-1 rounded-xl bg-white/5 p-1">
+                    <TabsTrigger
+                      value="tournament"
+                      className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                    >
+                      <Trophy className="size-3.5" />
+                      Tournoi
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="schedule"
+                      className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                    >
+                      <CalendarDays className="size-3.5" />
+                      Calendrier
+                    </TabsTrigger>
+                    {tournament.toornamentStages.map(stage => (
+                      <TabsTrigger
+                        key={stage.id}
+                        value={stage.stageId}
+                        className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                      >
+                        <Layers className="size-3.5" />
+                        {stage.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  {/* Tournament overview widget */}
+                  <TabsContent value="tournament">
+                    <div className="overflow-hidden rounded-2xl border border-white/10">
+                      <iframe
+                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/?_locale=fr&theme=dark`}
+                        className="h-98 w-full border-0"
+                        allow="fullscreen"
+                        title="Tournoi Toornament"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Schedule widget */}
+                  <TabsContent value="schedule">
+                    <div className="overflow-hidden rounded-2xl border border-white/10">
+                      <iframe
+                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/matches/schedule/?_locale=fr&theme=dark`}
+                        className="h-125 w-full border-0"
+                        allow="fullscreen"
+                        title="Calendrier des matchs"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Per-stage widgets */}
+                  {tournament.toornamentStages.map(stage => (
+                    <TabsContent key={stage.id} value={stage.stageId}>
+                      <div className="overflow-hidden rounded-2xl border border-white/10">
+                        <iframe
+                          src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/${stage.stageId}/?_locale=fr&theme=dark`}
+                          className="h-125 w-full border-0"
+                          allow="fullscreen"
+                          title={`Bracket - ${stage.name}`}
+                        />
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
               ) : (
                 <div className="flex flex-col items-center gap-3 py-8 text-center">
                   <div className="inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10">

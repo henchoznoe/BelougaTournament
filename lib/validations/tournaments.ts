@@ -15,6 +15,22 @@ import {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
+/** Schema for a single Toornament stage linked to a tournament. */
+export const toornamentStageSchema = z.object({
+  id: z.uuid('ID de stage invalide.').optional(),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Le nom du stage est requis.')
+    .max(30, 'Le nom du stage ne peut pas dépasser 30 caractères.'),
+  stageId: z
+    .string()
+    .trim()
+    .min(1, "L'ID du stage Toornament est requis.")
+    .max(200, "L'ID du stage ne peut pas dépasser 200 caractères."),
+  number: z.number().int().min(0, "L'ordre doit être positif."),
+})
+
 /** Schema for a single dynamic tournament field. */
 export const tournamentFieldSchema = z.object({
   id: z.uuid('ID de champ invalide.').optional(),
@@ -100,6 +116,7 @@ const baseTournamentFields = {
   streamUrl: optionalUrl,
   autoApprove: z.boolean(),
   fields: z.array(tournamentFieldSchema),
+  toornamentStages: z.array(toornamentStageSchema),
 } as const
 
 /** Schema for creating a tournament. */
@@ -122,6 +139,15 @@ export const tournamentSchema = z
       message:
         'La fermeture des inscriptions doit être avant ou égale à la date de début.',
       path: ['registrationClose'],
+    },
+  )
+  .refine(
+    data =>
+      data.toornamentStages.length === 0 ||
+      (data.toornamentId !== undefined && data.toornamentId.trim() !== ''),
+    {
+      message: "L'ID Toornament est requis lorsque des stages sont configurés.",
+      path: ['toornamentId'],
     },
   )
 
@@ -158,6 +184,15 @@ export const updateTournamentSchema = z
       message:
         'La fermeture des inscriptions doit être avant ou égale à la date de début.',
       path: ['registrationClose'],
+    },
+  )
+  .refine(
+    data =>
+      data.toornamentStages.length === 0 ||
+      (data.toornamentId !== undefined && data.toornamentId.trim() !== ''),
+    {
+      message: "L'ID Toornament est requis lorsque des stages sont configurés.",
+      path: ['toornamentId'],
     },
   )
 
