@@ -50,25 +50,23 @@ The platform enables administrators to host and manage diverse gaming tournament
 
 ```bash
 ├── app/                  # Next.js App Router
-│   ├── (public)/         # Public facing routes (Landing, Tournaments)
-│   ├── (admin)/          # Protected Admin Dashboard routes
-│   └── api/              # API endpoints (Webhooks, Auth, Exports)
+│   ├── (public)/         # Public facing routes (Landing, Tournaments, Profile, Legal, ...)
+│   ├── admin/            # Protected Admin Dashboard routes
+│   └── api/              # API endpoints (Auth, Blob CRUD, CSV Export)
 ├── components/           # React Components
-│   ├── features/         # Domain-specific components (Tournament, Auth, etc.)
-│   ├── layout/           # Layout components (Headers, Footers, Sections)
+│   ├── features/         # Domain-specific components (admin, auth, tournaments, profile, ...)
 │   └── ui/               # Reusable primitives (shadcn/ui)
 ├── lib/                  # Core Utilities & Business Logic
 │   ├── actions/          # Server Actions
-│   ├── config/           # Configuration primitives (Routes, Messages)
-│   ├── core/             # Core business logic (Tournament, Registration, etc.)
-│   ├── hooks/            # Custom React hooks
-│   ├── services/         # Business logic services
+│   ├── config/           # Routes, constants (CACHE_TAGS, METADATA), admin nav
+│   ├── core/             # Auth, Prisma client, env validation, logger
+│   ├── services/         # Data access with caching
 │   ├── types/            # TypeScript types
 │   ├── utils/            # Utility functions
 │   └── validations/      # Zod Schemas
-├── prisma/               # Database Schema & Seeds
+├── prisma/               # Database Schema, Migrations & Seed
 ├── public/               # Static Assets
-└── tests/                # Unit tests
+└── tests/                # Unit tests (organized by layer)
 ```
 
 ## 🛠️ Getting Started
@@ -155,7 +153,7 @@ We use a strict 3-tier database architecture to ensure data safety:
 2. Automated migrations
 
 - Vercel automatically handles database migrations during deployment.
-- The `build` script in `package.json` (`prisma generate && prisma migrate deploy && tsx prisma/seed-admin.ts && next build`) ensures that the target database is always up-to-date before compiling the application.
+- The `build` script in `package.json` (`prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build`) ensures that the target database is always up-to-date before compiling the application.
 - **Important**: Never use `prisma migrate dev` on a remote database. Always use `pnpm migrate` locally and commit the generated SQL files.
 
 ## 📄 License

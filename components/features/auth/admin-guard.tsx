@@ -12,11 +12,7 @@ import { getSession } from '@/lib/services/auth'
 import { isAdmin } from '@/lib/utils/auth.helpers'
 
 /** Server component guard: redirects non-admin users before rendering children. */
-export default async function AdminGuard({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const AdminGuard = async ({ children }: { children: React.ReactNode }) => {
   const session = await getSession()
 
   if (!session?.user) {
@@ -29,3 +25,5 @@ export default async function AdminGuard({
 
   return <>{children}</>
 }
+
+export default AdminGuard

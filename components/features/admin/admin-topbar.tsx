@@ -13,6 +13,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
@@ -31,7 +36,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-zinc-400 hover:bg-white/5 hover:text-white md:hidden"
+          className="text-zinc-400 md:hidden"
           onClick={onMobileMenuToggle}
         >
           <Menu className="size-5" />
@@ -45,11 +50,12 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
           asChild
           variant="ghost"
           size="sm"
-          className="gap-2 text-zinc-400 hover:bg-white/5 hover:text-white"
+          className="gap-2 text-zinc-400"
         >
           <Link href={ROUTES.HOME}>
             <ArrowLeft className="size-4" />
             <span className="hidden sm:inline">Retour au site</span>
+            <span className="sr-only sm:hidden">Retour au site</span>
           </Link>
         </Button>
 
@@ -61,22 +67,40 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             <Skeleton className="size-8 rounded-full bg-zinc-800" />
           </div>
         ) : session?.user ? (
-          <div className="flex items-center gap-3">
-            <span
-              className={cn(
-                'hidden text-sm font-medium text-zinc-300 sm:block',
-              )}
-            >
-              {session.user.displayName}
-            </span>
-            <Image
-              src={session.user.image ?? ''}
-              alt={session.user.displayName}
-              width={32}
-              height={32}
-              className="rounded-full ring-2 ring-white/10"
-            />
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href={ROUTES.PROFILE}
+                className="flex items-center gap-3 rounded-xl px-3 py-1.5 transition-colors duration-200 hover:bg-white/5"
+              >
+                <span
+                  className={cn(
+                    'hidden text-sm font-medium text-zinc-300 sm:block',
+                  )}
+                >
+                  {session.user.displayName}
+                </span>
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.displayName}
+                    width={32}
+                    height={32}
+                    className="rounded-full ring-2 ring-white/10"
+                  />
+                ) : (
+                  <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10">
+                    <span className="text-xs font-medium text-zinc-300">
+                      {session.user.displayName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={8}>
+              Mon profil
+            </TooltipContent>
+          </Tooltip>
         ) : null}
       </div>
     </header>

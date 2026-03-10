@@ -8,7 +8,6 @@
 
 import type {
   FieldType,
-  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -20,7 +19,6 @@ import type {
 /** A user's registration with nested tournament info (for profile inscriptions). */
 export type UserRegistrationItem = {
   id: string
-  status: RegistrationStatus
   fieldValues: Record<string, string | number>
   createdAt: Date
   tournament: {
@@ -31,7 +29,6 @@ export type UserRegistrationItem = {
     format: TournamentFormat
     startDate: Date
     status: TournamentStatus
-    autoApprove: boolean
     fields: TournamentFieldItem[]
   }
 }
@@ -50,7 +47,6 @@ export type TournamentListItem = {
   endDate: Date
   registrationOpen: Date
   registrationClose: Date
-  autoApprove: boolean
   _count: {
     registrations: number
     teams: number
@@ -76,11 +72,11 @@ export type TournamentDetail = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
-  autoApprove: boolean
   status: TournamentStatus
   createdAt: Date
   updatedAt: Date
   fields: TournamentFieldItem[]
+  toornamentStages: ToornamentStageItem[]
   _count: {
     registrations: number
     teams: number
@@ -96,10 +92,17 @@ export type TournamentFieldItem = {
   order: number
 }
 
+/** A Toornament stage linked to a tournament. */
+export type ToornamentStageItem = {
+  id: string
+  name: string
+  stageId: string
+  number: number
+}
+
 /** Registration row for the admin inscriptions table. */
 export type TournamentRegistrationItem = {
   id: string
-  status: RegistrationStatus
   fieldValues: Record<string, string | number>
   createdAt: Date
   user: {
@@ -141,7 +144,6 @@ export type TeamItem = {
   members: TeamMemberItem[]
   registration: {
     id: string
-    status: RegistrationStatus
   } | null
 }
 
@@ -191,8 +193,8 @@ export type PublicTournamentDetail = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
-  autoApprove: boolean
   fields: TournamentFieldItem[]
+  toornamentStages: ToornamentStageItem[]
   _count: {
     registrations: number
     teams: number

@@ -17,7 +17,7 @@ export const updateProfile = authenticatedAction({
   schema: profileSchema,
   handler: async (data, session): Promise<ActionState> => {
     await prisma.user.update({
-      where: { id: session.user.id as string },
+      where: { id: session.user.id },
       data: { displayName: data.displayName },
     })
 

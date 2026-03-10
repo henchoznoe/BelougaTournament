@@ -72,7 +72,7 @@ describe('getDashboardStats', () => {
         byStatus: { DRAFT: 4, PUBLISHED: 5, ARCHIVED: 1 },
       },
       players: 42,
-      pendingRegistrations: 7,
+      totalRegistrations: 7,
       sponsors: 3,
     })
   })
@@ -88,7 +88,7 @@ describe('getDashboardStats', () => {
         byStatus: { DRAFT: 0, PUBLISHED: 0, ARCHIVED: 0 },
       },
       players: 0,
-      pendingRegistrations: 0,
+      totalRegistrations: 0,
       sponsors: 0,
     })
   })
@@ -155,7 +155,6 @@ describe('getRecentRegistrations', () => {
   const MOCK_REGISTRATIONS = [
     {
       id: 'reg-1',
-      status: 'PENDING',
       createdAt: new Date('2026-03-01'),
       user: { name: 'PlayerOne', image: null },
       tournament: { title: 'Tournoi Alpha', slug: 'tournoi-alpha' },

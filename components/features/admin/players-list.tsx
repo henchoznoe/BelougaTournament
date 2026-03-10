@@ -68,6 +68,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Rechercher un joueur..."
+            aria-label="Rechercher un joueur"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
@@ -220,8 +221,8 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => setEditingPlayer(player)}
-                          className="text-zinc-400 hover:text-white"
-                          title="Modifier"
+                          className="text-zinc-400"
+                          aria-label="Modifier"
                         >
                           <Pencil className="size-4" />
                         </Button>
@@ -231,7 +232,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                             size="icon-sm"
                             onClick={() => setUnbanningPlayer(player)}
                             className="text-zinc-400 hover:text-emerald-400"
-                            title="Débannir"
+                            aria-label="Débannir"
                           >
                             <ShieldOff className="size-4" />
                           </Button>
@@ -241,7 +242,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                             size="icon-sm"
                             onClick={() => setBanningPlayer(player)}
                             className="text-zinc-400 hover:text-red-400"
-                            title="Bannir"
+                            aria-label="Bannir"
                           >
                             <Ban className="size-4" />
                           </Button>

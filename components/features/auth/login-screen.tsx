@@ -62,11 +62,7 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Button
-              asChild
-              variant="ghost"
-              className="mb-12 text-zinc-400 hover:bg-white/5 hover:text-white"
-            >
+            <Button asChild variant="ghost" className="mb-12 text-zinc-400">
               <Link href={redirectTo}>
                 <ArrowLeft className="mr-2 size-4" />
                 Retour à l'accueil

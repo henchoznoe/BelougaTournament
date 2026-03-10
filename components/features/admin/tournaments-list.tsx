@@ -35,11 +35,14 @@ import { updateTournamentStatus } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
 import { formatShortDate } from '@/lib/utils/formatting'
-import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 const FORMAT_LABELS = {
-  SOLO: 'Solo',
-  TEAM: 'Équipe',
+  [TournamentFormat.SOLO]: 'Solo',
+  [TournamentFormat.TEAM]: 'Équipe',
 } as const
 
 interface TournamentsListProps {
@@ -95,6 +98,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Rechercher un tournoi..."
+            aria-label="Rechercher un tournoi"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
@@ -105,16 +109,16 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
             <span>
               {tournaments.length} tournoi{tournaments.length !== 1 ? 's' : ''}
             </span>
-            {statusCount('PUBLISHED') > 0 && (
+            {statusCount(TournamentStatus.PUBLISHED) > 0 && (
               <span className="text-emerald-400">
-                {statusCount('PUBLISHED')} publié
-                {statusCount('PUBLISHED') !== 1 ? 's' : ''}
+                {statusCount(TournamentStatus.PUBLISHED)} publié
+                {statusCount(TournamentStatus.PUBLISHED) !== 1 ? 's' : ''}
               </span>
             )}
-            {statusCount('DRAFT') > 0 && (
+            {statusCount(TournamentStatus.DRAFT) > 0 && (
               <span className="text-amber-400">
-                {statusCount('DRAFT')} brouillon
-                {statusCount('DRAFT') !== 1 ? 's' : ''}
+                {statusCount(TournamentStatus.DRAFT)} brouillon
+                {statusCount(TournamentStatus.DRAFT) !== 1 ? 's' : ''}
               </span>
             )}
           </div>
@@ -188,7 +192,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   <TableCell className="hidden sm:table-cell">
                     <span className="text-xs text-zinc-400">
                       {FORMAT_LABELS[tournament.format]}
-                      {tournament.format === 'TEAM' &&
+                      {tournament.format === TournamentFormat.TEAM &&
                         ` (${tournament.teamSize.toString()})`}
                     </span>
                   </TableCell>
@@ -225,9 +229,15 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         <TournamentStatusBadge status={tournament.status} />
                       </SelectTrigger>
                       <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value="DRAFT">Brouillon</SelectItem>
-                        <SelectItem value="PUBLISHED">Publié</SelectItem>
-                        <SelectItem value="ARCHIVED">Archivé</SelectItem>
+                        <SelectItem value={TournamentStatus.DRAFT}>
+                          Brouillon
+                        </SelectItem>
+                        <SelectItem value={TournamentStatus.PUBLISHED}>
+                          Publié
+                        </SelectItem>
+                        <SelectItem value={TournamentStatus.ARCHIVED}>
+                          Archivé
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -239,10 +249,11 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         variant="ghost"
                         size="icon-sm"
                         asChild
-                        className="text-zinc-400 hover:text-white"
+                        className="text-zinc-400"
                       >
                         <Link
                           href={`${ROUTES.ADMIN_TOURNAMENTS}/${tournament.slug}`}
+                          aria-label="Modifier"
                         >
                           <Pencil className="size-4" />
                         </Link>
@@ -252,6 +263,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         size="icon-sm"
                         onClick={() => setDeletingTournament(tournament)}
                         className="text-zinc-400 hover:text-red-400"
+                        aria-label="Supprimer"
                       >
                         <Trash2 className="size-4" />
                       </Button>

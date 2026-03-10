@@ -9,7 +9,10 @@
 'use server'
 
 import { revalidateTag } from 'next/cache'
+import { headers } from 'next/headers'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS } from '@/lib/config/constants'
+import auth from '@/lib/core/auth'
 import prisma from '@/lib/core/prisma'
 import { searchUsers } from '@/lib/services/admins'
 import type { ActionState } from '@/lib/types/actions'
@@ -35,17 +38,21 @@ export const promoteToAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role !== 'USER') {
+    if (user.role !== Role.USER) {
       return { success: false, message: `${user.name} est déjà admin.` }
     }
 
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: { role: 'ADMIN' },
-    })
+    // Update role and revoke sessions so the user picks up the new role on next login
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: data.userId },
+        data: { role: Role.ADMIN },
+      }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
+    ])
 
-    revalidateTag('admins', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été promu admin.` }
   },
@@ -65,14 +72,14 @@ export const demoteAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Impossible de rétrograder un super admin.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 
@@ -81,17 +88,18 @@ export const demoteAdmin = authenticatedAction({
       return { success: false, message: 'Vous ne pouvez pas vous rétrograder.' }
     }
 
-    // Remove all assignments and demote in a transaction
+    // Remove all assignments, demote, and revoke sessions in a transaction
     await prisma.$transaction([
       prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
       prisma.user.update({
         where: { id: data.userId },
-        data: { role: 'USER' },
+        data: { role: Role.USER },
       }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    revalidateTag('admins', 'minutes')
-    revalidateTag('dashboard-stats', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: `${user.name} a été rétrogradé.` }
   },
@@ -111,14 +119,14 @@ export const updateAdminAssignments = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Les super admins ont accès à tous les tournois.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 
@@ -137,7 +145,7 @@ export const updateAdminAssignments = authenticatedAction({
         : []),
     ])
 
-    revalidateTag('admins', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
 
     return {
       success: true,
@@ -146,8 +154,14 @@ export const updateAdminAssignments = authenticatedAction({
   },
 })
 
-/** Server action wrapper for user search (usable from client components). */
+/** Server action wrapper for user search (SUPERADMIN only, usable from client components). */
 export const searchUsersAction = async (query: string) => {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session?.user || (session.user.role as Role) !== Role.SUPERADMIN) {
+    return []
+  }
+
   return searchUsers(query)
 }
 
@@ -165,14 +179,14 @@ export const updateAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user.role === Role.SUPERADMIN) {
       return {
         success: false,
         message: 'Impossible de modifier un super admin.',
       }
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
     }
 
@@ -195,7 +209,7 @@ export const updateAdmin = authenticatedAction({
         : []),
     ])
 
-    revalidateTag('admins', 'minutes')
+    revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
 
     return { success: true, message: `${user.name} a été mis à jour.` }
   },

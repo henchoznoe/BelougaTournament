@@ -389,6 +389,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Tournament: 'Tournament',
+  ToornamentStage: 'ToornamentStage',
   TournamentField: 'TournamentField',
   Team: 'Team',
   TeamMember: 'TeamMember',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "tournament" | "tournamentField" | "team" | "teamMember" | "tournamentRegistration" | "adminAssignment" | "globalSettings" | "sponsor"
+    modelProps: "user" | "session" | "account" | "verification" | "tournament" | "toornamentStage" | "tournamentField" | "team" | "teamMember" | "tournamentRegistration" | "adminAssignment" | "globalSettings" | "sponsor"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -782,6 +783,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TournamentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TournamentCountAggregateOutputType> | number
+        }
+      }
+    }
+    ToornamentStage: {
+      payload: Prisma.$ToornamentStagePayload<ExtArgs>
+      fields: Prisma.ToornamentStageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ToornamentStageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ToornamentStageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        findFirst: {
+          args: Prisma.ToornamentStageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ToornamentStageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        findMany: {
+          args: Prisma.ToornamentStageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>[]
+        }
+        create: {
+          args: Prisma.ToornamentStageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        createMany: {
+          args: Prisma.ToornamentStageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ToornamentStageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>[]
+        }
+        delete: {
+          args: Prisma.ToornamentStageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        update: {
+          args: Prisma.ToornamentStageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ToornamentStageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ToornamentStageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ToornamentStageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ToornamentStageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToornamentStagePayload>
+        }
+        aggregate: {
+          args: Prisma.ToornamentStageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateToornamentStage>
+        }
+        groupBy: {
+          args: Prisma.ToornamentStageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ToornamentStageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ToornamentStageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ToornamentStageCountAggregateOutputType> | number
         }
       }
     }
@@ -1422,13 +1497,23 @@ export const TournamentScalarFieldEnum = {
   prize: 'prize',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
-  autoApprove: 'autoApprove',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type TournamentScalarFieldEnum = (typeof TournamentScalarFieldEnum)[keyof typeof TournamentScalarFieldEnum]
+
+
+export const ToornamentStageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  stageId: 'stageId',
+  number: 'number',
+  tournamentId: 'tournamentId'
+} as const
+
+export type ToornamentStageScalarFieldEnum = (typeof ToornamentStageScalarFieldEnum)[keyof typeof ToornamentStageScalarFieldEnum]
 
 
 export const TournamentFieldScalarFieldEnum = {
@@ -1471,7 +1556,6 @@ export const TournamentRegistrationScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   fieldValues: 'fieldValues',
-  status: 'status',
   createdAt: 'createdAt'
 } as const
 
@@ -1687,20 +1771,6 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
- * Reference to a field of type 'RegistrationStatus'
- */
-export type EnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus'>
-    
-
-
-/**
- * Reference to a field of type 'RegistrationStatus[]'
- */
-export type ListEnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus[]'>
-    
-
-
-/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1813,6 +1883,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   tournament?: Prisma.TournamentOmit
+  toornamentStage?: Prisma.ToornamentStageOmit
   tournamentField?: Prisma.TournamentFieldOmit
   team?: Prisma.TeamOmit
   teamMember?: Prisma.TeamMemberOmit

@@ -10,8 +10,10 @@
 
 import {
   Calendar,
+  CalendarDays,
   Clock,
   Gamepad2,
+  Layers,
   ScrollText,
   Swords,
   Trophy,
@@ -30,6 +32,10 @@ import type {
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentDetailProps {
   tournament: PublicTournamentDetail
@@ -43,7 +49,7 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
   const open = new Date(tournament.registrationOpen)
   const close = new Date(tournament.registrationClose)
 
-  if (tournament.status === 'ARCHIVED') {
+  if (tournament.status === TournamentStatus.ARCHIVED) {
     return {
       label: 'Tournoi terminé',
       className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
@@ -69,7 +75,7 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
 
 /** Checks if registration is currently open. */
 const isRegistrationOpen = (tournament: PublicTournamentDetail) => {
-  if (tournament.status === 'ARCHIVED') return false
+  if (tournament.status === TournamentStatus.ARCHIVED) return false
   const now = new Date()
   const open = new Date(tournament.registrationOpen)
   const close = new Date(tournament.registrationClose)
@@ -147,26 +153,39 @@ export const TournamentDetail = ({
               icon={Swords}
               label="Format"
               value={
-                tournament.format === 'SOLO'
+                tournament.format === TournamentFormat.SOLO
                   ? 'Solo'
                   : `Équipe de ${tournament.teamSize}`
               }
             />
-            <InfoRow
-              icon={Users}
-              label="Inscrits"
-              value={
-                tournament.maxTeams
-                  ? `${tournament._count.registrations} / ${tournament.maxTeams}`
-                  : `${tournament._count.registrations}`
-              }
-            />
-            {tournament.format === 'TEAM' && (
+            {/* Registration / team counts — differs by format */}
+            {tournament.format === TournamentFormat.SOLO ? (
               <InfoRow
-                icon={Trophy}
-                label="Équipes"
-                value={`${tournament._count.teams}`}
+                icon={Users}
+                label="Inscrits"
+                value={
+                  tournament.maxTeams
+                    ? `${tournament._count.registrations} / ${tournament.maxTeams}`
+                    : `${tournament._count.registrations}`
+                }
               />
+            ) : (
+              <>
+                <InfoRow
+                  icon={Users}
+                  label="Joueurs"
+                  value={`${tournament._count.registrations}`}
+                />
+                <InfoRow
+                  icon={Trophy}
+                  label="Équipes"
+                  value={
+                    tournament.maxTeams
+                      ? `${tournament._count.teams} / ${tournament.maxTeams}`
+                      : `${tournament._count.teams}`
+                  }
+                />
+              </>
             )}
             <InfoRow
               icon={Calendar}
@@ -323,14 +342,72 @@ export const TournamentDetail = ({
               </h3>
 
               {tournament.toornamentId ? (
-                <div className="overflow-hidden rounded-2xl border border-white/10">
-                  <iframe
-                    src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/?_locale=fr&theme=dark`}
-                    className="h-[500px] w-full border-0"
-                    allow="fullscreen"
-                    title="Bracket Toornament"
-                  />
-                </div>
+                <Tabs defaultValue="tournament" className="space-y-4">
+                  <TabsList className="w-full flex-wrap justify-start gap-1 rounded-xl bg-white/5 p-1">
+                    <TabsTrigger
+                      value="tournament"
+                      className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                    >
+                      <Trophy className="size-3.5" />
+                      Tournoi
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="schedule"
+                      className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                    >
+                      <CalendarDays className="size-3.5" />
+                      Calendrier
+                    </TabsTrigger>
+                    {tournament.toornamentStages.map(stage => (
+                      <TabsTrigger
+                        key={stage.id}
+                        value={stage.stageId}
+                        className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                      >
+                        <Layers className="size-3.5" />
+                        {stage.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  {/* Tournament overview widget */}
+                  <TabsContent value="tournament">
+                    <div className="overflow-hidden rounded-2xl border border-white/10">
+                      <iframe
+                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/?_locale=fr&theme=dark`}
+                        className="h-98 w-full border-0"
+                        allow="fullscreen"
+                        title="Tournoi Toornament"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Schedule widget */}
+                  <TabsContent value="schedule">
+                    <div className="overflow-hidden rounded-2xl border border-white/10">
+                      <iframe
+                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/matches/schedule/?_locale=fr&theme=dark`}
+                        className="h-125 w-full border-0"
+                        allow="fullscreen"
+                        title="Calendrier des matchs"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Per-stage widgets */}
+                  {tournament.toornamentStages.map(stage => (
+                    <TabsContent key={stage.id} value={stage.stageId}>
+                      <div className="overflow-hidden rounded-2xl border border-white/10">
+                        <iframe
+                          src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/${stage.stageId}/?_locale=fr&theme=dark`}
+                          className="h-125 w-full border-0"
+                          allow="fullscreen"
+                          title={`Bracket - ${stage.name}`}
+                        />
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
               ) : (
                 <div className="flex flex-col items-center gap-3 py-8 text-center">
                   <div className="inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10">
@@ -366,7 +443,6 @@ export const TournamentDetail = ({
               <TournamentRegistrationForm
                 tournamentId={tournament.id}
                 fields={tournament.fields}
-                autoApprove={tournament.autoApprove}
                 format={tournament.format}
                 teamSize={tournament.teamSize}
                 availableTeams={availableTeams}
@@ -374,7 +450,7 @@ export const TournamentDetail = ({
             </>
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
-              {tournament.status === 'ARCHIVED' ? (
+              {tournament.status === TournamentStatus.ARCHIVED ? (
                 <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
               ) : new Date() < new Date(tournament.registrationOpen) ? (
                 <p className="text-sm text-zinc-500">

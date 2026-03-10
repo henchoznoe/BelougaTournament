@@ -11,12 +11,13 @@ export const ROUTES = {
   STREAM: '/stream',
   TOURNAMENTS: '/tournaments',
   TOURNAMENTS_ARCHIVE: '/tournaments/archive',
-  LEADERBOARD: '/classement',
+  LEADERBOARD: '/leaderboard',
   LEGAL: '/legal',
   PRIVACY: '/privacy',
   TERMS: '/terms',
   CONTACT: '/contact',
-  PROFILE: '/profil',
+  PROFILE: '/profile',
+  PROFILE_TOURNAMENTS: '/profile/tournaments',
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',
@@ -32,4 +33,6 @@ export const ROUTES = {
   ADMIN_TOURNAMENT_TEAMS: (slug: string) =>
     `/admin/tournaments/${slug}/teams` as const,
   ADMIN_SPONSORS: '/admin/sponsors',
+  API_TOURNAMENT_EXPORT_CSV: (id: string) =>
+    `/api/admin/tournaments/${id}/export-csv` as const,
 } as const

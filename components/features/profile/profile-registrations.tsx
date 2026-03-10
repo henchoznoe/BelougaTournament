@@ -27,21 +27,8 @@ import {
 import { unregisterFromTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
-
-const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  APPROVED: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'border-red-500/30 bg-red-500/10 text-red-400',
-} as const
-
-const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
-} as const
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface ProfileRegistrationsProps {
   registrations: UserRegistrationItem[]
@@ -100,7 +87,7 @@ export const ProfileRegistrations = ({
                   )}
                   <span className="inline-flex items-center gap-1">
                     <Swords className="size-3" />
-                    {registration.tournament.format === 'SOLO'
+                    {registration.tournament.format === TournamentFormat.SOLO
                       ? 'Solo'
                       : 'Équipe'}
                   </span>
@@ -111,19 +98,11 @@ export const ProfileRegistrations = ({
                 </div>
               </Link>
               <div className="flex shrink-0 items-center gap-2">
-                <span
-                  className={cn(
-                    'rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
-                    REGISTRATION_STATUS_STYLES[registration.status],
-                  )}
-                >
-                  {REGISTRATION_STATUS_LABELS[registration.status]}
-                </span>
                 <button
                   type="button"
                   onClick={() => setEditingRegistration(registration)}
                   className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
-                  title="Modifier l'inscription"
+                  aria-label="Modifier l'inscription"
                 >
                   <Pencil className="size-3.5" />
                 </button>
@@ -131,7 +110,7 @@ export const ProfileRegistrations = ({
                   type="button"
                   onClick={() => setUnregisterTarget(registration)}
                   className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  title="Se désinscrire"
+                  aria-label="Se désinscrire"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -180,7 +159,8 @@ export const ProfileRegistrations = ({
                 {unregisterTarget?.tournament.title}
               </span>
               &nbsp;?
-              {unregisterTarget?.tournament.format === 'TEAM' && (
+              {unregisterTarget?.tournament.format ===
+                TournamentFormat.TEAM && (
                 <span className="mt-2 block text-amber-400">
                   Si vous êtes le dernier membre de votre équipe, celle-ci sera
                   dissoute.

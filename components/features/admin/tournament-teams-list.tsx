@@ -41,21 +41,7 @@ import {
 } from '@/components/ui/tooltip'
 import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
 import type { TeamItem, TeamMemberItem } from '@/lib/types/tournament'
-import { cn } from '@/lib/utils/cn'
 import { formatDateTime } from '@/lib/utils/formatting'
-import type { RegistrationStatus } from '@/prisma/generated/prisma/enums'
-
-const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  APPROVED: 'bg-emerald-500/10 text-emerald-400',
-  REJECTED: 'bg-red-500/10 text-red-400',
-} as const
-
-const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
-  PENDING: 'En attente',
-  APPROVED: 'Approuvée',
-  REJECTED: 'Refusée',
-} as const
 
 interface TournamentTeamsListProps {
   teams: TeamItem[]
@@ -141,6 +127,7 @@ export const TournamentTeamsList = ({
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Rechercher une équipe..."
+            aria-label="Rechercher une équipe"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
@@ -180,9 +167,6 @@ export const TournamentTeamsList = ({
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
                   Créée le
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Inscription
                 </TableHead>
                 <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Actions
@@ -282,22 +266,6 @@ export const TournamentTeamsList = ({
                     {formatDateTime(team.createdAt)}
                   </TableCell>
 
-                  {/* Registration status */}
-                  <TableCell>
-                    {team.registration ? (
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                          REGISTRATION_STATUS_STYLES[team.registration.status],
-                        )}
-                      >
-                        {REGISTRATION_STATUS_LABELS[team.registration.status]}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">—</span>
-                    )}
-                  </TableCell>
-
                   {/* Actions */}
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
@@ -306,7 +274,7 @@ export const TournamentTeamsList = ({
                         size="icon-sm"
                         onClick={() => setKickingTeam(team)}
                         className="text-zinc-400 hover:text-amber-400"
-                        title="Retirer un membre"
+                        aria-label="Retirer un membre"
                       >
                         <UserMinus className="size-4" />
                       </Button>
@@ -315,7 +283,7 @@ export const TournamentTeamsList = ({
                         size="icon-sm"
                         onClick={() => setDissolvingTeam(team)}
                         className="text-zinc-400 hover:text-red-400"
-                        title="Dissoudre l'équipe"
+                        aria-label="Dissoudre l'équipe"
                       >
                         <Trash2 className="size-4" />
                       </Button>

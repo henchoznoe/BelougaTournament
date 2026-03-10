@@ -8,19 +8,21 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { PlayerRow } from '@/lib/types/player'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 /** Fetches all users for the admin players table. */
 export const getPlayers = async (): Promise<PlayerRow[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('players')
+  cacheTag(CACHE_TAGS.PLAYERS)
 
   try {
     const rows = await prisma.user.findMany({
-      where: { role: 'USER' },
+      where: { role: Role.USER },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,

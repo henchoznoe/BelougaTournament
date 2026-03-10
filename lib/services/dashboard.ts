@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -15,12 +16,13 @@ import type {
   RecentRegistration,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
+import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-stats')
+  cacheTag(CACHE_TAGS.DASHBOARD_STATS)
 
   try {
     const [
@@ -29,15 +31,17 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       publishedCount,
       archivedCount,
       players,
-      pendingRegistrations,
+      totalRegistrations,
       sponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
-      prisma.tournament.count({ where: { status: 'DRAFT' } }),
-      prisma.tournament.count({ where: { status: 'PUBLISHED' } }),
-      prisma.tournament.count({ where: { status: 'ARCHIVED' } }),
-      prisma.user.count({ where: { role: 'USER' } }),
-      prisma.tournamentRegistration.count({ where: { status: 'PENDING' } }),
+      prisma.tournament.count({ where: { status: TournamentStatus.DRAFT } }),
+      prisma.tournament.count({
+        where: { status: TournamentStatus.PUBLISHED },
+      }),
+      prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
+      prisma.user.count({ where: { role: Role.USER } }),
+      prisma.tournamentRegistration.count(),
       prisma.sponsor.count(),
     ])
 
@@ -45,13 +49,13 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       tournaments: {
         total: tournaments,
         byStatus: {
-          DRAFT: draftCount,
-          PUBLISHED: publishedCount,
-          ARCHIVED: archivedCount,
+          [TournamentStatus.DRAFT]: draftCount,
+          [TournamentStatus.PUBLISHED]: publishedCount,
+          [TournamentStatus.ARCHIVED]: archivedCount,
         },
       },
       players,
-      pendingRegistrations,
+      totalRegistrations,
       sponsors,
     }
   } catch (error) {
@@ -59,10 +63,14 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     return {
       tournaments: {
         total: 0,
-        byStatus: { DRAFT: 0, PUBLISHED: 0, ARCHIVED: 0 },
+        byStatus: {
+          [TournamentStatus.DRAFT]: 0,
+          [TournamentStatus.PUBLISHED]: 0,
+          [TournamentStatus.ARCHIVED]: 0,
+        },
       },
       players: 0,
-      pendingRegistrations: 0,
+      totalRegistrations: 0,
       sponsors: 0,
     }
   }
@@ -74,12 +82,12 @@ export const getUpcomingTournaments = async (
 ): Promise<UpcomingTournament[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-upcoming')
+  cacheTag(CACHE_TAGS.DASHBOARD_UPCOMING)
 
   try {
     const rows = await prisma.tournament.findMany({
       where: {
-        status: 'PUBLISHED',
+        status: TournamentStatus.PUBLISHED,
         startDate: { gte: new Date() },
       },
       orderBy: { startDate: 'asc' },
@@ -114,7 +122,7 @@ export const getRecentRegistrations = async (
 ): Promise<RecentRegistration[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('dashboard-registrations')
+  cacheTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -122,7 +130,6 @@ export const getRecentRegistrations = async (
       take: limit,
       select: {
         id: true,
-        status: true,
         createdAt: true,
         user: {
           select: {

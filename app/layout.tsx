@@ -12,7 +12,8 @@ import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
-import { METADATA } from '@/lib/config/constants'
+import { DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
+import { env } from '@/lib/core/env'
 import { cn } from '@/lib/utils/cn'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { config } from '@fortawesome/fontawesome-svg-core'
@@ -35,18 +36,23 @@ const paladins = localFont({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
     default: METADATA.NAME,
     template: METADATA.TEMPLATE_TITLE,
   },
   description: METADATA.DESCRIPTION,
+  icons: {
+    icon: DEFAULT_ASSETS.LOGO,
+    apple: DEFAULT_ASSETS.LOGO,
+  },
 }
 
 config.autoAddCss = false
 
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
-    <html lang="fr-CH" className="scroll-smooth">
+    <html lang="fr-CH" className="dark scroll-smooth">
       <body
         className={cn(
           inter.variable,

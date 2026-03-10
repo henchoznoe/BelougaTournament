@@ -24,12 +24,6 @@ enum FieldType {
   NUMBER
 }
 
-enum RegistrationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum TournamentStatus {
   DRAFT
   PUBLISHED
@@ -115,17 +109,17 @@ model Tournament {
   maxTeams          Int?
   format            TournamentFormat
   teamSize          Int                      @default(1)
-  game              String? // ex: Valorant, Rocket League
-  imageUrl          String? // Bannière du tournoi
-  rules             String? // Règlement complet du tournoi
-  prize             String? // Cashprize ou récompenses
+  game              String? // e.g. Valorant, Rocket League
+  imageUrl          String? // Tournament banner image
+  rules             String? // Full tournament ruleset
+  prize             String? // Cash prize or rewards
   toornamentId      String?
-  streamUrl         String? // Override du stream global (optionnel)
-  autoApprove       Boolean                  @default(false)
+  streamUrl         String? // Optional per-tournament stream URL override
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   fields            TournamentField[]
+  toornamentStages  ToornamentStage[]
   teams             Team[]
   registrations     TournamentRegistration[]
   adminAssignments  AdminAssignment[]
@@ -133,6 +127,15 @@ model Tournament {
   @@index([status])
   @@index([startDate])
   @@index([endDate])
+}
+
+model ToornamentStage {
+  id           String     @id @default(uuid())
+  name         String // Display label (e.g. "Poules", "Playoffs")
+  stageId      String // Toornament stage ID (e.g. "618983668512789184")
+  number       Int        @default(0) // Display order
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 }
 
 model TournamentField {
@@ -182,7 +185,6 @@ model TournamentRegistration {
   userId            String
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldValues       Json               @default("{}")
-  status            RegistrationStatus @default(PENDING)
   createdAt         DateTime           @default(now())
 
   @@unique([tournamentId, userId])

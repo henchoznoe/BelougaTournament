@@ -49,6 +49,7 @@ const {
   getTournamentById,
   getRegistrations,
   getTeams,
+  getAvailableTeams,
   getPublishedTournaments,
   getArchivedTournaments,
   getPublicTournamentBySlug,
@@ -73,7 +74,6 @@ const MOCK_LIST_ITEM = {
   endDate: new Date('2026-06-17T18:00:00.000Z'),
   registrationOpen: new Date('2026-05-01T00:00:00.000Z'),
   registrationClose: new Date('2026-06-14T23:59:00.000Z'),
-  autoApprove: false,
   _count: { registrations: 12, teams: 4 },
 }
 
@@ -128,7 +128,6 @@ describe('getTournaments', () => {
         endDate: true,
         registrationOpen: true,
         registrationClose: true,
-        autoApprove: true,
         _count: {
           select: {
             registrations: true,
@@ -176,6 +175,9 @@ describe('getTournamentBySlug', () => {
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -225,6 +227,9 @@ describe('getTournamentById', () => {
         fields: {
           orderBy: { order: 'asc' },
         },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
+        },
         _count: {
           select: {
             registrations: true,
@@ -258,7 +263,6 @@ describe('getTournamentById', () => {
 
 const MOCK_REGISTRATION = {
   id: 'reg-1',
-  status: 'PENDING',
   fieldValues: { 'Riot ID': 'Player#1234' },
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   user: {
@@ -298,7 +302,6 @@ const MOCK_TEAM = {
   ],
   registration: {
     id: 'reg-1',
-    status: 'PENDING',
   },
 }
 
@@ -322,7 +325,6 @@ describe('getRegistrations', () => {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        status: true,
         fieldValues: true,
         createdAt: true,
         user: {
@@ -409,7 +411,6 @@ describe('getTeams', () => {
         registration: {
           select: {
             id: true,
-            status: true,
           },
         },
       },
@@ -428,6 +429,69 @@ describe('getTeams', () => {
     mockTeamFindMany.mockRejectedValue(new Error('DB error'))
 
     const result = await getTeams('tournament-1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixtures — available teams
+// ---------------------------------------------------------------------------
+
+const MOCK_AVAILABLE_TEAM = {
+  id: 'team-1',
+  name: 'Alpha Squad',
+  captain: { displayName: 'Captain One' },
+  _count: { members: 3 },
+}
+
+// ---------------------------------------------------------------------------
+// getAvailableTeams
+// ---------------------------------------------------------------------------
+
+describe('getAvailableTeams', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns non-full teams for a tournament', async () => {
+    mockTeamFindMany.mockResolvedValue([MOCK_AVAILABLE_TEAM])
+
+    const result = await getAvailableTeams('tournament-1')
+
+    expect(result).toEqual([MOCK_AVAILABLE_TEAM])
+    expect(mockTeamFindMany).toHaveBeenCalledWith({
+      where: { tournamentId: 'tournament-1', isFull: false },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        captain: {
+          select: {
+            displayName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('returns empty array when no teams available', async () => {
+    mockTeamFindMany.mockResolvedValue([])
+
+    const result = await getAvailableTeams('tournament-1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns empty array on database error', async () => {
+    mockTeamFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getAvailableTeams('tournament-1')
 
     expect(result).toEqual([])
   })
@@ -461,7 +525,6 @@ const MOCK_PUBLIC_DETAIL = {
   prize: '500 CHF',
   toornamentId: null,
   streamUrl: null,
-  autoApprove: false,
   fields: [
     {
       id: 'field-1',
@@ -618,6 +681,9 @@ describe('getPublicTournamentBySlug', () => {
         fields: {
           orderBy: { order: 'asc' },
         },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
+        },
         _count: {
           select: {
             registrations: true,
@@ -651,7 +717,6 @@ describe('getPublicTournamentBySlug', () => {
 
 const MOCK_USER_REGISTRATION = {
   id: 'reg-user-1',
-  status: 'PENDING',
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   tournament: {
     title: 'Valorant Cup',
@@ -665,7 +730,6 @@ const MOCK_USER_REGISTRATION = {
 
 const MOCK_USER_PAST_REGISTRATION = {
   id: 'reg-user-2',
-  status: 'APPROVED',
   createdAt: new Date('2025-11-10T10:00:00.000Z'),
   tournament: {
     title: 'CS2 Winter Cup',
@@ -679,7 +743,6 @@ const MOCK_USER_PAST_REGISTRATION = {
 
 const USER_REGISTRATION_SELECT = {
   id: true,
-  status: true,
   fieldValues: true,
   createdAt: true,
   tournament: {
@@ -691,7 +754,6 @@ const USER_REGISTRATION_SELECT = {
       format: true,
       startDate: true,
       status: true,
-      autoApprove: true,
       fields: {
         orderBy: { order: 'asc' },
         select: {

@@ -8,20 +8,22 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS, SEARCH_CONFIG } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { AdminUser, TournamentOption } from '@/lib/types/admin'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 /** Fetches all users with ADMIN or SUPERADMIN role, including tournament assignments. */
 export const getAdmins = async (): Promise<AdminUser[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('admins')
+  cacheTag(CACHE_TAGS.ADMINS)
 
   try {
     const rows = await prisma.user.findMany({
       where: {
-        role: { in: ['ADMIN', 'SUPERADMIN'] },
+        role: { in: [Role.ADMIN, Role.SUPERADMIN] },
       },
       orderBy: [{ role: 'desc' }, { name: 'asc' }],
       select: {
@@ -58,7 +60,7 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
 export const getTournamentOptions = async (): Promise<TournamentOption[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag('tournament-options')
+  cacheTag(CACHE_TAGS.TOURNAMENT_OPTIONS)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -83,18 +85,18 @@ export const searchUsers = async (
 ): Promise<
   { id: string; name: string; email: string; image: string | null }[]
 > => {
-  if (!query || query.length < 2) return []
+  if (!query || query.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) return []
 
   try {
     const rows = await prisma.user.findMany({
       where: {
-        role: 'USER',
+        role: Role.USER,
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
           { email: { contains: query, mode: 'insensitive' } },
         ],
       },
-      take: 10,
+      take: SEARCH_CONFIG.MAX_RESULTS,
       orderBy: { name: 'asc' },
       select: {
         id: true,

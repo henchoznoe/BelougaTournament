@@ -11,6 +11,8 @@ import {
   formatDate,
   formatDateTime,
   formatShortDate,
+  fromNullable,
+  toNullable,
 } from '@/lib/utils/formatting'
 
 // ---------------------------------------------------------------------------
@@ -87,5 +89,37 @@ describe('formatShortDate', () => {
 
   it('formats last day of year correctly', () => {
     expect(formatShortDate(new Date(2026, 11, 31))).toBe('31.12.2026')
+  })
+})
+
+describe('toNullable', () => {
+  it('returns null for an empty string', () => {
+    expect(toNullable('')).toBeNull()
+  })
+
+  it('returns null for undefined', () => {
+    expect(toNullable(undefined)).toBeNull()
+  })
+
+  it('returns the value for a non-empty string', () => {
+    expect(toNullable('hello')).toBe('hello')
+  })
+
+  it('returns the value for a whitespace-only string', () => {
+    expect(toNullable(' ')).toBe(' ')
+  })
+})
+
+describe('fromNullable', () => {
+  it('returns empty string for null', () => {
+    expect(fromNullable(null)).toBe('')
+  })
+
+  it('returns the value for a non-null string', () => {
+    expect(fromNullable('hello')).toBe('hello')
+  })
+
+  it('returns empty string for empty string', () => {
+    expect(fromNullable('')).toBe('')
   })
 })

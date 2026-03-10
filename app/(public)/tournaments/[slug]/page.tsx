@@ -17,6 +17,7 @@ import {
   getAvailableTeams,
   getPublicTournamentBySlug,
 } from '@/lib/services/tournaments'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentPageProps {
   params: Promise<{ slug: string }>
@@ -52,7 +53,9 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
 
   // Fetch available teams for TEAM format tournaments
   const availableTeams =
-    tournament.format === 'TEAM' ? await getAvailableTeams(tournament.id) : []
+    tournament.format === TournamentFormat.TEAM
+      ? await getAvailableTeams(tournament.id)
+      : []
 
   return (
     <>

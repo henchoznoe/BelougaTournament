@@ -40,6 +40,7 @@ const mockUserFindUnique = vi.fn()
 const mockUserUpdate = vi.fn()
 const mockAdminAssignmentDeleteMany = vi.fn()
 const mockAdminAssignmentCreateMany = vi.fn()
+const mockSessionDeleteMany = vi.fn()
 const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
@@ -53,6 +54,9 @@ vi.mock('@/lib/core/prisma', () => ({
         mockAdminAssignmentDeleteMany(...args),
       createMany: (...args: unknown[]) =>
         mockAdminAssignmentCreateMany(...args),
+    },
+    session: {
+      deleteMany: (...args: unknown[]) => mockSessionDeleteMany(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -138,7 +142,7 @@ describe('promoteToAdmin', () => {
 
   it('promotes a USER to ADMIN and returns success', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Alice' })
-    mockUserUpdate.mockResolvedValue({})
+    mockTransaction.mockResolvedValue([])
 
     const result = await promoteToAdmin({ userId: VALID_UUID })
 
@@ -146,9 +150,17 @@ describe('promoteToAdmin', () => {
       success: true,
       message: 'Alice a été promu admin.',
     })
+    expect(mockTransaction).toHaveBeenCalledOnce()
+    // Transaction should include user.update and session.deleteMany
+    const transactionArg = mockTransaction.mock.calls[0][0]
+    expect(Array.isArray(transactionArg)).toBe(true)
+    expect(transactionArg).toHaveLength(2)
     expect(mockUserUpdate).toHaveBeenCalledWith({
       where: { id: VALID_UUID },
       data: { role: 'ADMIN' },
+    })
+    expect(mockSessionDeleteMany).toHaveBeenCalledWith({
+      where: { userId: VALID_UUID },
     })
   })
 
@@ -215,6 +227,13 @@ describe('demoteAdmin', () => {
 
     expect(result).toEqual({ success: true, message: 'Bob a été rétrogradé.' })
     expect(mockTransaction).toHaveBeenCalledOnce()
+    // Transaction should include adminAssignment.deleteMany, user.update, and session.deleteMany
+    const transactionArg = mockTransaction.mock.calls[0][0]
+    expect(Array.isArray(transactionArg)).toBe(true)
+    expect(transactionArg).toHaveLength(3)
+    expect(mockSessionDeleteMany).toHaveBeenCalledWith({
+      where: { userId: OTHER_UUID },
+    })
   })
 })
 

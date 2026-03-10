@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import type { Role } from '@/prisma/generated/prisma/enums'
+import type { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** An admin user with their tournament assignments. */
 export type AdminUser = {
@@ -33,5 +33,5 @@ export type TournamentOption = {
   id: string
   title: string
   slug: string
-  status: string
+  status: TournamentStatus
 }

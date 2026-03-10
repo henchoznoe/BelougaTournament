@@ -8,18 +8,27 @@
 
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
-const ALLOWED_TYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/svg+xml',
-])
+const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 const ALLOWED_FOLDERS = new Set(['logos', 'sponsors'])
+const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
+
+/** Validates that a URL belongs to the app's Vercel Blob store. */
+const isValidBlobUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url)
+    return (
+      parsed.protocol === 'https:' && parsed.hostname.endsWith(BLOB_HOST_SUFFIX)
+    )
+  } catch {
+    return false
+  }
+}
 
 /** Verifies that the request comes from an authenticated SUPERADMIN. */
 const verifySuperAdmin = async (request: Request) => {
@@ -75,7 +84,7 @@ export const POST = async (request: Request) => {
 
     if (!ALLOWED_TYPES.has(file.type)) {
       return NextResponse.json(
-        { error: 'Format non supporté. Utilisez PNG, JPEG, WebP ou SVG.' },
+        { error: 'Format non supporté. Utilisez PNG, JPEG ou WebP.' },
         { status: 400 },
       )
     }
@@ -108,6 +117,11 @@ export const POST = async (request: Request) => {
   }
 }
 
+/** Schema for blob DELETE request body. */
+const deleteBlobSchema = z.object({
+  url: z.url('URL du fichier invalide.'),
+})
+
 /** DELETE — Remove a blob by URL. Expects JSON body with { url: string }. */
 export const DELETE = async (request: Request) => {
   const session = await verifySuperAdmin(request)
@@ -116,16 +130,20 @@ export const DELETE = async (request: Request) => {
   }
 
   try {
-    const { url } = (await request.json()) as { url: string }
+    const parsed = deleteBlobSchema.safeParse(await request.json())
 
-    if (!url) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'URL du fichier manquante.' },
+        { error: 'URL du fichier manquante ou invalide.' },
         { status: 400 },
       )
     }
 
-    await del(url)
+    if (!isValidBlobUrl(parsed.data.url)) {
+      return NextResponse.json({ error: 'URL invalide.' }, { status: 400 })
+    }
+
+    await del(parsed.data.url)
 
     return NextResponse.json({ success: true })
   } catch (error) {

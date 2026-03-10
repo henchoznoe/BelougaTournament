@@ -21,9 +21,10 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { useFieldArray, useForm, useWatch } from 'react-hook-form'
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -39,30 +40,21 @@ import { createTournament, updateTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
+import { fromNullable } from '@/lib/utils/formatting'
 import {
   type TournamentFormInput,
   type TournamentInput,
   tournamentSchema,
 } from '@/lib/validations/tournaments'
+import {
+  FieldType,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentFormProps {
   tournament?: TournamentDetail
 }
-
-/** Formats a Date to a datetime-local input value (YYYY-MM-DDTHH:MM). */
-const toDateTimeLocal = (date: Date): string => {
-  const d = new Date(date)
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-/** Converts a datetime-local value to ISO string. */
-const toISOString = (dateTimeLocal: string): string => {
-  return new Date(dateTimeLocal).toISOString()
-}
-
-/** Converts null to empty string for form default values. */
-const fromNullable = (val: string | null): string => val ?? ''
 
 /** Generates a slug from a title. */
 const slugify = (text: string): string => {
@@ -78,7 +70,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isEditing = !!tournament
   const fieldsLocked =
     isEditing &&
-    tournament.status === 'PUBLISHED' &&
+    tournament.status === TournamentStatus.PUBLISHED &&
     tournament._count.registrations > 0
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -97,10 +89,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           title: tournament.title,
           slug: tournament.slug,
           description: tournament.description,
-          startDate: toDateTimeLocal(tournament.startDate),
-          endDate: toDateTimeLocal(tournament.endDate),
-          registrationOpen: toDateTimeLocal(tournament.registrationOpen),
-          registrationClose: toDateTimeLocal(tournament.registrationClose),
+          startDate: new Date(tournament.startDate).toISOString(),
+          endDate: new Date(tournament.endDate).toISOString(),
+          registrationOpen: new Date(tournament.registrationOpen).toISOString(),
+          registrationClose: new Date(
+            tournament.registrationClose,
+          ).toISOString(),
           maxTeams: tournament.maxTeams,
           format: tournament.format,
           teamSize: tournament.teamSize,
@@ -110,13 +104,18 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: fromNullable(tournament.prize),
           toornamentId: fromNullable(tournament.toornamentId),
           streamUrl: fromNullable(tournament.streamUrl),
-          autoApprove: tournament.autoApprove,
           fields: tournament.fields.map(f => ({
             id: f.id,
             label: f.label,
             type: f.type,
             required: f.required,
             order: f.order,
+          })),
+          toornamentStages: tournament.toornamentStages.map(s => ({
+            id: s.id,
+            name: s.name,
+            stageId: s.stageId,
+            number: s.number,
           })),
         }
       : {
@@ -128,7 +127,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           registrationOpen: '',
           registrationClose: '',
           maxTeams: null,
-          format: 'SOLO',
+          format: TournamentFormat.SOLO,
           teamSize: 1,
           game: '',
           imageUrl: '',
@@ -136,8 +135,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: '',
           toornamentId: '',
           streamUrl: '',
-          autoApprove: false,
           fields: [],
+          toornamentStages: [],
         },
   })
 
@@ -146,18 +145,22 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     name: 'fields',
   })
 
+  const {
+    fields: stageFields,
+    append: appendStage,
+    remove: removeStage,
+    move: moveStage,
+  } = useFieldArray({
+    control,
+    name: 'toornamentStages',
+  })
+
   const format = useWatch({ control, name: 'format' })
+  const toornamentIdValue = useWatch({ control, name: 'toornamentId' }) ?? ''
 
   const onSubmit = (data: TournamentFormInput) => {
-    // Convert datetime-local values to ISO strings and cast to action input type
-    // (Zod defaults are applied server-side by authenticatedAction)
-    const payload = {
-      ...data,
-      startDate: toISOString(data.startDate),
-      endDate: toISOString(data.endDate),
-      registrationOpen: toISOString(data.registrationOpen),
-      registrationClose: toISOString(data.registrationClose),
-    } as TournamentInput
+    // Date fields are already ISO strings from the DateTimePicker
+    const payload = data as TournamentInput
 
     startTransition(async () => {
       const result = isEditing
@@ -187,7 +190,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const addField = () => {
     append({
       label: '',
-      type: 'TEXT',
+      type: FieldType.TEXT,
       required: false,
       order: fields.length,
     })
@@ -199,6 +202,23 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     // Update order values after move
     for (let i = 0; i < fields.length; i++) {
       setValue(`fields.${i}.order`, i)
+    }
+  }
+
+  const addStage = () => {
+    appendStage({
+      name: '',
+      stageId: '',
+      number: stageFields.length,
+    })
+  }
+
+  const moveStageItem = (from: number, to: number) => {
+    if (to < 0 || to >= stageFields.length) return
+    moveStage(from, to)
+    // Update number values after move
+    for (let i = 0; i < stageFields.length; i++) {
+      setValue(`toornamentStages.${i}.number`, i)
     }
   }
 
@@ -283,10 +303,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             <Select
               value={format}
               onValueChange={val => {
-                setValue('format', val as 'SOLO' | 'TEAM', {
+                setValue('format', val as TournamentFormat, {
                   shouldDirty: true,
                 })
-                if (val === 'SOLO') {
+                if (val === TournamentFormat.SOLO) {
                   setValue('teamSize', 1, { shouldDirty: true })
                 }
               }}
@@ -296,8 +316,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SOLO">Solo</SelectItem>
-                <SelectItem value="TEAM">Équipe</SelectItem>
+                <SelectItem value={TournamentFormat.SOLO}>Solo</SelectItem>
+                <SelectItem value={TournamentFormat.TEAM}>Équipe</SelectItem>
               </SelectContent>
             </Select>
             {isEditing && (
@@ -315,7 +335,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             type="number"
             placeholder="1"
             error={errors.teamSize?.message}
-            disabled={isPending || format === 'SOLO'}
+            disabled={isPending || format === TournamentFormat.SOLO}
             {...register('teamSize', { valueAsNumber: true })}
           />
           <FormField
@@ -341,38 +361,102 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           Dates
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            id="startDate"
-            label="Date de début"
-            type="datetime-local"
-            error={errors.startDate?.message}
-            disabled={isPending}
-            {...register('startDate')}
-          />
-          <FormField
-            id="endDate"
-            label="Date de fin"
-            type="datetime-local"
-            error={errors.endDate?.message}
-            disabled={isPending}
-            {...register('endDate')}
-          />
-          <FormField
-            id="registrationOpen"
-            label="Ouverture des inscriptions"
-            type="datetime-local"
-            error={errors.registrationOpen?.message}
-            disabled={isPending}
-            {...register('registrationOpen')}
-          />
-          <FormField
-            id="registrationClose"
-            label="Fermeture des inscriptions"
-            type="datetime-local"
-            error={errors.registrationClose?.message}
-            disabled={isPending}
-            {...register('registrationClose')}
-          />
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="startDate"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Date de début
+            </Label>
+            <Controller
+              control={control}
+              name="startDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Date de début"
+                />
+              )}
+            />
+            {errors.startDate?.message && (
+              <p className="text-xs text-red-400">{errors.startDate.message}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="endDate"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Date de fin
+            </Label>
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Date de fin"
+                />
+              )}
+            />
+            {errors.endDate?.message && (
+              <p className="text-xs text-red-400">{errors.endDate.message}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="registrationOpen"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Ouverture des inscriptions
+            </Label>
+            <Controller
+              control={control}
+              name="registrationOpen"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Ouverture des inscriptions"
+                />
+              )}
+            />
+            {errors.registrationOpen?.message && (
+              <p className="text-xs text-red-400">
+                {errors.registrationOpen.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="registrationClose"
+              className="text-xs font-medium text-zinc-400"
+            >
+              Fermeture des inscriptions
+            </Label>
+            <Controller
+              control={control}
+              name="registrationClose"
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isPending}
+                  placeholder="Fermeture des inscriptions"
+                />
+              )}
+            />
+            {errors.registrationClose?.message && (
+              <p className="text-xs text-red-400">
+                {errors.registrationClose.message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -433,28 +517,116 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             {...register('streamUrl')}
           />
         </div>
-      </div>
 
-      <div className="h-px bg-white/5" />
+        {/* Toornament stages (only visible when toornamentId is set) */}
+        {toornamentIdValue.trim() !== '' && (
+          <div className="space-y-3 rounded-xl border border-white/5 bg-white/2 p-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
+                Stages Toornament
+              </h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={addStage}
+                disabled={isPending}
+                className="gap-1 text-xs text-blue-400 hover:text-blue-300"
+              >
+                <Plus className="size-3.5" />
+                Ajouter
+              </Button>
+            </div>
 
-      {/* Registration settings */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase">
-          Inscriptions
-        </h3>
-        <div className="flex items-center gap-3">
-          <Switch
-            id="autoApprove"
-            checked={useWatch({ control, name: 'autoApprove' })}
-            onCheckedChange={checked =>
-              setValue('autoApprove', checked, { shouldDirty: true })
-            }
-            disabled={isPending}
-          />
-          <Label htmlFor="autoApprove" className="text-sm text-zinc-300">
-            Approuver automatiquement les inscriptions
-          </Label>
-        </div>
+            {stageFields.length === 0 && (
+              <p className="text-xs text-zinc-600">
+                Aucun stage configuré. Seuls le widget principal et le
+                calendrier seront affichés.
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {stageFields.map((stage, index) => (
+                <div
+                  key={stage.id}
+                  className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-2.5"
+                >
+                  {/* Reorder button */}
+                  <div className="flex flex-col gap-0.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => moveStageItem(index, index - 1)}
+                      disabled={index === 0 || isPending}
+                      className="text-zinc-600 hover:text-zinc-400 disabled:opacity-30"
+                      aria-label={`Monter le stage ${(index + 1).toString()}`}
+                    >
+                      <GripVertical className="size-4" />
+                    </button>
+                  </div>
+
+                  {/* Stage inputs */}
+                  <div className="grid flex-1 gap-2 sm:grid-cols-2">
+                    <div>
+                      <Input
+                        placeholder="Nom du stage (ex: Poules)"
+                        aria-label={`Nom du stage ${(index + 1).toString()}`}
+                        disabled={isPending}
+                        className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
+                        {...register(`toornamentStages.${index}.name`)}
+                      />
+                      {errors.toornamentStages?.[index]?.name?.message && (
+                        <p className="mt-1 text-xs text-red-400">
+                          {errors.toornamentStages[index].name.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        placeholder="ID du stage (ex: 618983668512789184)"
+                        aria-label={`ID du stage ${(index + 1).toString()}`}
+                        disabled={isPending}
+                        className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
+                        {...register(`toornamentStages.${index}.stageId`)}
+                      />
+                      {errors.toornamentStages?.[index]?.stageId?.message && (
+                        <p className="mt-1 text-xs text-red-400">
+                          {errors.toornamentStages[index].stageId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hidden number field */}
+                  <input
+                    type="hidden"
+                    {...register(`toornamentStages.${index}.number`, {
+                      valueAsNumber: true,
+                    })}
+                  />
+
+                  {/* Delete stage button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      removeStage(index)
+                      // Re-index remaining stages
+                      for (let i = index; i < stageFields.length - 1; i++) {
+                        setValue(`toornamentStages.${i}.number`, i)
+                      }
+                    }}
+                    disabled={isPending}
+                    className="mt-0.5 text-zinc-500 hover:text-red-400"
+                    aria-label={`Supprimer le stage ${(index + 1).toString()}`}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-white/5" />
@@ -507,7 +679,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   onClick={() => moveField(index, index - 1)}
                   disabled={index === 0 || isPending || fieldsLocked}
                   className="text-zinc-600 hover:text-zinc-400 disabled:opacity-30"
-                  title="Monter"
+                  aria-label={`Monter le champ ${(index + 1).toString()}`}
                 >
                   <GripVertical className="size-4" />
                 </button>
@@ -518,6 +690,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 <div className="sm:col-span-2">
                   <Input
                     placeholder="Libellé du champ"
+                    aria-label={`Libellé du champ ${(index + 1).toString()}`}
                     disabled={isPending || fieldsLocked}
                     className="h-9 rounded-lg border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
                     {...register(`fields.${index}.label`)}
@@ -533,11 +706,9 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   <Select
                     value={watch(`fields.${index}.type`)}
                     onValueChange={val =>
-                      setValue(
-                        `fields.${index}.type`,
-                        val as 'TEXT' | 'NUMBER',
-                        { shouldDirty: true },
-                      )
+                      setValue(`fields.${index}.type`, val as FieldType, {
+                        shouldDirty: true,
+                      })
                     }
                     disabled={isPending || fieldsLocked}
                   >
@@ -545,8 +716,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TEXT">Texte</SelectItem>
-                      <SelectItem value="NUMBER">Nombre</SelectItem>
+                      <SelectItem value={FieldType.TEXT}>Texte</SelectItem>
+                      <SelectItem value={FieldType.NUMBER}>Nombre</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -586,6 +757,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 }}
                 disabled={isPending || fieldsLocked}
                 className="mt-0.5 text-zinc-500 hover:text-red-400"
+                aria-label={`Supprimer le champ ${(index + 1).toString()}`}
               >
                 <Trash2 className="size-3.5" />
               </Button>
@@ -602,7 +774,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           type="button"
           variant="ghost"
           asChild
-          className="gap-2 text-zinc-400 hover:text-white"
+          className="gap-2 text-zinc-400"
         >
           <Link href={ROUTES.ADMIN_TOURNAMENTS}>
             <ArrowLeft className="size-4" />

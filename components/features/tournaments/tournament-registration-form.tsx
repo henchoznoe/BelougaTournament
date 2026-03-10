@@ -34,12 +34,11 @@ import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
 import type { AvailableTeam, TournamentFieldItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import type { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import { FieldType, TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentRegistrationFormProps {
   tournamentId: string
   fields: TournamentFieldItem[]
-  autoApprove: boolean
   format: TournamentFormat
   teamSize: number
   availableTeams: AvailableTeam[]
@@ -53,7 +52,7 @@ const buildFieldValues = (
   const result: Record<string, string | number> = {}
   for (const field of fields) {
     const raw = formData[field.label] ?? ''
-    if (field.type === 'NUMBER' && raw !== '') {
+    if (field.type === FieldType.NUMBER && raw !== '') {
       result[field.label] = Number(raw)
     } else {
       result[field.label] = raw
@@ -65,7 +64,6 @@ const buildFieldValues = (
 export const TournamentRegistrationForm = ({
   tournamentId,
   fields,
-  autoApprove,
   format,
   teamSize,
   availableTeams,
@@ -89,7 +87,7 @@ export const TournamentRegistrationForm = ({
 
   const onSubmit = (data: Record<string, string>) => {
     // Client-side team field validation
-    if (format === 'TEAM') {
+    if (format === TournamentFormat.TEAM) {
       if (teamMode === 'create') {
         const trimmed = teamName.trim()
         if (trimmed.length < 2 || trimmed.length > 30) {
@@ -111,7 +109,7 @@ export const TournamentRegistrationForm = ({
 
       let result: ActionState
 
-      if (format === 'TEAM') {
+      if (format === TournamentFormat.TEAM) {
         if (teamMode === 'create') {
           result = await createTeamAndRegister({
             tournamentId,
@@ -168,7 +166,7 @@ export const TournamentRegistrationForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Team mode selector (TEAM format only) */}
-      {format === 'TEAM' && (
+      {format === TournamentFormat.TEAM && (
         <div className="space-y-4">
           <div className="flex gap-2">
             <Button
@@ -277,14 +275,16 @@ export const TournamentRegistrationForm = ({
               </Label>
               <Input
                 id={`field-${field.id}`}
-                type={field.type === 'NUMBER' ? 'number' : 'text'}
+                type={field.type === FieldType.NUMBER ? 'number' : 'text'}
                 disabled={isPending}
                 className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
                 {...register(field.label, {
                   required: field.required
                     ? `Le champ « ${field.label} » est requis.`
                     : false,
-                  ...(field.type === 'NUMBER' ? { valueAsNumber: false } : {}),
+                  ...(field.type === FieldType.NUMBER
+                    ? { valueAsNumber: false }
+                    : {}),
                 })}
               />
               {errors[field.label] && (
@@ -301,16 +301,10 @@ export const TournamentRegistrationForm = ({
         </p>
       )}
 
-      {autoApprove ? (
-        <p className="text-center text-xs text-zinc-500">
-          <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
-          Votre inscription sera automatiquement acceptée.
-        </p>
-      ) : (
-        <p className="text-center text-xs text-zinc-500">
-          Votre inscription sera soumise à validation par un administrateur.
-        </p>
-      )}
+      <p className="text-center text-xs text-zinc-500">
+        <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
+        Votre inscription sera enregistrée.
+      </p>
 
       <Button type="submit" disabled={isPending} className="w-full gap-2">
         {isPending ? (
@@ -318,7 +312,7 @@ export const TournamentRegistrationForm = ({
         ) : (
           <Send className="size-4" />
         )}
-        {format === 'TEAM'
+        {format === TournamentFormat.TEAM
           ? teamMode === 'create'
             ? "Créer et s'inscrire"
             : "Rejoindre et s'inscrire"

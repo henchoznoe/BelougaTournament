@@ -19,14 +19,10 @@ export const banPlayerSchema = z.object({
     .optional(),
 })
 
-export type BanPlayerInput = z.infer<typeof banPlayerSchema>
-
 /** Schema for unbanning a player. */
 export const unbanPlayerSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
-
-export type UnbanPlayerInput = z.infer<typeof unbanPlayerSchema>
 
 /** Schema for updating a player's display name. */
 export const updatePlayerSchema = z.object({
@@ -37,5 +33,3 @@ export const updatePlayerSchema = z.object({
     .min(2, 'Le pseudo doit contenir au moins 2 caractères.')
     .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.'),
 })
-
-export type UpdatePlayerInput = z.infer<typeof updatePlayerSchema>

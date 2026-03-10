@@ -6,13 +6,15 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS, SETTINGS_SINGLETON_ID } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
 const DEFAULT_SETTINGS: GlobalSettings = {
-  id: 1,
+  id: SETTINGS_SINGLETON_ID,
   logoUrl: null,
   twitchUsername: null,
   twitchUrl: null,
@@ -31,11 +33,11 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('settings')
+  cacheTag(CACHE_TAGS.SETTINGS)
 
   try {
     const settings = await prisma.globalSettings.findUnique({
-      where: { id: 1 },
+      where: { id: SETTINGS_SINGLETON_ID },
     })
     return settings ?? DEFAULT_SETTINGS
   } catch (error) {

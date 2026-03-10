@@ -8,7 +8,7 @@
 
 'use client'
 
-import { AlertTriangle, Loader2, Save } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
@@ -29,6 +29,7 @@ import type {
   TournamentFieldItem,
   UserRegistrationItem,
 } from '@/lib/types/tournament'
+import { FieldType } from '@/prisma/generated/prisma/enums'
 
 interface RegistrationEditDialogProps {
   open: boolean
@@ -44,7 +45,7 @@ const buildFieldValues = (
   const result: Record<string, string | number> = {}
   for (const field of fields) {
     const raw = formData[field.label] ?? ''
-    if (field.type === 'NUMBER' && raw !== '') {
+    if (field.type === FieldType.NUMBER && raw !== '') {
       result[field.label] = Number(raw)
     } else {
       result[field.label] = raw
@@ -108,8 +109,6 @@ export const RegistrationEditDialog = ({
     })
   }
 
-  const willResetStatus = registration.status === 'APPROVED'
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/10 bg-zinc-950 sm:max-w-md">
@@ -121,16 +120,6 @@ export const RegistrationEditDialog = ({
             {registration.tournament.title}
           </DialogDescription>
         </DialogHeader>
-
-        {willResetStatus && (
-          <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-            <p className="text-xs text-amber-300">
-              Votre inscription est actuellement approuvée. La modifier remettra
-              votre inscription en attente de validation.
-            </p>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {fields.length > 0 ? (
@@ -148,7 +137,7 @@ export const RegistrationEditDialog = ({
                   </Label>
                   <Input
                     id={`edit-field-${field.id}`}
-                    type={field.type === 'NUMBER' ? 'number' : 'text'}
+                    type={field.type === FieldType.NUMBER ? 'number' : 'text'}
                     disabled={isPending}
                     className="h-9 border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
                     {...register(field.label, {

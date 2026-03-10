@@ -10,10 +10,10 @@ import { describe, expect, it } from 'vitest'
 import {
   deleteTournamentSchema,
   registerForTournamentSchema,
+  toornamentStageSchema,
   tournamentFieldSchema,
   tournamentSchema,
   unregisterFromTournamentSchema,
-  updateRegistrationStatusSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
@@ -45,8 +45,8 @@ const VALID_TOURNAMENT = {
   prize: '500 CHF',
   toornamentId: '',
   streamUrl: '',
-  autoApprove: false,
   fields: [VALID_FIELD],
+  toornamentStages: [],
 }
 
 // ---------------------------------------------------------------------------
@@ -104,6 +104,73 @@ describe('tournamentFieldSchema', () => {
   it('rejects an invalid UUID for id', () => {
     expect(
       tournamentFieldSchema.safeParse({ ...VALID_FIELD, id: INVALID_UUID })
+        .success,
+    ).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// toornamentStageSchema
+// ---------------------------------------------------------------------------
+
+const VALID_STAGE = {
+  name: 'Poules',
+  stageId: '618983668512789184',
+  number: 0,
+}
+
+describe('toornamentStageSchema', () => {
+  it('accepts a valid stage', () => {
+    expect(toornamentStageSchema.safeParse(VALID_STAGE).success).toBe(true)
+  })
+
+  it('accepts a stage with optional id', () => {
+    const result = toornamentStageSchema.safeParse({
+      ...VALID_STAGE,
+      id: VALID_UUID,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects an empty name', () => {
+    expect(
+      toornamentStageSchema.safeParse({ ...VALID_STAGE, name: '' }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a name exceeding 30 characters', () => {
+    expect(
+      toornamentStageSchema.safeParse({
+        ...VALID_STAGE,
+        name: 'x'.repeat(31),
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects an empty stageId', () => {
+    expect(
+      toornamentStageSchema.safeParse({ ...VALID_STAGE, stageId: '' }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a stageId exceeding 200 characters', () => {
+    expect(
+      toornamentStageSchema.safeParse({
+        ...VALID_STAGE,
+        stageId: 'x'.repeat(201),
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a negative number', () => {
+    expect(
+      toornamentStageSchema.safeParse({ ...VALID_STAGE, number: -1 }).success,
+    ).toBe(false)
+  })
+
+  it('rejects an invalid UUID for id', () => {
+    expect(
+      toornamentStageSchema.safeParse({ ...VALID_STAGE, id: INVALID_UUID })
         .success,
     ).toBe(false)
   })
@@ -326,6 +393,35 @@ describe('tournamentSchema', () => {
       }).success,
     ).toBe(false)
   })
+
+  // --- Toornament stages refinement ---
+
+  it('accepts stages when toornamentId is set', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      toornamentId: '1234567890',
+      toornamentStages: [VALID_STAGE],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects stages when toornamentId is empty', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      toornamentId: '',
+      toornamentStages: [VALID_STAGE],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts empty stages with empty toornamentId', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      toornamentId: '',
+      toornamentStages: [],
+    })
+    expect(result.success).toBe(true)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -455,96 +551,6 @@ describe('updateTournamentStatusSchema', () => {
   it('rejects missing id', () => {
     expect(
       updateTournamentStatusSchema.safeParse({ status: 'DRAFT' }).success,
-    ).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// updateRegistrationStatusSchema
-// ---------------------------------------------------------------------------
-
-describe('updateRegistrationStatusSchema', () => {
-  it('accepts PENDING status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'PENDING',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts APPROVED status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'APPROVED',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts REJECTED status', () => {
-    const result = updateRegistrationStatusSchema.safeParse({
-      id: VALID_UUID,
-      tournamentId: VALID_UUID,
-      status: 'REJECTED',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('rejects an invalid status', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: VALID_UUID,
-        status: 'CANCELLED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects an invalid id UUID', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: INVALID_UUID,
-        tournamentId: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects an invalid tournamentId UUID', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: INVALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing id', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        tournamentId: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing tournamentId', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        status: 'APPROVED',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects missing status', () => {
-    expect(
-      updateRegistrationStatusSchema.safeParse({
-        id: VALID_UUID,
-        tournamentId: VALID_UUID,
-      }).success,
     ).toBe(false)
   })
 })

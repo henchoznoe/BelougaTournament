@@ -13,22 +13,16 @@ export const promoteAdminSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
 
-export type PromoteAdminInput = z.infer<typeof promoteAdminSchema>
-
 /** Schema for demoting an admin back to USER. */
 export const demoteAdminSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
-
-export type DemoteAdminInput = z.infer<typeof demoteAdminSchema>
 
 /** Schema for updating an admin's tournament assignments. */
 export const updateAssignmentsSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
   tournamentIds: z.array(z.uuid('ID tournoi invalide.')),
 })
-
-export type UpdateAssignmentsInput = z.infer<typeof updateAssignmentsSchema>
 
 /** Schema for updating an admin's display name and tournament assignments. */
 export const updateAdminSchema = z.object({
@@ -40,5 +34,3 @@ export const updateAdminSchema = z.object({
     .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.'),
   tournamentIds: z.array(z.uuid('ID tournoi invalide.')),
 })
-
-export type UpdateAdminInput = z.infer<typeof updateAdminSchema>

@@ -24,7 +24,7 @@ const TermsPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONDITIONS GÉNÉRALES"
-          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 1er mars 2026."
+          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 6 mars 2026."
         />
 
         <div className="space-y-6">

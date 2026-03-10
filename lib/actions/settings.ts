@@ -10,13 +10,12 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { CACHE_TAGS, SETTINGS_SINGLETON_ID } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { toNullable } from '@/lib/utils/formatting'
 import { settingsSchema } from '@/lib/validations/settings'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-/** Converts empty strings to null for nullable Prisma fields. */
-const toNullable = (val: string): string | null => val || null
 
 export const updateSettings = authenticatedAction({
   schema: settingsSchema,
@@ -39,12 +38,12 @@ export const updateSettings = authenticatedAction({
     }
 
     await prisma.globalSettings.upsert({
-      where: { id: 1 },
+      where: { id: SETTINGS_SINGLETON_ID },
       update: payload,
-      create: { id: 1, ...payload },
+      create: { id: SETTINGS_SINGLETON_ID, ...payload },
     })
 
-    revalidateTag('settings', 'hours')
+    revalidateTag(CACHE_TAGS.SETTINGS, 'hours')
 
     return { success: true, message: 'Les paramètres ont été mis à jour.' }
   },

@@ -15,7 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DEFAULT_ASSETS } from '@/lib/config/constants'
+import { CURRENT_YEAR, DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 
@@ -72,7 +72,7 @@ export const HeroSection = ({ twitchUrl }: HeroSectionProps) => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex size-2 rounded-full bg-blue-500"></span>
             </span>
-            Saison 2026 en préparation
+            Saison {CURRENT_YEAR}{' '}
           </span>
         </motion.div>
 

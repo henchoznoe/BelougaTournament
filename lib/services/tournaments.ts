@@ -8,6 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -20,12 +21,13 @@ import type {
   TournamentRegistrationItem,
   UserRegistrationItem,
 } from '@/lib/types/tournament'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** Fetches all tournaments for the admin list table. */
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -43,7 +45,7 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
         endDate: true,
         registrationOpen: true,
         registrationClose: true,
-        autoApprove: true,
+
         _count: {
           select: {
             registrations: true,
@@ -65,7 +67,7 @@ export const getTournamentBySlug = async (
 ): Promise<TournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -73,6 +75,9 @@ export const getTournamentBySlug = async (
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -95,7 +100,7 @@ export const getTournamentById = async (
 ): Promise<TournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -103,6 +108,9 @@ export const getTournamentById = async (
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -125,7 +133,7 @@ export const getRegistrations = async (
 ): Promise<TournamentRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -133,7 +141,6 @@ export const getRegistrations = async (
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        status: true,
         fieldValues: true,
         createdAt: true,
         user: {
@@ -163,7 +170,7 @@ export const getRegistrations = async (
 export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.team.findMany({
@@ -200,7 +207,6 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
         registration: {
           select: {
             id: true,
-            status: true,
           },
         },
       },
@@ -246,11 +252,11 @@ export const getPublishedTournaments = async (): Promise<
 > => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
-      where: { status: 'PUBLISHED' },
+      where: { status: TournamentStatus.PUBLISHED },
       orderBy: { startDate: 'asc' },
       select: PUBLIC_LIST_SELECT,
     })
@@ -267,11 +273,11 @@ export const getArchivedTournaments = async (): Promise<
 > => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournament.findMany({
-      where: { status: 'ARCHIVED' },
+      where: { status: TournamentStatus.ARCHIVED },
       orderBy: { startDate: 'desc' },
       select: PUBLIC_LIST_SELECT,
     })
@@ -288,14 +294,20 @@ export const getPublicTournamentBySlug = async (
 ): Promise<PublicTournamentDetail | null> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const row = await prisma.tournament.findFirst({
-      where: { slug, status: { in: ['PUBLISHED', 'ARCHIVED'] } },
+      where: {
+        slug,
+        status: { in: [TournamentStatus.PUBLISHED, TournamentStatus.ARCHIVED] },
+      },
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        toornamentStages: {
+          orderBy: { number: 'asc' },
         },
         _count: {
           select: {
@@ -318,7 +330,7 @@ export const getAvailableTeams = async (
 ): Promise<AvailableTeam[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.team.findMany({
@@ -353,7 +365,6 @@ export const getAvailableTeams = async (
 /** Shared select for user registration items. */
 const USER_REGISTRATION_SELECT = {
   id: true,
-  status: true,
   fieldValues: true,
   createdAt: true,
   tournament: {
@@ -365,7 +376,6 @@ const USER_REGISTRATION_SELECT = {
       format: true,
       startDate: true,
       status: true,
-      autoApprove: true,
       fields: {
         orderBy: { order: 'asc' as const },
         select: {
@@ -386,13 +396,13 @@ export const getUserRegistrations = async (
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        tournament: { status: 'PUBLISHED' },
+        tournament: { status: TournamentStatus.PUBLISHED },
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,
@@ -410,13 +420,13 @@ export const getUserPastRegistrations = async (
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
   cacheLife('hours')
-  cacheTag('tournaments')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        tournament: { status: 'ARCHIVED' },
+        tournament: { status: TournamentStatus.ARCHIVED },
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,
