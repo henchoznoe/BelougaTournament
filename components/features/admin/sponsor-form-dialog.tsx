@@ -514,7 +514,7 @@ export const SponsorFormDialog = ({
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="text-zinc-400 hover:text-white"
+              className="text-zinc-400"
             >
               Annuler
             </Button>

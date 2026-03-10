@@ -221,7 +221,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => setEditingPlayer(player)}
-                          className="text-zinc-400 hover:text-white"
+                          className="text-zinc-400"
                           aria-label="Modifier"
                         >
                           <Pencil className="size-4" />

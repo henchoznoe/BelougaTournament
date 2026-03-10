@@ -31,7 +31,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-zinc-400 hover:bg-white/5 hover:text-white md:hidden"
+          className="text-zinc-400 md:hidden"
           onClick={onMobileMenuToggle}
         >
           <Menu className="size-5" />
@@ -45,7 +45,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
           asChild
           variant="ghost"
           size="sm"
-          className="gap-2 text-zinc-400 hover:bg-white/5 hover:text-white"
+          className="gap-2 text-zinc-400"
         >
           <Link href={ROUTES.HOME}>
             <ArrowLeft className="size-4" />

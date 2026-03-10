@@ -167,7 +167,7 @@ export const PlayerBanDialog = ({
             variant="ghost"
             onClick={() => onOpenChange(false)}
             disabled={isPending}
-            className="text-zinc-400 hover:text-white"
+            className="text-zinc-400"
           >
             Annuler
           </Button>

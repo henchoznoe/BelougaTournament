@@ -249,7 +249,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                         variant="ghost"
                         size="icon-sm"
                         asChild
-                        className="text-zinc-400 hover:text-white"
+                        className="text-zinc-400"
                       >
                         <Link
                           href={`${ROUTES.ADMIN_TOURNAMENTS}/${tournament.slug}`}

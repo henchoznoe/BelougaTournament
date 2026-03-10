@@ -142,7 +142,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => handleEdit(sponsor)}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-zinc-400"
                         aria-label="Modifier"
                       >
                         <Pencil className="size-4" />

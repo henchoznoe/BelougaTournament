@@ -44,11 +44,7 @@ const AdminErrorPage = ({ error, reset }: ErrorPageProps) => {
         )}
       </div>
       <div className="flex gap-3">
-        <Button
-          asChild
-          variant="ghost"
-          className="text-zinc-400 hover:bg-white/5 hover:text-white"
-        >
+        <Button asChild variant="ghost" className="text-zinc-400">
           <Link href={ROUTES.ADMIN_DASHBOARD}>
             <ArrowLeft className="mr-2 size-4" />
             Tableau de bord

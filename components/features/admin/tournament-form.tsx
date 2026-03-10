@@ -798,7 +798,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           type="button"
           variant="ghost"
           asChild
-          className="gap-2 text-zinc-400 hover:text-white"
+          className="gap-2 text-zinc-400"
         >
           <Link href={ROUTES.ADMIN_TOURNAMENTS}>
             <ArrowLeft className="size-4" />

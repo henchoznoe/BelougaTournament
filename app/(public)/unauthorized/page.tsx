@@ -30,11 +30,7 @@ const UnauthorizedPage = () => {
           page.
         </p>
       </div>
-      <Button
-        asChild
-        variant="ghost"
-        className="text-zinc-400 hover:bg-white/5 hover:text-white"
-      >
+      <Button asChild variant="ghost" className="text-zinc-400">
         <Link href={ROUTES.HOME}>
           <ArrowLeft className="mr-2 size-4" />
           Retour à l&apos;accueil

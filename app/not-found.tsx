@@ -28,7 +28,7 @@ const NotFoundPage = () => {
       </div>
       <Button
         variant="ghost"
-        className="text-zinc-400 hover:bg-white/5 hover:text-white"
+        className="text-zinc-400"
         onClick={() => router.back()}
       >
         <ArrowLeft className="mr-2 size-4" />

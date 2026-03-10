@@ -213,7 +213,7 @@ const NavbarProfile = ({
         <Button
           asChild
           variant="ghost"
-          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+          className="justify-start gap-3 h-10 px-2 text-zinc-300"
           onClick={onClick}
         >
           <Link href={ROUTES.PROFILE}>
@@ -224,7 +224,7 @@ const NavbarProfile = ({
         <Button
           asChild
           variant="ghost"
-          className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+          className="justify-start gap-3 h-10 px-2 text-zinc-300"
           onClick={onClick}
         >
           <Link href={ROUTES.PROFILE_TOURNAMENTS}>
@@ -236,7 +236,7 @@ const NavbarProfile = ({
           <Button
             asChild
             variant="ghost"
-            className="justify-start gap-3 h-10 px-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+            className="justify-start gap-3 h-10 px-2 text-zinc-300"
             onClick={onClick}
           >
             <Link href={ROUTES.ADMIN_DASHBOARD}>
@@ -357,11 +357,7 @@ export const PublicNavbar = () => {
         <div className="md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-zinc-400 hover:bg-white/10 hover:text-white"
-              >
+              <Button variant="ghost" size="icon" className="text-zinc-400">
                 <Menu className="size-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>

@@ -172,7 +172,7 @@ export const AdminsList = ({ admins, tournaments }: AdminsListProps) => {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => setEditingAdmin(admin)}
-                            className="text-zinc-400 hover:text-white"
+                            className="text-zinc-400"
                             aria-label="Gérer les tournois"
                           >
                             <Pencil className="size-4" />
