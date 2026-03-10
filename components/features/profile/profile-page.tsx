@@ -132,21 +132,28 @@ export const ProfilePage = async () => {
               {/* Email */}
               <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
                 <Mail className="size-4 shrink-0 text-zinc-500" />
-                <span className="min-w-0 truncate text-sm text-zinc-300">
-                  {dbUser.email}
-                </span>
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                    Mail
+                  </span>
+                  <span className="truncate text-sm text-zinc-300">
+                    {dbUser.email}
+                  </span>
+                </div>
                 <Lock className="ml-auto size-3.5 shrink-0 text-zinc-600" />
               </div>
 
               {/* Member since */}
               <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
                 <Calendar className="size-4 shrink-0 text-zinc-500" />
-                <span className="text-sm text-zinc-400">
-                  Membre depuis le{' '}
-                  <span className="text-zinc-300">
-                    {formatDate(dbUser.createdAt)}
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                    Inscription
                   </span>
-                </span>
+                  <span className="text-sm text-zinc-300">
+                    Membre depuis le {formatDate(dbUser.createdAt)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
