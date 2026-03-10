@@ -1,6 +1,6 @@
 /**
  * File: prisma/seed.ts
- * Description: Seed orchestrator — runs admin seed always, dummy data in dev/preview only.
+ * Description: Seed orchestrator — provisions admin users from SUPERADMIN_EMAILS.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -11,16 +11,12 @@ import { config } from 'dotenv'
 import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
 import { seedAdmins } from './seed-admin'
-import { seedDummy } from './seed-dummy'
 
 config({ path: '.env.local' })
 
 const main = async () => {
-  const nodeEnv = process.env.NODE_ENV
-  const vercelEnv = process.env.VERCEL_ENV
-
   // Skip seeding entirely in test environment
-  if (nodeEnv === 'test') {
+  if (process.env.NODE_ENV === 'test') {
     console.log('Skipping seed in test environment.')
     return
   }
@@ -31,24 +27,9 @@ const main = async () => {
   const prisma = new PrismaClient({ adapter })
 
   console.log('Starting seed process...')
-  console.log(
-    `Environment: NODE_ENV=${nodeEnv}, VERCEL_ENV=${vercelEnv ?? 'N/A'}`,
-  )
 
   try {
-    // Always seed admin users
     await seedAdmins(prisma)
-
-    // Seed dummy data unless we are in production
-    const isProduction = vercelEnv === 'production'
-
-    if (!isProduction) {
-      console.log('\nDummy data seeding enabled for this environment.')
-      await seedDummy(prisma)
-    } else {
-      console.log('\nSkipping dummy data (production environment).')
-    }
-
     console.log('\nSeed completed successfully!')
   } catch (error) {
     console.error('Seed failed:', error)
