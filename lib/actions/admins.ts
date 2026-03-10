@@ -42,10 +42,14 @@ export const promoteToAdmin = authenticatedAction({
       return { success: false, message: `${user.name} est déjà admin.` }
     }
 
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: { role: Role.ADMIN },
-    })
+    // Update role and revoke sessions so the user picks up the new role on next login
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: data.userId },
+        data: { role: Role.ADMIN },
+      }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
+    ])
 
     revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
@@ -84,13 +88,14 @@ export const demoteAdmin = authenticatedAction({
       return { success: false, message: 'Vous ne pouvez pas vous rétrograder.' }
     }
 
-    // Remove all assignments and demote in a transaction
+    // Remove all assignments, demote, and revoke sessions in a transaction
     await prisma.$transaction([
       prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
       prisma.user.update({
         where: { id: data.userId },
         data: { role: Role.USER },
       }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
     revalidateTag(CACHE_TAGS.ADMINS, 'minutes')
