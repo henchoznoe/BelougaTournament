@@ -14,6 +14,7 @@ import { UsersList } from '@/components/features/admin/users-list'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getTournamentOptions, getUsers } from '@/lib/services/users'
+import { isOwner } from '@/lib/utils/owner'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ const AdminUsersPage = async () => {
           users={users}
           tournaments={tournaments}
           viewerRole={session.user.role as Role}
+          viewerIsOwner={isOwner(session.user.email)}
         />
       </Suspense>
     </div>

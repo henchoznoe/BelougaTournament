@@ -43,6 +43,7 @@ import {
   deleteUser,
   demoteAdmin,
   promoteToAdmin,
+  promoteToSuperAdmin,
   unbanUser,
   updateUser,
 } from '@/lib/actions/users'
@@ -77,6 +78,7 @@ interface UserDetailDialogProps {
   user: UserRow
   tournaments: TournamentOption[]
   viewerRole: Role
+  viewerIsOwner: boolean
 }
 
 type FormInput = { displayName: string }
@@ -87,6 +89,7 @@ export const UserDetailDialog = ({
   user,
   tournaments,
   viewerRole,
+  viewerIsOwner,
 }: UserDetailDialogProps) => {
   const router = useRouter()
   const viewerIsSuperAdmin = viewerRole === Role.SUPERADMIN
@@ -100,7 +103,11 @@ export const UserDetailDialog = ({
     (viewerIsSuperAdmin || user.role === Role.USER)
   const showAssignments = user.role === Role.ADMIN && viewerIsSuperAdmin
   const showBanManagement = user.role === Role.USER
-  const showDangerZone = viewerIsSuperAdmin && user.role !== Role.SUPERADMIN
+  const showDangerZone =
+    viewerIsSuperAdmin &&
+    (user.role === Role.ADMIN ||
+      user.role === Role.USER ||
+      (user.role === Role.SUPERADMIN && viewerIsOwner))
 
   // Form state for displayName
   const {
@@ -127,7 +134,13 @@ export const UserDetailDialog = ({
 
   // Inline confirmation state
   const [confirmAction, setConfirmAction] = useState<
-    'promote' | 'demote' | 'delete' | 'unban' | null
+    | 'promote'
+    | 'promoteSuperAdmin'
+    | 'demote'
+    | 'demoteSuperAdmin'
+    | 'delete'
+    | 'unban'
+    | null
   >(null)
 
   // Transitions
@@ -243,6 +256,19 @@ export const UserDetailDialog = ({
   const handlePromote = () => {
     startActionTransition(async () => {
       const result = await promoteToAdmin({ userId: user.id })
+      if (result.success) {
+        toast.success(result.message)
+        onOpenChange(false)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
+
+  const handlePromoteToSuperAdmin = () => {
+    startActionTransition(async () => {
+      const result = await promoteToSuperAdmin({ userId: user.id })
       if (result.success) {
         toast.success(result.message)
         onOpenChange(false)
@@ -644,50 +670,95 @@ export const UserDetailDialog = ({
         )}
 
         {/* ── Gestion du rôle ── */}
-        {viewerIsSuperAdmin && user.role === Role.USER && !banned && (
-          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Gestion du rôle
-            </p>
+        {viewerIsSuperAdmin &&
+          ((user.role === Role.USER && !banned) ||
+            (user.role === Role.ADMIN && viewerIsOwner)) && (
+            <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Gestion du rôle
+              </p>
 
-            {confirmAction === 'promote' ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  size="sm"
-                  disabled={isActionPending}
-                  onClick={handlePromote}
-                  className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
-                >
-                  {isActionPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
+              {/* Promote USER → ADMIN */}
+              {user.role === Role.USER &&
+                !banned &&
+                (confirmAction === 'promote' ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={isActionPending}
+                      onClick={handlePromote}
+                      className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+                    >
+                      {isActionPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <ShieldCheck className="size-4" />
+                      )}
+                      Confirmer la promotion
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setConfirmAction(null)}
+                      disabled={isActionPending}
+                      className="text-zinc-500"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmAction('promote')}
+                    className="gap-2 text-blue-400 hover:text-blue-300"
+                  >
                     <ShieldCheck className="size-4" />
-                  )}
-                  Confirmer la promotion
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setConfirmAction(null)}
-                  disabled={isActionPending}
-                  className="text-zinc-500"
-                >
-                  Annuler
-                </Button>
-              </div>
-            ) : (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setConfirmAction('promote')}
-                className="gap-2 text-blue-400 hover:text-blue-300"
-              >
-                <ShieldCheck className="size-4" />
-                Promouvoir admin
-              </Button>
-            )}
-          </div>
-        )}
+                    Promouvoir admin
+                  </Button>
+                ))}
+
+              {/* Promote ADMIN → SUPERADMIN (owner only) */}
+              {user.role === Role.ADMIN &&
+                viewerIsOwner &&
+                (confirmAction === 'promoteSuperAdmin' ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={isActionPending}
+                      onClick={handlePromoteToSuperAdmin}
+                      className="gap-2 bg-amber-600 text-white hover:bg-amber-500"
+                    >
+                      {isActionPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Crown className="size-4" />
+                      )}
+                      Confirmer la promotion
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setConfirmAction(null)}
+                      disabled={isActionPending}
+                      className="text-zinc-500"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmAction('promoteSuperAdmin')}
+                    className="gap-2 text-amber-400 hover:text-amber-300"
+                  >
+                    <Crown className="size-4" />
+                    Promouvoir super admin
+                  </Button>
+                ))}
+            </div>
+          )}
 
         {/* ── Zone dangereuse ── */}
         {showDangerZone && (
@@ -697,7 +768,52 @@ export const UserDetailDialog = ({
             </p>
 
             <div className="space-y-2">
-              {/* Demote (ADMIN only) */}
+              {/* Demote SUPERADMIN → ADMIN (owner only) */}
+              {user.role === Role.SUPERADMIN &&
+                viewerIsOwner &&
+                (confirmAction === 'demoteSuperAdmin' ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-zinc-400">
+                      Le super admin sera rétrogradé à admin.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        size="sm"
+                        disabled={isActionPending}
+                        onClick={handleDemote}
+                        className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                      >
+                        {isActionPending ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <ShieldOff className="size-4" />
+                        )}
+                        Confirmer la rétrogradation
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmAction(null)}
+                        disabled={isActionPending}
+                        className="text-zinc-500"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmAction('demoteSuperAdmin')}
+                    className="gap-2 text-red-400 hover:text-red-300"
+                  >
+                    <ShieldOff className="size-4" />
+                    Rétrograder à admin
+                  </Button>
+                ))}
+
+              {/* Demote ADMIN → USER */}
               {user.role === Role.ADMIN &&
                 (confirmAction === 'demote' ? (
                   <div className="space-y-2">

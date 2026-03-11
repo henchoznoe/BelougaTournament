@@ -13,6 +13,7 @@ import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { isOwner } from '@/lib/utils/owner'
 import {
   banUserSchema,
   deleteUserSchema,
@@ -58,7 +59,55 @@ export const promoteToAdmin = authenticatedAction({
   },
 })
 
-/** Demotes an ADMIN back to USER role. Also removes all tournament assignments. */
+/** Promotes an ADMIN to SUPERADMIN role. Owner-only action. */
+export const promoteToSuperAdmin = authenticatedAction({
+  schema: promoteUserSchema,
+  role: Role.SUPERADMIN,
+  handler: async (data, session): Promise<ActionState> => {
+    if (!isOwner(session.user.email)) {
+      return {
+        success: false,
+        message: 'Seuls les owners peuvent promouvoir un super admin.',
+      }
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { role: true, name: true },
+    })
+
+    if (!user) {
+      return { success: false, message: 'Utilisateur introuvable.' }
+    }
+
+    if (user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message: `${user.name} doit être admin pour être promu super admin.`,
+      }
+    }
+
+    // Remove assignments (super admins have full access), promote, and revoke sessions
+    await prisma.$transaction([
+      prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
+      prisma.user.update({
+        where: { id: data.userId },
+        data: { role: Role.SUPERADMIN },
+      }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
+    ])
+
+    revalidateTag(CACHE_TAGS.USERS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+
+    return {
+      success: true,
+      message: `${user.name} a été promu super admin.`,
+    }
+  },
+})
+
+/** Demotes an ADMIN back to USER role. Also removes all tournament assignments. Owners can also demote SUPERADMINs to ADMIN. */
 export const demoteAdmin = authenticatedAction({
   schema: demoteUserSchema,
   role: Role.SUPERADMIN,
@@ -72,20 +121,39 @@ export const demoteAdmin = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
+    // Prevent self-demotion
+    if (data.userId === session.user.id) {
+      return { success: false, message: 'Vous ne pouvez pas vous rétrograder.' }
+    }
+
+    // SUPERADMIN targets: only owners can demote them (to ADMIN)
     if (user.role === Role.SUPERADMIN) {
+      if (!isOwner(session.user.email)) {
+        return {
+          success: false,
+          message: 'Impossible de rétrograder un super admin.',
+        }
+      }
+
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: data.userId },
+          data: { role: Role.ADMIN },
+        }),
+        prisma.session.deleteMany({ where: { userId: data.userId } }),
+      ])
+
+      revalidateTag(CACHE_TAGS.USERS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+
       return {
-        success: false,
-        message: 'Impossible de rétrograder un super admin.',
+        success: true,
+        message: `${user.name} a été rétrogradé à admin.`,
       }
     }
 
     if (user.role !== Role.ADMIN) {
       return { success: false, message: `${user.name} n'est pas admin.` }
-    }
-
-    // Prevent self-demotion
-    if (data.userId === session.user.id) {
-      return { success: false, message: 'Vous ne pouvez pas vous rétrograder.' }
     }
 
     // Remove all assignments, demote, and revoke sessions in a transaction

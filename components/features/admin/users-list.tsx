@@ -57,12 +57,14 @@ interface UsersListProps {
   users: UserRow[]
   tournaments: TournamentOption[]
   viewerRole: Role
+  viewerIsOwner: boolean
 }
 
 export const UsersList = ({
   users,
   tournaments,
   viewerRole,
+  viewerIsOwner,
 }: UsersListProps) => {
   const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
@@ -408,6 +410,7 @@ export const UsersList = ({
           user={selectedUser}
           tournaments={tournaments}
           viewerRole={viewerRole}
+          viewerIsOwner={viewerIsOwner}
         />
       )}
     </>

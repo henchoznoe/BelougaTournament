@@ -36,6 +36,11 @@ vi.mock('next/cache', () => ({
   cacheTag: vi.fn(),
 }))
 
+const mockIsOwner = vi.fn()
+vi.mock('@/lib/utils/owner', () => ({
+  isOwner: (...args: unknown[]) => mockIsOwner(...args),
+}))
+
 const mockUserFindUnique = vi.fn()
 const mockUserUpdate = vi.fn()
 const mockUserDelete = vi.fn()
@@ -70,6 +75,7 @@ vi.mock('@/lib/core/prisma', () => ({
 
 const {
   promoteToAdmin,
+  promoteToSuperAdmin,
   demoteAdmin,
   updateAdminAssignments,
   updateUser,
@@ -111,6 +117,23 @@ const ADMIN_SESSION = {
   session: {
     id: 'sess-2',
     userId: 'admin-1',
+    token: 'tok',
+    expiresAt: '2027-01-01',
+  },
+}
+
+const OWNER_UUID = 'd3ffd499-9c0b-4ef8-bb6d-6bb9bd380a44'
+
+const OWNER_SESSION = {
+  user: {
+    id: OWNER_UUID,
+    role: Role.SUPERADMIN,
+    email: 'owner@test.com',
+    name: 'Owner',
+  },
+  session: {
+    id: 'sess-3',
+    userId: OWNER_UUID,
     token: 'tok',
     expiresAt: '2027-01-01',
   },
@@ -209,8 +232,9 @@ describe('demoteAdmin', () => {
 
   it('returns error when trying to demote a SUPERADMIN', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'SUPERADMIN', name: 'Super' })
+    mockIsOwner.mockReturnValue(false)
 
-    expect(await demoteAdmin({ userId: VALID_UUID })).toEqual({
+    expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
       success: false,
       message: 'Impossible de rétrograder un super admin.',
     })
@@ -219,7 +243,7 @@ describe('demoteAdmin', () => {
   it('returns error when user is not an admin', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Alice' })
 
-    expect(await demoteAdmin({ userId: VALID_UUID })).toEqual({
+    expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
       success: false,
       message: "Alice n'est pas admin.",
     })
@@ -694,5 +718,172 @@ describe('deleteUser', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// promoteToSuperAdmin
+// ---------------------------------------------------------------------------
+
+describe('promoteToSuperAdmin', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(OWNER_SESSION)
+    mockIsOwner.mockReturnValue(true)
+    mockTransaction.mockResolvedValue([])
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await promoteToSuperAdmin({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns Unauthorized when caller is not SUPERADMIN', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+
+    expect(await promoteToSuperAdmin({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when caller is SUPERADMIN but not owner', async () => {
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockIsOwner.mockReturnValue(false)
+
+    expect(await promoteToSuperAdmin({ userId: OTHER_UUID })).toEqual({
+      success: false,
+      message: 'Seuls les owners peuvent promouvoir un super admin.',
+    })
+  })
+
+  it('returns error when user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(await promoteToSuperAdmin({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Utilisateur introuvable.',
+    })
+  })
+
+  it('returns error when target is not an ADMIN', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
+
+    expect(await promoteToSuperAdmin({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Alice doit être admin pour être promu super admin.',
+    })
+  })
+
+  it('returns error when target is already SUPERADMIN', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPERADMIN,
+      name: 'Super',
+    })
+
+    expect(await promoteToSuperAdmin({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Super doit être admin pour être promu super admin.',
+    })
+  })
+
+  it('promotes an ADMIN to SUPERADMIN and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Bob' })
+
+    const result = await promoteToSuperAdmin({ userId: VALID_UUID })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Bob a été promu super admin.',
+    })
+    expect(mockTransaction).toHaveBeenCalledOnce()
+    const transactionArg = mockTransaction.mock.calls[0][0]
+    expect(Array.isArray(transactionArg)).toBe(true)
+    expect(transactionArg).toHaveLength(3)
+    expect(mockAdminAssignmentDeleteMany).toHaveBeenCalledWith({
+      where: { adminId: VALID_UUID },
+    })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { role: Role.SUPERADMIN },
+    })
+    expect(mockSessionDeleteMany).toHaveBeenCalledWith({
+      where: { userId: VALID_UUID },
+    })
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await promoteToSuperAdmin({ userId: 'bad-uuid' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// demoteAdmin (owner scenarios)
+// ---------------------------------------------------------------------------
+
+describe('demoteAdmin (owner scenarios)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(OWNER_SESSION)
+    mockIsOwner.mockReturnValue(true)
+    mockTransaction.mockResolvedValue([])
+  })
+
+  it('owner can demote a SUPERADMIN to ADMIN', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPERADMIN,
+      name: 'Super',
+    })
+
+    const result = await demoteAdmin({ userId: OTHER_UUID })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Super a été rétrogradé à admin.',
+    })
+    expect(mockTransaction).toHaveBeenCalledOnce()
+    const transactionArg = mockTransaction.mock.calls[0][0]
+    expect(Array.isArray(transactionArg)).toBe(true)
+    expect(transactionArg).toHaveLength(2)
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: OTHER_UUID },
+      data: { role: Role.ADMIN },
+    })
+    expect(mockSessionDeleteMany).toHaveBeenCalledWith({
+      where: { userId: OTHER_UUID },
+    })
+  })
+
+  it('non-owner SUPERADMIN still cannot demote a SUPERADMIN', async () => {
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockIsOwner.mockReturnValue(false)
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPERADMIN,
+      name: 'Super',
+    })
+
+    expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
+      success: false,
+      message: 'Impossible de rétrograder un super admin.',
+    })
+  })
+
+  it('owner cannot self-demote', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPERADMIN,
+      name: 'Owner',
+    })
+
+    expect(await demoteAdmin({ userId: OWNER_UUID })).toEqual({
+      success: false,
+      message: 'Vous ne pouvez pas vous rétrograder.',
+    })
   })
 })
