@@ -359,6 +359,27 @@ export const getAvailableTeams = async (
 }
 
 // ---------------------------------------------------------------------------
+// User registration check (public tournament detail page)
+// ---------------------------------------------------------------------------
+
+/** Checks whether a user is already registered for a given tournament (non-cached, user-specific). */
+export const isUserRegisteredForTournament = async (
+  userId: string,
+  tournamentId: string,
+): Promise<boolean> => {
+  try {
+    const row = await prisma.tournamentRegistration.findUnique({
+      where: { tournamentId_userId: { tournamentId, userId } },
+      select: { id: true },
+    })
+    return row !== null
+  } catch (error) {
+    logger.error({ error }, 'Error checking user registration status')
+    return false
+  }
+}
+
+// ---------------------------------------------------------------------------
 // User registration services (profile page)
 // ---------------------------------------------------------------------------
 
