@@ -9,13 +9,19 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
+import { ADMIN_ROUTE_ROLES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const ADMIN_ROLES = new Set<Role>([Role.ADMIN, Role.SUPERADMIN])
 
-/** Path prefixes that require SUPERADMIN role. */
-const SUPERADMIN_PREFIXES = ['/admin/settings', '/admin/sponsors', '/admin/admins']
+/**
+ * Sorted route prefixes (longest first) so that the most specific prefix
+ * matches before a shorter one (e.g. /admin/tournaments before /admin).
+ */
+const SORTED_ROUTE_ENTRIES = Object.entries(ADMIN_ROUTE_ROLES).sort(
+  (a, b) => b[0].length - a[0].length,
+)
 
 /** Fetch the active session from the BetterAuth session endpoint. */
 const fetchSession = async (request: NextRequest): Promise<AuthSession | null> => {
@@ -30,6 +36,12 @@ const fetchSession = async (request: NextRequest): Promise<AuthSession | null> =
   }
 }
 
+/** Resolve the minimum role required for the given pathname. */
+const getRequiredRole = (pathname: string): Role => {
+  const match = SORTED_ROUTE_ENTRIES.find(([prefix]) => pathname.startsWith(prefix))
+  return match ? match[1] : Role.ADMIN
+}
+
 export const proxy = async (request: NextRequest) => {
   const session = await fetchSession(request)
 
@@ -41,10 +53,8 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
-  const isSuperAdminRoute = SUPERADMIN_PREFIXES.some(prefix =>
-    request.nextUrl.pathname.startsWith(prefix),
-  )
-  if (isSuperAdminRoute && session.user.role !== Role.SUPERADMIN) {
+  const requiredRole = getRequiredRole(request.nextUrl.pathname)
+  if (requiredRole === Role.SUPERADMIN && session.user.role !== Role.SUPERADMIN) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 

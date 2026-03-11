@@ -7,7 +7,8 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { ROUTES } from '@/lib/config/routes'
+import { ADMIN_ROUTE_ROLES, ROUTES } from '@/lib/config/routes'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -60,6 +61,37 @@ describe('ROUTES', () => {
     )
     for (const [, path] of staticRoutes) {
       expect(path).toMatch(/^\//)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ADMIN_ROUTE_ROLES
+// ---------------------------------------------------------------------------
+
+describe('ADMIN_ROUTE_ROLES', () => {
+  it('maps ADMIN-level routes correctly', () => {
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_DASHBOARD]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_TOURNAMENTS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_PLAYERS]).toBe(Role.ADMIN)
+  })
+
+  it('maps SUPERADMIN-level routes correctly', () => {
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SETTINGS]).toBe(Role.SUPERADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SPONSORS]).toBe(Role.SUPERADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_ADMINS]).toBe(Role.SUPERADMIN)
+  })
+
+  it('every key is a valid admin route starting with /admin', () => {
+    for (const path of Object.keys(ADMIN_ROUTE_ROLES)) {
+      expect(path).toMatch(/^\/admin/)
+    }
+  })
+
+  it('every value is a valid Role enum member', () => {
+    const validRoles = new Set(Object.values(Role))
+    for (const role of Object.values(ADMIN_ROUTE_ROLES)) {
+      expect(validRoles.has(role)).toBe(true)
     }
   })
 })
