@@ -79,6 +79,8 @@ export const UsersList = ({
       if (match) {
         setSelectedUser(match)
       }
+      // Clear the search param so closing the dialog does not re-trigger the effect
+      window.history.replaceState({}, '', window.location.pathname)
     }
   }, [searchParams, users, selectedUser])
 
