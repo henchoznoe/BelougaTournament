@@ -9,6 +9,7 @@
 import { Settings } from 'lucide-react'
 import type { Metadata } from 'next'
 import { SettingsForm } from '@/components/features/admin/settings-form'
+import SuperAdminGuard from '@/components/features/auth/super-admin-guard'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 export const metadata: Metadata = {
@@ -19,20 +20,22 @@ const AdminSettingsPage = async () => {
   const settings = await getGlobalSettings()
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Settings className="size-6 text-blue-400" />
-          Paramètres
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Configurez les paramètres globaux de la plateforme.
-        </p>
-      </div>
+    <SuperAdminGuard>
+      <div className="mx-auto max-w-3xl space-y-6">
+        {/* Page heading */}
+        <div className="space-y-1">
+          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
+            <Settings className="size-6 text-blue-400" />
+            Paramètres
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Configurez les paramètres globaux de la plateforme.
+          </p>
+        </div>
 
-      <SettingsForm settings={settings} />
-    </div>
+        <SettingsForm settings={settings} />
+      </div>
+    </SuperAdminGuard>
   )
 }
 

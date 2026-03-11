@@ -60,8 +60,15 @@ describe('getDashboardStats', () => {
       .mockResolvedValueOnce(4) // DRAFT
       .mockResolvedValueOnce(5) // PUBLISHED
       .mockResolvedValueOnce(1) // ARCHIVED
-    mockUserCount.mockResolvedValue(42)
-    mockRegistrationCount.mockResolvedValue(7)
+    mockUserCount
+      .mockResolvedValueOnce(50) // total users
+      .mockResolvedValueOnce(42) // players (role USER)
+      .mockResolvedValueOnce(3) // admins (ADMIN + SUPERADMIN)
+      .mockResolvedValueOnce(8) // ghosts (no registrations)
+    mockRegistrationCount
+      .mockResolvedValueOnce(7) // total registrations
+      .mockResolvedValueOnce(4) // solo (teamId null)
+      .mockResolvedValueOnce(3) // team (teamId not null)
     mockSponsorCount.mockResolvedValue(3)
 
     const result = await getDashboardStats()
@@ -71,8 +78,17 @@ describe('getDashboardStats', () => {
         total: 10,
         byStatus: { DRAFT: 4, PUBLISHED: 5, ARCHIVED: 1 },
       },
-      players: 42,
-      totalRegistrations: 7,
+      users: {
+        total: 50,
+        players: 42,
+        admins: 3,
+        ghosts: 8,
+      },
+      registrations: {
+        total: 7,
+        solo: 4,
+        team: 3,
+      },
       sponsors: 3,
     })
   })
@@ -87,8 +103,17 @@ describe('getDashboardStats', () => {
         total: 0,
         byStatus: { DRAFT: 0, PUBLISHED: 0, ARCHIVED: 0 },
       },
-      players: 0,
-      totalRegistrations: 0,
+      users: {
+        total: 0,
+        players: 0,
+        admins: 0,
+        ghosts: 0,
+      },
+      registrations: {
+        total: 0,
+        solo: 0,
+        team: 0,
+      },
       sponsors: 0,
     })
   })

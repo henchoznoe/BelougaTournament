@@ -30,8 +30,13 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       draftCount,
       publishedCount,
       archivedCount,
+      totalUsers,
       players,
+      admins,
+      ghosts,
       totalRegistrations,
+      soloRegistrations,
+      teamRegistrations,
       sponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
@@ -40,8 +45,19 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         where: { status: TournamentStatus.PUBLISHED },
       }),
       prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
+      prisma.user.count(),
       prisma.user.count({ where: { role: Role.USER } }),
+      prisma.user.count({
+        where: { role: { in: [Role.ADMIN, Role.SUPERADMIN] } },
+      }),
+      prisma.user.count({
+        where: { registrations: { none: {} } },
+      }),
       prisma.tournamentRegistration.count(),
+      prisma.tournamentRegistration.count({ where: { teamId: null } }),
+      prisma.tournamentRegistration.count({
+        where: { teamId: { not: null } },
+      }),
       prisma.sponsor.count(),
     ])
 
@@ -54,8 +70,17 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
           [TournamentStatus.ARCHIVED]: archivedCount,
         },
       },
-      players,
-      totalRegistrations,
+      users: {
+        total: totalUsers,
+        players,
+        admins,
+        ghosts,
+      },
+      registrations: {
+        total: totalRegistrations,
+        solo: soloRegistrations,
+        team: teamRegistrations,
+      },
       sponsors,
     }
   } catch (error) {
@@ -69,8 +94,17 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
           [TournamentStatus.ARCHIVED]: 0,
         },
       },
-      players: 0,
-      totalRegistrations: 0,
+      users: {
+        total: 0,
+        players: 0,
+        admins: 0,
+        ghosts: 0,
+      },
+      registrations: {
+        total: 0,
+        solo: 0,
+        team: 0,
+      },
       sponsors: 0,
     }
   }

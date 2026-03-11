@@ -16,8 +16,17 @@ export type DashboardStats = {
     total: number
     byStatus: Record<TournamentStatus, number>
   }
-  players: number
-  totalRegistrations: number
+  users: {
+    total: number
+    players: number
+    admins: number
+    ghosts: number
+  }
+  registrations: {
+    total: number
+    solo: number
+    team: number
+  }
   sponsors: number
 }
 

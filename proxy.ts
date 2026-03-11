@@ -14,6 +14,9 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 const ADMIN_ROLES = new Set<Role>([Role.ADMIN, Role.SUPERADMIN])
 
+/** Path prefixes that require SUPERADMIN role. */
+const SUPERADMIN_PREFIXES = ['/admin/settings', '/admin/sponsors', '/admin/admins']
+
 /** Fetch the active session from the BetterAuth session endpoint. */
 const fetchSession = async (request: NextRequest): Promise<AuthSession | null> => {
   try {
@@ -35,6 +38,13 @@ export const proxy = async (request: NextRequest) => {
   }
 
   if (!ADMIN_ROLES.has(session.user.role)) {
+    return NextResponse.redirect(new URL('/unauthorized', request.url))
+  }
+
+  const isSuperAdminRoute = SUPERADMIN_PREFIXES.some(prefix =>
+    request.nextUrl.pathname.startsWith(prefix),
+  )
+  if (isSuperAdminRoute && session.user.role !== Role.SUPERADMIN) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 

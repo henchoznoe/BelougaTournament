@@ -7,6 +7,8 @@
  */
 
 import { ClipboardList, Handshake, Swords, Users } from 'lucide-react'
+import Link from 'next/link'
+import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
 
 interface DashboardStatsProps {
@@ -17,6 +19,7 @@ const STAT_CARDS = [
   {
     key: 'tournaments',
     label: 'Tournois',
+    href: ROUTES.ADMIN_TOURNAMENTS,
     icon: Swords,
     getValue: (s: DashboardStats) => s.tournaments.total,
     getDetail: (s: DashboardStats) => {
@@ -33,26 +36,41 @@ const STAT_CARDS = [
     bg: 'bg-blue-500/10',
   },
   {
-    key: 'players',
-    label: 'Joueurs inscrits',
+    key: 'users',
+    label: 'Utilisateurs',
+    href: ROUTES.ADMIN_PLAYERS,
     icon: Users,
-    getValue: (s: DashboardStats) => s.players,
-    getDetail: () => 'Comptes avec rôle joueur',
+    getValue: (s: DashboardStats) => s.users.total,
+    getDetail: (s: DashboardStats) => {
+      const parts: string[] = []
+      if (s.users.players > 0) parts.push(`${s.users.players} joueurs`)
+      if (s.users.admins > 0) parts.push(`${s.users.admins} admins`)
+      if (s.users.ghosts > 0) parts.push(`${s.users.ghosts} fantômes`)
+      return parts.join(' · ') || 'Aucun utilisateur'
+    },
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/10',
   },
   {
     key: 'registrations',
     label: 'Inscriptions',
+    href: ROUTES.ADMIN_TOURNAMENTS,
     icon: ClipboardList,
-    getValue: (s: DashboardStats) => s.totalRegistrations,
-    getDetail: () => 'Total des inscriptions',
+    getValue: (s: DashboardStats) => s.registrations.total,
+    getDetail: (s: DashboardStats) => {
+      const parts: string[] = []
+      if (s.registrations.solo > 0) parts.push(`${s.registrations.solo} solo`)
+      if (s.registrations.team > 0)
+        parts.push(`${s.registrations.team} en équipe`)
+      return parts.join(' · ') || 'Aucune inscription'
+    },
     color: 'text-sky-400',
     bg: 'bg-sky-500/10',
   },
   {
     key: 'sponsors',
     label: 'Sponsors',
+    href: ROUTES.ADMIN_SPONSORS,
     icon: Handshake,
     getValue: (s: DashboardStats) => s.sponsors,
     getDetail: () => 'Partenaires affichés',
@@ -70,9 +88,10 @@ export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
         const detail = card.getDetail(stats)
 
         return (
-          <div
+          <Link
             key={card.key}
-            className="rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm transition-colors hover:border-white/10"
+            href={card.href}
+            className="cursor-pointer rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm transition-colors hover:border-white/10"
           >
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
@@ -84,7 +103,7 @@ export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
             </div>
             <p className="mt-3 text-3xl font-bold text-white">{value}</p>
             <p className="mt-1 text-xs text-zinc-500">{detail}</p>
-          </div>
+          </Link>
         )
       })}
     </div>

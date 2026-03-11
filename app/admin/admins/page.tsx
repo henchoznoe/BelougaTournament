@@ -9,6 +9,7 @@
 import { ShieldCheck } from 'lucide-react'
 import type { Metadata } from 'next'
 import { AdminsList } from '@/components/features/admin/admins-list'
+import SuperAdminGuard from '@/components/features/auth/super-admin-guard'
 import { getAdmins, getTournamentOptions } from '@/lib/services/admins'
 
 export const metadata: Metadata = {
@@ -22,20 +23,22 @@ const AdminAdminsPage = async () => {
   ])
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <ShieldCheck className="size-6 text-blue-400" />
-          Administrateurs
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Gérez les administrateurs et leurs assignations de tournois.
-        </p>
-      </div>
+    <SuperAdminGuard>
+      <div className="mx-auto max-w-4xl space-y-6">
+        {/* Page heading */}
+        <div className="space-y-1">
+          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
+            <ShieldCheck className="size-6 text-blue-400" />
+            Administrateurs
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Gérez les administrateurs et leurs assignations de tournois.
+          </p>
+        </div>
 
-      <AdminsList admins={admins} tournaments={tournaments} />
-    </div>
+        <AdminsList admins={admins} tournaments={tournaments} />
+      </div>
+    </SuperAdminGuard>
   )
 }
 
