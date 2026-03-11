@@ -6,7 +6,16 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Calendar, ClipboardList, Gamepad2, Users } from 'lucide-react'
+import {
+  ArrowRight,
+  Calendar,
+  ClipboardList,
+  Gamepad2,
+  Users,
+} from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { ROUTES } from '@/lib/config/routes'
 import type {
   RecentRegistration,
   UpcomingTournament,
@@ -26,7 +35,7 @@ export const DashboardUpcomingTournaments = ({
   tournaments,
 }: UpcomingTournamentsProps) => {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+    <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <Calendar className="size-4 text-blue-400" />
         <h2 className="text-sm font-semibold text-white">Prochains tournois</h2>
@@ -37,46 +46,59 @@ export const DashboardUpcomingTournaments = ({
           Aucun tournoi à venir.
         </p>
       ) : (
-        <div className="space-y-3">
-          {tournaments.map(tournament => (
-            <div
-              key={tournament.id}
-              className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">
-                  {tournament.title}
-                </p>
-                <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
-                  {tournament.game && (
-                    <span className="flex items-center gap-1">
-                      <Gamepad2 className="size-3" />
-                      {tournament.game}
+        <>
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {tournaments.map(tournament => (
+              <Link
+                key={tournament.id}
+                href={ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug)}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-white">
+                    {tournament.title}
+                  </p>
+                  <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
+                    {tournament.game && (
+                      <span className="flex items-center gap-1">
+                        <Gamepad2 className="size-3" />
+                        {tournament.game}
+                      </span>
+                    )}
+                    <span>{formatDate(tournament.startDate)}</span>
+                    <span className="capitalize">
+                      {tournament.format === TournamentFormat.SOLO
+                        ? 'Solo'
+                        : `${tournament.teamSize}v${tournament.teamSize}`}
+                    </span>
+                  </div>
+                </div>
+                <div className="ml-4 flex items-center gap-3 text-xs text-zinc-400">
+                  <span
+                    className="flex items-center gap-1"
+                    title="Inscriptions"
+                  >
+                    <ClipboardList className="size-3" />
+                    {tournament._count.registrations}
+                  </span>
+                  {tournament.format === TournamentFormat.TEAM && (
+                    <span className="flex items-center gap-1" title="Équipes">
+                      <Users className="size-3" />
+                      {tournament._count.teams}
                     </span>
                   )}
-                  <span>{formatDate(tournament.startDate)}</span>
-                  <span className="capitalize">
-                    {tournament.format === TournamentFormat.SOLO
-                      ? 'Solo'
-                      : `${tournament.teamSize}v${tournament.teamSize}`}
-                  </span>
                 </div>
-              </div>
-              <div className="ml-4 flex items-center gap-3 text-xs text-zinc-400">
-                <span className="flex items-center gap-1" title="Inscriptions">
-                  <ClipboardList className="size-3" />
-                  {tournament._count.registrations}
-                </span>
-                {tournament.format === TournamentFormat.TEAM && (
-                  <span className="flex items-center gap-1" title="Équipes">
-                    <Users className="size-3" />
-                    {tournament._count.teams}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+          <Link
+            href={ROUTES.ADMIN_TOURNAMENTS}
+            className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          >
+            Voir tout
+            <ArrowRight className="size-3" />
+          </Link>
+        </>
       )}
     </div>
   )
@@ -86,7 +108,7 @@ export const DashboardRecentRegistrations = ({
   registrations,
 }: RecentRegistrationsProps) => {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+    <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <ClipboardList className="size-4 text-blue-400" />
         <h2 className="text-sm font-semibold text-white">
@@ -99,27 +121,52 @@ export const DashboardRecentRegistrations = ({
           Aucune inscription récente.
         </p>
       ) : (
-        <div className="space-y-3">
-          {registrations.map(reg => (
-            <div
-              key={reg.id}
-              className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">
-                  {reg.user.name}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-zinc-500">
-                  {reg.tournament.title}
-                  {reg.team && ` · ${reg.team.name}`}
-                </p>
-              </div>
-              <span className="ml-4 text-[10px] text-zinc-600">
-                {formatDate(reg.createdAt)}
-              </span>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {registrations.map(reg => (
+              <Link
+                key={reg.id}
+                href={ROUTES.ADMIN_REGISTRATIONS}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  {reg.user.image ? (
+                    <Image
+                      src={reg.user.image}
+                      alt={reg.user.name}
+                      width={28}
+                      height={28}
+                      className="size-7 shrink-0 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">
+                      {reg.user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-white">
+                      {reg.user.name}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-zinc-500">
+                      {reg.tournament.title}
+                      {reg.team && ` · ${reg.team.name}`}
+                    </p>
+                  </div>
+                </div>
+                <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
+                  {formatDate(reg.createdAt)}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Link
+            href={ROUTES.ADMIN_REGISTRATIONS}
+            className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          >
+            Voir tout
+            <ArrowRight className="size-3" />
+          </Link>
+        </>
       )}
     </div>
   )

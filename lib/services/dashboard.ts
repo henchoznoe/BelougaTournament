@@ -112,7 +112,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 
 /** Fetches the next upcoming published tournaments (by start date). */
 export const getUpcomingTournaments = async (
-  limit = 5,
+  limit = 8,
 ): Promise<UpcomingTournament[]> => {
   'use cache'
   cacheLife('minutes')
@@ -152,7 +152,7 @@ export const getUpcomingTournaments = async (
 
 /** Fetches the most recent tournament registrations. */
 export const getRecentRegistrations = async (
-  limit = 5,
+  limit = 8,
 ): Promise<RecentRegistration[]> => {
   'use cache'
   cacheLife('minutes')
