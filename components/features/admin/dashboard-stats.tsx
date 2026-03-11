@@ -38,7 +38,7 @@ const STAT_CARDS = [
   {
     key: 'users',
     label: 'Utilisateurs',
-    href: ROUTES.ADMIN_PLAYERS,
+    href: ROUTES.ADMIN_USERS,
     icon: Users,
     getValue: (s: DashboardStats) => s.users.total,
     getDetail: (s: DashboardStats) => {
@@ -54,7 +54,7 @@ const STAT_CARDS = [
   {
     key: 'registrations',
     label: 'Inscriptions',
-    href: ROUTES.ADMIN_TOURNAMENTS,
+    href: ROUTES.ADMIN_REGISTRATIONS,
     icon: ClipboardList,
     getValue: (s: DashboardStats) => s.registrations.total,
     getDetail: (s: DashboardStats) => {

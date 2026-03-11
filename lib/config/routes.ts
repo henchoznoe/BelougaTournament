@@ -23,8 +23,8 @@ export const ROUTES = {
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',
-  ADMIN_ADMINS: '/admin/admins',
-  ADMIN_PLAYERS: '/admin/players',
+  ADMIN_USERS: '/admin/users',
+  ADMIN_REGISTRATIONS: '/admin/registrations',
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',
   ADMIN_NEW_TOURNAMENT: '/admin/tournaments/new',
@@ -48,8 +48,8 @@ export const ROUTES = {
 export const ADMIN_ROUTE_ROLES = {
   [ROUTES.ADMIN_DASHBOARD]: Role.ADMIN,
   [ROUTES.ADMIN_TOURNAMENTS]: Role.ADMIN,
-  [ROUTES.ADMIN_PLAYERS]: Role.ADMIN,
+  [ROUTES.ADMIN_USERS]: Role.ADMIN,
+  [ROUTES.ADMIN_REGISTRATIONS]: Role.ADMIN,
   [ROUTES.ADMIN_SETTINGS]: Role.SUPERADMIN,
   [ROUTES.ADMIN_SPONSORS]: Role.SUPERADMIN,
-  [ROUTES.ADMIN_ADMINS]: Role.SUPERADMIN,
 } as const

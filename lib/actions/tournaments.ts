@@ -429,6 +429,7 @@ export const deleteTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
 
     return {
       success: true,
@@ -527,6 +528,7 @@ export const updateRegistrationFields = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
 
     return {
       success: true,
@@ -583,6 +585,7 @@ export const registerForTournament = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
 
     return {
       success: true,
@@ -664,6 +667,7 @@ export const createTeamAndRegister = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
@@ -743,6 +747,7 @@ export const joinTeamAndRegister = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
@@ -799,6 +804,7 @@ export const unregisterFromTournament = authenticatedAction({
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+      revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return {
@@ -825,6 +831,7 @@ export const unregisterFromTournament = authenticatedAction({
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+      revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return {
@@ -878,6 +885,7 @@ export const unregisterFromTournament = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
@@ -970,6 +978,7 @@ export const kickPlayer = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
@@ -1018,6 +1027,7 @@ export const dissolveTeam = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return { success: true, message: "L'\u00e9quipe a \u00e9t\u00e9 dissoute." }

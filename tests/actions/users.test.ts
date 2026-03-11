@@ -1,6 +1,6 @@
 /**
- * File: tests/actions/admins.test.ts
- * Description: Unit tests for admin server actions (promote, demote, updateAssignments, updateAdmin, searchUsersAction).
+ * File: tests/actions/users.test.ts
+ * Description: Unit tests for unified user server actions (promote, demote, ban, unban, update, delete).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -38,6 +38,7 @@ vi.mock('next/cache', () => ({
 
 const mockUserFindUnique = vi.fn()
 const mockUserUpdate = vi.fn()
+const mockUserDelete = vi.fn()
 const mockAdminAssignmentDeleteMany = vi.fn()
 const mockAdminAssignmentCreateMany = vi.fn()
 const mockSessionDeleteMany = vi.fn()
@@ -48,6 +49,7 @@ vi.mock('@/lib/core/prisma', () => ({
     user: {
       findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
       update: (...args: unknown[]) => mockUserUpdate(...args),
+      delete: (...args: unknown[]) => mockUserDelete(...args),
     },
     adminAssignment: {
       deleteMany: (...args: unknown[]) =>
@@ -62,11 +64,6 @@ vi.mock('@/lib/core/prisma', () => ({
   },
 }))
 
-const mockSearchUsers = vi.fn()
-vi.mock('@/lib/services/admins', () => ({
-  searchUsers: (...args: unknown[]) => mockSearchUsers(...args),
-}))
-
 // ---------------------------------------------------------------------------
 // Module under test
 // ---------------------------------------------------------------------------
@@ -75,9 +72,11 @@ const {
   promoteToAdmin,
   demoteAdmin,
   updateAdminAssignments,
-  updateAdmin,
-  searchUsersAction,
-} = await import('@/lib/actions/admins')
+  updateUser,
+  banUser,
+  unbanUser,
+  deleteUser,
+} = await import('@/lib/actions/users')
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -101,6 +100,23 @@ const SUPERADMIN_SESSION = {
     expiresAt: '2027-01-01',
   },
 }
+
+const ADMIN_SESSION = {
+  user: {
+    id: 'admin-1',
+    role: Role.ADMIN,
+    email: 'admin@test.com',
+    name: 'Admin',
+  },
+  session: {
+    id: 'sess-2',
+    userId: 'admin-1',
+    token: 'tok',
+    expiresAt: '2027-01-01',
+  },
+}
+
+const BAN_DATE = new Date('2027-01-01T00:00:00Z')
 
 // ---------------------------------------------------------------------------
 // promoteToAdmin
@@ -151,7 +167,6 @@ describe('promoteToAdmin', () => {
       message: 'Alice a été promu admin.',
     })
     expect(mockTransaction).toHaveBeenCalledOnce()
-    // Transaction should include user.update and session.deleteMany
     const transactionArg = mockTransaction.mock.calls[0][0]
     expect(Array.isArray(transactionArg)).toBe(true)
     expect(transactionArg).toHaveLength(2)
@@ -211,7 +226,6 @@ describe('demoteAdmin', () => {
   })
 
   it('returns error when trying to self-demote', async () => {
-    // Session user id = VALID_UUID — demoting the same user should be blocked
     mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Self' })
 
     expect(await demoteAdmin({ userId: VALID_UUID })).toEqual({
@@ -227,7 +241,6 @@ describe('demoteAdmin', () => {
 
     expect(result).toEqual({ success: true, message: 'Bob a été rétrogradé.' })
     expect(mockTransaction).toHaveBeenCalledOnce()
-    // Transaction should include adminAssignment.deleteMany, user.update, and session.deleteMany
     const transactionArg = mockTransaction.mock.calls[0][0]
     expect(Array.isArray(transactionArg)).toBe(true)
     expect(transactionArg).toHaveLength(3)
@@ -296,7 +309,6 @@ describe('updateAdminAssignments', () => {
     await updateAdminAssignments({ userId: VALID_UUID, tournamentIds: [] })
 
     expect(mockTransaction).toHaveBeenCalledOnce()
-    // With no tournamentIds, the transaction array should only contain deleteMany
     const transactionArg = mockTransaction.mock.calls[0][0]
     expect(Array.isArray(transactionArg)).toBe(true)
     expect(transactionArg).toHaveLength(1)
@@ -304,45 +316,22 @@ describe('updateAdminAssignments', () => {
 })
 
 // ---------------------------------------------------------------------------
-// searchUsersAction
+// updateUser
 // ---------------------------------------------------------------------------
 
-describe('searchUsersAction', () => {
-  beforeEach(() => vi.clearAllMocks())
-
-  it('delegates to the searchUsers service', async () => {
-    const mockResults = [
-      { id: 'u1', name: 'Alice', email: 'alice@test.com', image: null },
-    ]
-    mockSearchUsers.mockResolvedValue(mockResults)
-
-    const result = await searchUsersAction('alice')
-
-    expect(result).toEqual(mockResults)
-    expect(mockSearchUsers).toHaveBeenCalledWith('alice')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// updateAdmin
-// ---------------------------------------------------------------------------
-
-describe('updateAdmin', () => {
+describe('updateUser', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
     mockTransaction.mockResolvedValue([])
+    mockUserUpdate.mockResolvedValue({})
   })
 
   it('returns Unauthorized when not authenticated', async () => {
     mockGetSession.mockResolvedValue(null)
 
     expect(
-      await updateAdmin({
-        userId: VALID_UUID,
-        displayName: 'AdminXYZ',
-        tournamentIds: [],
-      }),
+      await updateUser({ userId: VALID_UUID, displayName: 'UserXYZ' }),
     ).toEqual({ success: false, message: 'Unauthorized' })
   })
 
@@ -350,11 +339,7 @@ describe('updateAdmin', () => {
     mockUserFindUnique.mockResolvedValue(null)
 
     expect(
-      await updateAdmin({
-        userId: VALID_UUID,
-        displayName: 'AdminXYZ',
-        tournamentIds: [],
-      }),
+      await updateUser({ userId: VALID_UUID, displayName: 'UserXYZ' }),
     ).toEqual({ success: false, message: 'Utilisateur introuvable.' })
   })
 
@@ -362,33 +347,35 @@ describe('updateAdmin', () => {
     mockUserFindUnique.mockResolvedValue({ role: 'SUPERADMIN', name: 'Super' })
 
     expect(
-      await updateAdmin({
-        userId: VALID_UUID,
-        displayName: 'AdminXYZ',
-        tournamentIds: [],
-      }),
+      await updateUser({ userId: VALID_UUID, displayName: 'UserXYZ' }),
     ).toEqual({
       success: false,
       message: 'Impossible de modifier un super admin.',
     })
   })
 
-  it('returns error when user is not an admin', async () => {
+  it('updates a USER displayName without tournament assignments', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Alice' })
 
-    expect(
-      await updateAdmin({
-        userId: VALID_UUID,
-        displayName: 'AdminXYZ',
-        tournamentIds: [],
-      }),
-    ).toEqual({ success: false, message: "Alice n'est pas admin." })
+    const result = await updateUser({
+      userId: VALID_UUID,
+      displayName: 'AliceXYZ',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Alice a été mis à jour.',
+    })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { displayName: 'AliceXYZ' },
+    })
   })
 
-  it('updates displayName and assignments and returns success', async () => {
+  it('updates an ADMIN displayName and tournament assignments', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
 
-    const result = await updateAdmin({
+    const result = await updateUser({
       userId: VALID_UUID,
       displayName: 'CarolXYZ',
       tournamentIds: [TOURN_UUID],
@@ -401,27 +388,40 @@ describe('updateAdmin', () => {
     expect(mockTransaction).toHaveBeenCalledOnce()
   })
 
-  it('handles empty tournamentIds without createMany call', async () => {
+  it('handles ADMIN with empty tournamentIds', async () => {
     mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
 
-    await updateAdmin({
+    await updateUser({
       userId: VALID_UUID,
       displayName: 'CarolXYZ',
       tournamentIds: [],
     })
 
     expect(mockTransaction).toHaveBeenCalledOnce()
-    // With no tournamentIds: user.update + deleteMany = 2 items
     const transactionArg = mockTransaction.mock.calls[0][0]
     expect(Array.isArray(transactionArg)).toBe(true)
     expect(transactionArg).toHaveLength(2)
   })
 
+  it('allows ADMIN caller to update a USER', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Bob' })
+
+    const result = await updateUser({
+      userId: VALID_UUID,
+      displayName: 'BobXYZ',
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Bob a été mis à jour.',
+    })
+  })
+
   it('returns validation error for invalid UUID', async () => {
-    const result = await updateAdmin({
+    const result = await updateUser({
       userId: 'bad-id',
-      displayName: 'AdminXYZ',
-      tournamentIds: [],
+      displayName: 'UserXYZ',
     })
 
     expect(result.success).toBe(false)
@@ -429,11 +429,268 @@ describe('updateAdmin', () => {
   })
 
   it('returns validation error when displayName is too short', async () => {
-    const result = await updateAdmin({
+    const result = await updateUser({
       userId: VALID_UUID,
       displayName: 'A',
-      tournamentIds: [],
     })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// banUser
+// ---------------------------------------------------------------------------
+
+describe('banUser', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockUserUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(
+      await banUser({ userId: VALID_UUID, bannedUntil: BAN_DATE }),
+    ).toEqual({ success: false, message: 'Unauthorized' })
+  })
+
+  it('returns Unauthorized when caller is a plain USER', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'u-1', role: Role.USER },
+      session: {},
+    })
+
+    expect(
+      await banUser({ userId: VALID_UUID, bannedUntil: BAN_DATE }),
+    ).toEqual({ success: false, message: 'Unauthorized' })
+  })
+
+  it('returns error when target user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(
+      await banUser({ userId: VALID_UUID, bannedUntil: BAN_DATE }),
+    ).toEqual({ success: false, message: 'Utilisateur introuvable.' })
+  })
+
+  it('returns error when trying to ban an admin', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.ADMIN,
+      name: 'AdminUser',
+    })
+
+    expect(
+      await banUser({ userId: VALID_UUID, bannedUntil: BAN_DATE }),
+    ).toEqual({
+      success: false,
+      message: 'Impossible de bannir un administrateur.',
+    })
+  })
+
+  it('bans a USER and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
+
+    const result = await banUser({
+      userId: VALID_UUID,
+      bannedUntil: BAN_DATE,
+      banReason: 'Cheating',
+    })
+
+    expect(result).toEqual({ success: true, message: 'Alice a été banni.' })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { bannedUntil: BAN_DATE, banReason: 'Cheating' },
+    })
+  })
+
+  it('sets banReason to null when not provided', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
+
+    await banUser({ userId: VALID_UUID, bannedUntil: BAN_DATE })
+
+    expect(mockUserUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { bannedUntil: BAN_DATE, banReason: null },
+      }),
+    )
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await banUser({ userId: 'bad-id', bannedUntil: BAN_DATE })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('allows SUPERADMIN to ban a player', async () => {
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Bob' })
+
+    const result = await banUser({
+      userId: VALID_UUID,
+      bannedUntil: BAN_DATE,
+    })
+
+    expect(result).toEqual({ success: true, message: 'Bob a été banni.' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// unbanUser
+// ---------------------------------------------------------------------------
+
+describe('unbanUser', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockUserUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await unbanUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(await unbanUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Utilisateur introuvable.',
+    })
+  })
+
+  it('returns error when user is not banned', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.USER,
+      name: 'Alice',
+      bannedUntil: null,
+    })
+
+    expect(await unbanUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: "Alice n'est pas banni.",
+    })
+  })
+
+  it('unbans a user and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.USER,
+      name: 'Alice',
+      bannedUntil: BAN_DATE,
+    })
+
+    const result = await unbanUser({ userId: VALID_UUID })
+
+    expect(result).toEqual({ success: true, message: 'Alice a été débanni.' })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { bannedUntil: null, banReason: null },
+    })
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await unbanUser({ userId: 'not-valid' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// deleteUser
+// ---------------------------------------------------------------------------
+
+describe('deleteUser', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockUserDelete.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await deleteUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns Unauthorized when caller is ADMIN (not SUPERADMIN)', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+
+    expect(await deleteUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns error when user not found', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(await deleteUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Utilisateur introuvable.',
+    })
+  })
+
+  it('returns error when target is not a USER role', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'AdminGuy' })
+
+    expect(await deleteUser({ userId: OTHER_UUID })).toEqual({
+      success: false,
+      message:
+        "Seuls les utilisateurs avec le rôle Joueur peuvent être supprimés. Rétrogradez d'abord les admins.",
+    })
+  })
+
+  it('returns error when target is SUPERADMIN', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPERADMIN,
+      name: 'Super',
+    })
+
+    expect(await deleteUser({ userId: OTHER_UUID })).toEqual({
+      success: false,
+      message:
+        "Seuls les utilisateurs avec le rôle Joueur peuvent être supprimés. Rétrogradez d'abord les admins.",
+    })
+  })
+
+  it('returns error when trying to self-delete', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Self' })
+
+    expect(await deleteUser({ userId: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Vous ne pouvez pas vous supprimer.',
+    })
+  })
+
+  it('deletes a USER and returns success', async () => {
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
+
+    const result = await deleteUser({ userId: OTHER_UUID })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Alice a été supprimé définitivement.',
+    })
+    expect(mockUserDelete).toHaveBeenCalledWith({
+      where: { id: OTHER_UUID },
+    })
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await deleteUser({ userId: 'not-a-uuid' })
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Validation error')

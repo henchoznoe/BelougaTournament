@@ -73,13 +73,13 @@ describe('ADMIN_ROUTE_ROLES', () => {
   it('maps ADMIN-level routes correctly', () => {
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_DASHBOARD]).toBe(Role.ADMIN)
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_TOURNAMENTS]).toBe(Role.ADMIN)
-    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_PLAYERS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_USERS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_REGISTRATIONS]).toBe(Role.ADMIN)
   })
 
   it('maps SUPERADMIN-level routes correctly', () => {
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SETTINGS]).toBe(Role.SUPERADMIN)
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SPONSORS]).toBe(Role.SUPERADMIN)
-    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_ADMINS]).toBe(Role.SUPERADMIN)
   })
 
   it('every key is a valid admin route starting with /admin', () => {

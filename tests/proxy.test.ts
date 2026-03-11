@@ -174,29 +174,6 @@ describe('proxy — admin route guard', () => {
     expect(response.headers.get('location')).toBe(`${BASE_URL}/unauthorized`)
   })
 
-  it('redirects ADMIN to /unauthorized on superadmin-only route /admin/admins', async () => {
-    mockSession({
-      session: {
-        id: 's6',
-        userId: 'u6',
-        expiresAt: new Date().toISOString(),
-        token: 'tok',
-      },
-      user: {
-        id: 'u6',
-        email: 'admin@test.com',
-        name: 'Admin',
-        role: Role.ADMIN,
-      },
-    })
-    const { proxy } = await import('@/proxy')
-
-    const response = await proxy(makeRequest('/admin/admins'))
-
-    expect(response.status).toBe(307)
-    expect(response.headers.get('location')).toBe(`${BASE_URL}/unauthorized`)
-  })
-
   it('allows SUPERADMIN access to superadmin-only routes', async () => {
     mockSession({
       session: {
@@ -214,11 +191,7 @@ describe('proxy — admin route guard', () => {
     })
     const { proxy } = await import('@/proxy')
 
-    for (const path of [
-      '/admin/sponsors',
-      '/admin/settings',
-      '/admin/admins',
-    ]) {
+    for (const path of ['/admin/sponsors', '/admin/settings']) {
       const response = await proxy(makeRequest(path))
       expect(response.status).toBe(200)
     }

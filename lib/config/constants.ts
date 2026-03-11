@@ -76,15 +76,15 @@ export const TOURNAMENT_STATUS_STYLES: Record<TournamentStatus, string> = {
 
 /** Centralized cache tag names used with cacheTag() and revalidateTag(). */
 export const CACHE_TAGS = {
-  ADMINS: 'admins',
   DASHBOARD_STATS: 'dashboard-stats',
   DASHBOARD_UPCOMING: 'dashboard-upcoming',
   DASHBOARD_REGISTRATIONS: 'dashboard-registrations',
-  PLAYERS: 'players',
+  REGISTRATIONS: 'registrations',
   SETTINGS: 'settings',
   SPONSORS: 'sponsors',
   TOURNAMENTS: 'tournaments',
   TOURNAMENT_OPTIONS: 'tournament-options',
+  USERS: 'users',
 } as const
 
 /** Sentinel date used for permanent bans. */

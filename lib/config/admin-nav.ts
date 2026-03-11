@@ -8,10 +8,10 @@
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  ClipboardList,
   Handshake,
   LayoutDashboard,
   Settings,
-  ShieldCheck,
   Trophy,
   Users,
 } from 'lucide-react'
@@ -43,14 +43,19 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         icon: LayoutDashboard,
       },
       {
+        label: 'Utilisateurs',
+        href: ROUTES.ADMIN_USERS,
+        icon: Users,
+      },
+      {
+        label: 'Inscriptions',
+        href: ROUTES.ADMIN_REGISTRATIONS,
+        icon: ClipboardList,
+      },
+      {
         label: 'Tournois',
         href: ROUTES.ADMIN_TOURNAMENTS,
         icon: Trophy,
-      },
-      {
-        label: 'Joueurs',
-        href: ROUTES.ADMIN_PLAYERS,
-        icon: Users,
       },
     ],
   },
@@ -68,12 +73,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         href: ROUTES.ADMIN_SPONSORS,
         icon: Handshake,
         superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_SPONSORS),
-      },
-      {
-        label: 'Admins',
-        href: ROUTES.ADMIN_ADMINS,
-        icon: ShieldCheck,
-        superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_ADMINS),
       },
     ],
   },
