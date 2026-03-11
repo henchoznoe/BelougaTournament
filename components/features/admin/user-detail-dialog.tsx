@@ -324,7 +324,7 @@ export const UserDetailDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto border-white/10 bg-zinc-950 sm:max-w-lg">
-        {/* Header */}
+        {/* ── Header ── */}
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
@@ -354,46 +354,42 @@ export const UserDetailDialog = ({
               <DialogDescription className="truncate text-sm text-zinc-400">
                 {user.email}
               </DialogDescription>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {getRoleBadge()}
+                {getStatusBadge()}
+              </div>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Info badges & details */}
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            {getRoleBadge()}
-            {getStatusBadge()}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            {user.discordId && (
-              <div className="flex items-center gap-1.5 text-zinc-400">
-                <span className="text-zinc-600">Discord :</span>
-                {user.discordId}
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 text-zinc-400">
-              <Calendar className="size-3 text-zinc-600" />
-              {formatDate(user.createdAt)}
+        {/* ── Informations ── */}
+        <div className="rounded-xl border border-white/5 bg-white/2 p-3">
+          <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Calendar className="size-3 shrink-0 text-zinc-600" />
+              <span>Inscrit le {formatDate(user.createdAt)}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-zinc-400">
-              <ClipboardList className="size-3 text-zinc-600" />
-              {user._count.registrations} inscription
-              {user._count.registrations !== 1 ? 's' : ''}
+            <div className="flex items-center gap-2 text-zinc-400">
+              <ClipboardList className="size-3 shrink-0 text-zinc-600" />
+              <span>
+                {user._count.registrations} inscription
+                {user._count.registrations !== 1 ? 's' : ''}
+              </span>
             </div>
             {user.role === Role.ADMIN && (
-              <div className="flex items-center gap-1.5 text-zinc-400">
-                <Trophy className="size-3 text-zinc-600" />
-                {user.adminOf.length} tournoi
-                {user.adminOf.length !== 1 ? 's' : ''} assigné
-                {user.adminOf.length !== 1 ? 's' : ''}
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Trophy className="size-3 shrink-0 text-zinc-600" />
+                <span>
+                  {user.adminOf.length} tournoi
+                  {user.adminOf.length !== 1 ? 's' : ''} assigné
+                  {user.adminOf.length !== 1 ? 's' : ''}
+                </span>
               </div>
             )}
           </div>
 
-          {/* Ban details (if banned) */}
           {banned && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-300">
+            <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-300">
               {isPermanentBan ? (
                 <p>Ban permanent</p>
               ) : (
@@ -410,12 +406,14 @@ export const UserDetailDialog = ({
           )}
         </div>
 
-        {/* Edit section */}
+        {/* ── Modification ── */}
         {canEdit && (
-          <>
-            <div className="border-t border-white/5" />
+          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
             <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-              {/* Display name */}
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Modification
+              </p>
+
               <div className="space-y-1.5">
                 <label
                   htmlFor="userDisplayName"
@@ -436,76 +434,68 @@ export const UserDetailDialog = ({
                 )}
               </div>
 
-              {/* Tournament assignments (ADMIN + SUPERADMIN viewer) */}
               {showAssignments && (
-                <>
-                  <div className="border-t border-white/5" />
-                  <div className="space-y-1.5">
-                    <p className="text-sm font-medium text-zinc-300">
-                      Tournois assignés
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-zinc-300">
+                    Tournois assignés
+                  </p>
+                  {tournaments.length === 0 ? (
+                    <p className="py-3 text-center text-sm text-zinc-500">
+                      Aucun tournoi disponible.
                     </p>
-                    {tournaments.length === 0 ? (
-                      <p className="py-4 text-center text-sm text-zinc-500">
-                        Aucun tournoi disponible.
-                      </p>
-                    ) : (
-                      <div className="max-h-48 space-y-1 overflow-y-auto">
-                        {tournaments.map(tournament => {
-                          const isChecked = selectedIds.has(tournament.id)
-                          const status = tournament.status as TournamentStatus
-                          const statusLabel =
-                            TOURNAMENT_STATUS_LABELS[status] ??
-                            tournament.status
-                          const statusClassName =
-                            TOURNAMENT_STATUS_STYLES[status] ??
-                            'bg-zinc-500/10 text-zinc-400'
+                  ) : (
+                    <div className="max-h-48 space-y-1 overflow-y-auto">
+                      {tournaments.map(tournament => {
+                        const isChecked = selectedIds.has(tournament.id)
+                        const status = tournament.status as TournamentStatus
+                        const statusLabel =
+                          TOURNAMENT_STATUS_LABELS[status] ?? tournament.status
+                        const statusClassName =
+                          TOURNAMENT_STATUS_STYLES[status] ??
+                          'bg-zinc-500/10 text-zinc-400'
 
-                          return (
-                            <button
-                              key={tournament.id}
-                              type="button"
-                              onClick={() => handleToggle(tournament.id)}
+                        return (
+                          <button
+                            key={tournament.id}
+                            type="button"
+                            onClick={() => handleToggle(tournament.id)}
+                            className={cn(
+                              'flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors',
+                              isChecked
+                                ? 'border-blue-500/30 bg-blue-500/5'
+                                : 'border-white/5 bg-white/2 hover:border-white/10',
+                            )}
+                          >
+                            <div
                               className={cn(
-                                'flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors',
+                                'flex size-4 shrink-0 items-center justify-center rounded-[4px] border shadow-xs transition-colors',
                                 isChecked
-                                  ? 'border-blue-500/30 bg-blue-500/5'
-                                  : 'border-white/5 bg-white/2 hover:border-white/10',
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : 'border-input dark:bg-input/30',
                               )}
                             >
-                              <div
-                                className={cn(
-                                  'flex size-4 shrink-0 items-center justify-center rounded-[4px] border shadow-xs transition-colors',
-                                  isChecked
-                                    ? 'border-primary bg-primary text-primary-foreground'
-                                    : 'border-input dark:bg-input/30',
-                                )}
-                              >
-                                {isChecked && <Check className="size-3" />}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <Trophy className="size-3 shrink-0 text-zinc-500" />
-                                  <span className="truncate text-sm font-medium text-zinc-200">
-                                    {tournament.title}
-                                  </span>
-                                </div>
-                              </div>
-                              <span
-                                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusClassName}`}
-                              >
-                                {statusLabel}
+                              {isChecked && <Check className="size-3" />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="flex items-center gap-1.5 truncate text-sm font-medium text-zinc-200">
+                                <Trophy className="size-3 shrink-0 text-zinc-500" />
+                                {tournament.title}
                               </span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </>
+                            </div>
+                            <span
+                              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusClassName}`}
+                            >
+                              {statusLabel}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
 
-              {/* Save button */}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 border-t border-white/5 pt-3">
                 {showAssignments && (
                   <p className="text-xs text-zinc-500">
                     {selectedIds.size} tournoi
@@ -530,160 +520,203 @@ export const UserDetailDialog = ({
                 </Button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
-        {/* Ban management (USER role + viewer is ADMIN+) */}
+        {/* ── Gestion du ban ── */}
         {showBanManagement && (
-          <>
-            <div className="border-t border-white/5" />
-            <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                Gestion du ban
-              </p>
+          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+              Gestion du ban
+            </p>
 
-              {banned ? (
-                confirmAction === 'unban' ? (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      disabled={isActionPending}
-                      onClick={handleUnban}
-                      className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                    >
-                      {isActionPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <ShieldOff className="size-4" />
-                      )}
-                      Confirmer le déban
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConfirmAction(null)}
-                      disabled={isActionPending}
-                      className="text-zinc-500"
-                    >
-                      Annuler
-                    </Button>
-                  </div>
-                ) : (
+            {banned ? (
+              confirmAction === 'unban' ? (
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     size="sm"
-                    onClick={() => setConfirmAction('unban')}
+                    disabled={isActionPending}
+                    onClick={handleUnban}
                     className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
                   >
-                    <ShieldOff className="size-4" />
-                    Débannir
+                    {isActionPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ShieldOff className="size-4" />
+                    )}
+                    Confirmer le déban
                   </Button>
-                )
-              ) : showBanForm ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    {BAN_DURATION_OPTIONS.map(option => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setDuration(option.value)}
-                        className={cn(
-                          'rounded-lg border px-3 py-2 text-sm transition-colors',
-                          duration === option.value
-                            ? 'border-red-500/30 bg-red-500/10 text-red-400'
-                            : 'border-white/5 bg-white/2 text-zinc-400 hover:border-white/10 hover:text-zinc-200',
-                        )}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {duration === 'custom' && (
-                    <DateTimePicker
-                      value={customDate}
-                      onChange={setCustomDate}
-                      disabled={isActionPending}
-                      placeholder="Date et heure de fin de ban"
-                    />
-                  )}
-
-                  <Input
-                    placeholder="Raison (optionnel)"
-                    value={banReason}
-                    onChange={e => setBanReason(e.target.value)}
-                    maxLength={500}
-                    className="border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600"
-                  />
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      disabled={
-                        isActionPending ||
-                        (duration === 'custom' && !customDate)
-                      }
-                      onClick={handleBan}
-                      className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                    >
-                      {isActionPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Ban className="size-4" />
-                      )}
-                      Bannir
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowBanForm(false)}
-                      disabled={isActionPending}
-                      className="text-zinc-500"
-                    >
-                      Annuler
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setConfirmAction(null)}
+                    disabled={isActionPending}
+                    className="text-zinc-500"
+                  >
+                    Annuler
+                  </Button>
                 </div>
               ) : (
                 <Button
                   size="sm"
-                  onClick={() => setShowBanForm(true)}
-                  className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                  onClick={() => setConfirmAction('unban')}
+                  className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
                 >
-                  <Ban className="size-4" />
-                  Bannir
+                  <ShieldOff className="size-4" />
+                  Débannir
                 </Button>
-              )}
-            </div>
-          </>
+              )
+            ) : showBanForm ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {BAN_DURATION_OPTIONS.map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setDuration(option.value)}
+                      className={cn(
+                        'rounded-lg border px-3 py-2 text-sm transition-colors',
+                        duration === option.value
+                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                          : 'border-white/5 bg-white/2 text-zinc-400 hover:border-white/10 hover:text-zinc-200',
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {duration === 'custom' && (
+                  <DateTimePicker
+                    value={customDate}
+                    onChange={setCustomDate}
+                    disabled={isActionPending}
+                    placeholder="Date et heure de fin de ban"
+                  />
+                )}
+
+                <Input
+                  placeholder="Raison (optionnel)"
+                  value={banReason}
+                  onChange={e => setBanReason(e.target.value)}
+                  maxLength={500}
+                  className="border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600"
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    disabled={
+                      isActionPending || (duration === 'custom' && !customDate)
+                    }
+                    onClick={handleBan}
+                    className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                  >
+                    {isActionPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Ban className="size-4" />
+                    )}
+                    Bannir
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowBanForm(false)}
+                    disabled={isActionPending}
+                    className="text-zinc-500"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => setShowBanForm(true)}
+                className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+              >
+                <Ban className="size-4" />
+                Bannir
+              </Button>
+            )}
+          </div>
         )}
 
-        {/* Danger zone (SUPERADMIN only) */}
-        {showDangerZone && (
-          <>
-            <div className="border-t border-white/5" />
-            <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wider text-red-400/60">
-                Zone dangereuse
-              </p>
+        {/* ── Gestion du rôle ── */}
+        {viewerIsSuperAdmin && user.role === Role.USER && !banned && (
+          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+              Gestion du rôle
+            </p>
 
-              <div className="space-y-2">
-                {/* Promote (USER only, not banned) */}
-                {user.role === Role.USER &&
-                  !banned &&
-                  (confirmAction === 'promote' ? (
-                    <div className="flex items-center gap-2">
+            {confirmAction === 'promote' ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  disabled={isActionPending}
+                  onClick={handlePromote}
+                  className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+                >
+                  {isActionPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="size-4" />
+                  )}
+                  Confirmer la promotion
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmAction(null)}
+                  disabled={isActionPending}
+                  className="text-zinc-500"
+                >
+                  Annuler
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setConfirmAction('promote')}
+                className="gap-2 text-blue-400 hover:text-blue-300"
+              >
+                <ShieldCheck className="size-4" />
+                Promouvoir admin
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* ── Zone dangereuse ── */}
+        {showDangerZone && (
+          <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-red-400/60">
+              Zone dangereuse
+            </p>
+
+            <div className="space-y-2">
+              {/* Demote (ADMIN only) */}
+              {user.role === Role.ADMIN &&
+                (confirmAction === 'demote' ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-zinc-400">
+                      Les assignations de tournois seront supprimées.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         size="sm"
                         disabled={isActionPending}
-                        onClick={handlePromote}
-                        className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+                        onClick={handleDemote}
+                        className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
                       >
                         {isActionPending ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : (
-                          <ShieldCheck className="size-4" />
+                          <ShieldOff className="size-4" />
                         )}
-                        Confirmer la promotion
+                        Confirmer la rétrogradation
                       </Button>
                       <Button
                         variant="ghost"
@@ -695,109 +728,65 @@ export const UserDetailDialog = ({
                         Annuler
                       </Button>
                     </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirmAction('promote')}
-                      className="gap-2 text-blue-400 hover:text-blue-300"
-                    >
-                      <ShieldCheck className="size-4" />
-                      Promouvoir admin
-                    </Button>
-                  ))}
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmAction('demote')}
+                    className="gap-2 text-red-400 hover:text-red-300"
+                  >
+                    <ShieldOff className="size-4" />
+                    Rétrograder
+                  </Button>
+                ))}
 
-                {/* Demote (ADMIN only) */}
-                {user.role === Role.ADMIN &&
-                  (confirmAction === 'demote' ? (
-                    <div className="flex flex-col gap-2">
-                      <p className="text-xs text-zinc-400">
-                        Les assignations de tournois seront supprimées.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          disabled={isActionPending}
-                          onClick={handleDemote}
-                          className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                        >
-                          {isActionPending ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <ShieldOff className="size-4" />
-                          )}
-                          Confirmer la rétrogradation
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setConfirmAction(null)}
-                          disabled={isActionPending}
-                          className="text-zinc-500"
-                        >
-                          Annuler
-                        </Button>
-                      </div>
+              {/* Delete (USER only) */}
+              {user.role === Role.USER &&
+                (confirmAction === 'delete' ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-red-400">
+                      Toutes les données associées (inscriptions, équipes, etc.)
+                      seront définitivement supprimées.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        size="sm"
+                        disabled={isActionPending}
+                        onClick={handleDelete}
+                        className="gap-2 bg-red-600 text-white hover:bg-red-500"
+                      >
+                        {isActionPending ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-4" />
+                        )}
+                        Confirmer la suppression
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmAction(null)}
+                        disabled={isActionPending}
+                        className="text-zinc-500"
+                      >
+                        Annuler
+                      </Button>
                     </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirmAction('demote')}
-                      className="gap-2 text-red-400 hover:text-red-300"
-                    >
-                      <ShieldOff className="size-4" />
-                      Rétrograder
-                    </Button>
-                  ))}
-
-                {/* Delete (USER only) */}
-                {user.role === Role.USER &&
-                  (confirmAction === 'delete' ? (
-                    <div className="flex flex-col gap-2">
-                      <p className="text-xs text-red-400">
-                        Toutes les données associées (inscriptions, équipes,
-                        etc.) seront définitivement supprimées.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          disabled={isActionPending}
-                          onClick={handleDelete}
-                          className="gap-2 bg-red-600 text-white hover:bg-red-500"
-                        >
-                          {isActionPending ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="size-4" />
-                          )}
-                          Confirmer la suppression
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setConfirmAction(null)}
-                          disabled={isActionPending}
-                          className="text-zinc-500"
-                        >
-                          Annuler
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirmAction('delete')}
-                      className="gap-2 text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 className="size-4" />
-                      Supprimer l'utilisateur
-                    </Button>
-                  ))}
-              </div>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmAction('delete')}
+                    className="gap-2 text-red-400 hover:text-red-300"
+                  >
+                    <Trash2 className="size-4" />
+                    Supprimer l'utilisateur
+                  </Button>
+                ))}
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>
