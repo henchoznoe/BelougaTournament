@@ -99,7 +99,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           format: tournament.format,
           teamSize: tournament.teamSize,
           game: fromNullable(tournament.game),
-          imageUrl: fromNullable(tournament.imageUrl),
           rules: fromNullable(tournament.rules),
           prize: fromNullable(tournament.prize),
           toornamentId: fromNullable(tournament.toornamentId),
@@ -130,7 +129,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           format: TournamentFormat.SOLO,
           teamSize: 1,
           game: '',
-          imageUrl: '',
           rules: '',
           prize: '',
           toornamentId: '',
@@ -276,14 +274,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             error={errors.game?.message}
             disabled={isPending}
             {...register('game')}
-          />
-          <FormField
-            id="imageUrl"
-            label="Image (URL)"
-            placeholder="https://example.com/image.png"
-            error={errors.imageUrl?.message}
-            disabled={isPending}
-            {...register('imageUrl')}
           />
         </div>
       </div>

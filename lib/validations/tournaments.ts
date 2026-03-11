@@ -93,7 +93,6 @@ const baseTournamentFields = {
     .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
     .optional()
     .default(''),
-  imageUrl: optionalUrl,
   rules: z
     .string()
     .trim()

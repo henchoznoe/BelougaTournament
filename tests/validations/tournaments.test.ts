@@ -40,7 +40,6 @@ const VALID_TOURNAMENT = {
   format: 'TEAM' as const,
   teamSize: 5,
   game: 'Valorant',
-  imageUrl: '',
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
   toornamentId: '',
@@ -210,10 +209,9 @@ describe('tournamentSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('accepts valid URLs for imageUrl and streamUrl', () => {
+  it('accepts valid URL for streamUrl', () => {
     const result = tournamentSchema.safeParse({
       ...VALID_TOURNAMENT,
-      imageUrl: 'https://example.com/banner.png',
       streamUrl: 'https://twitch.tv/belouga',
     })
     expect(result.success).toBe(true)
@@ -326,15 +324,6 @@ describe('tournamentSchema', () => {
   })
 
   // --- URLs ---
-
-  it('rejects an invalid imageUrl', () => {
-    expect(
-      tournamentSchema.safeParse({
-        ...VALID_TOURNAMENT,
-        imageUrl: 'not-a-url',
-      }).success,
-    ).toBe(false)
-  })
 
   it('rejects an invalid streamUrl', () => {
     expect(
