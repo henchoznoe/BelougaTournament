@@ -18,7 +18,8 @@ import {
   Trophy,
 } from 'lucide-react'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import { UserDetailDialog } from '@/components/features/admin/user-detail-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -63,11 +64,23 @@ export const UsersList = ({
   tournaments,
   viewerRole,
 }: UsersListProps) => {
+  const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
   const [selectedUser, setSelectedUser] = useState<UserRow | undefined>()
+
+  // Deep-link: auto-open dialog when ?userId=xxx is present
+  useEffect(() => {
+    const userId = searchParams.get('userId')
+    if (userId && !selectedUser) {
+      const match = users.find(u => u.id === userId)
+      if (match) {
+        setSelectedUser(match)
+      }
+    }
+  }, [searchParams, users, selectedUser])
 
   const filtered = useMemo(() => {
     let result = users

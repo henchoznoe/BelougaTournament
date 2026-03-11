@@ -9,6 +9,7 @@
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { UsersList } from '@/components/features/admin/users-list'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -44,11 +45,13 @@ const AdminUsersPage = async () => {
         </p>
       </div>
 
-      <UsersList
-        users={users}
-        tournaments={tournaments}
-        viewerRole={session.user.role as Role}
-      />
+      <Suspense>
+        <UsersList
+          users={users}
+          tournaments={tournaments}
+          viewerRole={session.user.role as Role}
+        />
+      </Suspense>
     </div>
   )
 }

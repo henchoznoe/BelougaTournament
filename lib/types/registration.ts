@@ -7,6 +7,7 @@
  */
 
 import type {
+  FieldType,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -15,11 +16,13 @@ import type {
 export type RegistrationRow = {
   id: string
   createdAt: Date
+  fieldValues: Record<string, string | number>
   user: {
     id: string
     name: string
     displayName: string
     image: string | null
+    bannedUntil: Date | null
   }
   tournament: {
     id: string
@@ -27,9 +30,24 @@ export type RegistrationRow = {
     slug: string
     format: TournamentFormat
     status: TournamentStatus
+    fields: {
+      label: string
+      type: FieldType
+      required: boolean
+      order: number
+    }[]
   }
   team: {
     id: string
     name: string
+    captainId: string
+    isFull: boolean
   } | null
+}
+
+/** Lightweight team option for the "change team" dropdown. */
+export type TeamOption = {
+  id: string
+  name: string
+  isFull: boolean
 }
