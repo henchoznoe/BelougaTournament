@@ -18,7 +18,8 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import { RegistrationDetailDialog } from '@/components/features/admin/registration-detail-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,6 +60,7 @@ export const RegistrationsList = ({
   teamsByTournament,
   viewerRole,
 }: RegistrationsListProps) => {
+  const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
   const [formatFilter, setFormatFilter] = useState<FormatFilter>('all')
   const [tournamentFilter, setTournamentFilter] = useState('all')
@@ -66,6 +68,19 @@ export const RegistrationsList = ({
   const [selectedRegistration, setSelectedRegistration] = useState<
     RegistrationRow | undefined
   >()
+
+  // Deep-link: auto-open dialog when ?registrationId=xxx is present
+  useEffect(() => {
+    const registrationId = searchParams.get('registrationId')
+    if (registrationId && !selectedRegistration) {
+      const match = registrations.find(r => r.id === registrationId)
+      if (match) {
+        setSelectedRegistration(match)
+      }
+      // Clear the search param so closing the dialog does not re-trigger the effect
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [searchParams, registrations, selectedRegistration])
 
   // Derive unique tournaments for the tournament dropdown
   const tournaments = useMemo(() => {

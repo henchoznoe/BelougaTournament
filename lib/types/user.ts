@@ -7,7 +7,11 @@
  */
 
 import type { BAN_DURATION_OPTIONS } from '@/lib/config/constants'
-import type { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
+import type {
+  Role,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** A user as displayed in the unified admin users table. */
 export type UserRow = {
@@ -21,9 +25,7 @@ export type UserRow = {
   createdAt: Date
   bannedUntil: Date | null
   banReason: string | null
-  _count: {
-    registrations: number
-  }
+  registrations: UserRegistrationRow[]
   adminOf: {
     id: string
     tournamentId: string
@@ -33,6 +35,18 @@ export type UserRow = {
       slug: string
     }
   }[]
+}
+
+/** A registration entry nested inside a UserRow. */
+export type UserRegistrationRow = {
+  id: string
+  createdAt: Date
+  tournament: {
+    title: string
+    format: TournamentFormat
+    status: TournamentStatus
+  }
+  team: { name: string } | null
 }
 
 /** Minimal tournament data for the assignment picker. */

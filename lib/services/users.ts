@@ -53,9 +53,23 @@ export const getUsers = async (): Promise<UserRow[]> => {
         createdAt: true,
         bannedUntil: true,
         banReason: true,
-        _count: {
+        registrations: {
+          orderBy: { createdAt: 'desc' },
           select: {
-            registrations: true,
+            id: true,
+            createdAt: true,
+            tournament: {
+              select: {
+                title: true,
+                format: true,
+                status: true,
+              },
+            },
+            team: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
         adminOf: {

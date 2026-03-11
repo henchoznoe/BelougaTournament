@@ -16,14 +16,17 @@ import {
   Check,
   ClipboardList,
   Crown,
+  ExternalLink,
   Loader2,
   Save,
   ShieldCheck,
   ShieldOff,
   Trash2,
   Trophy,
+  Users,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
@@ -53,6 +56,7 @@ import {
   TOURNAMENT_STATUS_LABELS,
   TOURNAMENT_STATUS_STYLES,
 } from '@/lib/config/constants'
+import { ROUTES } from '@/lib/config/routes'
 import type {
   BanDurationValue,
   TournamentOption,
@@ -63,7 +67,7 @@ import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
 import { updateUserSchema } from '@/lib/validations/users'
 import type { TournamentStatus } from '@/prisma/generated/prisma/enums'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 const DURATION_TO_DAYS: Record<string, number> = {
   '1d': 1,
@@ -398,8 +402,8 @@ export const UserDetailDialog = ({
             <div className="flex items-center gap-2 text-zinc-400">
               <ClipboardList className="size-3 shrink-0 text-zinc-600" />
               <span>
-                {user._count.registrations} inscription
-                {user._count.registrations !== 1 ? 's' : ''}
+                {user.registrations.length} inscription
+                {user.registrations.length !== 1 ? 's' : ''}
               </span>
             </div>
             {user.role === Role.ADMIN && (
@@ -431,6 +435,59 @@ export const UserDetailDialog = ({
             </div>
           )}
         </div>
+
+        {/* ── Inscriptions ── */}
+        {user.registrations.length > 0 && (
+          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+              Inscriptions
+            </p>
+            <div className="max-h-48 space-y-1 overflow-y-auto">
+              {user.registrations.map(reg => {
+                const status = reg.tournament.status as TournamentStatus
+                const statusLabel =
+                  TOURNAMENT_STATUS_LABELS[status] ?? reg.tournament.status
+                const statusClassName =
+                  TOURNAMENT_STATUS_STYLES[status] ??
+                  'bg-zinc-500/10 text-zinc-400'
+
+                return (
+                  <Link
+                    key={reg.id}
+                    href={`${ROUTES.ADMIN_REGISTRATIONS}?registrationId=${reg.id}`}
+                    className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/2 px-3 py-2 transition-colors hover:border-white/10 hover:bg-white/4"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5 truncate text-sm font-medium text-zinc-200">
+                        <Trophy className="size-3 shrink-0 text-zinc-500" />
+                        {reg.tournament.title}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-zinc-500">
+                        <span>
+                          {reg.tournament.format === TournamentFormat.SOLO
+                            ? 'Solo'
+                            : 'Equipe'}
+                        </span>
+                        {reg.team && (
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="size-3" />
+                            {reg.team.name}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusClassName}`}
+                    >
+                      {statusLabel}
+                    </span>
+                    <ExternalLink className="size-3 shrink-0 text-zinc-600" />
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ── Modification ── */}
         {canEdit && (

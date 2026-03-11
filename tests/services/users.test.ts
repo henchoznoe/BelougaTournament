@@ -66,7 +66,34 @@ const MOCK_USERS = [
     createdAt: new Date('2026-01-01'),
     bannedUntil: null,
     banReason: null,
-    _count: { registrations: 3 },
+    registrations: [
+      {
+        id: 'reg-1',
+        createdAt: new Date('2026-01-15'),
+        tournament: {
+          title: 'Tournoi Alpha',
+          format: 'SOLO',
+          status: 'PUBLISHED',
+        },
+        team: null,
+      },
+      {
+        id: 'reg-2',
+        createdAt: new Date('2026-01-10'),
+        tournament: { title: 'Tournoi Beta', format: 'TEAM', status: 'DRAFT' },
+        team: { name: 'Les Loups' },
+      },
+      {
+        id: 'reg-3',
+        createdAt: new Date('2026-01-05'),
+        tournament: {
+          title: 'Tournoi Gamma',
+          format: 'SOLO',
+          status: 'ARCHIVED',
+        },
+        team: null,
+      },
+    ],
     adminOf: [],
   },
   {
@@ -80,7 +107,7 @@ const MOCK_USERS = [
     createdAt: new Date('2026-02-01'),
     bannedUntil: null,
     banReason: null,
-    _count: { registrations: 0 },
+    registrations: [],
     adminOf: [
       {
         id: 'assign-1',
