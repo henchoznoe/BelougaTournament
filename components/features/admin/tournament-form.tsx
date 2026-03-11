@@ -154,6 +154,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   })
 
   const format = useWatch({ control, name: 'format' })
+  const isSolo = format === TournamentFormat.SOLO
   const toornamentIdValue = useWatch({ control, name: 'toornamentId' }) ?? ''
 
   const onSubmit = (data: TournamentFormInput) => {
@@ -285,7 +286,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase">
           Format
         </h3>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div
+          className={cn(
+            'grid gap-4',
+            isSolo ? 'sm:grid-cols-2' : 'sm:grid-cols-3',
+          )}
+        >
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-zinc-400">
               Type de format
@@ -319,27 +325,34 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               <p className="text-xs text-red-400">{errors.format.message}</p>
             )}
           </div>
-          <FormField
-            id="teamSize"
-            label="Taille d'équipe"
-            type="number"
-            placeholder="1"
-            error={errors.teamSize?.message}
-            disabled={isPending || format === TournamentFormat.SOLO}
-            {...register('teamSize', { valueAsNumber: true })}
-          />
-          <FormField
-            id="maxTeams"
-            label="Nombre max. d'équipes"
-            type="number"
-            placeholder="Illimité"
-            error={errors.maxTeams?.message}
-            disabled={isPending}
-            {...register('maxTeams', {
-              setValueAs: (v: string) =>
-                v === '' || v === undefined ? null : Number(v),
-            })}
-          />
+          {!isSolo && (
+            <FormField
+              id="teamSize"
+              label="Taille d'équipe"
+              type="number"
+              placeholder="1"
+              error={errors.teamSize?.message}
+              disabled={isPending}
+              {...register('teamSize', { valueAsNumber: true })}
+            />
+          )}
+          <div className="space-y-1.5">
+            <FormField
+              id="maxTeams"
+              label={
+                isSolo ? 'Nombre max. de joueurs' : "Nombre max. d'équipes"
+              }
+              type="number"
+              placeholder="Illimité"
+              error={errors.maxTeams?.message}
+              disabled={isPending}
+              {...register('maxTeams', {
+                setValueAs: (v: string) =>
+                  v === '' || v === undefined ? null : Number(v),
+              })}
+            />
+            <p className="text-xs text-zinc-500">Si vide, places illimitées.</p>
+          </div>
         </div>
       </div>
 
