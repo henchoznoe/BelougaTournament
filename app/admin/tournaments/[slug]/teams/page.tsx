@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { TournamentTeamsList } from '@/components/features/admin/tournament-teams-list'
 import { getTeams, getTournamentBySlug } from '@/lib/services/tournaments'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface AdminTournamentTeamsPageProps {
   params: Promise<{ slug: string }>
@@ -31,7 +32,7 @@ const AdminTournamentTeamsPage = async ({
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
 
-  if (!tournament) {
+  if (!tournament || tournament.format !== TournamentFormat.TEAM) {
     notFound()
   }
 

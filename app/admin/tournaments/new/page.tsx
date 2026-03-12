@@ -8,13 +8,22 @@
 
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { TournamentForm } from '@/components/features/admin/tournament-form'
+import { ROUTES } from '@/lib/config/routes'
+import { getSession } from '@/lib/services/auth'
 
 export const metadata: Metadata = {
   title: 'Nouveau tournoi',
 }
 
-const AdminNewTournamentPage = () => {
+const AdminNewTournamentPage = async () => {
+  const session = await getSession()
+
+  if (!session?.user) {
+    redirect(ROUTES.LOGIN)
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Page heading */}

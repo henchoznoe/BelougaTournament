@@ -44,6 +44,7 @@ export const TournamentDetailTabs = ({
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               isActive

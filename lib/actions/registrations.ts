@@ -229,6 +229,7 @@ export const adminUpdateRegistrationFields = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
 
     return {
       success: true,

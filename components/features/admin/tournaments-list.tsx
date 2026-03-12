@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/tournaments-list.tsx
- * Description: Client component displaying the tournaments table with CRUD and status actions.
+ * Description: Client component displaying the tournaments table with clickable rows and actions dropdown.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,21 +8,14 @@
 
 'use client'
 
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { TournamentDeleteDialog } from '@/components/features/admin/tournament-delete-dialog'
+import { useMemo, useState } from 'react'
+import { TournamentActionsDropdown } from '@/components/features/admin/tournament-actions-dropdown'
 import { TournamentStatusBadge } from '@/components/features/admin/tournament-status-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -31,7 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { updateTournamentStatus } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
 import { formatShortDate } from '@/lib/utils/formatting'
@@ -51,10 +43,6 @@ interface TournamentsListProps {
 
 export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   const [search, setSearch] = useState('')
-  const [deletingTournament, setDeletingTournament] = useState<
-    TournamentListItem | undefined
-  >()
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   const filtered = useMemo(() => {
@@ -67,25 +55,6 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
         t.game?.toLowerCase().includes(q),
     )
   }, [tournaments, search])
-
-  const handleStatusChange = (
-    tournament: TournamentListItem,
-    newStatus: TournamentStatus,
-  ) => {
-    if (newStatus === tournament.status) return
-    startTransition(async () => {
-      const result = await updateTournamentStatus({
-        id: tournament.id,
-        status: newStatus,
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-    })
-  }
 
   const statusCount = (status: TournamentStatus) =>
     tournaments.filter(t => t.status === status).length
@@ -144,7 +113,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
@@ -163,8 +132,8 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                 <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Statut
                 </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Actions
+                <TableHead className="w-10 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -172,7 +141,18 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
               {filtered.map(tournament => (
                 <TableRow
                   key={tournament.id}
-                  className="border-white/5 hover:bg-white/2"
+                  tabIndex={0}
+                  role="link"
+                  className="cursor-pointer border-white/5 hover:bg-white/4"
+                  onClick={() =>
+                    router.push(ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug))
+                  }
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      router.push(ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug))
+                    }
+                  }}
                 >
                   {/* Title & game */}
                   <TableCell>
@@ -218,73 +198,18 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
 
                   {/* Status */}
                   <TableCell>
-                    <Select
-                      value={tournament.status}
-                      onValueChange={val =>
-                        handleStatusChange(tournament, val as TournamentStatus)
-                      }
-                      disabled={isPending}
-                    >
-                      <SelectTrigger className="h-7 w-auto gap-1.5 rounded-full border-none bg-transparent p-0 shadow-none">
-                        <TournamentStatusBadge status={tournament.status} />
-                      </SelectTrigger>
-                      <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value={TournamentStatus.DRAFT}>
-                          Brouillon
-                        </SelectItem>
-                        <SelectItem value={TournamentStatus.PUBLISHED}>
-                          Publié
-                        </SelectItem>
-                        <SelectItem value={TournamentStatus.ARCHIVED}>
-                          Archivé
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <TournamentStatusBadge status={tournament.status} />
                   </TableCell>
 
                   {/* Actions */}
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        asChild
-                        className="text-zinc-400"
-                      >
-                        <Link
-                          href={`${ROUTES.ADMIN_TOURNAMENTS}/${tournament.slug}`}
-                          aria-label="Modifier"
-                        >
-                          <Pencil className="size-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setDeletingTournament(tournament)}
-                        className="text-zinc-400 hover:text-red-400"
-                        aria-label="Supprimer"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                  <TableCell onClick={e => e.stopPropagation()}>
+                    <TournamentActionsDropdown tournament={tournament} />
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-      )}
-
-      {/* Delete confirmation dialog */}
-      {deletingTournament && (
-        <TournamentDeleteDialog
-          open={!!deletingTournament}
-          onOpenChange={open => {
-            if (!open) setDeletingTournament(undefined)
-          }}
-          tournament={deletingTournament}
-        />
       )}
     </>
   )

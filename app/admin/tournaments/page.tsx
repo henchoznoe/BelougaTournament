@@ -8,7 +8,10 @@
 
 import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { TournamentsList } from '@/components/features/admin/tournaments-list'
+import { ROUTES } from '@/lib/config/routes'
+import { getSession } from '@/lib/services/auth'
 import { getTournaments } from '@/lib/services/tournaments'
 
 export const metadata: Metadata = {
@@ -16,10 +19,16 @@ export const metadata: Metadata = {
 }
 
 const AdminTournamentsPage = async () => {
+  const session = await getSession()
+
+  if (!session?.user) {
+    redirect(ROUTES.LOGIN)
+  }
+
   const tournaments = await getTournaments()
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       {/* Page heading */}
       <div className="space-y-1">
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">

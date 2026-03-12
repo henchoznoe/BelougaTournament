@@ -47,7 +47,7 @@ import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
 
-type FormatFilter = 'all' | 'SOLO' | 'TEAM'
+type FormatFilter = 'all' | TournamentFormat
 
 interface RegistrationsListProps {
   registrations: RegistrationRow[]
@@ -170,13 +170,16 @@ export const RegistrationsList = ({
         </div>
         <div className="flex items-center gap-2">
           <Select value={formatFilter} onValueChange={handleFormatFilter}>
-            <SelectTrigger className="w-28 border-white/10 bg-white/5 text-zinc-200">
+            <SelectTrigger
+              aria-label="Filtrer par format"
+              className="w-28 border-white/10 bg-white/5 text-zinc-200"
+            >
               <SelectValue placeholder="Format" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
               <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="SOLO">Solo</SelectItem>
-              <SelectItem value="TEAM">Equipe</SelectItem>
+              <SelectItem value={TournamentFormat.SOLO}>Solo</SelectItem>
+              <SelectItem value={TournamentFormat.TEAM}>Equipe</SelectItem>
             </SelectContent>
           </Select>
           {tournaments.length > 1 && (
@@ -184,7 +187,10 @@ export const RegistrationsList = ({
               value={tournamentFilter}
               onValueChange={handleTournamentFilter}
             >
-              <SelectTrigger className="w-44 border-white/10 bg-white/5 text-zinc-200">
+              <SelectTrigger
+                aria-label="Filtrer par tournoi"
+                className="w-44 border-white/10 bg-white/5 text-zinc-200"
+              >
                 <SelectValue placeholder="Tournoi" />
               </SelectTrigger>
               <SelectContent className="border-white/10 bg-zinc-950">
@@ -220,7 +226,7 @@ export const RegistrationsList = ({
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
@@ -245,8 +251,16 @@ export const RegistrationsList = ({
                 return (
                   <TableRow
                     key={reg.id}
+                    tabIndex={0}
+                    role="button"
                     className="cursor-pointer border-white/5 hover:bg-white/4"
                     onClick={() => setSelectedRegistration(reg)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedRegistration(reg)
+                      }
+                    }}
                   >
                     {/* Player */}
                     <TableCell>

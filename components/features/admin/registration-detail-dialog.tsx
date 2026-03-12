@@ -214,6 +214,7 @@ export const RegistrationDetailDialog = ({
             <Link
               href={`${ROUTES.ADMIN_USERS}?userId=${registration.user.id}`}
               onClick={() => onOpenChange(false)}
+              aria-label={`Voir le profil de ${registration.user.displayName}`}
               className="group relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 transition-colors hover:border-blue-500/30"
             >
               {registration.user.image ? (
@@ -500,7 +501,7 @@ export const RegistrationDetailDialog = ({
 
         {/* ── Zone dangereuse ── */}
         {canManage && (
-          <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-4">
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
             <p className="mb-3 text-xs font-medium uppercase tracking-wider text-red-400/60">
               Zone dangereuse
             </p>
