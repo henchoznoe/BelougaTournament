@@ -17,7 +17,9 @@ import {
   ClipboardList,
   Crown,
   ExternalLink,
+  Hash,
   Loader2,
+  Pencil,
   Save,
   ShieldCheck,
   ShieldOff,
@@ -107,11 +109,12 @@ export const UserDetailDialog = ({
     (viewerIsSuperAdmin || user.role === Role.USER)
   const showAssignments = user.role === Role.ADMIN && viewerIsSuperAdmin
   const showBanManagement = user.role === Role.USER
-  const showDangerZone =
+  const showRoleManagement =
     viewerIsSuperAdmin &&
-    (user.role === Role.ADMIN ||
-      user.role === Role.USER ||
+    ((user.role === Role.USER && !banned) ||
+      user.role === Role.ADMIN ||
       (user.role === Role.SUPERADMIN && viewerIsOwner))
+  const showDangerZone = viewerIsSuperAdmin && user.role === Role.USER
 
   // Form state for displayName
   const {
@@ -351,6 +354,10 @@ export const UserDetailDialog = ({
     )
   }
 
+  // Whether displayName is different from the Discord username
+  const hasCustomDisplayName =
+    user.displayName && user.displayName !== user.name
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto border-white/10 bg-zinc-950 sm:max-w-lg">
@@ -379,9 +386,12 @@ export const UserDetailDialog = ({
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="truncate text-lg text-white">
-                {user.name}
+                {hasCustomDisplayName ? user.displayName : user.name}
               </DialogTitle>
               <DialogDescription className="truncate text-sm text-zinc-400">
+                {hasCustomDisplayName && (
+                  <span className="text-zinc-500">{user.name} &middot; </span>
+                )}
                 {user.email}
               </DialogDescription>
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -393,56 +403,87 @@ export const UserDetailDialog = ({
         </DialogHeader>
 
         {/* ── Informations ── */}
-        <div className="rounded-xl border border-white/5 bg-white/2 p-3">
-          <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <Calendar className="size-3 shrink-0 text-zinc-600" />
-              <span>Inscrit le {formatDate(user.createdAt)}</span>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
+            <Calendar className="size-4 shrink-0 text-zinc-500" />
+            <div className="flex min-w-0 flex-col">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                Inscrit le
+              </span>
+              <span className="text-sm text-zinc-300">
+                {formatDate(user.createdAt)}
+              </span>
             </div>
-            <div className="flex items-center gap-2 text-zinc-400">
-              <ClipboardList className="size-3 shrink-0 text-zinc-600" />
-              <span>
+          </div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
+            <ClipboardList className="size-4 shrink-0 text-zinc-500" />
+            <div className="flex min-w-0 flex-col">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                Inscriptions
+              </span>
+              <span className="text-sm text-zinc-300">
                 {user.registrations.length} inscription
                 {user.registrations.length !== 1 ? 's' : ''}
               </span>
             </div>
-            {user.role === Role.ADMIN && (
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Trophy className="size-3 shrink-0 text-zinc-600" />
-                <span>
+          </div>
+          {user.discordId && (
+            <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
+              <Hash className="size-4 shrink-0 text-zinc-500" />
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                  Discord ID
+                </span>
+                <span className="truncate text-sm text-zinc-300">
+                  {user.discordId}
+                </span>
+              </div>
+            </div>
+          )}
+          {user.role === Role.ADMIN && (
+            <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
+              <Trophy className="size-4 shrink-0 text-zinc-500" />
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                  Tournois assignes
+                </span>
+                <span className="text-sm text-zinc-300">
                   {user.adminOf.length} tournoi
-                  {user.adminOf.length !== 1 ? 's' : ''} assigné
                   {user.adminOf.length !== 1 ? 's' : ''}
                 </span>
               </div>
-            )}
-          </div>
-
-          {banned && (
-            <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-300">
-              {isPermanentBan ? (
-                <p>Ban permanent</p>
-              ) : (
-                user.bannedUntil && (
-                  <p>Banni jusqu'au {formatDate(user.bannedUntil)}</p>
-                )
-              )}
-              {user.banReason ? (
-                <p className="mt-1 text-red-400">Raison : {user.banReason}</p>
-              ) : (
-                <p className="mt-1 text-red-400/60">Aucune raison spécifiée.</p>
-              )}
             </div>
           )}
         </div>
 
+        {/* ── Ban alert ── */}
+        {banned && (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-red-300">
+            {isPermanentBan ? (
+              <p>Ban permanent</p>
+            ) : (
+              user.bannedUntil && (
+                <p>Banni jusqu'au {formatDate(user.bannedUntil)}</p>
+              )
+            )}
+            {user.banReason ? (
+              <p className="mt-1 text-red-400">Raison : {user.banReason}</p>
+            ) : (
+              <p className="mt-1 text-red-400/60">Aucune raison spécifiée.</p>
+            )}
+          </div>
+        )}
+
         {/* ── Inscriptions ── */}
         {user.registrations.length > 0 && (
           <div className="rounded-xl border border-white/5 bg-white/2 p-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Inscriptions
-            </p>
-            <div className="max-h-48 space-y-1 overflow-y-auto">
+            <div className="mb-3 flex items-center gap-2">
+              <ClipboardList className="size-3.5 text-zinc-500" />
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Inscriptions
+              </p>
+            </div>
+            <div className="max-h-48 space-y-1.5 overflow-y-auto">
               {user.registrations.map(reg => {
                 const status = reg.tournament.status as TournamentStatus
                 const statusLabel =
@@ -493,9 +534,12 @@ export const UserDetailDialog = ({
         {canEdit && (
           <div className="rounded-xl border border-white/5 bg-white/2 p-4">
             <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                Modification
-              </p>
+              <div className="flex items-center gap-2">
+                <Pencil className="size-3.5 text-zinc-500" />
+                <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                  Modification
+                </p>
+              </div>
 
               <div className="space-y-1.5">
                 <label
@@ -606,135 +650,17 @@ export const UserDetailDialog = ({
           </div>
         )}
 
-        {/* ── Gestion du ban ── */}
-        {showBanManagement && (
+        {/* ── Gestion du role ── */}
+        {showRoleManagement && (
           <div className="rounded-xl border border-white/5 bg-white/2 p-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Gestion du ban
-            </p>
-
-            {banned ? (
-              confirmAction === 'unban' ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    disabled={isActionPending}
-                    onClick={handleUnban}
-                    className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                  >
-                    {isActionPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ShieldOff className="size-4" />
-                    )}
-                    Confirmer le déban
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmAction(null)}
-                    disabled={isActionPending}
-                    className="text-zinc-500"
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() => setConfirmAction('unban')}
-                  className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                >
-                  <ShieldOff className="size-4" />
-                  Débannir
-                </Button>
-              )
-            ) : showBanForm ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {BAN_DURATION_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setDuration(option.value)}
-                      className={cn(
-                        'rounded-lg border px-3 py-2 text-sm transition-colors',
-                        duration === option.value
-                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
-                          : 'border-white/5 bg-white/2 text-zinc-400 hover:border-white/10 hover:text-zinc-200',
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-
-                {duration === 'custom' && (
-                  <DateTimePicker
-                    value={customDate}
-                    onChange={setCustomDate}
-                    disabled={isActionPending}
-                    placeholder="Date et heure de fin de ban"
-                  />
-                )}
-
-                <Input
-                  placeholder="Raison (optionnel)"
-                  value={banReason}
-                  onChange={e => setBanReason(e.target.value)}
-                  maxLength={500}
-                  className="border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600"
-                />
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    disabled={
-                      isActionPending || (duration === 'custom' && !customDate)
-                    }
-                    onClick={handleBan}
-                    className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                  >
-                    {isActionPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Ban className="size-4" />
-                    )}
-                    Bannir
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowBanForm(false)}
-                    disabled={isActionPending}
-                    className="text-zinc-500"
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => setShowBanForm(true)}
-                className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-              >
-                <Ban className="size-4" />
-                Bannir
-              </Button>
-            )}
-          </div>
-        )}
-
-        {/* ── Gestion du rôle ── */}
-        {viewerIsSuperAdmin &&
-          ((user.role === Role.USER && !banned) ||
-            (user.role === Role.ADMIN && viewerIsOwner)) && (
-            <div className="rounded-xl border border-white/5 bg-white/2 p-4">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-                Gestion du rôle
+            <div className="mb-3 flex items-center gap-2">
+              <ShieldCheck className="size-3.5 text-zinc-500" />
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Gestion du role
               </p>
+            </div>
 
+            <div className="space-y-2">
               {/* Promote USER → ADMIN */}
               {user.role === Role.USER &&
                 !banned &&
@@ -814,61 +740,11 @@ export const UserDetailDialog = ({
                     Promouvoir super admin
                   </Button>
                 ))}
-            </div>
-          )}
 
-        {/* ── Zone dangereuse ── */}
-        {showDangerZone && (
-          <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-red-400/60">
-              Zone dangereuse
-            </p>
-
-            <div className="space-y-2">
-              {/* Demote SUPERADMIN → ADMIN (owner only) */}
-              {user.role === Role.SUPERADMIN &&
-                viewerIsOwner &&
-                (confirmAction === 'demoteSuperAdmin' ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-zinc-400">
-                      Le super admin sera rétrogradé à admin.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        size="sm"
-                        disabled={isActionPending}
-                        onClick={handleDemote}
-                        className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                      >
-                        {isActionPending ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <ShieldOff className="size-4" />
-                        )}
-                        Confirmer la rétrogradation
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setConfirmAction(null)}
-                        disabled={isActionPending}
-                        className="text-zinc-500"
-                      >
-                        Annuler
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setConfirmAction('demoteSuperAdmin')}
-                    className="gap-2 text-red-400 hover:text-red-300"
-                  >
-                    <ShieldOff className="size-4" />
-                    Rétrograder à admin
-                  </Button>
-                ))}
+              {/* Separator between promote and demote actions */}
+              {user.role === Role.ADMIN && viewerIsOwner && (
+                <div className="border-t border-white/5" />
+              )}
 
               {/* Demote ADMIN → USER */}
               {user.role === Role.ADMIN &&
@@ -882,7 +758,7 @@ export const UserDetailDialog = ({
                         size="sm"
                         disabled={isActionPending}
                         onClick={handleDemote}
-                        className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                        className="gap-2 bg-orange-500/10 text-orange-500 hover:bg-orange-500/20"
                       >
                         {isActionPending ? (
                           <Loader2 className="size-4 animate-spin" />
@@ -907,34 +783,34 @@ export const UserDetailDialog = ({
                     size="sm"
                     variant="ghost"
                     onClick={() => setConfirmAction('demote')}
-                    className="gap-2 text-red-400 hover:text-red-300"
+                    className="gap-2 text-orange-400 hover:text-orange-300"
                   >
                     <ShieldOff className="size-4" />
-                    Rétrograder
+                    Rétrograder à joueur
                   </Button>
                 ))}
 
-              {/* Delete (USER only) */}
-              {user.role === Role.USER &&
-                (confirmAction === 'delete' ? (
+              {/* Demote SUPERADMIN → ADMIN (owner only) */}
+              {user.role === Role.SUPERADMIN &&
+                viewerIsOwner &&
+                (confirmAction === 'demoteSuperAdmin' ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-red-400">
-                      Toutes les données associées (inscriptions, équipes, etc.)
-                      seront définitivement supprimées.
+                    <p className="text-xs text-zinc-400">
+                      Le super admin sera rétrogradé à admin.
                     </p>
                     <div className="flex flex-wrap items-center gap-2">
                       <Button
                         size="sm"
                         disabled={isActionPending}
-                        onClick={handleDelete}
-                        className="gap-2 bg-red-600 text-white hover:bg-red-500"
+                        onClick={handleDemote}
+                        className="gap-2 bg-orange-500/10 text-orange-500 hover:bg-orange-500/20"
                       >
                         {isActionPending ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : (
-                          <Trash2 className="size-4" />
+                          <ShieldOff className="size-4" />
                         )}
-                        Confirmer la suppression
+                        Confirmer la rétrogradation
                       </Button>
                       <Button
                         variant="ghost"
@@ -951,14 +827,192 @@ export const UserDetailDialog = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => setConfirmAction('delete')}
-                    className="gap-2 text-red-400 hover:text-red-300"
+                    onClick={() => setConfirmAction('demoteSuperAdmin')}
+                    className="gap-2 text-orange-400 hover:text-orange-300"
                   >
-                    <Trash2 className="size-4" />
-                    Supprimer l'utilisateur
+                    <ShieldOff className="size-4" />
+                    Rétrograder à admin
                   </Button>
                 ))}
             </div>
+          </div>
+        )}
+
+        {/* ── Gestion du ban ── */}
+        {showBanManagement && (
+          <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Ban className="size-3.5 text-zinc-500" />
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Gestion du ban
+              </p>
+            </div>
+
+            {banned ? (
+              confirmAction === 'unban' ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    disabled={isActionPending}
+                    onClick={handleUnban}
+                    className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                  >
+                    {isActionPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ShieldOff className="size-4" />
+                    )}
+                    Confirmer le déban
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setConfirmAction(null)}
+                    disabled={isActionPending}
+                    className="text-zinc-500"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => setConfirmAction('unban')}
+                  className="gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                >
+                  <ShieldOff className="size-4" />
+                  Débannir
+                </Button>
+              )
+            ) : showBanForm ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {BAN_DURATION_OPTIONS.map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setDuration(option.value)}
+                      className={cn(
+                        'rounded-lg border px-3 py-2 text-sm transition-colors',
+                        duration === option.value
+                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                          : 'border-white/5 bg-white/2 text-zinc-400 hover:border-white/10 hover:text-zinc-200',
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {duration === 'custom' && (
+                  <DateTimePicker
+                    value={customDate}
+                    onChange={setCustomDate}
+                    disabled={isActionPending}
+                    placeholder="Date et heure de fin de ban"
+                  />
+                )}
+
+                <Input
+                  placeholder="Raison (optionnel)"
+                  value={banReason}
+                  onChange={e => setBanReason(e.target.value)}
+                  maxLength={500}
+                  className="border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600"
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    disabled={
+                      isActionPending || (duration === 'custom' && !customDate)
+                    }
+                    onClick={handleBan}
+                    className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                  >
+                    {isActionPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Ban className="size-4" />
+                    )}
+                    Bannir
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowBanForm(false)}
+                    disabled={isActionPending}
+                    className="text-zinc-500"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => setShowBanForm(true)}
+                className="gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+              >
+                <Ban className="size-4" />
+                Bannir
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* ── Zone dangereuse ── */}
+        {showDangerZone && (
+          <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Trash2 className="size-3.5 text-red-400/60" />
+              <p className="text-xs font-medium uppercase tracking-wider text-red-400/60">
+                Zone dangereuse
+              </p>
+            </div>
+
+            {confirmAction === 'delete' ? (
+              <div className="space-y-2">
+                <p className="text-xs text-red-400">
+                  Toutes les données associées (inscriptions, équipes, etc.)
+                  seront définitivement supprimées.
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    disabled={isActionPending}
+                    onClick={handleDelete}
+                    className="gap-2 bg-red-600 text-white hover:bg-red-500"
+                  >
+                    {isActionPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="size-4" />
+                    )}
+                    Confirmer la suppression
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setConfirmAction(null)}
+                    disabled={isActionPending}
+                    className="text-zinc-500"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setConfirmAction('delete')}
+                className="gap-2 text-red-400 hover:text-red-300"
+              >
+                <Trash2 className="size-4" />
+                Supprimer l'utilisateur
+              </Button>
+            )}
           </div>
         )}
       </DialogContent>
