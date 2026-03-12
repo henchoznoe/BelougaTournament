@@ -1,9 +1,9 @@
 /**
  * File: components/features/admin/users-list.tsx
  * Description: Client component displaying the admin users table with search, filters, pagination, and actions dropdown.
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
@@ -52,7 +52,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
 
-type RoleFilter = 'all' | 'SUPERADMIN' | 'ADMIN' | 'USER'
+type RoleFilter = 'all' | Role
 type StatusFilter = 'all' | 'active' | 'banned'
 
 interface UsersListProps {
@@ -193,7 +193,7 @@ export const UsersList = ({
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
-              <SelectItem value="all">Tous les roles</SelectItem>
+              <SelectItem value="all">Tous les rôles</SelectItem>
               <SelectItem value={Role.SUPERADMIN}>Super Admin</SelectItem>
               <SelectItem value={Role.ADMIN}>Admin</SelectItem>
               <SelectItem value={Role.USER}>Joueur</SelectItem>
@@ -229,12 +229,12 @@ export const UsersList = ({
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
           <p className="text-sm text-zinc-500">
             {search || roleFilter !== 'all' || statusFilter !== 'all'
-              ? 'Aucun utilisateur trouve pour ces criteres.'
+              ? 'Aucun utilisateur trouvé pour ces critères.'
               : 'Aucun utilisateur inscrit.'}
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
@@ -242,7 +242,7 @@ export const UsersList = ({
                   Utilisateur
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
-                  Role
+                  Rôle
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
                   Statut
@@ -251,7 +251,7 @@ export const UsersList = ({
                   Inscriptions
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
-                  Tournois assignes
+                  Tournois assignés
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:table-cell">
                   Inscrit le
@@ -335,7 +335,7 @@ export const UsersList = ({
                     <TableCell className="hidden md:table-cell">
                       {user.role === Role.SUPERADMIN ? (
                         <span className="text-xs text-zinc-500 italic">
-                          Acces total
+                          Accès total
                         </span>
                       ) : user.role === Role.ADMIN ? (
                         user.adminOf.length === 0 ? (
@@ -405,7 +405,7 @@ export const UsersList = ({
               size="icon-sm"
               disabled={safePage <= 1}
               onClick={() => setPage(p => p - 1)}
-              aria-label="Page precedente"
+              aria-label="Page précédente"
               className="text-zinc-400"
             >
               <ChevronLeft className="size-4" />

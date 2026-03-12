@@ -35,6 +35,7 @@ export const createSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été créé.' }
   },
@@ -55,6 +56,7 @@ export const updateSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été mis à jour.' }
   },
@@ -69,6 +71,7 @@ export const deleteSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été supprimé.' }
   },

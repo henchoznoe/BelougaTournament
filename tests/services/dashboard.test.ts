@@ -7,6 +7,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  Role,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -145,10 +150,10 @@ describe('getUpcomingTournaments', () => {
       title: 'Tournoi Alpha',
       slug: 'tournoi-alpha',
       game: 'Valorant',
-      format: 'SINGLE_ELIMINATION',
+      format: TournamentFormat.SOLO,
       teamSize: 5,
       startDate: new Date('2026-04-01'),
-      status: 'PUBLISHED',
+      status: TournamentStatus.PUBLISHED,
       _count: { registrations: 8, teams: 2 },
     },
   ]
@@ -161,7 +166,7 @@ describe('getUpcomingTournaments', () => {
     expect(result).toEqual(MOCK_TOURNAMENTS)
     expect(mockTournamentFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ status: 'PUBLISHED' }),
+        where: expect.objectContaining({ status: TournamentStatus.PUBLISHED }),
       }),
     )
   })
@@ -195,7 +200,11 @@ describe('getRecentRegistrations', () => {
       id: 'reg-1',
       createdAt: new Date('2026-03-01'),
       user: { name: 'PlayerOne', image: null },
-      tournament: { title: 'Tournoi Alpha', slug: 'tournoi-alpha' },
+      tournament: {
+        id: 'tourn-1',
+        title: 'Tournoi Alpha',
+        slug: 'tournoi-alpha',
+      },
       team: { name: 'Team Alpha' },
     },
   ]
@@ -241,7 +250,7 @@ describe('getRecentUsers', () => {
       name: 'PlayerOne',
       displayName: 'Player One',
       image: null,
-      role: 'USER',
+      role: Role.USER,
       createdAt: new Date('2026-03-10'),
     },
     {
@@ -249,7 +258,7 @@ describe('getRecentUsers', () => {
       name: 'AdminUser',
       displayName: 'Admin User',
       image: 'https://cdn.discordapp.com/avatars/456/def.png',
-      role: 'ADMIN',
+      role: Role.ADMIN,
       createdAt: new Date('2026-03-08'),
     },
   ]

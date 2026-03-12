@@ -1,9 +1,9 @@
 /**
  * File: lib/types/user.ts
  * Description: Types for admin user management (table list and detail page).
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import type { BAN_DURATION_OPTIONS } from '@/lib/config/constants'

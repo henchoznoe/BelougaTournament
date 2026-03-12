@@ -77,7 +77,6 @@ const {
   promoteToAdmin,
   promoteToSuperAdmin,
   demoteAdmin,
-  updateAdminAssignments,
   updateUser,
   banUser,
   unbanUser,
@@ -275,71 +274,6 @@ describe('demoteAdmin', () => {
 })
 
 // ---------------------------------------------------------------------------
-// updateAdminAssignments
-// ---------------------------------------------------------------------------
-
-describe('updateAdminAssignments', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
-    mockTransaction.mockResolvedValue([])
-  })
-
-  it('returns error when user not found', async () => {
-    mockUserFindUnique.mockResolvedValue(null)
-
-    expect(
-      await updateAdminAssignments({ userId: VALID_UUID, tournamentIds: [] }),
-    ).toEqual({ success: false, message: 'Utilisateur introuvable.' })
-  })
-
-  it('returns error when user is SUPERADMIN', async () => {
-    mockUserFindUnique.mockResolvedValue({ role: 'SUPERADMIN', name: 'Super' })
-
-    expect(
-      await updateAdminAssignments({ userId: VALID_UUID, tournamentIds: [] }),
-    ).toEqual({
-      success: false,
-      message: 'Les super admins ont accès à tous les tournois.',
-    })
-  })
-
-  it('returns error when user is not an admin', async () => {
-    mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Alice' })
-
-    expect(
-      await updateAdminAssignments({ userId: VALID_UUID, tournamentIds: [] }),
-    ).toEqual({ success: false, message: "Alice n'est pas admin." })
-  })
-
-  it('updates assignments and returns success', async () => {
-    mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
-
-    const result = await updateAdminAssignments({
-      userId: VALID_UUID,
-      tournamentIds: [TOURN_UUID],
-    })
-
-    expect(result).toEqual({
-      success: true,
-      message: 'Assignations de Carol mises à jour.',
-    })
-    expect(mockTransaction).toHaveBeenCalledOnce()
-  })
-
-  it('handles empty tournamentIds array without createMany call', async () => {
-    mockUserFindUnique.mockResolvedValue({ role: 'ADMIN', name: 'Carol' })
-
-    await updateAdminAssignments({ userId: VALID_UUID, tournamentIds: [] })
-
-    expect(mockTransaction).toHaveBeenCalledOnce()
-    const transactionArg = mockTransaction.mock.calls[0][0]
-    expect(Array.isArray(transactionArg)).toBe(true)
-    expect(transactionArg).toHaveLength(1)
-  })
-})
-
-// ---------------------------------------------------------------------------
 // updateUser
 // ---------------------------------------------------------------------------
 
@@ -429,7 +363,7 @@ describe('updateUser', () => {
 
   it('allows ADMIN caller to update a USER', async () => {
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
-    mockUserFindUnique.mockResolvedValue({ role: 'USER', name: 'Bob' })
+    mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Bob' })
 
     const result = await updateUser({
       userId: VALID_UUID,
@@ -439,6 +373,22 @@ describe('updateUser', () => {
     expect(result).toEqual({
       success: true,
       message: 'Bob a été mis à jour.',
+    })
+  })
+
+  it('prevents ADMIN from modifying tournament assignments', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Carol' })
+
+    const result = await updateUser({
+      userId: VALID_UUID,
+      displayName: 'CarolXYZ',
+      tournamentIds: [TOURN_UUID],
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Seuls les super admins peuvent modifier les assignations.',
     })
   })
 

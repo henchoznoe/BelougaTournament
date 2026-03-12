@@ -1,9 +1,9 @@
 /**
  * File: components/features/admin/ban-user-dialog.tsx
  * Description: Reusable dialog for banning a user with duration and reason selection.
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
@@ -73,7 +73,7 @@ export const BanUserDialog = ({
   const handleBan = () => {
     const bannedUntil = computeBanDate()
     if (!bannedUntil) {
-      toast.error('Veuillez selectionner une date valide.')
+      toast.error('Veuillez sélectionner une date valide.')
       return
     }
     startTransition(async () => {
@@ -107,12 +107,15 @@ export const BanUserDialog = ({
         <DialogHeader>
           <DialogTitle className="text-white">Bannir {userName}</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            Choisissez la duree et la raison du ban.
+            Choisissez la durée et la raison du ban.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+          <fieldset
+            className="grid grid-cols-2 gap-2"
+            aria-label="Durée du ban"
+          >
             {BAN_DURATION_OPTIONS.map(option => (
               <button
                 key={option.value}
@@ -128,7 +131,7 @@ export const BanUserDialog = ({
                 {option.label}
               </button>
             ))}
-          </div>
+          </fieldset>
 
           {duration === 'custom' && (
             <DateTimePicker
@@ -138,15 +141,14 @@ export const BanUserDialog = ({
               placeholder="Date et heure de fin de ban"
             />
           )}
-
           <Input
             placeholder="Raison (optionnel)"
+            aria-label="Raison du ban"
             value={banReason}
             onChange={e => setBanReason(e.target.value)}
             maxLength={500}
             className="border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600"
           />
-
           <div className="flex items-center gap-2 pt-1">
             <Button
               size="sm"

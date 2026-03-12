@@ -1,9 +1,9 @@
 /**
  * File: app/admin/users/page.tsx
  * Description: Admin page for unified user management (players, admins, super admins).
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { Users } from 'lucide-react'
@@ -38,7 +38,7 @@ const AdminUsersPage = async () => {
           Utilisateurs
         </h1>
         <p className="text-sm text-zinc-400">
-          Gerez tous les utilisateurs de la plateforme.
+          Gérez tous les utilisateurs de la plateforme.
         </p>
       </div>
 

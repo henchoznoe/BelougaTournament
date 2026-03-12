@@ -10,6 +10,7 @@ import { ClipboardList, Handshake, Swords, Users } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface DashboardStatsProps {
   stats: DashboardStats
@@ -24,12 +25,18 @@ const STAT_CARDS = [
     getValue: (s: DashboardStats) => s.tournaments.total,
     getDetail: (s: DashboardStats) => {
       const parts: string[] = []
-      if (s.tournaments.byStatus.PUBLISHED > 0)
-        parts.push(`${s.tournaments.byStatus.PUBLISHED} publiés`)
-      if (s.tournaments.byStatus.DRAFT > 0)
-        parts.push(`${s.tournaments.byStatus.DRAFT} brouillons`)
-      if (s.tournaments.byStatus.ARCHIVED > 0)
-        parts.push(`${s.tournaments.byStatus.ARCHIVED} archivés`)
+      if (s.tournaments.byStatus[TournamentStatus.PUBLISHED] > 0)
+        parts.push(
+          `${s.tournaments.byStatus[TournamentStatus.PUBLISHED]} publiés`,
+        )
+      if (s.tournaments.byStatus[TournamentStatus.DRAFT] > 0)
+        parts.push(
+          `${s.tournaments.byStatus[TournamentStatus.DRAFT]} brouillons`,
+        )
+      if (s.tournaments.byStatus[TournamentStatus.ARCHIVED] > 0)
+        parts.push(
+          `${s.tournaments.byStatus[TournamentStatus.ARCHIVED]} archivés`,
+        )
       return parts.join(' · ') || 'Aucun tournoi'
     },
     color: 'text-blue-400',

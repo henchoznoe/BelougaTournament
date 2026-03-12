@@ -1,9 +1,9 @@
 /**
  * File: lib/services/users.ts
  * Description: Services for fetching user data (profile, admin table, and detail page).
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import 'server-only'

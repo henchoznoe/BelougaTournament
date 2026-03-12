@@ -7,6 +7,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  Role,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -49,7 +54,7 @@ const MOCK_PROFILE = {
   displayName: 'Test Player',
   email: 'test@example.com',
   image: 'https://cdn.discordapp.com/avatars/123/abc.png',
-  role: 'USER',
+  role: Role.USER,
   createdAt: new Date('2026-01-01T00:00:00Z'),
 }
 
@@ -61,7 +66,7 @@ const MOCK_USERS = [
     email: 'player1@example.com',
     image: null,
     discordId: 'discord-1',
-    role: 'USER',
+    role: Role.USER,
     createdAt: new Date('2026-01-01'),
     bannedUntil: null,
     banReason: null,
@@ -75,7 +80,7 @@ const MOCK_USERS = [
     email: 'admin@example.com',
     image: null,
     discordId: 'discord-2',
-    role: 'ADMIN',
+    role: Role.ADMIN,
     createdAt: new Date('2026-02-01'),
     bannedUntil: null,
     banReason: null,
@@ -101,7 +106,7 @@ const MOCK_USER_DETAIL = {
   email: 'player1@example.com',
   image: null,
   discordId: 'discord-1',
-  role: 'USER',
+  role: Role.USER,
   createdAt: new Date('2026-01-01'),
   bannedUntil: null,
   banReason: null,
@@ -111,15 +116,19 @@ const MOCK_USER_DETAIL = {
       createdAt: new Date('2026-01-15'),
       tournament: {
         title: 'Tournoi Alpha',
-        format: 'SOLO',
-        status: 'PUBLISHED',
+        format: TournamentFormat.SOLO,
+        status: TournamentStatus.PUBLISHED,
       },
       team: null,
     },
     {
       id: 'reg-2',
       createdAt: new Date('2026-01-10'),
-      tournament: { title: 'Tournoi Beta', format: 'TEAM', status: 'DRAFT' },
+      tournament: {
+        title: 'Tournoi Beta',
+        format: TournamentFormat.TEAM,
+        status: TournamentStatus.DRAFT,
+      },
       team: { name: 'Les Loups' },
     },
   ],
@@ -131,13 +140,13 @@ const MOCK_TOURNAMENTS = [
     id: 'tourn-1',
     title: 'Tournoi Alpha',
     slug: 'tournoi-alpha',
-    status: 'PUBLISHED',
+    status: TournamentStatus.PUBLISHED,
   },
   {
     id: 'tourn-2',
     title: 'Tournoi Beta',
     slug: 'tournoi-beta',
-    status: 'DRAFT',
+    status: TournamentStatus.DRAFT,
   },
 ]
 

@@ -20,7 +20,6 @@ import {
   demoteUserSchema,
   promoteUserSchema,
   unbanUserSchema,
-  updateAssignmentsSchema,
   updateUserSchema,
 } from '@/lib/validations/users'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -54,6 +53,7 @@ export const promoteToAdmin = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été promu admin.` }
   },
@@ -99,6 +99,7 @@ export const promoteToSuperAdmin = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return {
       success: true,
@@ -145,6 +146,7 @@ export const demoteAdmin = authenticatedAction({
 
       revalidateTag(CACHE_TAGS.USERS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
       return {
         success: true,
@@ -168,57 +170,9 @@ export const demoteAdmin = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été rétrogradé.` }
-  },
-})
-
-/** Updates tournament assignments for an admin. Replaces all existing assignments. */
-export const updateAdminAssignments = authenticatedAction({
-  schema: updateAssignmentsSchema,
-  role: Role.SUPERADMIN,
-  handler: async (data): Promise<ActionState> => {
-    const user = await prisma.user.findUnique({
-      where: { id: data.userId },
-      select: { role: true, name: true },
-    })
-
-    if (!user) {
-      return { success: false, message: 'Utilisateur introuvable.' }
-    }
-
-    if (user.role === Role.SUPERADMIN) {
-      return {
-        success: false,
-        message: 'Les super admins ont accès à tous les tournois.',
-      }
-    }
-
-    if (user.role !== Role.ADMIN) {
-      return { success: false, message: `${user.name} n'est pas admin.` }
-    }
-
-    // Replace all assignments in a transaction
-    await prisma.$transaction([
-      prisma.adminAssignment.deleteMany({ where: { adminId: data.userId } }),
-      ...(data.tournamentIds.length > 0
-        ? [
-            prisma.adminAssignment.createMany({
-              data: data.tournamentIds.map(tournamentId => ({
-                adminId: data.userId,
-                tournamentId,
-              })),
-            }),
-          ]
-        : []),
-    ])
-
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-
-    return {
-      success: true,
-      message: `Assignations de ${user.name} mises à jour.`,
-    }
   },
 })
 
@@ -226,7 +180,7 @@ export const updateAdminAssignments = authenticatedAction({
 export const updateUser = authenticatedAction({
   schema: updateUserSchema,
   role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data): Promise<ActionState> => {
+  handler: async (data, session): Promise<ActionState> => {
     const user = await prisma.user.findUnique({
       where: { id: data.userId },
       select: { role: true, name: true },
@@ -240,6 +194,14 @@ export const updateUser = authenticatedAction({
       return {
         success: false,
         message: 'Impossible de modifier un super admin.',
+      }
+    }
+
+    // Only SUPERADMIN can modify tournament assignments
+    if (data.tournamentIds && (session.user.role as Role) !== Role.SUPERADMIN) {
+      return {
+        success: false,
+        message: 'Seuls les super admins peuvent modifier les assignations.',
       }
     }
 
@@ -271,6 +233,7 @@ export const updateUser = authenticatedAction({
     }
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été mis à jour.` }
   },
@@ -307,6 +270,7 @@ export const banUser = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été banni.` }
   },
@@ -340,6 +304,7 @@ export const unbanUser = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été débanni.` }
   },
@@ -377,7 +342,10 @@ export const deleteUser = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
     return {
       success: true,

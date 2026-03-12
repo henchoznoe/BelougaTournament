@@ -1,9 +1,9 @@
 /**
  * File: components/features/admin/user-actions-dropdown.tsx
  * Description: Dropdown menu with quick actions for each user row in the admin users table.
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
@@ -88,8 +88,14 @@ export const UserActionsDropdown = ({
   const canDemoteAdmin = viewerIsSuperAdmin && user.role === Role.ADMIN
   const canDemoteSuperAdmin =
     viewerIsSuperAdmin && viewerIsOwner && user.role === Role.SUPERADMIN
-  const canBan = user.role === Role.USER && !banned
-  const canUnban = user.role === Role.USER && banned
+  const canBan =
+    (viewerIsSuperAdmin || viewerRole === Role.ADMIN) &&
+    user.role === Role.USER &&
+    !banned
+  const canUnban =
+    (viewerIsSuperAdmin || viewerRole === Role.ADMIN) &&
+    user.role === Role.USER &&
+    banned
   const canDelete = viewerIsSuperAdmin && user.role === Role.USER
 
   const hasRoleActions =
@@ -140,11 +146,11 @@ export const UserActionsDropdown = ({
       case 'promoteSuperAdmin':
         return 'Promouvoir super admin'
       case 'demote':
-        return 'Retrograder a joueur'
+        return 'Rétrograder à joueur'
       case 'demoteSuperAdmin':
-        return 'Retrograder a admin'
+        return 'Rétrograder à admin'
       case 'unban':
-        return 'Debannir'
+        return 'Débannir'
       case 'delete':
         return "Supprimer l'utilisateur"
       default:
@@ -155,17 +161,17 @@ export const UserActionsDropdown = ({
   const getConfirmDescription = (): string => {
     switch (confirmAction) {
       case 'promote':
-        return `${user.name} sera promu au role d'admin.`
+        return `${user.name} sera promu au rôle d'admin.`
       case 'promoteSuperAdmin':
-        return `${user.name} sera promu au role de super admin. Ses assignations de tournois seront supprimees.`
+        return `${user.name} sera promu au rôle de super admin. Ses assignations de tournois seront supprimées.`
       case 'demote':
-        return `${user.name} sera retrograde a joueur. Ses assignations de tournois seront supprimees.`
+        return `${user.name} sera rétrogradé à joueur. Ses assignations de tournois seront supprimées.`
       case 'demoteSuperAdmin':
-        return `${user.name} sera retrograde au role d'admin.`
+        return `${user.name} sera rétrogradé au rôle d'admin.`
       case 'unban':
-        return `${user.name} sera debanni et pourra a nouveau acceder a la plateforme.`
+        return `${user.name} sera débanni et pourra à nouveau accéder à la plateforme.`
       case 'delete':
-        return `${user.name} sera definitivement supprime. Toutes les donnees associees (inscriptions, equipes, etc.) seront supprimees.`
+        return `${user.name} sera définitivement supprimé. Toutes les données associées (inscriptions, équipes, etc.) seront supprimées.`
       default:
         return ''
     }
@@ -217,7 +223,7 @@ export const UserActionsDropdown = ({
               {canDemoteAdmin && (
                 <DropdownMenuItem onClick={() => setConfirmAction('demote')}>
                   <ShieldOff className="size-4 text-orange-400" />
-                  Retrograder a joueur
+                  Rétrograder à joueur
                 </DropdownMenuItem>
               )}
               {canDemoteSuperAdmin && (
@@ -225,7 +231,7 @@ export const UserActionsDropdown = ({
                   onClick={() => setConfirmAction('demoteSuperAdmin')}
                 >
                   <ShieldOff className="size-4 text-orange-400" />
-                  Retrograder a admin
+                  Rétrograder à admin
                 </DropdownMenuItem>
               )}
             </>
@@ -243,7 +249,7 @@ export const UserActionsDropdown = ({
               {canUnban && (
                 <DropdownMenuItem onClick={() => setConfirmAction('unban')}>
                   <ShieldOff className="size-4 text-emerald-400" />
-                  Debannir
+                  Débannir
                 </DropdownMenuItem>
               )}
             </>

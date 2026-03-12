@@ -1,9 +1,9 @@
 /**
  * File: app/admin/users/[id]/page.tsx
  * Description: Admin page for viewing and managing a single user (detail view).
- * Author: Noe Henchoz
+ * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 import { ArrowLeft, Users } from 'lucide-react'
@@ -27,7 +27,7 @@ export const generateMetadata = async ({
   const { id } = await params
   const user = await getUserById(id)
   return {
-    title: user ? `${user.name}` : 'Utilisateur introuvable',
+    title: user ? user.name : 'Utilisateur introuvable',
   }
 }
 
