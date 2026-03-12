@@ -79,6 +79,8 @@ export const CACHE_TAGS = {
   DASHBOARD_STATS: 'dashboard-stats',
   DASHBOARD_UPCOMING: 'dashboard-upcoming',
   DASHBOARD_REGISTRATIONS: 'dashboard-registrations',
+  DASHBOARD_RECENT_USERS: 'dashboard-recent-users',
+  DASHBOARD_RECENT_SPONSORS: 'dashboard-recent-sponsors',
   REGISTRATIONS: 'registrations',
   SETTINGS: 'settings',
   SPONSORS: 'sponsors',

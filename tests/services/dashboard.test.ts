@@ -24,6 +24,8 @@ const mockRegistrationCount = vi.fn()
 const mockSponsorCount = vi.fn()
 const mockTournamentFindMany = vi.fn()
 const mockRegistrationFindMany = vi.fn()
+const mockUserFindMany = vi.fn()
+const mockSponsorFindMany = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -31,12 +33,18 @@ vi.mock('@/lib/core/prisma', () => ({
       count: (...args: unknown[]) => mockTournamentCount(...args),
       findMany: (...args: unknown[]) => mockTournamentFindMany(...args),
     },
-    user: { count: (...args: unknown[]) => mockUserCount(...args) },
+    user: {
+      count: (...args: unknown[]) => mockUserCount(...args),
+      findMany: (...args: unknown[]) => mockUserFindMany(...args),
+    },
     tournamentRegistration: {
       count: (...args: unknown[]) => mockRegistrationCount(...args),
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
     },
-    sponsor: { count: (...args: unknown[]) => mockSponsorCount(...args) },
+    sponsor: {
+      count: (...args: unknown[]) => mockSponsorCount(...args),
+      findMany: (...args: unknown[]) => mockSponsorFindMany(...args),
+    },
   },
 }))
 
@@ -44,8 +52,13 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getDashboardStats, getUpcomingTournaments, getRecentRegistrations } =
-  await import('@/lib/services/dashboard')
+const {
+  getDashboardStats,
+  getUpcomingTournaments,
+  getRecentRegistrations,
+  getRecentUsers,
+  getRecentSponsors,
+} = await import('@/lib/services/dashboard')
 
 // ---------------------------------------------------------------------------
 // getDashboardStats
@@ -212,5 +225,111 @@ describe('getRecentRegistrations', () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
     expect(await getRecentRegistrations()).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getRecentUsers
+// ---------------------------------------------------------------------------
+
+describe('getRecentUsers', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const MOCK_RECENT_USERS = [
+    {
+      id: 'user-1',
+      name: 'PlayerOne',
+      displayName: 'Player One',
+      image: null,
+      role: 'USER',
+      createdAt: new Date('2026-03-10'),
+    },
+    {
+      id: 'user-2',
+      name: 'AdminUser',
+      displayName: 'Admin User',
+      image: 'https://cdn.discordapp.com/avatars/456/def.png',
+      role: 'ADMIN',
+      createdAt: new Date('2026-03-08'),
+    },
+  ]
+
+  it('returns recent users', async () => {
+    mockUserFindMany.mockResolvedValue(MOCK_RECENT_USERS)
+
+    const result = await getRecentUsers()
+
+    expect(result).toEqual(MOCK_RECENT_USERS)
+    expect(mockUserFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: 'desc' } }),
+    )
+  })
+
+  it('respects the limit parameter', async () => {
+    mockUserFindMany.mockResolvedValue([])
+
+    await getRecentUsers(3)
+
+    expect(mockUserFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 3 }),
+    )
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockUserFindMany.mockRejectedValue(new Error('DB error'))
+
+    expect(await getRecentUsers()).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getRecentSponsors
+// ---------------------------------------------------------------------------
+
+describe('getRecentSponsors', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const MOCK_RECENT_SPONSORS = [
+    {
+      id: 'sponsor-1',
+      name: 'Sponsor Alpha',
+      imageUrls: ['https://blob.vercel-storage.com/sponsors/alpha.png'],
+      url: 'https://alpha.com',
+      createdAt: new Date('2026-03-05'),
+    },
+    {
+      id: 'sponsor-2',
+      name: 'Sponsor Beta',
+      imageUrls: [],
+      url: null,
+      createdAt: new Date('2026-03-01'),
+    },
+  ]
+
+  it('returns recent sponsors', async () => {
+    mockSponsorFindMany.mockResolvedValue(MOCK_RECENT_SPONSORS)
+
+    const result = await getRecentSponsors()
+
+    expect(result).toEqual(MOCK_RECENT_SPONSORS)
+    expect(mockSponsorFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: 'desc' } }),
+    )
+  })
+
+  it('respects the limit parameter', async () => {
+    mockSponsorFindMany.mockResolvedValue([])
+
+    await getRecentSponsors(3)
+
+    expect(mockSponsorFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 3 }),
+    )
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockSponsorFindMany.mockRejectedValue(new Error('DB error'))
+
+    expect(await getRecentSponsors()).toEqual([])
   })
 })

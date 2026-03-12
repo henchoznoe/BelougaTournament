@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/dashboard-recent.tsx
- * Description: Dashboard panels showing upcoming tournaments and recent registrations.
+ * Description: Dashboard panels showing upcoming tournaments, recent registrations, recent users, and recent sponsors.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -10,7 +10,12 @@ import {
   ArrowRight,
   Calendar,
   ClipboardList,
+  Crown,
+  ExternalLink,
   Gamepad2,
+  Handshake,
+  ShieldCheck,
+  UserPlus,
   Users,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -18,10 +23,12 @@ import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type {
   RecentRegistration,
+  RecentSponsor,
+  RecentUser,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
 import { formatDate } from '@/lib/utils/formatting'
-import { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface UpcomingTournamentsProps {
   tournaments: UpcomingTournament[]
@@ -29,6 +36,14 @@ interface UpcomingTournamentsProps {
 
 interface RecentRegistrationsProps {
   registrations: RecentRegistration[]
+}
+
+interface RecentUsersProps {
+  users: RecentUser[]
+}
+
+interface RecentSponsorsProps {
+  sponsors: RecentSponsor[]
 }
 
 export const DashboardUpcomingTournaments = ({
@@ -161,6 +176,170 @@ export const DashboardRecentRegistrations = ({
           </div>
           <Link
             href={ROUTES.ADMIN_REGISTRATIONS}
+            className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          >
+            Voir tout
+            <ArrowRight className="size-3" />
+          </Link>
+        </>
+      )}
+    </div>
+  )
+}
+
+const getRoleBadge = (role: Role) => {
+  if (role === Role.SUPERADMIN) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+        <Crown className="size-2.5" />
+        Super Admin
+      </span>
+    )
+  }
+  if (role === Role.ADMIN) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-400">
+        <ShieldCheck className="size-2.5" />
+        Admin
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400">
+      Joueur
+    </span>
+  )
+}
+
+export const DashboardRecentUsers = ({ users }: RecentUsersProps) => {
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+      <div className="mb-4 flex items-center gap-2">
+        <UserPlus className="size-4 text-emerald-400" />
+        <h2 className="text-sm font-semibold text-white">
+          Inscriptions récentes sur le site
+        </h2>
+      </div>
+
+      {users.length === 0 ? (
+        <p className="py-4 text-center text-sm text-zinc-500">
+          Aucun utilisateur récent.
+        </p>
+      ) : (
+        <>
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {users.map(user => (
+              <Link
+                key={user.id}
+                href={ROUTES.ADMIN_USER_DETAIL(user.id)}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt={user.name}
+                      width={28}
+                      height={28}
+                      className="size-7 shrink-0 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-white">
+                      {user.displayName}
+                    </p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span className="truncate text-xs text-zinc-500">
+                        {user.name}
+                      </span>
+                      {getRoleBadge(user.role)}
+                    </div>
+                  </div>
+                </div>
+                <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
+                  {formatDate(user.createdAt)}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Link
+            href={ROUTES.ADMIN_USERS}
+            className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          >
+            Voir tout
+            <ArrowRight className="size-3" />
+          </Link>
+        </>
+      )}
+    </div>
+  )
+}
+
+export const DashboardRecentSponsors = ({ sponsors }: RecentSponsorsProps) => {
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+      <div className="mb-4 flex items-center gap-2">
+        <Handshake className="size-4 text-purple-400" />
+        <h2 className="text-sm font-semibold text-white">Sponsors récents</h2>
+      </div>
+
+      {sponsors.length === 0 ? (
+        <p className="py-4 text-center text-sm text-zinc-500">
+          Aucun sponsor récent.
+        </p>
+      ) : (
+        <>
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {sponsors.map(sponsor => (
+              <div
+                key={sponsor.id}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  {sponsor.imageUrls.length > 0 ? (
+                    <Image
+                      src={sponsor.imageUrls[0]}
+                      alt={sponsor.name}
+                      width={28}
+                      height={28}
+                      className="size-7 shrink-0 rounded-lg object-contain"
+                    />
+                  ) : (
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-xs font-medium text-purple-400">
+                      {sponsor.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-white">
+                        {sponsor.name}
+                      </p>
+                      {sponsor.url && (
+                        <a
+                          href={sponsor.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-500 transition-colors hover:text-zinc-300"
+                          aria-label={`Visiter ${sponsor.name}`}
+                        >
+                          <ExternalLink className="size-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
+                  {formatDate(sponsor.createdAt)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <Link
+            href={ROUTES.ADMIN_SPONSORS}
             className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Voir tout

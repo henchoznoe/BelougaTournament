@@ -7,6 +7,7 @@
  */
 
 import type {
+  Role,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -60,4 +61,21 @@ export type RecentRegistration = {
   team: {
     name: string
   } | null
+}
+
+export type RecentUser = {
+  id: string
+  name: string
+  displayName: string
+  image: string | null
+  role: Role
+  createdAt: Date
+}
+
+export type RecentSponsor = {
+  id: string
+  name: string
+  imageUrls: string[]
+  url: string | null
+  createdAt: Date
 }

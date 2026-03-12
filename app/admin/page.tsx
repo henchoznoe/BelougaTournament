@@ -10,12 +10,16 @@ import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
 import {
   DashboardRecentRegistrations,
+  DashboardRecentSponsors,
+  DashboardRecentUsers,
   DashboardUpcomingTournaments,
 } from '@/components/features/admin/dashboard-recent'
 import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
 import {
   getDashboardStats,
   getRecentRegistrations,
+  getRecentSponsors,
+  getRecentUsers,
   getUpcomingTournaments,
 } from '@/lib/services/dashboard'
 
@@ -24,10 +28,18 @@ export const metadata: Metadata = {
 }
 
 const AdminDashboardPage = async () => {
-  const [stats, upcomingTournaments, recentRegistrations] = await Promise.all([
+  const [
+    stats,
+    upcomingTournaments,
+    recentRegistrations,
+    recentUsers,
+    recentSponsors,
+  ] = await Promise.all([
     getDashboardStats(),
     getUpcomingTournaments(),
     getRecentRegistrations(),
+    getRecentUsers(),
+    getRecentSponsors(),
   ])
 
   return (
@@ -46,10 +58,12 @@ const AdminDashboardPage = async () => {
       {/* Stats cards */}
       <DashboardStatsCards stats={stats} />
 
-      {/* Two-column panels: upcoming tournaments & recent registrations */}
+      {/* Two-column panels */}
       <div className="grid gap-6 lg:grid-cols-2">
         <DashboardUpcomingTournaments tournaments={upcomingTournaments} />
         <DashboardRecentRegistrations registrations={recentRegistrations} />
+        <DashboardRecentUsers users={recentUsers} />
+        <DashboardRecentSponsors sponsors={recentSponsors} />
       </div>
     </div>
   )
