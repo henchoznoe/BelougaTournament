@@ -37,9 +37,8 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getUserProfile, getUsers, getTournamentOptions } = await import(
-  '@/lib/services/users'
-)
+const { getUserProfile, getUsers, getUserById, getTournamentOptions } =
+  await import('@/lib/services/users')
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -66,34 +65,7 @@ const MOCK_USERS = [
     createdAt: new Date('2026-01-01'),
     bannedUntil: null,
     banReason: null,
-    registrations: [
-      {
-        id: 'reg-1',
-        createdAt: new Date('2026-01-15'),
-        tournament: {
-          title: 'Tournoi Alpha',
-          format: 'SOLO',
-          status: 'PUBLISHED',
-        },
-        team: null,
-      },
-      {
-        id: 'reg-2',
-        createdAt: new Date('2026-01-10'),
-        tournament: { title: 'Tournoi Beta', format: 'TEAM', status: 'DRAFT' },
-        team: { name: 'Les Loups' },
-      },
-      {
-        id: 'reg-3',
-        createdAt: new Date('2026-01-05'),
-        tournament: {
-          title: 'Tournoi Gamma',
-          format: 'SOLO',
-          status: 'ARCHIVED',
-        },
-        team: null,
-      },
-    ],
+    _count: { registrations: 3 },
     adminOf: [],
   },
   {
@@ -107,7 +79,7 @@ const MOCK_USERS = [
     createdAt: new Date('2026-02-01'),
     bannedUntil: null,
     banReason: null,
-    registrations: [],
+    _count: { registrations: 0 },
     adminOf: [
       {
         id: 'assign-1',
@@ -121,6 +93,38 @@ const MOCK_USERS = [
     ],
   },
 ]
+
+const MOCK_USER_DETAIL = {
+  id: 'user-1',
+  name: 'PlayerOne',
+  displayName: 'Player One',
+  email: 'player1@example.com',
+  image: null,
+  discordId: 'discord-1',
+  role: 'USER',
+  createdAt: new Date('2026-01-01'),
+  bannedUntil: null,
+  banReason: null,
+  registrations: [
+    {
+      id: 'reg-1',
+      createdAt: new Date('2026-01-15'),
+      tournament: {
+        title: 'Tournoi Alpha',
+        format: 'SOLO',
+        status: 'PUBLISHED',
+      },
+      team: null,
+    },
+    {
+      id: 'reg-2',
+      createdAt: new Date('2026-01-10'),
+      tournament: { title: 'Tournoi Beta', format: 'TEAM', status: 'DRAFT' },
+      team: { name: 'Les Loups' },
+    },
+  ],
+  adminOf: [],
+}
 
 const MOCK_TOURNAMENTS = [
   {
@@ -193,6 +197,37 @@ describe('getUsers', () => {
     mockUserFindMany.mockRejectedValue(new Error('DB error'))
 
     expect(await getUsers()).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getUserById
+// ---------------------------------------------------------------------------
+
+describe('getUserById', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns the full user detail when found', async () => {
+    mockUserFindUnique.mockResolvedValue(MOCK_USER_DETAIL)
+
+    const result = await getUserById('user-1')
+
+    expect(result).toEqual(MOCK_USER_DETAIL)
+    expect(mockUserFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'user-1' } }),
+    )
+  })
+
+  it('returns null when user does not exist', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(await getUserById('non-existent-id')).toBeNull()
+  })
+
+  it('returns null on database error', async () => {
+    mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
+
+    expect(await getUserById('user-1')).toBeNull()
   })
 })
 

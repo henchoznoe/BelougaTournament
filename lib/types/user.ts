@@ -1,9 +1,9 @@
 /**
  * File: lib/types/user.ts
- * Description: Types for the unified admin users management page.
- * Author: Noé Henchoz
+ * Description: Types for admin user management (table list and detail page).
+ * Author: Noe Henchoz
  * License: MIT
- * Copyright (c) 2026 Noé Henchoz
+ * Copyright (c) 2026 Noe Henchoz
  */
 
 import type { BAN_DURATION_OPTIONS } from '@/lib/config/constants'
@@ -13,8 +13,44 @@ import type {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
-/** A user as displayed in the unified admin users table. */
+/** A user as displayed in the admin users table (lightweight). */
 export type UserRow = {
+  id: string
+  name: string
+  displayName: string
+  email: string
+  image: string | null
+  discordId: string | null
+  role: Role
+  createdAt: Date
+  bannedUntil: Date | null
+  banReason: string | null
+  _count: { registrations: number }
+  adminOf: {
+    id: string
+    tournamentId: string
+    tournament: {
+      id: string
+      title: string
+      slug: string
+    }
+  }[]
+}
+
+/** A registration entry nested inside a UserDetail. */
+export type UserRegistrationRow = {
+  id: string
+  createdAt: Date
+  tournament: {
+    title: string
+    format: TournamentFormat
+    status: TournamentStatus
+  }
+  team: { name: string } | null
+}
+
+/** Full user data for the admin user detail page. */
+export type UserDetail = {
   id: string
   name: string
   displayName: string
@@ -35,18 +71,6 @@ export type UserRow = {
       slug: string
     }
   }[]
-}
-
-/** A registration entry nested inside a UserRow. */
-export type UserRegistrationRow = {
-  id: string
-  createdAt: Date
-  tournament: {
-    title: string
-    format: TournamentFormat
-    status: TournamentStatus
-  }
-  team: { name: string } | null
 }
 
 /** Minimal tournament data for the assignment picker. */

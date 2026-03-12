@@ -24,6 +24,7 @@ export const ROUTES = {
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',
   ADMIN_USERS: '/admin/users',
+  ADMIN_USER_DETAIL: (id: string) => `/admin/users/${id}` as const,
   ADMIN_REGISTRATIONS: '/admin/registrations',
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',

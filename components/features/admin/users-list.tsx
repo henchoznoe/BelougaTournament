@@ -1,9 +1,9 @@
 /**
  * File: components/features/admin/users-list.tsx
- * Description: Client component displaying the unified users table with search, filters, pagination, and clickable rows.
- * Author: Noé Henchoz
+ * Description: Client component displaying the admin users table with search, filters, pagination, and actions dropdown.
+ * Author: Noe Henchoz
  * License: MIT
- * Copyright (c) 2026 Noé Henchoz
+ * Copyright (c) 2026 Noe Henchoz
  */
 
 'use client'
@@ -18,9 +18,9 @@ import {
   Trophy,
 } from 'lucide-react'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
-import { UserDetailDialog } from '@/components/features/admin/user-detail-dialog'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
+import { UserActionsDropdown } from '@/components/features/admin/user-actions-dropdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -44,8 +44,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { TournamentOption, UserRow } from '@/lib/types/user'
+import { ROUTES } from '@/lib/config/routes'
+import type { UserRow } from '@/lib/types/user'
 import { isBanned } from '@/lib/utils/auth.helpers'
+import { formatShortDate } from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
@@ -55,36 +57,20 @@ type StatusFilter = 'all' | 'active' | 'banned'
 
 interface UsersListProps {
   users: UserRow[]
-  tournaments: TournamentOption[]
   viewerRole: Role
   viewerIsOwner: boolean
 }
 
 export const UsersList = ({
   users,
-  tournaments,
   viewerRole,
   viewerIsOwner,
 }: UsersListProps) => {
-  const searchParams = useSearchParams()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
-  const [selectedUser, setSelectedUser] = useState<UserRow | undefined>()
-
-  // Deep-link: auto-open dialog when ?userId=xxx is present
-  useEffect(() => {
-    const userId = searchParams.get('userId')
-    if (userId && !selectedUser) {
-      const match = users.find(u => u.id === userId)
-      if (match) {
-        setSelectedUser(match)
-      }
-      // Clear the search param so closing the dialog does not re-trigger the effect
-      window.history.replaceState({}, '', window.location.pathname)
-    }
-  }, [searchParams, users, selectedUser])
 
   const filtered = useMemo(() => {
     let result = users
@@ -204,10 +190,10 @@ export const UsersList = ({
         <div className="flex items-center gap-2">
           <Select value={roleFilter} onValueChange={handleRoleFilter}>
             <SelectTrigger className="w-36 border-white/10 bg-white/5 text-zinc-200">
-              <SelectValue placeholder="Rôle" />
+              <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
-              <SelectItem value="all">Tous les rôles</SelectItem>
+              <SelectItem value="all">Tous les roles</SelectItem>
               <SelectItem value={Role.SUPERADMIN}>Super Admin</SelectItem>
               <SelectItem value={Role.ADMIN}>Admin</SelectItem>
               <SelectItem value={Role.USER}>Joueur</SelectItem>
@@ -243,7 +229,7 @@ export const UsersList = ({
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
           <p className="text-sm text-zinc-500">
             {search || roleFilter !== 'all' || statusFilter !== 'all'
-              ? 'Aucun utilisateur trouvé pour ces critères.'
+              ? 'Aucun utilisateur trouve pour ces criteres.'
               : 'Aucun utilisateur inscrit.'}
           </p>
         </div>
@@ -256,13 +242,22 @@ export const UsersList = ({
                   Utilisateur
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
-                  Rôle
+                  Role
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
                   Statut
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
-                  Tournois assignés
+                  Inscriptions
+                </TableHead>
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
+                  Tournois assignes
+                </TableHead>
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:table-cell">
+                  Inscrit le
+                </TableHead>
+                <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -274,7 +269,9 @@ export const UsersList = ({
                   <TableRow
                     key={user.id}
                     className="cursor-pointer border-white/5 hover:bg-white/4"
-                    onClick={() => setSelectedUser(user)}
+                    onClick={() =>
+                      router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
+                    }
                   >
                     {/* User info */}
                     <TableCell>
@@ -320,11 +317,25 @@ export const UsersList = ({
                       {getStatusBadge(user)}
                     </TableCell>
 
-                    {/* Tournament assignments (only meaningful for admins) */}
+                    {/* Registrations count */}
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-xs text-zinc-400">
+                        {user._count.registrations > 0 ? (
+                          <>
+                            {user._count.registrations} tournoi
+                            {user._count.registrations > 1 ? 's' : ''}
+                          </>
+                        ) : (
+                          <span className="text-zinc-600">&mdash;</span>
+                        )}
+                      </span>
+                    </TableCell>
+
+                    {/* Tournament assignments */}
                     <TableCell className="hidden md:table-cell">
                       {user.role === Role.SUPERADMIN ? (
                         <span className="text-xs text-zinc-500 italic">
-                          Accès total
+                          Acces total
                         </span>
                       ) : user.role === Role.ADMIN ? (
                         user.adminOf.length === 0 ? (
@@ -353,8 +364,24 @@ export const UsersList = ({
                           </TooltipProvider>
                         )
                       ) : (
-                        <span className="text-xs text-zinc-600">—</span>
+                        <span className="text-xs text-zinc-600">&mdash;</span>
                       )}
+                    </TableCell>
+
+                    {/* Created at */}
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-xs text-zinc-500">
+                        {formatShortDate(user.createdAt)}
+                      </span>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell onClick={e => e.stopPropagation()}>
+                      <UserActionsDropdown
+                        user={user}
+                        viewerRole={viewerRole}
+                        viewerIsOwner={viewerIsOwner}
+                      />
                     </TableCell>
                   </TableRow>
                 )
@@ -368,7 +395,7 @@ export const UsersList = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-zinc-500">
-            {(safePage - 1) * PAGE_SIZE + 1}–
+            {(safePage - 1) * PAGE_SIZE + 1}&ndash;
             {Math.min(safePage * PAGE_SIZE, filtered.length)} sur{' '}
             {filtered.length}
           </p>
@@ -378,7 +405,7 @@ export const UsersList = ({
               size="icon-sm"
               disabled={safePage <= 1}
               onClick={() => setPage(p => p - 1)}
-              aria-label="Page précédente"
+              aria-label="Page precedente"
               className="text-zinc-400"
             >
               <ChevronLeft className="size-4" />
@@ -398,20 +425,6 @@ export const UsersList = ({
             </Button>
           </div>
         </div>
-      )}
-
-      {/* User detail dialog */}
-      {selectedUser && (
-        <UserDetailDialog
-          open={!!selectedUser}
-          onOpenChange={open => {
-            if (!open) setSelectedUser(undefined)
-          }}
-          user={selectedUser}
-          tournaments={tournaments}
-          viewerRole={viewerRole}
-          viewerIsOwner={viewerIsOwner}
-        />
       )}
     </>
   )

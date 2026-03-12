@@ -1,19 +1,18 @@
 /**
  * File: app/admin/users/page.tsx
  * Description: Admin page for unified user management (players, admins, super admins).
- * Author: Noé Henchoz
+ * Author: Noe Henchoz
  * License: MIT
- * Copyright (c) 2026 Noé Henchoz
+ * Copyright (c) 2026 Noe Henchoz
  */
 
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
 import { UsersList } from '@/components/features/admin/users-list'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
-import { getTournamentOptions, getUsers } from '@/lib/services/users'
+import { getUsers } from '@/lib/services/users'
 import { isOwner } from '@/lib/utils/owner'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
@@ -28,10 +27,7 @@ const AdminUsersPage = async () => {
     redirect(ROUTES.LOGIN)
   }
 
-  const [users, tournaments] = await Promise.all([
-    getUsers(),
-    getTournamentOptions(),
-  ])
+  const users = await getUsers()
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -42,18 +38,15 @@ const AdminUsersPage = async () => {
           Utilisateurs
         </h1>
         <p className="text-sm text-zinc-400">
-          Gérez tous les utilisateurs de la plateforme.
+          Gerez tous les utilisateurs de la plateforme.
         </p>
       </div>
 
-      <Suspense>
-        <UsersList
-          users={users}
-          tournaments={tournaments}
-          viewerRole={session.user.role as Role}
-          viewerIsOwner={isOwner(session.user.email)}
-        />
-      </Suspense>
+      <UsersList
+        users={users}
+        viewerRole={session.user.role as Role}
+        viewerIsOwner={isOwner(session.user.email)}
+      />
     </div>
   )
 }
