@@ -8,6 +8,7 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import {
   DashboardRecentRegistrations,
   DashboardRecentSponsors,
@@ -15,6 +16,8 @@ import {
   DashboardUpcomingTournaments,
 } from '@/components/features/admin/dashboard-recent'
 import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
+import { ROUTES } from '@/lib/config/routes'
+import { getSession } from '@/lib/services/auth'
 import {
   getDashboardStats,
   getRecentRegistrations,
@@ -28,6 +31,12 @@ export const metadata: Metadata = {
 }
 
 const AdminDashboardPage = async () => {
+  const session = await getSession()
+
+  if (!session?.user) {
+    redirect(ROUTES.LOGIN)
+  }
+
   const [
     stats,
     upcomingTournaments,
@@ -43,7 +52,7 @@ const AdminDashboardPage = async () => {
   ])
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       {/* Page heading */}
       <div className="space-y-1">
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">

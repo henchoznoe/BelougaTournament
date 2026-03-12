@@ -47,12 +47,12 @@ export const UserDangerSection = ({
   }
 
   return (
-    <div className="rounded-2xl border border-red-500/10 bg-red-500/5 p-6">
+    <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <Trash2 className="size-4 text-red-400/60" />
-        <h3 className="text-sm font-medium uppercase tracking-wider text-red-400/60">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-red-400/60">
           Zone dangereuse
-        </h3>
+        </h2>
       </div>
 
       {confirmDelete ? (

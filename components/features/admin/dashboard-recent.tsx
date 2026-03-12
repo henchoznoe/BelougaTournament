@@ -10,16 +10,15 @@ import {
   ArrowRight,
   Calendar,
   ClipboardList,
-  Crown,
   ExternalLink,
   Gamepad2,
   Handshake,
-  ShieldCheck,
   UserPlus,
   Users,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { RoleBadge } from '@/components/ui/role-badge'
 import { ROUTES } from '@/lib/config/routes'
 import type {
   RecentRegistration,
@@ -28,7 +27,7 @@ import type {
   UpcomingTournament,
 } from '@/lib/types/dashboard'
 import { formatDate } from '@/lib/utils/formatting'
-import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface UpcomingTournamentsProps {
   tournaments: UpcomingTournament[]
@@ -108,6 +107,7 @@ export const DashboardUpcomingTournaments = ({
           </div>
           <Link
             href={ROUTES.ADMIN_TOURNAMENTS}
+            aria-label="Voir tous les tournois"
             className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Voir tout
@@ -125,7 +125,7 @@ export const DashboardRecentRegistrations = ({
   return (
     <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
-        <ClipboardList className="size-4 text-blue-400" />
+        <ClipboardList className="size-4 text-sky-400" />
         <h2 className="text-sm font-semibold text-white">
           Inscriptions récentes
         </h2>
@@ -154,7 +154,10 @@ export const DashboardRecentRegistrations = ({
                       className="size-7 shrink-0 rounded-full"
                     />
                   ) : (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">
+                    <div
+                      aria-hidden="true"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400"
+                    >
                       {reg.user.name.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -176,6 +179,7 @@ export const DashboardRecentRegistrations = ({
           </div>
           <Link
             href={ROUTES.ADMIN_REGISTRATIONS}
+            aria-label="Voir toutes les inscriptions"
             className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Voir tout
@@ -187,37 +191,13 @@ export const DashboardRecentRegistrations = ({
   )
 }
 
-const getRoleBadge = (role: Role) => {
-  if (role === Role.SUPERADMIN) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
-        <Crown className="size-2.5" />
-        Super Admin
-      </span>
-    )
-  }
-  if (role === Role.ADMIN) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-400">
-        <ShieldCheck className="size-2.5" />
-        Admin
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400">
-      Joueur
-    </span>
-  )
-}
-
 export const DashboardRecentUsers = ({ users }: RecentUsersProps) => {
   return (
     <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <UserPlus className="size-4 text-emerald-400" />
         <h2 className="text-sm font-semibold text-white">
-          Inscriptions récentes sur le site
+          Utilisateurs récents
         </h2>
       </div>
 
@@ -244,7 +224,10 @@ export const DashboardRecentUsers = ({ users }: RecentUsersProps) => {
                       className="size-7 shrink-0 rounded-full"
                     />
                   ) : (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">
+                    <div
+                      aria-hidden="true"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-medium text-zinc-400"
+                    >
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -256,7 +239,7 @@ export const DashboardRecentUsers = ({ users }: RecentUsersProps) => {
                       <span className="truncate text-xs text-zinc-500">
                         {user.name}
                       </span>
-                      {getRoleBadge(user.role)}
+                      <RoleBadge role={user.role} />
                     </div>
                   </div>
                 </div>
@@ -268,6 +251,7 @@ export const DashboardRecentUsers = ({ users }: RecentUsersProps) => {
           </div>
           <Link
             href={ROUTES.ADMIN_USERS}
+            aria-label="Voir tous les utilisateurs"
             className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Voir tout
@@ -295,9 +279,10 @@ export const DashboardRecentSponsors = ({ sponsors }: RecentSponsorsProps) => {
         <>
           <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
             {sponsors.map(sponsor => (
-              <div
+              <Link
                 key={sponsor.id}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3"
+                href={ROUTES.ADMIN_SPONSORS}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   {sponsor.imageUrls.length > 0 ? (
@@ -309,7 +294,10 @@ export const DashboardRecentSponsors = ({ sponsors }: RecentSponsorsProps) => {
                       className="size-7 shrink-0 rounded-lg object-contain"
                     />
                   ) : (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-xs font-medium text-purple-400">
+                    <div
+                      aria-hidden="true"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-xs font-medium text-purple-400"
+                    >
                       {sponsor.name.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -335,11 +323,12 @@ export const DashboardRecentSponsors = ({ sponsors }: RecentSponsorsProps) => {
                 <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
                   {formatDate(sponsor.createdAt)}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
           <Link
             href={ROUTES.ADMIN_SPONSORS}
+            aria-label="Voir tous les sponsors"
             className="mt-4 flex items-center justify-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Voir tout

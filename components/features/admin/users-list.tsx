@@ -8,21 +8,14 @@
 
 'use client'
 
-import {
-  Ban,
-  ChevronLeft,
-  ChevronRight,
-  Crown,
-  Search,
-  ShieldCheck,
-  Trophy,
-} from 'lucide-react'
+import { Ban, ChevronLeft, ChevronRight, Search, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { UserActionsDropdown } from '@/components/features/admin/user-actions-dropdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RoleBadge } from '@/components/ui/role-badge'
 import {
   Select,
   SelectContent,
@@ -30,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
   TableBody,
@@ -128,51 +122,6 @@ export const UsersList = ({
 
   const bannedCount = users.filter(u => isBanned(u.bannedUntil)).length
 
-  const getRoleBadge = (user: UserRow) => {
-    if (user.role === Role.SUPERADMIN) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
-          <Crown className="size-3" />
-          Super Admin
-        </span>
-      )
-    }
-    if (user.role === Role.ADMIN) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-400">
-          <ShieldCheck className="size-3" />
-          Admin
-        </span>
-      )
-    }
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400">
-        Joueur
-      </span>
-    )
-  }
-
-  const getStatusBadge = (user: UserRow) => {
-    const banned = isBanned(user.bannedUntil)
-    const isPermanent =
-      user.bannedUntil && new Date(user.bannedUntil).getFullYear() >= 9999
-
-    if (banned) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
-          <Ban className="size-3" />
-          {isPermanent ? 'Ban permanent' : 'Banni'}
-        </span>
-      )
-    }
-
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
-        Actif
-      </span>
-    )
-  }
-
   return (
     <>
       {/* Search + filters */}
@@ -189,7 +138,10 @@ export const UsersList = ({
         </div>
         <div className="flex items-center gap-2">
           <Select value={roleFilter} onValueChange={handleRoleFilter}>
-            <SelectTrigger className="w-36 border-white/10 bg-white/5 text-zinc-200">
+            <SelectTrigger
+              aria-label="Filtrer par rôle"
+              className="w-36 border-white/10 bg-white/5 text-zinc-200"
+            >
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
@@ -200,7 +152,10 @@ export const UsersList = ({
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={handleStatusFilter}>
-            <SelectTrigger className="w-28 border-white/10 bg-white/5 text-zinc-200">
+            <SelectTrigger
+              aria-label="Filtrer par statut"
+              className="w-28 border-white/10 bg-white/5 text-zinc-200"
+            >
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
@@ -268,10 +223,18 @@ export const UsersList = ({
                 return (
                   <TableRow
                     key={user.id}
+                    tabIndex={0}
+                    role="link"
                     className="cursor-pointer border-white/5 hover:bg-white/4"
                     onClick={() =>
                       router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
                     }
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
+                      }
+                    }}
                   >
                     {/* User info */}
                     <TableCell>
@@ -309,12 +272,12 @@ export const UsersList = ({
 
                     {/* Role badge */}
                     <TableCell className="hidden sm:table-cell">
-                      {getRoleBadge(user)}
+                      <RoleBadge role={user.role} />
                     </TableCell>
 
                     {/* Status */}
                     <TableCell className="hidden sm:table-cell">
-                      {getStatusBadge(user)}
+                      <StatusBadge bannedUntil={user.bannedUntil} />
                     </TableCell>
 
                     {/* Registrations count */}

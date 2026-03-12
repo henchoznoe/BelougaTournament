@@ -112,9 +112,9 @@ export const UserEditSection = ({
       <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
         <div className="flex items-center gap-2">
           <Pencil className="size-4 text-zinc-500" />
-          <h3 className="text-sm font-medium uppercase tracking-wider text-zinc-500">
+          <h2 className="text-sm font-medium uppercase tracking-wider text-zinc-500">
             Modification
-          </h3>
+          </h2>
         </div>
 
         <div className="max-w-md space-y-1.5">

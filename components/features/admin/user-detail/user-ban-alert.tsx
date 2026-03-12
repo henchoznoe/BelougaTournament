@@ -9,7 +9,7 @@
 'use client'
 
 import type { UserDetail } from '@/lib/types/user'
-import { isBanned } from '@/lib/utils/auth.helpers'
+import { isBanned, isPermanentBan } from '@/lib/utils/auth.helpers'
 import { formatDate } from '@/lib/utils/formatting'
 
 interface UserBanAlertProps {
@@ -18,14 +18,13 @@ interface UserBanAlertProps {
 
 export const UserBanAlert = ({ user }: UserBanAlertProps) => {
   const banned = isBanned(user.bannedUntil)
-  const isPermanentBan =
-    user.bannedUntil && new Date(user.bannedUntil).getFullYear() >= 9999
+  const permanent = isPermanentBan(user.bannedUntil)
 
   if (!banned) return null
 
   return (
     <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-5 py-4 text-sm text-red-300">
-      {isPermanentBan ? (
+      {permanent ? (
         <p className="font-medium">Ban permanent</p>
       ) : (
         user.bannedUntil && (

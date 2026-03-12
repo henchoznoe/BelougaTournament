@@ -8,16 +8,10 @@
 
 'use client'
 
-import {
-  Ban,
-  Calendar,
-  ClipboardList,
-  Crown,
-  Hash,
-  ShieldCheck,
-  Trophy,
-} from 'lucide-react'
+import { Ban, Calendar, ClipboardList, Hash, Trophy } from 'lucide-react'
 import Image from 'next/image'
+import { RoleBadge } from '@/components/ui/role-badge'
+import { StatusBadge } from '@/components/ui/status-badge'
 import type { UserDetail } from '@/lib/types/user'
 import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDate } from '@/lib/utils/formatting'
@@ -29,50 +23,8 @@ interface UserProfileHeaderProps {
 
 export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
   const banned = isBanned(user.bannedUntil)
-  const isPermanentBan =
-    user.bannedUntil && new Date(user.bannedUntil).getFullYear() >= 9999
   const hasCustomDisplayName =
     user.displayName && user.displayName !== user.name
-
-  const getRoleBadge = () => {
-    if (user.role === Role.SUPERADMIN) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">
-          <Crown className="size-3" />
-          Super Admin
-        </span>
-      )
-    }
-    if (user.role === Role.ADMIN) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-400">
-          <ShieldCheck className="size-3" />
-          Admin
-        </span>
-      )
-    }
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2.5 py-1 text-xs font-semibold text-zinc-400">
-        Joueur
-      </span>
-    )
-  }
-
-  const getStatusBadge = () => {
-    if (banned) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
-          <Ban className="size-3" />
-          {isPermanentBan ? 'Ban permanent' : 'Banni'}
-        </span>
-      )
-    }
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
-        Actif
-      </span>
-    )
-  }
 
   return (
     <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
@@ -106,8 +58,8 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
           )}
           <p className="truncate text-sm text-zinc-400">{user.email}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {getRoleBadge()}
-            {getStatusBadge()}
+            <RoleBadge role={user.role} size="md" />
+            <StatusBadge bannedUntil={user.bannedUntil} size="md" />
           </div>
         </div>
       </div>

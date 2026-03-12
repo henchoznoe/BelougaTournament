@@ -12,11 +12,10 @@ export const AdminShellSkeleton = () => {
   return (
     <div className="flex h-dvh bg-zinc-950">
       {/* Sidebar skeleton (desktop only) */}
-      <aside className="hidden w-60 flex-col border-r border-white/5 bg-zinc-950/80 md:flex">
+      <aside className="hidden w-16 flex-col border-r border-white/5 bg-zinc-950/80 md:flex">
         {/* Logo area */}
-        <div className="flex h-16 items-center gap-3 border-b border-white/5 px-4">
+        <div className="flex h-16 items-center justify-center border-b border-white/5 px-4">
           <Skeleton className="size-7 shrink-0 rounded bg-zinc-800" />
-          <Skeleton className="h-4 w-16 rounded bg-zinc-800" />
         </div>
 
         {/* Nav items */}
@@ -24,35 +23,31 @@ export const AdminShellSkeleton = () => {
           {['dashboard', 'tournaments', 'players'].map(item => (
             <div
               key={item}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+              className="flex items-center justify-center rounded-xl px-3 py-2.5"
             >
               <Skeleton className="size-5 shrink-0 rounded bg-zinc-800" />
-              <Skeleton className="h-4 w-24 rounded bg-zinc-800" />
             </div>
           ))}
 
           {/* Group separator */}
           <div className="px-2 py-3">
             <div className="h-px bg-white/5" />
-            <Skeleton className="mt-3 h-3 w-20 rounded bg-zinc-800" />
           </div>
 
           {['settings', 'sponsors', 'admins'].map(item => (
             <div
               key={item}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+              className="flex items-center justify-center rounded-xl px-3 py-2.5"
             >
               <Skeleton className="size-5 shrink-0 rounded bg-zinc-800" />
-              <Skeleton className="h-4 w-20 rounded bg-zinc-800" />
             </div>
           ))}
         </div>
 
         {/* Collapse toggle area */}
         <div className="border-t border-white/5 p-2">
-          <div className="flex items-center gap-3 px-3 py-2.5">
+          <div className="flex items-center justify-center px-3 py-2.5">
             <Skeleton className="size-5 shrink-0 rounded bg-zinc-800" />
-            <Skeleton className="h-4 w-16 rounded bg-zinc-800" />
           </div>
         </div>
       </aside>

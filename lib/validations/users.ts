@@ -18,27 +18,27 @@ export const demoteUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
 
-/** Schema for updating an admin's tournament assignments. */
-export const updateAssignmentsSchema = z.object({
-  userId: z.uuid('ID utilisateur invalide.'),
-  tournamentIds: z.array(z.uuid('ID tournoi invalide.')),
-})
-
 /** Schema for updating a user (admin: displayName + assignments, player: displayName only). */
 export const updateUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
   displayName: z
     .string()
     .trim()
-    .min(2, 'Le pseudo doit contenir au moins 2 caractères.')
-    .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.'),
+    .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.')
+    .refine(v => v === '' || v.length >= 2, {
+      message: 'Le pseudo doit contenir au moins 2 caractères.',
+    }),
   tournamentIds: z.array(z.uuid('ID tournoi invalide.')).optional(),
 })
 
 /** Schema for banning a user. */
 export const banUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
-  bannedUntil: z.coerce.date({ message: 'Date de ban invalide.' }),
+  bannedUntil: z.coerce
+    .date({ message: 'Date de ban invalide.' })
+    .refine(d => d > new Date(), {
+      message: 'La date de ban doit être dans le futur.',
+    }),
   banReason: z
     .string()
     .trim()

@@ -260,13 +260,17 @@ export const banUser = authenticatedAction({
       }
     }
 
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: {
-        bannedUntil: data.bannedUntil,
-        banReason: data.banReason || null,
-      },
-    })
+    // Ban the user and revoke all sessions so they are logged out immediately
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: data.userId },
+        data: {
+          bannedUntil: data.bannedUntil,
+          banReason: data.banReason || null,
+        },
+      }),
+      prisma.session.deleteMany({ where: { userId: data.userId } }),
+    ])
 
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')

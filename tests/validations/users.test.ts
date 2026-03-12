@@ -13,7 +13,6 @@ import {
   demoteUserSchema,
   promoteUserSchema,
   unbanUserSchema,
-  updateAssignmentsSchema,
   updateUserSchema,
 } from '@/lib/validations/users'
 
@@ -65,49 +64,6 @@ describe('demoteUserSchema', () => {
 })
 
 // ---------------------------------------------------------------------------
-// updateAssignmentsSchema
-// ---------------------------------------------------------------------------
-
-describe('updateAssignmentsSchema', () => {
-  it('accepts a valid userId and empty tournamentIds array', () => {
-    const result = updateAssignmentsSchema.safeParse({
-      userId: VALID_UUID,
-      tournamentIds: [],
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts a valid userId with multiple tournament UUIDs', () => {
-    const result = updateAssignmentsSchema.safeParse({
-      userId: VALID_UUID,
-      tournamentIds: [VALID_UUID, VALID_UUID],
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('rejects invalid tournament UUID in the array', () => {
-    const result = updateAssignmentsSchema.safeParse({
-      userId: VALID_UUID,
-      tournamentIds: [INVALID_UUID],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects invalid userId', () => {
-    const result = updateAssignmentsSchema.safeParse({
-      userId: INVALID_UUID,
-      tournamentIds: [],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects missing tournamentIds', () => {
-    const result = updateAssignmentsSchema.safeParse({ userId: VALID_UUID })
-    expect(result.success).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
 // updateUserSchema
 // ---------------------------------------------------------------------------
 
@@ -153,6 +109,25 @@ describe('updateUserSchema', () => {
     expect(result.success).toBe(false)
   })
 
+  it('accepts an empty displayName to clear the field', () => {
+    const result = updateUserSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: '',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a whitespace-only displayName as empty after trim', () => {
+    const result = updateUserSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: '   ',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.displayName).toBe('')
+    }
+  })
+
   it('rejects displayName longer than 32 characters', () => {
     const result = updateUserSchema.safeParse({
       userId: VALID_UUID,
@@ -168,6 +143,17 @@ describe('updateUserSchema', () => {
     })
     // After trim "A" has length 1 — should fail min(2)
     expect(result.success).toBe(false)
+  })
+
+  it('trims whitespace on a 2-char displayName and accepts it', () => {
+    const result = updateUserSchema.safeParse({
+      userId: VALID_UUID,
+      displayName: '  AB  ',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.displayName).toBe('AB')
+    }
   })
 
   it('rejects an invalid tournament UUID in the array', () => {
@@ -265,6 +251,22 @@ describe('banUserSchema', () => {
   it('rejects missing bannedUntil', () => {
     const result = banUserSchema.safeParse({ userId: VALID_UUID })
     expect(result.success).toBe(false)
+  })
+
+  it('rejects a past date', () => {
+    const result = banUserSchema.safeParse({
+      userId: VALID_UUID,
+      bannedUntil: new Date('2020-01-01T00:00:00.000Z'),
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts the permanent ban date (year 9999)', () => {
+    const result = banUserSchema.safeParse({
+      userId: VALID_UUID,
+      bannedUntil: new Date('9999-12-31T23:59:59.999Z'),
+    })
+    expect(result.success).toBe(true)
   })
 })
 

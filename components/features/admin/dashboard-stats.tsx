@@ -98,6 +98,7 @@ export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
           <Link
             key={card.key}
             href={card.href}
+            aria-label={`Voir les ${card.label.toLowerCase()}`}
             className="cursor-pointer rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm transition-colors hover:border-white/10"
           >
             <div className="flex items-center justify-between">

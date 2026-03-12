@@ -83,9 +83,9 @@ export const UserRoleSection = ({
     <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <ShieldCheck className="size-4 text-zinc-500" />
-        <h3 className="text-sm font-medium uppercase tracking-wider text-zinc-500">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-zinc-500">
           Gestion du rôle
-        </h3>
+        </h2>
       </div>
 
       <div className="space-y-3">
