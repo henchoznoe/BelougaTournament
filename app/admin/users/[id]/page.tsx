@@ -6,10 +6,10 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ArrowLeft, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { UserDetail } from '@/components/features/admin/user-detail'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -50,15 +50,16 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      {/* Breadcrumb */}
+      <AdminBreadcrumb
+        segments={[
+          { label: 'Utilisateurs', href: ROUTES.ADMIN_USERS },
+          { label: user.name },
+        ]}
+      />
+
       {/* Page heading */}
       <div className="space-y-1">
-        <Link
-          href={ROUTES.ADMIN_USERS}
-          className="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-        >
-          <ArrowLeft className="size-4" />
-          Retour aux utilisateurs
-        </Link>
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
           <Users className="size-6 text-blue-400" />
           {user.name}

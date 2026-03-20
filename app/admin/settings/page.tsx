@@ -8,6 +8,7 @@
 
 import { Settings } from 'lucide-react'
 import type { Metadata } from 'next'
+import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { SettingsForm } from '@/components/features/admin/settings-form'
 import SuperAdminGuard from '@/components/features/auth/super-admin-guard'
 import { getGlobalSettings } from '@/lib/services/settings'
@@ -22,6 +23,9 @@ const AdminSettingsPage = async () => {
   return (
     <SuperAdminGuard>
       <div className="mx-auto max-w-3xl space-y-6">
+        {/* Breadcrumb */}
+        <AdminBreadcrumb segments={[{ label: 'Paramètres' }]} />
+
         {/* Page heading */}
         <div className="space-y-1">
           <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">

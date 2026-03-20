@@ -9,6 +9,7 @@
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { UsersList } from '@/components/features/admin/users-list'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -31,6 +32,9 @@ const AdminUsersPage = async () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {/* Breadcrumb */}
+      <AdminBreadcrumb segments={[{ label: 'Utilisateurs' }]} />
+
       {/* Page heading */}
       <div className="space-y-1">
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
