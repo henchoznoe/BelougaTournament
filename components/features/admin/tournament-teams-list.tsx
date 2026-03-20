@@ -13,7 +13,6 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { TeamDetailDialog } from '@/components/features/admin/team-detail-dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,24 +40,24 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
+import { ROUTES } from '@/lib/config/routes'
 import type { TeamItem, TeamMemberItem } from '@/lib/types/tournament'
 import { formatDateTime } from '@/lib/utils/formatting'
 
 interface TournamentTeamsListProps {
   teams: TeamItem[]
   tournamentId: string
+  slug: string
 }
 
 export const TournamentTeamsList = ({
   teams,
   tournamentId,
+  slug,
 }: TournamentTeamsListProps) => {
   const [search, setSearch] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-
-  // State for team detail dialog
-  const [selectedTeam, setSelectedTeam] = useState<TeamItem | undefined>()
 
   // State for kick member dialog
   const [kickingTeam, setKickingTeam] = useState<TeamItem | undefined>()
@@ -184,11 +183,17 @@ export const TournamentTeamsList = ({
                   tabIndex={0}
                   role="button"
                   className="cursor-pointer border-white/5 hover:bg-white/4"
-                  onClick={() => setSelectedTeam(team)}
+                  onClick={() =>
+                    router.push(
+                      ROUTES.ADMIN_TOURNAMENT_TEAM_DETAIL(slug, team.id),
+                    )
+                  }
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
-                      setSelectedTeam(team)
+                      router.push(
+                        ROUTES.ADMIN_TOURNAMENT_TEAM_DETAIL(slug, team.id),
+                      )
                     }
                   }}
                 >
@@ -506,18 +511,6 @@ export const TournamentTeamsList = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}
-
-      {/* Team detail dialog */}
-      {selectedTeam && (
-        <TeamDetailDialog
-          open={!!selectedTeam}
-          onOpenChange={open => {
-            if (!open) setSelectedTeam(undefined)
-          }}
-          team={selectedTeam}
-          tournamentId={tournamentId}
-        />
       )}
     </>
   )

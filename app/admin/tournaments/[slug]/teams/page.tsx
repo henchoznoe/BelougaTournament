@@ -38,7 +38,13 @@ const AdminTournamentTeamsPage = async ({
 
   const teams = await getTeams(tournament.id)
 
-  return <TournamentTeamsList teams={teams} tournamentId={tournament.id} />
+  return (
+    <TournamentTeamsList
+      teams={teams}
+      tournamentId={tournament.id}
+      slug={slug}
+    />
+  )
 }
 
 export default AdminTournamentTeamsPage

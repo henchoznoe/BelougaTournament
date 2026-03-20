@@ -38,6 +38,12 @@ export const ROUTES = {
   ADMIN_TOURNAMENT_TEAMS: (slug: string) =>
     `/admin/tournaments/${slug}/teams` as const,
   ADMIN_SPONSORS: '/admin/sponsors',
+  ADMIN_SPONSOR_NEW: '/admin/sponsors/new',
+  ADMIN_SPONSOR_EDIT: (id: string) => `/admin/sponsors/${id}/edit` as const,
+  ADMIN_REGISTRATION_DETAIL: (id: string) =>
+    `/admin/registrations/${id}` as const,
+  ADMIN_TOURNAMENT_TEAM_DETAIL: (slug: string, teamId: string) =>
+    `/admin/tournaments/${slug}/teams/${teamId}` as const,
   API_TOURNAMENT_EXPORT_CSV: (id: string) =>
     `/api/admin/tournaments/${id}/export-csv` as const,
 } as const

@@ -265,6 +265,57 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   }
 }
 
+/** Fetches a single team by ID (for admin team detail page). */
+export const getTeamById = async (teamId: string): Promise<TeamItem | null> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  try {
+    const row = await prisma.team.findUnique({
+      where: { id: teamId },
+      select: {
+        id: true,
+        name: true,
+        isFull: true,
+        createdAt: true,
+        captain: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+          },
+        },
+        members: {
+          orderBy: { joinedAt: 'asc' },
+          select: {
+            id: true,
+            joinedAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                image: true,
+              },
+            },
+          },
+        },
+        registration: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+    return row as unknown as TeamItem | null
+  } catch (error) {
+    logger.error({ error }, 'Error fetching team by ID')
+    return null
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Public services
 // ---------------------------------------------------------------------------

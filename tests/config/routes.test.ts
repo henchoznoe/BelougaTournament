@@ -61,6 +61,28 @@ describe('ROUTES', () => {
     )
   })
 
+  it('ADMIN_SPONSOR_NEW is /admin/sponsors/new', () => {
+    expect(ROUTES.ADMIN_SPONSOR_NEW).toBe('/admin/sponsors/new')
+  })
+
+  it('ADMIN_SPONSOR_EDIT builds id-based path', () => {
+    expect(ROUTES.ADMIN_SPONSOR_EDIT('sponsor-123')).toBe(
+      '/admin/sponsors/sponsor-123/edit',
+    )
+  })
+
+  it('ADMIN_REGISTRATION_DETAIL builds id-based path', () => {
+    expect(ROUTES.ADMIN_REGISTRATION_DETAIL('reg-456')).toBe(
+      '/admin/registrations/reg-456',
+    )
+  })
+
+  it('ADMIN_TOURNAMENT_TEAM_DETAIL builds slug and teamId-based path', () => {
+    expect(ROUTES.ADMIN_TOURNAMENT_TEAM_DETAIL('cup-2026', 'team-789')).toBe(
+      '/admin/tournaments/cup-2026/teams/team-789',
+    )
+  })
+
   it('all static routes are non-empty strings starting with /', () => {
     const staticRoutes = Object.entries(ROUTES).filter(
       ([, value]) => typeof value === 'string',

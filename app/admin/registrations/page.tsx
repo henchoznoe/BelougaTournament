@@ -8,41 +8,16 @@
 
 import { ClipboardList } from 'lucide-react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { RegistrationsList } from '@/components/features/admin/registrations-list'
-import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth'
-import {
-  getAllRegistrations,
-  getTeamOptions,
-} from '@/lib/services/registrations'
-import type { Role } from '@/prisma/generated/prisma/enums'
-import { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import { getAllRegistrations } from '@/lib/services/registrations'
 
 export const metadata: Metadata = {
   title: 'Inscriptions',
 }
 
 const AdminRegistrationsPage = async () => {
-  const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const registrations = await getAllRegistrations()
-
-  // Collect unique TEAM tournament IDs for the "change team" dropdown
-  const teamTournamentIds = [
-    ...new Set(
-      registrations
-        .filter(r => r.tournament.format === TournamentFormat.TEAM)
-        .map(r => r.tournament.id),
-    ),
-  ]
-
-  const teamsByTournament = await getTeamOptions(teamTournamentIds)
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -60,11 +35,7 @@ const AdminRegistrationsPage = async () => {
         </p>
       </div>
 
-      <RegistrationsList
-        registrations={registrations}
-        teamsByTournament={teamsByTournament}
-        viewerRole={session.user.role as Role}
-      />
+      <RegistrationsList registrations={registrations} />
     </div>
   )
 }

@@ -21,7 +21,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { BanUserDialog } from '@/components/features/admin/ban-user-dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,7 +74,6 @@ export const UserActionsDropdown = ({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
-  const [showBanDialog, setShowBanDialog] = useState(false)
 
   const viewerIsSuperAdmin = viewerRole === Role.SUPERADMIN
   const banned = isBanned(user.bannedUntil)
@@ -241,9 +239,11 @@ export const UserActionsDropdown = ({
             <>
               <DropdownMenuSeparator className="bg-white/5" />
               {canBan && (
-                <DropdownMenuItem onClick={() => setShowBanDialog(true)}>
-                  <Ban className="size-4 text-red-400" />
-                  Bannir
+                <DropdownMenuItem asChild>
+                  <Link href={ROUTES.ADMIN_USER_DETAIL(user.id)}>
+                    <Ban className="size-4 text-red-400" />
+                    Bannir
+                  </Link>
                 </DropdownMenuItem>
               )}
               {canUnban && (
@@ -302,14 +302,6 @@ export const UserActionsDropdown = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Ban Dialog */}
-      <BanUserDialog
-        userId={user.id}
-        userName={user.name}
-        open={showBanDialog}
-        onOpenChange={setShowBanDialog}
-      />
     </>
   )
 }

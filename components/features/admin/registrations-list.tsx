@@ -18,9 +18,8 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
-import { RegistrationDetailDialog } from '@/components/features/admin/registration-detail-dialog'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -39,10 +38,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
-import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
+import type { RegistrationRow } from '@/lib/types/registration'
 import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
-import type { Role } from '@/prisma/generated/prisma/enums'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
@@ -51,36 +49,16 @@ type FormatFilter = 'all' | TournamentFormat
 
 interface RegistrationsListProps {
   registrations: RegistrationRow[]
-  teamsByTournament: Record<string, TeamOption[]>
-  viewerRole: Role
 }
 
 export const RegistrationsList = ({
   registrations,
-  teamsByTournament,
-  viewerRole,
 }: RegistrationsListProps) => {
-  const searchParams = useSearchParams()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [formatFilter, setFormatFilter] = useState<FormatFilter>('all')
   const [tournamentFilter, setTournamentFilter] = useState('all')
   const [page, setPage] = useState(1)
-  const [selectedRegistration, setSelectedRegistration] = useState<
-    RegistrationRow | undefined
-  >()
-
-  // Deep-link: auto-open dialog when ?registrationId=xxx is present
-  useEffect(() => {
-    const registrationId = searchParams.get('registrationId')
-    if (registrationId && !selectedRegistration) {
-      const match = registrations.find(r => r.id === registrationId)
-      if (match) {
-        setSelectedRegistration(match)
-      }
-      // Clear the search param so closing the dialog does not re-trigger the effect
-      window.history.replaceState({}, '', window.location.pathname)
-    }
-  }, [searchParams, registrations, selectedRegistration])
 
   // Derive unique tournaments for the tournament dropdown
   const tournaments = useMemo(() => {
@@ -153,6 +131,10 @@ export const RegistrationsList = ({
   const teamCount = registrations.filter(
     r => r.tournament.format === TournamentFormat.TEAM,
   ).length
+
+  const handleRowClick = (registrationId: string) => {
+    router.push(ROUTES.ADMIN_REGISTRATION_DETAIL(registrationId))
+  }
 
   return (
     <>
@@ -254,11 +236,11 @@ export const RegistrationsList = ({
                     tabIndex={0}
                     role="button"
                     className="cursor-pointer border-white/5 hover:bg-white/4"
-                    onClick={() => setSelectedRegistration(reg)}
+                    onClick={() => handleRowClick(reg.id)}
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        setSelectedRegistration(reg)
+                        handleRowClick(reg.id)
                       }
                     }}
                   >
@@ -368,19 +350,6 @@ export const RegistrationsList = ({
             </Button>
           </div>
         </div>
-      )}
-
-      {/* Registration detail dialog */}
-      {selectedRegistration && (
-        <RegistrationDetailDialog
-          open={!!selectedRegistration}
-          onOpenChange={open => {
-            if (!open) setSelectedRegistration(undefined)
-          }}
-          registration={selectedRegistration}
-          teamsByTournament={teamsByTournament}
-          viewerRole={viewerRole}
-        />
       )}
     </>
   )

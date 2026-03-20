@@ -117,6 +117,95 @@ export const getAllRegistrations = async (): Promise<RegistrationRow[]> => {
   }
 }
 
+/** Fetches a single registration by ID (for the admin registration detail page). */
+export const getRegistrationById = async (
+  id: string,
+): Promise<RegistrationRow | null> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(CACHE_TAGS.REGISTRATIONS)
+
+  try {
+    const row = (await prisma.tournamentRegistration.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        createdAt: true,
+        fieldValues: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            image: true,
+            bannedUntil: true,
+            teamMembers: {
+              select: {
+                team: {
+                  select: {
+                    id: true,
+                    name: true,
+                    captainId: true,
+                    isFull: true,
+                    tournamentId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        tournament: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            format: true,
+            status: true,
+            fields: {
+              select: {
+                label: true,
+                type: true,
+                required: true,
+                order: true,
+              },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+        team: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })) as unknown as RawRegistrationRow | null
+
+    if (!row) return null
+
+    // Post-process: resolve team from TeamMember
+    const membership = row.user.teamMembers.find(
+      tm => tm.team.tournamentId === row.tournament.id,
+    )
+
+    const team = membership
+      ? {
+          id: membership.team.id,
+          name: membership.team.name,
+          captainId: membership.team.captainId,
+          isFull: membership.team.isFull,
+        }
+      : null
+
+    const { teamMembers: _, ...user } = row.user
+
+    return { ...row, user, team }
+  } catch (error) {
+    logger.error({ error }, 'Error fetching registration by ID')
+    return null
+  }
+}
+
 /** Fetches lightweight team options for all TEAM-format tournaments present in the registrations. */
 export const getTeamOptions = async (
   tournamentIds: string[],

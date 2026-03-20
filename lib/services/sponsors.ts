@@ -27,3 +27,17 @@ export const getSponsors = async (): Promise<Sponsor[]> => {
     return []
   }
 }
+
+/** Fetches a single sponsor by ID (for admin edit page). */
+export const getSponsorById = async (id: string): Promise<Sponsor | null> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.SPONSORS)
+
+  try {
+    return await prisma.sponsor.findUnique({ where: { id } })
+  } catch (error) {
+    logger.error({ error }, 'Error fetching sponsor by ID')
+    return null
+  }
+}

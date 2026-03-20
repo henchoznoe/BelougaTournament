@@ -10,8 +10,8 @@
 
 import { Ban, ChevronLeft, ChevronRight, Download, Search } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { RegistrationDetailDialog } from '@/components/features/admin/registration-detail-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -23,54 +23,24 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
-import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
 import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
-import type {
-  FieldType,
-  Role,
-  TournamentFormat,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
-
-/** Tournament context needed to construct RegistrationRow for the dialog. */
-interface TournamentContext {
-  id: string
-  title: string
-  slug: string
-  format: TournamentFormat
-  status: TournamentStatus
-  fields: {
-    label: string
-    type: FieldType
-    required: boolean
-    order: number
-  }[]
-}
 
 interface TournamentRegistrationsListProps {
   registrations: TournamentRegistrationItem[]
   tournamentId: string
-  tournamentContext: TournamentContext
-  teamsByTournament: Record<string, TeamOption[]>
-  viewerRole: Role
 }
 
 export const TournamentRegistrationsList = ({
   registrations,
   tournamentId,
-  tournamentContext,
-  teamsByTournament,
-  viewerRole,
 }: TournamentRegistrationsListProps) => {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [selectedRegistration, setSelectedRegistration] = useState<
-    RegistrationRow | undefined
-  >()
 
   const filtered = useMemo(() => {
     if (!search) return registrations
@@ -88,18 +58,6 @@ export const TournamentRegistrationsList = ({
     setPage(1)
   }
 
-  // Convert a TournamentRegistrationItem to a RegistrationRow for the dialog
-  const toRegistrationRow = (
-    item: TournamentRegistrationItem,
-  ): RegistrationRow => ({
-    id: item.id,
-    createdAt: item.createdAt,
-    fieldValues: item.fieldValues,
-    user: item.user,
-    tournament: tournamentContext,
-    team: item.team,
-  })
-
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
@@ -110,6 +68,10 @@ export const TournamentRegistrationsList = ({
 
   const handleExportCsv = () => {
     window.open(ROUTES.API_TOURNAMENT_EXPORT_CSV(tournamentId))
+  }
+
+  const handleRowClick = (registrationId: string) => {
+    router.push(ROUTES.ADMIN_REGISTRATION_DETAIL(registrationId))
   }
 
   return (
@@ -180,13 +142,11 @@ export const TournamentRegistrationsList = ({
                     tabIndex={0}
                     role="button"
                     className="cursor-pointer border-white/5 hover:bg-white/4"
-                    onClick={() =>
-                      setSelectedRegistration(toRegistrationRow(registration))
-                    }
+                    onClick={() => handleRowClick(registration.id)}
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        setSelectedRegistration(toRegistrationRow(registration))
+                        handleRowClick(registration.id)
                       }
                     }}
                   >
@@ -281,19 +241,6 @@ export const TournamentRegistrationsList = ({
             </Button>
           </div>
         </div>
-      )}
-
-      {/* Registration detail dialog */}
-      {selectedRegistration && (
-        <RegistrationDetailDialog
-          open={!!selectedRegistration}
-          onOpenChange={open => {
-            if (!open) setSelectedRegistration(undefined)
-          }}
-          registration={selectedRegistration}
-          teamsByTournament={teamsByTournament}
-          viewerRole={viewerRole}
-        />
       )}
     </>
   )
