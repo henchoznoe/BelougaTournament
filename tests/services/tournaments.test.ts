@@ -270,6 +270,37 @@ const MOCK_REGISTRATION = {
     name: 'player1',
     displayName: 'Player One',
     image: null,
+    bannedUntil: null,
+  },
+  team: {
+    id: 'team-1',
+    name: 'Alpha Squad',
+    captainId: 'user-1',
+    isFull: false,
+  },
+}
+
+/** Raw shape returned by Prisma before post-processing (includes teamMembers). */
+const MOCK_RAW_REGISTRATION = {
+  id: 'reg-1',
+  fieldValues: { 'Riot ID': 'Player#1234' },
+  createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  user: {
+    id: 'user-1',
+    name: 'player1',
+    displayName: 'Player One',
+    image: null,
+    bannedUntil: null,
+    teamMembers: [
+      {
+        team: {
+          id: 'team-1',
+          name: 'Alpha Squad',
+          captainId: 'user-1',
+          isFull: false,
+        },
+      },
+    ],
   },
   team: {
     id: 'team-1',
@@ -315,7 +346,7 @@ describe('getRegistrations', () => {
   })
 
   it('returns registrations for a tournament', async () => {
-    mockRegistrationFindMany.mockResolvedValue([MOCK_REGISTRATION])
+    mockRegistrationFindMany.mockResolvedValue([MOCK_RAW_REGISTRATION])
 
     const result = await getRegistrations('tournament-1')
 
@@ -333,6 +364,20 @@ describe('getRegistrations', () => {
             name: true,
             displayName: true,
             image: true,
+            bannedUntil: true,
+            teamMembers: {
+              where: { team: { tournamentId: 'tournament-1' } },
+              select: {
+                team: {
+                  select: {
+                    id: true,
+                    name: true,
+                    captainId: true,
+                    isFull: true,
+                  },
+                },
+              },
+            },
           },
         },
         team: {

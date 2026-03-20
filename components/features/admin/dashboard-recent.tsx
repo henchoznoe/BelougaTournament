@@ -65,7 +65,7 @@ export const DashboardUpcomingTournaments = ({
             {tournaments.map(tournament => (
               <Link
                 key={tournament.id}
-                href={ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug)}
+                href={ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug)}
                 className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
               >
                 <div className="min-w-0 flex-1">

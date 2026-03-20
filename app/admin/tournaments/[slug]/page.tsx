@@ -1,6 +1,6 @@
 /**
  * File: app/admin/tournaments/[slug]/page.tsx
- * Description: Admin page for editing an existing tournament (tab within tournament detail layout).
+ * Description: Admin tournament overview page showing status, stats and quick actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,26 +8,26 @@
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { TournamentForm } from '@/components/features/admin/tournament-form'
+import { TournamentOverview } from '@/components/features/admin/tournament-overview'
 import { getTournamentBySlug } from '@/lib/services/tournaments'
 
-interface AdminEditTournamentPageProps {
+interface AdminTournamentOverviewPageProps {
   params: Promise<{ slug: string }>
 }
 
 export const generateMetadata = async ({
   params,
-}: AdminEditTournamentPageProps): Promise<Metadata> => {
+}: AdminTournamentOverviewPageProps): Promise<Metadata> => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
   return {
-    title: tournament ? `Modifier ${tournament.title}` : 'Tournoi introuvable',
+    title: tournament ? tournament.title : 'Tournoi introuvable',
   }
 }
 
-const AdminEditTournamentPage = async ({
+const AdminTournamentOverviewPage = async ({
   params,
-}: AdminEditTournamentPageProps) => {
+}: AdminTournamentOverviewPageProps) => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
 
@@ -35,7 +35,7 @@ const AdminEditTournamentPage = async ({
     notFound()
   }
 
-  return <TournamentForm tournament={tournament} />
+  return <TournamentOverview tournament={tournament} />
 }
 
-export default AdminEditTournamentPage
+export default AdminTournamentOverviewPage

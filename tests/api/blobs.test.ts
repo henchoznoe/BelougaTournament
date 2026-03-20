@@ -188,6 +188,15 @@ describe('GET /api/admin/blobs', () => {
     expect(mockList).toHaveBeenCalledWith({ prefix: 'sponsors/' })
   })
 
+  it('lists blobs with tournaments folder prefix', async () => {
+    mockList.mockResolvedValue({ blobs: [] })
+
+    const response = await GET(makeGetRequest('tournaments'))
+
+    expect(response.status).toBe(200)
+    expect(mockList).toHaveBeenCalledWith({ prefix: 'tournaments/' })
+  })
+
   it('ignores invalid folder and lists all blobs', async () => {
     mockList.mockResolvedValue({ blobs: [] })
 
@@ -313,6 +322,28 @@ describe('POST /api/admin/blobs', () => {
     })
     expect(mockPut).toHaveBeenCalledWith(
       'sponsors/logo.png',
+      expect.any(File),
+      {
+        access: 'public',
+        addRandomSuffix: true,
+      },
+    )
+  })
+
+  it('uploads file with tournaments folder prefix', async () => {
+    const file = createFile('banner.webp', 'image/webp')
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', 'tournaments')
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      url: 'https://blob.vercel.com/test.png',
+    })
+    expect(mockPut).toHaveBeenCalledWith(
+      'tournaments/banner.webp',
       expect.any(File),
       {
         access: 'public',

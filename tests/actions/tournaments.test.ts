@@ -192,6 +192,7 @@ const VALID_TOURNAMENT_INPUT = {
   prize: '500 CHF',
   toornamentId: '',
   streamUrl: '',
+  imageUrl: '',
   fields: [
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
@@ -261,6 +262,7 @@ describe('createTournament', () => {
         rules: 'Double élimination BO3.',
         prize: '500 CHF',
         toornamentId: null,
+        imageUrl: null,
         streamUrl: null,
         fields: {
           create: [

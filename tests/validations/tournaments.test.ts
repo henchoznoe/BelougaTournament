@@ -44,6 +44,7 @@ const VALID_TOURNAMENT = {
   prize: '500 CHF',
   toornamentId: '',
   streamUrl: '',
+  imageUrl: '',
   fields: [VALID_FIELD],
   toornamentStages: [],
 }
@@ -215,6 +216,31 @@ describe('tournamentSchema', () => {
       streamUrl: 'https://twitch.tv/belouga',
     })
     expect(result.success).toBe(true)
+  })
+
+  it('accepts empty imageUrl', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      imageUrl: '',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts valid URL for imageUrl', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      imageUrl: 'https://example.com/image.png',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects an invalid imageUrl', () => {
+    expect(
+      tournamentSchema.safeParse({
+        ...VALID_TOURNAMENT,
+        imageUrl: 'ftp://invalid',
+      }).success,
+    ).toBe(false)
   })
 
   // --- Title ---

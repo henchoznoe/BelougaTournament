@@ -29,8 +29,10 @@ export const ROUTES = {
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',
   ADMIN_NEW_TOURNAMENT: '/admin/tournaments/new',
-  ADMIN_EDIT_TOURNAMENT: (slug: string) =>
+  ADMIN_TOURNAMENT_DETAIL: (slug: string) =>
     `/admin/tournaments/${slug}` as const,
+  ADMIN_TOURNAMENT_EDIT: (slug: string) =>
+    `/admin/tournaments/${slug}/edit` as const,
   ADMIN_TOURNAMENT_REGISTRATIONS: (slug: string) =>
     `/admin/tournaments/${slug}/registrations` as const,
   ADMIN_TOURNAMENT_TEAMS: (slug: string) =>

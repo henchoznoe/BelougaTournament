@@ -248,7 +248,7 @@ export const RegistrationDetailDialog = ({
               </DialogDescription>
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 <Link
-                  href={ROUTES.ADMIN_EDIT_TOURNAMENT(
+                  href={ROUTES.ADMIN_TOURNAMENT_DETAIL(
                     registration.tournament.slug,
                   )}
                   onClick={() => onOpenChange(false)}

@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/tournament-registrations-list.tsx
- * Description: Client component displaying tournament registrations with search and pagination.
+ * Description: Client component displaying tournament registrations with search, pagination, and clickable rows.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,9 +8,10 @@
 
 'use client'
 
-import { ChevronLeft, ChevronRight, Download, Search } from 'lucide-react'
+import { Ban, ChevronLeft, ChevronRight, Download, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
+import { RegistrationDetailDialog } from '@/components/features/admin/registration-detail-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,22 +23,54 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
+import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
+import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
+import type {
+  FieldType,
+  Role,
+  TournamentFormat,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
+
+/** Tournament context needed to construct RegistrationRow for the dialog. */
+interface TournamentContext {
+  id: string
+  title: string
+  slug: string
+  format: TournamentFormat
+  status: TournamentStatus
+  fields: {
+    label: string
+    type: FieldType
+    required: boolean
+    order: number
+  }[]
+}
 
 interface TournamentRegistrationsListProps {
   registrations: TournamentRegistrationItem[]
   tournamentId: string
+  tournamentContext: TournamentContext
+  teamsByTournament: Record<string, TeamOption[]>
+  viewerRole: Role
 }
 
 export const TournamentRegistrationsList = ({
   registrations,
   tournamentId,
+  tournamentContext,
+  teamsByTournament,
+  viewerRole,
 }: TournamentRegistrationsListProps) => {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [selectedRegistration, setSelectedRegistration] = useState<
+    RegistrationRow | undefined
+  >()
 
   const filtered = useMemo(() => {
     if (!search) return registrations
@@ -54,6 +87,18 @@ export const TournamentRegistrationsList = ({
     setSearch(value)
     setPage(1)
   }
+
+  // Convert a TournamentRegistrationItem to a RegistrationRow for the dialog
+  const toRegistrationRow = (
+    item: TournamentRegistrationItem,
+  ): RegistrationRow => ({
+    id: item.id,
+    createdAt: item.createdAt,
+    fieldValues: item.fieldValues,
+    user: item.user,
+    tournament: tournamentContext,
+    team: item.team,
+  })
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
@@ -126,57 +171,77 @@ export const TournamentRegistrationsList = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginated.map(registration => (
-                <TableRow
-                  key={registration.id}
-                  className="border-white/5 hover:bg-white/2"
-                >
-                  {/* Player info */}
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
-                        {registration.user.image ? (
-                          <Image
-                            src={registration.user.image}
-                            alt={registration.user.name}
-                            width={32}
-                            height={32}
-                            className="size-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs font-medium text-zinc-400">
-                            {registration.user.name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-200">
-                          {registration.user.displayName}
-                        </p>
-                        <p className="truncate text-xs text-zinc-500">
-                          {registration.user.name}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
+              {paginated.map(registration => {
+                const banned = isBanned(registration.user.bannedUntil)
 
-                  {/* Team */}
-                  <TableCell className="hidden sm:table-cell">
-                    {registration.team ? (
-                      <span className="text-xs text-zinc-400">
-                        {registration.team.name}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">—</span>
-                    )}
-                  </TableCell>
+                return (
+                  <TableRow
+                    key={registration.id}
+                    tabIndex={0}
+                    role="button"
+                    className="cursor-pointer border-white/5 hover:bg-white/4"
+                    onClick={() =>
+                      setSelectedRegistration(toRegistrationRow(registration))
+                    }
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedRegistration(toRegistrationRow(registration))
+                      }
+                    }}
+                  >
+                    {/* Player info */}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+                          {registration.user.image ? (
+                            <Image
+                              src={registration.user.image}
+                              alt={registration.user.name}
+                              width={32}
+                              height={32}
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs font-medium text-zinc-400">
+                              {registration.user.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          {banned && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                              <Ban className="size-3.5 text-red-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-zinc-200">
+                            {registration.user.displayName}
+                          </p>
+                          <p className="truncate text-xs text-zinc-500">
+                            {registration.user.name}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
 
-                  {/* Date */}
-                  <TableCell className="hidden text-xs text-zinc-500 md:table-cell">
-                    {formatDateTime(registration.createdAt)}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    {/* Team */}
+                    <TableCell className="hidden sm:table-cell">
+                      {registration.team ? (
+                        <span className="text-xs text-zinc-400">
+                          {registration.team.name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-zinc-600">&mdash;</span>
+                      )}
+                    </TableCell>
+
+                    {/* Date */}
+                    <TableCell className="hidden text-xs text-zinc-500 md:table-cell">
+                      {formatDateTime(registration.createdAt)}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>
@@ -216,6 +281,19 @@ export const TournamentRegistrationsList = ({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Registration detail dialog */}
+      {selectedRegistration && (
+        <RegistrationDetailDialog
+          open={!!selectedRegistration}
+          onOpenChange={open => {
+            if (!open) setSelectedRegistration(undefined)
+          }}
+          registration={selectedRegistration}
+          teamsByTournament={teamsByTournament}
+          viewerRole={viewerRole}
+        />
       )}
     </>
   )

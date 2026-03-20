@@ -186,7 +186,7 @@ export const TournamentRegistrationForm = ({
           variant="outline"
           className="gap-2 border-white/10 bg-white/5 hover:bg-white/10"
         >
-          <Link href={ROUTES.PROFILE_TOURNAMENTS}>
+          <Link href={`${ROUTES.PROFILE}#inscriptions`}>
             Voir / modifier mon inscription
           </Link>
         </Button>

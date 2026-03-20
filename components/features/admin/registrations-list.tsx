@@ -299,7 +299,9 @@ export const RegistrationsList = ({
                     {/* Tournament */}
                     <TableCell>
                       <Link
-                        href={ROUTES.ADMIN_EDIT_TOURNAMENT(reg.tournament.slug)}
+                        href={ROUTES.ADMIN_TOURNAMENT_DETAIL(
+                          reg.tournament.slug,
+                        )}
                         onClick={e => e.stopPropagation()}
                         className="inline-flex items-center gap-1.5 text-sm text-zinc-300 hover:text-blue-400"
                       >

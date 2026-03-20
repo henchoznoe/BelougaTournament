@@ -1,6 +1,6 @@
 /**
  * File: app/admin/tournaments/[slug]/layout.tsx
- * Description: Shared layout for tournament detail pages with heading and tab navigation.
+ * Description: Shared layout for tournament detail pages with breadcrumb, heading and tab navigation.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -9,9 +9,11 @@
 import { Trophy } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { TournamentDetailTabs } from '@/components/features/admin/tournament-detail-tabs'
 import { TournamentStatusBadge } from '@/components/features/admin/tournament-status-badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ROUTES } from '@/lib/config/routes'
 import { getTournamentBySlug } from '@/lib/services/tournaments'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -35,6 +37,14 @@ const TournamentHeader = async ({
 
   return (
     <>
+      {/* Breadcrumb */}
+      <AdminBreadcrumb
+        segments={[
+          { label: 'Tournois', href: ROUTES.ADMIN_TOURNAMENTS },
+          { label: tournament.title },
+        ]}
+      />
+
       {/* Page heading */}
       <div className="space-y-1">
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
@@ -65,6 +75,7 @@ const AdminTournamentLayout = ({
       <Suspense
         fallback={
           <div className="space-y-6">
+            <Skeleton className="h-4 w-48 rounded-lg" />
             <div className="space-y-2">
               <Skeleton className="h-8 w-64 rounded-lg" />
               <Skeleton className="h-4 w-96 rounded-lg" />

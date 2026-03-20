@@ -9,8 +9,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Loader2, Save } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
@@ -19,6 +18,7 @@ import { TournamentDatesSection } from '@/components/features/admin/tournament-f
 import { TournamentFieldsSection } from '@/components/features/admin/tournament-form/tournament-fields-section'
 import { TournamentFormatSection } from '@/components/features/admin/tournament-form/tournament-format-section'
 import { TournamentGeneralSection } from '@/components/features/admin/tournament-form/tournament-general-section'
+import { TournamentImageSection } from '@/components/features/admin/tournament-form/tournament-image-section'
 import { TournamentLinksSection } from '@/components/features/admin/tournament-form/tournament-links-section'
 import { TournamentRulesSection } from '@/components/features/admin/tournament-form/tournament-rules-section'
 import { Button } from '@/components/ui/button'
@@ -80,6 +80,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: fromNullable(tournament.prize),
           toornamentId: fromNullable(tournament.toornamentId),
           streamUrl: fromNullable(tournament.streamUrl),
+          imageUrl: fromNullable(tournament.imageUrl),
           fields: tournament.fields.map(f => ({
             id: f.id,
             label: f.label,
@@ -110,6 +111,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           prize: '',
           toornamentId: '',
           streamUrl: '',
+          imageUrl: '',
           fields: [],
           toornamentStages: [],
         },
@@ -160,6 +162,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       <div className="h-px bg-white/5" />
 
+      <TournamentImageSection form={form} isPending={isPending} />
+
+      <div className="h-px bg-white/5" />
+
       <TournamentFormatSection
         form={form}
         isPending={isPending}
@@ -189,18 +195,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       <div className="h-px bg-white/5" />
 
       {/* Submit */}
-      <div className="flex items-center justify-between">
-        <Button
-          type="button"
-          variant="ghost"
-          asChild
-          className="gap-2 text-zinc-400"
-        >
-          <Link href={ROUTES.ADMIN_TOURNAMENTS}>
-            <ArrowLeft className="size-4" />
-            Retour
-          </Link>
-        </Button>
+      <div className="flex items-center justify-end">
         <Button
           type="submit"
           disabled={isPending || (!isDirty && isEditing)}

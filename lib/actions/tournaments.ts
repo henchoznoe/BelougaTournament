@@ -258,6 +258,7 @@ export const createTournament = authenticatedAction({
         rules: toNullable(data.rules),
         prize: toNullable(data.prize),
         toornamentId: toNullable(data.toornamentId),
+        imageUrl: toNullable(data.imageUrl),
         streamUrl: toNullable(data.streamUrl),
         fields: {
           create: data.fields.map(field => ({
@@ -375,6 +376,7 @@ export const updateTournament = authenticatedAction({
           rules: toNullable(data.rules),
           prize: toNullable(data.prize),
           toornamentId: toNullable(data.toornamentId),
+          imageUrl: toNullable(data.imageUrl),
           streamUrl: toNullable(data.streamUrl),
           fields: {
             create: data.fields.map(field => ({

@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { TeamDetailDialog } from '@/components/features/admin/team-detail-dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,6 +56,9 @@ export const TournamentTeamsList = ({
   const [search, setSearch] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  // State for team detail dialog
+  const [selectedTeam, setSelectedTeam] = useState<TeamItem | undefined>()
 
   // State for kick member dialog
   const [kickingTeam, setKickingTeam] = useState<TeamItem | undefined>()
@@ -177,7 +181,16 @@ export const TournamentTeamsList = ({
               {filtered.map(team => (
                 <TableRow
                   key={team.id}
-                  className="border-white/5 hover:bg-white/2"
+                  tabIndex={0}
+                  role="button"
+                  className="cursor-pointer border-white/5 hover:bg-white/4"
+                  onClick={() => setSelectedTeam(team)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelectedTeam(team)
+                    }
+                  }}
                 >
                   {/* Team name + captain */}
                   <TableCell>
@@ -268,26 +281,54 @@ export const TournamentTeamsList = ({
 
                   {/* Actions */}
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setKickingTeam(team)}
-                        className="text-zinc-400 hover:text-amber-400"
-                        aria-label="Retirer un membre"
-                      >
-                        <UserMinus className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setDissolvingTeam(team)}
-                        className="text-zinc-400 hover:text-red-400"
-                        aria-label="Dissoudre l'équipe"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    <fieldset
+                      className="flex items-center justify-end gap-1 border-none p-0"
+                      onClick={e => e.stopPropagation()}
+                      onKeyDown={e => e.stopPropagation()}
+                    >
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setKickingTeam(team)}
+                              className="text-zinc-400 hover:text-amber-400"
+                              aria-label="Retirer un membre"
+                            >
+                              <UserMinus className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="bottom"
+                            className="border-white/10 bg-zinc-900 text-zinc-300"
+                          >
+                            Retirer un membre
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setDissolvingTeam(team)}
+                              className="text-zinc-400 hover:text-red-400"
+                              aria-label="Dissoudre l'équipe"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="bottom"
+                            className="border-white/10 bg-zinc-900 text-zinc-300"
+                          >
+                            Dissoudre l'équipe
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </fieldset>
                   </TableCell>
                 </TableRow>
               ))}
@@ -465,6 +506,18 @@ export const TournamentTeamsList = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      )}
+
+      {/* Team detail dialog */}
+      {selectedTeam && (
+        <TeamDetailDialog
+          open={!!selectedTeam}
+          onOpenChange={open => {
+            if (!open) setSelectedTeam(undefined)
+          }}
+          team={selectedTeam}
+          tournamentId={tournamentId}
+        />
       )}
     </>
   )

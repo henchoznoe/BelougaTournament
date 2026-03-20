@@ -145,12 +145,14 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   role="link"
                   className="cursor-pointer border-white/5 hover:bg-white/4"
                   onClick={() =>
-                    router.push(ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug))
+                    router.push(ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug))
                   }
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
-                      router.push(ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug))
+                      router.push(
+                        ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug),
+                      )
                     }
                   }}
                 >

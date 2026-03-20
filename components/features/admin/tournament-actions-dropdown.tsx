@@ -121,7 +121,7 @@ export const TournamentActionsDropdown = ({
           onClick={e => e.stopPropagation()}
         >
           <DropdownMenuItem asChild>
-            <Link href={ROUTES.ADMIN_EDIT_TOURNAMENT(tournament.slug)}>
+            <Link href={ROUTES.ADMIN_TOURNAMENT_EDIT(tournament.slug)}>
               <Pencil className="size-4" />
               Modifier
             </Link>
