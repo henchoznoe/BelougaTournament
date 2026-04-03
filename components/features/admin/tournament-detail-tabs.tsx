@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/tournament-detail-tabs.tsx
- * Description: Tab navigation for tournament detail pages (edit, registrations, teams).
+ * Description: Tab navigation for tournament detail pages (overview, edit, registrations, teams).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -25,7 +25,8 @@ export const TournamentDetailTabs = ({
   const pathname = usePathname()
 
   const tabs = [
-    { label: 'Modifier', href: ROUTES.ADMIN_EDIT_TOURNAMENT(slug) },
+    { label: 'Aperçu', href: ROUTES.ADMIN_TOURNAMENT_DETAIL(slug) },
+    { label: 'Modifier', href: ROUTES.ADMIN_TOURNAMENT_EDIT(slug) },
     {
       label: 'Inscriptions',
       href: ROUTES.ADMIN_TOURNAMENT_REGISTRATIONS(slug),
@@ -44,6 +45,7 @@ export const TournamentDetailTabs = ({
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               isActive

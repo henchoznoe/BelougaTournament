@@ -127,4 +127,73 @@ describe('proxy — admin route guard', () => {
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toBe(`${BASE_URL}/login`)
   })
+
+  it('redirects ADMIN to /unauthorized on superadmin-only route /admin/sponsors', async () => {
+    mockSession({
+      session: {
+        id: 's4',
+        userId: 'u4',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u4',
+        email: 'admin@test.com',
+        name: 'Admin',
+        role: Role.ADMIN,
+      },
+    })
+    const { proxy } = await import('@/proxy')
+
+    const response = await proxy(makeRequest('/admin/sponsors'))
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe(`${BASE_URL}/unauthorized`)
+  })
+
+  it('redirects ADMIN to /unauthorized on superadmin-only route /admin/settings', async () => {
+    mockSession({
+      session: {
+        id: 's5',
+        userId: 'u5',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u5',
+        email: 'admin@test.com',
+        name: 'Admin',
+        role: Role.ADMIN,
+      },
+    })
+    const { proxy } = await import('@/proxy')
+
+    const response = await proxy(makeRequest('/admin/settings'))
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe(`${BASE_URL}/unauthorized`)
+  })
+
+  it('allows SUPERADMIN access to superadmin-only routes', async () => {
+    mockSession({
+      session: {
+        id: 's7',
+        userId: 'u7',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u7',
+        email: 'superadmin@test.com',
+        name: 'Super',
+        role: Role.SUPERADMIN,
+      },
+    })
+    const { proxy } = await import('@/proxy')
+
+    for (const path of ['/admin/sponsors', '/admin/settings']) {
+      const response = await proxy(makeRequest(path))
+      expect(response.status).toBe(200)
+    }
+  })
 })

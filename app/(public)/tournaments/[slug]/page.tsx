@@ -12,10 +12,12 @@ import { Suspense } from 'react'
 import { TournamentDetail } from '@/components/features/tournaments/tournament-detail'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 import {
   getAvailableTeams,
   getPublicTournamentBySlug,
+  isUserRegisteredForTournament,
 } from '@/lib/services/tournaments'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -42,9 +44,10 @@ export const generateMetadata = async ({
 
 const TournamentContent = async ({ params }: TournamentPageProps) => {
   const { slug } = await params
-  const [tournament, settings] = await Promise.all([
+  const [tournament, settings, session] = await Promise.all([
     getPublicTournamentBySlug(slug),
     getGlobalSettings(),
+    getSession(),
   ])
 
   if (!tournament) {
@@ -57,6 +60,11 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
       ? await getAvailableTeams(tournament.id)
       : []
 
+  // Check if the logged-in user is already registered for this tournament
+  const isRegistered = session?.user
+    ? await isUserRegisteredForTournament(session.user.id, tournament.id)
+    : false
+
   return (
     <>
       <PageHeader
@@ -67,6 +75,7 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
         tournament={tournament}
         twitchUsername={settings.twitchUsername ?? undefined}
         availableTeams={availableTeams}
+        isRegistered={isRegistered}
       />
     </>
   )

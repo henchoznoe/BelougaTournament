@@ -93,7 +93,6 @@ const baseTournamentFields = {
     .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
     .optional()
     .default(''),
-  imageUrl: optionalUrl,
   rules: z
     .string()
     .trim()
@@ -112,6 +111,7 @@ const baseTournamentFields = {
     .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
     .optional()
     .default(''),
+  imageUrl: optionalUrl,
   streamUrl: optionalUrl,
   fields: z.array(tournamentFieldSchema),
   toornamentStages: z.array(toornamentStageSchema),

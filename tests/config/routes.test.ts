@@ -7,7 +7,8 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { ROUTES } from '@/lib/config/routes'
+import { ADMIN_ROUTE_ROLES, ROUTES } from '@/lib/config/routes'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -30,9 +31,15 @@ describe('ROUTES', () => {
     expect(ROUTES.PROFILE_TOURNAMENTS).toBe('/profile/tournaments')
   })
 
-  it('ADMIN_EDIT_TOURNAMENT builds slug-based path', () => {
-    expect(ROUTES.ADMIN_EDIT_TOURNAMENT('my-tourney')).toBe(
+  it('ADMIN_TOURNAMENT_DETAIL builds slug-based path', () => {
+    expect(ROUTES.ADMIN_TOURNAMENT_DETAIL('my-tourney')).toBe(
       '/admin/tournaments/my-tourney',
+    )
+  })
+
+  it('ADMIN_TOURNAMENT_EDIT builds slug-based path', () => {
+    expect(ROUTES.ADMIN_TOURNAMENT_EDIT('my-tourney')).toBe(
+      '/admin/tournaments/my-tourney/edit',
     )
   })
 
@@ -54,12 +61,65 @@ describe('ROUTES', () => {
     )
   })
 
+  it('ADMIN_SPONSOR_NEW is /admin/sponsors/new', () => {
+    expect(ROUTES.ADMIN_SPONSOR_NEW).toBe('/admin/sponsors/new')
+  })
+
+  it('ADMIN_SPONSOR_EDIT builds id-based path', () => {
+    expect(ROUTES.ADMIN_SPONSOR_EDIT('sponsor-123')).toBe(
+      '/admin/sponsors/sponsor-123/edit',
+    )
+  })
+
+  it('ADMIN_REGISTRATION_DETAIL builds id-based path', () => {
+    expect(ROUTES.ADMIN_REGISTRATION_DETAIL('reg-456')).toBe(
+      '/admin/registrations/reg-456',
+    )
+  })
+
+  it('ADMIN_TOURNAMENT_TEAM_DETAIL builds slug and teamId-based path', () => {
+    expect(ROUTES.ADMIN_TOURNAMENT_TEAM_DETAIL('cup-2026', 'team-789')).toBe(
+      '/admin/tournaments/cup-2026/teams/team-789',
+    )
+  })
+
   it('all static routes are non-empty strings starting with /', () => {
     const staticRoutes = Object.entries(ROUTES).filter(
       ([, value]) => typeof value === 'string',
     )
     for (const [, path] of staticRoutes) {
       expect(path).toMatch(/^\//)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ADMIN_ROUTE_ROLES
+// ---------------------------------------------------------------------------
+
+describe('ADMIN_ROUTE_ROLES', () => {
+  it('maps ADMIN-level routes correctly', () => {
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_DASHBOARD]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_TOURNAMENTS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_USERS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_REGISTRATIONS]).toBe(Role.ADMIN)
+  })
+
+  it('maps SUPERADMIN-level routes correctly', () => {
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SETTINGS]).toBe(Role.SUPERADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SPONSORS]).toBe(Role.SUPERADMIN)
+  })
+
+  it('every key is a valid admin route starting with /admin', () => {
+    for (const path of Object.keys(ADMIN_ROUTE_ROLES)) {
+      expect(path).toMatch(/^\/admin/)
+    }
+  })
+
+  it('every value is a valid Role enum member', () => {
+    const validRoles = new Set(Object.values(Role))
+    for (const role of Object.values(ADMIN_ROUTE_ROLES)) {
+      expect(validRoles.has(role)).toBe(true)
     }
   })
 })

@@ -1,0 +1,64 @@
+/**
+ * File: components/features/admin/user-detail.tsx
+ * Description: Orchestrator component for the admin user detail page, composing all sub-sections.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
+'use client'
+
+import { UserBanAlert } from '@/components/features/admin/user-detail/user-ban-alert'
+import { UserBanSection } from '@/components/features/admin/user-detail/user-ban-section'
+import { UserDangerSection } from '@/components/features/admin/user-detail/user-danger-section'
+import { UserEditSection } from '@/components/features/admin/user-detail/user-edit-section'
+import { UserProfileHeader } from '@/components/features/admin/user-detail/user-profile-header'
+import { UserRegistrationsSection } from '@/components/features/admin/user-detail/user-registrations-section'
+import { UserRoleSection } from '@/components/features/admin/user-detail/user-role-section'
+import type {
+  TournamentOption,
+  UserDetail as UserDetailType,
+} from '@/lib/types/user'
+import { Role } from '@/prisma/generated/prisma/enums'
+
+interface UserDetailProps {
+  user: UserDetailType
+  tournaments: TournamentOption[]
+  viewerRole: Role
+  viewerIsOwner: boolean
+}
+
+export const UserDetail = ({
+  user,
+  tournaments,
+  viewerRole,
+  viewerIsOwner,
+}: UserDetailProps) => {
+  const viewerIsSuperAdmin = viewerRole === Role.SUPERADMIN
+
+  const canEdit =
+    user.role !== Role.SUPERADMIN &&
+    (viewerIsSuperAdmin || user.role === Role.USER)
+
+  return (
+    <div className="space-y-6">
+      <UserProfileHeader user={user} />
+      <UserBanAlert user={user} />
+      <UserRegistrationsSection user={user} />
+      {canEdit && (
+        <UserEditSection
+          user={user}
+          tournaments={tournaments}
+          viewerRole={viewerRole}
+        />
+      )}
+      <UserRoleSection
+        user={user}
+        viewerRole={viewerRole}
+        viewerIsOwner={viewerIsOwner}
+      />
+      {user.role === Role.USER && <UserBanSection user={user} />}
+      <UserDangerSection user={user} viewerRole={viewerRole} />
+    </div>
+  )
+}

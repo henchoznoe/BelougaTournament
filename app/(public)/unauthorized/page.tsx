@@ -6,18 +6,16 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ArrowLeft, ShieldOff } from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { ROUTES } from '@/lib/config/routes'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Accès refusé',
-}
+import { ArrowLeft, ShieldOff } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 
 /** Rendered when an authenticated user tries to access a route they are not authorized for. */
 const UnauthorizedPage = () => {
+  const router = useRouter()
+
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-zinc-950 px-4 text-zinc-50">
       <div className="flex size-16 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-orange-500/20">
@@ -30,11 +28,13 @@ const UnauthorizedPage = () => {
           page.
         </p>
       </div>
-      <Button asChild variant="ghost" className="text-zinc-400">
-        <Link href={ROUTES.HOME}>
-          <ArrowLeft className="mr-2 size-4" />
-          Retour à l&apos;accueil
-        </Link>
+      <Button
+        variant="ghost"
+        className="text-zinc-400"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="mr-2 size-4" />
+        Retour
       </Button>
     </div>
   )

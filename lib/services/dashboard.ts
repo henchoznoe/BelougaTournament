@@ -14,6 +14,8 @@ import prisma from '@/lib/core/prisma'
 import type {
   DashboardStats,
   RecentRegistration,
+  RecentSponsor,
+  RecentUser,
   UpcomingTournament,
 } from '@/lib/types/dashboard'
 import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
@@ -30,8 +32,13 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       draftCount,
       publishedCount,
       archivedCount,
+      totalUsers,
       players,
+      admins,
+      ghosts,
       totalRegistrations,
+      soloRegistrations,
+      teamRegistrations,
       sponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
@@ -40,8 +47,19 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         where: { status: TournamentStatus.PUBLISHED },
       }),
       prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
+      prisma.user.count(),
       prisma.user.count({ where: { role: Role.USER } }),
+      prisma.user.count({
+        where: { role: { in: [Role.ADMIN, Role.SUPERADMIN] } },
+      }),
+      prisma.user.count({
+        where: { registrations: { none: {} } },
+      }),
       prisma.tournamentRegistration.count(),
+      prisma.tournamentRegistration.count({ where: { teamId: null } }),
+      prisma.tournamentRegistration.count({
+        where: { teamId: { not: null } },
+      }),
       prisma.sponsor.count(),
     ])
 
@@ -54,8 +72,17 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
           [TournamentStatus.ARCHIVED]: archivedCount,
         },
       },
-      players,
-      totalRegistrations,
+      users: {
+        total: totalUsers,
+        players,
+        admins,
+        ghosts,
+      },
+      registrations: {
+        total: totalRegistrations,
+        solo: soloRegistrations,
+        team: teamRegistrations,
+      },
       sponsors,
     }
   } catch (error) {
@@ -69,8 +96,17 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
           [TournamentStatus.ARCHIVED]: 0,
         },
       },
-      players: 0,
-      totalRegistrations: 0,
+      users: {
+        total: 0,
+        players: 0,
+        admins: 0,
+        ghosts: 0,
+      },
+      registrations: {
+        total: 0,
+        solo: 0,
+        team: 0,
+      },
       sponsors: 0,
     }
   }
@@ -78,7 +114,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 
 /** Fetches the next upcoming published tournaments (by start date). */
 export const getUpcomingTournaments = async (
-  limit = 5,
+  limit = 8,
 ): Promise<UpcomingTournament[]> => {
   'use cache'
   cacheLife('minutes')
@@ -118,7 +154,7 @@ export const getUpcomingTournaments = async (
 
 /** Fetches the most recent tournament registrations. */
 export const getRecentRegistrations = async (
-  limit = 5,
+  limit = 8,
 ): Promise<RecentRegistration[]> => {
   'use cache'
   cacheLife('minutes')
@@ -154,6 +190,59 @@ export const getRecentRegistrations = async (
     return rows as unknown as RecentRegistration[]
   } catch (error) {
     logger.error({ error }, 'Error fetching recent registrations')
+    return []
+  }
+}
+
+/** Fetches the most recently registered users on the platform. */
+export const getRecentUsers = async (limit = 8): Promise<RecentUser[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+
+  try {
+    const rows = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        name: true,
+        displayName: true,
+        image: true,
+        role: true,
+        createdAt: true,
+      },
+    })
+    return rows as unknown as RecentUser[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching recent users')
+    return []
+  }
+}
+
+/** Fetches the most recently added sponsors. */
+export const getRecentSponsors = async (
+  limit = 8,
+): Promise<RecentSponsor[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS)
+
+  try {
+    const rows = await prisma.sponsor.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        name: true,
+        imageUrls: true,
+        url: true,
+        createdAt: true,
+      },
+    })
+    return rows as unknown as RecentSponsor[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching recent sponsors')
     return []
   }
 }

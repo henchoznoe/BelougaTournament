@@ -8,7 +8,14 @@
 
 'use client'
 
-import { CheckCircle, Loader2, LogIn, Send, Users } from 'lucide-react'
+import {
+  CheckCircle,
+  Loader2,
+  LogIn,
+  Send,
+  UserCheck,
+  Users,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -42,6 +49,7 @@ interface TournamentRegistrationFormProps {
   format: TournamentFormat
   teamSize: number
   availableTeams: AvailableTeam[]
+  isRegistered: boolean
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -67,6 +75,7 @@ export const TournamentRegistrationForm = ({
   format,
   teamSize,
   availableTeams,
+  isRegistered,
 }: TournamentRegistrationFormProps) => {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
@@ -156,6 +165,29 @@ export const TournamentRegistrationForm = ({
           <Link href={ROUTES.LOGIN}>
             <LogIn className="size-4" />
             Se connecter
+          </Link>
+        </Button>
+      </div>
+    )
+  }
+
+  // Already registered: show confirmation and link to profile
+  if (isRegistered) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-4 text-center">
+        <div className="inline-flex rounded-full bg-emerald-500/10 p-3 ring-1 ring-emerald-500/20">
+          <UserCheck className="size-5 text-emerald-400" />
+        </div>
+        <p className="text-sm text-zinc-300">
+          Vous êtes déjà inscrit à ce tournoi.
+        </p>
+        <Button
+          asChild
+          variant="outline"
+          className="gap-2 border-white/10 bg-white/5 hover:bg-white/10"
+        >
+          <Link href={`${ROUTES.PROFILE}#inscriptions`}>
+            Voir / modifier mon inscription
           </Link>
         </Button>
       </div>

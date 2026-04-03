@@ -131,15 +131,15 @@ describe('TOURNAMENT_STATUS_STYLES', () => {
 describe('CACHE_TAGS', () => {
   it('defines expected tag keys', () => {
     const expectedKeys = [
-      'ADMINS',
       'DASHBOARD_STATS',
       'DASHBOARD_UPCOMING',
       'DASHBOARD_REGISTRATIONS',
-      'PLAYERS',
+      'REGISTRATIONS',
       'SETTINGS',
       'SPONSORS',
       'TOURNAMENTS',
       'TOURNAMENT_OPTIONS',
+      'USERS',
     ]
     for (const key of expectedKeys) {
       expect(CACHE_TAGS).toHaveProperty(key)

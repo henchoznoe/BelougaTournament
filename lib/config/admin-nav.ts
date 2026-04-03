@@ -8,14 +8,19 @@
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  ClipboardList,
   Handshake,
   LayoutDashboard,
   Settings,
-  ShieldCheck,
   Trophy,
   Users,
 } from 'lucide-react'
-import { ROUTES } from '@/lib/config/routes'
+import { ADMIN_ROUTE_ROLES, ROUTES } from '@/lib/config/routes'
+import { Role } from '@/prisma/generated/prisma/enums'
+
+/** Returns true if the route requires SUPERADMIN based on ADMIN_ROUTE_ROLES. */
+const isSuperAdminRoute = (href: string): boolean =>
+  ADMIN_ROUTE_ROLES[href as keyof typeof ADMIN_ROUTE_ROLES] === Role.SUPERADMIN
 
 interface AdminNavItem {
   label: string
@@ -38,14 +43,19 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         icon: LayoutDashboard,
       },
       {
+        label: 'Utilisateurs',
+        href: ROUTES.ADMIN_USERS,
+        icon: Users,
+      },
+      {
+        label: 'Inscriptions',
+        href: ROUTES.ADMIN_REGISTRATIONS,
+        icon: ClipboardList,
+      },
+      {
         label: 'Tournois',
         href: ROUTES.ADMIN_TOURNAMENTS,
         icon: Trophy,
-      },
-      {
-        label: 'Joueurs',
-        href: ROUTES.ADMIN_PLAYERS,
-        icon: Users,
       },
     ],
   },
@@ -56,19 +66,13 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         label: 'Paramètres',
         href: ROUTES.ADMIN_SETTINGS,
         icon: Settings,
-        superAdminOnly: true,
+        superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_SETTINGS),
       },
       {
         label: 'Sponsors',
         href: ROUTES.ADMIN_SPONSORS,
         icon: Handshake,
-        superAdminOnly: true,
-      },
-      {
-        label: 'Admins',
-        href: ROUTES.ADMIN_ADMINS,
-        icon: ShieldCheck,
-        superAdminOnly: true,
+        superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_SPONSORS),
       },
     ],
   },

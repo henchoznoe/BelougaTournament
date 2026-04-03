@@ -188,11 +188,11 @@ const VALID_TOURNAMENT_INPUT = {
   format: 'TEAM' as const,
   teamSize: 5,
   game: 'Valorant',
-  imageUrl: '',
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
   toornamentId: '',
   streamUrl: '',
+  imageUrl: '',
   fields: [
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
@@ -259,10 +259,10 @@ describe('createTournament', () => {
         format: 'TEAM',
         teamSize: 5,
         game: 'Valorant',
-        imageUrl: null,
         rules: 'Double élimination BO3.',
         prize: '500 CHF',
         toornamentId: null,
+        imageUrl: null,
         streamUrl: null,
         fields: {
           create: [
@@ -280,7 +280,6 @@ describe('createTournament', () => {
     await createTournament(VALID_TOURNAMENT_INPUT)
 
     const createArg = mockTournamentCreate.mock.calls[0][0]
-    expect(createArg.data.imageUrl).toBeNull()
     expect(createArg.data.streamUrl).toBeNull()
     expect(createArg.data.toornamentId).toBeNull()
   })
@@ -288,13 +287,11 @@ describe('createTournament', () => {
   it('preserves non-empty optional strings', async () => {
     await createTournament({
       ...VALID_TOURNAMENT_INPUT,
-      imageUrl: 'https://example.com/banner.png',
       streamUrl: 'https://twitch.tv/belouga',
       toornamentId: 'toorn-123',
     })
 
     const createArg = mockTournamentCreate.mock.calls[0][0]
-    expect(createArg.data.imageUrl).toBe('https://example.com/banner.png')
     expect(createArg.data.streamUrl).toBe('https://twitch.tv/belouga')
     expect(createArg.data.toornamentId).toBe('toorn-123')
   })

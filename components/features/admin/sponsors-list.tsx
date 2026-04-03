@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/sponsors-list.tsx
- * Description: Client component displaying the sponsors table with CRUD actions.
+ * Description: Client component displaying the sponsors table with edit/delete actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -10,9 +10,9 @@
 
 import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
 import { SponsorDeleteDialog } from '@/components/features/admin/sponsor-delete-dialog'
-import { SponsorFormDialog } from '@/components/features/admin/sponsor-form-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ROUTES } from '@/lib/config/routes'
 import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
@@ -30,23 +31,7 @@ interface SponsorsListProps {
 }
 
 export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingSponsor, setEditingSponsor] = useState<Sponsor | undefined>()
   const [deletingSponsor, setDeletingSponsor] = useState<Sponsor | undefined>()
-
-  const handleCreate = () => {
-    setEditingSponsor(undefined)
-    setFormOpen(true)
-  }
-
-  const handleEdit = (sponsor: Sponsor) => {
-    setEditingSponsor(sponsor)
-    setFormOpen(true)
-  }
-
-  const handleDelete = (sponsor: Sponsor) => {
-    setDeletingSponsor(sponsor)
-  }
 
   return (
     <>
@@ -58,11 +43,13 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
             : `${sponsors.length.toString()} sponsor${sponsors.length > 1 ? 's' : ''}`}
         </p>
         <Button
-          onClick={handleCreate}
+          asChild
           className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
         >
-          <Plus className="size-4" />
-          Ajouter
+          <Link href={ROUTES.ADMIN_SPONSOR_NEW}>
+            <Plus className="size-4" />
+            Ajouter
+          </Link>
         </Button>
       </div>
 
@@ -141,16 +128,18 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => handleEdit(sponsor)}
+                        asChild
                         className="text-zinc-400"
                         aria-label="Modifier"
                       >
-                        <Pencil className="size-4" />
+                        <Link href={ROUTES.ADMIN_SPONSOR_EDIT(sponsor.id)}>
+                          <Pencil className="size-4" />
+                        </Link>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => handleDelete(sponsor)}
+                        onClick={() => setDeletingSponsor(sponsor)}
                         className="text-zinc-400 hover:text-red-400"
                         aria-label="Supprimer"
                       >
@@ -164,13 +153,6 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
           </Table>
         </div>
       )}
-
-      {/* Form dialog (create/edit) */}
-      <SponsorFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        sponsor={editingSponsor}
-      />
 
       {/* Delete confirmation dialog */}
       {deletingSponsor && (

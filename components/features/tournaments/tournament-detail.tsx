@@ -41,6 +41,7 @@ interface TournamentDetailProps {
   tournament: PublicTournamentDetail
   twitchUsername?: string
   availableTeams: AvailableTeam[]
+  isRegistered: boolean
 }
 
 /** Determines the registration status label and color. */
@@ -102,6 +103,7 @@ export const TournamentDetail = ({
   tournament,
   twitchUsername,
   availableTeams,
+  isRegistered,
 }: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
@@ -446,6 +448,7 @@ export const TournamentDetail = ({
                 format={tournament.format}
                 teamSize={tournament.teamSize}
                 availableTeams={availableTeams}
+                isRegistered={isRegistered}
               />
             </>
           ) : (

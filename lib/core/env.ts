@@ -33,6 +33,12 @@ const serverSchema = z.object({
   // Storage
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
 
+  // Platform owners (comma-separated emails)
+  OWNER_EMAILS: z
+    .string()
+    .min(1, 'OWNER_EMAILS is required')
+    .transform(val => val.split(',').map(e => e.trim())),
+
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),

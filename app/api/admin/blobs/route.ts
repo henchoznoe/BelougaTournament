@@ -15,7 +15,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
-const ALLOWED_FOLDERS = new Set(['logos', 'sponsors'])
+const ALLOWED_FOLDERS = new Set(['logos', 'sponsors', 'tournaments'])
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
 
 /** Validates that a URL belongs to the app's Vercel Blob store. */
