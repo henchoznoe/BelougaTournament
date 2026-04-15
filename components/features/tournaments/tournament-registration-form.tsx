@@ -17,7 +17,7 @@ import {
   Users,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -79,7 +79,11 @@ export const TournamentRegistrationForm = ({
 }: TournamentRegistrationFormProps) => {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
+  const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const currentPath =
+    searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname
 
   // Team-specific state
   const [teamMode, setTeamMode] = useState<'create' | 'join'>('create')
@@ -162,7 +166,9 @@ export const TournamentRegistrationForm = ({
           Connectez-vous pour vous inscrire à ce tournoi.
         </p>
         <Button asChild className="gap-2">
-          <Link href={ROUTES.LOGIN}>
+          <Link
+            href={`${ROUTES.LOGIN}?from=${encodeURIComponent(currentPath)}`}
+          >
             <LogIn className="size-4" />
             Se connecter
           </Link>
