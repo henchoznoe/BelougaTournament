@@ -151,7 +151,7 @@ export type AdminAssignmentGroupByOutputType = {
   _max: AdminAssignmentMaxAggregateOutputType | null
 }
 
-type GetAdminAssignmentGroupByPayload<T extends AdminAssignmentGroupByArgs> = Prisma.PrismaPromise<
+export type GetAdminAssignmentGroupByPayload<T extends AdminAssignmentGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AdminAssignmentGroupByOutputType, T['by']> &
       {
@@ -1207,6 +1207,11 @@ export type AdminAssignmentFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Skip the first `n` AdminAssignments.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of AdminAssignments.
+   */
   distinct?: Prisma.AdminAssignmentScalarFieldEnum | Prisma.AdminAssignmentScalarFieldEnum[]
 }
 

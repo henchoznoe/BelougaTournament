@@ -192,7 +192,7 @@ export type ToornamentStageGroupByOutputType = {
   _max: ToornamentStageMaxAggregateOutputType | null
 }
 
-type GetToornamentStageGroupByPayload<T extends ToornamentStageGroupByArgs> = Prisma.PrismaPromise<
+export type GetToornamentStageGroupByPayload<T extends ToornamentStageGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ToornamentStageGroupByOutputType, T['by']> &
       {
@@ -1166,6 +1166,11 @@ export type ToornamentStageFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Skip the first `n` ToornamentStages.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of ToornamentStages.
+   */
   distinct?: Prisma.ToornamentStageScalarFieldEnum | Prisma.ToornamentStageScalarFieldEnum[]
 }
 

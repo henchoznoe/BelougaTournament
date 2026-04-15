@@ -255,7 +255,7 @@ export type GlobalSettingsGroupByOutputType = {
   _max: GlobalSettingsMaxAggregateOutputType | null
 }
 
-type GetGlobalSettingsGroupByPayload<T extends GlobalSettingsGroupByArgs> = Prisma.PrismaPromise<
+export type GetGlobalSettingsGroupByPayload<T extends GlobalSettingsGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<GlobalSettingsGroupByOutputType, T['by']> &
       {
@@ -1250,6 +1250,11 @@ export type GlobalSettingsFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` GlobalSettings.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of GlobalSettings.
+   */
   distinct?: Prisma.GlobalSettingsScalarFieldEnum | Prisma.GlobalSettingsScalarFieldEnum[]
 }
 

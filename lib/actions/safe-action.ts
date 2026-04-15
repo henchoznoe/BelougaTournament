@@ -42,7 +42,7 @@ export function authenticatedAction<T extends z.ZodType>({
         headers: await headers(),
       })
 
-      if (!session || !session.user) {
+      if (!session?.user) {
         return { success: false, message: 'Unauthorized' }
       }
 
