@@ -13,11 +13,21 @@ import { motion } from 'framer-motion'
 import { ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CURRENT_YEAR, DEFAULT_ASSETS } from '@/lib/config/constants'
+import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
+import type {
+  HeroTournamentBadge,
+  HeroTournamentBadgeTournament,
+} from '@/lib/types/tournament'
+import { cn } from '@/lib/utils/cn'
+import {
+  getNextHeroTournamentBadgeUpdateDelay,
+  resolveHeroTournamentBadge,
+} from '@/lib/utils/hero-tournament-badge'
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -40,11 +50,56 @@ const itemVariants: Variants = {
 }
 
 interface HeroSectionProps {
+  badge: HeroTournamentBadge
+  badgeTournaments: HeroTournamentBadgeTournament[]
   twitchUrl?: string
 }
 
-export const HeroSection = ({ twitchUrl }: HeroSectionProps) => {
+const HERO_BADGE_STYLES: Record<HeroTournamentBadge['variant'], string> = {
+  idle: 'border-zinc-400/20 bg-zinc-400/10 text-zinc-300',
+  upcoming: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+  live: 'border-blue-500/30 bg-blue-500/10 text-blue-300',
+}
+
+const HERO_BADGE_DOT_STYLES: Record<HeroTournamentBadge['variant'], string> = {
+  idle: 'bg-zinc-400',
+  upcoming: 'bg-amber-400',
+  live: 'bg-blue-500',
+}
+
+export const HeroSection = ({
+  badge,
+  badgeTournaments,
+  twitchUrl,
+}: HeroSectionProps) => {
   const { data: session, isPending } = authClient.useSession()
+  const [currentBadge, setCurrentBadge] = useState(badge)
+
+  useEffect(() => {
+    let timeoutId: number | undefined
+
+    const refreshBadge = () => {
+      const now = new Date()
+      setCurrentBadge(resolveHeroTournamentBadge(badgeTournaments, now))
+
+      const nextDelay = getNextHeroTournamentBadgeUpdateDelay(
+        badgeTournaments,
+        now,
+      )
+
+      if (nextDelay !== null) {
+        timeoutId = window.setTimeout(refreshBadge, nextDelay)
+      }
+    }
+
+    refreshBadge()
+
+    return () => {
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [badgeTournaments])
 
   return (
     <section className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-4 text-center">
@@ -67,12 +122,29 @@ export const HeroSection = ({ twitchUrl }: HeroSectionProps) => {
         className="relative z-10 max-w-5xl space-y-8"
       >
         <motion.div variants={itemVariants} className="flex justify-center">
-          <span className="flex items-center gap-2.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400 backdrop-blur-sm">
+          <span
+            className={cn(
+              'flex max-w-full items-center gap-2.5 rounded-full px-4 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors duration-300',
+              HERO_BADGE_STYLES[currentBadge.variant],
+            )}
+          >
             <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex size-2 rounded-full bg-blue-500"></span>
+              {currentBadge.variant !== 'idle' && (
+                <span
+                  className={cn(
+                    'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+                    HERO_BADGE_DOT_STYLES[currentBadge.variant],
+                  )}
+                ></span>
+              )}
+              <span
+                className={cn(
+                  'relative inline-flex size-2 rounded-full',
+                  HERO_BADGE_DOT_STYLES[currentBadge.variant],
+                )}
+              ></span>
             </span>
-            Saison {CURRENT_YEAR}{' '}
+            <span className="truncate">{currentBadge.label}</span>
           </span>
         </motion.div>
 

@@ -13,6 +13,9 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
   AvailableTeam,
+  HeroTournamentBadge,
+  HeroTournamentBadgeData,
+  HeroTournamentBadgeTournament,
   PublicTournamentDetail,
   PublicTournamentListItem,
   TeamItem,
@@ -21,7 +24,18 @@ import type {
   TournamentRegistrationItem,
   UserRegistrationItem,
 } from '@/lib/types/tournament'
+import {
+  DEFAULT_HERO_TOURNAMENT_BADGE,
+  resolveHeroTournamentBadge,
+} from '@/lib/utils/hero-tournament-badge'
 import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+
+/** Shared select for the landing hero badge. */
+const HERO_BADGE_SELECT = {
+  title: true,
+  startDate: true,
+  endDate: true,
+} as const
 
 /** Fetches all tournaments for the admin list table. */
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
@@ -364,6 +378,40 @@ export const getPublishedTournaments = async (): Promise<
     return []
   }
 }
+
+/** Fetches the badge data used by the landing hero. */
+export const getHeroTournamentBadgeData =
+  async (): Promise<HeroTournamentBadgeData> => {
+    'use cache'
+    cacheLife('hours')
+    cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+    try {
+      const tournaments = (await prisma.tournament.findMany({
+        where: { status: TournamentStatus.PUBLISHED },
+        orderBy: { startDate: 'asc' },
+        select: HERO_BADGE_SELECT,
+      })) as HeroTournamentBadgeTournament[]
+
+      return {
+        badge: resolveHeroTournamentBadge(tournaments),
+        tournaments,
+      }
+    } catch (error) {
+      logger.error({ error }, 'Error fetching landing hero tournament badge')
+      return {
+        badge: DEFAULT_HERO_TOURNAMENT_BADGE,
+        tournaments: [],
+      }
+    }
+  }
+
+/** Fetches the tournament state displayed in the landing hero badge. */
+export const getHeroTournamentBadge =
+  async (): Promise<HeroTournamentBadge> => {
+    const data = await getHeroTournamentBadgeData()
+    return data.badge
+  }
 
 /** Fetches all ARCHIVED tournaments for the public archive page. */
 export const getArchivedTournaments = async (): Promise<
