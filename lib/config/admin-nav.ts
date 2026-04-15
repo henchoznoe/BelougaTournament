@@ -15,18 +15,12 @@ import {
   Trophy,
   Users,
 } from 'lucide-react'
-import { ADMIN_ROUTE_ROLES, ROUTES } from '@/lib/config/routes'
-import { Role } from '@/prisma/generated/prisma/enums'
-
-/** Returns true if the route requires SUPERADMIN based on ADMIN_ROUTE_ROLES. */
-const isSuperAdminRoute = (href: string): boolean =>
-  ADMIN_ROUTE_ROLES[href as keyof typeof ADMIN_ROUTE_ROLES] === Role.SUPERADMIN
+import { ROUTES } from '@/lib/config/routes'
 
 interface AdminNavItem {
   label: string
   href: string
   icon: LucideIcon
-  superAdminOnly?: boolean
 }
 
 interface AdminNavGroup {
@@ -60,19 +54,17 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     ],
   },
   {
-    label: 'Super Admin',
+    label: 'Configuration',
     items: [
       {
         label: 'Paramètres',
         href: ROUTES.ADMIN_SETTINGS,
         icon: Settings,
-        superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_SETTINGS),
       },
       {
         label: 'Sponsors',
         href: ROUTES.ADMIN_SPONSORS,
         icon: Handshake,
-        superAdminOnly: isSuperAdminRoute(ROUTES.ADMIN_SPONSORS),
       },
     ],
   },

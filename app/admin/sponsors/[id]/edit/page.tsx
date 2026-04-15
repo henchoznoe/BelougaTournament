@@ -11,7 +11,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { SponsorForm } from '@/components/features/admin/sponsor-form'
-import SuperAdminGuard from '@/components/features/auth/super-admin-guard'
+import AdminGuard from '@/components/features/auth/admin-guard'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'
 
@@ -38,7 +38,7 @@ const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
   }
 
   return (
-    <SuperAdminGuard>
+    <AdminGuard>
       <div className="mx-auto max-w-5xl space-y-6">
         <AdminBreadcrumb
           segments={[
@@ -61,7 +61,7 @@ const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
 
         <SponsorForm sponsor={sponsor} />
       </div>
-    </SuperAdminGuard>
+    </AdminGuard>
   )
 }
 

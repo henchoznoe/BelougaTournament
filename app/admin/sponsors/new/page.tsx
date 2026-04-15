@@ -10,7 +10,7 @@ import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { SponsorForm } from '@/components/features/admin/sponsor-form'
-import SuperAdminGuard from '@/components/features/auth/super-admin-guard'
+import AdminGuard from '@/components/features/auth/admin-guard'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 const AdminNewSponsorPage = async () => {
   return (
-    <SuperAdminGuard>
+    <AdminGuard>
       <div className="mx-auto max-w-5xl space-y-6">
         <AdminBreadcrumb
           segments={[
@@ -41,7 +41,7 @@ const AdminNewSponsorPage = async () => {
 
         <SponsorForm />
       </div>
-    </SuperAdminGuard>
+    </AdminGuard>
   )
 }
 

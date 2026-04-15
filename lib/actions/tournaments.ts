@@ -96,47 +96,6 @@ type TeamMemberWithTeam = {
 }
 
 /**
- * Checks whether an ADMIN user is assigned to a given tournament.
- * SUPERADMINs always pass this check.
- */
-const checkAdminAssignment = async (
-  userId: string,
-  userRole: Role,
-  tournamentId: string,
-): Promise<boolean> => {
-  if (userRole === Role.SUPERADMIN) return true
-
-  const assignment = await prisma.adminAssignment.findUnique({
-    where: {
-      adminId_tournamentId: {
-        adminId: userId,
-        tournamentId,
-      },
-    },
-  })
-  return !!assignment
-}
-
-/**
- * Verifies that an admin has access to a tournament.
- * Returns an ActionState error if denied, or null if access is granted.
- */
-const requireAdminAccess = async (
-  userId: string,
-  userRole: Role,
-  tournamentId: string,
-): Promise<ActionState | null> => {
-  const hasAccess = await checkAdminAssignment(userId, userRole, tournamentId)
-  if (!hasAccess) {
-    return {
-      success: false,
-      message: "Vous n'avez pas accès à ce tournoi.",
-    }
-  }
-  return null
-}
-
-/**
  * Checks whether a user is currently banned.
  * Returns an ActionState error if banned, or null if not banned.
  */
@@ -240,7 +199,7 @@ const fetchTournamentForRegistration = async (
 /** Creates a new tournament with its dynamic fields. */
 export const createTournament = authenticatedAction({
   schema: tournamentSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
+  role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     await prisma.tournament.create({
       data: {
@@ -292,15 +251,8 @@ export const createTournament = authenticatedAction({
 /** Updates an existing tournament and syncs its dynamic fields. */
 export const updateTournament = authenticatedAction({
   schema: updateTournamentSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.id,
-    )
-    if (denied) return denied
-
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // Fetch existing tournament to enforce immutability rules
     const existing = (await prisma.tournament.findUnique({
       where: { id: data.id },
@@ -411,15 +363,8 @@ export const updateTournament = authenticatedAction({
 /** Deletes a tournament by ID. */
 export const deleteTournament = authenticatedAction({
   schema: deleteTournamentSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.id,
-    )
-    if (denied) return denied
-
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     await prisma.tournament.delete({
       where: { id: data.id },
     })
@@ -441,15 +386,8 @@ export const deleteTournament = authenticatedAction({
 /** Updates a tournament's status (DRAFT / PUBLISHED / ARCHIVED). */
 export const updateTournamentStatus = authenticatedAction({
   schema: updateTournamentStatusSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.id,
-    )
-    if (denied) return denied
-
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     await prisma.tournament.update({
       where: { id: data.id },
       data: { status: data.status },
@@ -902,15 +840,8 @@ export const unregisterFromTournament = authenticatedAction({
 /** Kicks a player from a team. If the player is captain, promotes the next member or dissolves the team. */
 export const kickPlayer = authenticatedAction({
   schema: kickPlayerSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.tournamentId,
-    )
-    if (denied) return denied
-
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // Fetch team with members ordered by join date
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
@@ -991,15 +922,8 @@ export const kickPlayer = authenticatedAction({
 /** Dissolves a team and removes all member registrations. */
 export const dissolveTeam = authenticatedAction({
   schema: dissolveTeamSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
-    const denied = await requireAdminAccess(
-      session.user.id,
-      session.user.role,
-      data.tournamentId,
-    )
-    if (denied) return denied
-
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // Fetch team with members to get all user IDs
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },

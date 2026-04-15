@@ -1,6 +1,6 @@
 /**
  * File: app/admin/users/page.tsx
- * Description: Admin page for unified user management (players, admins, super admins).
+ * Description: Admin page for unified user management (players and admins).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz

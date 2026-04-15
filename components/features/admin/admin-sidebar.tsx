@@ -20,9 +20,7 @@ import {
 import { ADMIN_NAV } from '@/lib/config/admin-nav'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
-import { authClient } from '@/lib/core/auth-client'
 import { cn } from '@/lib/utils/cn'
-import { Role } from '@/prisma/generated/prisma/enums'
 
 interface AdminSidebarProps {
   collapsed: boolean
@@ -37,9 +35,7 @@ export const AdminSidebar = ({
   mobile = false,
   onNavigate,
 }: AdminSidebarProps) => {
-  const { data: session } = authClient.useSession()
   const pathname = usePathname()
-  const userRole = session?.user?.role
 
   const isLinkActive = (href: string): boolean =>
     href === ROUTES.ADMIN_DASHBOARD
@@ -81,13 +77,6 @@ export const AdminSidebar = ({
         className="flex-1 space-y-1 overflow-y-auto px-2 py-4"
       >
         {ADMIN_NAV.map(group => {
-          // Filter items by role
-          const visibleItems = group.items.filter(
-            item => !item.superAdminOnly || userRole === Role.SUPERADMIN,
-          )
-
-          if (visibleItems.length === 0) return null
-
           const groupKey = group.label ?? group.items[0]?.href ?? 'default'
 
           return (
@@ -105,7 +94,7 @@ export const AdminSidebar = ({
               )}
 
               {/* Nav items */}
-              {visibleItems.map(item => {
+              {group.items.map(item => {
                 const isActive = isLinkActive(item.href)
                 const linkContent = (
                   <Link

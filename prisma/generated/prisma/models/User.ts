@@ -243,7 +243,6 @@ export type UserWhereInput = {
   registrations?: Prisma.TournamentRegistrationListRelationFilter
   captainOf?: Prisma.TeamListRelationFilter
   teamMembers?: Prisma.TeamMemberListRelationFilter
-  adminOf?: Prisma.AdminAssignmentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -264,7 +263,6 @@ export type UserOrderByWithRelationInput = {
   registrations?: Prisma.TournamentRegistrationOrderByRelationAggregateInput
   captainOf?: Prisma.TeamOrderByRelationAggregateInput
   teamMembers?: Prisma.TeamMemberOrderByRelationAggregateInput
-  adminOf?: Prisma.AdminAssignmentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -288,7 +286,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   registrations?: Prisma.TournamentRegistrationListRelationFilter
   captainOf?: Prisma.TeamListRelationFilter
   teamMembers?: Prisma.TeamMemberListRelationFilter
-  adminOf?: Prisma.AdminAssignmentListRelationFilter
 }, "id" | "email" | "discordId">
 
 export type UserOrderByWithAggregationInput = {
@@ -345,7 +342,6 @@ export type UserCreateInput = {
   registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -366,7 +362,6 @@ export type UserUncheckedCreateInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserUpdateInput = {
@@ -387,7 +382,6 @@ export type UserUpdateInput = {
   registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -408,7 +402,6 @@ export type UserUncheckedUpdateInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -600,20 +593,6 @@ export type UserUpdateOneRequiredWithoutRegistrationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRegistrationsInput, Prisma.UserUpdateWithoutRegistrationsInput>, Prisma.UserUncheckedUpdateWithoutRegistrationsInput>
 }
 
-export type UserCreateNestedOneWithoutAdminOfInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAdminOfInput, Prisma.UserUncheckedCreateWithoutAdminOfInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminOfInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutAdminOfNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAdminOfInput, Prisma.UserUncheckedCreateWithoutAdminOfInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminOfInput
-  upsert?: Prisma.UserUpsertWithoutAdminOfInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminOfInput, Prisma.UserUpdateWithoutAdminOfInput>, Prisma.UserUncheckedUpdateWithoutAdminOfInput>
-}
-
 export type UserCreateWithoutSessionsInput = {
   id?: string
   name: string
@@ -631,7 +610,6 @@ export type UserCreateWithoutSessionsInput = {
   registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -651,7 +629,6 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -687,7 +664,6 @@ export type UserUpdateWithoutSessionsInput = {
   registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -707,7 +683,6 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -727,7 +702,6 @@ export type UserCreateWithoutAccountsInput = {
   registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -747,7 +721,6 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -783,7 +756,6 @@ export type UserUpdateWithoutAccountsInput = {
   registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -803,7 +775,6 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type UserCreateWithoutCaptainOfInput = {
@@ -823,7 +794,6 @@ export type UserCreateWithoutCaptainOfInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateWithoutCaptainOfInput = {
@@ -843,7 +813,6 @@ export type UserUncheckedCreateWithoutCaptainOfInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserCreateOrConnectWithoutCaptainOfInput = {
@@ -879,7 +848,6 @@ export type UserUpdateWithoutCaptainOfInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCaptainOfInput = {
@@ -899,7 +867,6 @@ export type UserUncheckedUpdateWithoutCaptainOfInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type UserCreateWithoutTeamMembersInput = {
@@ -919,7 +886,6 @@ export type UserCreateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembersInput = {
@@ -939,7 +905,6 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembersInput = {
@@ -975,7 +940,6 @@ export type UserUpdateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembersInput = {
@@ -995,7 +959,6 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type UserCreateWithoutRegistrationsInput = {
@@ -1015,7 +978,6 @@ export type UserCreateWithoutRegistrationsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentCreateNestedManyWithoutAdminInput
 }
 
 export type UserUncheckedCreateWithoutRegistrationsInput = {
@@ -1035,7 +997,6 @@ export type UserUncheckedCreateWithoutRegistrationsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  adminOf?: Prisma.AdminAssignmentUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type UserCreateOrConnectWithoutRegistrationsInput = {
@@ -1071,7 +1032,6 @@ export type UserUpdateWithoutRegistrationsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUpdateManyWithoutAdminNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRegistrationsInput = {
@@ -1091,103 +1051,6 @@ export type UserUncheckedUpdateWithoutRegistrationsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  adminOf?: Prisma.AdminAssignmentUncheckedUpdateManyWithoutAdminNestedInput
-}
-
-export type UserCreateWithoutAdminOfInput = {
-  id?: string
-  name: string
-  displayName?: string
-  email: string
-  emailVerified: boolean
-  image?: string | null
-  discordId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  role?: $Enums.Role
-  bannedUntil?: Date | string | null
-  banReason?: string | null
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  registrations?: Prisma.TournamentRegistrationCreateNestedManyWithoutUserInput
-  captainOf?: Prisma.TeamCreateNestedManyWithoutCaptainInput
-  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutAdminOfInput = {
-  id?: string
-  name: string
-  displayName?: string
-  email: string
-  emailVerified: boolean
-  image?: string | null
-  discordId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  role?: $Enums.Role
-  bannedUntil?: Date | string | null
-  banReason?: string | null
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  registrations?: Prisma.TournamentRegistrationUncheckedCreateNestedManyWithoutUserInput
-  captainOf?: Prisma.TeamUncheckedCreateNestedManyWithoutCaptainInput
-  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutAdminOfInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutAdminOfInput, Prisma.UserUncheckedCreateWithoutAdminOfInput>
-}
-
-export type UserUpsertWithoutAdminOfInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutAdminOfInput, Prisma.UserUncheckedUpdateWithoutAdminOfInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutAdminOfInput, Prisma.UserUncheckedCreateWithoutAdminOfInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutAdminOfInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutAdminOfInput, Prisma.UserUncheckedUpdateWithoutAdminOfInput>
-}
-
-export type UserUpdateWithoutAdminOfInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  displayName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  bannedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  registrations?: Prisma.TournamentRegistrationUpdateManyWithoutUserNestedInput
-  captainOf?: Prisma.TeamUpdateManyWithoutCaptainNestedInput
-  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutAdminOfInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  displayName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  bannedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  registrations?: Prisma.TournamentRegistrationUncheckedUpdateManyWithoutUserNestedInput
-  captainOf?: Prisma.TeamUncheckedUpdateManyWithoutCaptainNestedInput
-  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1201,7 +1064,6 @@ export type UserCountOutputType = {
   registrations: number
   captainOf: number
   teamMembers: number
-  adminOf: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1210,7 +1072,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   registrations?: boolean | UserCountOutputTypeCountRegistrationsArgs
   captainOf?: boolean | UserCountOutputTypeCountCaptainOfArgs
   teamMembers?: boolean | UserCountOutputTypeCountTeamMembersArgs
-  adminOf?: boolean | UserCountOutputTypeCountAdminOfArgs
 }
 
 /**
@@ -1258,13 +1119,6 @@ export type UserCountOutputTypeCountTeamMembersArgs<ExtArgs extends runtime.Type
   where?: Prisma.TeamMemberWhereInput
 }
 
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountAdminOfArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AdminAssignmentWhereInput
-}
-
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1284,7 +1138,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   captainOf?: boolean | Prisma.User$captainOfArgs<ExtArgs>
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
-  adminOf?: boolean | Prisma.User$adminOfArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1340,7 +1193,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   captainOf?: boolean | Prisma.User$captainOfArgs<ExtArgs>
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
-  adminOf?: boolean | Prisma.User$adminOfArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1354,7 +1206,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     registrations: Prisma.$TournamentRegistrationPayload<ExtArgs>[]
     captainOf: Prisma.$TeamPayload<ExtArgs>[]
     teamMembers: Prisma.$TeamMemberPayload<ExtArgs>[]
-    adminOf: Prisma.$AdminAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1768,7 +1619,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   registrations<T extends Prisma.User$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TournamentRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   captainOf<T extends Prisma.User$captainOfArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$captainOfArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teamMembers<T extends Prisma.User$teamMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  adminOf<T extends Prisma.User$adminOfArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminOfArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2320,30 +2170,6 @@ export type User$teamMembersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TeamMemberScalarFieldEnum | Prisma.TeamMemberScalarFieldEnum[]
-}
-
-/**
- * User.adminOf
- */
-export type User$adminOfArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AdminAssignment
-   */
-  select?: Prisma.AdminAssignmentSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AdminAssignment
-   */
-  omit?: Prisma.AdminAssignmentOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AdminAssignmentInclude<ExtArgs> | null
-  where?: Prisma.AdminAssignmentWhereInput
-  orderBy?: Prisma.AdminAssignmentOrderByWithRelationInput | Prisma.AdminAssignmentOrderByWithRelationInput[]
-  cursor?: Prisma.AdminAssignmentWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AdminAssignmentScalarFieldEnum | Prisma.AdminAssignmentScalarFieldEnum[]
 }
 
 /**

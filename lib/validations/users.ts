@@ -18,7 +18,7 @@ export const demoteUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
 
-/** Schema for updating a user (admin: displayName + assignments, player: displayName only). */
+/** Schema for updating a user display name. */
 export const updateUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
   displayName: z
@@ -28,7 +28,6 @@ export const updateUserSchema = z.object({
     .refine(v => v === '' || v.length >= 2, {
       message: 'Le pseudo doit contenir au moins 2 caractères.',
     }),
-  tournamentIds: z.array(z.uuid('ID tournoi invalide.')).optional(),
 })
 
 /** Schema for banning a user. */
@@ -51,7 +50,7 @@ export const unbanUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
 
-/** Schema for deleting a user (SUPERADMIN only, USER-role targets only). */
+/** Schema for deleting a user (owner-only, USER-role targets only). */
 export const deleteUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })

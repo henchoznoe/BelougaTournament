@@ -50,7 +50,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       prisma.user.count(),
       prisma.user.count({ where: { role: Role.USER } }),
       prisma.user.count({
-        where: { role: { in: [Role.ADMIN, Role.SUPERADMIN] } },
+        where: { role: Role.ADMIN },
       }),
       prisma.user.count({
         where: { registrations: { none: {} } },

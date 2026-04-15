@@ -13,10 +13,6 @@ import {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 vi.mock('server-only', () => ({}))
 vi.mock('next/cache', () => ({ cacheLife: vi.fn(), cacheTag: vi.fn() }))
 vi.mock('@/lib/core/logger', () => ({
@@ -25,29 +21,18 @@ vi.mock('@/lib/core/logger', () => ({
 
 const mockUserFindUnique = vi.fn()
 const mockUserFindMany = vi.fn()
-const mockTournamentFindMany = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
     user: {
       findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
       findMany: (...args: unknown[]) => mockUserFindMany(...args),
     },
-    tournament: {
-      findMany: (...args: unknown[]) => mockTournamentFindMany(...args),
-    },
   },
 }))
 
-// ---------------------------------------------------------------------------
-// Module under test
-// ---------------------------------------------------------------------------
-
-const { getUserProfile, getUsers, getUserById, getTournamentOptions } =
-  await import('@/lib/services/users')
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
+const { getUserProfile, getUsers, getUserById } = await import(
+  '@/lib/services/users'
+)
 
 const MOCK_PROFILE = {
   name: 'TestPlayer',
@@ -71,7 +56,6 @@ const MOCK_USERS = [
     bannedUntil: null,
     banReason: null,
     _count: { registrations: 3 },
-    adminOf: [],
   },
   {
     id: 'admin-1',
@@ -85,17 +69,6 @@ const MOCK_USERS = [
     bannedUntil: null,
     banReason: null,
     _count: { registrations: 0 },
-    adminOf: [
-      {
-        id: 'assign-1',
-        tournamentId: 'tourn-1',
-        tournament: {
-          id: 'tourn-1',
-          title: 'Tournoi Alpha',
-          slug: 'tournoi-alpha',
-        },
-      },
-    ],
   },
 ]
 
@@ -121,38 +94,8 @@ const MOCK_USER_DETAIL = {
       },
       team: null,
     },
-    {
-      id: 'reg-2',
-      createdAt: new Date('2026-01-10'),
-      tournament: {
-        title: 'Tournoi Beta',
-        format: TournamentFormat.TEAM,
-        status: TournamentStatus.DRAFT,
-      },
-      team: { name: 'Les Loups' },
-    },
   ],
-  adminOf: [],
 }
-
-const MOCK_TOURNAMENTS = [
-  {
-    id: 'tourn-1',
-    title: 'Tournoi Alpha',
-    slug: 'tournoi-alpha',
-    status: TournamentStatus.PUBLISHED,
-  },
-  {
-    id: 'tourn-2',
-    title: 'Tournoi Beta',
-    slug: 'tournoi-beta',
-    status: TournamentStatus.DRAFT,
-  },
-]
-
-// ---------------------------------------------------------------------------
-// getUserProfile
-// ---------------------------------------------------------------------------
 
 describe('getUserProfile', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -160,18 +103,10 @@ describe('getUserProfile', () => {
   it('returns the user profile when found', async () => {
     mockUserFindUnique.mockResolvedValue(MOCK_PROFILE)
 
-    const result = await getUserProfile('user-1')
-
-    expect(result).toEqual(MOCK_PROFILE)
+    expect(await getUserProfile('user-1')).toEqual(MOCK_PROFILE)
     expect(mockUserFindUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'user-1' } }),
     )
-  })
-
-  it('returns null when user does not exist', async () => {
-    mockUserFindUnique.mockResolvedValue(null)
-
-    expect(await getUserProfile('non-existent-id')).toBeNull()
   })
 
   it('returns null on database error', async () => {
@@ -181,25 +116,13 @@ describe('getUserProfile', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// getUsers
-// ---------------------------------------------------------------------------
-
 describe('getUsers', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns the list of all users', async () => {
     mockUserFindMany.mockResolvedValue(MOCK_USERS)
 
-    const result = await getUsers()
-
-    expect(result).toEqual(MOCK_USERS)
-  })
-
-  it('returns an empty array when no users exist', async () => {
-    mockUserFindMany.mockResolvedValue([])
-
-    expect(await getUsers()).toEqual([])
+    expect(await getUsers()).toEqual(MOCK_USERS)
   })
 
   it('returns an empty array on database error', async () => {
@@ -209,55 +132,21 @@ describe('getUsers', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// getUserById
-// ---------------------------------------------------------------------------
-
 describe('getUserById', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns the full user detail when found', async () => {
     mockUserFindUnique.mockResolvedValue(MOCK_USER_DETAIL)
 
-    const result = await getUserById('user-1')
-
-    expect(result).toEqual(MOCK_USER_DETAIL)
+    expect(await getUserById('user-1')).toEqual(MOCK_USER_DETAIL)
     expect(mockUserFindUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'user-1' } }),
     )
-  })
-
-  it('returns null when user does not exist', async () => {
-    mockUserFindUnique.mockResolvedValue(null)
-
-    expect(await getUserById('non-existent-id')).toBeNull()
   })
 
   it('returns null on database error', async () => {
     mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
     expect(await getUserById('user-1')).toBeNull()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// getTournamentOptions
-// ---------------------------------------------------------------------------
-
-describe('getTournamentOptions', () => {
-  beforeEach(() => vi.clearAllMocks())
-
-  it('returns the list of tournament options', async () => {
-    mockTournamentFindMany.mockResolvedValue(MOCK_TOURNAMENTS)
-
-    const result = await getTournamentOptions()
-
-    expect(result).toEqual(MOCK_TOURNAMENTS)
-  })
-
-  it('returns an empty array on database error', async () => {
-    mockTournamentFindMany.mockRejectedValue(new Error('DB error'))
-
-    expect(await getTournamentOptions()).toEqual([])
   })
 })

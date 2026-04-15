@@ -44,7 +44,7 @@ const { authenticatedAction } = await import('@/lib/actions/safe-action')
 
 const schema = z.object({ name: z.string().min(1) })
 
-const makeSession = (role: Role = Role.SUPERADMIN, id = 'user-1') => ({
+const makeSession = (role: Role = Role.ADMIN, id = 'user-1') => ({
   user: { id, role, email: 'test@example.com', name: 'Test' },
   session: {
     id: 'session-1',
@@ -114,7 +114,7 @@ describe('authenticatedAction — role checking', () => {
 
     const action = authenticatedAction({
       schema,
-      role: Role.SUPERADMIN,
+      role: Role.ADMIN,
       handler: async () => ({ success: true, message: 'ok' }),
     })
 
@@ -129,7 +129,7 @@ describe('authenticatedAction — role checking', () => {
 
     const action = authenticatedAction({
       schema,
-      role: [Role.ADMIN, Role.SUPERADMIN],
+      role: Role.ADMIN,
       handler: async () => ({ success: true, message: 'ok' }),
     })
 
@@ -140,12 +140,12 @@ describe('authenticatedAction — role checking', () => {
   })
 
   it('allows access when user role matches single required role', async () => {
-    mockGetSession.mockResolvedValue(makeSession(Role.SUPERADMIN))
+    mockGetSession.mockResolvedValue(makeSession(Role.ADMIN))
 
     const handler = vi.fn().mockResolvedValue({ success: true, message: 'ok' })
     const action = authenticatedAction({
       schema,
-      role: Role.SUPERADMIN,
+      role: Role.ADMIN,
       handler,
     })
 
@@ -160,7 +160,7 @@ describe('authenticatedAction — role checking', () => {
     const handler = vi.fn().mockResolvedValue({ success: true, message: 'ok' })
     const action = authenticatedAction({
       schema,
-      role: [Role.ADMIN, Role.SUPERADMIN],
+      role: Role.ADMIN,
       handler,
     })
 
@@ -203,7 +203,7 @@ describe('authenticatedAction — input validation', () => {
     expect(handler).toHaveBeenCalledWith(
       { name: 'Alice' },
       expect.objectContaining({
-        user: expect.objectContaining({ role: Role.SUPERADMIN }),
+        user: expect.objectContaining({ role: Role.ADMIN }),
       }),
     )
   })

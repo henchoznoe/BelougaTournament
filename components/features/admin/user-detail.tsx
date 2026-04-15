@@ -15,50 +15,26 @@ import { UserEditSection } from '@/components/features/admin/user-detail/user-ed
 import { UserProfileHeader } from '@/components/features/admin/user-detail/user-profile-header'
 import { UserRegistrationsSection } from '@/components/features/admin/user-detail/user-registrations-section'
 import { UserRoleSection } from '@/components/features/admin/user-detail/user-role-section'
-import type {
-  TournamentOption,
-  UserDetail as UserDetailType,
-} from '@/lib/types/user'
+import type { UserDetail as UserDetailType } from '@/lib/types/user'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 interface UserDetailProps {
   user: UserDetailType
-  tournaments: TournamentOption[]
-  viewerRole: Role
   viewerIsOwner: boolean
 }
 
-export const UserDetail = ({
-  user,
-  tournaments,
-  viewerRole,
-  viewerIsOwner,
-}: UserDetailProps) => {
-  const viewerIsSuperAdmin = viewerRole === Role.SUPERADMIN
-
-  const canEdit =
-    user.role !== Role.SUPERADMIN &&
-    (viewerIsSuperAdmin || user.role === Role.USER)
+export const UserDetail = ({ user, viewerIsOwner }: UserDetailProps) => {
+  const canEdit = true
 
   return (
     <div className="space-y-6">
       <UserProfileHeader user={user} />
       <UserBanAlert user={user} />
       <UserRegistrationsSection user={user} />
-      {canEdit && (
-        <UserEditSection
-          user={user}
-          tournaments={tournaments}
-          viewerRole={viewerRole}
-        />
-      )}
-      <UserRoleSection
-        user={user}
-        viewerRole={viewerRole}
-        viewerIsOwner={viewerIsOwner}
-      />
+      {canEdit && <UserEditSection user={user} />}
+      <UserRoleSection user={user} viewerIsOwner={viewerIsOwner} />
       {user.role === Role.USER && <UserBanSection user={user} />}
-      <UserDangerSection user={user} viewerRole={viewerRole} />
+      <UserDangerSection user={user} viewerIsOwner={viewerIsOwner} />
     </div>
   )
 }

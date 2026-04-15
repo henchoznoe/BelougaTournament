@@ -80,7 +80,7 @@ export const RegistrationDetail = ({
   // Promote captain state
   const [confirmPromote, setConfirmPromote] = useState(false)
 
-  const canManage = viewerRole === Role.SUPERADMIN || viewerRole === Role.ADMIN
+  const canManage = viewerRole === Role.ADMIN
   const isTeam = registration.tournament.format === TournamentFormat.TEAM
   const banned = isBanned(registration.user.bannedUntil)
   const isCaptain = registration.team?.captainId === registration.user.id

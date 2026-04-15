@@ -85,7 +85,7 @@ External packages first, then internal `@/` imports. No blank lines between grou
 | Variables/funcs    | camelCase        | `handleLogout`                   |
 | Constants (objects)| UPPER_SNAKE_CASE | `ROUTES`, `CACHE_TAGS`           |
 | Types/Interfaces   | PascalCase       | `AuthSession`, `ActionState`     |
-| Prisma enums       | UPPER_SNAKE_CASE | `SUPERADMIN`, `DRAFT`            |
+| Prisma enums       | UPPER_SNAKE_CASE | `ADMIN`, `DRAFT`                 |
 
 ### Types & Validation
 
@@ -104,7 +104,7 @@ Available enums: `Role`, `TournamentFormat`, `FieldType`, `TournamentStatus`.
 // GOOD — use enum imports everywhere
 import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
-if (user.role === Role.SUPERADMIN) { ... }
+if (user.role === Role.ADMIN) { ... }
 await prisma.tournament.findMany({ where: { status: TournamentStatus.PUBLISHED } })
 <SelectItem value={TournamentStatus.DRAFT}>Brouillon</SelectItem>
 
@@ -116,7 +116,7 @@ const STATUS_STYLES: Record<TournamentStatus, string> = {
 } as const
 
 // BAD — never use string literals
-if (user.role === 'SUPERADMIN') { ... }
+if (user.role === 'ADMIN') { ... }
 <SelectItem value="DRAFT">Brouillon</SelectItem>
 ```
 
@@ -174,7 +174,7 @@ proxy.ts                  # Edge middleware for /admin/* route protection
 ```ts
 export const myAction = authenticatedAction({
   schema: myZodSchema,
-  role: Role.SUPERADMIN,
+  role: Role.ADMIN,
   handler: async (data, session): Promise<ActionState> => {
     await prisma.model.create({ data })
     revalidateTag(CACHE_TAGS.MY_TAG, 'hours') // 2nd arg must match cacheLife profile

@@ -8,14 +8,13 @@
 
 'use client'
 
-import { Ban, Calendar, ClipboardList, Hash, Trophy } from 'lucide-react'
+import { Ban, Calendar, ClipboardList, Hash } from 'lucide-react'
 import Image from 'next/image'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { StatusBadge } from '@/components/ui/status-badge'
 import type { UserDetail } from '@/lib/types/user'
 import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDate } from '@/lib/utils/formatting'
-import { Role } from '@/prisma/generated/prisma/enums'
 
 interface UserProfileHeaderProps {
   user: UserDetail
@@ -98,20 +97,6 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
               </span>
               <span className="truncate text-sm text-zinc-300">
                 {user.discordId}
-              </span>
-            </div>
-          </div>
-        )}
-        {user.role === Role.ADMIN && (
-          <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/2 px-4 py-3">
-            <Trophy className="size-4 shrink-0 text-zinc-500" />
-            <div className="flex min-w-0 flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-zinc-600">
-                Tournois assignés
-              </span>
-              <span className="text-sm text-zinc-300">
-                {user.adminOf.length} tournoi
-                {user.adminOf.length !== 1 ? 's' : ''}
               </span>
             </div>
           </div>

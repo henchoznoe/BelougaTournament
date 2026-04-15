@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/sponsors.test.ts
- * Description: Unit tests for sponsor CRUD server actions (SUPERADMIN only).
+ * Description: Unit tests for sponsor CRUD server actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -62,16 +62,16 @@ const { createSponsor, updateSponsor, deleteSponsor } = await import(
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const SUPERADMIN_SESSION = {
+const ADMIN_SESSION = {
   user: {
-    id: 'sa-1',
-    role: Role.SUPERADMIN,
-    email: 'sa@test.com',
-    name: 'Super',
+    id: 'admin-1',
+    role: Role.ADMIN,
+    email: 'admin@test.com',
+    name: 'Admin',
   },
   session: {
     id: 'sess-1',
-    userId: 'sa-1',
+    userId: 'admin-1',
     token: 'tok',
     expiresAt: '2027-01-01',
   },
@@ -93,7 +93,7 @@ const VALID_SPONSOR_INPUT = {
 describe('createSponsor', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockSponsorCreate.mockResolvedValue({})
   })
 
@@ -106,9 +106,9 @@ describe('createSponsor', () => {
     })
   })
 
-  it('returns Unauthorized for non-SUPERADMIN role', async () => {
+  it('returns Unauthorized for non-admin role', async () => {
     mockGetSession.mockResolvedValue({
-      user: { id: 'admin-1', role: Role.ADMIN },
+      user: { id: 'user-1', role: Role.USER },
       session: {},
     })
 
@@ -178,7 +178,7 @@ describe('createSponsor', () => {
 describe('updateSponsor', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockSponsorUpdate.mockResolvedValue({})
   })
 
@@ -250,7 +250,7 @@ describe('updateSponsor', () => {
 describe('deleteSponsor', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(SUPERADMIN_SESSION)
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockSponsorDelete.mockResolvedValue({})
   })
 
@@ -263,9 +263,9 @@ describe('deleteSponsor', () => {
     })
   })
 
-  it('returns Unauthorized for non-SUPERADMIN role', async () => {
+  it('returns Unauthorized for non-admin role', async () => {
     mockGetSession.mockResolvedValue({
-      user: { id: 'admin-1', role: Role.ADMIN },
+      user: { id: 'user-1', role: Role.USER },
       session: {},
     })
 

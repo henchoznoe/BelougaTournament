@@ -11,7 +11,7 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
-import type { TournamentOption, UserDetail, UserRow } from '@/lib/types/user'
+import type { UserDetail, UserRow } from '@/lib/types/user'
 
 /** Fetches the profile data for a given user ID. Returns null if not found. */
 export const getUserProfile = async (userId: string) => {
@@ -54,19 +54,6 @@ export const getUsers = async (): Promise<UserRow[]> => {
         bannedUntil: true,
         banReason: true,
         _count: { select: { registrations: true } },
-        adminOf: {
-          select: {
-            id: true,
-            tournamentId: true,
-            tournament: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-              },
-            },
-          },
-        },
       },
     })
     return rows as unknown as UserRow[]
@@ -117,47 +104,11 @@ export const getUserById = async (
             },
           },
         },
-        adminOf: {
-          select: {
-            id: true,
-            tournamentId: true,
-            tournament: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-              },
-            },
-          },
-        },
       },
     })
     return user as unknown as UserDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching user by ID')
     return null
-  }
-}
-
-/** Fetches all tournaments for the assignment picker. */
-export const getTournamentOptions = async (): Promise<TournamentOption[]> => {
-  'use cache'
-  cacheLife('minutes')
-  cacheTag(CACHE_TAGS.TOURNAMENT_OPTIONS)
-
-  try {
-    const rows = await prisma.tournament.findMany({
-      orderBy: [{ status: 'asc' }, { title: 'asc' }],
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-      },
-    })
-    return rows as unknown as TournamentOption[]
-  } catch (error) {
-    logger.error({ error }, 'Error fetching tournament options')
-    return []
   }
 }

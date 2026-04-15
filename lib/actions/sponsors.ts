@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/sponsors.ts
- * Description: Server actions for sponsor CRUD operations (SUPERADMIN only).
+ * Description: Server actions for sponsor CRUD operations.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -23,7 +23,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 export const createSponsor = authenticatedAction({
   schema: sponsorSchema,
-  role: Role.SUPERADMIN,
+  role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     await prisma.sponsor.create({
       data: {
@@ -43,7 +43,7 @@ export const createSponsor = authenticatedAction({
 
 export const updateSponsor = authenticatedAction({
   schema: updateSponsorSchema,
-  role: Role.SUPERADMIN,
+  role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     await prisma.sponsor.update({
       where: { id: data.id },
@@ -64,7 +64,7 @@ export const updateSponsor = authenticatedAction({
 
 export const deleteSponsor = authenticatedAction({
   schema: deleteSponsorSchema,
-  role: Role.SUPERADMIN,
+  role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     await prisma.sponsor.delete({
       where: { id: data.id },

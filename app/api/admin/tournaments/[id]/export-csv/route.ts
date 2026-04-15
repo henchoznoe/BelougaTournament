@@ -53,29 +53,14 @@ const buildCsvRow = (fields: string[]): string =>
   fields.map(escapeCsvField).join(',')
 
 /**
- * Verifies that the request comes from an authenticated ADMIN or SUPERADMIN.
- * ADMINs must be assigned to the tournament; SUPERADMINs bypass the assignment check.
+ * Verifies that the request comes from an authenticated admin.
  */
-const verifyAdminAccess = async (request: Request, tournamentId: string) => {
+const verifyAdminAccess = async (request: Request) => {
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session?.user) return null
 
   const role = session.user.role as Role
-  if (role === Role.SUPERADMIN) return session
-
-  if (role === Role.ADMIN) {
-    const assignment = await prisma.adminAssignment.findUnique({
-      where: {
-        adminId_tournamentId: {
-          adminId: session.user.id,
-          tournamentId,
-        },
-      },
-    })
-    if (assignment) return session
-  }
-
-  return null
+  return role === Role.ADMIN ? session : null
 }
 
 /** GET — Export tournament registrations as a Toornament-compatible CSV file. */
@@ -85,7 +70,7 @@ export const GET = async (
 ) => {
   const { id: tournamentId } = await params
 
-  const session = await verifyAdminAccess(request, tournamentId)
+  const session = await verifyAdminAccess(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
