@@ -88,16 +88,16 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 | `/admin/tournaments/:slug/registrations` | Manage registrations (view, CSV export) | ADMIN+ |
 | `/admin/tournaments/:slug/teams` | Manage teams (dissolve, kick) | ADMIN+ |
 | `/admin/players` | Player management (edit, ban/unban) | ADMIN+ |
-| `/admin/admins` | Admin management (promote/demote, tournament assignments) | SUPERADMIN |
-| `/admin/settings` | Global settings (logo, Twitch, socials, features) | SUPERADMIN |
-| `/admin/sponsors` | Sponsor management (CRUD, image upload) | SUPERADMIN |
+| `/admin/users` | User management (promote/demote, ban/unban, delete) | ADMIN |
+| `/admin/settings` | Global settings (logo, Twitch, socials, features) | ADMIN |
+| `/admin/sponsors` | Sponsor management (CRUD, image upload) | ADMIN |
 
 ### API Routes
 
 | Route | Method | Purpose |
 |---|---|---|
 | `/api/auth/[...all]` | GET, POST | BetterAuth catch-all handler (OAuth, session) |
-| `/api/admin/blobs` | GET, POST, DELETE | Vercel Blob CRUD (SUPERADMIN only) |
+| `/api/admin/blobs` | GET, POST, DELETE | Vercel Blob CRUD (ADMIN only) |
 | `/api/admin/tournaments/:id/export-csv` | GET | CSV export of tournament registrations (ADMIN+) |
 
 ### SEO
@@ -115,7 +115,7 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 
 | Enum | Values |
 |---|---|
-| `Role` | `USER`, `ADMIN`, `SUPERADMIN` |
+| `Role` | `USER`, `ADMIN` |
 | `TournamentFormat` | `SOLO`, `TEAM` |
 | `FieldType` | `TEXT`, `NUMBER` |
 | `TournamentStatus` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
@@ -128,12 +128,11 @@ User ──────┬── Session (1:N)
            ├── TournamentRegistration (1:N)
            ├── Team (1:N, as captain)
            ├── TeamMember (1:N)
-           └── AdminAssignment (1:N)
 
 Tournament ┬── TournamentField (1:N, custom form fields)
            ├── Team (1:N)
            ├── TournamentRegistration (1:N)
-           └── AdminAssignment (1:N)
+           └── ToornamentStage (1:N)
 
 Team ──────┬── TeamMember (1:N)
            └── TournamentRegistration (1:1, optional)
@@ -146,7 +145,6 @@ Verification     (standalone, BetterAuth internal)
 **Key constraints:**
 - `@@unique([name, tournamentId])` on `Team` — unique team name per tournament
 - `@@unique([tournamentId, userId])` on `TournamentRegistration` — one registration per user per tournament
-- `@@unique([adminId, tournamentId])` on `AdminAssignment`
 - All foreign keys use `onDelete: Cascade`
 
 ---
@@ -162,7 +160,7 @@ Client Component (form submit)
   └─> Server Action
        └─> authenticatedAction
             ├─ 1. Auth check (getSession via headers)
-            ├─ 2. Role check (ADMIN / SUPERADMIN / array)
+            ├─ 2. Role check (ADMIN / array)
             ├─ 3. Zod validation (schema.safeParse)
             ├─ 4. Handler execution (business logic)
             ├─ 5. Error handling (Prisma error mapping + logger)
@@ -219,7 +217,7 @@ Request to /admin/*
   ├─ Layer 1 — Edge Middleware (proxy.ts)
   │   ├─ Fetches session via internal GET /api/auth/get-session
   │   ├─ Unauthenticated → redirect to /login
-  │   └─ Not ADMIN/SUPERADMIN → redirect to /unauthorized
+  │   └─ Not ADMIN → redirect to /unauthorized
   │
   └─ Layer 2 — Server Component (AdminGuard)
       ├─ Calls getSession() at component level
@@ -269,8 +267,7 @@ components/
 | `tournaments.ts` | `hours` | `TOURNAMENTS` | Admin list, by-slug detail, public lists, registrations, teams, user registrations |
 | `dashboard.ts` | `minutes` | `DASHBOARD_*` | Aggregate stats, upcoming tournaments, recent registrations |
 | `settings.ts` | `hours` | `SETTINGS` | Singleton global settings with fallback defaults |
-| `admins.ts` | `hours` | `ADMINS` | Admin user listing with tournament assignments |
-| `players.ts` | `hours` | `PLAYERS` | Player listing for admin management |
+| `users.ts` | `hours` | `USERS` | User profile and admin user management queries |
 | `sponsors.ts` | `hours` | `SPONSORS` | Sponsor listing |
 | `auth.ts` | — | — | `getSession()` (no cache, reads from cookies) |
 | `users.ts` | `hours` | — | User profile queries |
@@ -280,8 +277,7 @@ components/
 | Action File | Operations |
 |---|---|
 | `tournaments.ts` | Create, update, delete tournament; update status; register/unregister; create/join/dissolve team; kick player; update fields |
-| `admins.ts` | Promote, demote, update admin (display name + tournament assignments) |
-| `players.ts` | Update display name, ban/unban |
+| `users.ts` | Promote, demote, update, ban/unban, delete |
 | `sponsors.ts` | Create, update, delete sponsor |
 | `settings.ts` | Update global settings |
 | `profile.ts` | Update own display name |
@@ -317,7 +313,7 @@ All Zod v4 schemas live in `lib/validations/`. Each action file references its c
 - **Folder prefixes:** `logos/`, `sponsors/`
 - **Allowed types:** PNG, JPEG, WebP (no SVG)
 - **Max size:** 5 MB
-- **Access:** SUPERADMIN only
+- **Access:** ADMIN only
 - **Security:** DELETE validates URL domain (`*.public.blob.vercel-storage.com`)
 - **Next.js:** Remote image patterns configured in `next.config.ts`
 
@@ -373,7 +369,7 @@ Node 22 + pnpm 10
 | `DATABASE_URL` | Server | Pooled PostgreSQL connection (PrismaClient) |
 | `DIRECT_URL` | Server | Direct PostgreSQL connection (Prisma CLI migrations) |
 | `BLOB_READ_WRITE_TOKEN` | Server | Vercel Blob storage token |
-| `SUPERADMIN_EMAILS` | Server | Comma-separated emails for seed admin promotion |
+| `ADMIN_EMAILS` | Server | Comma-separated emails for seed admin promotion |
 | `NEXT_PUBLIC_APP_URL` | Client | Public-facing app URL |
 | `VERCEL_ENV` | Server (optional) | Vercel runtime environment |
 | `VERCEL_GIT_COMMIT_SHA` | Server (optional) | Git commit SHA for version display |

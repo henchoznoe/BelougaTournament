@@ -43,7 +43,6 @@ import {
   deleteUser,
   demoteAdmin,
   promoteToAdmin,
-  promoteToSuperAdmin,
   unbanUser,
 } from '@/lib/actions/users'
 import { ROUTES } from '@/lib/config/routes'
@@ -58,13 +57,7 @@ interface UserActionsDropdownProps {
   viewerIsOwner: boolean
 }
 
-type ConfirmAction =
-  | 'promote'
-  | 'promoteSuperAdmin'
-  | 'demote'
-  | 'demoteSuperAdmin'
-  | 'unban'
-  | 'delete'
+type ConfirmAction = 'promote' | 'demote' | 'unban' | 'delete'
 
 export const UserActionsDropdown = ({
   user,
@@ -75,32 +68,16 @@ export const UserActionsDropdown = ({
   const [isPending, startTransition] = useTransition()
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
 
-  const viewerIsSuperAdmin = viewerRole === Role.SUPERADMIN
   const banned = isBanned(user.bannedUntil)
 
-  // Permission checks
-  const canPromoteToAdmin =
-    viewerIsSuperAdmin && user.role === Role.USER && !banned
-  const canPromoteToSuperAdmin =
-    viewerIsSuperAdmin && viewerIsOwner && user.role === Role.ADMIN
-  const canDemoteAdmin = viewerIsSuperAdmin && user.role === Role.ADMIN
-  const canDemoteSuperAdmin =
-    viewerIsSuperAdmin && viewerIsOwner && user.role === Role.SUPERADMIN
-  const canBan =
-    (viewerIsSuperAdmin || viewerRole === Role.ADMIN) &&
-    user.role === Role.USER &&
-    !banned
+  const canPromoteToAdmin = viewerIsOwner && user.role === Role.USER && !banned
+  const canDemoteAdmin = viewerIsOwner && user.role === Role.ADMIN
+  const canBan = viewerRole === Role.ADMIN && user.role === Role.USER && !banned
   const canUnban =
-    (viewerIsSuperAdmin || viewerRole === Role.ADMIN) &&
-    user.role === Role.USER &&
-    banned
-  const canDelete = viewerIsSuperAdmin && user.role === Role.USER
+    viewerRole === Role.ADMIN && user.role === Role.USER && banned
+  const canDelete = viewerIsOwner && user.role === Role.USER
 
-  const hasRoleActions =
-    canPromoteToAdmin ||
-    canPromoteToSuperAdmin ||
-    canDemoteAdmin ||
-    canDemoteSuperAdmin
+  const hasRoleActions = canPromoteToAdmin || canDemoteAdmin
   const hasBanActions = canBan || canUnban
   const hasActions = hasRoleActions || hasBanActions || canDelete
 
@@ -109,15 +86,12 @@ export const UserActionsDropdown = ({
   const executeAction = (action: ConfirmAction) => {
     startTransition(async () => {
       let result: ActionState
+
       switch (action) {
         case 'promote':
           result = await promoteToAdmin({ userId: user.id })
           break
-        case 'promoteSuperAdmin':
-          result = await promoteToSuperAdmin({ userId: user.id })
-          break
         case 'demote':
-        case 'demoteSuperAdmin':
           result = await demoteAdmin({ userId: user.id })
           break
         case 'unban':
@@ -127,12 +101,14 @@ export const UserActionsDropdown = ({
           result = await deleteUser({ userId: user.id })
           break
       }
+
       if (result.success) {
         toast.success(result.message)
         router.refresh()
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
+
       setConfirmAction(null)
     })
   }
@@ -141,12 +117,8 @@ export const UserActionsDropdown = ({
     switch (confirmAction) {
       case 'promote':
         return 'Promouvoir admin'
-      case 'promoteSuperAdmin':
-        return 'Promouvoir super admin'
       case 'demote':
         return 'Rétrograder à joueur'
-      case 'demoteSuperAdmin':
-        return 'Rétrograder à admin'
       case 'unban':
         return 'Débannir'
       case 'delete':
@@ -160,12 +132,8 @@ export const UserActionsDropdown = ({
     switch (confirmAction) {
       case 'promote':
         return `${user.name} sera promu au rôle d'admin.`
-      case 'promoteSuperAdmin':
-        return `${user.name} sera promu au rôle de super admin. Ses assignations de tournois seront supprimées.`
       case 'demote':
-        return `${user.name} sera rétrogradé à joueur. Ses assignations de tournois seront supprimées.`
-      case 'demoteSuperAdmin':
-        return `${user.name} sera rétrogradé au rôle d'admin.`
+        return `${user.name} sera rétrogradé à joueur.`
       case 'unban':
         return `${user.name} sera débanni et pourra à nouveau accéder à la plateforme.`
       case 'delete':
@@ -210,26 +178,10 @@ export const UserActionsDropdown = ({
                   Promouvoir admin
                 </DropdownMenuItem>
               )}
-              {canPromoteToSuperAdmin && (
-                <DropdownMenuItem
-                  onClick={() => setConfirmAction('promoteSuperAdmin')}
-                >
-                  <ShieldCheck className="size-4 text-amber-400" />
-                  Promouvoir super admin
-                </DropdownMenuItem>
-              )}
               {canDemoteAdmin && (
                 <DropdownMenuItem onClick={() => setConfirmAction('demote')}>
                   <ShieldOff className="size-4 text-orange-400" />
                   Rétrograder à joueur
-                </DropdownMenuItem>
-              )}
-              {canDemoteSuperAdmin && (
-                <DropdownMenuItem
-                  onClick={() => setConfirmAction('demoteSuperAdmin')}
-                >
-                  <ShieldOff className="size-4 text-orange-400" />
-                  Rétrograder à admin
                 </DropdownMenuItem>
               )}
             </>
@@ -270,7 +222,6 @@ export const UserActionsDropdown = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Confirmation AlertDialog */}
       <AlertDialog
         open={!!confirmAction}
         onOpenChange={open => !open && setConfirmAction(null)}

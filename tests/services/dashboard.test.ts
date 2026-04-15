@@ -81,7 +81,7 @@ describe('getDashboardStats', () => {
     mockUserCount
       .mockResolvedValueOnce(50) // total users
       .mockResolvedValueOnce(42) // players (role USER)
-      .mockResolvedValueOnce(3) // admins (ADMIN + SUPERADMIN)
+      .mockResolvedValueOnce(3) // admins
       .mockResolvedValueOnce(8) // ghosts (no registrations)
     mockRegistrationCount
       .mockResolvedValueOnce(7) // total registrations

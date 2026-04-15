@@ -168,7 +168,7 @@ export type SponsorGroupByOutputType = {
   _max: SponsorMaxAggregateOutputType | null
 }
 
-type GetSponsorGroupByPayload<T extends SponsorGroupByArgs> = Prisma.PrismaPromise<
+export type GetSponsorGroupByPayload<T extends SponsorGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<SponsorGroupByOutputType, T['by']> &
       {
@@ -1021,6 +1021,11 @@ export type SponsorFindManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Skip the first `n` Sponsors.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Sponsors.
+   */
   distinct?: Prisma.SponsorScalarFieldEnum | Prisma.SponsorScalarFieldEnum[]
 }
 

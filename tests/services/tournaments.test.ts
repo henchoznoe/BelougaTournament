@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -50,6 +50,8 @@ const {
   getRegistrations,
   getTeams,
   getAvailableTeams,
+  getHeroTournamentBadge,
+  getHeroTournamentBadgeData,
   getPublishedTournaments,
   getArchivedTournaments,
   getPublicTournamentBySlug,
@@ -580,6 +582,109 @@ const MOCK_PUBLIC_DETAIL = {
     },
   ],
 }
+
+// ---------------------------------------------------------------------------
+// getHeroTournamentBadge
+// ---------------------------------------------------------------------------
+
+describe('getHeroTournamentBadge', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns a live badge when a published tournament is currently running', async () => {
+    vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadge()
+
+    expect(result).toEqual({
+      label: 'Valorant Cup en cours',
+      variant: 'live',
+    })
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { status: 'PUBLISHED' },
+      orderBy: { startDate: 'asc' },
+      select: {
+        title: true,
+        startDate: true,
+        endDate: true,
+      },
+    })
+  })
+
+  it('returns an upcoming badge in hours when the next tournament starts soon', async () => {
+    vi.setSystemTime(new Date('2026-06-15T07:00:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadge()
+
+    expect(result).toEqual({
+      label: 'Valorant Cup dans 3 heures',
+      variant: 'upcoming',
+    })
+  })
+
+  it('returns an upcoming badge with minutes when the next tournament is close', async () => {
+    vi.setSystemTime(new Date('2026-06-15T09:48:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadge()
+
+    expect(result).toEqual({
+      label: 'Valorant Cup dans 12 minutes',
+      variant: 'upcoming',
+    })
+  })
+
+  it('returns an upcoming badge in days when the next tournament is farther away', async () => {
+    vi.setSystemTime(new Date('2026-06-10T10:00:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadge()
+
+    expect(result).toEqual({
+      label: 'Valorant Cup dans 5 jours',
+      variant: 'upcoming',
+    })
+  })
+
+  it('returns the idle badge when there is no live or upcoming tournament', async () => {
+    vi.setSystemTime(new Date('2026-06-20T10:00:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadge()
+
+    expect(result).toEqual({
+      label: 'Aucun tournoi en cours',
+      variant: 'idle',
+    })
+  })
+
+  it('returns both the initial badge and tournament timings for client refreshes', async () => {
+    vi.setSystemTime(new Date('2026-06-15T09:48:00.000Z'))
+    mockFindMany.mockResolvedValue([MOCK_PUBLIC_LIST_ITEM])
+
+    const result = await getHeroTournamentBadgeData()
+
+    expect(result.badge).toEqual({
+      label: 'Valorant Cup dans 12 minutes',
+      variant: 'upcoming',
+    })
+    expect(result.tournaments).toEqual([
+      expect.objectContaining({
+        title: 'Valorant Cup',
+        startDate: new Date('2026-06-15T10:00:00.000Z'),
+        endDate: new Date('2026-06-17T18:00:00.000Z'),
+      }),
+    ])
+  })
+})
 
 // ---------------------------------------------------------------------------
 // getPublishedTournaments

@@ -7,48 +7,18 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { isAdmin, isBanned, isSuperAdmin } from '@/lib/utils/auth.helpers'
+import { isAdmin, isBanned } from '@/lib/utils/auth.helpers'
 import { Role } from '@/prisma/generated/prisma/enums'
-
-// ---------------------------------------------------------------------------
-// isAdmin
-// ---------------------------------------------------------------------------
 
 describe('isAdmin', () => {
   it('returns true for ADMIN role', () => {
     expect(isAdmin(Role.ADMIN)).toBe(true)
   })
 
-  it('returns true for SUPERADMIN role', () => {
-    expect(isAdmin(Role.SUPERADMIN)).toBe(true)
-  })
-
   it('returns false for USER role', () => {
     expect(isAdmin(Role.USER)).toBe(false)
   })
 })
-
-// ---------------------------------------------------------------------------
-// isSuperAdmin
-// ---------------------------------------------------------------------------
-
-describe('isSuperAdmin', () => {
-  it('returns true for SUPERADMIN role', () => {
-    expect(isSuperAdmin(Role.SUPERADMIN)).toBe(true)
-  })
-
-  it('returns false for ADMIN role', () => {
-    expect(isSuperAdmin(Role.ADMIN)).toBe(false)
-  })
-
-  it('returns false for USER role', () => {
-    expect(isSuperAdmin(Role.USER)).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// isBanned
-// ---------------------------------------------------------------------------
 
 describe('isBanned', () => {
   it('returns false when bannedUntil is null', () => {

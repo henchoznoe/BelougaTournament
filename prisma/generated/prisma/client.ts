@@ -90,11 +90,6 @@ export type TeamMember = Prisma.TeamMemberModel
  */
 export type TournamentRegistration = Prisma.TournamentRegistrationModel
 /**
- * Model AdminAssignment
- * 
- */
-export type AdminAssignment = Prisma.AdminAssignmentModel
-/**
  * Model GlobalSettings
  * 
  */

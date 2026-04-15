@@ -50,7 +50,7 @@ export const TwitchPlayer = ({
 
     // biome-ignore lint/suspicious/noExplicitAny: Twitch API is loaded globally via external script
     const Twitch = (window as any).Twitch
-    if (!Twitch || !Twitch.Player) return
+    if (!Twitch?.Player) return
 
     // Fallback: If after 8 seconds we haven't received any state, assume offline
     // (covers invalid channels and deferred offline events)

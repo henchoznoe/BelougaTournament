@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/settings.ts
- * Description: Server action for updating global settings (SUPERADMIN only).
+ * Description: Server action for updating global settings.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -19,7 +19,7 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 export const updateSettings = authenticatedAction({
   schema: settingsSchema,
-  role: Role.SUPERADMIN,
+  role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     const payload = {
       logoUrl: toNullable(data.logoUrl),

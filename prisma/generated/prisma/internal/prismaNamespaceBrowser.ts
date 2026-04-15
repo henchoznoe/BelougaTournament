@@ -61,7 +61,6 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TournamentRegistration: 'TournamentRegistration',
-  AdminAssignment: 'AdminAssignment',
   GlobalSettings: 'GlobalSettings',
   Sponsor: 'Sponsor'
 } as const
@@ -225,16 +224,6 @@ export const TournamentRegistrationScalarFieldEnum = {
 } as const
 
 export type TournamentRegistrationScalarFieldEnum = (typeof TournamentRegistrationScalarFieldEnum)[keyof typeof TournamentRegistrationScalarFieldEnum]
-
-
-export const AdminAssignmentScalarFieldEnum = {
-  id: 'id',
-  adminId: 'adminId',
-  tournamentId: 'tournamentId',
-  assignedAt: 'assignedAt'
-} as const
-
-export type AdminAssignmentScalarFieldEnum = (typeof AdminAssignmentScalarFieldEnum)[keyof typeof AdminAssignmentScalarFieldEnum]
 
 
 export const GlobalSettingsScalarFieldEnum = {

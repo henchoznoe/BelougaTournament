@@ -204,6 +204,28 @@ export type PublicTournamentDetail = {
   }
 }
 
+/** Dynamic badge state displayed in the landing page hero. */
+export type HeroTournamentBadgeVariant = 'idle' | 'upcoming' | 'live'
+
+/** A minimal public tournament shape used to compute the hero badge. */
+export type HeroTournamentBadgeTournament = {
+  title: string
+  startDate: Date | string
+  endDate: Date | string
+}
+
+/** Dynamic badge state displayed in the landing page hero. */
+export type HeroTournamentBadge = {
+  label: string
+  variant: HeroTournamentBadgeVariant
+}
+
+/** Full data payload required by the landing hero badge. */
+export type HeroTournamentBadgeData = {
+  badge: HeroTournamentBadge
+  tournaments: HeroTournamentBadgeTournament[]
+}
+
 /** A non-full team available for joining in the public registration dropdown. */
 export type AvailableTeam = {
   id: string

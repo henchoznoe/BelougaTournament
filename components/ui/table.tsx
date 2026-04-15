@@ -110,11 +110,11 @@ const TableCaption = ({ className, ...props }: ComponentProps<'caption'>) => {
 
 export {
   Table,
-  TableHeader,
   TableBody,
+  TableCaption,
+  TableCell,
   TableFooter,
   TableHead,
+  TableHeader,
   TableRow,
-  TableCell,
-  TableCaption,
 }

@@ -12,12 +12,12 @@ import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
 
 /**
- * Parse the SUPERADMIN_EMAILS env var (comma-separated list of emails)
+ * Parse the ADMIN_EMAILS env var (comma-separated list of emails)
  * and derive a placeholder name from the local part of each address.
  * The name is overwritten on first Discord OAuth login.
  */
-const parseSuperadminEmails = () => {
-  const raw = process.env.SUPERADMIN_EMAILS?.trim()
+const parseAdminEmails = () => {
+  const raw = process.env.ADMIN_EMAILS?.trim()
   if (!raw) return []
 
   return raw
@@ -27,7 +27,7 @@ const parseSuperadminEmails = () => {
     .map(email => {
       const localPart = email.split('@')[0]
       const name = localPart.charAt(0).toUpperCase() + localPart.slice(1)
-      return { email, name, displayName: name, role: 'SUPERADMIN' as const }
+      return { email, name, displayName: name, role: 'ADMIN' as const }
     })
 }
 
@@ -36,10 +36,10 @@ const parseSuperadminEmails = () => {
  * Accepts an existing PrismaClient instance (used by the orchestrator).
  */
 export const seedAdmins = async (prisma: PrismaClient) => {
-  const users = parseSuperadminEmails()
+  const users = parseAdminEmails()
 
   if (users.length === 0) {
-    console.log('No SUPERADMIN_EMAILS configured — skipping admin seed.')
+    console.log('No ADMIN_EMAILS configured — skipping admin seed.')
     return
   }
 

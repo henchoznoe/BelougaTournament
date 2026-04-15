@@ -42,11 +42,11 @@ type TeamMemberWithTeam = {
   team: TeamWithMembers
 }
 
-/** Forces deletion of a registration. SUPERADMIN can delete any; ADMIN can delete for assigned tournaments. */
+/** Forces deletion of a registration. */
 export const adminDeleteRegistration = authenticatedAction({
   schema: deleteRegistrationSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // 1. Fetch registration with tournament + user info
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
@@ -60,25 +60,7 @@ export const adminDeleteRegistration = authenticatedAction({
       return { success: false, message: 'Inscription introuvable.' }
     }
 
-    // 2. If viewer is ADMIN (not SUPERADMIN), check tournament assignment
-    if (session.user.role === Role.ADMIN) {
-      const assignment = await prisma.adminAssignment.findUnique({
-        where: {
-          adminId_tournamentId: {
-            adminId: session.user.id,
-            tournamentId: registration.tournament.id,
-          },
-        },
-      })
-      if (!assignment) {
-        return {
-          success: false,
-          message: "Vous n'avez pas accès à ce tournoi.",
-        }
-      }
-    }
-
-    // 3. SOLO format — just delete the registration
+    // 2. SOLO format — just delete the registration
     if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.tournamentRegistration.delete({
         where: { id: registration.id },
@@ -95,7 +77,7 @@ export const adminDeleteRegistration = authenticatedAction({
       }
     }
 
-    // 4. TEAM format — find team membership
+    // 3. TEAM format — find team membership
     const teamMember = (await prisma.teamMember.findFirst({
       where: {
         userId: registration.userId,
@@ -187,8 +169,8 @@ export const adminDeleteRegistration = authenticatedAction({
 /** Updates the custom field values (fieldValues JSON) on a registration. */
 export const adminUpdateRegistrationFields = authenticatedAction({
   schema: updateRegistrationFieldsSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
       include: {
@@ -203,24 +185,6 @@ export const adminUpdateRegistrationFields = authenticatedAction({
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
-    }
-
-    // ADMIN assignment check
-    if (session.user.role === Role.ADMIN) {
-      const assignment = await prisma.adminAssignment.findUnique({
-        where: {
-          adminId_tournamentId: {
-            adminId: session.user.id,
-            tournamentId: registration.tournament.id,
-          },
-        },
-      })
-      if (!assignment) {
-        return {
-          success: false,
-          message: "Vous n'avez pas accès à ce tournoi.",
-        }
-      }
     }
 
     await prisma.tournamentRegistration.update({
@@ -261,8 +225,8 @@ type TargetTeam = {
 /** Moves a player from their current team to a different team in the same tournament. */
 export const adminChangeTeam = authenticatedAction({
   schema: changeTeamSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // 1. Fetch registration
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
@@ -283,25 +247,7 @@ export const adminChangeTeam = authenticatedAction({
       }
     }
 
-    // 2. ADMIN assignment check
-    if (session.user.role === Role.ADMIN) {
-      const assignment = await prisma.adminAssignment.findUnique({
-        where: {
-          adminId_tournamentId: {
-            adminId: session.user.id,
-            tournamentId: registration.tournament.id,
-          },
-        },
-      })
-      if (!assignment) {
-        return {
-          success: false,
-          message: "Vous n'avez pas accès à ce tournoi.",
-        }
-      }
-    }
-
-    // 3. Verify target team exists and belongs to the same tournament
+    // 2. Verify target team exists and belongs to the same tournament
     const targetTeam = (await prisma.team.findUnique({
       where: { id: data.targetTeamId },
     })) as TargetTeam | null
@@ -321,7 +267,7 @@ export const adminChangeTeam = authenticatedAction({
       return { success: false, message: "L'equipe cible est déjà complète." }
     }
 
-    // 4. Find current team membership
+    // 3. Find current team membership
     const currentMember = (await prisma.teamMember.findFirst({
       where: {
         userId: registration.userId,
@@ -354,7 +300,7 @@ export const adminChangeTeam = authenticatedAction({
       m => m.userId !== registration.userId,
     )
 
-    // 5. Execute in a transaction
+    // 4. Execute in a transaction
     await prisma.$transaction(async tx => {
       // a. Remove from old team
       await tx.teamMember.deleteMany({
@@ -431,8 +377,8 @@ type PromoteTeam = {
 /** Promotes a team member to captain (swaps the captainId and moves the teamId FK). */
 export const adminPromoteCaptain = authenticatedAction({
   schema: promoteCaptainSchema,
-  role: [Role.ADMIN, Role.SUPERADMIN],
-  handler: async (data, session): Promise<ActionState> => {
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
     // 1. Fetch the team
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
@@ -443,25 +389,7 @@ export const adminPromoteCaptain = authenticatedAction({
       return { success: false, message: 'Equipe introuvable.' }
     }
 
-    // 2. ADMIN assignment check
-    if (session.user.role === Role.ADMIN) {
-      const assignment = await prisma.adminAssignment.findUnique({
-        where: {
-          adminId_tournamentId: {
-            adminId: session.user.id,
-            tournamentId: team.tournamentId,
-          },
-        },
-      })
-      if (!assignment) {
-        return {
-          success: false,
-          message: "Vous n'avez pas accès à ce tournoi.",
-        }
-      }
-    }
-
-    // 3. Verify the user is a member of this team
+    // 2. Verify the user is a member of this team
     const isMember = team.members.some(m => m.userId === data.userId)
     if (!isMember) {
       return {
@@ -470,14 +398,14 @@ export const adminPromoteCaptain = authenticatedAction({
       }
     }
 
-    // 4. Verify user is not already captain
+    // 3. Verify user is not already captain
     if (team.captainId === data.userId) {
       return { success: false, message: "L'utilisateur est déjà capitaine." }
     }
 
     const oldCaptainId = team.captainId
 
-    // 5. Swap in a transaction
+    // 4. Swap in a transaction
     await prisma.$transaction(async tx => {
       // a. Remove teamId FK from old captain's registration
       await tx.tournamentRegistration.updateMany({

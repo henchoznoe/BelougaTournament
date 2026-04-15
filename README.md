@@ -35,16 +35,13 @@ The platform enables administrators to host and manage diverse gaming tournament
   - **Validation:** Real-time checks for quotas (SLOT limits) and deadlines.
 - **Optimized UX:** Skeleton loaders via `shadcn/ui` for seamless Twitch embeds and data fetching.
 
-### 🛡️ Admin & SuperAdmin Dashboard
-- **Secure Access:** Middleware proxy verifying `ADMIN` or `SUPERADMIN` roles.
+### 🛡️ Admin Dashboard
+- **Secure Access:** Middleware proxy verifying the `ADMIN` role.
 - **Tournament CRUD:** Full lifecycle management (Draft -> Published -> Archived).
 - **Form Builder:** Intuitive UI to configure custom registration fields per tournament.
 - **Toornament CSV Export:** Intelligent bridge to export registered teams as CSV for 1-click bracket generation in Toornament.
 - **Team & Player Moderation:** Capabilities to kick players or dissolve teams.
-- **SuperAdmin Exclusives:** 
-  - Sponsor management (CRUD with priority sorting).
-  - Global content configuration (Logos, Twitch Stream URL, Social Networks).
-  - Role assignment (Promoting users to Admins).
+- **Platform Management:** Sponsor management, global content configuration, and user role assignment.
 
 ## 🗂️ Project Structure
 

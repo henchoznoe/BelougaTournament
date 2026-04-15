@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.4.2
- * Query Engine version: 94a226be1cf2967af2541cca5529f0f7ba866919
+ * Prisma Client JS version: 7.7.0
+ * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.4.2",
-  engine: "94a226be1cf2967af2541cca5529f0f7ba866919"
+  client: "7.7.0",
+  engine: "75cbdc1eb7150937890ad5465d861175c6624711"
 }
 
 /**
@@ -394,7 +394,6 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TournamentRegistration: 'TournamentRegistration',
-  AdminAssignment: 'AdminAssignment',
   GlobalSettings: 'GlobalSettings',
   Sponsor: 'Sponsor'
 } as const
@@ -412,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "tournament" | "toornamentStage" | "tournamentField" | "team" | "teamMember" | "tournamentRegistration" | "adminAssignment" | "globalSettings" | "sponsor"
+    modelProps: "user" | "session" | "account" | "verification" | "tournament" | "toornamentStage" | "tournamentField" | "team" | "teamMember" | "tournamentRegistration" | "globalSettings" | "sponsor"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1156,80 +1155,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    AdminAssignment: {
-      payload: Prisma.$AdminAssignmentPayload<ExtArgs>
-      fields: Prisma.AdminAssignmentFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AdminAssignmentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AdminAssignmentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        findFirst: {
-          args: Prisma.AdminAssignmentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AdminAssignmentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        findMany: {
-          args: Prisma.AdminAssignmentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>[]
-        }
-        create: {
-          args: Prisma.AdminAssignmentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        createMany: {
-          args: Prisma.AdminAssignmentCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AdminAssignmentCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>[]
-        }
-        delete: {
-          args: Prisma.AdminAssignmentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        update: {
-          args: Prisma.AdminAssignmentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        deleteMany: {
-          args: Prisma.AdminAssignmentDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AdminAssignmentUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AdminAssignmentUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>[]
-        }
-        upsert: {
-          args: Prisma.AdminAssignmentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminAssignmentPayload>
-        }
-        aggregate: {
-          args: Prisma.AdminAssignmentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminAssignment>
-        }
-        groupBy: {
-          args: Prisma.AdminAssignmentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AdminAssignmentGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AdminAssignmentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AdminAssignmentCountAggregateOutputType> | number
-        }
-      }
-    }
     GlobalSettings: {
       payload: Prisma.$GlobalSettingsPayload<ExtArgs>
       fields: Prisma.GlobalSettingsFieldRefs
@@ -1562,16 +1487,6 @@ export const TournamentRegistrationScalarFieldEnum = {
 export type TournamentRegistrationScalarFieldEnum = (typeof TournamentRegistrationScalarFieldEnum)[keyof typeof TournamentRegistrationScalarFieldEnum]
 
 
-export const AdminAssignmentScalarFieldEnum = {
-  id: 'id',
-  adminId: 'adminId',
-  tournamentId: 'tournamentId',
-  assignedAt: 'assignedAt'
-} as const
-
-export type AdminAssignmentScalarFieldEnum = (typeof AdminAssignmentScalarFieldEnum)[keyof typeof AdminAssignmentScalarFieldEnum]
-
-
 export const GlobalSettingsScalarFieldEnum = {
   id: 'id',
   logoUrl: 'logoUrl',
@@ -1888,7 +1803,6 @@ export type GlobalOmitConfig = {
   team?: Prisma.TeamOmit
   teamMember?: Prisma.TeamMemberOmit
   tournamentRegistration?: Prisma.TournamentRegistrationOmit
-  adminAssignment?: Prisma.AdminAssignmentOmit
   globalSettings?: Prisma.GlobalSettingsOmit
   sponsor?: Prisma.SponsorOmit
 }

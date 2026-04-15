@@ -1,6 +1,6 @@
 /**
  * File: app/api/admin/blobs/route.ts
- * Description: API route for managing Vercel Blob uploads (SUPERADMIN only).
+ * Description: API route for managing Vercel Blob uploads.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -30,10 +30,10 @@ const isValidBlobUrl = (url: string): boolean => {
   }
 }
 
-/** Verifies that the request comes from an authenticated SUPERADMIN. */
-const verifySuperAdmin = async (request: Request) => {
+/** Verifies that the request comes from an authenticated admin. */
+const verifyAdmin = async (request: Request) => {
   const session = await auth.api.getSession({ headers: request.headers })
-  if (!session?.user || session.user.role !== Role.SUPERADMIN) {
+  if (!session?.user || session.user.role !== Role.ADMIN) {
     return null
   }
   return session
@@ -41,7 +41,7 @@ const verifySuperAdmin = async (request: Request) => {
 
 /** GET — List blobs, optionally filtered by folder prefix. */
 export const GET = async (request: Request) => {
-  const session = await verifySuperAdmin(request)
+  const session = await verifyAdmin(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -65,7 +65,7 @@ export const GET = async (request: Request) => {
 
 /** POST — Upload a file to Vercel Blob. Expects FormData with a "file" field and optional "folder" field. */
 export const POST = async (request: Request) => {
-  const session = await verifySuperAdmin(request)
+  const session = await verifyAdmin(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -124,7 +124,7 @@ const deleteBlobSchema = z.object({
 
 /** DELETE — Remove a blob by URL. Expects JSON body with { url: string }. */
 export const DELETE = async (request: Request) => {
-  const session = await verifySuperAdmin(request)
+  const session = await verifyAdmin(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

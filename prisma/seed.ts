@@ -1,6 +1,6 @@
 /**
  * File: prisma/seed.ts
- * Description: Seed orchestrator — provisions admin users from SUPERADMIN_EMAILS.
+ * Description: Seed orchestrator — provisions admin users from ADMIN_EMAILS.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz

@@ -105,9 +105,9 @@ describe('ADMIN_ROUTE_ROLES', () => {
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_REGISTRATIONS]).toBe(Role.ADMIN)
   })
 
-  it('maps SUPERADMIN-level routes correctly', () => {
-    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SETTINGS]).toBe(Role.SUPERADMIN)
-    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SPONSORS]).toBe(Role.SUPERADMIN)
+  it('maps configuration routes to ADMIN', () => {
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SETTINGS]).toBe(Role.ADMIN)
+    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_SPONSORS]).toBe(Role.ADMIN)
   })
 
   it('every key is a valid admin route starting with /admin', () => {

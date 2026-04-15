@@ -101,8 +101,7 @@ const NavbarProfile = ({
     )
   }
 
-  const isAdmin =
-    session.user.role === Role.ADMIN || session.user.role === Role.SUPERADMIN
+  const isAdmin = session.user.role === Role.ADMIN
 
   // Desktop Dropdown
   if (mode === 'desktop') {

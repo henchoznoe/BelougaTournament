@@ -13,8 +13,6 @@ import { ADMIN_ROUTE_ROLES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-const ADMIN_ROLES = new Set<Role>([Role.ADMIN, Role.SUPERADMIN])
-
 /**
  * Sorted route prefixes (longest first) so that the most specific prefix
  * matches before a shorter one (e.g. /admin/tournaments before /admin).
@@ -49,12 +47,12 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (!ADMIN_ROLES.has(session.user.role)) {
+  if (session.user.role !== Role.ADMIN) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
   const requiredRole = getRequiredRole(request.nextUrl.pathname)
-  if (requiredRole === Role.SUPERADMIN && session.user.role !== Role.SUPERADMIN) {
+  if (session.user.role !== requiredRole) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 

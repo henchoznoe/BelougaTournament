@@ -13,9 +13,8 @@ import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import { UserDetail } from '@/components/features/admin/user-detail'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
-import { getTournamentOptions, getUserById } from '@/lib/services/users'
+import { getUserById } from '@/lib/services/users'
 import { isOwner } from '@/lib/utils/owner'
-import type { Role } from '@/prisma/generated/prisma/enums'
 
 interface AdminUserDetailPageProps {
   params: Promise<{ id: string }>
@@ -39,10 +38,7 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
     redirect(ROUTES.LOGIN)
   }
 
-  const [user, tournaments] = await Promise.all([
-    getUserById(id),
-    getTournamentOptions(),
-  ])
+  const user = await getUserById(id)
 
   if (!user) {
     notFound()
@@ -66,12 +62,7 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
         </h1>
       </div>
 
-      <UserDetail
-        user={user}
-        tournaments={tournaments}
-        viewerRole={session.user.role as Role}
-        viewerIsOwner={isOwner(session.user.email)}
-      />
+      <UserDetail user={user} viewerIsOwner={isOwner(session.user.email)} />
     </div>
   )
 }

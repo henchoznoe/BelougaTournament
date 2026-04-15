@@ -391,9 +391,7 @@ const PrivacyPage = () => {
                 Authentification sécurisée via OAuth 2.0 — aucun mot de passe
                 stocké sur la Plateforme
               </li>
-              <li>
-                Accès aux données restreint par rôle (USER, ADMIN, SUPERADMIN)
-              </li>
+              <li>Accès aux données restreint par rôle (USER, ADMIN)</li>
               <li>Surveillance des erreurs et alertes de sécurité</li>
               <li>
                 Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et

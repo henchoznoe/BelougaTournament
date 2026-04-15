@@ -68,19 +68,10 @@ describe('demoteUserSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('updateUserSchema', () => {
-  it('accepts valid userId and displayName without tournamentIds', () => {
+  it('accepts valid userId and displayName', () => {
     const result = updateUserSchema.safeParse({
       userId: VALID_UUID,
       displayName: 'PlayerXYZ',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('accepts valid userId, displayName, and tournamentIds', () => {
-    const result = updateUserSchema.safeParse({
-      userId: VALID_UUID,
-      displayName: 'AdminXYZ',
-      tournamentIds: [VALID_UUID],
     })
     expect(result.success).toBe(true)
   })
@@ -154,15 +145,6 @@ describe('updateUserSchema', () => {
     if (result.success) {
       expect(result.data.displayName).toBe('AB')
     }
-  })
-
-  it('rejects an invalid tournament UUID in the array', () => {
-    const result = updateUserSchema.safeParse({
-      userId: VALID_UUID,
-      displayName: 'AdminXYZ',
-      tournamentIds: [INVALID_UUID],
-    })
-    expect(result.success).toBe(false)
   })
 
   it('rejects an invalid userId', () => {

@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/settings-form.tsx
- * Description: Form for editing global platform settings (SUPERADMIN only).
+ * Description: Form for editing global platform settings.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz

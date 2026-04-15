@@ -20,18 +20,18 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 interface UserDangerSectionProps {
   user: UserDetail
-  viewerRole: Role
+  viewerIsOwner: boolean
 }
 
 export const UserDangerSection = ({
   user,
-  viewerRole,
+  viewerIsOwner,
 }: UserDangerSectionProps) => {
   const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isActionPending, startActionTransition] = useTransition()
 
-  if (viewerRole !== Role.SUPERADMIN || user.role !== Role.USER) return null
+  if (!viewerIsOwner || user.role !== Role.USER) return null
 
   const handleDelete = () => {
     startActionTransition(async () => {

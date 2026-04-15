@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Ban, ChevronLeft, ChevronRight, Search, Trophy } from 'lucide-react'
+import { Ban, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -32,12 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRow } from '@/lib/types/user'
 import { isBanned } from '@/lib/utils/auth.helpers'
@@ -69,19 +63,16 @@ export const UsersList = ({
   const filtered = useMemo(() => {
     let result = users
 
-    // Role filter
     if (roleFilter !== 'all') {
       result = result.filter(u => u.role === roleFilter)
     }
 
-    // Status filter
     if (statusFilter === 'active') {
       result = result.filter(u => !isBanned(u.bannedUntil))
     } else if (statusFilter === 'banned') {
       result = result.filter(u => isBanned(u.bannedUntil))
     }
 
-    // Search filter
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -96,7 +87,6 @@ export const UsersList = ({
     return result
   }, [users, search, roleFilter, statusFilter])
 
-  // Reset to page 1 when filters change
   const handleSearch = (value: string) => {
     setSearch(value)
     setPage(1)
@@ -112,7 +102,6 @@ export const UsersList = ({
     setPage(1)
   }
 
-  // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const paginated = filtered.slice(
@@ -124,7 +113,6 @@ export const UsersList = ({
 
   return (
     <>
-      {/* Search + filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-xs flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
@@ -146,7 +134,6 @@ export const UsersList = ({
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
               <SelectItem value="all">Tous les rôles</SelectItem>
-              <SelectItem value={Role.SUPERADMIN}>Super Admin</SelectItem>
               <SelectItem value={Role.ADMIN}>Admin</SelectItem>
               <SelectItem value={Role.USER}>Joueur</SelectItem>
             </SelectContent>
@@ -167,7 +154,6 @@ export const UsersList = ({
         </div>
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 text-xs text-zinc-500">
         <span>
           {filtered.length} utilisateur{filtered.length !== 1 ? 's' : ''}
@@ -179,7 +165,6 @@ export const UsersList = ({
         )}
       </div>
 
-      {/* Users table */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
           <p className="text-sm text-zinc-500">
@@ -204,9 +189,6 @@ export const UsersList = ({
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
                   Inscriptions
-                </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
-                  Tournois assignés
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:table-cell">
                   Inscrit le
@@ -236,7 +218,6 @@ export const UsersList = ({
                       }
                     }}
                   >
-                    {/* User info */}
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
@@ -270,17 +251,14 @@ export const UsersList = ({
                       </div>
                     </TableCell>
 
-                    {/* Role badge */}
                     <TableCell className="hidden sm:table-cell">
                       <RoleBadge role={user.role} />
                     </TableCell>
 
-                    {/* Status */}
                     <TableCell className="hidden sm:table-cell">
                       <StatusBadge bannedUntil={user.bannedUntil} />
                     </TableCell>
 
-                    {/* Registrations count */}
                     <TableCell className="hidden md:table-cell">
                       <span className="text-xs text-zinc-400">
                         {user._count.registrations > 0 ? (
@@ -294,51 +272,12 @@ export const UsersList = ({
                       </span>
                     </TableCell>
 
-                    {/* Tournament assignments */}
-                    <TableCell className="hidden md:table-cell">
-                      {user.role === Role.SUPERADMIN ? (
-                        <span className="text-xs text-zinc-500 italic">
-                          Accès total
-                        </span>
-                      ) : user.role === Role.ADMIN ? (
-                        user.adminOf.length === 0 ? (
-                          <span className="text-xs text-zinc-600">Aucun</span>
-                        ) : (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="inline-flex cursor-default items-center gap-1 text-xs text-zinc-400">
-                                  <Trophy className="size-3" />
-                                  {user.adminOf.length} tournoi
-                                  {user.adminOf.length > 1 ? 's' : ''}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="bottom"
-                                className="max-w-64 border-white/10 bg-zinc-900 text-zinc-300"
-                              >
-                                <ul className="space-y-0.5 text-xs">
-                                  {user.adminOf.map(a => (
-                                    <li key={a.id}>{a.tournament.title}</li>
-                                  ))}
-                                </ul>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )
-                      ) : (
-                        <span className="text-xs text-zinc-600">&mdash;</span>
-                      )}
-                    </TableCell>
-
-                    {/* Created at */}
                     <TableCell className="hidden lg:table-cell">
                       <span className="text-xs text-zinc-500">
                         {formatShortDate(user.createdAt)}
                       </span>
                     </TableCell>
 
-                    {/* Actions */}
                     <TableCell onClick={e => e.stopPropagation()}>
                       <UserActionsDropdown
                         user={user}
@@ -354,7 +293,6 @@ export const UsersList = ({
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-zinc-500">

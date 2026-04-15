@@ -12,7 +12,6 @@ import {
   Lock,
   Mail,
   Shield,
-  ShieldCheck,
   Trophy,
   User,
 } from 'lucide-react'
@@ -39,11 +38,6 @@ const ROLE_CONFIG = {
     label: 'Admin',
     icon: Shield,
     className: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
-  },
-  [Role.SUPERADMIN]: {
-    label: 'Super Admin',
-    icon: ShieldCheck,
-    className: 'border-purple-500/30 bg-purple-500/10 text-purple-400',
   },
 } as const
 

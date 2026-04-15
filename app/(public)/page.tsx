@@ -16,6 +16,7 @@ import { TournamentsSection } from '@/components/features/landing/tournaments-se
 import { TournamentsSkeleton } from '@/components/features/landing/tournaments-skeleton'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
+import { getHeroTournamentBadgeData } from '@/lib/services/tournaments'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -23,14 +24,19 @@ export const metadata: Metadata = {
 }
 
 const LandingPage = async () => {
-  const [globalSettings, sponsors] = await Promise.all([
+  const [globalSettings, sponsors, heroBadgeData] = await Promise.all([
     getGlobalSettings(),
     getSponsors(),
+    getHeroTournamentBadgeData(),
   ])
 
   return (
     <div className="flex flex-col overflow-x-hidden gap-12">
-      <HeroSection twitchUrl={globalSettings.twitchUrl ?? undefined} />
+      <HeroSection
+        twitchUrl={globalSettings.twitchUrl ?? undefined}
+        badge={heroBadgeData.badge}
+        badgeTournaments={heroBadgeData.tournaments}
+      />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />

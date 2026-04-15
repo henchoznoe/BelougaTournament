@@ -26,15 +26,6 @@ export type UserRow = {
   bannedUntil: Date | null
   banReason: string | null
   _count: { registrations: number }
-  adminOf: {
-    id: string
-    tournamentId: string
-    tournament: {
-      id: string
-      title: string
-      slug: string
-    }
-  }[]
 }
 
 /** A registration entry nested inside a UserDetail. */
@@ -62,23 +53,6 @@ export type UserDetail = {
   bannedUntil: Date | null
   banReason: string | null
   registrations: UserRegistrationRow[]
-  adminOf: {
-    id: string
-    tournamentId: string
-    tournament: {
-      id: string
-      title: string
-      slug: string
-    }
-  }[]
-}
-
-/** Minimal tournament data for the assignment picker. */
-export type TournamentOption = {
-  id: string
-  title: string
-  slug: string
-  status: TournamentStatus
 }
 
 /** Ban duration option value type. */
