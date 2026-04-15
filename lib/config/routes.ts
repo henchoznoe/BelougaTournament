@@ -44,8 +44,6 @@ export const ROUTES = {
     `/admin/registrations/${id}` as const,
   ADMIN_TOURNAMENT_TEAM_DETAIL: (slug: string, teamId: string) =>
     `/admin/tournaments/${slug}/teams/${teamId}` as const,
-  API_TOURNAMENT_EXPORT_CSV: (id: string) =>
-    `/api/admin/tournaments/${id}/export-csv` as const,
 } as const
 
 /**
