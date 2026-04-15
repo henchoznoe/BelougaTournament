@@ -18,11 +18,11 @@ export const TournamentsSkeleton = () => {
         <Skeleton className="h-6 w-96 rounded-lg" />
       </div>
 
-      {/* Card Grid Skeleton */}
-      <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
-        <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
-        <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
+      {/* Card Row Skeleton */}
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6">
+        <Skeleton className="h-72 w-full max-w-md shrink-0 rounded-3xl border border-white/5 bg-white/2 md:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]" />
+        <Skeleton className="h-72 w-full max-w-md shrink-0 rounded-3xl border border-white/5 bg-white/2 md:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]" />
+        <Skeleton className="h-72 w-full max-w-md shrink-0 rounded-3xl border border-white/5 bg-white/2 md:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]" />
       </div>
     </section>
   )

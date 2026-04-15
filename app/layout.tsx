@@ -52,7 +52,7 @@ config.autoAddCss = false
 
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
-    <html lang="fr-CH" className="dark scroll-smooth">
+    <html lang="fr-CH" className="dark scroll-smooth" suppressHydrationWarning>
       <body
         className={cn(
           inter.variable,

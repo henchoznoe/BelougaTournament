@@ -46,10 +46,15 @@ export const TournamentsSection = async () => {
         </p>
       </div>
 
-      {/* Tournament Cards Grid */}
-      <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Tournament Cards Row */}
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6">
         {displayed.map(tournament => (
-          <TournamentCard key={tournament.id} tournament={tournament} />
+          <div
+            key={tournament.id}
+            className="w-full max-w-md shrink-0 md:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]"
+          >
+            <TournamentCard tournament={tournament} />
+          </div>
         ))}
       </div>
 
