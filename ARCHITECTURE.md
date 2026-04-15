@@ -85,7 +85,7 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 | `/admin/tournaments` | Tournament list (CRUD, status management) | ADMIN+ |
 | `/admin/tournaments/new` | Create tournament | ADMIN+ |
 | `/admin/tournaments/:slug` | Edit tournament (tabbed: general, registrations, teams) | ADMIN+ |
-| `/admin/tournaments/:slug/registrations` | Manage registrations (view, CSV export) | ADMIN+ |
+| `/admin/tournaments/:slug/registrations` | Manage registrations (view and moderation) | ADMIN+ |
 | `/admin/tournaments/:slug/teams` | Manage teams (dissolve, kick) | ADMIN+ |
 | `/admin/players` | Player management (edit, ban/unban) | ADMIN+ |
 | `/admin/users` | User management (promote/demote, ban/unban, delete) | ADMIN |
@@ -98,7 +98,6 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 |---|---|---|
 | `/api/auth/[...all]` | GET, POST | BetterAuth catch-all handler (OAuth, session) |
 | `/api/admin/blobs` | GET, POST, DELETE | Vercel Blob CRUD (ADMIN only) |
-| `/api/admin/tournaments/:id/export-csv` | GET | CSV export of tournament registrations (ADMIN+) |
 
 ### SEO
 
@@ -329,7 +328,7 @@ tests/
 ├── validations/    # Zod schema validation (tournaments, settings, admins, players, sponsors, profile)
 ├── services/       # Data access mocking (tournaments, dashboard, admins, players, auth)
 ├── actions/        # Server action testing (tournaments, admins, players, sponsors, settings, profile, safe-action)
-├── api/            # API route handlers (blobs, export-csv)
+├── api/            # API route handlers (blobs)
 ├── seo/            # SEO files (robots.ts, sitemap.ts)
 └── proxy.test.ts   # Edge middleware guard
 ```

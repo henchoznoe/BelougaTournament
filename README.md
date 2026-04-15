@@ -39,7 +39,6 @@ The platform enables administrators to host and manage diverse gaming tournament
 - **Secure Access:** Middleware proxy verifying the `ADMIN` role.
 - **Tournament CRUD:** Full lifecycle management (Draft -> Published -> Archived).
 - **Form Builder:** Intuitive UI to configure custom registration fields per tournament.
-- **Toornament CSV Export:** Intelligent bridge to export registered teams as CSV for 1-click bracket generation in Toornament.
 - **Team & Player Moderation:** Capabilities to kick players or dissolve teams.
 - **Platform Management:** Sponsor management, global content configuration, and user role assignment.
 
@@ -49,7 +48,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 ├── app/                  # Next.js App Router
 │   ├── (public)/         # Public facing routes (Landing, Tournaments, Profile, Legal, ...)
 │   ├── admin/            # Protected Admin Dashboard routes
-│   └── api/              # API endpoints (Auth, Blob CRUD, CSV Export)
+│   └── api/              # API endpoints (Auth, Blob CRUD)
 ├── components/           # React Components
 │   ├── features/         # Domain-specific components (admin, auth, tournaments, profile, ...)
 │   └── ui/               # Reusable primitives (shadcn/ui)

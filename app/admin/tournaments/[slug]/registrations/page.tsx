@@ -42,12 +42,7 @@ const AdminTournamentRegistrationsPage = async ({
 
   const registrations = await getRegistrations(tournament.id)
 
-  return (
-    <TournamentRegistrationsList
-      registrations={registrations}
-      tournamentId={tournament.id}
-    />
-  )
+  return <TournamentRegistrationsList registrations={registrations} />
 }
 
 export default AdminTournamentRegistrationsPage

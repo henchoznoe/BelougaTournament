@@ -17,15 +17,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -36,11 +36,8 @@ jobs:
       - name: Type-check
         run: pnpm exec tsc --noEmit
 
-      - name: Lint
-        run: pnpm lint
-
-      - name: Format check
-        run: pnpm exec biome format .
+      - name: Format & Lint check
+        run: pnpm exec biome check .
 
       - name: Run unit tests
         run: pnpm test

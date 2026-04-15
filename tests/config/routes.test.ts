@@ -55,12 +55,6 @@ describe('ROUTES', () => {
     )
   })
 
-  it('API_TOURNAMENT_EXPORT_CSV builds id-based API path', () => {
-    expect(ROUTES.API_TOURNAMENT_EXPORT_CSV('uuid-123')).toBe(
-      '/api/admin/tournaments/uuid-123/export-csv',
-    )
-  })
-
   it('ADMIN_SPONSOR_NEW is /admin/sponsors/new', () => {
     expect(ROUTES.ADMIN_SPONSOR_NEW).toBe('/admin/sponsors/new')
   })
