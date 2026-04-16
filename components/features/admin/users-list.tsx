@@ -35,7 +35,7 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRow } from '@/lib/types/user'
 import { isBanned } from '@/lib/utils/auth.helpers'
-import { formatShortDate } from '@/lib/utils/formatting'
+import { formatDateTime, formatShortDate } from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
@@ -193,6 +193,9 @@ export const UsersList = ({
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:table-cell">
                   Inscrit le
                 </TableHead>
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 xl:table-cell">
+                  Dernière connexion
+                </TableHead>
                 <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   <span className="sr-only">Actions</span>
                 </TableHead>
@@ -275,6 +278,14 @@ export const UsersList = ({
                     <TableCell className="hidden lg:table-cell">
                       <span className="text-xs text-zinc-500">
                         {formatShortDate(user.createdAt)}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="hidden xl:table-cell">
+                      <span className="text-xs text-zinc-500">
+                        {user.lastLoginAt
+                          ? formatDateTime(user.lastLoginAt)
+                          : 'Jamais'}
                       </span>
                     </TableCell>
 

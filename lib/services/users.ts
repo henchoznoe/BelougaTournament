@@ -25,6 +25,7 @@ export const getUserProfile = async (userId: string) => {
         image: true,
         role: true,
         createdAt: true,
+        lastLoginAt: true,
       },
     })
   } catch (error) {
@@ -51,6 +52,7 @@ export const getUsers = async (): Promise<UserRow[]> => {
         discordId: true,
         role: true,
         createdAt: true,
+        lastLoginAt: true,
         bannedUntil: true,
         banReason: true,
         _count: { select: { registrations: true } },
@@ -83,6 +85,7 @@ export const getUserById = async (
         discordId: true,
         role: true,
         createdAt: true,
+        lastLoginAt: true,
         bannedUntil: true,
         banReason: true,
         registrations: {

@@ -90,6 +90,7 @@ export const UserScalarFieldEnum = {
   image: 'image',
   discordId: 'discordId',
   createdAt: 'createdAt',
+  lastLoginAt: 'lastLoginAt',
   updatedAt: 'updatedAt',
   role: 'role',
   bannedUntil: 'bannedUntil',

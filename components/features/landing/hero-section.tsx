@@ -170,10 +170,10 @@ export const HeroSection = ({
               rel="noopener noreferrer"
               className="font-semibold text-blue-400 underline decoration-blue-400/30 underline-offset-2 transition-colors hover:text-blue-300 hover:decoration-blue-300/50"
             >
-              Quentadoulive
+              Quentadou
             </a>
           ) : (
-            <span className="font-semibold text-blue-400">Quentadoulive</span>
+            <span className="font-semibold text-blue-400">Quentadou</span>
           )}
           .
           <br />
