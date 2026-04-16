@@ -89,44 +89,52 @@ const auth = betterAuth({
 
             if (!user) return
 
+            const updateData: Record<string, unknown> = {
+              lastLoginAt: session.createdAt
+                ? new Date(session.createdAt)
+                : new Date(),
+            }
+
             const discordAccount = user.accounts.find(
               acc => acc.providerId === 'discord',
             )
-            if (!discordAccount?.accessToken) return
 
-            const response = await fetch(DISCORD.API_USER_URL, {
-              headers: {
-                Authorization: `Bearer ${discordAccount.accessToken}`,
-              },
-            })
-
-            if (!response.ok) return
-
-            const discordProfile: DiscordProfile = await response.json()
-
-            const avatarUrl = discordProfile.avatar
-              ? DISCORD.AVATAR_CDN_URL(discordProfile.id, discordProfile.avatar)
-              : null
-
-            const name = discordProfile.global_name || discordProfile.username
-
-            const updateData: Record<string, unknown> = {}
-
-            // Always sync Discord-controlled fields
-            if (user.name !== name) updateData.name = name
-            if (user.image !== avatarUrl) updateData.image = avatarUrl
-            if (user.discordId !== discordProfile.id)
-              updateData.discordId = discordProfile.id
-
-            // On first login, initialize displayName from Discord name
-            if (!user.displayName) updateData.displayName = name
-
-            if (Object.keys(updateData).length > 0) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: updateData,
+            if (discordAccount?.accessToken) {
+              const response = await fetch(DISCORD.API_USER_URL, {
+                headers: {
+                  Authorization: `Bearer ${discordAccount.accessToken}`,
+                },
               })
+
+              if (response.ok) {
+                const discordProfile: DiscordProfile = await response.json()
+
+                const avatarUrl = discordProfile.avatar
+                  ? DISCORD.AVATAR_CDN_URL(
+                      discordProfile.id,
+                      discordProfile.avatar,
+                    )
+                  : null
+
+                const name =
+                  discordProfile.global_name || discordProfile.username
+
+                // Always sync Discord-controlled fields
+                if (user.name !== name) updateData.name = name
+                if (user.image !== avatarUrl) updateData.image = avatarUrl
+                if (user.discordId !== discordProfile.id) {
+                  updateData.discordId = discordProfile.id
+                }
+
+                // On first login, initialize displayName from Discord name
+                if (!user.displayName) updateData.displayName = name
+              }
             }
+
+            await prisma.user.update({
+              where: { id: user.id },
+              data: updateData,
+            })
           } catch (error) {
             logger.error(
               { error, userId: session.userId },

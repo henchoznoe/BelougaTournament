@@ -38,6 +38,7 @@ model User {
   image         String?
   discordId     String?                  @unique
   createdAt     DateTime                 @default(now())
+  lastLoginAt   DateTime?
   updatedAt     DateTime                 @updatedAt
   role          Role                     @default(USER)
   bannedUntil   DateTime?

@@ -41,6 +41,7 @@ const MOCK_PROFILE = {
   image: 'https://cdn.discordapp.com/avatars/123/abc.png',
   role: Role.USER,
   createdAt: new Date('2026-01-01T00:00:00Z'),
+  lastLoginAt: new Date('2026-04-15T19:30:00Z'),
 }
 
 const MOCK_USERS = [
@@ -53,6 +54,7 @@ const MOCK_USERS = [
     discordId: 'discord-1',
     role: Role.USER,
     createdAt: new Date('2026-01-01'),
+    lastLoginAt: new Date('2026-04-15T19:30:00Z'),
     bannedUntil: null,
     banReason: null,
     _count: { registrations: 3 },
@@ -66,6 +68,7 @@ const MOCK_USERS = [
     discordId: 'discord-2',
     role: Role.ADMIN,
     createdAt: new Date('2026-02-01'),
+    lastLoginAt: null,
     bannedUntil: null,
     banReason: null,
     _count: { registrations: 0 },
@@ -81,6 +84,7 @@ const MOCK_USER_DETAIL = {
   discordId: 'discord-1',
   role: Role.USER,
   createdAt: new Date('2026-01-01'),
+  lastLoginAt: new Date('2026-04-15T19:30:00Z'),
   bannedUntil: null,
   banReason: null,
   registrations: [
@@ -123,6 +127,13 @@ describe('getUsers', () => {
     mockUserFindMany.mockResolvedValue(MOCK_USERS)
 
     expect(await getUsers()).toEqual(MOCK_USERS)
+    expect(mockUserFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          lastLoginAt: true,
+        }),
+      }),
+    )
   })
 
   it('returns an empty array on database error', async () => {
@@ -140,7 +151,12 @@ describe('getUserById', () => {
 
     expect(await getUserById('user-1')).toEqual(MOCK_USER_DETAIL)
     expect(mockUserFindUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'user-1' } }),
+      expect.objectContaining({
+        where: { id: 'user-1' },
+        select: expect.objectContaining({
+          lastLoginAt: true,
+        }),
+      }),
     )
   })
 

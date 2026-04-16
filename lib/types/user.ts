@@ -23,6 +23,7 @@ export type UserRow = {
   discordId: string | null
   role: Role
   createdAt: Date
+  lastLoginAt: Date | null
   bannedUntil: Date | null
   banReason: string | null
   _count: { registrations: number }
@@ -50,6 +51,7 @@ export type UserDetail = {
   discordId: string | null
   role: Role
   createdAt: Date
+  lastLoginAt: Date | null
   bannedUntil: Date | null
   banReason: string | null
   registrations: UserRegistrationRow[]
