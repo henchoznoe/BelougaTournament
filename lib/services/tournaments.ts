@@ -30,6 +30,7 @@ import {
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
 import {
+  PaymentStatus,
   RegistrationStatus,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -640,8 +641,16 @@ export const getUserPastRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        status: RegistrationStatus.CONFIRMED,
-        tournament: { status: TournamentStatus.ARCHIVED },
+        OR: [
+          {
+            status: RegistrationStatus.CONFIRMED,
+            tournament: { status: TournamentStatus.ARCHIVED },
+          },
+          {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: PaymentStatus.REFUNDED,
+          },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,

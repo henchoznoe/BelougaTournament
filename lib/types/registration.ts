@@ -8,6 +8,8 @@
 
 import type {
   FieldType,
+  PaymentStatus,
+  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -16,6 +18,15 @@ import type {
 export type RegistrationRow = {
   id: string
   createdAt: Date
+  status: RegistrationStatus
+  paymentStatus: PaymentStatus
+  payment: {
+    id: string
+    amount: number
+    currency: string
+    paidAt: Date | null
+    refundedAt: Date | null
+  } | null
   fieldValues: Record<string, string | number>
   user: {
     id: string

@@ -76,6 +76,7 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
         twitchUsername={settings.twitchUsername ?? undefined}
         availableTeams={availableTeams}
         registrationState={isRegistered}
+        isAuthenticated={!!session?.user}
       />
     </>
   )

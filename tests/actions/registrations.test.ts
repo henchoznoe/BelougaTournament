@@ -7,7 +7,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  Role,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 vi.mock('server-only', () => ({}))
 
@@ -24,6 +28,15 @@ vi.mock('next/headers', () => ({
 
 vi.mock('@/lib/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}))
+
+const mockRefundCreate = vi.fn()
+vi.mock('@/lib/core/stripe', () => ({
+  getStripe: () => ({
+    refunds: {
+      create: (...args: unknown[]) => mockRefundCreate(...args),
+    },
+  }),
 }))
 
 vi.mock('next/cache', () => ({
@@ -45,6 +58,7 @@ const mockTxRegistrationDelete = vi.fn()
 const mockTxRegistrationUpdate = vi.fn()
 const mockTxTeamUpdate = vi.fn()
 const mockTxTeamDelete = vi.fn()
+const mockTxPaymentUpdate = vi.fn()
 
 const mockTx = {
   teamMember: {
@@ -60,6 +74,9 @@ const mockTx = {
     update: (...args: unknown[]) => mockTxTeamUpdate(...args),
     delete: (...args: unknown[]) => mockTxTeamDelete(...args),
   },
+  payment: {
+    update: (...args: unknown[]) => mockTxPaymentUpdate(...args),
+  },
 }
 
 const mockTransaction = vi.fn(
@@ -74,6 +91,9 @@ vi.mock('@/lib/core/prisma', () => ({
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       delete: (...args: unknown[]) => mockRegistrationDelete(...args),
       update: (...args: unknown[]) => mockRegistrationUpdate(...args),
+    },
+    payment: {
+      update: (...args: unknown[]) => mockTxPaymentUpdate(...args),
     },
     teamMember: {
       findFirst: (...args: unknown[]) => mockTeamMemberFindFirst(...args),
@@ -91,6 +111,7 @@ const {
   adminUpdateRegistrationFields,
   adminChangeTeam,
   adminPromoteCaptain,
+  adminRefundRegistration,
 } = await import('@/lib/actions/registrations')
 
 const REG_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
@@ -154,6 +175,9 @@ describe('registration admin actions', () => {
       userId: USER_UUID,
       tournament: { id: TOURN_UUID, format: TournamentFormat.SOLO },
       user: { name: 'Alice' },
+      paymentRequiredSnapshot: false,
+      paymentStatus: PaymentStatus.NOT_REQUIRED,
+      payments: [],
     })
     mockRegistrationDelete.mockResolvedValue({})
 
@@ -229,5 +253,33 @@ describe('registration admin actions', () => {
     expect(
       await adminPromoteCaptain({ teamId: TEAM_UUID, userId: MEMBER_UUID }),
     ).toEqual({ success: true, message: 'Le capitaine a été mis à jour.' })
+  })
+
+  it('refunds a paid registration for admins', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      id: REG_UUID,
+      userId: USER_UUID,
+      paymentRequiredSnapshot: true,
+      paymentStatus: PaymentStatus.PAID,
+      payments: [
+        {
+          id: 'payment-1',
+          status: PaymentStatus.PAID,
+          amount: 500,
+          stripePaymentIntentId: 'pi_123',
+          stripeChargeId: 'ch_123',
+        },
+      ],
+      tournament: { id: TOURN_UUID, format: TournamentFormat.SOLO },
+      user: { name: 'Alice' },
+    })
+
+    expect(await adminRefundRegistration({ registrationId: REG_UUID })).toEqual(
+      {
+        success: true,
+        message: "L'inscription de Alice a été remboursée.",
+      },
+    )
+    expect(mockRefundCreate).toHaveBeenCalledOnce()
   })
 })

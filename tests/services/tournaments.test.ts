@@ -1011,8 +1011,16 @@ describe('getUserPastRegistrations', () => {
     expect(mockRegistrationFindMany).toHaveBeenCalledWith({
       where: {
         userId: 'user-1',
-        status: 'CONFIRMED',
-        tournament: { status: 'ARCHIVED' },
+        OR: [
+          {
+            status: 'CONFIRMED',
+            tournament: { status: 'ARCHIVED' },
+          },
+          {
+            status: 'CANCELLED',
+            paymentStatus: 'REFUNDED',
+          },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,

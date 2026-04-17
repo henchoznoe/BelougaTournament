@@ -8,7 +8,16 @@
 
 'use client'
 
-import { Calendar, Gamepad2, Loader2, Pencil, Swords, X } from 'lucide-react'
+import {
+  BadgeCheck,
+  Calendar,
+  CreditCard,
+  Gamepad2,
+  Loader2,
+  Pencil,
+  Swords,
+  X,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -28,7 +37,11 @@ import { unregisterFromTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { formatDate } from '@/lib/utils/formatting'
-import { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  RegistrationStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 interface ProfileRegistrationsProps {
   registrations: UserRegistrationItem[]
@@ -67,54 +80,93 @@ export const ProfileRegistrations = ({
       {registrations.length > 0 ? (
         <div className="space-y-2">
           {registrations.map(registration => (
-            <div
-              key={registration.id}
-              className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-colors duration-200 hover:border-white/10 hover:bg-white/4"
-            >
-              <Link
-                href={`${ROUTES.TOURNAMENTS}/${registration.tournament.slug}`}
-                className="flex min-w-0 flex-1 flex-col gap-1"
-              >
-                <span className="truncate text-sm font-medium text-white">
-                  {registration.tournament.title}
-                </span>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                  {registration.tournament.game && (
+            <div key={registration.id} className="space-y-2">
+              <div className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-colors duration-200 hover:border-white/10 hover:bg-white/4">
+                <Link
+                  href={`${ROUTES.TOURNAMENTS}/${registration.tournament.slug}`}
+                  className="flex min-w-0 flex-1 flex-col gap-1"
+                >
+                  <span className="truncate text-sm font-medium text-white">
+                    {registration.tournament.title}
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                    {registration.tournament.game && (
+                      <span className="inline-flex items-center gap-1">
+                        <Gamepad2 className="size-3" />
+                        {registration.tournament.game}
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1">
-                      <Gamepad2 className="size-3" />
-                      {registration.tournament.game}
+                      <Swords className="size-3" />
+                      {registration.tournament.format === TournamentFormat.SOLO
+                        ? 'Solo'
+                        : 'Équipe'}
                     </span>
-                  )}
-                  <span className="inline-flex items-center gap-1">
-                    <Swords className="size-3" />
-                    {registration.tournament.format === TournamentFormat.SOLO
-                      ? 'Solo'
-                      : 'Équipe'}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Calendar className="size-3" />
-                    {formatDate(registration.tournament.startDate)}
-                  </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="size-3" />
+                      {formatDate(registration.tournament.startDate)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-zinc-400">
+                      <BadgeCheck className="size-3" />
+                      {registration.status === RegistrationStatus.CONFIRMED
+                        ? 'Inscription confirmée'
+                        : registration.status === RegistrationStatus.PENDING
+                          ? 'Inscription en attente'
+                          : registration.status === RegistrationStatus.CANCELLED
+                            ? 'Inscription annulée'
+                            : 'Inscription expirée'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-zinc-400">
+                      <CreditCard className="size-3" />
+                      {registration.paymentStatus === PaymentStatus.PAID
+                        ? 'Paiement validé'
+                        : registration.paymentStatus === PaymentStatus.REFUNDED
+                          ? 'Paiement remboursé'
+                          : registration.paymentStatus === PaymentStatus.PENDING
+                            ? 'Paiement en attente'
+                            : registration.paymentStatus ===
+                                PaymentStatus.FAILED
+                              ? 'Paiement échoué'
+                              : registration.paymentStatus ===
+                                  PaymentStatus.CANCELLED
+                                ? 'Paiement annulé'
+                                : 'Tournoi gratuit'}
+                    </span>
+                  </div>
+                </Link>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingRegistration(registration)}
+                    disabled={
+                      registration.status !== RegistrationStatus.CONFIRMED
+                    }
+                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
+                    aria-label="Modifier l'inscription"
+                  >
+                    <Pencil className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUnregisterTarget(registration)}
+                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                    aria-label="Se désinscrire"
+                  >
+                    <X className="size-3.5" />
+                  </button>
                 </div>
-              </Link>
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingRegistration(registration)}
-                  className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
-                  aria-label="Modifier l'inscription"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUnregisterTarget(registration)}
-                  className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  aria-label="Se désinscrire"
-                >
-                  <X className="size-3.5" />
-                </button>
               </div>
+              {registration.status === RegistrationStatus.PENDING && (
+                <p className="px-1 text-xs text-amber-300">
+                  Paiement Stripe en attente. Si vous venez de payer, le webhook
+                  n'a peut-être pas encore confirmé votre inscription.
+                </p>
+              )}
+              {registration.paymentStatus === PaymentStatus.REFUNDED && (
+                <p className="px-1 text-xs text-emerald-300">
+                  Cette inscription a été remboursée et n'est plus active.
+                </p>
+              )}
             </div>
           ))}
         </div>

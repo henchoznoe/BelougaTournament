@@ -6,7 +6,13 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Calendar, ChevronLeft, Gamepad2, Swords } from 'lucide-react'
+import {
+  Calendar,
+  ChevronLeft,
+  CreditCard,
+  Gamepad2,
+  Swords,
+} from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ROUTES } from '@/lib/config/routes'
@@ -14,7 +20,10 @@ import { getSession } from '@/lib/services/auth'
 import { getUserPastRegistrations } from '@/lib/services/tournaments'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { formatDate } from '@/lib/utils/formatting'
-import { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 /** Renders a single past registration row as a link to the tournament detail page. */
 const RegistrationRow = ({
@@ -50,9 +59,16 @@ const RegistrationRow = ({
           </span>
         </div>
       </div>
-      <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400">
-        Participé
-      </span>
+      {registration.paymentStatus === PaymentStatus.REFUNDED ? (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-blue-300">
+          <CreditCard className="size-3" />
+          Remboursé
+        </span>
+      ) : (
+        <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+          Participé
+        </span>
+      )}
     </Link>
   )
 }

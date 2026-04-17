@@ -47,6 +47,9 @@ const MOCK_RAW_REGISTRATIONS = [
   {
     id: 'reg-1',
     createdAt: new Date('2026-03-01'),
+    status: 'CONFIRMED',
+    paymentStatus: 'NOT_REQUIRED',
+    payments: [],
     fieldValues: { Pseudo: 'AliceIG' },
     user: {
       id: 'user-1',
@@ -69,6 +72,17 @@ const MOCK_RAW_REGISTRATIONS = [
   {
     id: 'reg-2',
     createdAt: new Date('2026-03-02'),
+    status: 'CONFIRMED',
+    paymentStatus: 'PAID',
+    payments: [
+      {
+        id: 'payment-1',
+        amount: 500,
+        currency: 'CHF',
+        paidAt: new Date('2026-03-02'),
+        refundedAt: null,
+      },
+    ],
     fieldValues: {},
     user: {
       id: 'user-2',
@@ -101,6 +115,9 @@ const MOCK_RAW_REGISTRATIONS = [
   {
     id: 'reg-3',
     createdAt: new Date('2026-03-03'),
+    status: 'PENDING',
+    paymentStatus: 'PENDING',
+    payments: [],
     fieldValues: {},
     user: {
       id: 'user-3',
@@ -149,6 +166,7 @@ describe('getAllRegistrations', () => {
     // SOLO registration — no team
     expect(result[0].team).toBeNull()
     expect(result[0].user.bannedUntil).toBeNull()
+    expect(result[0].payment).toBeNull()
     // teamMembers should be stripped from user
     expect(
       (result[0].user as Record<string, unknown>).teamMembers,
@@ -160,6 +178,13 @@ describe('getAllRegistrations', () => {
       name: 'Team Alpha',
       captainId: 'user-2',
       isFull: false,
+    })
+    expect(result[1].payment).toEqual({
+      id: 'payment-1',
+      amount: 500,
+      currency: 'CHF',
+      paidAt: new Date('2026-03-02'),
+      refundedAt: null,
     })
 
     // TEAM non-captain — team also resolved from TeamMember (not from FK)

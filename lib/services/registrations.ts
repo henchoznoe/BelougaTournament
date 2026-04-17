@@ -16,6 +16,7 @@ import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 /** Raw row shape returned by Prisma before post-processing. */
 type RawRegistrationRow = Omit<RegistrationRow, 'team' | 'user'> & {
+  payments: NonNullable<RegistrationRow['payment']>[]
   user: RegistrationRow['user'] & {
     teamMembers: {
       team: {
@@ -47,7 +48,20 @@ export const getAllRegistrations = async (): Promise<RegistrationRow[]> => {
       select: {
         id: true,
         createdAt: true,
+        status: true,
+        paymentStatus: true,
         fieldValues: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            amount: true,
+            currency: true,
+            paidAt: true,
+            refundedAt: true,
+          },
+        },
         user: {
           select: {
             id: true,
@@ -115,7 +129,7 @@ export const getAllRegistrations = async (): Promise<RegistrationRow[]> => {
       // Strip teamMembers from user (internal resolution only)
       const { teamMembers: _, ...user } = row.user
 
-      return { ...row, user, team }
+      return { ...row, user, team, payment: row.payments[0] ?? null }
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching all registrations')
@@ -137,7 +151,20 @@ export const getRegistrationById = async (
       select: {
         id: true,
         createdAt: true,
+        status: true,
+        paymentStatus: true,
         fieldValues: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            amount: true,
+            currency: true,
+            paidAt: true,
+            refundedAt: true,
+          },
+        },
         user: {
           select: {
             id: true,
@@ -205,7 +232,7 @@ export const getRegistrationById = async (
 
     const { teamMembers: _, ...user } = row.user
 
-    return { ...row, user, team }
+    return { ...row, user, team, payment: row.payments[0] ?? null }
   } catch (error) {
     logger.error({ error }, 'Error fetching registration by ID')
     return null

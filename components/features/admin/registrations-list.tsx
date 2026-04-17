@@ -9,9 +9,11 @@
 'use client'
 
 import {
+  BadgeCheck,
   Ban,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Search,
   Trophy,
   Users,
@@ -41,7 +43,11 @@ import { ROUTES } from '@/lib/config/routes'
 import type { RegistrationRow } from '@/lib/types/registration'
 import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
-import { TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  RegistrationStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
 
@@ -294,14 +300,43 @@ export const RegistrationsList = ({
 
                     {/* Team */}
                     <TableCell className="hidden sm:table-cell">
-                      {reg.team ? (
-                        <span className="inline-flex items-center gap-1 text-sm text-zinc-300">
-                          <Users className="size-3 text-zinc-500" />
-                          {reg.team.name}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-zinc-600">&mdash;</span>
-                      )}
+                      <div className="space-y-1">
+                        {reg.team ? (
+                          <span className="inline-flex items-center gap-1 text-sm text-zinc-300">
+                            <Users className="size-3 text-zinc-500" />
+                            {reg.team.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-600">&mdash;</span>
+                        )}
+                        <div className="flex flex-wrap gap-1 text-[11px]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-zinc-400">
+                            <BadgeCheck className="size-3" />
+                            {reg.status === RegistrationStatus.CONFIRMED
+                              ? 'Confirmée'
+                              : reg.status === RegistrationStatus.PENDING
+                                ? 'En attente'
+                                : reg.status === RegistrationStatus.CANCELLED
+                                  ? 'Annulée'
+                                  : 'Expirée'}
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-zinc-400">
+                            <CreditCard className="size-3" />
+                            {reg.paymentStatus === PaymentStatus.PAID
+                              ? 'Payé'
+                              : reg.paymentStatus === PaymentStatus.REFUNDED
+                                ? 'Remboursé'
+                                : reg.paymentStatus === PaymentStatus.PENDING
+                                  ? 'En attente'
+                                  : reg.paymentStatus === PaymentStatus.FAILED
+                                    ? 'Échoué'
+                                    : reg.paymentStatus ===
+                                        PaymentStatus.CANCELLED
+                                      ? 'Annulé'
+                                      : 'Gratuit'}
+                          </span>
+                        </div>
+                      </div>
                     </TableCell>
 
                     {/* Date */}

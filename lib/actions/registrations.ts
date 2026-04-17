@@ -12,15 +12,17 @@ import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
+import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import {
   changeTeamSchema,
   deleteRegistrationSchema,
   promoteCaptainSchema,
+  refundRegistrationSchema,
   updateRegistrationFieldsSchema,
 } from '@/lib/validations/registrations'
 import {
-  type PaymentStatus,
+  PaymentStatus,
   RegistrationStatus,
   Role,
   TournamentFormat,
@@ -32,6 +34,13 @@ type RegistrationWithDetails = {
   userId: string
   paymentRequiredSnapshot: boolean
   paymentStatus: PaymentStatus
+  payments: {
+    id: string
+    status: PaymentStatus
+    amount: number
+    stripePaymentIntentId: string | null
+    stripeChargeId: string | null
+  }[]
   tournament: { id: string; format: TournamentFormat }
   user: { name: string }
 }
@@ -59,6 +68,10 @@ export const adminDeleteRegistration = authenticatedAction({
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
       include: {
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
         tournament: { select: { id: true, format: true } },
         user: { select: { name: true } },
       },
@@ -237,6 +250,179 @@ export const adminUpdateRegistrationFields = authenticatedAction({
     return {
       success: true,
       message: `Les champs de ${registration.user.name} ont été mis à jour.`,
+    }
+  },
+})
+
+/** Refunds a paid registration manually and cancels the player's registration. */
+export const adminRefundRegistration = authenticatedAction({
+  schema: refundRegistrationSchema,
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
+    const registration = (await prisma.tournamentRegistration.findUnique({
+      where: { id: data.registrationId },
+      include: {
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        tournament: { select: { id: true, format: true } },
+        user: { select: { name: true } },
+      },
+    })) as RegistrationWithDetails | null
+
+    if (!registration) {
+      return { success: false, message: 'Inscription introuvable.' }
+    }
+
+    if (
+      !registration.paymentRequiredSnapshot ||
+      registration.paymentStatus !== PaymentStatus.PAID
+    ) {
+      return {
+        success: false,
+        message: 'Cette inscription ne peut pas être remboursée.',
+      }
+    }
+
+    const latestPayment = registration.payments[0]
+
+    if (!latestPayment) {
+      return {
+        success: false,
+        message: 'Aucun paiement Stripe associé à cette inscription.',
+      }
+    }
+
+    const stripe = getStripe()
+
+    await stripe.refunds.create(
+      latestPayment.stripePaymentIntentId
+        ? {
+            payment_intent: latestPayment.stripePaymentIntentId,
+            reason: 'requested_by_customer',
+          }
+        : {
+            charge: latestPayment.stripeChargeId ?? undefined,
+            reason: 'requested_by_customer',
+          },
+      {
+        idempotencyKey: `admin-refund-${registration.id}-${latestPayment.id}`,
+      },
+    )
+
+    if (registration.tournament.format === TournamentFormat.SOLO) {
+      await prisma.$transaction(async tx => {
+        await tx.payment.update({
+          where: { id: latestPayment.id },
+          data: {
+            status: PaymentStatus.REFUNDED,
+            refundAmount: latestPayment.amount,
+            refundedAt: new Date(),
+          },
+        })
+
+        await tx.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: PaymentStatus.REFUNDED,
+            cancelledAt: new Date(),
+            teamId: null,
+          },
+        })
+      })
+    } else {
+      const teamMember = (await prisma.teamMember.findFirst({
+        where: {
+          userId: registration.userId,
+          team: { tournamentId: registration.tournament.id },
+        },
+        include: {
+          team: {
+            include: {
+              tournament: { select: { teamSize: true } },
+              members: { orderBy: { joinedAt: 'asc' } },
+            },
+          },
+        },
+      })) as TeamMemberWithTeam | null
+
+      if (!teamMember) {
+        await prisma.$transaction(async tx => {
+          await tx.payment.update({
+            where: { id: latestPayment.id },
+            data: {
+              status: PaymentStatus.REFUNDED,
+              refundAmount: latestPayment.amount,
+              refundedAt: new Date(),
+            },
+          })
+
+          await tx.tournamentRegistration.update({
+            where: { id: registration.id },
+            data: {
+              status: RegistrationStatus.CANCELLED,
+              paymentStatus: PaymentStatus.REFUNDED,
+              cancelledAt: new Date(),
+              teamId: null,
+            },
+          })
+        })
+      } else {
+        const team = teamMember.team
+        const isCaptain = team.captainId === registration.userId
+        const otherMembers = team.members.filter(
+          member => member.userId !== registration.userId,
+        )
+
+        await prisma.$transaction(async tx => {
+          await tx.teamMember.deleteMany({
+            where: { teamId: team.id, userId: registration.userId },
+          })
+
+          await tx.payment.update({
+            where: { id: latestPayment.id },
+            data: {
+              status: PaymentStatus.REFUNDED,
+              refundAmount: latestPayment.amount,
+              refundedAt: new Date(),
+            },
+          })
+
+          await tx.tournamentRegistration.update({
+            where: { id: registration.id },
+            data: {
+              status: RegistrationStatus.CANCELLED,
+              paymentStatus: PaymentStatus.REFUNDED,
+              cancelledAt: new Date(),
+              teamId: null,
+            },
+          })
+
+          if (isCaptain && otherMembers.length > 0) {
+            await tx.team.update({
+              where: { id: team.id },
+              data: { captainId: otherMembers[0].userId },
+            })
+            await syncTeamFullState(tx, team.id, team.tournament.teamSize)
+          } else if (otherMembers.length === 0) {
+            await tx.team.delete({ where: { id: team.id } })
+          } else {
+            await syncTeamFullState(tx, team.id, team.tournament.teamSize)
+          }
+        })
+      }
+    }
+
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+
+    return {
+      success: true,
+      message: `L'inscription de ${registration.user.name} a été remboursée.`,
     }
   },
 })

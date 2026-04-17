@@ -66,6 +66,7 @@ interface TournamentRegistrationFormProps {
   teamSize: number
   availableTeams: AvailableTeam[]
   registrationState: UserTournamentRegistrationState | null
+  isAuthenticated: boolean
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -93,6 +94,7 @@ export const TournamentRegistrationForm = ({
   teamSize,
   availableTeams,
   registrationState,
+  isAuthenticated,
 }: TournamentRegistrationFormProps) => {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
@@ -177,8 +179,9 @@ export const TournamentRegistrationForm = ({
     })
   }
 
-  // Loading state while session is being fetched
-  if (isSessionPending) {
+  // Loading state: only show spinner when the client session is still pending
+  // AND the server didn't already resolve the auth state (prevents hydration mismatch)
+  if (isSessionPending && !isAuthenticated) {
     return (
       <div className="flex items-center justify-center py-6">
         <Loader2 className="size-5 animate-spin text-zinc-500" />
@@ -187,7 +190,7 @@ export const TournamentRegistrationForm = ({
   }
 
   // Not authenticated: show login CTA
-  if (!session?.user) {
+  if (!session?.user && !isAuthenticated) {
     return (
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <p className="text-sm text-zinc-400">
@@ -246,7 +249,7 @@ export const TournamentRegistrationForm = ({
             Inscription payante: {entryFeeLabel}
           </p>
           <p className="mt-1 text-xs text-zinc-400">
-            Votre place est réservée pendant 15 minutes au moment de la
+            Votre place est réservée pendant 30 minutes au moment de la
             redirection vers Stripe.
           </p>
         </div>

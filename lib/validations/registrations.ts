@@ -30,3 +30,8 @@ export const promoteCaptainSchema = z.object({
   teamId: z.uuid('ID equipe invalide.'),
   userId: z.uuid('ID utilisateur invalide.'),
 })
+
+/** Schema for admin-refunding a registration manually. */
+export const refundRegistrationSchema = z.object({
+  registrationId: z.uuid('ID inscription invalide.'),
+})

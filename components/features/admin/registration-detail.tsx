@@ -9,9 +9,11 @@
 'use client'
 
 import {
+  BadgeCheck,
   Ban,
   Calendar,
   Check,
+  CreditCard,
   Crown,
   ExternalLink,
   Loader2,
@@ -40,6 +42,7 @@ import {
   adminChangeTeam,
   adminDeleteRegistration,
   adminPromoteCaptain,
+  adminRefundRegistration,
   adminUpdateRegistrationFields,
 } from '@/lib/actions/registrations'
 import { ROUTES } from '@/lib/config/routes'
@@ -48,6 +51,8 @@ import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
 import {
   FieldType,
+  PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
@@ -84,6 +89,29 @@ export const RegistrationDetail = ({
   const isTeam = registration.tournament.format === TournamentFormat.TEAM
   const banned = isBanned(registration.user.bannedUntil)
   const isCaptain = registration.team?.captainId === registration.user.id
+  const canRefund = registration.paymentStatus === PaymentStatus.PAID
+
+  const registrationStatusLabel =
+    registration.status === RegistrationStatus.CONFIRMED
+      ? 'Confirmée'
+      : registration.status === RegistrationStatus.PENDING
+        ? 'En attente'
+        : registration.status === RegistrationStatus.CANCELLED
+          ? 'Annulée'
+          : 'Expirée'
+
+  const paymentStatusLabel =
+    registration.paymentStatus === PaymentStatus.PAID
+      ? 'Payé'
+      : registration.paymentStatus === PaymentStatus.REFUNDED
+        ? 'Remboursé'
+        : registration.paymentStatus === PaymentStatus.PENDING
+          ? 'Paiement en attente'
+          : registration.paymentStatus === PaymentStatus.FAILED
+            ? 'Paiement échoué'
+            : registration.paymentStatus === PaymentStatus.CANCELLED
+              ? 'Paiement annulé'
+              : 'Gratuit'
 
   const fieldEntries = registration.tournament.fields
     .map(f => ({
@@ -176,6 +204,21 @@ export const RegistrationDetail = ({
     })
   }
 
+  const handleRefund = () => {
+    startTransition(async () => {
+      const result = await adminRefundRegistration({
+        registrationId: registration.id,
+      })
+
+      if (result.success) {
+        toast.success(result.message)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header card */}
@@ -249,6 +292,14 @@ export const RegistrationDetail = ({
           <div className="flex items-center gap-2 text-zinc-400">
             <Trophy className="size-3 shrink-0 text-zinc-600" />
             <span>{isTeam ? 'Equipe' : 'Solo'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-zinc-400">
+            <BadgeCheck className="size-3 shrink-0 text-zinc-600" />
+            <span>Inscription: {registrationStatusLabel}</span>
+          </div>
+          <div className="flex items-center gap-2 text-zinc-400">
+            <CreditCard className="size-3 shrink-0 text-zinc-600" />
+            <span>Paiement: {paymentStatusLabel}</span>
           </div>
           {registration.team && (
             <div className="flex items-center gap-2 text-zinc-400">
@@ -510,15 +561,33 @@ export const RegistrationDetail = ({
               </div>
             </div>
           ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setConfirmDelete(true)}
-              className="gap-2 text-red-400 hover:text-red-300"
-            >
-              <Trash2 className="size-4" />
-              Supprimer l'inscription
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {canRefund && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleRefund}
+                  disabled={isPending}
+                  className="gap-2 text-emerald-400 hover:text-emerald-300"
+                >
+                  {isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="size-4" />
+                  )}
+                  Rembourser et annuler
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setConfirmDelete(true)}
+                className="gap-2 text-red-400 hover:text-red-300"
+              >
+                <Trash2 className="size-4" />
+                Supprimer l'inscription
+              </Button>
+            </div>
           )}
         </div>
       )}

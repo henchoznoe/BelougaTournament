@@ -319,6 +319,15 @@ export const POST = async (request: Request) => {
       signature,
       getStripeWebhookSecret(),
     )
+
+    logger.info(
+      {
+        eventId: event.id,
+        type: event.type,
+        livemode: event.livemode,
+      },
+      'Stripe webhook received',
+    )
   } catch (error) {
     logger.error({ error }, 'Invalid Stripe webhook signature')
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 400 })
@@ -330,6 +339,7 @@ export const POST = async (request: Request) => {
   })
 
   if (alreadyProcessed) {
+    logger.info({ eventId: event.id }, 'Stripe webhook already processed')
     return NextResponse.json({ received: true, duplicate: true })
   }
 
