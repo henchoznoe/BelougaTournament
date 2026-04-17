@@ -10,6 +10,8 @@ import { z } from 'zod'
 import { optionalUrl } from '@/lib/validations/shared'
 import {
   FieldType,
+  RefundPolicyType,
+  RegistrationType,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -105,6 +107,28 @@ const baseTournamentFields = {
     .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
     .optional()
     .default(''),
+  registrationType: z.enum([RegistrationType.FREE, RegistrationType.PAID], {
+    message: 'Le type d’inscription doit être FREE ou PAID.',
+  }),
+  entryFeeAmount: z
+    .number()
+    .int()
+    .min(100, "Le prix d'entrée doit être d'au moins 1 CHF.")
+    .max(100000, "Le prix d'entrée ne peut pas dépasser 1000 CHF.")
+    .nullable(),
+  entryFeeCurrency: z.literal('CHF'),
+  refundPolicyType: z.enum(
+    [RefundPolicyType.NONE, RefundPolicyType.BEFORE_DEADLINE],
+    {
+      message: 'La politique de remboursement est invalide.',
+    },
+  ),
+  refundDeadlineDays: z
+    .number()
+    .int()
+    .min(1, 'Le délai de remboursement doit être d’au moins 1 jour.')
+    .max(90, 'Le délai de remboursement ne peut pas dépasser 90 jours.')
+    .nullable(),
   toornamentId: z
     .string()
     .trim()
@@ -137,6 +161,39 @@ export const tournamentSchema = z
       message:
         'La fermeture des inscriptions doit être avant ou égale à la date de début.',
       path: ['registrationClose'],
+    },
+  )
+  .refine(
+    data =>
+      data.registrationType === RegistrationType.FREE
+        ? data.entryFeeAmount === null
+        : data.entryFeeAmount !== null,
+    {
+      message: 'Le prix est requis pour un tournoi payant.',
+      path: ['entryFeeAmount'],
+    },
+  )
+  .refine(
+    data =>
+      data.registrationType === RegistrationType.FREE
+        ? data.refundPolicyType === RefundPolicyType.NONE &&
+          data.refundDeadlineDays === null
+        : true,
+    {
+      message:
+        'Les tournois gratuits ne peuvent pas définir de remboursement automatique.',
+      path: ['refundPolicyType'],
+    },
+  )
+  .refine(
+    data =>
+      data.refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
+        ? data.refundDeadlineDays !== null
+        : data.refundDeadlineDays === null,
+    {
+      message:
+        'Le délai de remboursement est requis uniquement pour une politique avec délai.',
+      path: ['refundDeadlineDays'],
     },
   )
   .refine(
@@ -182,6 +239,39 @@ export const updateTournamentSchema = z
       message:
         'La fermeture des inscriptions doit être avant ou égale à la date de début.',
       path: ['registrationClose'],
+    },
+  )
+  .refine(
+    data =>
+      data.registrationType === RegistrationType.FREE
+        ? data.entryFeeAmount === null
+        : data.entryFeeAmount !== null,
+    {
+      message: 'Le prix est requis pour un tournoi payant.',
+      path: ['entryFeeAmount'],
+    },
+  )
+  .refine(
+    data =>
+      data.registrationType === RegistrationType.FREE
+        ? data.refundPolicyType === RefundPolicyType.NONE &&
+          data.refundDeadlineDays === null
+        : true,
+    {
+      message:
+        'Les tournois gratuits ne peuvent pas définir de remboursement automatique.',
+      path: ['refundPolicyType'],
+    },
+  )
+  .refine(
+    data =>
+      data.refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
+        ? data.refundDeadlineDays !== null
+        : data.refundDeadlineDays === null,
+    {
+      message:
+        'Le délai de remboursement est requis uniquement pour une politique avec délai.',
+      path: ['refundDeadlineDays'],
     },
   )
   .refine(

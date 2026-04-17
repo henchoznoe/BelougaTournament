@@ -40,9 +40,9 @@ const mockTeamFindUnique = vi.fn()
 
 const mockTxTeamMemberDeleteMany = vi.fn()
 const mockTxTeamMemberCreate = vi.fn()
+const mockTxTeamMemberCount = vi.fn()
 const mockTxRegistrationDelete = vi.fn()
 const mockTxRegistrationUpdate = vi.fn()
-const mockTxRegistrationUpdateMany = vi.fn()
 const mockTxTeamUpdate = vi.fn()
 const mockTxTeamDelete = vi.fn()
 
@@ -50,11 +50,11 @@ const mockTx = {
   teamMember: {
     deleteMany: (...args: unknown[]) => mockTxTeamMemberDeleteMany(...args),
     create: (...args: unknown[]) => mockTxTeamMemberCreate(...args),
+    count: (...args: unknown[]) => mockTxTeamMemberCount(...args),
   },
   tournamentRegistration: {
     delete: (...args: unknown[]) => mockTxRegistrationDelete(...args),
     update: (...args: unknown[]) => mockTxRegistrationUpdate(...args),
-    updateMany: (...args: unknown[]) => mockTxRegistrationUpdateMany(...args),
   },
   team: {
     update: (...args: unknown[]) => mockTxTeamUpdate(...args),
@@ -80,6 +80,7 @@ vi.mock('@/lib/core/prisma', () => ({
     },
     team: {
       findUnique: (...args: unknown[]) => mockTeamFindUnique(...args),
+      update: (...args: unknown[]) => mockTxTeamUpdate(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...(args as [never])),
   },
@@ -133,6 +134,7 @@ describe('registration admin actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockTxTeamMemberCount.mockResolvedValue(1)
   })
 
   it('rejects non-admin users for adminDeleteRegistration', async () => {
@@ -193,12 +195,14 @@ describe('registration admin actions', () => {
       id: TARGET_TEAM_UUID,
       name: 'Team Beta',
       tournamentId: TOURN_UUID,
-      isFull: false,
+      tournament: { teamSize: 2 },
+      _count: { members: 1 },
     })
     mockTeamMemberFindFirst.mockResolvedValue({
       team: {
         id: TEAM_UUID,
         captainId: USER_UUID,
+        tournament: { teamSize: 2 },
         members: [{ userId: USER_UUID }, { userId: MEMBER_UUID }],
       },
     })

@@ -61,6 +61,8 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TournamentRegistration: 'TournamentRegistration',
+  Payment: 'Payment',
+  StripeWebhookEvent: 'StripeWebhookEvent',
   GlobalSettings: 'GlobalSettings',
   Sponsor: 'Sponsor'
 } as const
@@ -160,6 +162,11 @@ export const TournamentScalarFieldEnum = {
   imageUrl: 'imageUrl',
   rules: 'rules',
   prize: 'prize',
+  registrationType: 'registrationType',
+  entryFeeAmount: 'entryFeeAmount',
+  entryFeeCurrency: 'entryFeeCurrency',
+  refundPolicyType: 'refundPolicyType',
+  refundDeadlineDays: 'refundDeadlineDays',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
   status: 'status',
@@ -221,10 +228,52 @@ export const TournamentRegistrationScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   fieldValues: 'fieldValues',
+  status: 'status',
+  paymentStatus: 'paymentStatus',
+  paymentRequiredSnapshot: 'paymentRequiredSnapshot',
+  entryFeeAmountSnapshot: 'entryFeeAmountSnapshot',
+  entryFeeCurrencySnapshot: 'entryFeeCurrencySnapshot',
+  refundDeadlineDaysSnapshot: 'refundDeadlineDaysSnapshot',
+  confirmedAt: 'confirmedAt',
+  cancelledAt: 'cancelledAt',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const
 
 export type TournamentRegistrationScalarFieldEnum = (typeof TournamentRegistrationScalarFieldEnum)[keyof typeof TournamentRegistrationScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  registrationId: 'registrationId',
+  provider: 'provider',
+  status: 'status',
+  amount: 'amount',
+  currency: 'currency',
+  stripeCheckoutSessionId: 'stripeCheckoutSessionId',
+  stripePaymentIntentId: 'stripePaymentIntentId',
+  stripeChargeId: 'stripeChargeId',
+  stripeCustomerId: 'stripeCustomerId',
+  refundAmount: 'refundAmount',
+  paidAt: 'paidAt',
+  refundedAt: 'refundedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const StripeWebhookEventScalarFieldEnum = {
+  id: 'id',
+  stripeEventId: 'stripeEventId',
+  type: 'type',
+  payload: 'payload',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type StripeWebhookEventScalarFieldEnum = (typeof StripeWebhookEventScalarFieldEnum)[keyof typeof StripeWebhookEventScalarFieldEnum]
 
 
 export const GlobalSettingsScalarFieldEnum = {
@@ -273,6 +322,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {

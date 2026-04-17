@@ -10,6 +10,10 @@ import { z } from 'zod'
 
 const clientSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL must be a valid URL'),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z
+    .string()
+    .min(1, 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
+    .optional(),
 })
 
 const serverSchema = z.object({
@@ -33,6 +37,16 @@ const serverSchema = z.object({
   // Storage
   BLOB_READ_WRITE_TOKEN: z.string().min(1, 'BLOB_READ_WRITE_TOKEN is required'),
 
+  // Stripe
+  STRIPE_SECRET_KEY: z
+    .string()
+    .min(1, 'STRIPE_SECRET_KEY is required')
+    .optional(),
+  STRIPE_WEBHOOK_SECRET: z
+    .string()
+    .min(1, 'STRIPE_WEBHOOK_SECRET is required')
+    .optional(),
+
   // Platform owners (comma-separated emails)
   OWNER_EMAILS: z
     .string()
@@ -49,6 +63,8 @@ const isServer = typeof window === 'undefined'
 // Parse client-side
 const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 })
 
 // Parse server-side

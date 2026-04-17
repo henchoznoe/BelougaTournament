@@ -71,6 +71,9 @@ const MOCK_LIST_ITEM = {
   format: 'TEAM',
   teamSize: 5,
   maxTeams: 16,
+  registrationType: 'FREE',
+  entryFeeAmount: null,
+  entryFeeCurrency: null,
   status: 'PUBLISHED',
   startDate: new Date('2026-06-15T10:00:00.000Z'),
   endDate: new Date('2026-06-17T18:00:00.000Z'),
@@ -85,6 +88,8 @@ const MOCK_DETAIL = {
   imageUrl: null,
   rules: 'Double élimination.',
   prize: '500 CHF',
+  refundPolicyType: 'NONE',
+  refundDeadlineDays: null,
   toornamentId: null,
   streamUrl: null,
   createdAt: new Date('2026-04-01T00:00:00.000Z'),
@@ -125,6 +130,9 @@ describe('getTournaments', () => {
         format: true,
         teamSize: true,
         maxTeams: true,
+        registrationType: true,
+        entryFeeAmount: true,
+        entryFeeCurrency: true,
         status: true,
         startDate: true,
         endDate: true,
@@ -267,6 +275,8 @@ const MOCK_REGISTRATION = {
   id: 'reg-1',
   fieldValues: { 'Riot ID': 'Player#1234' },
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  status: 'CONFIRMED',
+  paymentStatus: 'NOT_REQUIRED',
   user: {
     id: 'user-1',
     name: 'player1',
@@ -287,6 +297,8 @@ const MOCK_RAW_REGISTRATION = {
   id: 'reg-1',
   fieldValues: { 'Riot ID': 'Player#1234' },
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  status: 'CONFIRMED',
+  paymentStatus: 'NOT_REQUIRED',
   user: {
     id: 'user-1',
     name: 'player1',
@@ -333,9 +345,6 @@ const MOCK_TEAM = {
       },
     },
   ],
-  registration: {
-    id: 'reg-1',
-  },
 }
 
 // ---------------------------------------------------------------------------
@@ -360,6 +369,8 @@ describe('getRegistrations', () => {
         id: true,
         fieldValues: true,
         createdAt: true,
+        status: true,
+        paymentStatus: true,
         user: {
           select: {
             id: true,
@@ -453,11 +464,6 @@ describe('getTeams', () => {
                 image: true,
               },
             },
-          },
-        },
-        registration: {
-          select: {
-            id: true,
           },
         },
       },
@@ -558,6 +564,9 @@ const MOCK_PUBLIC_LIST_ITEM = {
   format: 'TEAM',
   teamSize: 5,
   maxTeams: 16,
+  registrationType: 'FREE',
+  entryFeeAmount: null,
+  entryFeeCurrency: null,
   status: 'PUBLISHED',
   startDate: new Date('2026-06-15T10:00:00.000Z'),
   endDate: new Date('2026-06-17T18:00:00.000Z'),
@@ -570,6 +579,8 @@ const MOCK_PUBLIC_DETAIL = {
   ...MOCK_PUBLIC_LIST_ITEM,
   rules: 'Double élimination.',
   prize: '500 CHF',
+  refundPolicyType: 'NONE',
+  refundDeadlineDays: null,
   toornamentId: null,
   streamUrl: null,
   fields: [
@@ -714,6 +725,9 @@ describe('getPublishedTournaments', () => {
         format: true,
         teamSize: true,
         maxTeams: true,
+        registrationType: true,
+        entryFeeAmount: true,
+        entryFeeCurrency: true,
         status: true,
         startDate: true,
         endDate: true,
@@ -775,6 +789,9 @@ describe('getArchivedTournaments', () => {
         format: true,
         teamSize: true,
         maxTeams: true,
+        registrationType: true,
+        entryFeeAmount: true,
+        entryFeeCurrency: true,
         status: true,
         startDate: true,
         endDate: true,
@@ -867,27 +884,37 @@ describe('getPublicTournamentBySlug', () => {
 
 const MOCK_USER_REGISTRATION = {
   id: 'reg-user-1',
+  fieldValues: {},
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
+  status: 'CONFIRMED',
+  paymentStatus: 'NOT_REQUIRED',
   tournament: {
+    id: 'uuid-1',
     title: 'Valorant Cup',
     slug: 'valorant-cup',
     game: 'Valorant',
     format: 'TEAM',
     startDate: new Date('2026-06-15T10:00:00.000Z'),
     status: 'PUBLISHED',
+    fields: [],
   },
 }
 
 const MOCK_USER_PAST_REGISTRATION = {
   id: 'reg-user-2',
+  fieldValues: {},
   createdAt: new Date('2025-11-10T10:00:00.000Z'),
+  status: 'CONFIRMED',
+  paymentStatus: 'NOT_REQUIRED',
   tournament: {
+    id: 'uuid-2',
     title: 'CS2 Winter Cup',
     slug: 'cs2-winter-cup',
     game: 'CS2',
     format: 'TEAM',
     startDate: new Date('2025-12-01T10:00:00.000Z'),
     status: 'ARCHIVED',
+    fields: [],
   },
 }
 
@@ -895,6 +922,8 @@ const USER_REGISTRATION_SELECT = {
   id: true,
   fieldValues: true,
   createdAt: true,
+  status: true,
+  paymentStatus: true,
   tournament: {
     select: {
       id: true,

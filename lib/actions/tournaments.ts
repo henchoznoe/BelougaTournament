@@ -30,6 +30,10 @@ import {
 } from '@/lib/validations/tournaments'
 import {
   FieldType,
+  PaymentStatus,
+  RefundPolicyType,
+  RegistrationStatus,
+  RegistrationType,
   Role,
   TournamentFormat,
   TournamentStatus,
@@ -43,6 +47,11 @@ import {
 type TournamentWithFieldsAndCount = {
   id: string
   format: TournamentFormat
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
   status: TournamentStatus
   fields: { label: string; type: FieldType; required: boolean; order: number }[]
   _count: { registrations: number }
@@ -57,6 +66,11 @@ type TournamentWithFields = {
   registrationClose: Date
   maxTeams: number | null
   teamSize: number
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
   fields: { label: string; type: FieldType; required: boolean; order: number }[]
 }
 
@@ -71,14 +85,21 @@ type RegistrationWithTournament = {
 /** Registration with minimal tournament info. Used by unregisterFromTournament. */
 type RegistrationWithTournamentInfo = {
   id: string
-  tournament: { status: TournamentStatus; format: TournamentFormat }
+  paymentStatus: PaymentStatus
+  status: RegistrationStatus
+  tournament: {
+    status: TournamentStatus
+    format: TournamentFormat
+    startDate: Date
+    refundPolicyType: RefundPolicyType
+    refundDeadlineDays: number | null
+  }
 }
 
 /** Team with a member count. Used by joinTeamAndRegister. */
 type TeamWithMemberCount = {
   id: string
   tournamentId: string
-  isFull: boolean
   _count: { members: number }
 }
 
@@ -87,6 +108,7 @@ type TeamWithMembers = {
   id: string
   tournamentId: string
   captainId: string
+  tournament: { teamSize: number }
   members: { userId: string }[]
 }
 
@@ -137,6 +159,41 @@ const validateFieldValues = (
     }
   }
   return { valid: true }
+}
+
+/** Returns true when a player is still eligible for an automatic refund. */
+const isRefundEligible = (
+  startDate: Date,
+  refundPolicyType: RefundPolicyType,
+  refundDeadlineDays: number | null,
+  now: Date,
+) => {
+  if (refundPolicyType !== RefundPolicyType.BEFORE_DEADLINE) {
+    return false
+  }
+
+  if (refundDeadlineDays === null) {
+    return false
+  }
+
+  return (
+    startDate.getTime() - now.getTime() >=
+    refundDeadlineDays * 24 * 60 * 60 * 1000
+  )
+}
+
+/** Recomputes the `isFull` flag for a team after a membership mutation. */
+const syncTeamFullState = async (
+  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
+  teamId: string,
+  teamSize: number,
+) => {
+  const memberCount = await tx.teamMember.count({ where: { teamId } })
+
+  await tx.team.update({
+    where: { id: teamId },
+    data: { isFull: memberCount >= teamSize },
+  })
 }
 
 /**
@@ -211,6 +268,20 @@ export const createTournament = authenticatedAction({
         registrationOpen: new Date(data.registrationOpen),
         registrationClose: new Date(data.registrationClose),
         maxTeams: data.maxTeams,
+        registrationType: data.registrationType,
+        entryFeeAmount: data.entryFeeAmount,
+        entryFeeCurrency:
+          data.registrationType === RegistrationType.PAID
+            ? data.entryFeeCurrency
+            : null,
+        refundPolicyType:
+          data.registrationType === RegistrationType.PAID
+            ? data.refundPolicyType
+            : RefundPolicyType.NONE,
+        refundDeadlineDays:
+          data.registrationType === RegistrationType.PAID
+            ? data.refundDeadlineDays
+            : null,
         format: data.format,
         teamSize: data.teamSize,
         game: toNullable(data.game),
@@ -275,6 +346,37 @@ export const updateTournament = authenticatedAction({
       }
     }
 
+    if (data.registrationType !== existing.registrationType) {
+      return {
+        success: false,
+        message:
+          'Le mode d’inscription ne peut pas être modifié après la création.',
+      }
+    }
+
+    if (data.entryFeeAmount !== existing.entryFeeAmount) {
+      return {
+        success: false,
+        message: 'Le prix d’entrée ne peut pas être modifié après la création.',
+      }
+    }
+
+    if (data.refundPolicyType !== existing.refundPolicyType) {
+      return {
+        success: false,
+        message:
+          'La politique de remboursement ne peut pas être modifiée après la création.',
+      }
+    }
+
+    if (data.refundDeadlineDays !== existing.refundDeadlineDays) {
+      return {
+        success: false,
+        message:
+          'Le délai de remboursement ne peut pas être modifié après la création.',
+      }
+    }
+
     // Dynamic fields are locked when tournament is PUBLISHED with registrations
     if (
       existing.status === TournamentStatus.PUBLISHED &&
@@ -322,6 +424,20 @@ export const updateTournament = authenticatedAction({
           registrationOpen: new Date(data.registrationOpen),
           registrationClose: new Date(data.registrationClose),
           maxTeams: data.maxTeams,
+          registrationType: data.registrationType,
+          entryFeeAmount: data.entryFeeAmount,
+          entryFeeCurrency:
+            data.registrationType === RegistrationType.PAID
+              ? data.entryFeeCurrency
+              : null,
+          refundPolicyType:
+            data.registrationType === RegistrationType.PAID
+              ? data.refundPolicyType
+              : RefundPolicyType.NONE,
+          refundDeadlineDays:
+            data.registrationType === RegistrationType.PAID
+              ? data.refundDeadlineDays
+              : null,
           format: data.format,
           teamSize: data.teamSize,
           game: toNullable(data.game),
@@ -446,6 +562,14 @@ export const updateRegistrationFields = authenticatedAction({
       }
     }
 
+    if (new Date() > registration.tournament.registrationClose) {
+      return {
+        success: false,
+        message:
+          'Les inscriptions sont fermées. Vous ne pouvez plus modifier vos informations.',
+      }
+    }
+
     // 3. Validate dynamic field values
     const tournament: TournamentWithFields = registration.tournament
     const fieldValidation = validateFieldValues(
@@ -518,6 +642,10 @@ export const registerForTournament = authenticatedAction({
         tournamentId: data.tournamentId,
         userId: session.user.id,
         fieldValues: data.fieldValues,
+        status: RegistrationStatus.CONFIRMED,
+        paymentStatus: PaymentStatus.NOT_REQUIRED,
+        paymentRequiredSnapshot: false,
+        confirmedAt: new Date(),
       },
     })
 
@@ -582,7 +710,7 @@ export const createTeamAndRegister = authenticatedAction({
           name: data.teamName,
           captainId: session.user.id,
           tournamentId: data.tournamentId,
-          isFull: tournament.teamSize <= 1,
+          isFull: false,
         },
       })
 
@@ -599,8 +727,14 @@ export const createTeamAndRegister = authenticatedAction({
           userId: session.user.id,
           fieldValues: data.fieldValues,
           teamId: team.id,
+          status: RegistrationStatus.CONFIRMED,
+          paymentStatus: PaymentStatus.NOT_REQUIRED,
+          paymentRequiredSnapshot: false,
+          confirmedAt: new Date(),
         },
       })
+
+      await syncTeamFullState(tx, team.id, tournament.teamSize)
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
@@ -646,8 +780,8 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: '\u00c9quipe introuvable.' }
     }
 
-    if (team.isFull) {
-      return { success: false, message: 'Cette \u00e9quipe est compl\u00e8te.' }
+    if (team._count.members >= tournament.teamSize) {
+      return { success: false, message: 'Cette équipe est complète.' }
     }
 
     // 4. Validate dynamic field values
@@ -656,7 +790,7 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: validation.message }
     }
 
-    // 5. Create member + registration, conditionally mark team as full
+    // 5. Create member + registration and recompute team fullness in-transaction
     await prisma.$transaction(async tx => {
       await tx.teamMember.create({
         data: {
@@ -665,22 +799,20 @@ export const joinTeamAndRegister = authenticatedAction({
         },
       })
 
-      // Mark team as full if member count reaches teamSize
-      const newMemberCount = team._count.members + 1
-      if (newMemberCount >= tournament.teamSize) {
-        await tx.team.update({
-          where: { id: data.teamId },
-          data: { isFull: true },
-        })
-      }
-
       await tx.tournamentRegistration.create({
         data: {
           tournamentId: data.tournamentId,
           userId: session.user.id,
           fieldValues: data.fieldValues,
+          teamId: data.teamId,
+          status: RegistrationStatus.CONFIRMED,
+          paymentStatus: PaymentStatus.NOT_REQUIRED,
+          paymentRequiredSnapshot: false,
+          confirmedAt: new Date(),
         },
       })
+
+      await syncTeamFullState(tx, data.teamId, tournament.teamSize)
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
@@ -719,7 +851,15 @@ export const unregisterFromTournament = authenticatedAction({
         },
       },
       include: {
-        tournament: { select: { status: true, format: true } },
+        tournament: {
+          select: {
+            status: true,
+            format: true,
+            startDate: true,
+            refundPolicyType: true,
+            refundDeadlineDays: true,
+          },
+        },
       },
     })) as RegistrationWithTournamentInfo | null
 
@@ -730,7 +870,15 @@ export const unregisterFromTournament = authenticatedAction({
     if (registration.tournament.status !== TournamentStatus.PUBLISHED) {
       return {
         success: false,
-        message: 'Ce tournoi ne permet plus de d\u00e9sinscription.',
+        message: 'Ce tournoi ne permet plus de désinscription.',
+      }
+    }
+
+    if (new Date() >= registration.tournament.startDate) {
+      return {
+        success: false,
+        message:
+          'Le tournoi a déjà commencé. La désinscription est indisponible.',
       }
     }
 
@@ -756,7 +904,10 @@ export const unregisterFromTournament = authenticatedAction({
       where: { userId, team: { tournamentId: data.tournamentId } },
       include: {
         team: {
-          include: { members: { orderBy: { joinedAt: 'asc' } } },
+          include: {
+            tournament: { select: { teamSize: true } },
+            members: { orderBy: { joinedAt: 'asc' } },
+          },
         },
       },
     })) as TeamMemberWithTeam | null
@@ -781,6 +932,14 @@ export const unregisterFromTournament = authenticatedAction({
     const team = teamMember.team
     const isCaptain = team.captainId === userId
     const otherMembers = team.members.filter(m => m.userId !== userId)
+    const refundEligible =
+      registration.paymentStatus === PaymentStatus.PAID &&
+      isRefundEligible(
+        registration.tournament.startDate,
+        registration.tournament.refundPolicyType,
+        registration.tournament.refundDeadlineDays,
+        new Date(),
+      )
 
     await prisma.$transaction(async tx => {
       // a. Remove team member record
@@ -797,27 +956,17 @@ export const unregisterFromTournament = authenticatedAction({
         // c. Promote next member to captain
         const newCaptain = otherMembers[0]
 
-        await tx.tournamentRegistration.updateMany({
-          where: {
-            tournamentId: data.tournamentId,
-            userId: newCaptain.userId,
-          },
-          data: { teamId: team.id },
-        })
-
         await tx.team.update({
           where: { id: team.id },
-          data: { captainId: newCaptain.userId, isFull: false },
+          data: { captainId: newCaptain.userId },
         })
+        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
       } else if (otherMembers.length === 0) {
         // d. Last member — dissolve the team
         await tx.team.delete({ where: { id: team.id } })
       } else {
-        // e. Non-captain leaving — mark team as not full
-        await tx.team.update({
-          where: { id: team.id },
-          data: { isFull: false },
-        })
+        // e. Non-captain leaving — keep team state in sync
+        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
       }
     })
 
@@ -828,7 +977,9 @@ export const unregisterFromTournament = authenticatedAction({
 
     return {
       success: true,
-      message: 'Votre inscription a \u00e9t\u00e9 annul\u00e9e.',
+      message: refundEligible
+        ? 'Votre inscription a été annulée. Le remboursement automatique Stripe sera branché dans la prochaine étape.'
+        : 'Votre inscription a été annulée. Cette désinscription n’ouvre pas droit à un remboursement automatique.',
     }
   },
 })
@@ -846,6 +997,7 @@ export const kickPlayer = authenticatedAction({
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: {
+        tournament: { select: { teamSize: true } },
         members: { orderBy: { joinedAt: 'asc' } },
       },
     })) as TeamWithMembers | null
@@ -880,30 +1032,17 @@ export const kickPlayer = authenticatedAction({
         // 3a. Promote next member to captain
         const newCaptain = otherMembers[0]
 
-        // Transfer the team's registration link to the new captain
-        // First, unlink the old captain's registration (already deleted above)
-        // Then set the new captain's registration to reference this team
-        await tx.tournamentRegistration.updateMany({
-          where: {
-            tournamentId: data.tournamentId,
-            userId: newCaptain.userId,
-          },
-          data: { teamId: data.teamId },
-        })
-
         await tx.team.update({
           where: { id: data.teamId },
-          data: { captainId: newCaptain.userId, isFull: false },
+          data: { captainId: newCaptain.userId },
         })
+        await syncTeamFullState(tx, data.teamId, team.tournament.teamSize)
       } else if (isCaptain && otherMembers.length === 0) {
         // 3b. Last member — dissolve the team
         await tx.team.delete({ where: { id: data.teamId } })
       } else {
-        // 3c. Non-captain kicked — just mark team as not full
-        await tx.team.update({
-          where: { id: data.teamId },
-          data: { isFull: false },
-        })
+        // 3c. Non-captain kicked — keep team state in sync
+        await syncTeamFullState(tx, data.teamId, team.tournament.teamSize)
       }
     })
 

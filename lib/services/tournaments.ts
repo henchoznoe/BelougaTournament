@@ -54,6 +54,9 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
         format: true,
         teamSize: true,
         maxTeams: true,
+        registrationType: true,
+        entryFeeAmount: true,
+        entryFeeCurrency: true,
         status: true,
         startDate: true,
         endDate: true,
@@ -175,6 +178,8 @@ export const getRegistrations = async (
         id: true,
         fieldValues: true,
         createdAt: true,
+        status: true,
+        paymentStatus: true,
         user: {
           select: {
             id: true,
@@ -265,11 +270,6 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
             },
           },
         },
-        registration: {
-          select: {
-            id: true,
-          },
-        },
       },
     })
     return rows as unknown as TeamItem[]
@@ -316,11 +316,6 @@ export const getTeamById = async (teamId: string): Promise<TeamItem | null> => {
             },
           },
         },
-        registration: {
-          select: {
-            id: true,
-          },
-        },
       },
     })
     return row as unknown as TeamItem | null
@@ -345,6 +340,9 @@ const PUBLIC_LIST_SELECT = {
   format: true,
   teamSize: true,
   maxTeams: true,
+  registrationType: true,
+  entryFeeAmount: true,
+  entryFeeCurrency: true,
   status: true,
   startDate: true,
   endDate: true,
@@ -534,6 +532,8 @@ const USER_REGISTRATION_SELECT = {
   id: true,
   fieldValues: true,
   createdAt: true,
+  status: true,
+  paymentStatus: true,
   tournament: {
     select: {
       id: true,

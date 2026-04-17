@@ -8,6 +8,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  RefundPolicyType,
+  RegistrationType,
   Role,
   TournamentFormat,
   TournamentStatus,
@@ -45,8 +47,8 @@ const mockTeamFindUnique = vi.fn()
 const mockTeamUpdate = vi.fn()
 const mockTeamDelete = vi.fn()
 const mockTeamMemberDeleteMany = vi.fn()
+const mockTeamMemberCount = vi.fn()
 const mockRegistrationDeleteMany = vi.fn()
-const mockRegistrationUpdateMany = vi.fn()
 const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
@@ -70,10 +72,10 @@ vi.mock('@/lib/core/prisma', () => ({
     },
     teamMember: {
       deleteMany: (...args: unknown[]) => mockTeamMemberDeleteMany(...args),
+      count: (...args: unknown[]) => mockTeamMemberCount(...args),
     },
     tournamentRegistration: {
       deleteMany: (...args: unknown[]) => mockRegistrationDeleteMany(...args),
-      updateMany: (...args: unknown[]) => mockRegistrationUpdateMany(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -132,6 +134,11 @@ const VALID_TOURNAMENT_INPUT = {
   game: 'Valorant',
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
+  registrationType: RegistrationType.FREE,
+  entryFeeAmount: null,
+  entryFeeCurrency: 'CHF' as const,
+  refundPolicyType: RefundPolicyType.NONE,
+  refundDeadlineDays: null,
   toornamentId: '',
   streamUrl: '',
   imageUrl: '',
@@ -149,6 +156,11 @@ const MEMBER_UUID = '44444444-4444-4444-8444-444444444444'
 const EXISTING_TOURNAMENT = {
   id: TOURNAMENT_UUID,
   format: TournamentFormat.TEAM,
+  registrationType: RegistrationType.FREE,
+  entryFeeAmount: null,
+  entryFeeCurrency: 'CHF' as const,
+  refundPolicyType: RefundPolicyType.NONE,
+  refundDeadlineDays: null,
   status: TournamentStatus.DRAFT,
   fields: [],
   _count: { registrations: 0 },
@@ -163,6 +175,7 @@ describe('tournament admin actions', () => {
     mockTournamentDelete.mockResolvedValue({})
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])
+    mockTeamMemberCount.mockResolvedValue(1)
   })
 
   it('rejects non-admin users for createTournament', async () => {
@@ -220,14 +233,17 @@ describe('team moderation actions', () => {
       id: TEAM_UUID,
       tournamentId: TOURNAMENT_UUID,
       captainId: CAPTAIN_UUID,
+      tournament: { teamSize: 2 },
       members: [{ userId: CAPTAIN_UUID }, { userId: MEMBER_UUID }],
     })
     mockTransaction.mockImplementation(async callback =>
       callback({
-        teamMember: { deleteMany: mockTeamMemberDeleteMany },
+        teamMember: {
+          deleteMany: mockTeamMemberDeleteMany,
+          count: mockTeamMemberCount,
+        },
         tournamentRegistration: {
           deleteMany: mockRegistrationDeleteMany,
-          updateMany: mockRegistrationUpdateMany,
         },
         team: { update: mockTeamUpdate, delete: mockTeamDelete },
       }),

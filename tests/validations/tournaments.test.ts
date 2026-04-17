@@ -42,6 +42,11 @@ const VALID_TOURNAMENT = {
   game: 'Valorant',
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
+  registrationType: 'FREE' as const,
+  entryFeeAmount: null,
+  entryFeeCurrency: 'CHF' as const,
+  refundPolicyType: 'NONE' as const,
+  refundDeadlineDays: null,
   toornamentId: '',
   streamUrl: '',
   imageUrl: '',
@@ -191,6 +196,39 @@ describe('tournamentSchema', () => {
       maxTeams: null,
     })
     expect(result.success).toBe(true)
+  })
+
+  it('accepts a paid tournament with a refund deadline', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: 500,
+      refundPolicyType: 'BEFORE_DEADLINE',
+      refundDeadlineDays: 14,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a paid tournament without a price', () => {
+    expect(
+      tournamentSchema.safeParse({
+        ...VALID_TOURNAMENT,
+        registrationType: 'PAID',
+        entryFeeAmount: null,
+        refundPolicyType: 'BEFORE_DEADLINE',
+        refundDeadlineDays: 14,
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a refund deadline for free tournaments', () => {
+    expect(
+      tournamentSchema.safeParse({
+        ...VALID_TOURNAMENT,
+        refundPolicyType: 'BEFORE_DEADLINE',
+        refundDeadlineDays: 14,
+      }).success,
+    ).toBe(false)
   })
 
   it('accepts a tournament with empty fields array', () => {

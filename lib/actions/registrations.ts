@@ -33,6 +33,7 @@ type RegistrationWithDetails = {
 type TeamWithMembers = {
   id: string
   captainId: string
+  tournament: { teamSize: number }
   members: { userId: string }[]
 }
 
@@ -85,7 +86,10 @@ export const adminDeleteRegistration = authenticatedAction({
       },
       include: {
         team: {
-          include: { members: { orderBy: { joinedAt: 'asc' } } },
+          include: {
+            tournament: { select: { teamSize: true } },
+            members: { orderBy: { joinedAt: 'asc' } },
+          },
         },
       },
     })) as TeamMemberWithTeam | null
@@ -126,27 +130,17 @@ export const adminDeleteRegistration = authenticatedAction({
         // c. Promote next member to captain
         const newCaptain = otherMembers[0]
 
-        await tx.tournamentRegistration.updateMany({
-          where: {
-            tournamentId: registration.tournament.id,
-            userId: newCaptain.userId,
-          },
-          data: { teamId: team.id },
-        })
-
         await tx.team.update({
           where: { id: team.id },
-          data: { captainId: newCaptain.userId, isFull: false },
+          data: { captainId: newCaptain.userId },
         })
+        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
       } else if (otherMembers.length === 0) {
         // d. Last member — dissolve the team
         await tx.team.delete({ where: { id: team.id } })
       } else {
-        // e. Non-captain leaving — mark team as not full
-        await tx.team.update({
-          where: { id: team.id },
-          data: { isFull: false },
-        })
+        // e. Non-captain leaving — keep team state in sync
+        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
       }
     })
 
@@ -219,7 +213,22 @@ type TargetTeam = {
   id: string
   name: string
   tournamentId: string
-  isFull: boolean
+  tournament: { teamSize: number }
+  _count: { members: number }
+}
+
+/** Recomputes the `isFull` flag for a team after an admin mutation. */
+const syncTeamFullState = async (
+  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
+  teamId: string,
+  teamSize: number,
+) => {
+  const memberCount = await tx.teamMember.count({ where: { teamId } })
+
+  await tx.team.update({
+    where: { id: teamId },
+    data: { isFull: memberCount >= teamSize },
+  })
 }
 
 /** Moves a player from their current team to a different team in the same tournament. */
@@ -250,6 +259,10 @@ export const adminChangeTeam = authenticatedAction({
     // 2. Verify target team exists and belongs to the same tournament
     const targetTeam = (await prisma.team.findUnique({
       where: { id: data.targetTeamId },
+      include: {
+        tournament: { select: { teamSize: true } },
+        _count: { select: { members: true } },
+      },
     })) as TargetTeam | null
 
     if (!targetTeam) {
@@ -263,7 +276,7 @@ export const adminChangeTeam = authenticatedAction({
       }
     }
 
-    if (targetTeam.isFull) {
+    if (targetTeam._count.members >= targetTeam.tournament.teamSize) {
       return { success: false, message: "L'equipe cible est déjà complète." }
     }
 
@@ -275,7 +288,10 @@ export const adminChangeTeam = authenticatedAction({
       },
       include: {
         team: {
-          include: { members: { orderBy: { joinedAt: 'asc' } } },
+          include: {
+            tournament: { select: { teamSize: true } },
+            members: { orderBy: { joinedAt: 'asc' } },
+          },
         },
       },
     })) as TeamMemberWithTeam | null
@@ -311,45 +327,33 @@ export const adminChangeTeam = authenticatedAction({
       if (wasCaptain && otherMembers.length > 0) {
         const newCaptain = otherMembers[0]
 
-        // Clear the teamId FK from old captain's registration (since they're leaving)
-        await tx.tournamentRegistration.update({
-          where: { id: registration.id },
-          data: { teamId: null },
-        })
-
-        // Move teamId FK to new captain's registration
-        await tx.tournamentRegistration.updateMany({
-          where: {
-            tournamentId: registration.tournament.id,
-            userId: newCaptain.userId,
-          },
-          data: { teamId: oldTeam.id },
-        })
-
         await tx.team.update({
           where: { id: oldTeam.id },
-          data: { captainId: newCaptain.userId, isFull: false },
+          data: { captainId: newCaptain.userId },
         })
+        await syncTeamFullState(tx, oldTeam.id, oldTeam.tournament.teamSize)
       } else if (otherMembers.length === 0) {
-        // Clear the teamId FK before dissolving the team (cascade would handle it, but be explicit)
-        await tx.tournamentRegistration.update({
-          where: { id: registration.id },
-          data: { teamId: null },
-        })
-
         await tx.team.delete({ where: { id: oldTeam.id } })
       } else {
         // Non-captain leaving old team
-        await tx.team.update({
-          where: { id: oldTeam.id },
-          data: { isFull: false },
-        })
+        await syncTeamFullState(tx, oldTeam.id, oldTeam.tournament.teamSize)
       }
 
       // c. Add to new team
       await tx.teamMember.create({
         data: { teamId: data.targetTeamId, userId: registration.userId },
       })
+
+      await tx.tournamentRegistration.update({
+        where: { id: registration.id },
+        data: { teamId: data.targetTeamId },
+      })
+
+      await syncTeamFullState(
+        tx,
+        data.targetTeamId,
+        targetTeam.tournament.teamSize,
+      )
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
@@ -374,7 +378,7 @@ type PromoteTeam = {
   members: { userId: string }[]
 }
 
-/** Promotes a team member to captain (swaps the captainId and moves the teamId FK). */
+/** Promotes a team member to captain. */
 export const adminPromoteCaptain = authenticatedAction({
   schema: promoteCaptainSchema,
   role: Role.ADMIN,
@@ -403,27 +407,9 @@ export const adminPromoteCaptain = authenticatedAction({
       return { success: false, message: "L'utilisateur est déjà capitaine." }
     }
 
-    const oldCaptainId = team.captainId
-
-    // 4. Swap in a transaction
-    await prisma.$transaction(async tx => {
-      // a. Remove teamId FK from old captain's registration
-      await tx.tournamentRegistration.updateMany({
-        where: { tournamentId: team.tournamentId, userId: oldCaptainId },
-        data: { teamId: null },
-      })
-
-      // b. Set teamId FK on new captain's registration
-      await tx.tournamentRegistration.updateMany({
-        where: { tournamentId: team.tournamentId, userId: data.userId },
-        data: { teamId: team.id },
-      })
-
-      // c. Update team captainId
-      await tx.team.update({
-        where: { id: team.id },
-        data: { captainId: data.userId },
-      })
+    await prisma.team.update({
+      where: { id: team.id },
+      data: { captainId: data.userId },
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')

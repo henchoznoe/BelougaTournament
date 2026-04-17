@@ -90,6 +90,16 @@ export type TeamMember = Prisma.TeamMemberModel
  */
 export type TournamentRegistration = Prisma.TournamentRegistrationModel
 /**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model StripeWebhookEvent
+ * 
+ */
+export type StripeWebhookEvent = Prisma.StripeWebhookEventModel
+/**
  * Model GlobalSettings
  * 
  */

@@ -32,6 +32,8 @@ import {
   tournamentSchema,
 } from '@/lib/validations/tournaments'
 import {
+  RefundPolicyType,
+  RegistrationType,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -59,7 +61,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const form = useForm<TournamentFormInput>({
+  const form = useForm<TournamentFormInput, undefined, TournamentInput>({
     resolver: zodResolver(tournamentSchema),
     defaultValues: tournament
       ? {
@@ -73,6 +75,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             tournament.registrationClose,
           ).toISOString(),
           maxTeams: tournament.maxTeams,
+          registrationType: tournament.registrationType,
+          entryFeeAmount: tournament.entryFeeAmount,
+          entryFeeCurrency: (tournament.entryFeeCurrency ?? 'CHF') as 'CHF',
+          refundPolicyType: tournament.refundPolicyType,
+          refundDeadlineDays: tournament.refundDeadlineDays,
           format: tournament.format,
           teamSize: tournament.teamSize,
           game: fromNullable(tournament.game),
@@ -104,6 +111,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           registrationOpen: '',
           registrationClose: '',
           maxTeams: null,
+          registrationType: RegistrationType.FREE,
+          entryFeeAmount: null,
+          entryFeeCurrency: 'CHF' as const,
+          refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+          refundDeadlineDays: 14,
           format: TournamentFormat.SOLO,
           teamSize: 1,
           game: '',
@@ -119,14 +131,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
   const { isDirty } = form.formState
 
-  const onSubmit = (data: TournamentFormInput) => {
-    // Date fields are already ISO strings from the DateTimePicker
-    const payload = data as TournamentInput
-
+  const onSubmit = (data: TournamentInput) => {
     startTransition(async () => {
       const result = isEditing
-        ? await updateTournament({ ...payload, id: tournament.id })
-        : await createTournament(payload)
+        ? await updateTournament({ ...data, id: tournament.id })
+        : await createTournament(data)
 
       if (result.success) {
         toast.success(result.message)
@@ -178,7 +187,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       <div className="h-px bg-white/5" />
 
-      <TournamentRulesSection form={form} isPending={isPending} />
+      <TournamentRulesSection
+        form={form}
+        isPending={isPending}
+        isEditing={isEditing}
+      />
 
       <div className="h-px bg-white/5" />
 
