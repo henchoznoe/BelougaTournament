@@ -8,20 +8,11 @@
 
 'use client'
 
-import {
-  Archive,
-  Eye,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Send,
-  Trash2,
-} from 'lucide-react'
+import { Eye, Loader2, MoreHorizontal, Pencil, Send } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { TournamentDeleteDialog } from '@/components/features/admin/tournament-delete-dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,7 +48,15 @@ export const TournamentActionsDropdown = ({
   const [confirmStatus, setConfirmStatus] = useState<TournamentStatus | null>(
     null,
   )
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const canToggleStatus =
+    tournament.status === TournamentStatus.DRAFT ||
+    tournament.status === TournamentStatus.PUBLISHED
+
+  const targetStatus =
+    tournament.status === TournamentStatus.DRAFT
+      ? TournamentStatus.PUBLISHED
+      : TournamentStatus.DRAFT
 
   const handleStatusChange = (newStatus: TournamentStatus) => {
     startTransition(async () => {
@@ -75,31 +74,15 @@ export const TournamentActionsDropdown = ({
     })
   }
 
-  const getConfirmTitle = (): string => {
-    switch (confirmStatus) {
-      case TournamentStatus.PUBLISHED:
-        return 'Publier le tournoi'
-      case TournamentStatus.DRAFT:
-        return 'Repasser en brouillon'
-      case TournamentStatus.ARCHIVED:
-        return 'Archiver le tournoi'
-      default:
-        return ''
-    }
-  }
+  const confirmTitle =
+    confirmStatus === TournamentStatus.PUBLISHED
+      ? 'Publier le tournoi'
+      : 'Repasser en brouillon'
 
-  const getConfirmDescription = (): string => {
-    switch (confirmStatus) {
-      case TournamentStatus.PUBLISHED:
-        return `Le tournoi « ${tournament.title} » sera visible publiquement.`
-      case TournamentStatus.DRAFT:
-        return `Le tournoi « ${tournament.title} » ne sera plus visible publiquement.`
-      case TournamentStatus.ARCHIVED:
-        return `Le tournoi « ${tournament.title} » sera archivé et ne sera plus visible sur la page principale.`
-      default:
-        return ''
-    }
-  }
+  const confirmDescription =
+    confirmStatus === TournamentStatus.PUBLISHED
+      ? `Le tournoi « ${tournament.title} » sera visible publiquement.`
+      : `Le tournoi « ${tournament.title} » ne sera plus visible publiquement.`
 
   return (
     <>
@@ -121,54 +104,32 @@ export const TournamentActionsDropdown = ({
           onClick={e => e.stopPropagation()}
         >
           <DropdownMenuItem asChild>
-            <Link href={ROUTES.ADMIN_TOURNAMENT_EDIT(tournament.slug)}>
-              <Pencil className="size-4" />
-              Modifier
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={ROUTES.ADMIN_TOURNAMENT_REGISTRATIONS(tournament.slug)}>
+            <Link href={ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug)}>
               <Eye className="size-4" />
-              Inscriptions
+              Voir le tournoi
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="bg-white/5" />
-
-          {tournament.status !== TournamentStatus.PUBLISHED && (
-            <DropdownMenuItem
-              onClick={() => setConfirmStatus(TournamentStatus.PUBLISHED)}
-            >
-              <Send className="size-4 text-emerald-400" />
-              Publier
-            </DropdownMenuItem>
+          {canToggleStatus && (
+            <>
+              <DropdownMenuSeparator className="bg-white/5" />
+              {targetStatus === TournamentStatus.PUBLISHED ? (
+                <DropdownMenuItem
+                  onClick={() => setConfirmStatus(TournamentStatus.PUBLISHED)}
+                >
+                  <Send className="size-4 text-emerald-400" />
+                  Publier
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => setConfirmStatus(TournamentStatus.DRAFT)}
+                >
+                  <Pencil className="size-4 text-amber-400" />
+                  Brouillon
+                </DropdownMenuItem>
+              )}
+            </>
           )}
-          {tournament.status !== TournamentStatus.DRAFT && (
-            <DropdownMenuItem
-              onClick={() => setConfirmStatus(TournamentStatus.DRAFT)}
-            >
-              <Pencil className="size-4 text-amber-400" />
-              Brouillon
-            </DropdownMenuItem>
-          )}
-          {tournament.status !== TournamentStatus.ARCHIVED && (
-            <DropdownMenuItem
-              onClick={() => setConfirmStatus(TournamentStatus.ARCHIVED)}
-            >
-              <Archive className="size-4 text-zinc-400" />
-              Archiver
-            </DropdownMenuItem>
-          )}
-
-          <DropdownMenuSeparator className="bg-white/5" />
-
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2 className="size-4" />
-            Supprimer
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -180,10 +141,10 @@ export const TournamentActionsDropdown = ({
         <AlertDialogContent className="border-white/10 bg-zinc-950">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">
-              {getConfirmTitle()}
+              {confirmTitle}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              {getConfirmDescription()}
+              {confirmDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -203,13 +164,6 @@ export const TournamentActionsDropdown = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Delete confirmation dialog */}
-      <TournamentDeleteDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        tournament={tournament}
-      />
     </>
   )
 }
