@@ -8,7 +8,6 @@
 
 import type { LucideIcon } from 'lucide-react'
 import {
-  ClipboardList,
   Handshake,
   LayoutDashboard,
   Settings,
@@ -40,11 +39,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         label: 'Utilisateurs',
         href: ROUTES.ADMIN_USERS,
         icon: Users,
-      },
-      {
-        label: 'Inscriptions',
-        href: ROUTES.ADMIN_REGISTRATIONS,
-        icon: ClipboardList,
       },
       {
         label: 'Tournois',

@@ -132,8 +132,8 @@ describe('CACHE_TAGS', () => {
   it('defines expected tag keys', () => {
     const expectedKeys = [
       'DASHBOARD_STATS',
-      'DASHBOARD_UPCOMING',
       'DASHBOARD_REGISTRATIONS',
+      'DASHBOARD_RECENT_USERS',
       'REGISTRATIONS',
       'SETTINGS',
       'SPONSORS',

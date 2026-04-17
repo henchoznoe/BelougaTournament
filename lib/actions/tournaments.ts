@@ -779,11 +779,10 @@ export const updateTournament = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
     return {
       success: true,
-      message: 'Le tournoi a \u00e9t\u00e9 mis \u00e0 jour.',
+      message: 'Le tournoi a été mis à jour.',
     }
   },
 })
@@ -800,7 +799,6 @@ export const deleteTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
 
@@ -824,11 +822,10 @@ export const updateTournamentStatus = authenticatedAction({
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.TOURNAMENT_OPTIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_UPCOMING, 'minutes')
 
     return {
       success: true,
-      message: 'Le statut du tournoi a \u00e9t\u00e9 mis \u00e0 jour.',
+      message: 'Le statut du tournoi a été mis à jour.',
     }
   },
 })

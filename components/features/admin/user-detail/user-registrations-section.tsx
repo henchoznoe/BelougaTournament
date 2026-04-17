@@ -123,7 +123,7 @@ export const UserRegistrationsSection = ({
                     </TableCell>
                     <TableCell>
                       <Link
-                        href={`${ROUTES.ADMIN_REGISTRATIONS}?registrationId=${reg.id}`}
+                        href={ROUTES.ADMIN_REGISTRATION_DETAIL(reg.id)}
                         className="inline-flex items-center text-zinc-500 transition-colors hover:text-zinc-300"
                         aria-label={`Voir l'inscription au tournoi ${reg.tournament.title}`}
                       >

@@ -25,7 +25,6 @@ export const ROUTES = {
   ADMIN_DASHBOARD: '/admin',
   ADMIN_USERS: '/admin/users',
   ADMIN_USER_DETAIL: (id: string) => `/admin/users/${id}` as const,
-  ADMIN_REGISTRATIONS: '/admin/registrations',
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',
   ADMIN_NEW_TOURNAMENT: '/admin/tournaments/new',
@@ -56,7 +55,6 @@ export const ADMIN_ROUTE_ROLES = {
   [ROUTES.ADMIN_DASHBOARD]: Role.ADMIN,
   [ROUTES.ADMIN_TOURNAMENTS]: Role.ADMIN,
   [ROUTES.ADMIN_USERS]: Role.ADMIN,
-  [ROUTES.ADMIN_REGISTRATIONS]: Role.ADMIN,
   [ROUTES.ADMIN_SETTINGS]: Role.ADMIN,
   [ROUTES.ADMIN_SPONSORS]: Role.ADMIN,
 } as const

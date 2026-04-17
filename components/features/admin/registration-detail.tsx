@@ -133,7 +133,7 @@ export const RegistrationDetail = ({
       })
       if (result.success) {
         toast.success(result.message)
-        router.push(ROUTES.ADMIN_REGISTRATIONS)
+        router.push(ROUTES.ADMIN_DASHBOARD)
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }

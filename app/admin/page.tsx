@@ -11,20 +11,16 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
 import {
+  DashboardRecentLogins,
   DashboardRecentRegistrations,
-  DashboardRecentSponsors,
-  DashboardRecentUsers,
-  DashboardUpcomingTournaments,
 } from '@/components/features/admin/dashboard-recent'
 import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import {
   getDashboardStats,
+  getRecentLogins,
   getRecentRegistrations,
-  getRecentSponsors,
-  getRecentUsers,
-  getUpcomingTournaments,
 } from '@/lib/services/dashboard'
 
 export const metadata: Metadata = {
@@ -38,18 +34,10 @@ const AdminDashboardPage = async () => {
     redirect(ROUTES.LOGIN)
   }
 
-  const [
-    stats,
-    upcomingTournaments,
-    recentRegistrations,
-    recentUsers,
-    recentSponsors,
-  ] = await Promise.all([
+  const [stats, recentLogins, recentRegistrations] = await Promise.all([
     getDashboardStats(),
-    getUpcomingTournaments(),
+    getRecentLogins(),
     getRecentRegistrations(),
-    getRecentUsers(),
-    getRecentSponsors(),
   ])
 
   return (
@@ -73,10 +61,8 @@ const AdminDashboardPage = async () => {
 
       {/* Two-column panels */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <DashboardUpcomingTournaments tournaments={upcomingTournaments} />
+        <DashboardRecentLogins logins={recentLogins} />
         <DashboardRecentRegistrations registrations={recentRegistrations} />
-        <DashboardRecentUsers users={recentUsers} />
-        <DashboardRecentSponsors sponsors={recentSponsors} />
       </div>
     </div>
   )

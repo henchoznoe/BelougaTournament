@@ -63,7 +63,7 @@ const AdminRegistrationDetailPage = async ({
       {/* Breadcrumb */}
       <AdminBreadcrumb
         segments={[
-          { label: 'Inscriptions', href: ROUTES.ADMIN_REGISTRATIONS },
+          { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD },
           { label: registration.user.displayName },
         ]}
       />

@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ClipboardList, Handshake, Swords, Users } from 'lucide-react'
+import { Swords, Users } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
@@ -18,77 +18,32 @@ interface DashboardStatsProps {
 
 const STAT_CARDS = [
   {
-    key: 'tournaments',
-    label: 'Tournois',
-    href: ROUTES.ADMIN_TOURNAMENTS,
-    icon: Swords,
-    getValue: (s: DashboardStats) => s.tournaments.total,
-    getDetail: (s: DashboardStats) => {
-      const parts: string[] = []
-      if (s.tournaments.byStatus[TournamentStatus.PUBLISHED] > 0)
-        parts.push(
-          `${s.tournaments.byStatus[TournamentStatus.PUBLISHED]} publiés`,
-        )
-      if (s.tournaments.byStatus[TournamentStatus.DRAFT] > 0)
-        parts.push(
-          `${s.tournaments.byStatus[TournamentStatus.DRAFT]} brouillons`,
-        )
-      if (s.tournaments.byStatus[TournamentStatus.ARCHIVED] > 0)
-        parts.push(
-          `${s.tournaments.byStatus[TournamentStatus.ARCHIVED]} archivés`,
-        )
-      return parts.join(' · ') || 'Aucun tournoi'
-    },
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10',
-  },
-  {
     key: 'users',
     label: 'Utilisateurs',
     href: ROUTES.ADMIN_USERS,
     icon: Users,
     getValue: (s: DashboardStats) => s.users.total,
-    getDetail: (s: DashboardStats) => {
-      const parts: string[] = []
-      if (s.users.players > 0) parts.push(`${s.users.players} joueurs`)
-      if (s.users.admins > 0) parts.push(`${s.users.admins} admins`)
-      if (s.users.ghosts > 0) parts.push(`${s.users.ghosts} fantômes`)
-      return parts.join(' · ') || 'Aucun utilisateur'
-    },
+    getDetail: (s: DashboardStats) =>
+      `${s.users.players} joueurs · ${s.users.admins} admins`,
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/10',
   },
   {
-    key: 'registrations',
-    label: 'Inscriptions',
-    href: ROUTES.ADMIN_REGISTRATIONS,
-    icon: ClipboardList,
-    getValue: (s: DashboardStats) => s.registrations.total,
-    getDetail: (s: DashboardStats) => {
-      const parts: string[] = []
-      if (s.registrations.solo > 0) parts.push(`${s.registrations.solo} solo`)
-      if (s.registrations.team > 0)
-        parts.push(`${s.registrations.team} en équipe`)
-      return parts.join(' · ') || 'Aucune inscription'
-    },
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/10',
-  },
-  {
-    key: 'sponsors',
-    label: 'Sponsors',
-    href: ROUTES.ADMIN_SPONSORS,
-    icon: Handshake,
-    getValue: (s: DashboardStats) => s.sponsors,
-    getDetail: () => 'Partenaires affichés',
-    color: 'text-purple-400',
-    bg: 'bg-purple-500/10',
+    key: 'tournaments',
+    label: 'Tournois',
+    href: ROUTES.ADMIN_TOURNAMENTS,
+    icon: Swords,
+    getValue: (s: DashboardStats) => s.tournaments.total,
+    getDetail: (s: DashboardStats) =>
+      `${s.tournaments.byStatus[TournamentStatus.PUBLISHED]} publiés · ${s.tournaments.byStatus[TournamentStatus.DRAFT]} brouillons · ${s.tournaments.byStatus[TournamentStatus.ARCHIVED]} archivés`,
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/10',
   },
 ] as const
 
 export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2">
       {STAT_CARDS.map(card => {
         const Icon = card.icon
         const value = card.getValue(stats)

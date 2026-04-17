@@ -1,6 +1,6 @@
 /**
  * File: lib/services/registrations.ts
- * Description: Services for fetching all tournament registrations (global admin page).
+ * Description: Services for fetching tournament registration data (detail page and team options).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -12,7 +12,6 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
-import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 /** Raw row shape returned by Prisma before post-processing. */
 type RawRegistrationRow = Omit<RegistrationRow, 'team' | 'user'> & {
@@ -29,112 +28,6 @@ type RawRegistrationRow = Omit<RegistrationRow, 'team' | 'user'> & {
     }[]
   }
   team: { id: string; name: string } | null
-}
-
-/** Fetches all tournament registrations for the global admin registrations page. */
-export const getAllRegistrations = async (): Promise<RegistrationRow[]> => {
-  'use cache'
-  cacheLife('minutes')
-  cacheTag(CACHE_TAGS.REGISTRATIONS)
-
-  try {
-    const rows = (await prisma.tournamentRegistration.findMany({
-      where: {
-        status: {
-          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        createdAt: true,
-        status: true,
-        paymentStatus: true,
-        fieldValues: true,
-        payments: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: {
-            id: true,
-            amount: true,
-            currency: true,
-            paidAt: true,
-            refundedAt: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            displayName: true,
-            image: true,
-            bannedUntil: true,
-            teamMembers: {
-              select: {
-                team: {
-                  select: {
-                    id: true,
-                    name: true,
-                    captainId: true,
-                    isFull: true,
-                    tournamentId: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        tournament: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            format: true,
-            status: true,
-            fields: {
-              select: {
-                label: true,
-                type: true,
-                required: true,
-                order: true,
-              },
-              orderBy: { order: 'asc' },
-            },
-          },
-        },
-        team: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    })) as unknown as RawRegistrationRow[]
-
-    // Post-process: resolve team from TeamMember for all players (not just captains)
-    return rows.map(row => {
-      const membership = row.user.teamMembers.find(
-        tm => tm.team.tournamentId === row.tournament.id,
-      )
-
-      const team = membership
-        ? {
-            id: membership.team.id,
-            name: membership.team.name,
-            captainId: membership.team.captainId,
-            isFull: membership.team.isFull,
-          }
-        : null
-
-      // Strip teamMembers from user (internal resolution only)
-      const { teamMembers: _, ...user } = row.user
-
-      return { ...row, user, team, payment: row.payments[0] ?? null }
-    })
-  } catch (error) {
-    logger.error({ error }, 'Error fetching all registrations')
-    return []
-  }
 }
 
 /** Fetches a single registration by ID (for the admin registration detail page). */
