@@ -495,12 +495,14 @@ const fetchTournamentForRegistration = async (
 
 /** Creates or refreshes a registration row for the next registration attempt. */
 const upsertRegistrationAttempt = async ({
+  tx = prisma,
   existingRegistration,
   tournament,
   userId,
   fieldValues,
   teamId,
 }: {
+  tx?: Pick<typeof prisma, 'tournamentRegistration'>
   existingRegistration: ExistingRegistration | null
   tournament: TournamentWithFields
   userId: string
@@ -510,7 +512,7 @@ const upsertRegistrationAttempt = async ({
   const isPaid = tournament.registrationType === RegistrationType.PAID
 
   if (existingRegistration) {
-    return prisma.tournamentRegistration.update({
+    return tx.tournamentRegistration.update({
       where: { id: existingRegistration.id },
       data: {
         fieldValues,
@@ -536,7 +538,7 @@ const upsertRegistrationAttempt = async ({
     })
   }
 
-  return prisma.tournamentRegistration.create({
+  return tx.tournamentRegistration.create({
     data: {
       tournamentId: tournament.id,
       userId,
@@ -1042,6 +1044,7 @@ export const createTeamAndRegister = authenticatedAction({
       })
 
       const registration = await upsertRegistrationAttempt({
+        tx,
         existingRegistration,
         tournament,
         userId: session.user.id,
@@ -1127,6 +1130,7 @@ export const joinTeamAndRegister = authenticatedAction({
       })
 
       const registration = await upsertRegistrationAttempt({
+        tx,
         existingRegistration,
         tournament,
         userId: session.user.id,
