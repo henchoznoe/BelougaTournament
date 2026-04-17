@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import type { BAN_DURATION_OPTIONS } from '@/lib/config/constants'
 import type {
   Role,
   TournamentFormat,
@@ -24,9 +23,6 @@ export type UserRow = {
   role: Role
   createdAt: Date
   lastLoginAt: Date | null
-  bannedUntil: Date | null
-  banReason: string | null
-  _count: { registrations: number }
 }
 
 /** A registration entry nested inside a UserDetail. */
@@ -52,10 +48,5 @@ export type UserDetail = {
   role: Role
   createdAt: Date
   lastLoginAt: Date | null
-  bannedUntil: Date | null
-  banReason: string | null
   registrations: UserRegistrationRow[]
 }
-
-/** Ban duration option value type. */
-export type BanDurationValue = (typeof BAN_DURATION_OPTIONS)[number]['value']

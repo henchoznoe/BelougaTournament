@@ -133,7 +133,6 @@ export type TournamentRegistrationItem = {
     name: string
     displayName: string
     image: string | null
-    bannedUntil: Date | null
   }
   team: {
     id: string

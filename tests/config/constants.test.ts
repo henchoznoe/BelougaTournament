@@ -9,14 +9,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   AUTH_CONFIG,
-  BAN_DURATION_OPTIONS,
   CACHE_TAGS,
   CURRENT_YEAR,
   DEFAULT_ASSETS,
   DISCORD,
   METADATA,
   NOON_UTC_SUFFIX,
-  PERMANENT_BAN_DATE,
   SEARCH_CONFIG,
   SETTINGS_SINGLETON_ID,
   TOURNAMENT_STATUS_LABELS,
@@ -150,34 +148,6 @@ describe('CACHE_TAGS', () => {
     for (const value of Object.values(CACHE_TAGS)) {
       expect(value).toBeTypeOf('string')
       expect(value.length).toBeGreaterThan(0)
-    }
-  })
-})
-
-describe('PERMANENT_BAN_DATE', () => {
-  it('is a Date in the far future (year 9999)', () => {
-    expect(PERMANENT_BAN_DATE).toBeInstanceOf(Date)
-    expect(PERMANENT_BAN_DATE.getUTCFullYear()).toBe(9999)
-  })
-})
-
-describe('BAN_DURATION_OPTIONS', () => {
-  it('has at least 2 options', () => {
-    expect(BAN_DURATION_OPTIONS.length).toBeGreaterThanOrEqual(2)
-  })
-
-  it('includes a permanent option', () => {
-    expect(BAN_DURATION_OPTIONS.some(o => o.value === 'permanent')).toBe(true)
-  })
-
-  it('includes a custom option', () => {
-    expect(BAN_DURATION_OPTIONS.some(o => o.value === 'custom')).toBe(true)
-  })
-
-  it('every option has a label and value', () => {
-    for (const option of BAN_DURATION_OPTIONS) {
-      expect(option.label).toBeTypeOf('string')
-      expect(option.value).toBeTypeOf('string')
     }
   })
 })

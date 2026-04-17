@@ -9,7 +9,6 @@
 'use client'
 
 import {
-  Ban,
   Eye,
   Loader2,
   MoreHorizontal,
@@ -39,16 +38,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  deleteUser,
-  demoteAdmin,
-  promoteToAdmin,
-  unbanUser,
-} from '@/lib/actions/users'
+import { deleteUser, demoteAdmin, promoteToAdmin } from '@/lib/actions/users'
 import { ROUTES } from '@/lib/config/routes'
 import type { ActionState } from '@/lib/types/actions'
 import type { UserRow } from '@/lib/types/user'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 interface UserActionsDropdownProps {
@@ -57,7 +50,7 @@ interface UserActionsDropdownProps {
   viewerIsOwner: boolean
 }
 
-type ConfirmAction = 'promote' | 'demote' | 'unban' | 'delete'
+type ConfirmAction = 'promote' | 'demote' | 'delete'
 
 export const UserActionsDropdown = ({
   user,
@@ -68,18 +61,12 @@ export const UserActionsDropdown = ({
   const [isPending, startTransition] = useTransition()
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
 
-  const banned = isBanned(user.bannedUntil)
-
-  const canPromoteToAdmin = viewerIsOwner && user.role === Role.USER && !banned
+  const canPromoteToAdmin = viewerIsOwner && user.role === Role.USER
   const canDemoteAdmin = viewerIsOwner && user.role === Role.ADMIN
-  const canBan = viewerRole === Role.ADMIN && user.role === Role.USER && !banned
-  const canUnban =
-    viewerRole === Role.ADMIN && user.role === Role.USER && banned
   const canDelete = viewerIsOwner && user.role === Role.USER
 
   const hasRoleActions = canPromoteToAdmin || canDemoteAdmin
-  const hasBanActions = canBan || canUnban
-  const hasActions = hasRoleActions || hasBanActions || canDelete
+  const hasActions = hasRoleActions || canDelete
 
   if (!hasActions) return null
 
@@ -93,9 +80,6 @@ export const UserActionsDropdown = ({
           break
         case 'demote':
           result = await demoteAdmin({ userId: user.id })
-          break
-        case 'unban':
-          result = await unbanUser({ userId: user.id })
           break
         case 'delete':
           result = await deleteUser({ userId: user.id })
@@ -119,8 +103,6 @@ export const UserActionsDropdown = ({
         return 'Promouvoir admin'
       case 'demote':
         return 'Rétrograder à joueur'
-      case 'unban':
-        return 'Débannir'
       case 'delete':
         return "Supprimer l'utilisateur"
       default:
@@ -134,8 +116,6 @@ export const UserActionsDropdown = ({
         return `${user.name} sera promu au rôle d'admin.`
       case 'demote':
         return `${user.name} sera rétrogradé à joueur.`
-      case 'unban':
-        return `${user.name} sera débanni et pourra à nouveau accéder à la plateforme.`
       case 'delete':
         return `${user.name} sera définitivement supprimé. Toutes les données associées (inscriptions, équipes, etc.) seront supprimées.`
       default:
@@ -182,26 +162,6 @@ export const UserActionsDropdown = ({
                 <DropdownMenuItem onClick={() => setConfirmAction('demote')}>
                   <ShieldOff className="size-4 text-orange-400" />
                   Rétrograder à joueur
-                </DropdownMenuItem>
-              )}
-            </>
-          )}
-
-          {hasBanActions && (
-            <>
-              <DropdownMenuSeparator className="bg-white/5" />
-              {canBan && (
-                <DropdownMenuItem asChild>
-                  <Link href={ROUTES.ADMIN_USER_DETAIL(user.id)}>
-                    <Ban className="size-4 text-red-400" />
-                    Bannir
-                  </Link>
-                </DropdownMenuItem>
-              )}
-              {canUnban && (
-                <DropdownMenuItem onClick={() => setConfirmAction('unban')}>
-                  <ShieldOff className="size-4 text-emerald-400" />
-                  Débannir
                 </DropdownMenuItem>
               )}
             </>

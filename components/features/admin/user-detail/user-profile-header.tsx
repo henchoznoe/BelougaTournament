@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/user-detail/user-profile-header.tsx
- * Description: Profile header section displaying user avatar, name, email, role/status badges, and info cards.
+ * Description: Profile header section displaying user avatar, name, email, role badge, and info cards.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,12 +8,10 @@
 
 'use client'
 
-import { Ban, Calendar, ClipboardList, Clock3, Hash } from 'lucide-react'
+import { Calendar, ClipboardList, Clock3, Hash } from 'lucide-react'
 import Image from 'next/image'
 import { RoleBadge } from '@/components/ui/role-badge'
-import { StatusBadge } from '@/components/ui/status-badge'
 import type { UserDetail } from '@/lib/types/user'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDate, formatDateTime } from '@/lib/utils/formatting'
 
 interface UserProfileHeaderProps {
@@ -21,7 +19,6 @@ interface UserProfileHeaderProps {
 }
 
 export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
-  const banned = isBanned(user.bannedUntil)
   const hasCustomDisplayName =
     user.displayName && user.displayName !== user.name
 
@@ -42,11 +39,6 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
               {user.name.charAt(0).toUpperCase()}
             </span>
           )}
-          {banned && (
-            <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-              <Ban className="size-5 text-red-400" />
-            </div>
-          )}
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-xl font-semibold text-white">
@@ -58,7 +50,6 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
           <p className="truncate text-sm text-zinc-400">{user.email}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <RoleBadge role={user.role} size="md" />
-            <StatusBadge bannedUntil={user.bannedUntil} size="md" />
           </div>
         </div>
       </div>

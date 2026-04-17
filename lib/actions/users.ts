@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/users.ts
- * Description: Server actions for unified user management (promote, demote, ban, unban, update, delete).
+ * Description: Server actions for unified user management (promote, demote, update, delete).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -15,11 +15,9 @@ import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { isOwner } from '@/lib/utils/owner'
 import {
-  banUserSchema,
   deleteUserSchema,
   demoteUserSchema,
   promoteUserSchema,
-  unbanUserSchema,
   updateUserSchema,
 } from '@/lib/validations/users'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -133,80 +131,6 @@ export const updateUser = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
 
     return { success: true, message: `${user.name} a été mis à jour.` }
-  },
-})
-
-/** Bans a user until the specified date. */
-export const banUser = authenticatedAction({
-  schema: banUserSchema,
-  role: Role.ADMIN,
-  handler: async (data): Promise<ActionState> => {
-    const user = await prisma.user.findUnique({
-      where: { id: data.userId },
-      select: { role: true, name: true },
-    })
-
-    if (!user) {
-      return { success: false, message: 'Utilisateur introuvable.' }
-    }
-
-    if (user.role !== Role.USER) {
-      return {
-        success: false,
-        message: 'Impossible de bannir un administrateur.',
-      }
-    }
-
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: data.userId },
-        data: {
-          bannedUntil: data.bannedUntil,
-          banReason: data.banReason || null,
-        },
-      }),
-      prisma.session.deleteMany({ where: { userId: data.userId } }),
-    ])
-
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
-
-    return { success: true, message: `${user.name} a été banni.` }
-  },
-})
-
-/** Removes the ban from a user. */
-export const unbanUser = authenticatedAction({
-  schema: unbanUserSchema,
-  role: Role.ADMIN,
-  handler: async (data): Promise<ActionState> => {
-    const user = await prisma.user.findUnique({
-      where: { id: data.userId },
-      select: { name: true, bannedUntil: true },
-    })
-
-    if (!user) {
-      return { success: false, message: 'Utilisateur introuvable.' }
-    }
-
-    if (!user.bannedUntil) {
-      return { success: false, message: `${user.name} n'est pas banni.` }
-    }
-
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: {
-        bannedUntil: null,
-        banReason: null,
-      },
-    })
-
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
-
-    return { success: true, message: `${user.name} a été débanni.` }
   },
 })
 

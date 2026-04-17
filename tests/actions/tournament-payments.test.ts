@@ -114,7 +114,6 @@ describe('paid tournament registration actions', () => {
       },
     })
 
-    mockUserFindUnique.mockResolvedValue({ bannedUntil: null })
     mockTournamentFindUnique.mockResolvedValue({
       id: TOURNAMENT_UUID,
       title: 'PUBG Duo Cup',

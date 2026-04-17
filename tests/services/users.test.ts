@@ -55,9 +55,6 @@ const MOCK_USERS = [
     role: Role.USER,
     createdAt: new Date('2026-01-01'),
     lastLoginAt: new Date('2026-04-15T19:30:00Z'),
-    bannedUntil: null,
-    banReason: null,
-    _count: { registrations: 3 },
   },
   {
     id: 'admin-1',
@@ -69,9 +66,6 @@ const MOCK_USERS = [
     role: Role.ADMIN,
     createdAt: new Date('2026-02-01'),
     lastLoginAt: null,
-    bannedUntil: null,
-    banReason: null,
-    _count: { registrations: 0 },
   },
 ]
 
@@ -85,8 +79,6 @@ const MOCK_USER_DETAIL = {
   role: Role.USER,
   createdAt: new Date('2026-01-01'),
   lastLoginAt: new Date('2026-04-15T19:30:00Z'),
-  bannedUntil: null,
-  banReason: null,
   registrations: [
     {
       id: 'reg-1',

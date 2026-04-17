@@ -64,7 +64,6 @@ export const getRegistrationById = async (
             name: true,
             displayName: true,
             image: true,
-            bannedUntil: true,
             teamMembers: {
               select: {
                 team: {

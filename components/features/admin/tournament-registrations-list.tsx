@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Ban, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentRegistrationItem } from '@/lib/types/tournament'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
 
 const PAGE_SIZE = 20
@@ -117,8 +116,6 @@ export const TournamentRegistrationsList = ({
             </TableHeader>
             <TableBody>
               {paginated.map(registration => {
-                const banned = isBanned(registration.user.bannedUntil)
-
                 return (
                   <TableRow
                     key={registration.id}
@@ -149,11 +146,6 @@ export const TournamentRegistrationsList = ({
                             <span className="text-xs font-medium text-zinc-400">
                               {registration.user.name.charAt(0).toUpperCase()}
                             </span>
-                          )}
-                          {banned && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-                              <Ban className="size-3.5 text-red-400" />
-                            </div>
                           )}
                         </div>
                         <div className="min-w-0">

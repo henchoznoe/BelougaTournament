@@ -196,7 +196,6 @@ export const getRegistrations = async (
             name: true,
             displayName: true,
             image: true,
-            bannedUntil: true,
             teamMembers: {
               where: { team: { tournamentId } },
               select: {

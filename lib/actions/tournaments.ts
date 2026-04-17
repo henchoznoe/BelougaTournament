@@ -16,7 +16,6 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, REGISTRATION_HOLD_MINUTES } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { toNullable } from '@/lib/utils/formatting'
 import {
   createTeamSchema,
@@ -138,21 +137,6 @@ type TeamWithMembers = {
 /** Team member with nested team (including members). Used by unregisterFromTournament. */
 type TeamMemberWithTeam = {
   team: TeamWithMembers
-}
-
-/**
- * Checks whether a user is currently banned.
- * Returns an ActionState error if banned, or null if not banned.
- */
-const checkBanStatus = async (userId: string): Promise<ActionState | null> => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { bannedUntil: true },
-  })
-  if (user && isBanned(user.bannedUntil)) {
-    return { success: false, message: 'Votre compte est banni.' }
-  }
-  return null
 }
 
 /** Validates dynamic field values against tournament field definitions. */
@@ -425,7 +409,7 @@ const startPaidRegistrationCheckout = async ({
 
 /**
  * Shared pre-checks for all registration actions.
- * Verifies: ban status, tournament exists & PUBLISHED, registration window open, no duplicate registration.
+ * Verifies: tournament exists & PUBLISHED, registration window open, no duplicate registration.
  * Returns the tournament on success, or an ActionState error on failure.
  */
 const fetchTournamentForRegistration = async (
@@ -438,11 +422,7 @@ const fetchTournamentForRegistration = async (
       existingRegistration: ExistingRegistration | null
     }
 > => {
-  // 1. Check ban status
-  const banResult = await checkBanStatus(userId)
-  if (banResult) return { error: banResult }
-
-  // 2. Fetch tournament with fields
+  // 1. Fetch tournament with fields
   const tournament = (await prisma.tournament.findUnique({
     where: { id: tournamentId },
     include: { fields: { orderBy: { order: 'asc' } } },
@@ -457,7 +437,7 @@ const fetchTournamentForRegistration = async (
     }
   }
 
-  // 3. Check registration window
+  // 2. Check registration window
   const now = new Date()
   if (now < tournament.registrationOpen || now > tournament.registrationClose) {
     return {
@@ -468,7 +448,7 @@ const fetchTournamentForRegistration = async (
     }
   }
 
-  // 4. Load any existing registration for reuse or duplicate detection
+  // 3. Load any existing registration for reuse or duplicate detection
   const existing = await prisma.tournamentRegistration.findUnique({
     where: {
       tournamentId_userId: { tournamentId, userId },
@@ -1175,11 +1155,7 @@ export const unregisterFromTournament = authenticatedAction({
   handler: async (data, session): Promise<ActionState> => {
     const userId = session.user.id
 
-    // 1. Check ban status
-    const banResult = await checkBanStatus(userId)
-    if (banResult) return banResult
-
-    // 2. Fetch the registration with tournament info
+    // 1. Fetch the registration with tournament info
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: {
         tournamentId_userId: {

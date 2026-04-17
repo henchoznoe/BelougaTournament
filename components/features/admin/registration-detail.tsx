@@ -10,7 +10,6 @@
 
 import {
   BadgeCheck,
-  Ban,
   Calendar,
   Check,
   CreditCard,
@@ -47,7 +46,6 @@ import {
 } from '@/lib/actions/registrations'
 import { ROUTES } from '@/lib/config/routes'
 import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime } from '@/lib/utils/formatting'
 import {
   FieldType,
@@ -87,7 +85,6 @@ export const RegistrationDetail = ({
 
   const canManage = viewerRole === Role.ADMIN
   const isTeam = registration.tournament.format === TournamentFormat.TEAM
-  const banned = isBanned(registration.user.bannedUntil)
   const isCaptain = registration.team?.captainId === registration.user.id
   const canRefund = registration.paymentStatus === PaymentStatus.PAID
 
@@ -242,11 +239,6 @@ export const RegistrationDetail = ({
                 {registration.user.name.charAt(0).toUpperCase()}
               </span>
             )}
-            {banned && (
-              <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-                <Ban className="size-5 text-red-400" />
-              </div>
-            )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
               <ExternalLink className="size-4 text-white" />
             </div>
@@ -268,12 +260,6 @@ export const RegistrationDetail = ({
                 <Trophy className="size-3" />
                 {registration.tournament.title}
               </Link>
-              {banned && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-400">
-                  <Ban className="size-3" />
-                  Banni
-                </span>
-              )}
             </div>
           </div>
         </div>

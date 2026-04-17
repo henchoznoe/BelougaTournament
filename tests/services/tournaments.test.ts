@@ -282,7 +282,6 @@ const MOCK_REGISTRATION = {
     name: 'player1',
     displayName: 'Player One',
     image: null,
-    bannedUntil: null,
   },
   team: {
     id: 'team-1',
@@ -304,7 +303,6 @@ const MOCK_RAW_REGISTRATION = {
     name: 'player1',
     displayName: 'Player One',
     image: null,
-    bannedUntil: null,
     teamMembers: [
       {
         team: {
@@ -380,7 +378,6 @@ describe('getRegistrations', () => {
             name: true,
             displayName: true,
             image: true,
-            bannedUntil: true,
             teamMembers: {
               where: { team: { tournamentId: 'tournament-1' } },
               select: {

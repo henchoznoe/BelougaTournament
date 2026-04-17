@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/users-list.tsx
- * Description: Client component displaying the admin users table with search, filters, pagination, and actions dropdown.
+ * Description: Client component displaying the admin users table with search, role filter, sortable columns, and pagination.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,7 +8,13 @@
 
 'use client'
 
-import { Ban, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Search,
+} from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -23,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
   TableBody,
@@ -34,19 +39,51 @@ import {
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRow } from '@/lib/types/user'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { formatDateTime, formatShortDate } from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = 20
 
 type RoleFilter = 'all' | Role
-type StatusFilter = 'all' | 'active' | 'banned'
+type SortKey = 'user' | 'role' | 'createdAt' | 'lastLoginAt'
+type SortDirection = 'asc' | 'desc'
+
+interface SortState {
+  key: SortKey | null
+  direction: SortDirection
+}
 
 interface UsersListProps {
   users: UserRow[]
   viewerRole: Role
   viewerIsOwner: boolean
+}
+
+/** Default sort: admins first, then alphabetical by name. */
+const defaultSort = (a: UserRow, b: UserRow): number => {
+  if (a.role !== b.role) {
+    return a.role === Role.ADMIN ? -1 : 1
+  }
+  return a.name.localeCompare(b.name)
+}
+
+const compareValues = (a: UserRow, b: UserRow, key: SortKey): number => {
+  switch (key) {
+    case 'user':
+      return a.name.localeCompare(b.name)
+    case 'role':
+      if (a.role === b.role) return 0
+      return a.role === Role.ADMIN ? -1 : 1
+    case 'createdAt':
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    case 'lastLoginAt': {
+      const aTime = a.lastLoginAt ? new Date(a.lastLoginAt).getTime() : 0
+      const bTime = b.lastLoginAt ? new Date(b.lastLoginAt).getTime() : 0
+      return aTime - bTime
+    }
+    default:
+      return 0
+  }
 }
 
 export const UsersList = ({
@@ -57,20 +94,32 @@ export const UsersList = ({
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
+  const [sort, setSort] = useState<SortState>({ key: null, direction: 'asc' })
+
+  const handleSort = (key: SortKey) => {
+    setSort(prev => {
+      if (prev.key !== key) return { key, direction: 'asc' }
+      if (prev.direction === 'asc') return { key, direction: 'desc' }
+      return { key: null, direction: 'asc' }
+    })
+    setPage(1)
+  }
+
+  const SortIndicator = ({ columnKey }: { columnKey: SortKey }) => {
+    if (sort.key !== columnKey) return null
+    return sort.direction === 'asc' ? (
+      <ChevronUp className="inline size-3" />
+    ) : (
+      <ChevronDown className="inline size-3" />
+    )
+  }
 
   const filtered = useMemo(() => {
     let result = users
 
     if (roleFilter !== 'all') {
       result = result.filter(u => u.role === roleFilter)
-    }
-
-    if (statusFilter === 'active') {
-      result = result.filter(u => !isBanned(u.bannedUntil))
-    } else if (statusFilter === 'banned') {
-      result = result.filter(u => isBanned(u.bannedUntil))
     }
 
     if (search) {
@@ -84,8 +133,18 @@ export const UsersList = ({
       )
     }
 
-    return result
-  }, [users, search, roleFilter, statusFilter])
+    // Sort
+    const sorted = [...result]
+    if (sort.key) {
+      const key = sort.key
+      const dir = sort.direction === 'asc' ? 1 : -1
+      sorted.sort((a, b) => compareValues(a, b, key) * dir)
+    } else {
+      sorted.sort(defaultSort)
+    }
+
+    return sorted
+  }, [users, search, roleFilter, sort])
 
   const handleSearch = (value: string) => {
     setSearch(value)
@@ -97,19 +156,12 @@ export const UsersList = ({
     setPage(1)
   }
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as StatusFilter)
-    setPage(1)
-  }
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const paginated = filtered.slice(
     (safePage - 1) * PAGE_SIZE,
     safePage * PAGE_SIZE,
   )
-
-  const bannedCount = users.filter(u => isBanned(u.bannedUntil)).length
 
   return (
     <>
@@ -138,19 +190,6 @@ export const UsersList = ({
               <SelectItem value={Role.USER}>Joueur</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={handleStatusFilter}>
-            <SelectTrigger
-              aria-label="Filtrer par statut"
-              className="w-28 border-white/10 bg-white/5 text-zinc-200"
-            >
-              <SelectValue placeholder="Statut" />
-            </SelectTrigger>
-            <SelectContent className="border-white/10 bg-zinc-950">
-              <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="active">Actifs</SelectItem>
-              <SelectItem value="banned">Bannis</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -158,17 +197,12 @@ export const UsersList = ({
         <span>
           {filtered.length} utilisateur{filtered.length !== 1 ? 's' : ''}
         </span>
-        {bannedCount > 0 && (
-          <span className="text-red-400">
-            {bannedCount} banni{bannedCount !== 1 ? 's' : ''}
-          </span>
-        )}
       </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
           <p className="text-sm text-zinc-500">
-            {search || roleFilter !== 'all' || statusFilter !== 'all'
+            {search || roleFilter !== 'all'
               ? 'Aucun utilisateur trouvé pour ces critères.'
               : 'Aucun utilisateur inscrit.'}
           </p>
@@ -178,23 +212,29 @@ export const UsersList = ({
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Utilisateur
+                <TableHead
+                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
+                  onClick={() => handleSort('user')}
+                >
+                  Utilisateur <SortIndicator columnKey="user" />
                 </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
-                  Rôle
+                <TableHead
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 sm:table-cell"
+                  onClick={() => handleSort('role')}
+                >
+                  Rôle <SortIndicator columnKey="role" />
                 </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
-                  Statut
+                <TableHead
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  Inscrit le <SortIndicator columnKey="createdAt" />
                 </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 md:table-cell">
-                  Inscriptions
-                </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:table-cell">
-                  Inscrit le
-                </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 xl:table-cell">
-                  Dernière connexion
+                <TableHead
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 lg:table-cell"
+                  onClick={() => handleSort('lastLoginAt')}
+                >
+                  Dernière connexion <SortIndicator columnKey="lastLoginAt" />
                 </TableHead>
                 <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   <span className="sr-only">Actions</span>
@@ -202,103 +242,75 @@ export const UsersList = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginated.map(user => {
-                const banned = isBanned(user.bannedUntil)
-
-                return (
-                  <TableRow
-                    key={user.id}
-                    tabIndex={0}
-                    role="link"
-                    className="cursor-pointer border-white/5 hover:bg-white/4"
-                    onClick={() =>
+              {paginated.map(user => (
+                <TableRow
+                  key={user.id}
+                  tabIndex={0}
+                  role="link"
+                  className="cursor-pointer border-white/5 hover:bg-white/4"
+                  onClick={() => router.push(ROUTES.ADMIN_USER_DETAIL(user.id))}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
                       router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
                     }
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
-                      }
-                    }}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
-                          {user.image ? (
-                            <Image
-                              src={user.image}
-                              alt={user.name}
-                              width={32}
-                              height={32}
-                              className="size-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-xs font-medium text-zinc-400">
-                              {user.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                          {banned && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-                              <Ban className="size-3.5 text-red-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-zinc-200">
-                            {user.name}
-                          </p>
-                          <p className="truncate text-xs text-zinc-500">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="hidden sm:table-cell">
-                      <RoleBadge role={user.role} />
-                    </TableCell>
-
-                    <TableCell className="hidden sm:table-cell">
-                      <StatusBadge bannedUntil={user.bannedUntil} />
-                    </TableCell>
-
-                    <TableCell className="hidden md:table-cell">
-                      <span className="text-xs text-zinc-400">
-                        {user._count.registrations > 0 ? (
-                          <>
-                            {user._count.registrations} tournoi
-                            {user._count.registrations > 1 ? 's' : ''}
-                          </>
+                  }}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+                        {user.image ? (
+                          <Image
+                            src={user.image}
+                            alt={user.name}
+                            width={32}
+                            height={32}
+                            className="size-full object-cover"
+                          />
                         ) : (
-                          <span className="text-zinc-600">&mdash;</span>
+                          <span className="text-xs font-medium text-zinc-400">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
                         )}
-                      </span>
-                    </TableCell>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-zinc-200">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs text-zinc-500">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
 
-                    <TableCell className="hidden lg:table-cell">
-                      <span className="text-xs text-zinc-500">
-                        {formatShortDate(user.createdAt)}
-                      </span>
-                    </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <RoleBadge role={user.role} />
+                  </TableCell>
 
-                    <TableCell className="hidden xl:table-cell">
-                      <span className="text-xs text-zinc-500">
-                        {user.lastLoginAt
-                          ? formatDateTime(user.lastLoginAt)
-                          : 'Jamais'}
-                      </span>
-                    </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <span className="text-xs text-zinc-500">
+                      {formatShortDate(user.createdAt)}
+                    </span>
+                  </TableCell>
 
-                    <TableCell onClick={e => e.stopPropagation()}>
-                      <UserActionsDropdown
-                        user={user}
-                        viewerRole={viewerRole}
-                        viewerIsOwner={viewerIsOwner}
-                      />
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                  <TableCell className="hidden lg:table-cell">
+                    <span className="text-xs text-zinc-500">
+                      {user.lastLoginAt
+                        ? formatDateTime(user.lastLoginAt)
+                        : 'Jamais'}
+                    </span>
+                  </TableCell>
+
+                  <TableCell onClick={e => e.stopPropagation()}>
+                    <UserActionsDropdown
+                      user={user}
+                      viewerRole={viewerRole}
+                      viewerIsOwner={viewerIsOwner}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

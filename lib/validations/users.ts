@@ -30,26 +30,6 @@ export const updateUserSchema = z.object({
     }),
 })
 
-/** Schema for banning a user. */
-export const banUserSchema = z.object({
-  userId: z.uuid('ID utilisateur invalide.'),
-  bannedUntil: z.coerce
-    .date({ message: 'Date de ban invalide.' })
-    .refine(d => d > new Date(), {
-      message: 'La date de ban doit être dans le futur.',
-    }),
-  banReason: z
-    .string()
-    .trim()
-    .max(500, 'La raison ne peut pas dépasser 500 caractères.')
-    .optional(),
-})
-
-/** Schema for unbanning a user. */
-export const unbanUserSchema = z.object({
-  userId: z.uuid('ID utilisateur invalide.'),
-})
-
 /** Schema for deleting a user (owner-only, USER-role targets only). */
 export const deleteUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),

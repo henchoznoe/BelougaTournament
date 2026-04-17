@@ -33,7 +33,6 @@ export type RegistrationRow = {
     name: string
     displayName: string
     image: string | null
-    bannedUntil: Date | null
   }
   tournament: {
     id: string

@@ -72,8 +72,6 @@ model User {
   lastLoginAt   DateTime?
   updatedAt     DateTime                 @updatedAt
   role          Role                     @default(USER)
-  bannedUntil   DateTime?
-  banReason     String?
   sessions      Session[]
   accounts      Account[]
   registrations TournamentRegistration[]

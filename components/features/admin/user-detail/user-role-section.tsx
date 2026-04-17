@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button'
 import { demoteAdmin, promoteToAdmin } from '@/lib/actions/users'
 import type { ActionState } from '@/lib/types/actions'
 import type { UserDetail } from '@/lib/types/user'
-import { isBanned } from '@/lib/utils/auth.helpers'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 type RoleAction = 'promote' | 'demote'
@@ -31,13 +30,11 @@ export const UserRoleSection = ({
   viewerIsOwner,
 }: UserRoleSectionProps) => {
   const router = useRouter()
-  const banned = isBanned(user.bannedUntil)
   const [confirmAction, setConfirmAction] = useState<RoleAction | null>(null)
   const [isActionPending, startActionTransition] = useTransition()
 
   const showRoleManagement =
-    viewerIsOwner &&
-    ((user.role === Role.USER && !banned) || user.role === Role.ADMIN)
+    viewerIsOwner && (user.role === Role.USER || user.role === Role.ADMIN)
 
   if (!showRoleManagement) return null
 
@@ -76,7 +73,6 @@ export const UserRoleSection = ({
 
       <div className="space-y-3">
         {user.role === Role.USER &&
-          !banned &&
           (confirmAction === 'promote' ? (
             <div className="flex flex-wrap items-center gap-2">
               <Button
