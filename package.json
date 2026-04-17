@@ -20,7 +20,8 @@
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhook"
   },
   "lint-staged": {
     "*.{ts,tsx,css}": [

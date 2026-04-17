@@ -12,6 +12,7 @@ import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, REGISTRATION_HOLD_MINUTES } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
@@ -393,7 +394,9 @@ const startPaidRegistrationCheckout = async ({
       message: 'Redirection vers Stripe…',
       data: { checkoutUrl: session.url },
     }
-  } catch (_error) {
+  } catch (error) {
+    logger.error({ error }, 'Failed to create Stripe checkout session')
+
     await prisma.$transaction(async tx => {
       await removeUserFromTeam(tx, userId, tournament.id)
 

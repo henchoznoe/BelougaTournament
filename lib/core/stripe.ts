@@ -11,7 +11,7 @@ import Stripe from 'stripe'
 import { env } from '@/lib/core/env'
 
 export const STRIPE_CURRENCY = 'chf'
-export const REGISTRATION_HOLD_MINUTES = 15
+export const REGISTRATION_HOLD_MINUTES = 30
 export const DEFAULT_REFUND_DEADLINE_DAYS = 14
 
 let stripeClient: Stripe | null = null
