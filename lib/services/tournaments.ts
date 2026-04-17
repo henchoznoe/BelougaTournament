@@ -23,12 +23,16 @@ import type {
   TournamentListItem,
   TournamentRegistrationItem,
   UserRegistrationItem,
+  UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Shared select for the landing hero badge. */
 const HERO_BADGE_SELECT = {
@@ -172,7 +176,12 @@ export const getRegistrations = async (
 
   try {
     const rows = (await prisma.tournamentRegistration.findMany({
-      where: { tournamentId },
+      where: {
+        tournamentId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -512,14 +521,49 @@ export const isUserRegisteredForTournament = async (
   tournamentId: string,
 ): Promise<boolean> => {
   try {
-    const row = await prisma.tournamentRegistration.findUnique({
-      where: { tournamentId_userId: { tournamentId, userId } },
+    const row = await prisma.tournamentRegistration.findFirst({
+      where: {
+        tournamentId,
+        userId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
       select: { id: true },
     })
     return row !== null
   } catch (error) {
     logger.error({ error }, 'Error checking user registration status')
     return false
+  }
+}
+
+/** Fetches the current registration state for a user on a tournament, if any active record exists. */
+export const getUserTournamentRegistrationState = async (
+  userId: string,
+  tournamentId: string,
+): Promise<UserTournamentRegistrationState | null> => {
+  try {
+    const row = await prisma.tournamentRegistration.findFirst({
+      where: {
+        tournamentId,
+        userId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        expiresAt: true,
+      },
+    })
+
+    return row as UserTournamentRegistrationState | null
+  } catch (error) {
+    logger.error({ error }, 'Error fetching user tournament registration state')
+    return null
   }
 }
 
@@ -569,6 +613,9 @@ export const getUserRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
         tournament: { status: TournamentStatus.PUBLISHED },
       },
       orderBy: { createdAt: 'desc' },
@@ -593,6 +640,7 @@ export const getUserPastRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
+        status: RegistrationStatus.CONFIRMED,
         tournament: { status: TournamentStatus.ARCHIVED },
       },
       orderBy: { createdAt: 'desc' },

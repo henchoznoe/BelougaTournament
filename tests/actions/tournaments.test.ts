@@ -32,6 +32,17 @@ vi.mock('@/lib/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock('@/lib/core/env', () => ({
+  env: {
+    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+  },
+}))
+
+vi.mock('@/lib/core/stripe', () => ({
+  REGISTRATION_HOLD_MINUTES: 15,
+  getStripe: vi.fn(),
+}))
+
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   cacheLife: vi.fn(),
@@ -48,6 +59,9 @@ const mockTeamUpdate = vi.fn()
 const mockTeamDelete = vi.fn()
 const mockTeamMemberDeleteMany = vi.fn()
 const mockTeamMemberCount = vi.fn()
+const mockRegistrationFindUnique = vi.fn()
+const mockRegistrationFindMany = vi.fn()
+const mockRegistrationDelete = vi.fn()
 const mockRegistrationDeleteMany = vi.fn()
 const mockTransaction = vi.fn()
 
@@ -75,6 +89,8 @@ vi.mock('@/lib/core/prisma', () => ({
       count: (...args: unknown[]) => mockTeamMemberCount(...args),
     },
     tournamentRegistration: {
+      findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
+      findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
       deleteMany: (...args: unknown[]) => mockRegistrationDeleteMany(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
@@ -176,6 +192,25 @@ describe('tournament admin actions', () => {
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])
     mockTeamMemberCount.mockResolvedValue(1)
+    mockRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-1',
+      paymentRequiredSnapshot: false,
+      paymentStatus: 'NOT_REQUIRED',
+    })
+    mockRegistrationFindMany.mockResolvedValue([
+      {
+        id: 'reg-1',
+        userId: CAPTAIN_UUID,
+        paymentRequiredSnapshot: false,
+        paymentStatus: 'NOT_REQUIRED',
+      },
+      {
+        id: 'reg-2',
+        userId: MEMBER_UUID,
+        paymentRequiredSnapshot: false,
+        paymentStatus: 'NOT_REQUIRED',
+      },
+    ])
   })
 
   it('rejects non-admin users for createTournament', async () => {
@@ -243,6 +278,7 @@ describe('team moderation actions', () => {
           count: mockTeamMemberCount,
         },
         tournamentRegistration: {
+          delete: mockRegistrationDelete,
           deleteMany: mockRegistrationDeleteMany,
         },
         team: { update: mockTeamUpdate, delete: mockTeamDelete },

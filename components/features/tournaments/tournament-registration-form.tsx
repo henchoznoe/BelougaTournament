@@ -10,6 +10,7 @@
 
 import {
   CheckCircle,
+  CreditCard,
   Loader2,
   LogIn,
   Send,
@@ -39,17 +40,32 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
-import type { AvailableTeam, TournamentFieldItem } from '@/lib/types/tournament'
+import type {
+  AvailableTeam,
+  PublicTournamentDetail,
+  TournamentFieldItem,
+  UserTournamentRegistrationState,
+} from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { FieldType, TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  FieldType,
+  PaymentStatus,
+  RegistrationStatus,
+  RegistrationType,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentRegistrationFormProps {
+  tournament: Pick<
+    PublicTournamentDetail,
+    'id' | 'registrationType' | 'entryFeeAmount' | 'entryFeeCurrency'
+  >
   tournamentId: string
   fields: TournamentFieldItem[]
   format: TournamentFormat
   teamSize: number
   availableTeams: AvailableTeam[]
-  isRegistered: boolean
+  registrationState: UserTournamentRegistrationState | null
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -70,12 +86,13 @@ const buildFieldValues = (
 }
 
 export const TournamentRegistrationForm = ({
+  tournament,
   tournamentId,
   fields,
   format,
   teamSize,
   availableTeams,
-  isRegistered,
+  registrationState,
 }: TournamentRegistrationFormProps) => {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
@@ -120,27 +137,38 @@ export const TournamentRegistrationForm = ({
     startTransition(async () => {
       const fieldValues = buildFieldValues(data, fields)
 
-      let result: ActionState
+      let result: ActionState<{ checkoutUrl?: string }>
 
       if (format === TournamentFormat.TEAM) {
         if (teamMode === 'create') {
-          result = await createTeamAndRegister({
+          result = (await createTeamAndRegister({
             tournamentId,
+            returnPath: currentPath,
             teamName: teamName.trim(),
             fieldValues,
-          })
+          })) as ActionState<{ checkoutUrl?: string }>
         } else {
-          result = await joinTeamAndRegister({
+          result = (await joinTeamAndRegister({
             tournamentId,
+            returnPath: currentPath,
             teamId: selectedTeamId,
             fieldValues,
-          })
+          })) as ActionState<{ checkoutUrl?: string }>
         }
       } else {
-        result = await registerForTournament({ tournamentId, fieldValues })
+        result = (await registerForTournament({
+          tournamentId,
+          returnPath: currentPath,
+          fieldValues,
+        })) as ActionState<{ checkoutUrl?: string }>
       }
 
       if (result.success) {
+        if (result.data?.checkoutUrl) {
+          window.location.href = result.data.checkoutUrl
+          return
+        }
+
         toast.success(result.message)
         router.refresh()
       } else {
@@ -178,7 +206,7 @@ export const TournamentRegistrationForm = ({
   }
 
   // Already registered: show confirmation and link to profile
-  if (isRegistered) {
+  if (registrationState?.status === RegistrationStatus.CONFIRMED) {
     return (
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <div className="inline-flex rounded-full bg-emerald-500/10 p-3 ring-1 ring-emerald-500/20">
@@ -200,9 +228,46 @@ export const TournamentRegistrationForm = ({
     )
   }
 
+  const isPendingRegistration =
+    registrationState?.status === RegistrationStatus.PENDING
+  const isPaidTournament = tournament.registrationType === RegistrationType.PAID
+  const entryFeeLabel =
+    tournament.entryFeeAmount !== null
+      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency ?? 'CHF'}`
+      : null
+
   // Registration form
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {isPaidTournament && entryFeeLabel && (
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm text-zinc-300">
+          <p className="flex items-center gap-2 font-medium text-white">
+            <CreditCard className="size-4 text-blue-400" />
+            Inscription payante: {entryFeeLabel}
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Votre place est réservée pendant 15 minutes au moment de la
+            redirection vers Stripe.
+          </p>
+        </div>
+      )}
+
+      {isPendingRegistration && (
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
+          <p className="font-medium text-amber-300">Paiement en attente</p>
+          <p className="mt-1 text-xs text-amber-200/80">
+            Votre inscription est en attente de confirmation Stripe. Si votre
+            session a expiré, vous pouvez relancer le paiement avec ce
+            formulaire.
+          </p>
+          {registrationState.paymentStatus === PaymentStatus.CANCELLED && (
+            <p className="mt-1 text-xs text-amber-200/80">
+              La précédente session Stripe a expiré ou a été annulée.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Team mode selector (TEAM format only) */}
       {format === TournamentFormat.TEAM && (
         <div className="space-y-4">
@@ -341,20 +406,30 @@ export const TournamentRegistrationForm = ({
 
       <p className="text-center text-xs text-zinc-500">
         <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
-        Votre inscription sera enregistrée.
+        {isPaidTournament
+          ? 'Votre inscription sera confirmée après paiement Stripe.'
+          : 'Votre inscription sera enregistrée.'}
       </p>
 
       <Button type="submit" disabled={isPending} className="w-full gap-2">
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
+        ) : isPaidTournament ? (
+          <CreditCard className="size-4" />
         ) : (
           <Send className="size-4" />
         )}
         {format === TournamentFormat.TEAM
           ? teamMode === 'create'
-            ? "Créer et s'inscrire"
-            : "Rejoindre et s'inscrire"
-          : "S'inscrire"}
+            ? isPaidTournament
+              ? 'Créer et payer'
+              : "Créer et s'inscrire"
+            : isPaidTournament
+              ? 'Rejoindre et payer'
+              : "Rejoindre et s'inscrire"
+          : isPaidTournament
+            ? 'Payer et s’inscrire'
+            : "S'inscrire"}
       </Button>
     </form>
   )

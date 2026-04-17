@@ -306,6 +306,12 @@ export const updateTournamentStatusSchema = z.object({
 /** Schema for a user registering for a tournament (solo). */
 export const registerForTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+  returnPath: z
+    .string()
+    .trim()
+    .min(1, 'Le chemin de retour est requis.')
+    .startsWith('/', 'Le chemin de retour doit commencer par /.')
+    .max(500, 'Le chemin de retour est trop long.'),
   fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
 })
 
@@ -323,6 +329,12 @@ export const updateRegistrationFieldsSchema = z.object({
 /** Schema for creating a team and registering as captain. */
 export const createTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+  returnPath: z
+    .string()
+    .trim()
+    .min(1, 'Le chemin de retour est requis.')
+    .startsWith('/', 'Le chemin de retour doit commencer par /.')
+    .max(500, 'Le chemin de retour est trop long.'),
   teamName: z
     .string()
     .trim()
@@ -334,6 +346,12 @@ export const createTeamSchema = z.object({
 /** Schema for joining an existing team and registering. */
 export const joinTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+  returnPath: z
+    .string()
+    .trim()
+    .min(1, 'Le chemin de retour est requis.')
+    .startsWith('/', 'Le chemin de retour doit commencer par /.')
+    .max(500, 'Le chemin de retour est trop long.'),
   teamId: z.uuid("ID d'équipe invalide."),
   fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
 })

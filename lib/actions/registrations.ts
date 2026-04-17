@@ -19,12 +19,19 @@ import {
   promoteCaptainSchema,
   updateRegistrationFieldsSchema,
 } from '@/lib/validations/registrations'
-import { Role, TournamentFormat } from '@/prisma/generated/prisma/enums'
+import {
+  type PaymentStatus,
+  RegistrationStatus,
+  Role,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 /** Registration with tournament info. Used by adminDeleteRegistration. */
 type RegistrationWithDetails = {
   id: string
   userId: string
+  paymentRequiredSnapshot: boolean
+  paymentStatus: PaymentStatus
   tournament: { id: string; format: TournamentFormat }
   user: { name: string }
 }
@@ -63,9 +70,21 @@ export const adminDeleteRegistration = authenticatedAction({
 
     // 2. SOLO format — just delete the registration
     if (registration.tournament.format === TournamentFormat.SOLO) {
-      await prisma.tournamentRegistration.delete({
-        where: { id: registration.id },
-      })
+      if (registration.paymentRequiredSnapshot) {
+        await prisma.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: registration.paymentStatus,
+            cancelledAt: new Date(),
+            teamId: null,
+          },
+        })
+      } else {
+        await prisma.tournamentRegistration.delete({
+          where: { id: registration.id },
+        })
+      }
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
@@ -96,9 +115,21 @@ export const adminDeleteRegistration = authenticatedAction({
 
     if (!teamMember) {
       // Edge case: registration exists but no team membership — clean up
-      await prisma.tournamentRegistration.delete({
-        where: { id: registration.id },
-      })
+      if (registration.paymentRequiredSnapshot) {
+        await prisma.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: registration.paymentStatus,
+            cancelledAt: new Date(),
+            teamId: null,
+          },
+        })
+      } else {
+        await prisma.tournamentRegistration.delete({
+          where: { id: registration.id },
+        })
+      }
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
@@ -123,8 +154,22 @@ export const adminDeleteRegistration = authenticatedAction({
         where: { teamId: team.id, userId: registration.userId },
       })
 
-      // b. Remove tournament registration
-      await tx.tournamentRegistration.delete({ where: { id: registration.id } })
+      // b. Remove or cancel tournament registration depending on payment history
+      if (registration.paymentRequiredSnapshot) {
+        await tx.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: registration.paymentStatus,
+            cancelledAt: new Date(),
+            teamId: null,
+          },
+        })
+      } else {
+        await tx.tournamentRegistration.delete({
+          where: { id: registration.id },
+        })
+      }
 
       if (isCaptain && otherMembers.length > 0) {
         // c. Promote next member to captain

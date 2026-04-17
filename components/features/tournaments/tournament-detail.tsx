@@ -29,6 +29,7 @@ import { ROUTES } from '@/lib/config/routes'
 import type {
   AvailableTeam,
   PublicTournamentDetail,
+  UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate, formatDateTime } from '@/lib/utils/formatting'
@@ -41,7 +42,7 @@ interface TournamentDetailProps {
   tournament: PublicTournamentDetail
   twitchUsername?: string
   availableTeams: AvailableTeam[]
-  isRegistered: boolean
+  registrationState: UserTournamentRegistrationState | null
 }
 
 /** Determines the registration status label and color. */
@@ -103,7 +104,7 @@ export const TournamentDetail = ({
   tournament,
   twitchUsername,
   availableTeams,
-  isRegistered,
+  registrationState,
 }: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
@@ -448,7 +449,8 @@ export const TournamentDetail = ({
                 format={tournament.format}
                 teamSize={tournament.teamSize}
                 availableTeams={availableTeams}
-                isRegistered={isRegistered}
+                tournament={tournament}
+                registrationState={registrationState}
               />
             </>
           ) : (

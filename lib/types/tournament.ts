@@ -16,6 +16,13 @@ import type {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
+export type UserTournamentRegistrationState = {
+  id: string
+  status: RegistrationStatus
+  paymentStatus: PaymentStatus
+  expiresAt: Date | null
+}
+
 // ---------------------------------------------------------------------------
 // User registration types (profile page)
 // ---------------------------------------------------------------------------

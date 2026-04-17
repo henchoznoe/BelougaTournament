@@ -615,6 +615,7 @@ describe('updateTournamentStatusSchema', () => {
 describe('registerForTournamentSchema', () => {
   const VALID_REGISTRATION = {
     tournamentId: VALID_UUID,
+    returnPath: '/tournaments/valorant-cup',
     fieldValues: { 'Riot ID': 'Player#1234', Rank: 'Diamond' },
   }
 
@@ -627,6 +628,7 @@ describe('registerForTournamentSchema', () => {
   it('accepts a registration with numeric field values', () => {
     const result = registerForTournamentSchema.safeParse({
       tournamentId: VALID_UUID,
+      returnPath: '/tournaments/valorant-cup',
       fieldValues: { 'Riot ID': 'Player#1234', MMR: 2500 },
     })
     expect(result.success).toBe(true)
@@ -635,6 +637,7 @@ describe('registerForTournamentSchema', () => {
   it('accepts a registration with empty fieldValues', () => {
     const result = registerForTournamentSchema.safeParse({
       tournamentId: VALID_UUID,
+      returnPath: '/tournaments/valorant-cup',
       fieldValues: {},
     })
     expect(result.success).toBe(true)
@@ -652,6 +655,7 @@ describe('registerForTournamentSchema', () => {
   it('rejects missing tournamentId', () => {
     expect(
       registerForTournamentSchema.safeParse({
+        returnPath: '/tournaments/valorant-cup',
         fieldValues: { 'Riot ID': 'Player#1234' },
       }).success,
     ).toBe(false)
@@ -668,6 +672,7 @@ describe('registerForTournamentSchema', () => {
   it('accepts mixed string and number values in fieldValues', () => {
     const result = registerForTournamentSchema.safeParse({
       tournamentId: VALID_UUID,
+      returnPath: '/tournaments/valorant-cup',
       fieldValues: { Name: 'John', Age: 25, Score: 100 },
     })
     expect(result.success).toBe(true)

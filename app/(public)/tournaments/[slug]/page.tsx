@@ -17,7 +17,7 @@ import { getGlobalSettings } from '@/lib/services/settings'
 import {
   getAvailableTeams,
   getPublicTournamentBySlug,
-  isUserRegisteredForTournament,
+  getUserTournamentRegistrationState,
 } from '@/lib/services/tournaments'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -62,8 +62,8 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
 
   // Check if the logged-in user is already registered for this tournament
   const isRegistered = session?.user
-    ? await isUserRegisteredForTournament(session.user.id, tournament.id)
-    : false
+    ? await getUserTournamentRegistrationState(session.user.id, tournament.id)
+    : null
 
   return (
     <>
@@ -75,7 +75,7 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
         tournament={tournament}
         twitchUsername={settings.twitchUsername ?? undefined}
         availableTeams={availableTeams}
-        isRegistered={isRegistered}
+        registrationState={isRegistered}
       />
     </>
   )

@@ -12,6 +12,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { RegistrationRow, TeamOption } from '@/lib/types/registration'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 /** Raw row shape returned by Prisma before post-processing. */
 type RawRegistrationRow = Omit<RegistrationRow, 'team' | 'user'> & {
@@ -37,6 +38,11 @@ export const getAllRegistrations = async (): Promise<RegistrationRow[]> => {
 
   try {
     const rows = (await prisma.tournamentRegistration.findMany({
+      where: {
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,

@@ -363,7 +363,10 @@ describe('getRegistrations', () => {
 
     expect(result).toEqual([MOCK_REGISTRATION])
     expect(mockRegistrationFindMany).toHaveBeenCalledWith({
-      where: { tournamentId: 'tournament-1' },
+      where: {
+        tournamentId: 'tournament-1',
+        status: { in: ['PENDING', 'CONFIRMED'] },
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -965,6 +968,7 @@ describe('getUserRegistrations', () => {
     expect(mockRegistrationFindMany).toHaveBeenCalledWith({
       where: {
         userId: 'user-1',
+        status: { in: ['PENDING', 'CONFIRMED'] },
         tournament: { status: 'PUBLISHED' },
       },
       orderBy: { createdAt: 'desc' },
@@ -1007,6 +1011,7 @@ describe('getUserPastRegistrations', () => {
     expect(mockRegistrationFindMany).toHaveBeenCalledWith({
       where: {
         userId: 'user-1',
+        status: 'CONFIRMED',
         tournament: { status: 'ARCHIVED' },
       },
       orderBy: { createdAt: 'desc' },
