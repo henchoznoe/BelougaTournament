@@ -65,7 +65,7 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
             <Button asChild variant="ghost" className="mb-12 text-zinc-400">
               <Link href={redirectTo}>
                 <ArrowLeft className="mr-2 size-4" />
-                Retour à l'accueil
+                Retour
               </Link>
             </Button>
 
@@ -77,7 +77,8 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
                 Bienvenue
               </h1>
               <p className="mt-2 text-zinc-400">
-                Connectez-vous pour accéder à votre espace joueur.
+                Connectez-vous pour accéder à votre espace joueur, gérer vos
+                inscriptions et suivre vos performances.
               </p>
             </div>
 

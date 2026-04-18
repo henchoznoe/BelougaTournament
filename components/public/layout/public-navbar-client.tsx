@@ -24,7 +24,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -65,6 +65,11 @@ const NavbarProfile = ({
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const mounted = useRef(false)
+
+  useEffect(() => {
+    mounted.current = true
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -87,7 +92,7 @@ const NavbarProfile = ({
     }
   }
 
-  if (isPending) {
+  if (isPending || !mounted.current) {
     return (
       <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
         <Skeleton className="size-5 rounded-full bg-zinc-700" />

@@ -1,6 +1,6 @@
 /**
  * File: components/public/tournaments/tournament-detail.tsx
- * Description: Client component displaying full tournament detail with tabs (details, stream, bracket).
+ * Description: Client component displaying full tournament detail with hero banner, markdown content, and tabs.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -11,19 +11,24 @@
 import {
   Calendar,
   CalendarDays,
+  ChevronLeft,
   Clock,
+  Coins,
   Gamepad2,
   Layers,
   ScrollText,
+  Shield,
   Swords,
   Trophy,
   Tv,
   Users,
   Video,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
+import { Markdown } from '@/components/ui/markdown'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import type {
@@ -54,25 +59,29 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
 
   if (tournament.status === TournamentStatus.ARCHIVED) {
     return {
-      label: 'Tournoi terminé',
+      label: 'Tournoi termine',
       className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
+      dotClassName: 'bg-zinc-400',
     }
   }
   if (now < open) {
     return {
-      label: 'Inscriptions bientôt ouvertes',
+      label: 'Inscriptions bientot',
       className: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+      dotClassName: 'bg-amber-400',
     }
   }
   if (now >= open && now <= close) {
     return {
       label: 'Inscriptions ouvertes',
       className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+      dotClassName: 'bg-emerald-400 animate-pulse',
     }
   }
   return {
-    label: 'Inscriptions fermées',
+    label: 'Inscriptions fermees',
     className: 'border-red-500/30 bg-red-500/10 text-red-400',
+    dotClassName: 'bg-red-400',
   }
 }
 
@@ -89,14 +98,12 @@ const isRegistrationOpen = (tournament: PublicTournamentDetail) => {
 const extractTwitchChannel = (streamUrl: string): string => {
   try {
     const url = new URL(streamUrl)
-    // Handle twitch.tv URLs like https://twitch.tv/channelname or https://www.twitch.tv/channelname
     if (url.hostname.includes('twitch.tv')) {
       const parts = url.pathname.split('/').filter(Boolean)
       return parts[0] ?? streamUrl
     }
     return streamUrl
   } catch {
-    // Not a valid URL, treat as channel name directly
     return streamUrl
   }
 }
@@ -111,104 +118,158 @@ export const TournamentDetail = ({
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
 
-  // Determine the effective Twitch channel: tournament-specific stream > global setting
   const twitchChannel = tournament.streamUrl
     ? extractTwitchChannel(tournament.streamUrl)
     : twitchUsername
 
+  const entryFee =
+    tournament.entryFeeAmount && tournament.entryFeeCurrency
+      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency}`
+      : null
+
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       {/* Back link */}
       <Link
         href={ROUTES.TOURNAMENTS}
         className="group inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors duration-300 hover:text-white"
       >
-        <span className="transition-transform duration-300 group-hover:-translate-x-0.5">
-          &larr;
-        </span>
+        <ChevronLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
         Retour aux tournois
       </Link>
 
-      {/* Heading section: essential info */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+      {/* ===== HERO SECTION ===== */}
+      <div className="relative overflow-hidden rounded-3xl border border-white/5">
+        {/* Background image or gradient */}
+        {tournament.imageUrl ? (
+          <div className="relative h-56 sm:h-72 md:h-80">
+            <Image
+              src={tournament.imageUrl}
+              alt={tournament.title}
+              fill
+              className="object-cover"
+              priority
+            />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/50 to-transparent" />
+          </div>
+        ) : (
+          <div className="relative h-44 sm:h-56 bg-gradient-to-br from-blue-600/20 via-zinc-950 to-purple-600/10">
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+          </div>
+        )}
 
-        <div className="relative z-10 space-y-5">
-          {/* Title + status badge */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <h2 className="font-paladins text-2xl tracking-wider text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">
-              {tournament.title}
-            </h2>
+        {/* Hero content overlay */}
+        <div className="relative z-10 -mt-28 sm:-mt-32 px-6 pb-6 md:px-8 md:pb-8">
+          {/* Status badge */}
+          <div className="mb-4 flex items-center gap-3">
             <span
               className={cn(
-                'shrink-0 self-start rounded-full border px-3 py-1 text-xs font-semibold',
+                'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold',
                 registrationStatus.className,
               )}
             >
+              <span
+                className={cn(
+                  'size-1.5 rounded-full',
+                  registrationStatus.dotClassName,
+                )}
+              />
               {registrationStatus.label}
             </span>
+            {tournament.game && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300">
+                <Gamepad2 className="size-3" />
+                {tournament.game}
+              </span>
+            )}
           </div>
 
-          {/* Info grid */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            {tournament.game && (
-              <InfoRow icon={Gamepad2} label="Jeu" value={tournament.game} />
-            )}
-            <InfoRow
+          {/* Title */}
+          <h1 className="mb-2 font-paladins text-3xl tracking-wider text-white drop-shadow-[0_0_20px_rgba(59,130,246,0.4)] sm:text-4xl md:text-5xl">
+            {tournament.title}
+          </h1>
+
+          {/* Quick info row */}
+          <div className="mt-4 flex flex-wrap gap-3">
+            <QuickBadge
               icon={Swords}
-              label="Format"
-              value={
+              text={
                 tournament.format === TournamentFormat.SOLO
                   ? 'Solo'
-                  : `Équipe de ${tournament.teamSize}`
+                  : `Equipe de ${tournament.teamSize}`
               }
             />
-            {/* Registration / team counts — differs by format */}
+            <QuickBadge
+              icon={Calendar}
+              text={formatDate(tournament.startDate)}
+            />
             {tournament.format === TournamentFormat.SOLO ? (
-              <InfoRow
+              <QuickBadge
                 icon={Users}
-                label="Inscrits"
-                value={
+                text={
                   tournament.maxTeams
-                    ? `${tournament._count.registrations} / ${tournament.maxTeams}`
-                    : `${tournament._count.registrations}`
+                    ? `${tournament._count.registrations}/${tournament.maxTeams} inscrits`
+                    : `${tournament._count.registrations} inscrits`
                 }
               />
             ) : (
-              <>
-                <InfoRow
-                  icon={Users}
-                  label="Joueurs"
-                  value={`${tournament._count.registrations}`}
-                />
-                <InfoRow
-                  icon={Trophy}
-                  label="Équipes"
-                  value={
-                    tournament.maxTeams
-                      ? `${tournament._count.teams} / ${tournament.maxTeams}`
-                      : `${tournament._count.teams}`
-                  }
-                />
-              </>
+              <QuickBadge
+                icon={Users}
+                text={
+                  tournament.maxTeams
+                    ? `${tournament._count.teams}/${tournament.maxTeams} equipes`
+                    : `${tournament._count.teams} equipes`
+                }
+              />
             )}
-            <InfoRow
-              icon={Calendar}
-              label="Début"
-              value={formatDateTime(tournament.startDate)}
-            />
-            <InfoRow
-              icon={Calendar}
-              label="Fin"
-              value={formatDateTime(tournament.endDate)}
-            />
+            {entryFee && <QuickBadge icon={Coins} text={entryFee} />}
           </div>
         </div>
       </div>
 
-      {/* Prize banner (conditional) */}
+      {/* ===== STATS GRID ===== */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard
+          icon={Swords}
+          label="Format"
+          value={
+            tournament.format === TournamentFormat.SOLO
+              ? 'Solo'
+              : `${tournament.teamSize}v${tournament.teamSize}`
+          }
+        />
+        <StatCard
+          icon={Users}
+          label={
+            tournament.format === TournamentFormat.SOLO ? 'Joueurs' : 'Equipes'
+          }
+          value={
+            tournament.format === TournamentFormat.SOLO
+              ? tournament.maxTeams
+                ? `${tournament._count.registrations} / ${tournament.maxTeams}`
+                : `${tournament._count.registrations}`
+              : tournament.maxTeams
+                ? `${tournament._count.teams} / ${tournament.maxTeams}`
+                : `${tournament._count.teams}`
+          }
+        />
+        <StatCard
+          icon={Calendar}
+          label="Debut"
+          value={formatDate(tournament.startDate)}
+        />
+        <StatCard
+          icon={Clock}
+          label="Fin"
+          value={formatDate(tournament.endDate)}
+        />
+      </div>
+
+      {/* ===== PRIZE BANNER ===== */}
       {tournament.prize && (
-        <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 md:p-8">
           <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
 
@@ -217,16 +278,17 @@ export const TournamentDetail = ({
               <Trophy className="size-6 text-amber-400" />
             </div>
             <h3 className="font-paladins text-lg tracking-wider text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-              Récompenses
+              Recompenses
             </h3>
-            <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-amber-200/80">
-              {tournament.prize}
-            </p>
+            <Markdown
+              content={tournament.prize}
+              className="prose-p:text-amber-200/80 prose-strong:text-amber-200"
+            />
           </div>
         </div>
       )}
 
-      {/* Tabbed content block */}
+      {/* ===== TABBED CONTENT ===== */}
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="w-full bg-white/5 border border-white/5 rounded-2xl p-1">
           <TabsTrigger
@@ -234,7 +296,7 @@ export const TournamentDetail = ({
             className="flex-1 gap-1.5 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
           >
             <ScrollText className="size-4" />
-            Détails
+            Details
           </TabsTrigger>
           <TabsTrigger
             value="stream"
@@ -252,183 +314,146 @@ export const TournamentDetail = ({
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab: Détails */}
+        {/* Tab: Details */}
         <TabsContent value="details">
-          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+          <div className="space-y-6">
+            {/* Description */}
+            {tournament.description && (
+              <ContentCard icon={ScrollText} title="Description">
+                <Markdown content={tournament.description} />
+              </ContentCard>
+            )}
 
-            <div className="relative z-10 space-y-6">
-              {/* Description */}
-              {tournament.description && (
-                <div className="space-y-3">
-                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-                    <ScrollText className="size-4 text-blue-400" />
-                    Description
-                  </h3>
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
-                    {tournament.description}
-                  </p>
-                </div>
-              )}
+            {/* Rules */}
+            {tournament.rules && (
+              <ContentCard icon={Shield} title="Reglement">
+                <Markdown content={tournament.rules} />
+              </ContentCard>
+            )}
 
-              {/* Rules */}
-              {tournament.rules && (
-                <div className="space-y-3">
-                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-                    <ScrollText className="size-4 text-blue-400" />
-                    Règlement
-                  </h3>
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-400">
-                    {tournament.rules}
-                  </p>
-                </div>
-              )}
-
-              {/* Dates */}
-              <div className="space-y-3">
-                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-                  <Calendar className="size-4 text-blue-400" />
-                  Dates
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <DateRow
-                    label="Début du tournoi"
-                    value={formatDateTime(tournament.startDate)}
-                  />
-                  <DateRow
-                    label="Fin du tournoi"
-                    value={formatDateTime(tournament.endDate)}
-                  />
-                  <DateRow
-                    label="Ouverture des inscriptions"
-                    value={formatDateTime(tournament.registrationOpen)}
-                  />
-                  <DateRow
-                    label="Fermeture des inscriptions"
-                    value={formatDateTime(tournament.registrationClose)}
-                  />
-                </div>
+            {/* Dates detail */}
+            <ContentCard icon={Calendar} title="Dates">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <DateRow
+                  label="Debut du tournoi"
+                  value={formatDateTime(tournament.startDate)}
+                />
+                <DateRow
+                  label="Fin du tournoi"
+                  value={formatDateTime(tournament.endDate)}
+                />
+                <DateRow
+                  label="Ouverture des inscriptions"
+                  value={formatDateTime(tournament.registrationOpen)}
+                />
+                <DateRow
+                  label="Fermeture des inscriptions"
+                  value={formatDateTime(tournament.registrationClose)}
+                />
               </div>
+            </ContentCard>
 
-              {/* Fallback when no description and no rules */}
-              {!tournament.description && !tournament.rules && (
-                <p className="py-4 text-center text-sm text-zinc-500">
-                  Aucun détail supplémentaire pour ce tournoi.
+            {/* Fallback */}
+            {!tournament.description && !tournament.rules && (
+              <div className="rounded-3xl border border-white/5 bg-white/2 p-8 text-center">
+                <p className="text-sm text-zinc-500">
+                  Aucun detail supplementaire pour ce tournoi.
                 </p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         {/* Tab: Stream */}
         <TabsContent value="stream">
-          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
-
-            <div className="relative z-10 space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-                <Video className="size-4 text-blue-400" />
-                Stream en direct
-              </h3>
-              <TwitchPlayer channel={twitchChannel} />
-            </div>
-          </div>
+          <ContentCard icon={Video} title="Stream en direct">
+            <TwitchPlayer channel={twitchChannel} />
+          </ContentCard>
         </TabsContent>
 
         {/* Tab: Bracket */}
         <TabsContent value="bracket">
-          <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
-
-            <div className="relative z-10 space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-                <Swords className="size-4 text-blue-400" />
-                Bracket Toornament
-              </h3>
-
-              {tournament.toornamentId ? (
-                <Tabs defaultValue="tournament" className="space-y-4">
-                  <TabsList className="w-full flex-wrap justify-start gap-1 rounded-xl bg-white/5 p-1">
+          <ContentCard icon={Swords} title="Bracket Toornament">
+            {tournament.toornamentId ? (
+              <Tabs defaultValue="tournament" className="space-y-4">
+                <TabsList className="w-full flex-wrap justify-start gap-1 rounded-xl bg-white/5 p-1">
+                  <TabsTrigger
+                    value="tournament"
+                    className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                  >
+                    <Trophy className="size-3.5" />
+                    Tournoi
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="schedule"
+                    className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                  >
+                    <CalendarDays className="size-3.5" />
+                    Calendrier
+                  </TabsTrigger>
+                  {tournament.toornamentStages.map(stage => (
                     <TabsTrigger
-                      value="tournament"
+                      key={stage.id}
+                      value={stage.stageId}
                       className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
                     >
-                      <Trophy className="size-3.5" />
-                      Tournoi
+                      <Layers className="size-3.5" />
+                      {stage.name}
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="schedule"
-                      className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
-                    >
-                      <CalendarDays className="size-3.5" />
-                      Calendrier
-                    </TabsTrigger>
-                    {tournament.toornamentStages.map(stage => (
-                      <TabsTrigger
-                        key={stage.id}
-                        value={stage.stageId}
-                        className="gap-1.5 rounded-lg text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white"
-                      >
-                        <Layers className="size-3.5" />
-                        {stage.name}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                  ))}
+                </TabsList>
 
-                  {/* Tournament overview widget */}
-                  <TabsContent value="tournament">
+                <TabsContent value="tournament">
+                  <div className="overflow-hidden rounded-2xl border border-white/10">
+                    <iframe
+                      src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/?_locale=fr&theme=dark`}
+                      className="h-98 w-full border-0"
+                      allow="fullscreen"
+                      title="Tournoi Toornament"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="schedule">
+                  <div className="overflow-hidden rounded-2xl border border-white/10">
+                    <iframe
+                      src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/matches/schedule/?_locale=fr&theme=dark`}
+                      className="h-125 w-full border-0"
+                      allow="fullscreen"
+                      title="Calendrier des matchs"
+                    />
+                  </div>
+                </TabsContent>
+
+                {tournament.toornamentStages.map(stage => (
+                  <TabsContent key={stage.id} value={stage.stageId}>
                     <div className="overflow-hidden rounded-2xl border border-white/10">
                       <iframe
-                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/?_locale=fr&theme=dark`}
-                        className="h-98 w-full border-0"
-                        allow="fullscreen"
-                        title="Tournoi Toornament"
-                      />
-                    </div>
-                  </TabsContent>
-
-                  {/* Schedule widget */}
-                  <TabsContent value="schedule">
-                    <div className="overflow-hidden rounded-2xl border border-white/10">
-                      <iframe
-                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/matches/schedule/?_locale=fr&theme=dark`}
+                        src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/${stage.stageId}/?_locale=fr&theme=dark`}
                         className="h-125 w-full border-0"
                         allow="fullscreen"
-                        title="Calendrier des matchs"
+                        title={`Bracket - ${stage.name}`}
                       />
                     </div>
                   </TabsContent>
-
-                  {/* Per-stage widgets */}
-                  {tournament.toornamentStages.map(stage => (
-                    <TabsContent key={stage.id} value={stage.stageId}>
-                      <div className="overflow-hidden rounded-2xl border border-white/10">
-                        <iframe
-                          src={`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/${stage.stageId}/?_locale=fr&theme=dark`}
-                          className="h-125 w-full border-0"
-                          allow="fullscreen"
-                          title={`Bracket - ${stage.name}`}
-                        />
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              ) : (
-                <div className="flex flex-col items-center gap-3 py-8 text-center">
-                  <div className="inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10">
-                    <Swords className="size-8 text-zinc-500" />
-                  </div>
-                  <p className="text-sm text-zinc-500">Pas encore disponible</p>
+                ))}
+              </Tabs>
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div className="inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10">
+                  <Swords className="size-8 text-zinc-500" />
                 </div>
-              )}
-            </div>
-          </div>
+                <p className="text-sm text-zinc-500">Pas encore disponible</p>
+              </div>
+            )}
+          </ContentCard>
         </TabsContent>
       </Tabs>
 
-      {/* Registration section */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+      {/* ===== REGISTRATION SECTION ===== */}
+      <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
+        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
 
         <div className="relative z-10 space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
@@ -439,7 +464,7 @@ export const TournamentDetail = ({
           {registrationOpen ? (
             <>
               <p className="text-center text-sm text-zinc-400">
-                Les inscriptions sont ouvertes jusqu'au{' '}
+                Les inscriptions sont ouvertes jusqu&apos;au{' '}
                 <span className="font-medium text-zinc-300">
                   {formatDate(tournament.registrationClose)}
                 </span>
@@ -459,7 +484,7 @@ export const TournamentDetail = ({
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               {tournament.status === TournamentStatus.ARCHIVED ? (
-                <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
+                <p className="text-sm text-zinc-500">Ce tournoi est termine.</p>
               ) : new Date() < new Date(tournament.registrationOpen) ? (
                 <p className="text-sm text-zinc-500">
                   Les inscriptions ouvriront le{' '}
@@ -470,7 +495,7 @@ export const TournamentDetail = ({
                 </p>
               ) : (
                 <p className="text-sm text-zinc-500">
-                  Les inscriptions sont fermées depuis le{' '}
+                  Les inscriptions sont fermees depuis le{' '}
                   <span className="font-medium text-zinc-400">
                     {formatDate(tournament.registrationClose)}
                   </span>
@@ -489,20 +514,52 @@ export const TournamentDetail = ({
 // Sub-components
 // ---------------------------------------------------------------------------
 
-interface InfoRowProps {
+interface QuickBadgeProps {
+  icon: React.ComponentType<{ className?: string }>
+  text: string
+}
+
+const QuickBadge = ({ icon: Icon, text }: QuickBadgeProps) => (
+  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur-sm">
+    <Icon className="size-3 text-zinc-500" />
+    {text}
+  </span>
+)
+
+interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>
   label: string
   value: string
 }
 
-const InfoRow = ({ icon: Icon, label, value }: InfoRowProps) => (
-  <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
-    <Icon className="size-4 shrink-0 text-zinc-500" />
-    <div className="flex min-w-0 flex-col">
-      <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+const StatCard = ({ icon: Icon, label, value }: StatCardProps) => (
+  <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-4 transition-colors duration-300 hover:border-white/10 hover:bg-white/4">
+    <div className="pointer-events-none absolute -right-4 -top-4 size-16 rounded-full bg-blue-500/5 blur-2xl transition-all duration-300 group-hover:bg-blue-500/10" />
+    <div className="relative z-10">
+      <Icon className="mb-2 size-4 text-blue-400" />
+      <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
         {label}
-      </span>
-      <span className="text-sm text-zinc-300">{value}</span>
+      </p>
+      <p className="text-sm font-semibold text-white">{value}</p>
+    </div>
+  </div>
+)
+
+interface ContentCardProps {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  children: React.ReactNode
+}
+
+const ContentCard = ({ icon: Icon, title, children }: ContentCardProps) => (
+  <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+    <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+    <div className="relative z-10 space-y-4">
+      <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+        <Icon className="size-4 text-blue-400" />
+        {title}
+      </h3>
+      {children}
     </div>
   </div>
 )

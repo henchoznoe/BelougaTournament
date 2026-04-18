@@ -8,9 +8,11 @@
 
 'use client'
 
-import { ArrowLeft, Menu } from 'lucide-react'
+import { ArrowLeft, LogOut, Menu } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -28,6 +30,27 @@ interface AdminTopbarProps {
 
 export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
   const { data: session, isPending } = authClient.useSession()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Déconnexion réussie')
+            router.push(ROUTES.HOME)
+          },
+          onError: ctx => {
+            console.error('Logout error:', ctx.error)
+            toast.error('Erreur lors de la déconnexion')
+          },
+        },
+      })
+    } catch (error) {
+      console.error('Unexpected logout error:', error)
+      toast.error('Une erreur inattendue est survenue')
+    }
+  }
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/80 px-4 backdrop-blur-xl md:px-6">
@@ -44,20 +67,41 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
         </Button>
       </div>
 
-      {/* Right: User info + Back to site */}
-      <div className="flex items-center gap-4">
-        <Button
-          asChild
-          variant="ghost"
-          size="sm"
-          className="gap-2 text-zinc-400"
-        >
-          <Link href={ROUTES.HOME}>
-            <ArrowLeft className="size-4" />
-            <span className="hidden sm:inline">Retour au site</span>
-            <span className="sr-only sm:hidden">Retour au site</span>
-          </Link>
-        </Button>
+      {/* Right: Back to site + Logout + User info */}
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-zinc-400"
+              onClick={() => router.push(ROUTES.HOME)}
+              aria-label="Retour au site"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={8}>
+            Retour au site
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-zinc-400 hover:text-red-400"
+              onClick={handleLogout}
+              aria-label="Se déconnecter"
+            >
+              <LogOut className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={8}>
+            Se déconnecter
+          </TooltipContent>
+        </Tooltip>
 
         <div className="h-6 w-px bg-white/10" />
 

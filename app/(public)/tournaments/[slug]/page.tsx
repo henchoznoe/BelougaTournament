@@ -10,7 +10,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
-import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
@@ -66,19 +65,13 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
     : null
 
   return (
-    <>
-      <PageHeader
-        title={tournament.title}
-        description={tournament.game ?? undefined}
-      />
-      <TournamentDetail
-        tournament={tournament}
-        twitchUsername={settings.twitchUsername ?? undefined}
-        availableTeams={availableTeams}
-        registrationState={isRegistered}
-        isAuthenticated={!!session?.user}
-      />
-    </>
+    <TournamentDetail
+      tournament={tournament}
+      twitchUsername={settings.twitchUsername ?? undefined}
+      availableTeams={availableTeams}
+      registrationState={isRegistered}
+      isAuthenticated={!!session?.user}
+    />
   )
 }
 
@@ -87,14 +80,17 @@ const TournamentPage = (props: TournamentPageProps) => {
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <Suspense
         fallback={
-          <div className="mx-auto w-full max-w-3xl space-y-6">
-            <div className="mb-16 flex flex-col items-center gap-3">
-              <Skeleton className="h-10 w-56 rounded-lg md:h-12 md:w-72 bg-white/2" />
-              <Skeleton className="h-5 w-32 rounded-md bg-white/2" />
-            </div>
+          <div className="mx-auto w-full max-w-4xl space-y-8">
+            <Skeleton className="h-6 w-40 rounded-md bg-white/2" />
             <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
+              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
+              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
+              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
+            </div>
             <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
-            <Skeleton className="h-40 rounded-3xl border border-white/5 bg-white/2" />
+            <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
           </div>
         }
       >

@@ -188,7 +188,7 @@ export const HeroSection = ({
           <Button
             asChild
             size="lg"
-            className="group h-14 bg-blue-600 px-8 text-lg font-bold shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)]"
+            className="group h-14 bg-blue-600 px-8 text-lg text-white font-bold shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)]"
           >
             <Link href={ROUTES.TOURNAMENTS}>
               Découvrir les tournois
