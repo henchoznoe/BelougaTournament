@@ -247,19 +247,19 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       {/* Stats line */}
       <div className="flex items-center gap-3 text-xs text-zinc-500">
         <span className="mr-2">
-          {tournaments.length} tournoi{tournaments.length !== 1 ? 's' : ''}
+          {tournaments.length} tournoi{tournaments.length > 0 ? 's' : ''}
         </span>
 
         <span className="text-amber-400">
-          {draftCount} brouillon{draftCount !== 1 ? 's' : ''}
+          {draftCount} brouillon{draftCount > 0 ? 's' : ''}
         </span>
 
         <span className="text-emerald-400">
-          {publishedCount} publié{publishedCount !== 1 ? 's' : ''}
+          {publishedCount} publié{publishedCount > 0 ? 's' : ''}
         </span>
 
         <span className="text-zinc-400">
-          {archivedCount} archivé{archivedCount !== 1 ? 's' : ''}
+          {archivedCount} archivé{archivedCount > 0 ? 's' : ''}
         </span>
       </div>
 

@@ -156,6 +156,9 @@ export const UsersList = ({
     setPage(1)
   }
 
+  const adminCount = users.filter(t => t.role === Role.ADMIN).length
+  const userCount = users.filter(t => t.role === Role.USER).length
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const paginated = filtered.slice(
@@ -193,9 +196,18 @@ export const UsersList = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-zinc-500">
-        <span>
-          {filtered.length} utilisateur{filtered.length !== 1 ? 's' : ''}
+      {/* Stats line */}
+      <div className="flex items-center gap-3 text-xs text-zinc-500">
+        <span className="mr-2">
+          {filtered.length} utilisateur{filtered.length > 0 ? 's' : ''}
+        </span>
+
+        <span className="text-amber-400">
+          {adminCount} admin{adminCount > 0 ? 's' : ''}
+        </span>
+
+        <span className="text-emerald-400">
+          {userCount} joueur{userCount > 0 ? 's' : ''}
         </span>
       </div>
 

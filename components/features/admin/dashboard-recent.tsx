@@ -12,7 +12,7 @@ import Link from 'next/link'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { ROUTES } from '@/lib/config/routes'
 import type { RecentLogin, RecentRegistration } from '@/lib/types/dashboard'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatDateTime } from '@/lib/utils/formatting'
 
 interface RecentLoginsProps {
   logins: RecentLogin[]
@@ -37,7 +37,7 @@ export const DashboardRecentLogins = ({ logins }: RecentLoginsProps) => {
           Aucune connexion récente.
         </p>
       ) : (
-        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+        <div className="max-h-105 space-y-2 overflow-y-auto pr-1">
           {logins.map(user => (
             <Link
               key={user.id}
@@ -74,7 +74,7 @@ export const DashboardRecentLogins = ({ logins }: RecentLoginsProps) => {
                 </div>
               </div>
               <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
-                {formatDate(user.lastLoginAt)}
+                {formatDateTime(user.lastLoginAt)}
               </span>
             </Link>
           ))}
@@ -117,7 +117,7 @@ export const DashboardRecentRegistrations = ({
                 </p>
               </div>
               <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
-                {formatDate(reg.createdAt)}
+                {formatDateTime(reg.createdAt)}
               </span>
             </Link>
           ))}
