@@ -29,7 +29,7 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getSponsors } = await import('@/lib/services/sponsors')
+const { getSponsors, getAllSponsors } = await import('@/lib/services/sponsors')
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -61,13 +61,14 @@ describe('getSponsors', () => {
     vi.clearAllMocks()
   })
 
-  it('returns sponsors ordered by supportedSince field', async () => {
+  it('returns only enabled sponsors ordered by supportedSince asc', async () => {
     mockFindMany.mockResolvedValue(MOCK_SPONSORS)
 
     const result = await getSponsors()
 
     expect(result).toEqual(MOCK_SPONSORS)
     expect(mockFindMany).toHaveBeenCalledWith({
+      where: { enabled: true },
       orderBy: { supportedSince: 'asc' },
     })
   })
@@ -84,6 +85,43 @@ describe('getSponsors', () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
     const result = await getSponsors()
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getAllSponsors
+// ---------------------------------------------------------------------------
+
+describe('getAllSponsors', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns all sponsors ordered by supportedSince desc', async () => {
+    mockFindMany.mockResolvedValue(MOCK_SPONSORS)
+
+    const result = await getAllSponsors()
+
+    expect(result).toEqual(MOCK_SPONSORS)
+    expect(mockFindMany).toHaveBeenCalledWith({
+      orderBy: { supportedSince: 'desc' },
+    })
+  })
+
+  it('returns an empty array when no sponsors exist', async () => {
+    mockFindMany.mockResolvedValue([])
+
+    const result = await getAllSponsors()
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getAllSponsors()
 
     expect(result).toEqual([])
   })

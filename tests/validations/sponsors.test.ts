@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest'
 import {
   deleteSponsorSchema,
   sponsorSchema,
+  toggleSponsorStatusSchema,
   updateSponsorSchema,
 } from '@/lib/validations/sponsors'
 
@@ -163,5 +164,27 @@ describe('updateSponsorSchema', () => {
         name: '',
       }).success,
     ).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// toggleSponsorStatusSchema
+// ---------------------------------------------------------------------------
+
+describe('toggleSponsorStatusSchema', () => {
+  it('accepts a valid UUID', () => {
+    expect(
+      toggleSponsorStatusSchema.safeParse({ id: VALID_UUID }).success,
+    ).toBe(true)
+  })
+
+  it('rejects an invalid UUID', () => {
+    expect(
+      toggleSponsorStatusSchema.safeParse({ id: INVALID_UUID }).success,
+    ).toBe(false)
+  })
+
+  it('rejects missing id', () => {
+    expect(toggleSponsorStatusSchema.safeParse({}).success).toBe(false)
   })
 })

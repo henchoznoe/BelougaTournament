@@ -8,38 +8,26 @@
 
 import { Handshake } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { SponsorsList } from '@/components/features/admin/sponsors-list'
-import AdminGuard from '@/components/features/auth/admin-guard'
-import { getSponsors } from '@/lib/services/sponsors'
+import { getAllSponsors } from '@/lib/services/sponsors'
 
 export const metadata: Metadata = {
   title: 'Sponsors',
 }
 
 const AdminSponsorsPage = async () => {
-  const sponsors = await getSponsors()
+  const sponsors = await getAllSponsors()
 
   return (
-    <AdminGuard>
-      <div className="mx-auto max-w-4xl space-y-6">
-        {/* Breadcrumb */}
-        <AdminBreadcrumb segments={[{ label: 'Sponsors' }]} />
-
-        {/* Page heading */}
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Handshake className="size-6 text-blue-400" />
-            Sponsors
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Gérez les sponsors affichés sur la plateforme.
-          </p>
-        </div>
-
-        <SponsorsList sponsors={sponsors} />
-      </div>
-    </AdminGuard>
+    <AdminContentLayout
+      segments={[{ label: 'Sponsors' }]}
+      icon={Handshake}
+      title="Sponsors"
+      subtitle="Gérez les sponsors affichés sur la plateforme."
+    >
+      <SponsorsList sponsors={sponsors} />
+    </AdminContentLayout>
   )
 }
 

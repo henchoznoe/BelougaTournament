@@ -8,15 +8,12 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import {
   DashboardRecentLogins,
   DashboardRecentRegistrations,
 } from '@/components/features/admin/dashboard-recent'
 import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
-import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth'
 import {
   getDashboardStats,
   getRecentLogins,
@@ -28,12 +25,6 @@ export const metadata: Metadata = {
 }
 
 const AdminDashboardPage = async () => {
-  const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const [stats, recentLogins, recentRegistrations] = await Promise.all([
     getDashboardStats(),
     getRecentLogins(),
@@ -41,21 +32,12 @@ const AdminDashboardPage = async () => {
   ])
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      {/* Breadcrumb */}
-      <AdminBreadcrumb segments={[{ label: 'Dashboard' }]} />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <LayoutDashboard className="size-6 text-blue-400" />
-          Dashboard
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Vue d'ensemble de la plateforme Belouga Tournament.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[{ label: 'Dashboard' }]}
+      icon={LayoutDashboard}
+      title="Dashboard"
+      subtitle="Vue d'ensemble de la plateforme Belouga Tournament."
+    >
       {/* Stats cards */}
       <DashboardStatsCards stats={stats} />
 
@@ -64,7 +46,7 @@ const AdminDashboardPage = async () => {
         <DashboardRecentLogins logins={recentLogins} />
         <DashboardRecentRegistrations registrations={recentRegistrations} />
       </div>
-    </div>
+    </AdminContentLayout>
   )
 }
 

@@ -1,34 +1,35 @@
 /**
- * File: app/admin/sponsors/[id]/edit/page.tsx
- * Description: Admin page for editing an existing sponsor.
+ * File: app/admin/sponsors/[id]/page.tsx
+ * Description: Admin page for viewing sponsor details (placeholder).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Pencil } from 'lucide-react'
+import { Handshake } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { SponsorForm } from '@/components/features/admin/sponsor-form'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'
 
-interface AdminEditSponsorPageProps {
+interface AdminSponsorDetailPageProps {
   params: Promise<{ id: string }>
 }
 
 export const generateMetadata = async ({
   params,
-}: AdminEditSponsorPageProps): Promise<Metadata> => {
+}: AdminSponsorDetailPageProps): Promise<Metadata> => {
   const { id } = await params
   const sponsor = await getSponsorById(id)
   return {
-    title: sponsor ? `Modifier ${sponsor.name}` : 'Sponsor introuvable',
+    title: sponsor ? sponsor.name : 'Sponsor introuvable',
   }
 }
 
-const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
+const AdminSponsorDetailPage = async ({
+  params,
+}: AdminSponsorDetailPageProps) => {
   const { id } = await params
   const sponsor = await getSponsorById(id)
 
@@ -40,16 +41,18 @@ const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
     <AdminContentLayout
       segments={[
         { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
-        { label: sponsor.name, href: ROUTES.ADMIN_SPONSORS },
-        { label: 'Modifier' },
+        { label: sponsor.name },
       ]}
-      icon={Pencil}
-      title={`Modifier ${sponsor.name}`}
-      subtitle="Modifiez les informations du sponsor."
+      icon={Handshake}
+      title={sponsor.name}
     >
-      <SponsorForm sponsor={sponsor} />
+      <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
+        <p className="text-sm text-zinc-500">
+          La page de détail du sponsor sera implémentée prochainement.
+        </p>
+      </div>
     </AdminContentLayout>
   )
 }
 
-export default AdminEditSponsorPage
+export default AdminSponsorDetailPage

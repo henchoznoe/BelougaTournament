@@ -8,10 +8,8 @@
 
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { UsersList } from '@/components/features/admin/users-list'
-import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUsers } from '@/lib/services/users'
 import { isOwner } from '@/lib/utils/owner'
@@ -23,35 +21,21 @@ export const metadata: Metadata = {
 
 const AdminUsersPage = async () => {
   const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const users = await getUsers()
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      {/* Breadcrumb */}
-      <AdminBreadcrumb segments={[{ label: 'Utilisateurs' }]} />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Users className="size-6 text-blue-400" />
-          Utilisateurs
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Gérez tous les utilisateurs de la plateforme.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[{ label: 'Utilisateurs' }]}
+      icon={Users}
+      title="Utilisateurs"
+      subtitle="Gérez tous les utilisateurs de la plateforme."
+    >
       <UsersList
         users={users}
-        viewerRole={session.user.role as Role}
-        viewerIsOwner={isOwner(session.user.email)}
+        viewerRole={session!.user.role as Role}
+        viewerIsOwner={isOwner(session!.user.email)}
       />
-    </div>
+    </AdminContentLayout>
   )
 }
 

@@ -8,9 +8,8 @@
 
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { SponsorForm } from '@/components/features/admin/sponsor-form'
-import AdminGuard from '@/components/features/auth/admin-guard'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -19,29 +18,17 @@ export const metadata: Metadata = {
 
 const AdminNewSponsorPage = async () => {
   return (
-    <AdminGuard>
-      <div className="mx-auto max-w-5xl space-y-6">
-        <AdminBreadcrumb
-          segments={[
-            { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
-            { label: 'Nouveau sponsor' },
-          ]}
-        />
-
-        {/* Page heading */}
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Plus className="size-6 text-blue-400" />
-            Nouveau sponsor
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Créez un nouveau sponsor sur la plateforme.
-          </p>
-        </div>
-
-        <SponsorForm />
-      </div>
-    </AdminGuard>
+    <AdminContentLayout
+      segments={[
+        { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
+        { label: 'Nouveau sponsor' },
+      ]}
+      icon={Plus}
+      title="Nouveau sponsor"
+      subtitle="Créez un nouveau sponsor sur la plateforme."
+    >
+      <SponsorForm />
+    </AdminContentLayout>
   )
 }
 

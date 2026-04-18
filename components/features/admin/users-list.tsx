@@ -183,12 +183,12 @@ export const UsersList = ({
           <Select value={roleFilter} onValueChange={handleRoleFilter}>
             <SelectTrigger
               aria-label="Filtrer par rôle"
-              className="w-36 border-white/10 bg-white/5 text-zinc-200"
+              className="w-28 border-white/10 bg-white/5 text-zinc-200"
             >
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
-              <SelectItem value="all">Tous les rôles</SelectItem>
+              <SelectItem value="all">Tous</SelectItem>
               <SelectItem value={Role.ADMIN}>Admin</SelectItem>
               <SelectItem value={Role.USER}>Joueur</SelectItem>
             </SelectContent>

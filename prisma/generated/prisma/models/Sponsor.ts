@@ -28,6 +28,7 @@ export type SponsorMinAggregateOutputType = {
   id: string | null
   name: string | null
   url: string | null
+  enabled: boolean | null
   supportedSince: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -37,6 +38,7 @@ export type SponsorMaxAggregateOutputType = {
   id: string | null
   name: string | null
   url: string | null
+  enabled: boolean | null
   supportedSince: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -47,6 +49,7 @@ export type SponsorCountAggregateOutputType = {
   name: number
   imageUrls: number
   url: number
+  enabled: number
   supportedSince: number
   createdAt: number
   updatedAt: number
@@ -58,6 +61,7 @@ export type SponsorMinAggregateInputType = {
   id?: true
   name?: true
   url?: true
+  enabled?: true
   supportedSince?: true
   createdAt?: true
   updatedAt?: true
@@ -67,6 +71,7 @@ export type SponsorMaxAggregateInputType = {
   id?: true
   name?: true
   url?: true
+  enabled?: true
   supportedSince?: true
   createdAt?: true
   updatedAt?: true
@@ -77,6 +82,7 @@ export type SponsorCountAggregateInputType = {
   name?: true
   imageUrls?: true
   url?: true
+  enabled?: true
   supportedSince?: true
   createdAt?: true
   updatedAt?: true
@@ -160,6 +166,7 @@ export type SponsorGroupByOutputType = {
   name: string
   imageUrls: string[]
   url: string | null
+  enabled: boolean
   supportedSince: Date
   createdAt: Date
   updatedAt: Date
@@ -191,6 +198,7 @@ export type SponsorWhereInput = {
   name?: Prisma.StringFilter<"Sponsor"> | string
   imageUrls?: Prisma.StringNullableListFilter<"Sponsor">
   url?: Prisma.StringNullableFilter<"Sponsor"> | string | null
+  enabled?: Prisma.BoolFilter<"Sponsor"> | boolean
   supportedSince?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
@@ -201,6 +209,7 @@ export type SponsorOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   imageUrls?: Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
+  enabled?: Prisma.SortOrder
   supportedSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -214,6 +223,7 @@ export type SponsorWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Sponsor"> | string
   imageUrls?: Prisma.StringNullableListFilter<"Sponsor">
   url?: Prisma.StringNullableFilter<"Sponsor"> | string | null
+  enabled?: Prisma.BoolFilter<"Sponsor"> | boolean
   supportedSince?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Sponsor"> | Date | string
@@ -224,6 +234,7 @@ export type SponsorOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   imageUrls?: Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
+  enabled?: Prisma.SortOrder
   supportedSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -240,6 +251,7 @@ export type SponsorScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Sponsor"> | string
   imageUrls?: Prisma.StringNullableListFilter<"Sponsor">
   url?: Prisma.StringNullableWithAggregatesFilter<"Sponsor"> | string | null
+  enabled?: Prisma.BoolWithAggregatesFilter<"Sponsor"> | boolean
   supportedSince?: Prisma.DateTimeWithAggregatesFilter<"Sponsor"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Sponsor"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Sponsor"> | Date | string
@@ -250,6 +262,7 @@ export type SponsorCreateInput = {
   name: string
   imageUrls?: Prisma.SponsorCreateimageUrlsInput | string[]
   url?: string | null
+  enabled?: boolean
   supportedSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -260,6 +273,7 @@ export type SponsorUncheckedCreateInput = {
   name: string
   imageUrls?: Prisma.SponsorCreateimageUrlsInput | string[]
   url?: string | null
+  enabled?: boolean
   supportedSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -270,6 +284,7 @@ export type SponsorUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrls?: Prisma.SponsorUpdateimageUrlsInput | string[]
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   supportedSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -280,6 +295,7 @@ export type SponsorUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrls?: Prisma.SponsorUpdateimageUrlsInput | string[]
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   supportedSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -290,6 +306,7 @@ export type SponsorCreateManyInput = {
   name: string
   imageUrls?: Prisma.SponsorCreateimageUrlsInput | string[]
   url?: string | null
+  enabled?: boolean
   supportedSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -300,6 +317,7 @@ export type SponsorUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrls?: Prisma.SponsorUpdateimageUrlsInput | string[]
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   supportedSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -310,6 +328,7 @@ export type SponsorUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrls?: Prisma.SponsorUpdateimageUrlsInput | string[]
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   supportedSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -328,6 +347,7 @@ export type SponsorCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   imageUrls?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
   supportedSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -337,6 +357,7 @@ export type SponsorMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
   supportedSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -346,6 +367,7 @@ export type SponsorMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
   supportedSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -367,6 +389,7 @@ export type SponsorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name?: boolean
   imageUrls?: boolean
   url?: boolean
+  enabled?: boolean
   supportedSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -377,6 +400,7 @@ export type SponsorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   imageUrls?: boolean
   url?: boolean
+  enabled?: boolean
   supportedSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -387,6 +411,7 @@ export type SponsorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   imageUrls?: boolean
   url?: boolean
+  enabled?: boolean
   supportedSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -397,12 +422,13 @@ export type SponsorSelectScalar = {
   name?: boolean
   imageUrls?: boolean
   url?: boolean
+  enabled?: boolean
   supportedSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SponsorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "imageUrls" | "url" | "supportedSince" | "createdAt" | "updatedAt", ExtArgs["result"]["sponsor"]>
+export type SponsorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "imageUrls" | "url" | "enabled" | "supportedSince" | "createdAt" | "updatedAt", ExtArgs["result"]["sponsor"]>
 
 export type $SponsorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Sponsor"
@@ -412,6 +438,7 @@ export type $SponsorPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     name: string
     imageUrls: string[]
     url: string | null
+    enabled: boolean
     supportedSince: Date
     createdAt: Date
     updatedAt: Date
@@ -842,6 +869,7 @@ export interface SponsorFieldRefs {
   readonly name: Prisma.FieldRef<"Sponsor", 'String'>
   readonly imageUrls: Prisma.FieldRef<"Sponsor", 'String[]'>
   readonly url: Prisma.FieldRef<"Sponsor", 'String'>
+  readonly enabled: Prisma.FieldRef<"Sponsor", 'Boolean'>
   readonly supportedSince: Prisma.FieldRef<"Sponsor", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Sponsor", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Sponsor", 'DateTime'>

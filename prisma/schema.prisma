@@ -294,6 +294,7 @@ model Sponsor {
   name           String
   imageUrls      String[]
   url            String?
+  enabled        Boolean  @default(true)
   supportedSince DateTime @default(now())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

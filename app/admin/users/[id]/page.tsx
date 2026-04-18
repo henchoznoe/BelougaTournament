@@ -8,8 +8,8 @@
 
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { notFound } from 'next/navigation'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { UserDetail } from '@/components/features/admin/user-detail'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -33,11 +33,6 @@ export const generateMetadata = async ({
 const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
   const { id } = await params
   const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const user = await getUserById(id)
 
   if (!user) {
@@ -45,25 +40,16 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* Breadcrumb */}
-      <AdminBreadcrumb
-        segments={[
-          { label: 'Utilisateurs', href: ROUTES.ADMIN_USERS },
-          { label: user.name },
-        ]}
-      />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Users className="size-6 text-blue-400" />
-          {user.name}
-        </h1>
-      </div>
-
-      <UserDetail user={user} viewerIsOwner={isOwner(session.user.email)} />
-    </div>
+    <AdminContentLayout
+      segments={[
+        { label: 'Utilisateurs', href: ROUTES.ADMIN_USERS },
+        { label: user.name },
+      ]}
+      icon={Users}
+      title={user.name}
+    >
+      <UserDetail user={user} viewerIsOwner={isOwner(session!.user.email)} />
+    </AdminContentLayout>
   )
 }
 

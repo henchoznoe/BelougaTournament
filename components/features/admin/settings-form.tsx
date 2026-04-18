@@ -9,7 +9,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Save, Settings } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
@@ -72,21 +72,12 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Page heading with save button */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Settings className="size-6 text-blue-400" />
-            Paramètres
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Configurez les paramètres globaux de la plateforme.
-          </p>
-        </div>
+      {/* Save button */}
+      <div className="flex justify-end">
         <Button
           type="submit"
           disabled={isPending || !isDirty}
-          className="shrink-0 gap-2 bg-blue-600 text-white hover:bg-blue-500"
+          className="w-full gap-2 bg-blue-600 text-white hover:bg-blue-500 sm:w-auto"
         >
           {isPending ? (
             <Loader2 className="size-4 animate-spin" />
