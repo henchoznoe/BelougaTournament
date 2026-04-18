@@ -43,7 +43,7 @@ export const AdminShellSkeleton = () => {
 
           {/* Right side: back + logout + separator + user */}
           <div className="flex items-center gap-4">
-            <Skeleton className="h-8 w-28 rounded bg-zinc-800" />
+            <Skeleton className="size-8 rounded bg-zinc-800" />
             <Skeleton className="size-8 rounded bg-zinc-800" />
             <div className="h-6 w-px bg-white/10" />
             <div className="flex items-center gap-3">
