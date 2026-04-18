@@ -22,44 +22,30 @@ interface AdminNavItem {
   icon: LucideIcon
 }
 
-interface AdminNavGroup {
-  label?: string
-  items: AdminNavItem[]
-}
-
-export const ADMIN_NAV: AdminNavGroup[] = [
+export const ADMIN_NAV: AdminNavItem[] = [
   {
-    items: [
-      {
-        label: 'Dashboard',
-        href: ROUTES.ADMIN_DASHBOARD,
-        icon: LayoutDashboard,
-      },
-      {
-        label: 'Utilisateurs',
-        href: ROUTES.ADMIN_USERS,
-        icon: Users,
-      },
-      {
-        label: 'Tournois',
-        href: ROUTES.ADMIN_TOURNAMENTS,
-        icon: Trophy,
-      },
-    ],
+    label: 'Dashboard',
+    href: ROUTES.ADMIN_DASHBOARD,
+    icon: LayoutDashboard,
   },
   {
-    label: 'Configuration',
-    items: [
-      {
-        label: 'Paramètres',
-        href: ROUTES.ADMIN_SETTINGS,
-        icon: Settings,
-      },
-      {
-        label: 'Sponsors',
-        href: ROUTES.ADMIN_SPONSORS,
-        icon: Handshake,
-      },
-    ],
+    label: 'Utilisateurs',
+    href: ROUTES.ADMIN_USERS,
+    icon: Users,
+  },
+  {
+    label: 'Tournois',
+    href: ROUTES.ADMIN_TOURNAMENTS,
+    icon: Trophy,
+  },
+  {
+    label: 'Sponsors',
+    href: ROUTES.ADMIN_SPONSORS,
+    icon: Handshake,
+  },
+  {
+    label: 'Paramètres',
+    href: ROUTES.ADMIN_SETTINGS,
+    icon: Settings,
   },
 ] as const
