@@ -642,24 +642,22 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
               </dd>
             </div>
             {isPaid && (
-              <>
-                <div className="flex items-start justify-between gap-2">
-                  <dt className="flex items-center gap-2 text-zinc-500">
-                    <RefreshCw className="size-3.5" />
-                    Remboursement
-                  </dt>
-                  <dd className="text-right text-zinc-300">
-                    {REFUND_POLICY_LABELS[tournament.refundPolicyType]}
-                    {tournament.refundPolicyType ===
-                      RefundPolicyType.BEFORE_DEADLINE &&
-                      tournament.refundDeadlineDays && (
-                        <span className="ml-1 text-zinc-500">
-                          ({tournament.refundDeadlineDays}j)
-                        </span>
-                      )}
-                  </dd>
-                </div>
-              </>
+              <div className="flex items-start justify-between gap-2">
+                <dt className="flex items-center gap-2 text-zinc-500">
+                  <RefreshCw className="size-3.5" />
+                  Remboursement
+                </dt>
+                <dd className="text-right text-zinc-300">
+                  {REFUND_POLICY_LABELS[tournament.refundPolicyType]}
+                  {tournament.refundPolicyType ===
+                    RefundPolicyType.BEFORE_DEADLINE &&
+                    tournament.refundDeadlineDays && (
+                      <span className="ml-1 text-zinc-500">
+                        ({tournament.refundDeadlineDays}j)
+                      </span>
+                    )}
+                </dd>
+              </div>
             )}
             {tournament.toornamentId && (
               <div className="flex items-start justify-between gap-2">
