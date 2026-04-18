@@ -88,7 +88,7 @@ export type TournamentDetail = {
   format: TournamentFormat
   teamSize: number
   game: string | null
-  imageUrl: string | null
+  imageUrls: string[]
   rules: string | null
   prize: string | null
   toornamentId: string | null
@@ -180,7 +180,7 @@ export type PublicTournamentListItem = {
   slug: string
   description: string
   game: string | null
-  imageUrl: string | null
+  imageUrls: string[]
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null
@@ -205,7 +205,7 @@ export type PublicTournamentDetail = {
   slug: string
   description: string
   game: string | null
-  imageUrl: string | null
+  imageUrls: string[]
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null

@@ -47,10 +47,14 @@ const makeTeam = (
     captainId?: string
     members?: { userId: string; joinedAt: Date }[]
     teamSize?: number
+    name?: string
+    isFull?: boolean
   } = {},
 ) => ({
   id: overrides.id ?? 'team-1',
+  name: overrides.name ?? 'Team Alpha',
   captainId: overrides.captainId ?? 'user-a',
+  isFull: overrides.isFull ?? false,
   members: overrides.members ?? [makeMember('user-a'), makeMember('user-b')],
   tournament: { teamSize: overrides.teamSize ?? 3 },
 })

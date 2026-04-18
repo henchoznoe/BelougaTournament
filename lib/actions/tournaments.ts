@@ -151,6 +151,7 @@ const issueStripeRefundAfterDbUpdate = async ({
   latestPayment,
   previousPaymentStatus,
   idempotencyPrefix,
+  onRevert,
 }: {
   registrationId: string
   latestPayment: {
@@ -161,6 +162,9 @@ const issueStripeRefundAfterDbUpdate = async ({
   }
   previousPaymentStatus: PaymentStatus
   idempotencyPrefix: string
+  onRevert?: (
+    tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  ) => Promise<void>
 }) => {
   try {
     const stripe = getStripe()
@@ -201,6 +205,7 @@ const issueStripeRefundAfterDbUpdate = async ({
           refundedAt: null,
         },
       })
+      if (onRevert) await onRevert(tx)
     })
     throw error
   }
@@ -535,7 +540,7 @@ export const createTournament = authenticatedAction({
         rules: toNullable(data.rules),
         prize: toNullable(data.prize),
         toornamentId: toNullable(data.toornamentId),
-        imageUrl: toNullable(data.imageUrl),
+        imageUrls: data.imageUrls,
         streamUrl: toNullable(data.streamUrl),
         fields: {
           create: data.fields.map(field => ({
@@ -608,7 +613,11 @@ export const updateTournament = authenticatedAction({
       }
     }
 
-    if (data.entryFeeCurrency !== existing.entryFeeCurrency) {
+    // Only compare currency for PAID tournaments (FREE tournaments store null in DB but form sends 'CHF')
+    if (
+      existing.entryFeeCurrency !== null &&
+      data.entryFeeCurrency !== existing.entryFeeCurrency
+    ) {
       return {
         success: false,
         message:
@@ -699,7 +708,7 @@ export const updateTournament = authenticatedAction({
           rules: toNullable(data.rules),
           prize: toNullable(data.prize),
           toornamentId: toNullable(data.toornamentId),
-          imageUrl: toNullable(data.imageUrl),
+          imageUrls: data.imageUrls,
           streamUrl: toNullable(data.streamUrl),
           fields: {
             create: data.fields.map(field => ({
@@ -734,6 +743,21 @@ export const deleteTournament = authenticatedAction({
   schema: deleteTournamentSchema,
   role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
+    // Prevent deletion if there are active (PAID) payments — refund them first
+    const paidCount = await prisma.tournamentRegistration.count({
+      where: {
+        tournamentId: data.id,
+        paymentStatus: PaymentStatus.PAID,
+      },
+    })
+    if (paidCount > 0) {
+      return {
+        success: false,
+        message:
+          "Impossible de supprimer ce tournoi : des inscriptions payées existent. Remboursez-les d'abord.",
+      }
+    }
+
     await prisma.tournament.delete({
       where: { id: data.id },
     })
@@ -754,6 +778,23 @@ export const updateTournamentStatus = authenticatedAction({
   schema: updateTournamentStatusSchema,
   role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
+    // Prevent reverting to DRAFT if there are paid registrations
+    if (data.status === TournamentStatus.DRAFT) {
+      const paidCount = await prisma.tournamentRegistration.count({
+        where: {
+          tournamentId: data.id,
+          paymentStatus: PaymentStatus.PAID,
+        },
+      })
+      if (paidCount > 0) {
+        return {
+          success: false,
+          message:
+            "Impossible de repasser en brouillon : des inscriptions payées existent. Remboursez-les d'abord.",
+        }
+      }
+    }
+
     await prisma.tournament.update({
       where: { id: data.id },
       data: { status: data.status },
@@ -1341,6 +1382,19 @@ export const unregisterFromTournament = authenticatedAction({
     }
 
     const team = teamMember.team
+
+    // Save pre-mutation state for potential Stripe revert
+    const teamRevertInfo = {
+      teamId: team.id,
+      userId,
+      joinedAt: teamMember.joinedAt,
+      captainId: team.captainId,
+      isFull: team.isFull,
+      teamWasDeleted: team.members.length === 1,
+      teamName: team.name,
+      tournamentId: data.tournamentId,
+    }
+
     await prisma.$transaction(async tx => {
       // a. Remove team member record
       await tx.teamMember.deleteMany({
@@ -1389,6 +1443,41 @@ export const unregisterFromTournament = authenticatedAction({
         latestPayment,
         previousPaymentStatus: registration.paymentStatus,
         idempotencyPrefix: 'refund',
+        onRevert: async tx => {
+          // Restore team membership that was removed during the DB-first phase
+          if (teamRevertInfo.teamWasDeleted) {
+            await tx.team.create({
+              data: {
+                id: teamRevertInfo.teamId,
+                name: teamRevertInfo.teamName,
+                tournamentId: teamRevertInfo.tournamentId,
+                captainId: teamRevertInfo.captainId,
+                isFull: teamRevertInfo.isFull,
+              },
+            })
+          } else {
+            await tx.team.update({
+              where: { id: teamRevertInfo.teamId },
+              data: {
+                captainId: teamRevertInfo.captainId,
+                isFull: teamRevertInfo.isFull,
+              },
+            })
+          }
+
+          await tx.teamMember.create({
+            data: {
+              teamId: teamRevertInfo.teamId,
+              userId: teamRevertInfo.userId,
+              joinedAt: teamRevertInfo.joinedAt,
+            },
+          })
+
+          await tx.tournamentRegistration.update({
+            where: { id: registration.id },
+            data: { teamId: teamRevertInfo.teamId },
+          })
+        },
       })
     }
 

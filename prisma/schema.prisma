@@ -138,7 +138,7 @@ model Tournament {
   format            TournamentFormat
   teamSize          Int                      @default(1)
   game              String? // e.g. Valorant, Rocket League
-  imageUrl          String? // Tournament banner image
+  imageUrls         String[] // Tournament images (Vercel Blob URLs)
   rules             String? // Full tournament ruleset
   prize             String? // Cash prize or rewards
   registrationType  RegistrationType         @default(FREE)

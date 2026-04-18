@@ -13,11 +13,11 @@ import {
   AlertTriangle,
   Calendar,
   ChevronDown,
+  ChevronUp,
   CreditCard,
   Eye,
   FileText,
   Gamepad2,
-  GripVertical,
   ImagePlus,
   Layers,
   Loader2,
@@ -33,10 +33,16 @@ import {
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
-import { type Resolver, useFieldArray, useForm } from 'react-hook-form'
+import {
+  Controller,
+  type FieldErrors,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form'
 import { toast } from 'sonner'
 import type { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Markdown } from '@/components/ui/markdown'
@@ -69,8 +75,9 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-/** Form output type derived from the Zod create schema (post-parse, post-defaults). */
-type TournamentInput = z.output<typeof tournamentSchema>
+/** Form output type derived from the Zod create schema (post-parse, post-defaults).
+ *  The update schema is a superset (adds `id`); both are used via resolver union. */
+type TournamentInput = z.output<typeof tournamentSchema> & { id?: string }
 
 interface BlobItem {
   url: string
@@ -106,23 +113,49 @@ const toDatetimeLocalValue = (iso: string | Date): string => {
   return formatter.format(d).replace(' ', 'T')
 }
 
-/** Convert datetime-local string (Swiss timezone) to ISO UTC datetime string. */
+/** Convert datetime-local string (Swiss timezone) to ISO UTC datetime string.
+ *  Uses convergent iteration to handle DST transition edge-cases correctly. */
 const toISOFromLocal = (localStr: string): string => {
-  // localStr is "YYYY-MM-DDTHH:mm" in Europe/Zurich
-  // Build a date string that we can parse as Swiss local time
+  // localStr is "YYYY-MM-DDTHH:mm" representing Europe/Zurich wall-clock time.
   const [datePart, timePart] = localStr.split('T')
-  // Use date-fns or manual approach: create a temporary Date in UTC, then offset
-  // Simpler: use Intl to find the offset for that date in Zurich
-  const naive = new Date(`${datePart}T${timePart}:00`)
-  // Get the UTC offset for Europe/Zurich at this date
-  const zurichStr = naive.toLocaleString('en-US', { timeZone: 'Europe/Zurich' })
-  const utcStr = naive.toLocaleString('en-US', { timeZone: 'UTC' })
-  const zurichDate = new Date(zurichStr)
-  const utcDate = new Date(utcStr)
-  const offsetMs = utcDate.getTime() - zurichDate.getTime()
-  // The actual UTC time = naive time + offset
-  const utcTime = new Date(naive.getTime() + offsetMs)
-  return utcTime.toISOString()
+  const naiveMs = Date.UTC(
+    Number(datePart.slice(0, 4)),
+    Number(datePart.slice(5, 7)) - 1,
+    Number(datePart.slice(8, 10)),
+    Number(timePart.slice(0, 2)),
+    Number(timePart.slice(3, 5)),
+  )
+
+  // Helper: compute Zurich offset (ms) at a given UTC instant
+  const zurichOffsetAt = (utcMs: number): number => {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Europe/Zurich',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).formatToParts(new Date(utcMs))
+    const get = (type: string) => parts.find(p => p.type === type)?.value ?? '0'
+    const zurichAsUtc = Date.UTC(
+      Number(get('year')),
+      Number(get('month')) - 1,
+      Number(get('day')),
+      Number(get('hour')),
+      Number(get('minute')),
+      Number(get('second')),
+    )
+    return zurichAsUtc - utcMs
+  }
+
+  // Convergent iteration: start with naive guess, refine offset until stable
+  let utcGuess = naiveMs - zurichOffsetAt(naiveMs)
+  const offset2 = zurichOffsetAt(utcGuess)
+  utcGuess = naiveMs - offset2
+
+  return new Date(utcGuess).toISOString()
 }
 
 // ─── Input styling constants ─────────────────────────────────────────────────
@@ -287,8 +320,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   } = useForm<TournamentInput>({
     resolver: zodResolver(
       isEditing ? updateTournamentSchema : tournamentSchema,
-    ) as unknown as Resolver<TournamentInput>,
+      // biome-ignore lint/suspicious/noExplicitAny: union of create/update schemas; TournamentInput is the common subset
+    ) as any,
     defaultValues: {
+      id: tournament?.id ?? '',
       title: tournament?.title ?? '',
       slug: tournament?.slug ?? '',
       description: tournament?.description ?? '',
@@ -312,7 +347,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       refundPolicyType: tournament?.refundPolicyType ?? RefundPolicyType.NONE,
       refundDeadlineDays: tournament?.refundDeadlineDays ?? null,
       toornamentId: fromNullable(tournament?.toornamentId ?? null),
-      imageUrl: fromNullable(tournament?.imageUrl ?? null),
+      imageUrls: tournament?.imageUrls ?? [],
       streamUrl: fromNullable(tournament?.streamUrl ?? null),
       fields:
         tournament?.fields.map(f => ({
@@ -336,12 +371,14 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     fields: fieldArrayFields,
     append: appendField,
     remove: removeField,
+    move: moveField,
   } = useFieldArray({ control, name: 'fields' })
 
   const {
     fields: stageArrayFields,
     append: appendStage,
     remove: removeStage,
+    move: moveStage,
   } = useFieldArray({ control, name: 'toornamentStages' })
 
   const watchTitle = watch('title')
@@ -351,7 +388,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const watchDescription = watch('description')
   const watchRules = watch('rules')
   const watchPrize = watch('prize')
-  const watchImageUrl = watch('imageUrl')
+  const watchImageUrls = watch('imageUrls')
   const watchMaxTeams = watch('maxTeams')
   const watchEntryFeeAmount = watch('entryFeeAmount')
   const watchRefundDeadlineDays = watch('refundDeadlineDays')
@@ -408,31 +445,37 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   }, [fetchBlobs])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'tournaments')
+      const newUrls: string[] = []
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', 'tournaments')
 
-      const res = await fetch('/api/admin/blobs', {
-        method: 'POST',
-        body: formData,
-      })
-      const data = (await res.json()) as { url?: string; error?: string }
+        const res = await fetch('/api/admin/blobs', {
+          method: 'POST',
+          body: formData,
+        })
+        const data = (await res.json()) as { url?: string; error?: string }
 
-      if (!res.ok || !data.url) {
-        toast.error(data.error ?? "Erreur lors de l'upload.")
-        return
+        if (!res.ok || !data.url) {
+          toast.error(data.error ?? "Erreur lors de l'upload.")
+          continue
+        }
+        newUrls.push(data.url)
       }
 
-      toast.success('Image importée avec succès.')
-      setValue('imageUrl', data.url, {
-        shouldDirty: true,
-        shouldValidate: true,
-      })
+      if (newUrls.length > 0) {
+        toast.success(`${newUrls.length} image(s) importée(s) avec succès.`)
+        setValue('imageUrls', [...watchImageUrls, ...newUrls], {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      }
       await fetchBlobs()
     } catch (error) {
       console.error('Error uploading tournament image:', error)
@@ -445,14 +488,28 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
   // ─── Form submission ────────────────────────────────────────────────────────
 
+  const onFormError = (fieldErrors: FieldErrors<TournamentInput>) => {
+    // Find the first error message to display in the toast
+    const firstError = Object.values(fieldErrors).find(e => e?.message)
+    const message =
+      firstError?.message ?? 'Veuillez corriger les erreurs du formulaire.'
+    toast.error(String(message))
+  }
+
   const onSubmit = (data: TournamentInput) => {
     // Convert datetime-local inputs (Swiss timezone) to ISO UTC strings
+    // Recompute field/stage order from array position (hidden inputs don't sync after reorder)
     const payload = {
       ...data,
       startDate: toISOFromLocal(data.startDate),
       endDate: toISOFromLocal(data.endDate),
       registrationOpen: toISOFromLocal(data.registrationOpen),
       registrationClose: toISOFromLocal(data.registrationClose),
+      fields: data.fields.map((f, i) => ({ ...f, order: i })),
+      toornamentStages: data.toornamentStages.map((s, i) => ({
+        ...s,
+        number: i,
+      })),
     }
 
     startTransition(async () => {
@@ -479,7 +536,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isTeam = watchFormat === TournamentFormat.TEAM
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-6">
       {/* ── Section 1: General Info ─────────────────────────────────────────── */}
       <div className={SECTION_CLASSES}>
         <SectionHeader icon={FileText} title="Informations générales" />
@@ -630,11 +687,17 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             <Label htmlFor="tournament-startDate" className={LABEL_CLASSES}>
               Début du tournoi *
             </Label>
-            <Input
-              id="tournament-startDate"
-              type="datetime-local"
-              className={cn(INPUT_CLASSES, 'w-56')}
-              {...register('startDate')}
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Début du tournoi"
+                  className={cn(INPUT_CLASSES, 'w-56')}
+                />
+              )}
             />
             {errors.startDate?.message && (
               <p className="text-xs text-red-400">{errors.startDate.message}</p>
@@ -645,11 +708,17 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             <Label htmlFor="tournament-endDate" className={LABEL_CLASSES}>
               Fin du tournoi *
             </Label>
-            <Input
-              id="tournament-endDate"
-              type="datetime-local"
-              className={cn(INPUT_CLASSES, 'w-56')}
-              {...register('endDate')}
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Fin du tournoi"
+                  className={cn(INPUT_CLASSES, 'w-56')}
+                />
+              )}
             />
             {errors.endDate?.message && (
               <p className="text-xs text-red-400">{errors.endDate.message}</p>
@@ -663,11 +732,17 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             >
               Ouverture des inscriptions *
             </Label>
-            <Input
-              id="tournament-registrationOpen"
-              type="datetime-local"
-              className={cn(INPUT_CLASSES, 'w-56')}
-              {...register('registrationOpen')}
+            <Controller
+              name="registrationOpen"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Ouverture des inscriptions"
+                  className={cn(INPUT_CLASSES, 'w-56')}
+                />
+              )}
             />
             {errors.registrationOpen?.message && (
               <p className="text-xs text-red-400">
@@ -683,11 +758,17 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             >
               Fermeture des inscriptions *
             </Label>
-            <Input
-              id="tournament-registrationClose"
-              type="datetime-local"
-              className={cn(INPUT_CLASSES, 'w-56')}
-              {...register('registrationClose')}
+            <Controller
+              name="registrationClose"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Fermeture des inscriptions"
+                  className={cn(INPUT_CLASSES, 'w-56')}
+                />
+              )}
             />
             {errors.registrationClose?.message && (
               <p className="text-xs text-red-400">
@@ -897,34 +978,73 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       {/* ── Section 5: Image & Media ───────────────────────────────────────── */}
       <div className={SECTION_CLASSES}>
-        <SectionHeader icon={ImagePlus} title="Image et médias" />
+        <SectionHeader icon={ImagePlus} title="Images et médias" />
         <div className="space-y-4">
-          {/* Image preview */}
-          {watchImageUrl && (
-            <div className="flex items-start gap-4">
-              <div className="relative size-24 overflow-hidden rounded-lg border border-white/10 bg-white/5">
-                <Image
-                  src={watchImageUrl}
-                  alt="Aperçu"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setValue('imageUrl', '', {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  })
-                }
-                className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-              >
-                <X className="mr-1 size-3.5" />
-                Retirer l&apos;image
-              </Button>
+          {/* Selected images grid */}
+          {watchImageUrls.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {watchImageUrls.map((url, index) => (
+                <div
+                  key={url}
+                  className={cn(
+                    'group relative aspect-square overflow-hidden rounded-lg border bg-white/5',
+                    index === 0
+                      ? 'border-blue-500/50 ring-2 ring-blue-500/20'
+                      : 'border-white/10',
+                  )}
+                >
+                  <Image
+                    src={url}
+                    alt={`Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Principal badge */}
+                  {index === 0 && (
+                    <span className="absolute left-1.5 top-1.5 rounded bg-blue-500/80 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      Principale
+                    </span>
+                  )}
+                  {/* Actions overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                    {/* Set as principal */}
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Définir comme principale"
+                        className="text-white hover:bg-white/20"
+                        onClick={() => {
+                          const updated = [...watchImageUrls]
+                          const [item] = updated.splice(index, 1)
+                          updated.unshift(item)
+                          setValue('imageUrls', updated, { shouldDirty: true })
+                        }}
+                      >
+                        <Trophy className="size-3" />
+                      </Button>
+                    )}
+                    {/* Remove */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label="Retirer l'image"
+                      className="text-red-400 hover:bg-red-500/20"
+                      onClick={() => {
+                        setValue(
+                          'imageUrls',
+                          watchImageUrls.filter((_, i) => i !== index),
+                          { shouldDirty: true },
+                        )
+                      }}
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -943,12 +1063,13 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               ) : (
                 <ImagePlus className="size-4" />
               )}
-              {isUploading ? 'Import en cours...' : 'Uploader une image'}
+              {isUploading ? 'Import en cours...' : 'Uploader des images'}
             </Button>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/png,image/jpeg,image/webp"
+              multiple
               className="hidden"
               onChange={handleUpload}
             />
@@ -987,17 +1108,29 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               ) : (
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
                   {blobs.map(blob => {
-                    const isSelected = watchImageUrl === blob.url
+                    const isSelected = watchImageUrls.includes(blob.url)
                     return (
                       <button
                         key={blob.url}
                         type="button"
-                        onClick={() =>
-                          setValue('imageUrl', isSelected ? '' : blob.url, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          })
-                        }
+                        onClick={() => {
+                          if (isSelected) {
+                            setValue(
+                              'imageUrls',
+                              watchImageUrls.filter(u => u !== blob.url),
+                              { shouldDirty: true, shouldValidate: true },
+                            )
+                          } else {
+                            setValue(
+                              'imageUrls',
+                              [...watchImageUrls, blob.url],
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            )
+                          }
+                        }}
                         className={cn(
                           'relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border bg-white/5 transition-all duration-200',
                           isSelected
@@ -1026,8 +1159,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               ))}
           </div>
 
-          {errors.imageUrl?.message && (
-            <p className="text-xs text-red-400">{errors.imageUrl.message}</p>
+          {errors.imageUrls?.message && (
+            <p className="text-xs text-red-400">{errors.imageUrls.message}</p>
           )}
 
           {/* Stream URL */}
@@ -1094,7 +1227,32 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               key={field.id}
               className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-3"
             >
-              <GripVertical className="mt-2.5 size-4 shrink-0 text-zinc-600" />
+              <div className="mt-1 flex shrink-0 flex-col gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={index === 0 || !!fieldsLocked}
+                  onClick={() => moveField(index, index - 1)}
+                  className="text-zinc-500 hover:text-zinc-300"
+                  aria-label="Monter le champ"
+                >
+                  <ChevronUp className="size-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={
+                    index === fieldArrayFields.length - 1 || !!fieldsLocked
+                  }
+                  onClick={() => moveField(index, index + 1)}
+                  className="text-zinc-500 hover:text-zinc-300"
+                  aria-label="Descendre le champ"
+                >
+                  <ChevronDown className="size-3" />
+                </Button>
+              </div>
               <div className="grid flex-1 gap-3 sm:grid-cols-4">
                 <div className="sm:col-span-2">
                   <Input
@@ -1163,11 +1321,6 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   </Button>
                 </div>
               </div>
-              <input
-                type="hidden"
-                {...register(`fields.${index}.order`, { valueAsNumber: true })}
-                value={index}
-              />
             </div>
           ))}
 
@@ -1225,7 +1378,30 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 key={stage.id}
                 className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-3"
               >
-                <GripVertical className="mt-2.5 size-4 shrink-0 text-zinc-600" />
+                <div className="mt-1 flex shrink-0 flex-col gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    disabled={index === 0}
+                    onClick={() => moveStage(index, index - 1)}
+                    className="text-zinc-500 hover:text-zinc-300"
+                    aria-label="Monter le stage"
+                  >
+                    <ChevronUp className="size-3" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    disabled={index === stageArrayFields.length - 1}
+                    onClick={() => moveStage(index, index + 1)}
+                    className="text-zinc-500 hover:text-zinc-300"
+                    aria-label="Descendre le stage"
+                  >
+                    <ChevronDown className="size-3" />
+                  </Button>
+                </div>
                 <div className="grid flex-1 gap-3 sm:grid-cols-3">
                   <Input
                     placeholder="Nom du stage"

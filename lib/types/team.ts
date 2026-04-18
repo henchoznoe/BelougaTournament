@@ -9,14 +9,17 @@
 /** Team with ordered members list. Used by team helpers and registration actions. */
 export interface TeamWithMembers {
   id: string
+  name: string
   tournamentId?: string
   captainId: string
+  isFull: boolean
   tournament: { teamSize: number }
-  members: { userId: string }[]
+  members: { userId: string; joinedAt: Date }[]
 }
 
 /** Team member with nested team (including members). */
 export interface TeamMemberWithTeam {
   userId?: string
+  joinedAt: Date
   team: TeamWithMembers
 }

@@ -380,6 +380,75 @@ export const TournamentDetailActions = ({
 
 // ─── Stats Summary ───────────────────────────────────────────────────────────
 
+// ─── Tournament Image Gallery ────────────────────────────────────────────────
+
+interface TournamentImageGalleryProps {
+  imageUrls: string[]
+  name: string
+}
+
+const TournamentImageGallery = ({
+  imageUrls,
+  name,
+}: TournamentImageGalleryProps) => {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  if (imageUrls.length === 0) {
+    return (
+      <div className="flex h-48 items-center justify-center rounded-2xl border border-white/5 bg-white/2">
+        <p className="text-sm text-zinc-500">Aucune image</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Main image */}
+      <div className="relative aspect-[3/1] overflow-hidden rounded-xl border border-white/5 bg-white/2">
+        <Image
+          src={imageUrls[selectedIndex]}
+          alt={`${name} — image ${selectedIndex + 1}`}
+          fill
+          className="object-contain p-4"
+          sizes="(max-width: 768px) 100vw, 800px"
+          priority
+        />
+      </div>
+
+      {/* Thumbnails (only if more than 1 image) */}
+      {imageUrls.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {imageUrls.map((url, index) => (
+            <button
+              key={url}
+              type="button"
+              onClick={() => setSelectedIndex(index)}
+              aria-label={`Voir image ${index + 1}`}
+              className={cn(
+                'relative size-16 shrink-0 overflow-hidden rounded-lg border transition-all',
+                'hover:border-white/20',
+                index === selectedIndex
+                  ? 'border-blue-500 ring-1 ring-blue-500/50'
+                  : 'border-white/5 bg-white/2',
+              )}
+            >
+              <Image
+                src={url}
+                alt={`${name} — miniature ${index + 1}`}
+                fill
+                className="object-contain p-1"
+                sizes="64px"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Stats Summary ───────────────────────────────────────────────────────────
+
 interface StatsSummaryProps {
   tournament: TournamentDetailType
 }
@@ -515,24 +584,6 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Tournament image */}
-      {tournament.imageUrl && (
-        <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
-            <ImageIcon className="size-4 text-blue-400" />
-            Image
-          </h2>
-          <div className="relative aspect-[3/1] w-full overflow-hidden rounded-xl border border-white/10">
-            <Image
-              src={tournament.imageUrl}
-              alt={tournament.title}
-              fill
-              className="object-cover"
-            />
-          </div>
-        </div>
-      )}
-
       {/* Stats summary */}
       <StatsSummary tournament={tournament} />
 
@@ -820,6 +871,20 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Tournament images */}
+      {tournament.imageUrls.length > 0 && (
+        <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <ImageIcon className="size-4 text-blue-400" />
+            Images
+          </h2>
+          <TournamentImageGallery
+            imageUrls={tournament.imageUrls}
+            name={tournament.title}
+          />
         </div>
       )}
 

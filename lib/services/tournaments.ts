@@ -299,7 +299,7 @@ const PUBLIC_LIST_SELECT = {
   slug: true,
   description: true,
   game: true,
-  imageUrl: true,
+  imageUrls: true,
   format: true,
   teamSize: true,
   maxTeams: true,
@@ -395,7 +395,7 @@ export const getArchivedTournaments = async (): Promise<
   }
 }
 
-/** Fetches a single PUBLISHED tournament by slug (public detail page). */
+/** Fetches a single PUBLISHED or ARCHIVED tournament by slug (public detail page). */
 export const getPublicTournamentBySlug = async (
   slug: string,
 ): Promise<PublicTournamentDetail | null> => {
@@ -579,6 +579,7 @@ export const getUserPastRegistrations = async (
           {
             status: RegistrationStatus.CANCELLED,
             paymentStatus: PaymentStatus.REFUNDED,
+            tournament: { status: TournamentStatus.ARCHIVED },
           },
         ],
       },

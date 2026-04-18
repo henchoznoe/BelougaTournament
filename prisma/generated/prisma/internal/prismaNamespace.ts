@@ -1566,7 +1566,7 @@ export const TournamentScalarFieldEnum = {
   format: 'format',
   teamSize: 'teamSize',
   game: 'game',
-  imageUrl: 'imageUrl',
+  imageUrls: 'imageUrls',
   rules: 'rules',
   prize: 'prize',
   registrationType: 'registrationType',

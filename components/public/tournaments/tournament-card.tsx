@@ -73,10 +73,10 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
       className="group relative block overflow-hidden rounded-3xl border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:shadow-[0_0_30px_rgba(59,130,246,0.08)]"
     >
       {/* Image banner */}
-      {tournament.imageUrl && (
+      {tournament.imageUrls.length > 0 && (
         <div className="relative h-40 w-full overflow-hidden">
           <Image
-            src={tournament.imageUrl}
+            src={tournament.imageUrls[0]}
             alt={tournament.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -87,7 +87,12 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
       )}
 
       {/* Content */}
-      <div className={cn('relative p-6', !tournament.imageUrl && 'pt-8')}>
+      <div
+        className={cn(
+          'relative p-6',
+          tournament.imageUrls.length === 0 && 'pt-8',
+        )}
+      >
         {/* Background glow */}
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
 

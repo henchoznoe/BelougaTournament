@@ -141,10 +141,10 @@ export const TournamentDetail = ({
       {/* ===== HERO SECTION ===== */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5">
         {/* Background image or gradient */}
-        {tournament.imageUrl ? (
+        {tournament.imageUrls.length > 0 ? (
           <div className="relative h-56 sm:h-72 md:h-80">
             <Image
-              src={tournament.imageUrl}
+              src={tournament.imageUrls[0]}
               alt={tournament.title}
               fill
               className="object-cover"

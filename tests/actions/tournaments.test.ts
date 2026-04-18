@@ -63,6 +63,7 @@ const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockRegistrationDelete = vi.fn()
 const mockRegistrationDeleteMany = vi.fn()
+const mockRegistrationCount = vi.fn()
 const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
@@ -92,6 +93,7 @@ vi.mock('@/lib/core/prisma', () => ({
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
       deleteMany: (...args: unknown[]) => mockRegistrationDeleteMany(...args),
+      count: (...args: unknown[]) => mockRegistrationCount(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -157,7 +159,7 @@ const VALID_TOURNAMENT_INPUT = {
   refundDeadlineDays: null,
   toornamentId: '',
   streamUrl: '',
-  imageUrl: '',
+  imageUrls: [],
   fields: [
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
@@ -192,6 +194,7 @@ describe('tournament admin actions', () => {
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])
     mockTeamMemberCount.mockResolvedValue(1)
+    mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationFindUnique.mockResolvedValue({
       id: 'reg-1',
       paymentRequiredSnapshot: false,

@@ -25,9 +25,9 @@ const AdminNewTournamentPage = async () => {
       ]}
       icon={Plus}
       title="Nouveau tournoi"
-      subtitle="Creez un nouveau tournoi sur la plateforme."
+      subtitle="Créez un nouveau tournoi sur la plateforme."
     >
-      <TournamentForm />
+      <TournamentForm key="new" />
     </AdminContentLayout>
   )
 }

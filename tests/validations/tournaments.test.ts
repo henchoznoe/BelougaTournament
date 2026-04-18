@@ -256,27 +256,30 @@ describe('tournamentSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('accepts empty imageUrl', () => {
+  it('accepts empty imageUrls array', () => {
     const result = tournamentSchema.safeParse({
       ...VALID_TOURNAMENT,
-      imageUrl: '',
+      imageUrls: [],
     })
     expect(result.success).toBe(true)
   })
 
-  it('accepts valid URL for imageUrl', () => {
+  it('accepts valid URLs for imageUrls', () => {
     const result = tournamentSchema.safeParse({
       ...VALID_TOURNAMENT,
-      imageUrl: 'https://example.com/image.png',
+      imageUrls: [
+        'https://example.com/image.png',
+        'https://example.com/image2.png',
+      ],
     })
     expect(result.success).toBe(true)
   })
 
-  it('rejects an invalid imageUrl', () => {
+  it('rejects an invalid imageUrls entry', () => {
     expect(
       tournamentSchema.safeParse({
         ...VALID_TOURNAMENT,
-        imageUrl: 'ftp://invalid',
+        imageUrls: ['not-a-url'],
       }).success,
     ).toBe(false)
   })
