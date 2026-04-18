@@ -14,6 +14,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { syncTeamFullState } from '@/lib/utils/team'
 import {
   changeTeamSchema,
   deleteRegistrationSchema,
@@ -419,6 +420,7 @@ export const adminRefundRegistration = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
     return {
       success: true,
@@ -446,20 +448,6 @@ type TargetTeam = {
   tournamentId: string
   tournament: { teamSize: number }
   _count: { members: number }
-}
-
-/** Recomputes the `isFull` flag for a team after an admin mutation. */
-const syncTeamFullState = async (
-  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
-  teamId: string,
-  teamSize: number,
-) => {
-  const memberCount = await tx.teamMember.count({ where: { teamId } })
-
-  await tx.team.update({
-    where: { id: teamId },
-    data: { isFull: memberCount >= teamSize },
-  })
 }
 
 /** Moves a player from their current team to a different team in the same tournament. */

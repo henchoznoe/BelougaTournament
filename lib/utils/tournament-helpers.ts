@@ -1,0 +1,59 @@
+/**
+ * File: lib/utils/tournament-helpers.ts
+ * Description: Shared tournament helper functions for field validation and refund eligibility.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
+import { FieldType, RefundPolicyType } from '@/prisma/generated/prisma/enums'
+
+/** Validates dynamic field values against tournament field definitions. */
+export const validateFieldValues = (
+  fields: { label: string; type: string; required: boolean }[],
+  fieldValues: Record<string, string | number>,
+): { valid: true } | { valid: false; message: string } => {
+  for (const field of fields) {
+    const value = fieldValues[field.label]
+    if (field.required && (value === undefined || value === '')) {
+      return {
+        valid: false,
+        message: `Le champ « ${field.label} » est requis.`,
+      }
+    }
+    if (
+      field.type === FieldType.NUMBER &&
+      value !== undefined &&
+      value !== ''
+    ) {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return {
+          valid: false,
+          message: `Le champ « ${field.label} » doit être un nombre.`,
+        }
+      }
+    }
+  }
+  return { valid: true }
+}
+
+/** Returns true when a player is still eligible for an automatic refund. */
+export const isRefundEligible = (
+  startDate: Date,
+  refundPolicyType: RefundPolicyType,
+  refundDeadlineDays: number | null,
+  now: Date,
+) => {
+  if (refundPolicyType !== RefundPolicyType.BEFORE_DEADLINE) {
+    return false
+  }
+
+  if (refundDeadlineDays === null) {
+    return false
+  }
+
+  return (
+    startDate.getTime() - now.getTime() >=
+    refundDeadlineDays * 24 * 60 * 60 * 1000
+  )
+}

@@ -13,76 +13,11 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
+import { removeUserFromTeam } from '@/lib/utils/team'
 import {
   PaymentStatus,
   RegistrationStatus,
 } from '@/prisma/generated/prisma/enums'
-
-type TeamWithMembers = {
-  id: string
-  captainId: string
-  tournament: { teamSize: number }
-  members: { userId: string }[]
-}
-
-type TeamMemberWithTeam = {
-  team: TeamWithMembers
-}
-
-const syncTeamFullState = async (
-  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
-  teamId: string,
-  teamSize: number,
-) => {
-  const memberCount = await tx.teamMember.count({ where: { teamId } })
-
-  await tx.team.update({
-    where: { id: teamId },
-    data: { isFull: memberCount >= teamSize },
-  })
-}
-
-const removeUserFromTeam = async (
-  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
-  userId: string,
-  tournamentId: string,
-) => {
-  const teamMember = (await tx.teamMember.findFirst({
-    where: { userId, team: { tournamentId } },
-    include: {
-      team: {
-        include: {
-          tournament: { select: { teamSize: true } },
-          members: { orderBy: { joinedAt: 'asc' } },
-        },
-      },
-    },
-  })) as TeamMemberWithTeam | null
-
-  if (!teamMember) {
-    return
-  }
-
-  const team = teamMember.team
-  const otherMembers = team.members.filter(member => member.userId !== userId)
-  const isCaptain = team.captainId === userId
-
-  await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
-
-  if (otherMembers.length === 0) {
-    await tx.team.delete({ where: { id: team.id } })
-    return
-  }
-
-  if (isCaptain) {
-    await tx.team.update({
-      where: { id: team.id },
-      data: { captainId: otherMembers[0].userId },
-    })
-  }
-
-  await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-}
 
 const handleCheckoutCompleted = async (event: Stripe.Event) => {
   const stripe = getStripe()
@@ -372,6 +307,7 @@ export const POST = async (request: Request) => {
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
     return NextResponse.json({ received: true })
   } catch (error) {

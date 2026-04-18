@@ -24,6 +24,7 @@ const mockUserCount = vi.fn()
 const mockSponsorCount = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockUserFindMany = vi.fn()
+const mockPaymentFindMany = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -40,6 +41,9 @@ vi.mock('@/lib/core/prisma', () => ({
     tournamentRegistration: {
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
     },
+    payment: {
+      findMany: (...args: unknown[]) => mockPaymentFindMany(...args),
+    },
   },
 }))
 
@@ -47,8 +51,12 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getDashboardStats, getRecentLogins, getRecentRegistrations } =
-  await import('@/lib/services/dashboard')
+const {
+  getDashboardStats,
+  getRecentLogins,
+  getRecentRegistrations,
+  getDashboardPaymentStats,
+} = await import('@/lib/services/dashboard')
 
 // ---------------------------------------------------------------------------
 // getDashboardStats
@@ -218,5 +226,178 @@ describe('getRecentRegistrations', () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
     expect(await getRecentRegistrations()).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getDashboardPaymentStats
+// ---------------------------------------------------------------------------
+
+describe('getDashboardPaymentStats', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const EMPTY_STATS = {
+    totalRevenue: 0,
+    totalRefunded: 0,
+    netRevenue: 0,
+    transactionCount: 0,
+    refundCount: 0,
+    currency: 'CHF',
+    byTournament: [],
+  }
+
+  it('returns empty stats when no payments exist', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+
+    expect(await getDashboardPaymentStats()).toEqual(EMPTY_STATS)
+  })
+
+  it('aggregates PAID payments correctly', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1000,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+      {
+        amount: 2000,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalRevenue).toBe(3000)
+    expect(result.totalRefunded).toBe(0)
+    expect(result.netRevenue).toBe(3000)
+    expect(result.transactionCount).toBe(2)
+    expect(result.refundCount).toBe(0)
+    expect(result.currency).toBe('CHF')
+    expect(result.byTournament).toHaveLength(1)
+    expect(result.byTournament[0].revenue).toBe(3000)
+    expect(result.byTournament[0].paidCount).toBe(2)
+  })
+
+  it('handles REFUNDED payments (counts original amount as revenue + refund)', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1500,
+        currency: 'CHF',
+        status: 'REFUNDED',
+        refundAmount: 1500,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalRevenue).toBe(1500)
+    expect(result.totalRefunded).toBe(1500)
+    expect(result.netRevenue).toBe(0)
+    expect(result.transactionCount).toBe(1)
+    expect(result.refundCount).toBe(1)
+  })
+
+  it('uses payment.amount as fallback when refundAmount is null', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 2000,
+        currency: 'CHF',
+        status: 'REFUNDED',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalRefunded).toBe(2000)
+    expect(result.netRevenue).toBe(0)
+  })
+
+  it('groups payments by tournament and sorts by revenue descending', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 500,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Small', slug: 'small' },
+        },
+      },
+      {
+        amount: 3000,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't2', title: 'Big', slug: 'big' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.byTournament).toHaveLength(2)
+    expect(result.byTournament[0].id).toBe('t2')
+    expect(result.byTournament[0].revenue).toBe(3000)
+    expect(result.byTournament[1].id).toBe('t1')
+    expect(result.byTournament[1].revenue).toBe(500)
+  })
+
+  it('mixes PAID and REFUNDED across tournaments', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1000,
+        currency: 'EUR',
+        status: 'PAID',
+        refundAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'A', slug: 'a' },
+        },
+      },
+      {
+        amount: 1000,
+        currency: 'EUR',
+        status: 'REFUNDED',
+        refundAmount: 800,
+        registration: {
+          tournament: { id: 't1', title: 'A', slug: 'a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalRevenue).toBe(2000)
+    expect(result.totalRefunded).toBe(800)
+    expect(result.netRevenue).toBe(1200)
+    expect(result.transactionCount).toBe(2)
+    expect(result.refundCount).toBe(1)
+    expect(result.currency).toBe('EUR')
+    expect(result.byTournament[0].revenue).toBe(2000)
+    expect(result.byTournament[0].refunded).toBe(800)
+    expect(result.byTournament[0].paidCount).toBe(2)
+    expect(result.byTournament[0].refundedCount).toBe(1)
+  })
+
+  it('returns empty stats on database error', async () => {
+    mockPaymentFindMany.mockRejectedValue(new Error('DB error'))
+
+    expect(await getDashboardPaymentStats()).toEqual(EMPTY_STATS)
   })
 })

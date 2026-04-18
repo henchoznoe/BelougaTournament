@@ -17,6 +17,11 @@ import prisma from '@/lib/core/prisma'
 import { getStripe, REGISTRATION_HOLD_MINUTES } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import { toNullable } from '@/lib/utils/formatting'
+import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
+import {
+  isRefundEligible,
+  validateFieldValues,
+} from '@/lib/utils/tournament-helpers'
 import {
   createTeamSchema,
   deleteTournamentSchema,
@@ -31,7 +36,7 @@ import {
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
 import {
-  FieldType,
+  type FieldType,
   PaymentProvider,
   PaymentStatus,
   RefundPolicyType,
@@ -139,116 +144,9 @@ type TeamMemberWithTeam = {
   team: TeamWithMembers
 }
 
-/** Validates dynamic field values against tournament field definitions. */
-const validateFieldValues = (
-  fields: { label: string; type: string; required: boolean }[],
-  fieldValues: Record<string, string | number>,
-): { valid: true } | { valid: false; message: string } => {
-  for (const field of fields) {
-    const value = fieldValues[field.label]
-    if (field.required && (value === undefined || value === '')) {
-      return {
-        valid: false,
-        message: `Le champ \u00ab ${field.label} \u00bb est requis.`,
-      }
-    }
-    if (
-      field.type === FieldType.NUMBER &&
-      value !== undefined &&
-      value !== ''
-    ) {
-      if (typeof value !== 'number' || Number.isNaN(value)) {
-        return {
-          valid: false,
-          message: `Le champ \u00ab ${field.label} \u00bb doit \u00eatre un nombre.`,
-        }
-      }
-    }
-  }
-  return { valid: true }
-}
-
-/** Returns true when a player is still eligible for an automatic refund. */
-const isRefundEligible = (
-  startDate: Date,
-  refundPolicyType: RefundPolicyType,
-  refundDeadlineDays: number | null,
-  now: Date,
-) => {
-  if (refundPolicyType !== RefundPolicyType.BEFORE_DEADLINE) {
-    return false
-  }
-
-  if (refundDeadlineDays === null) {
-    return false
-  }
-
-  return (
-    startDate.getTime() - now.getTime() >=
-    refundDeadlineDays * 24 * 60 * 60 * 1000
-  )
-}
-
-/** Recomputes the `isFull` flag for a team after a membership mutation. */
-const syncTeamFullState = async (
-  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
-  teamId: string,
-  teamSize: number,
-) => {
-  const memberCount = await tx.teamMember.count({ where: { teamId } })
-
-  await tx.team.update({
-    where: { id: teamId },
-    data: { isFull: memberCount >= teamSize },
-  })
-}
-
 /** Builds an absolute URL from an application-relative path. */
 const buildAbsoluteAppUrl = (path: string) => {
   return new URL(path, env.NEXT_PUBLIC_APP_URL).toString()
-}
-
-/** Removes a user from their team while keeping the registration row intact. */
-const removeUserFromTeam = async (
-  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
-  userId: string,
-  tournamentId: string,
-) => {
-  const teamMember = (await tx.teamMember.findFirst({
-    where: { userId, team: { tournamentId } },
-    include: {
-      team: {
-        include: {
-          tournament: { select: { teamSize: true } },
-          members: { orderBy: { joinedAt: 'asc' } },
-        },
-      },
-    },
-  })) as TeamMemberWithTeam | null
-
-  if (!teamMember) {
-    return
-  }
-
-  const team = teamMember.team
-  const otherMembers = team.members.filter(member => member.userId !== userId)
-  const isCaptain = team.captainId === userId
-
-  await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
-
-  if (otherMembers.length === 0) {
-    await tx.team.delete({ where: { id: team.id } })
-    return
-  }
-
-  if (isCaptain) {
-    await tx.team.update({
-      where: { id: team.id },
-      data: { captainId: otherMembers[0].userId },
-    })
-  }
-
-  await syncTeamFullState(tx, team.id, team.tournament.teamSize)
 }
 
 /** Creates or refreshes a pending Stripe checkout for a registration. */
@@ -606,7 +504,7 @@ export const createTournament = authenticatedAction({
 
     return {
       success: true,
-      message: 'Le tournoi a \u00e9t\u00e9 cr\u00e9\u00e9.',
+      message: 'Le tournoi a été créé.',
     }
   },
 })
@@ -634,7 +532,7 @@ export const updateTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'Le format du tournoi ne peut pas \u00eatre modifi\u00e9 apr\u00e8s la cr\u00e9ation.',
+          'Le format du tournoi ne peut pas être modifié après la création.',
       }
     }
 
@@ -692,7 +590,7 @@ export const updateTournament = authenticatedAction({
         return {
           success: false,
           message:
-            'Les champs personnalis\u00e9s ne peuvent pas \u00eatre modifi\u00e9s lorsque le tournoi est publi\u00e9 et a des inscriptions.',
+            'Les champs personnalisés ne peuvent pas être modifiés lorsque le tournoi est publié et a des inscriptions.',
         }
       }
     }
@@ -784,7 +682,7 @@ export const deleteTournament = authenticatedAction({
 
     return {
       success: true,
-      message: 'Le tournoi a \u00e9t\u00e9 supprim\u00e9.',
+      message: 'Le tournoi a été supprimé.',
     }
   },
 })
@@ -883,7 +781,7 @@ export const updateRegistrationFields = authenticatedAction({
 
     return {
       success: true,
-      message: 'Votre inscription a \u00e9t\u00e9 mise \u00e0 jour.',
+      message: 'Votre inscription a été mise à jour.',
     }
   },
 })
@@ -905,7 +803,7 @@ export const registerForTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'Ce tournoi est en format \u00e9quipe. Utilisez le formulaire \u00e9quipe.',
+          'Ce tournoi est en format équipe. Utilisez le formulaire équipe.',
       }
     }
 
@@ -956,7 +854,7 @@ export const registerForTournament = authenticatedAction({
 
     return {
       success: true,
-      message: 'Votre inscription a \u00e9t\u00e9 enregistr\u00e9e.',
+      message: 'Votre inscription a été enregistrée.',
     }
   },
 })
@@ -993,7 +891,7 @@ export const createTeamAndRegister = authenticatedAction({
       if (teamCount >= tournament.maxTeams) {
         return {
           success: false,
-          message: "Le nombre maximum d'\u00e9quipes est atteint.",
+          message: "Le nombre maximum d'équipes est atteint.",
         }
       }
     }
@@ -1053,8 +951,7 @@ export const createTeamAndRegister = authenticatedAction({
 
     return {
       success: true,
-      message:
-        'Votre \u00e9quipe a \u00e9t\u00e9 cr\u00e9\u00e9e et votre inscription enregistr\u00e9e.',
+      message: 'Votre équipe a été créée et votre inscription enregistrée.',
     }
   },
 })
@@ -1086,7 +983,7 @@ export const joinTeamAndRegister = authenticatedAction({
     })) as TeamWithMemberCount | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: '\u00c9quipe introuvable.' }
+      return { success: false, message: 'Équipe introuvable.' }
     }
 
     if (team._count.members >= tournament.teamSize) {
@@ -1140,7 +1037,7 @@ export const joinTeamAndRegister = authenticatedAction({
     return {
       success: true,
       message:
-        "Vous avez rejoint l'\u00e9quipe et votre inscription a \u00e9t\u00e9 enregistr\u00e9e.",
+        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
   },
 })
@@ -1277,12 +1174,13 @@ export const unregisterFromTournament = authenticatedAction({
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
       return {
         success: true,
         message: refundEligible
           ? 'Votre inscription a été annulée et remboursée.'
-          : 'Votre inscription a été annulée. Cette désinscription n’ouvre pas droit à un remboursement automatique.',
+          : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
       }
     }
 
@@ -1337,12 +1235,13 @@ export const unregisterFromTournament = authenticatedAction({
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
       return {
         success: true,
         message: refundEligible
           ? 'Votre inscription a été annulée et remboursée.'
-          : 'Votre inscription a été annulée. Cette désinscription n’ouvre pas droit à un remboursement automatique.',
+          : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
       }
     }
 
@@ -1409,12 +1308,13 @@ export const unregisterFromTournament = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
     return {
       success: true,
       message: refundEligible
         ? 'Votre inscription a été annulée et remboursée.'
-        : 'Votre inscription a été annulée. Cette désinscription n’ouvre pas droit à un remboursement automatique.',
+        : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
     }
   },
 })
@@ -1438,14 +1338,14 @@ export const kickPlayer = authenticatedAction({
     })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: '\u00c9quipe introuvable.' }
+      return { success: false, message: 'Équipe introuvable.' }
     }
 
     const isMember = team.members.some(m => m.userId === data.userId)
     if (!isMember) {
       return {
         success: false,
-        message: "Ce joueur ne fait pas partie de l'\u00e9quipe.",
+        message: "Ce joueur ne fait pas partie de l'équipe.",
       }
     }
 
@@ -1514,7 +1414,7 @@ export const kickPlayer = authenticatedAction({
 
     return {
       success: true,
-      message: "Le joueur a \u00e9t\u00e9 retir\u00e9 de l'\u00e9quipe.",
+      message: "Le joueur a été retiré de l'équipe.",
     }
   },
 })
@@ -1531,7 +1431,7 @@ export const dissolveTeam = authenticatedAction({
     })) as TeamWithMembers | null
 
     if (!team || team.tournamentId !== data.tournamentId) {
-      return { success: false, message: '\u00c9quipe introuvable.' }
+      return { success: false, message: 'Équipe introuvable.' }
     }
 
     const memberUserIds = team.members.map(m => m.userId)
@@ -1577,6 +1477,6 @@ export const dissolveTeam = authenticatedAction({
     revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
-    return { success: true, message: "L'\u00e9quipe a \u00e9t\u00e9 dissoute." }
+    return { success: true, message: "L'équipe a été dissoute." }
   },
 })

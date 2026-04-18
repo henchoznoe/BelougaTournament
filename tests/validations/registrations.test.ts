@@ -11,6 +11,7 @@ import {
   changeTeamSchema,
   deleteRegistrationSchema,
   promoteCaptainSchema,
+  refundRegistrationSchema,
   updateRegistrationFieldsSchema,
 } from '@/lib/validations/registrations'
 
@@ -194,5 +195,35 @@ describe('promoteCaptainSchema', () => {
       teamId: VALID_UUID,
     })
     expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// refundRegistrationSchema
+// ---------------------------------------------------------------------------
+
+describe('refundRegistrationSchema', () => {
+  it('accepts a valid UUID', () => {
+    expect(
+      refundRegistrationSchema.safeParse({ registrationId: VALID_UUID })
+        .success,
+    ).toBe(true)
+  })
+
+  it('rejects an invalid UUID', () => {
+    expect(
+      refundRegistrationSchema.safeParse({ registrationId: INVALID_UUID })
+        .success,
+    ).toBe(false)
+  })
+
+  it('rejects missing registrationId', () => {
+    expect(refundRegistrationSchema.safeParse({}).success).toBe(false)
+  })
+
+  it('rejects an empty string', () => {
+    expect(
+      refundRegistrationSchema.safeParse({ registrationId: '' }).success,
+    ).toBe(false)
   })
 })
