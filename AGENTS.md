@@ -150,8 +150,21 @@ app/
 └── not-found.tsx         # 404 page
 
 components/
-├── features/             # Domain components (admin/, auth/, contact/, landing/, layout/, legal/, profile/, stream/, tournaments/)
-└── ui/                   # shadcn/ui primitives
+├── admin/                # Admin domain components
+│   ├── dashboard/        # Dashboard panels (stats, recent)
+│   ├── forms/            # Admin forms (logo-picker, settings, sponsor)
+│   ├── lists/            # Admin lists (sponsors, tournaments, users)
+│   └── ui/               # Admin UI (shell, sidebar, topbar, breadcrumb, dropdowns, badges)
+├── public/               # Public domain components
+│   ├── auth/             # AdminGuard, LoginScreen, SocialLogin
+│   ├── contact/          # ContactBento
+│   ├── landing/          # Hero, features, sponsors, stream, tournaments sections
+│   ├── layout/           # PublicNavbar, PublicFooter
+│   ├── legal/            # LegalSection
+│   ├── profile/          # ProfilePage, ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
+│   ├── stream/           # TwitchPlayer
+│   └── tournaments/      # TournamentCard, TournamentDetail, TournamentRegistrationForm
+└── ui/                   # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 
 lib/
 ├── actions/              # Server actions (authenticatedAction wrapper)

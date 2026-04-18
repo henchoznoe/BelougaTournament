@@ -46,7 +46,6 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 interface UserActionsDropdownProps {
   user: UserRow
-  viewerRole: Role
   viewerIsOwner: boolean
 }
 
@@ -54,7 +53,6 @@ type ConfirmAction = 'promote' | 'demote' | 'delete'
 
 export const UserActionsDropdown = ({
   user,
-  viewerRole,
   viewerIsOwner,
 }: UserActionsDropdownProps) => {
   const router = useRouter()

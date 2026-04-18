@@ -59,14 +59,14 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
 
   if (tournament.status === TournamentStatus.ARCHIVED) {
     return {
-      label: 'Tournoi termine',
+      label: 'Tournoi terminé',
       className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
       dotClassName: 'bg-zinc-400',
     }
   }
   if (now < open) {
     return {
-      label: 'Inscriptions bientot',
+      label: 'Inscriptions bientôt',
       className: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
       dotClassName: 'bg-amber-400',
     }
@@ -79,7 +79,7 @@ const getRegistrationStatus = (tournament: PublicTournamentDetail) => {
     }
   }
   return {
-    label: 'Inscriptions fermees',
+    label: 'Inscriptions fermées',
     className: 'border-red-500/30 bg-red-500/10 text-red-400',
     dotClassName: 'bg-red-400',
   }
@@ -198,7 +198,7 @@ export const TournamentDetail = ({
               text={
                 tournament.format === TournamentFormat.SOLO
                   ? 'Solo'
-                  : `Equipe de ${tournament.teamSize}`
+                  : `Équipe de ${tournament.teamSize}`
               }
             />
             <QuickBadge
@@ -219,8 +219,8 @@ export const TournamentDetail = ({
                 icon={Users}
                 text={
                   tournament.maxTeams
-                    ? `${tournament._count.teams}/${tournament.maxTeams} equipes`
-                    : `${tournament._count.teams} equipes`
+                    ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
+                    : `${tournament._count.teams} équipes`
                 }
               />
             )}
@@ -243,7 +243,7 @@ export const TournamentDetail = ({
         <StatCard
           icon={Users}
           label={
-            tournament.format === TournamentFormat.SOLO ? 'Joueurs' : 'Equipes'
+            tournament.format === TournamentFormat.SOLO ? 'Joueurs' : 'Équipes'
           }
           value={
             tournament.format === TournamentFormat.SOLO
@@ -257,7 +257,7 @@ export const TournamentDetail = ({
         />
         <StatCard
           icon={Calendar}
-          label="Debut"
+          label="Début"
           value={formatDate(tournament.startDate)}
         />
         <StatCard
@@ -278,7 +278,7 @@ export const TournamentDetail = ({
               <Trophy className="size-6 text-amber-400" />
             </div>
             <h3 className="font-paladins text-lg tracking-wider text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-              Recompenses
+              Récompenses
             </h3>
             <Markdown
               content={tournament.prize}
@@ -296,7 +296,7 @@ export const TournamentDetail = ({
             className="flex-1 gap-1.5 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
           >
             <ScrollText className="size-4" />
-            Details
+            Détails
           </TabsTrigger>
           <TabsTrigger
             value="stream"
@@ -314,7 +314,7 @@ export const TournamentDetail = ({
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab: Details */}
+        {/* Tab: Détails */}
         <TabsContent value="details">
           <div className="space-y-6">
             {/* Description */}
@@ -326,7 +326,7 @@ export const TournamentDetail = ({
 
             {/* Rules */}
             {tournament.rules && (
-              <ContentCard icon={Shield} title="Reglement">
+              <ContentCard icon={Shield} title="Règlement">
                 <Markdown content={tournament.rules} />
               </ContentCard>
             )}
@@ -335,7 +335,7 @@ export const TournamentDetail = ({
             <ContentCard icon={Calendar} title="Dates">
               <div className="grid gap-3 sm:grid-cols-2">
                 <DateRow
-                  label="Debut du tournoi"
+                  label="Début du tournoi"
                   value={formatDateTime(tournament.startDate)}
                 />
                 <DateRow
@@ -357,7 +357,7 @@ export const TournamentDetail = ({
             {!tournament.description && !tournament.rules && (
               <div className="rounded-3xl border border-white/5 bg-white/2 p-8 text-center">
                 <p className="text-sm text-zinc-500">
-                  Aucun detail supplementaire pour ce tournoi.
+                  Aucun détail supplémentaire pour ce tournoi.
                 </p>
               </div>
             )}
@@ -484,7 +484,7 @@ export const TournamentDetail = ({
           ) : (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               {tournament.status === TournamentStatus.ARCHIVED ? (
-                <p className="text-sm text-zinc-500">Ce tournoi est termine.</p>
+                <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
               ) : new Date() < new Date(tournament.registrationOpen) ? (
                 <p className="text-sm text-zinc-500">
                   Les inscriptions ouvriront le{' '}
@@ -495,7 +495,7 @@ export const TournamentDetail = ({
                 </p>
               ) : (
                 <p className="text-sm text-zinc-500">
-                  Les inscriptions sont fermees depuis le{' '}
+                  Les inscriptions sont fermées depuis le{' '}
                   <span className="font-medium text-zinc-400">
                     {formatDate(tournament.registrationClose)}
                   </span>

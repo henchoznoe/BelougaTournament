@@ -288,52 +288,6 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   }
 }
 
-/** Fetches a single team by ID (for admin team detail page). */
-export const getTeamById = async (teamId: string): Promise<TeamItem | null> => {
-  'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
-
-  try {
-    const row = await prisma.team.findUnique({
-      where: { id: teamId },
-      select: {
-        id: true,
-        name: true,
-        isFull: true,
-        createdAt: true,
-        captain: {
-          select: {
-            id: true,
-            name: true,
-            displayName: true,
-            image: true,
-          },
-        },
-        members: {
-          orderBy: { joinedAt: 'asc' },
-          select: {
-            id: true,
-            joinedAt: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                displayName: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-    })
-    return row as unknown as TeamItem | null
-  } catch (error) {
-    logger.error({ error }, 'Error fetching team by ID')
-    return null
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Public services
 // ---------------------------------------------------------------------------
@@ -512,31 +466,8 @@ export const getAvailableTeams = async (
 }
 
 // ---------------------------------------------------------------------------
-// User registration check (public tournament detail page)
+// User registration state (public tournament detail page)
 // ---------------------------------------------------------------------------
-
-/** Checks whether a user is already registered for a given tournament (non-cached, user-specific). */
-export const isUserRegisteredForTournament = async (
-  userId: string,
-  tournamentId: string,
-): Promise<boolean> => {
-  try {
-    const row = await prisma.tournamentRegistration.findFirst({
-      where: {
-        tournamentId,
-        userId,
-        status: {
-          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
-        },
-      },
-      select: { id: true },
-    })
-    return row !== null
-  } catch (error) {
-    logger.error({ error }, 'Error checking user registration status')
-    return false
-  }
-}
 
 /** Fetches the current registration state for a user on a tournament, if any active record exists. */
 export const getUserTournamentRegistrationState = async (

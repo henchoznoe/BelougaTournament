@@ -55,7 +55,6 @@ interface SortState {
 
 interface UsersListProps {
   users: UserRow[]
-  viewerRole: Role
   viewerIsOwner: boolean
 }
 
@@ -86,11 +85,7 @@ const compareValues = (a: UserRow, b: UserRow, key: SortKey): number => {
   }
 }
 
-export const UsersList = ({
-  users,
-  viewerRole,
-  viewerIsOwner,
-}: UsersListProps) => {
+export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
@@ -317,7 +312,6 @@ export const UsersList = ({
                   <TableCell onClick={e => e.stopPropagation()}>
                     <UserActionsDropdown
                       user={user}
-                      viewerRole={viewerRole}
                       viewerIsOwner={viewerIsOwner}
                     />
                   </TableCell>

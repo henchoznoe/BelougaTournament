@@ -8,12 +8,13 @@
 
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { UsersList } from '@/components/admin/lists/users-list'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
+import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUsers } from '@/lib/services/users'
 import { isOwner } from '@/lib/utils/owner'
-import type { Role } from '@/prisma/generated/prisma/enums'
 
 export const metadata: Metadata = {
   title: 'Utilisateurs',
@@ -21,6 +22,11 @@ export const metadata: Metadata = {
 
 const AdminUsersPage = async () => {
   const session = await getSession()
+
+  if (!session) {
+    redirect(ROUTES.LOGIN)
+  }
+
   const users = await getUsers()
 
   return (
@@ -30,11 +36,7 @@ const AdminUsersPage = async () => {
       title="Utilisateurs"
       subtitle="Gérez tous les utilisateurs de la plateforme."
     >
-      <UsersList
-        users={users}
-        viewerRole={session!.user.role as Role}
-        viewerIsOwner={isOwner(session!.user.email)}
-      />
+      <UsersList users={users} viewerIsOwner={isOwner(session.user.email)} />
     </AdminContentLayout>
   )
 }

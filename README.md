@@ -21,6 +21,7 @@ The platform enables administrators to host and manage diverse gaming tournament
 - **Types:** TypeScript (Strict)
 - **UI:** [shadcn/ui](https://ui.shadcn.com/) + [TailwindCSS v4](https://tailwindcss.com/) (with Skeleton Loaders for optimal UX)
 - **State/Form:** React Hook Form + Zod v4 + Server Actions
+- **Markdown:** [React Markdown](https://github.com/remarkjs/react-markdown)
 - **Tooling:** [Biome](https://biomejs.dev/) (Linting/Formatting)
 
 ## ✨ Core Features
@@ -50,7 +51,8 @@ The platform enables administrators to host and manage diverse gaming tournament
 │   ├── admin/            # Protected Admin Dashboard routes
 │   └── api/              # API endpoints (Auth, Blob CRUD)
 ├── components/           # React Components
-│   ├── features/         # Domain-specific components (admin, auth, tournaments, profile, ...)
+│   ├── admin/            # Admin domain components (dashboard, forms, lists, ui)
+│   ├── public/           # Public domain components (auth, contact, landing, layout, legal, profile, stream, tournaments)
 │   └── ui/               # Reusable primitives (shadcn/ui)
 ├── lib/                  # Core Utilities & Business Logic
 │   ├── actions/          # Server Actions
