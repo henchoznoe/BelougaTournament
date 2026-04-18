@@ -6,7 +6,10 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('server-only', () => ({}))
+
 import {
   isRefundEligible,
   validateFieldValues,

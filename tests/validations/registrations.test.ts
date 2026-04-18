@@ -8,11 +8,11 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  adminUpdateRegistrationFieldsSchema,
   changeTeamSchema,
   deleteRegistrationSchema,
   promoteCaptainSchema,
   refundRegistrationSchema,
-  updateRegistrationFieldsSchema,
 } from '@/lib/validations/registrations'
 
 const VALID_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
@@ -50,12 +50,12 @@ describe('deleteRegistrationSchema', () => {
 })
 
 // ---------------------------------------------------------------------------
-// updateRegistrationFieldsSchema
+// adminUpdateRegistrationFieldsSchema
 // ---------------------------------------------------------------------------
 
-describe('updateRegistrationFieldsSchema', () => {
+describe('adminUpdateRegistrationFieldsSchema', () => {
   it('accepts valid registrationId and string field values', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
       fieldValues: { Pseudo: 'Alice', Rang: 'Gold' },
     })
@@ -63,7 +63,7 @@ describe('updateRegistrationFieldsSchema', () => {
   })
 
   it('accepts valid registrationId and number field values', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
       fieldValues: { ELO: 1500, Rank: 3 },
     })
@@ -71,7 +71,7 @@ describe('updateRegistrationFieldsSchema', () => {
   })
 
   it('accepts mixed string/number field values', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
       fieldValues: { Pseudo: 'Alice', ELO: 1500 },
     })
@@ -79,7 +79,7 @@ describe('updateRegistrationFieldsSchema', () => {
   })
 
   it('accepts an empty fieldValues object', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
       fieldValues: {},
     })
@@ -87,7 +87,7 @@ describe('updateRegistrationFieldsSchema', () => {
   })
 
   it('rejects invalid registrationId', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: INVALID_UUID,
       fieldValues: { Pseudo: 'Alice' },
     })
@@ -95,14 +95,14 @@ describe('updateRegistrationFieldsSchema', () => {
   })
 
   it('rejects missing fieldValues', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
     })
     expect(result.success).toBe(false)
   })
 
   it('rejects boolean field values', () => {
-    const result = updateRegistrationFieldsSchema.safeParse({
+    const result = adminUpdateRegistrationFieldsSchema.safeParse({
       registrationId: VALID_UUID,
       fieldValues: { Active: true },
     })

@@ -47,10 +47,6 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (session.user.role !== Role.ADMIN) {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
-  }
-
   const requiredRole = getRequiredRole(request.nextUrl.pathname)
   if (session.user.role !== requiredRole) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))

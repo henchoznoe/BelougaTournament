@@ -16,8 +16,13 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, REGISTRATION_HOLD_MINUTES } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import type { TeamMemberWithTeam, TeamWithMembers } from '@/lib/types/team'
 import { toNullable } from '@/lib/utils/formatting'
-import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
+import {
+  handleCaptainSuccession,
+  removeUserFromTeam,
+  syncTeamFullState,
+} from '@/lib/utils/team'
 import {
   isRefundEligible,
   validateFieldValues,
@@ -131,23 +136,74 @@ type TeamWithMemberCount = {
   _count: { members: number }
 }
 
-/** Team with ordered members list. Used by kickPlayer and unregisterFromTournament. */
-type TeamWithMembers = {
-  id: string
-  tournamentId: string
-  captainId: string
-  tournament: { teamSize: number }
-  members: { userId: string }[]
-}
-
-/** Team member with nested team (including members). Used by unregisterFromTournament. */
-type TeamMemberWithTeam = {
-  team: TeamWithMembers
-}
-
 /** Builds an absolute URL from an application-relative path. */
 const buildAbsoluteAppUrl = (path: string) => {
   return new URL(path, env.NEXT_PUBLIC_APP_URL).toString()
+}
+
+/**
+ * Issues a Stripe refund AFTER the DB has already been updated to REFUNDED state.
+ * If the Stripe API call fails, reverts the DB records back to their pre-refund state.
+ * Uses an idempotency key to ensure the refund is safe to retry.
+ */
+const issueStripeRefundAfterDbUpdate = async ({
+  registrationId,
+  latestPayment,
+  previousPaymentStatus,
+  idempotencyPrefix,
+}: {
+  registrationId: string
+  latestPayment: {
+    id: string
+    amount: number
+    stripePaymentIntentId: string | null
+    stripeChargeId: string | null
+  }
+  previousPaymentStatus: PaymentStatus
+  idempotencyPrefix: string
+}) => {
+  try {
+    const stripe = getStripe()
+    await stripe.refunds.create(
+      latestPayment.stripePaymentIntentId
+        ? {
+            payment_intent: latestPayment.stripePaymentIntentId,
+            reason: 'requested_by_customer',
+          }
+        : {
+            charge: latestPayment.stripeChargeId ?? undefined,
+            reason: 'requested_by_customer',
+          },
+      {
+        idempotencyKey: `${idempotencyPrefix}-${registrationId}-${latestPayment.id}`,
+      },
+    )
+  } catch (error) {
+    // Stripe refund failed — revert DB records back to pre-refund state
+    logger.error(
+      { error, registrationId },
+      'Stripe refund failed, reverting DB state',
+    )
+    await prisma.$transaction(async tx => {
+      await tx.tournamentRegistration.update({
+        where: { id: registrationId },
+        data: {
+          status: RegistrationStatus.CONFIRMED,
+          paymentStatus: previousPaymentStatus,
+          cancelledAt: null,
+        },
+      })
+      await tx.payment.update({
+        where: { id: latestPayment.id },
+        data: {
+          status: previousPaymentStatus,
+          refundAmount: null,
+          refundedAt: null,
+        },
+      })
+    })
+    throw error
+  }
 }
 
 /** Creates or refreshes a pending Stripe checkout for a registration. */
@@ -822,37 +878,48 @@ export const registerForTournament = authenticatedAction({
       }
     }
 
-    // 3. Check maxTeams limit (registrations count as "slots" for solo)
-    if (tournament.maxTeams !== null) {
-      const count = await prisma.tournamentRegistration.count({
-        where: {
-          tournamentId: data.tournamentId,
-          status: {
-            in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
-          },
-          ...(existingRegistration
-            ? { id: { not: existingRegistration.id } }
-            : {}),
-        },
-      })
-      if (count >= tournament.maxTeams) {
-        return { success: false, message: 'Le tournoi est complet.' }
-      }
-    }
-
-    // 4. Validate dynamic field values
+    // 3. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    const registration = await upsertRegistrationAttempt({
-      existingRegistration,
-      tournament,
-      userId: session.user.id,
-      fieldValues: data.fieldValues,
-      teamId: null,
-    })
+    // 4. Check maxTeams limit + upsert inside a transaction to prevent race conditions
+    let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
+    try {
+      registration = await prisma.$transaction(async tx => {
+        if (tournament.maxTeams !== null) {
+          const count = await tx.tournamentRegistration.count({
+            where: {
+              tournamentId: data.tournamentId,
+              status: {
+                in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+              },
+              ...(existingRegistration
+                ? { id: { not: existingRegistration.id } }
+                : {}),
+            },
+          })
+          if (count >= tournament.maxTeams) {
+            throw new Error('TOURNAMENT_FULL')
+          }
+        }
+
+        return upsertRegistrationAttempt({
+          tx,
+          existingRegistration,
+          tournament,
+          userId: session.user.id,
+          fieldValues: data.fieldValues,
+          teamId: null,
+        })
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'TOURNAMENT_FULL') {
+        return { success: false, message: 'Le tournoi est complet.' }
+      }
+      throw error
+    }
 
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
@@ -897,57 +964,65 @@ export const createTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 3. Check maxTeams limit (count teams, not registrations)
-    if (tournament.maxTeams !== null) {
-      const teamCount = await prisma.team.count({
-        where: { tournamentId: data.tournamentId },
-      })
-      if (teamCount >= tournament.maxTeams) {
-        return {
-          success: false,
-          message: "Le nombre maximum d'équipes est atteint.",
-        }
-      }
-    }
-
-    // 4. Validate dynamic field values
+    // 3. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    const registration = await prisma.$transaction(async tx => {
-      await removeUserFromTeam(tx, session.user.id, data.tournamentId)
+    let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
+    try {
+      registration = await prisma.$transaction(async tx => {
+        // Check maxTeams limit inside transaction to prevent race conditions
+        if (tournament.maxTeams !== null) {
+          const teamCount = await tx.team.count({
+            where: { tournamentId: data.tournamentId },
+          })
+          if (teamCount >= tournament.maxTeams) {
+            throw new Error('MAX_TEAMS_REACHED')
+          }
+        }
 
-      const team = await tx.team.create({
-        data: {
-          name: data.teamName,
-          captainId: session.user.id,
-          tournamentId: data.tournamentId,
-          isFull: false,
-        },
-      })
+        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
 
-      await tx.teamMember.create({
-        data: {
-          teamId: team.id,
+        const team = await tx.team.create({
+          data: {
+            name: data.teamName,
+            captainId: session.user.id,
+            tournamentId: data.tournamentId,
+            isFull: false,
+          },
+        })
+
+        await tx.teamMember.create({
+          data: {
+            teamId: team.id,
+            userId: session.user.id,
+          },
+        })
+
+        const registration = await upsertRegistrationAttempt({
+          tx,
+          existingRegistration,
+          tournament,
           userId: session.user.id,
-        },
+          fieldValues: data.fieldValues,
+          teamId: team.id,
+        })
+
+        await syncTeamFullState(tx, team.id, tournament.teamSize)
+
+        return registration
       })
-
-      const registration = await upsertRegistrationAttempt({
-        tx,
-        existingRegistration,
-        tournament,
-        userId: session.user.id,
-        fieldValues: data.fieldValues,
-        teamId: team.id,
-      })
-
-      await syncTeamFullState(tx, team.id, tournament.teamSize)
-
-      return registration
-    })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'MAX_TEAMS_REACHED') {
+        return {
+          success: false,
+          message: "Le nombre maximum d'équipes est atteint.",
+        }
+      }
+      throw error
+    }
 
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
@@ -989,7 +1064,7 @@ export const joinTeamAndRegister = authenticatedAction({
       }
     }
 
-    // 3. Fetch team and verify it belongs to the tournament and is not full
+    // 3. Fetch team and verify it belongs to the tournament
     const team = (await prisma.team.findUnique({
       where: { id: data.teamId },
       include: { _count: { select: { members: true } } },
@@ -999,39 +1074,52 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: 'Équipe introuvable.' }
     }
 
-    if (team._count.members >= tournament.teamSize) {
-      return { success: false, message: 'Cette équipe est complète.' }
-    }
-
     // 4. Validate dynamic field values
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
     }
 
-    const registration = await prisma.$transaction(async tx => {
-      await removeUserFromTeam(tx, session.user.id, data.tournamentId)
+    let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
+    try {
+      registration = await prisma.$transaction(async tx => {
+        // Re-check team capacity inside transaction to prevent race conditions
+        const freshTeam = await tx.team.findUnique({
+          where: { id: data.teamId },
+          include: { _count: { select: { members: true } } },
+        })
+        if (!freshTeam || freshTeam._count.members >= tournament.teamSize) {
+          throw new Error('TEAM_FULL')
+        }
 
-      await tx.teamMember.create({
-        data: {
-          teamId: data.teamId,
+        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
+
+        await tx.teamMember.create({
+          data: {
+            teamId: data.teamId,
+            userId: session.user.id,
+          },
+        })
+
+        const registration = await upsertRegistrationAttempt({
+          tx,
+          existingRegistration,
+          tournament,
           userId: session.user.id,
-        },
+          fieldValues: data.fieldValues,
+          teamId: data.teamId,
+        })
+
+        await syncTeamFullState(tx, data.teamId, tournament.teamSize)
+
+        return registration
       })
-
-      const registration = await upsertRegistrationAttempt({
-        tx,
-        existingRegistration,
-        tournament,
-        userId: session.user.id,
-        fieldValues: data.fieldValues,
-        teamId: data.teamId,
-      })
-
-      await syncTeamFullState(tx, data.teamId, tournament.teamSize)
-
-      return registration
-    })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'TEAM_FULL') {
+        return { success: false, message: 'Cette équipe est complète.' }
+      }
+      throw error
+    }
 
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
@@ -1126,29 +1214,6 @@ export const unregisterFromTournament = authenticatedAction({
       )
     const isPaidRegistration = registration.paymentRequiredSnapshot
 
-    if (
-      refundEligible &&
-      latestPayment &&
-      latestPayment.status === PaymentStatus.PAID
-    ) {
-      const stripe = getStripe()
-
-      await stripe.refunds.create(
-        latestPayment.stripePaymentIntentId
-          ? {
-              payment_intent: latestPayment.stripePaymentIntentId,
-              reason: 'requested_by_customer',
-            }
-          : {
-              charge: latestPayment.stripeChargeId ?? undefined,
-              reason: 'requested_by_customer',
-            },
-        {
-          idempotencyKey: `refund-${registration.id}-${latestPayment.id}`,
-        },
-      )
-    }
-
     // 3. SOLO format — cancel paid registrations, delete free registrations
     if (registration.tournament.format === TournamentFormat.SOLO) {
       if (isPaidRegistration) {
@@ -1179,6 +1244,16 @@ export const unregisterFromTournament = authenticatedAction({
       } else {
         await prisma.tournamentRegistration.delete({
           where: { id: registration.id },
+        })
+      }
+
+      // Issue Stripe refund after DB update (DB-first pattern)
+      if (refundEligible && latestPayment) {
+        await issueStripeRefundAfterDbUpdate({
+          registrationId: registration.id,
+          latestPayment,
+          previousPaymentStatus: registration.paymentStatus,
+          idempotencyPrefix: 'refund',
         })
       }
 
@@ -1242,6 +1317,16 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
+      // Issue Stripe refund after DB update (DB-first pattern)
+      if (refundEligible && latestPayment) {
+        await issueStripeRefundAfterDbUpdate({
+          registrationId: registration.id,
+          latestPayment,
+          previousPaymentStatus: registration.paymentStatus,
+          idempotencyPrefix: 'refund',
+        })
+      }
+
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
@@ -1256,9 +1341,6 @@ export const unregisterFromTournament = authenticatedAction({
     }
 
     const team = teamMember.team
-    const isCaptain = team.captainId === userId
-    const otherMembers = team.members.filter(m => m.userId !== userId)
-
     await prisma.$transaction(async tx => {
       // a. Remove team member record
       await tx.teamMember.deleteMany({
@@ -1296,23 +1378,19 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
-      if (isCaptain && otherMembers.length > 0) {
-        // c. Promote next member to captain
-        const newCaptain = otherMembers[0]
-
-        await tx.team.update({
-          where: { id: team.id },
-          data: { captainId: newCaptain.userId },
-        })
-        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-      } else if (otherMembers.length === 0) {
-        // d. Last member — dissolve the team
-        await tx.team.delete({ where: { id: team.id } })
-      } else {
-        // e. Non-captain leaving — keep team state in sync
-        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-      }
+      // c. Handle captain succession / team cleanup
+      await handleCaptainSuccession(tx, team, userId)
     })
+
+    // Issue Stripe refund after DB update (DB-first pattern)
+    if (refundEligible && latestPayment) {
+      await issueStripeRefundAfterDbUpdate({
+        registrationId: registration.id,
+        latestPayment,
+        previousPaymentStatus: registration.paymentStatus,
+        idempotencyPrefix: 'refund',
+      })
+    }
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
@@ -1372,9 +1450,6 @@ export const kickPlayer = authenticatedAction({
       },
     })
 
-    const isCaptain = team.captainId === data.userId
-    const otherMembers = team.members.filter(m => m.userId !== data.userId)
-
     await prisma.$transaction(async tx => {
       // 1. Remove team member record
       await tx.teamMember.deleteMany({
@@ -1398,22 +1473,8 @@ export const kickPlayer = authenticatedAction({
         })
       }
 
-      if (isCaptain && otherMembers.length > 0) {
-        // 3a. Promote next member to captain
-        const newCaptain = otherMembers[0]
-
-        await tx.team.update({
-          where: { id: data.teamId },
-          data: { captainId: newCaptain.userId },
-        })
-        await syncTeamFullState(tx, data.teamId, team.tournament.teamSize)
-      } else if (isCaptain && otherMembers.length === 0) {
-        // 3b. Last member — dissolve the team
-        await tx.team.delete({ where: { id: data.teamId } })
-      } else {
-        // 3c. Non-captain kicked — keep team state in sync
-        await syncTeamFullState(tx, data.teamId, team.tournament.teamSize)
-      }
+      // 3. Handle captain succession / team cleanup
+      await handleCaptainSuccession(tx, team, data.userId)
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')

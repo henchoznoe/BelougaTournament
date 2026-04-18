@@ -11,16 +11,18 @@
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
-import { syncTeamFullState } from '@/lib/utils/team'
+import type { TeamMemberWithTeam } from '@/lib/types/team'
+import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
 import {
+  adminUpdateRegistrationFieldsSchema,
   changeTeamSchema,
   deleteRegistrationSchema,
   promoteCaptainSchema,
   refundRegistrationSchema,
-  updateRegistrationFieldsSchema,
 } from '@/lib/validations/registrations'
 import {
   PaymentStatus,
@@ -44,20 +46,6 @@ type RegistrationWithDetails = {
   }[]
   tournament: { id: string; format: TournamentFormat }
   user: { name: string }
-}
-
-/** Team with ordered members. Used by adminDeleteRegistration. */
-type TeamWithMembers = {
-  id: string
-  captainId: string
-  tournament: { teamSize: number }
-  members: { userId: string }[]
-}
-
-/** Team member with nested team (including members). Used by adminDeleteRegistration. */
-type TeamMemberWithTeam = {
-  userId: string
-  team: TeamWithMembers
 }
 
 /** Forces deletion of a registration. */
@@ -155,10 +143,6 @@ export const adminDeleteRegistration = authenticatedAction({
     }
 
     const team = teamMember.team
-    const isCaptain = team.captainId === registration.userId
-    const otherMembers = team.members.filter(
-      m => m.userId !== registration.userId,
-    )
 
     await prisma.$transaction(async tx => {
       // a. Remove team member record
@@ -183,22 +167,8 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       }
 
-      if (isCaptain && otherMembers.length > 0) {
-        // c. Promote next member to captain
-        const newCaptain = otherMembers[0]
-
-        await tx.team.update({
-          where: { id: team.id },
-          data: { captainId: newCaptain.userId },
-        })
-        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-      } else if (otherMembers.length === 0) {
-        // d. Last member — dissolve the team
-        await tx.team.delete({ where: { id: team.id } })
-      } else {
-        // e. Non-captain leaving — keep team state in sync
-        await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-      }
+      // c. Handle captain succession / team cleanup
+      await handleCaptainSuccession(tx, team, registration.userId)
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
@@ -218,7 +188,7 @@ export const adminDeleteRegistration = authenticatedAction({
 
 /** Updates the custom field values (fieldValues JSON) on a registration. */
 export const adminUpdateRegistrationFields = authenticatedAction({
-  schema: updateRegistrationFieldsSchema,
+  schema: adminUpdateRegistrationFieldsSchema,
   role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
     const registration = (await prisma.tournamentRegistration.findUnique({
@@ -301,21 +271,7 @@ export const adminRefundRegistration = authenticatedAction({
 
     const stripe = getStripe()
 
-    await stripe.refunds.create(
-      latestPayment.stripePaymentIntentId
-        ? {
-            payment_intent: latestPayment.stripePaymentIntentId,
-            reason: 'requested_by_customer',
-          }
-        : {
-            charge: latestPayment.stripeChargeId ?? undefined,
-            reason: 'requested_by_customer',
-          },
-      {
-        idempotencyKey: `admin-refund-${registration.id}-${latestPayment.id}`,
-      },
-    )
-
+    // DB-first pattern: update DB to REFUNDED state before calling Stripe
     if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.$transaction(async tx => {
         await tx.payment.update({
@@ -376,10 +332,6 @@ export const adminRefundRegistration = authenticatedAction({
         })
       } else {
         const team = teamMember.team
-        const isCaptain = team.captainId === registration.userId
-        const otherMembers = team.members.filter(
-          member => member.userId !== registration.userId,
-        )
 
         await prisma.$transaction(async tx => {
           await tx.teamMember.deleteMany({
@@ -405,19 +357,52 @@ export const adminRefundRegistration = authenticatedAction({
             },
           })
 
-          if (isCaptain && otherMembers.length > 0) {
-            await tx.team.update({
-              where: { id: team.id },
-              data: { captainId: otherMembers[0].userId },
-            })
-            await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-          } else if (otherMembers.length === 0) {
-            await tx.team.delete({ where: { id: team.id } })
-          } else {
-            await syncTeamFullState(tx, team.id, team.tournament.teamSize)
-          }
+          await handleCaptainSuccession(tx, team, registration.userId)
         })
       }
+    }
+
+    // Issue Stripe refund after DB update; revert DB on failure
+    try {
+      await stripe.refunds.create(
+        latestPayment.stripePaymentIntentId
+          ? {
+              payment_intent: latestPayment.stripePaymentIntentId,
+              reason: 'requested_by_customer',
+            }
+          : {
+              charge: latestPayment.stripeChargeId ?? undefined,
+              reason: 'requested_by_customer',
+            },
+        {
+          idempotencyKey: `admin-refund-${registration.id}-${latestPayment.id}`,
+        },
+      )
+    } catch (error) {
+      // Stripe refund failed — revert DB records back to pre-refund state
+      logger.error(
+        { error, registrationId: registration.id },
+        'Admin Stripe refund failed, reverting DB state',
+      )
+      await prisma.$transaction(async tx => {
+        await tx.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: RegistrationStatus.CONFIRMED,
+            paymentStatus: PaymentStatus.PAID,
+            cancelledAt: null,
+          },
+        })
+        await tx.payment.update({
+          where: { id: latestPayment.id },
+          data: {
+            status: PaymentStatus.PAID,
+            refundAmount: null,
+            refundedAt: null,
+          },
+        })
+      })
+      throw error
     }
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
@@ -544,10 +529,6 @@ export const adminChangeTeam = authenticatedAction({
     }
 
     const oldTeam = currentMember.team
-    const wasCaptain = oldTeam.captainId === registration.userId
-    const otherMembers = oldTeam.members.filter(
-      m => m.userId !== registration.userId,
-    )
 
     // 4. Execute in a transaction
     await prisma.$transaction(async tx => {
@@ -557,20 +538,7 @@ export const adminChangeTeam = authenticatedAction({
       })
 
       // b. Handle captain succession on old team
-      if (wasCaptain && otherMembers.length > 0) {
-        const newCaptain = otherMembers[0]
-
-        await tx.team.update({
-          where: { id: oldTeam.id },
-          data: { captainId: newCaptain.userId },
-        })
-        await syncTeamFullState(tx, oldTeam.id, oldTeam.tournament.teamSize)
-      } else if (otherMembers.length === 0) {
-        await tx.team.delete({ where: { id: oldTeam.id } })
-      } else {
-        // Non-captain leaving old team
-        await syncTeamFullState(tx, oldTeam.id, oldTeam.tournament.teamSize)
-      }
+      await handleCaptainSuccession(tx, oldTeam, registration.userId)
 
       // c. Add to new team
       await tx.teamMember.create({

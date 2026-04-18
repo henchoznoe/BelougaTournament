@@ -57,4 +57,4 @@ const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
   )
 }
 
-export default SocialLogin
+export { SocialLogin }

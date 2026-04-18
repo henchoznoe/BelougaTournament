@@ -51,7 +51,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { createTournament, updateTournament } from '@/lib/actions/tournaments'
-import { NOON_UTC_SUFFIX } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
@@ -91,15 +90,40 @@ const slugify = (text: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-/** Convert ISO datetime string to date input value (YYYY-MM-DD). */
-const toDateInputValue = (iso: string | Date): string => {
+/** Convert ISO datetime string to datetime-local value in Swiss timezone (YYYY-MM-DDTHH:mm). */
+const toDatetimeLocalValue = (iso: string | Date): string => {
   const d = new Date(iso)
-  return d.toISOString().split('T')[0]
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Zurich',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  // sv-SE locale gives YYYY-MM-DD HH:mm format
+  return formatter.format(d).replace(' ', 'T')
 }
 
-/** Convert date input value to ISO datetime string with noon UTC. */
-const toISODatetime = (dateStr: string): string =>
-  `${dateStr}${NOON_UTC_SUFFIX}`
+/** Convert datetime-local string (Swiss timezone) to ISO UTC datetime string. */
+const toISOFromLocal = (localStr: string): string => {
+  // localStr is "YYYY-MM-DDTHH:mm" in Europe/Zurich
+  // Build a date string that we can parse as Swiss local time
+  const [datePart, timePart] = localStr.split('T')
+  // Use date-fns or manual approach: create a temporary Date in UTC, then offset
+  // Simpler: use Intl to find the offset for that date in Zurich
+  const naive = new Date(`${datePart}T${timePart}:00`)
+  // Get the UTC offset for Europe/Zurich at this date
+  const zurichStr = naive.toLocaleString('en-US', { timeZone: 'Europe/Zurich' })
+  const utcStr = naive.toLocaleString('en-US', { timeZone: 'UTC' })
+  const zurichDate = new Date(zurichStr)
+  const utcDate = new Date(utcStr)
+  const offsetMs = utcDate.getTime() - zurichDate.getTime()
+  // The actual UTC time = naive time + offset
+  const utcTime = new Date(naive.getTime() + offsetMs)
+  return utcTime.toISOString()
+}
 
 // ─── Input styling constants ─────────────────────────────────────────────────
 
@@ -138,7 +162,7 @@ const SectionHeader = ({
 const LockedIndicator = () => (
   <span className="inline-flex items-center gap-1 text-[10px] text-zinc-600">
     <Lock className="size-2.5" />
-    Verrouille
+    Verrouillé
   </span>
 )
 
@@ -185,7 +209,7 @@ const MarkdownField = ({
             )}
           >
             <Pencil className="mr-1 inline size-2.5" />
-            Editer
+            Éditer
           </button>
           <button
             type="button"
@@ -198,7 +222,7 @@ const MarkdownField = ({
             )}
           >
             <Eye className="mr-1 inline size-2.5" />
-            Apercu
+            Aperçu
           </button>
         </div>
       </div>
@@ -207,7 +231,7 @@ const MarkdownField = ({
           {value ? (
             <Markdown content={value} />
           ) : (
-            <p className="text-sm text-zinc-600">Rien a afficher.</p>
+            <p className="text-sm text-zinc-600">Rien à afficher.</p>
           )}
         </div>
       ) : (
@@ -268,13 +292,13 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       title: tournament?.title ?? '',
       slug: tournament?.slug ?? '',
       description: tournament?.description ?? '',
-      startDate: tournament ? toDateInputValue(tournament.startDate) : '',
-      endDate: tournament ? toDateInputValue(tournament.endDate) : '',
+      startDate: tournament ? toDatetimeLocalValue(tournament.startDate) : '',
+      endDate: tournament ? toDatetimeLocalValue(tournament.endDate) : '',
       registrationOpen: tournament
-        ? toDateInputValue(tournament.registrationOpen)
+        ? toDatetimeLocalValue(tournament.registrationOpen)
         : '',
       registrationClose: tournament
-        ? toDateInputValue(tournament.registrationClose)
+        ? toDatetimeLocalValue(tournament.registrationClose)
         : '',
       maxTeams: tournament?.maxTeams ?? null,
       format: tournament?.format ?? TournamentFormat.SOLO,
@@ -404,7 +428,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         return
       }
 
-      toast.success('Image importee avec succes.')
+      toast.success('Image importée avec succès.')
       setValue('imageUrl', data.url, {
         shouldDirty: true,
         shouldValidate: true,
@@ -422,13 +446,13 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   // ─── Form submission ────────────────────────────────────────────────────────
 
   const onSubmit = (data: TournamentInput) => {
-    // Convert date inputs to ISO datetime strings
+    // Convert datetime-local inputs (Swiss timezone) to ISO UTC strings
     const payload = {
       ...data,
-      startDate: toISODatetime(data.startDate),
-      endDate: toISODatetime(data.endDate),
-      registrationOpen: toISODatetime(data.registrationOpen),
-      registrationClose: toISODatetime(data.registrationClose),
+      startDate: toISOFromLocal(data.startDate),
+      endDate: toISOFromLocal(data.endDate),
+      registrationOpen: toISOFromLocal(data.registrationOpen),
+      registrationClose: toISOFromLocal(data.registrationClose),
     }
 
     startTransition(async () => {
@@ -458,7 +482,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* ── Section 1: General Info ─────────────────────────────────────────── */}
       <div className={SECTION_CLASSES}>
-        <SectionHeader icon={FileText} title="Informations generales" />
+        <SectionHeader icon={FileText} title="Informations générales" />
         <div className="space-y-4">
           {/* Title */}
           <div className="space-y-1.5">
@@ -482,7 +506,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               Slug *
               {!isEditing && (
                 <span className="ml-2 text-[10px] text-zinc-600">
-                  (genere automatiquement)
+                  (généré automatiquement)
                 </span>
               )}
             </Label>
@@ -509,6 +533,18 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             maxLength={5000}
             error={errors.description?.message}
           />
+          <p className="text-[10px] text-zinc-600">
+            Ce champ supporte la syntaxe{' '}
+            <a
+              href="https://markdownlivepreview.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline hover:text-blue-400"
+            >
+              Markdown
+            </a>
+            . Utilisez le bouton Aperçu pour prévisualiser le rendu.
+          </p>
         </div>
       </div>
 
@@ -557,7 +593,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={TournamentFormat.SOLO}>Solo</SelectItem>
-                <SelectItem value={TournamentFormat.TEAM}>Equipe</SelectItem>
+                <SelectItem value={TournamentFormat.TEAM}>Équipe</SelectItem>
               </SelectContent>
             </Select>
             {errors.format?.message && (
@@ -568,7 +604,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           {/* Team Size */}
           <div className="space-y-1.5">
             <Label htmlFor="tournament-teamSize" className={LABEL_CLASSES}>
-              Taille d&apos;equipe *
+              Taille d&apos;équipe *
             </Label>
             <Input
               id="tournament-teamSize"
@@ -592,12 +628,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="tournament-startDate" className={LABEL_CLASSES}>
-              Debut du tournoi *
+              Début du tournoi *
             </Label>
             <Input
               id="tournament-startDate"
-              type="date"
-              className={cn(INPUT_CLASSES, 'w-48')}
+              type="datetime-local"
+              className={cn(INPUT_CLASSES, 'w-56')}
               {...register('startDate')}
             />
             {errors.startDate?.message && (
@@ -611,8 +647,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             </Label>
             <Input
               id="tournament-endDate"
-              type="date"
-              className={cn(INPUT_CLASSES, 'w-48')}
+              type="datetime-local"
+              className={cn(INPUT_CLASSES, 'w-56')}
               {...register('endDate')}
             />
             {errors.endDate?.message && (
@@ -629,8 +665,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             </Label>
             <Input
               id="tournament-registrationOpen"
-              type="date"
-              className={cn(INPUT_CLASSES, 'w-48')}
+              type="datetime-local"
+              className={cn(INPUT_CLASSES, 'w-56')}
               {...register('registrationOpen')}
             />
             {errors.registrationOpen?.message && (
@@ -649,8 +685,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             </Label>
             <Input
               id="tournament-registrationClose"
-              type="date"
-              className={cn(INPUT_CLASSES, 'w-48')}
+              type="datetime-local"
+              className={cn(INPUT_CLASSES, 'w-56')}
               {...register('registrationClose')}
             />
             {errors.registrationClose?.message && (
@@ -661,8 +697,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           </div>
         </div>
         <p className="mt-3 text-[10px] text-zinc-600">
-          Les dates sont stockees a midi UTC pour eviter les decalages de fuseau
-          horaire.
+          Les heures sont en fuseau horaire suisse (Europe/Zurich) et converties
+          automatiquement en UTC pour le stockage.
         </p>
       </div>
 
@@ -680,7 +716,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 id="tournament-maxTeams"
                 type="number"
                 min={2}
-                placeholder="Illimite"
+                placeholder="Illimité"
                 className={INPUT_CLASSES}
                 value={watchMaxTeams ?? ''}
                 onChange={e => {
@@ -738,7 +774,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   htmlFor="tournament-entryFeeAmount"
                   className={LABEL_CLASSES}
                 >
-                  Prix d&apos;entree (CHF) * {isEditing && <LockedIndicator />}
+                  Prix d&apos;entrée (CHF) * {isEditing && <LockedIndicator />}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -807,7 +843,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                       Aucun remboursement
                     </SelectItem>
                     <SelectItem value={RefundPolicyType.BEFORE_DEADLINE}>
-                      Avant delai
+                      Avant délai
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -824,7 +860,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                     htmlFor="tournament-refundDeadlineDays"
                     className={LABEL_CLASSES}
                   >
-                    Delai (jours avant debut) *{' '}
+                    Délai (jours avant début) *{' '}
                     {isEditing && <LockedIndicator />}
                   </Label>
                   <Input
@@ -861,7 +897,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       {/* ── Section 5: Image & Media ───────────────────────────────────────── */}
       <div className={SECTION_CLASSES}>
-        <SectionHeader icon={ImagePlus} title="Image et medias" />
+        <SectionHeader icon={ImagePlus} title="Image et médias" />
         <div className="space-y-4">
           {/* Image preview */}
           {watchImageUrl && (
@@ -869,7 +905,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               <div className="relative size-24 overflow-hidden rounded-lg border border-white/10 bg-white/5">
                 <Image
                   src={watchImageUrl}
-                  alt="Apercu"
+                  alt="Aperçu"
                   fill
                   className="object-cover"
                 />
@@ -1018,10 +1054,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         <div className="space-y-4">
           <MarkdownField
             id="tournament-rules"
-            label="Regles"
+            label="Règles"
             value={watchRules}
             onChange={val => setValue('rules', val, { shouldValidate: true })}
-            placeholder="Regles du tournoi (supporte le Markdown)"
+            placeholder="Règles du tournoi (supporte le Markdown)"
             maxLength={10000}
             error={errors.rules?.message}
             rows={8}
@@ -1042,12 +1078,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       {/* ── Section 7: Custom Fields ───────────────────────────────────────── */}
       <div className={SECTION_CLASSES}>
-        <SectionHeader icon={Settings} title="Champs personnalises" />
+        <SectionHeader icon={Settings} title="Champs personnalisés" />
 
         {fieldsLocked && (
           <div className="mb-4 flex items-center gap-2 rounded-lg bg-amber-500/5 px-3 py-2 text-xs text-amber-400">
             <AlertTriangle className="size-3.5 shrink-0" />
-            Les champs ne peuvent pas etre modifies car le tournoi est publie
+            Les champs ne peuvent pas être modifiés car le tournoi est publié
             avec des inscrits.
           </div>
         )}
@@ -1062,7 +1098,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               <div className="grid flex-1 gap-3 sm:grid-cols-4">
                 <div className="sm:col-span-2">
                   <Input
-                    placeholder="Libelle"
+                    placeholder="Libellé"
                     disabled={!!fieldsLocked}
                     className={cn(
                       INPUT_CLASSES,
@@ -1158,7 +1194,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       {/* ── Section 8: Toornament Integration ──────────────────────────────── */}
       <div className={SECTION_CLASSES}>
-        <SectionHeader icon={Layers} title="Integration Toornament" />
+        <SectionHeader icon={Layers} title="Intégration Toornament" />
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="tournament-toornamentId" className={LABEL_CLASSES}>
@@ -1170,6 +1206,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               className={INPUT_CLASSES}
               {...register('toornamentId')}
             />
+            <p className="text-[10px] text-zinc-600">
+              Trouvable dans l&apos;URL du tournoi sur toornament.com (ex:
+              toornament.com/tournaments/<strong>ID</strong>/information).
+            </p>
             {errors.toornamentId?.message && (
               <p className="text-xs text-red-400">
                 {errors.toornamentId.message}
@@ -1185,6 +1225,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 key={stage.id}
                 className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-3"
               >
+                <GripVertical className="mt-2.5 size-4 shrink-0 text-zinc-600" />
                 <div className="grid flex-1 gap-3 sm:grid-cols-3">
                   <Input
                     placeholder="Nom du stage"
@@ -1192,19 +1233,18 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                     {...register(`toornamentStages.${index}.name`)}
                   />
                   <Input
-                    placeholder="ID du stage"
+                    placeholder="ID du stage (depuis Toornament)"
                     className={cn(INPUT_CLASSES, 'h-9 font-mono text-xs')}
                     {...register(`toornamentStages.${index}.stageId`)}
                   />
                   <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      placeholder="#"
-                      min={0}
-                      className={cn(INPUT_CLASSES, 'h-9 w-16 text-xs')}
+                    <span className="text-xs text-zinc-500">#{index + 1}</span>
+                    <input
+                      type="hidden"
                       {...register(`toornamentStages.${index}.number`, {
                         valueAsNumber: true,
                       })}
+                      value={index}
                     />
                     <Button
                       type="button"
@@ -1266,7 +1306,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           ) : (
             <Save className="size-4" />
           )}
-          {isEditing ? 'Enregistrer' : 'Creer'}
+          {isEditing ? 'Enregistrer' : 'Créer'}
         </Button>
       </div>
     </form>

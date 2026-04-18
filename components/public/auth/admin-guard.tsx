@@ -26,4 +26,4 @@ const AdminGuard = async ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-export default AdminGuard
+export { AdminGuard }

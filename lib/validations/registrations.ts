@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { fieldValuesSchema } from '@/lib/validations/shared'
 
 /** Schema for admin-deleting a registration. */
 export const deleteRegistrationSchema = z.object({
@@ -14,9 +15,9 @@ export const deleteRegistrationSchema = z.object({
 })
 
 /** Schema for admin-updating custom field values on a registration. */
-export const updateRegistrationFieldsSchema = z.object({
+export const adminUpdateRegistrationFieldsSchema = z.object({
   registrationId: z.uuid('ID inscription invalide.'),
-  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+  fieldValues: fieldValuesSchema,
 })
 
 /** Schema for admin-moving a player to a different team in the same tournament. */

@@ -438,11 +438,11 @@ describe('tournamentSchema', () => {
 
   // --- Datetime validation ---
 
-  it('rejects an invalid datetime format for startDate', () => {
+  it('rejects an empty startDate', () => {
     expect(
       tournamentSchema.safeParse({
         ...VALID_TOURNAMENT,
-        startDate: '2026-06-15',
+        startDate: '',
       }).success,
     ).toBe(false)
   })

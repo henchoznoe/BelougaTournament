@@ -8,19 +8,7 @@
 
 import 'server-only'
 import type prisma from '@/lib/core/prisma'
-
-/** Team with ordered members list. Used by removeUserFromTeam. */
-type TeamWithMembers = {
-  id: string
-  captainId: string
-  tournament: { teamSize: number }
-  members: { userId: string }[]
-}
-
-/** Team member with nested team (including members). */
-type TeamMemberWithTeam = {
-  team: TeamWithMembers
-}
+import type { TeamMemberWithTeam, TeamWithMembers } from '@/lib/types/team'
 
 /** Recomputes the `isFull` flag for a team after a membership mutation. */
 export const syncTeamFullState = async (
@@ -34,6 +22,34 @@ export const syncTeamFullState = async (
     where: { id: teamId },
     data: { isFull: memberCount >= teamSize },
   })
+}
+
+/**
+ * Handles captain succession and team cleanup after a member has been deleted.
+ * Call this AFTER deleting the teamMember row from the database.
+ * If no other members remain, the team is deleted.
+ * If the removed user was captain, the earliest-joined remaining member is promoted.
+ */
+export const handleCaptainSuccession = async (
+  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
+  team: TeamWithMembers,
+  removedUserId: string,
+) => {
+  const otherMembers = team.members.filter(m => m.userId !== removedUserId)
+
+  if (otherMembers.length === 0) {
+    await tx.team.delete({ where: { id: team.id } })
+    return
+  }
+
+  if (team.captainId === removedUserId) {
+    await tx.team.update({
+      where: { id: team.id },
+      data: { captainId: otherMembers[0].userId },
+    })
+  }
+
+  await syncTeamFullState(tx, team.id, team.tournament.teamSize)
 }
 
 /** Removes a user from their team while keeping the registration row intact. */
@@ -59,22 +75,8 @@ export const removeUserFromTeam = async (
   }
 
   const team = teamMember.team
-  const otherMembers = team.members.filter(member => member.userId !== userId)
-  const isCaptain = team.captainId === userId
 
   await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
 
-  if (otherMembers.length === 0) {
-    await tx.team.delete({ where: { id: team.id } })
-    return
-  }
-
-  if (isCaptain) {
-    await tx.team.update({
-      where: { id: team.id },
-      data: { captainId: otherMembers[0].userId },
-    })
-  }
-
-  await syncTeamFullState(tx, team.id, team.tournament.teamSize)
+  await handleCaptainSuccession(tx, team, userId)
 }

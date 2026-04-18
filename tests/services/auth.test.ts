@@ -8,6 +8,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('server-only', () => ({}))
+
 // ---------------------------------------------------------------------------
 // Mocks — must be defined before importing the module under test
 // ---------------------------------------------------------------------------

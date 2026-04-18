@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import { headers } from 'next/headers'
 import auth from '@/lib/core/auth'
 import type { AuthSession } from '@/lib/types/auth'

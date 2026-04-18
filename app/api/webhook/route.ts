@@ -306,6 +306,14 @@ export const POST = async (request: Request) => {
   }
 
   try {
+    // Insert idempotency record BEFORE processing to prevent double-processing on retries
+    await prisma.stripeWebhookEvent.create({
+      data: {
+        stripeEventId: event.id,
+        type: event.type,
+      },
+    })
+
     switch (event.type) {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(event)
@@ -323,13 +331,6 @@ export const POST = async (request: Request) => {
         break
     }
 
-    await prisma.stripeWebhookEvent.create({
-      data: {
-        stripeEventId: event.id,
-        type: event.type,
-      },
-    })
-
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
@@ -337,6 +338,15 @@ export const POST = async (request: Request) => {
 
     return NextResponse.json({ received: true })
   } catch (error) {
+    // Delete idempotency record on failure so Stripe can retry
+    try {
+      await prisma.stripeWebhookEvent.delete({
+        where: { stripeEventId: event.id },
+      })
+    } catch {
+      // Ignore if delete fails (record may not exist if create failed)
+    }
+
     logger.error(
       { error, eventId: event.id, type: event.type },
       'Failed to process Stripe webhook',

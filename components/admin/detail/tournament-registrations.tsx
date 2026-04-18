@@ -85,8 +85,10 @@ import type {
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
 import {
+  FieldType,
   PaymentStatus,
   RegistrationStatus,
+  RegistrationType,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
 
@@ -184,11 +186,11 @@ const EditFieldsDialog = ({
               </Label>
               <Input
                 id={`field-${field.id}`}
-                type={field.type === 'NUMBER' ? 'number' : 'text'}
+                type={field.type === FieldType.NUMBER ? 'number' : 'text'}
                 value={values[field.label] ?? ''}
                 onChange={e => {
                   const val =
-                    field.type === 'NUMBER'
+                    field.type === FieldType.NUMBER
                       ? e.target.value === ''
                         ? ''
                         : Number(e.target.value)
@@ -532,7 +534,7 @@ export const TournamentRegistrations = ({
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const isTeam = tournament.format === TournamentFormat.TEAM
-  const isPaid = tournament.registrationType === 'PAID'
+  const isPaid = tournament.registrationType === RegistrationType.PAID
   const fields = tournament.fields
 
   // Filter registrations

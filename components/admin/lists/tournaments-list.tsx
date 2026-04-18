@@ -13,8 +13,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Plus,
   Search,
 } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { TournamentActionsDropdown } from '@/components/admin/ui/tournament-actions-dropdown'
@@ -228,6 +230,15 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
               <SelectItem value={TournamentStatus.ARCHIVED}>Archivé</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            asChild
+            className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+          >
+            <Link href={ROUTES.ADMIN_TOURNAMENT_NEW}>
+              <Plus className="size-4" />
+              Créer
+            </Link>
+          </Button>
         </div>
       </div>
 

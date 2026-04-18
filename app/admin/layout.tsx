@@ -9,7 +9,7 @@
 import { Suspense } from 'react'
 import { AdminShell } from '@/components/admin/ui/admin-shell'
 import { AdminShellSkeleton } from '@/components/admin/ui/admin-shell-skeleton'
-import AdminGuard from '@/components/public/auth/admin-guard'
+import { AdminGuard } from '@/components/public/auth/admin-guard'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 interface AdminLayoutProps {

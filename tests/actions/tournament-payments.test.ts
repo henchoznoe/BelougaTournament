@@ -148,6 +148,8 @@ describe('paid tournament registration actions', () => {
           update: mockPaymentUpdate,
         },
         tournamentRegistration: {
+          count: mockRegistrationCount,
+          create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
         },
       }),

@@ -19,6 +19,7 @@ import {
   FileText,
   Gamepad2,
   Hash,
+  ImageIcon,
   Info,
   Layers,
   Loader2,
@@ -32,6 +33,7 @@ import {
   Users,
   Video,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
@@ -513,6 +515,24 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Tournament image */}
+      {tournament.imageUrl && (
+        <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <ImageIcon className="size-4 text-blue-400" />
+            Image
+          </h2>
+          <div className="relative aspect-[3/1] w-full overflow-hidden rounded-xl border border-white/10">
+            <Image
+              src={tournament.imageUrl}
+              alt={tournament.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Stats summary */}
       <StatsSummary tournament={tournament} />
 
