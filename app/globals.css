@@ -124,6 +124,10 @@
   .animate-bounce-slow {
     animation: bounce-slow 3s infinite;
   }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
   @keyframes bounce-slow {
     0%,
     100% {
@@ -141,7 +145,7 @@
       transform: translateX(0);
     }
     100% {
-      transform: translateX(calc(-50% - 0.5rem));
+      transform: translateX(calc(-50% - 0.75rem));
     }
   }
 }
