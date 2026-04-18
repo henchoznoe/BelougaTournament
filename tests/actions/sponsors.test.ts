@@ -40,12 +40,14 @@ vi.mock('next/cache', () => ({
 const mockSponsorCreate = vi.fn()
 const mockSponsorUpdate = vi.fn()
 const mockSponsorDelete = vi.fn()
+const mockSponsorFindUnique = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
     sponsor: {
       create: (...args: unknown[]) => mockSponsorCreate(...args),
       update: (...args: unknown[]) => mockSponsorUpdate(...args),
       delete: (...args: unknown[]) => mockSponsorDelete(...args),
+      findUnique: (...args: unknown[]) => mockSponsorFindUnique(...args),
     },
   },
 }))
@@ -54,9 +56,8 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { createSponsor, updateSponsor, deleteSponsor } = await import(
-  '@/lib/actions/sponsors'
-)
+const { createSponsor, updateSponsor, deleteSponsor, toggleSponsorStatus } =
+  await import('@/lib/actions/sponsors')
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -312,5 +313,99 @@ describe('deleteSponsor', () => {
     const result = await deleteSponsor({ id: VALID_UUID })
 
     expect(result).toEqual({ success: false, message: 'Record not found.' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// toggleSponsorStatus
+// ---------------------------------------------------------------------------
+
+describe('toggleSponsorStatus', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockSponsorFindUnique.mockResolvedValue({ enabled: true })
+    mockSponsorUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await toggleSponsorStatus({ id: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('returns Unauthorized for non-admin role', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'user-1', role: Role.USER },
+      session: {},
+    })
+
+    expect(await toggleSponsorStatus({ id: VALID_UUID })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('disables an enabled sponsor', async () => {
+    mockSponsorFindUnique.mockResolvedValue({ enabled: true })
+
+    const result = await toggleSponsorStatus({ id: VALID_UUID })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le sponsor a été désactivé.',
+    })
+    expect(mockSponsorUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { enabled: false },
+    })
+  })
+
+  it('enables a disabled sponsor', async () => {
+    mockSponsorFindUnique.mockResolvedValue({ enabled: false })
+
+    const result = await toggleSponsorStatus({ id: VALID_UUID })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Le sponsor a été activé.',
+    })
+    expect(mockSponsorUpdate).toHaveBeenCalledWith({
+      where: { id: VALID_UUID },
+      data: { enabled: true },
+    })
+  })
+
+  it('returns error when sponsor is not found', async () => {
+    mockSponsorFindUnique.mockResolvedValue(null)
+
+    const result = await toggleSponsorStatus({ id: VALID_UUID })
+
+    expect(result).toEqual({ success: false, message: 'Sponsor introuvable.' })
+    expect(mockSponsorUpdate).not.toHaveBeenCalled()
+  })
+
+  it('calls revalidateTag with the sponsors tag', async () => {
+    await toggleSponsorStatus({ id: VALID_UUID })
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors', 'hours')
+  })
+
+  it('returns validation error for invalid UUID', async () => {
+    const result = await toggleSponsorStatus({ id: 'bad-id' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns Internal server error when prisma update throws', async () => {
+    mockSponsorUpdate.mockRejectedValue(new Error('DB error'))
+
+    const result = await toggleSponsorStatus({ id: VALID_UUID })
+
+    expect(result).toEqual({ success: false, message: 'Internal server error' })
   })
 })

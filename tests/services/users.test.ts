@@ -8,6 +8,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentFormat,
   TournamentStatus,
@@ -55,9 +57,6 @@ const MOCK_USERS = [
     role: Role.USER,
     createdAt: new Date('2026-01-01'),
     lastLoginAt: new Date('2026-04-15T19:30:00Z'),
-    bannedUntil: null,
-    banReason: null,
-    _count: { registrations: 3 },
   },
   {
     id: 'admin-1',
@@ -69,9 +68,6 @@ const MOCK_USERS = [
     role: Role.ADMIN,
     createdAt: new Date('2026-02-01'),
     lastLoginAt: null,
-    bannedUntil: null,
-    banReason: null,
-    _count: { registrations: 0 },
   },
 ]
 
@@ -85,18 +81,31 @@ const MOCK_USER_DETAIL = {
   role: Role.USER,
   createdAt: new Date('2026-01-01'),
   lastLoginAt: new Date('2026-04-15T19:30:00Z'),
-  bannedUntil: null,
-  banReason: null,
   registrations: [
     {
       id: 'reg-1',
       createdAt: new Date('2026-01-15'),
+      status: RegistrationStatus.CONFIRMED,
+      paymentStatus: PaymentStatus.PAID,
+      entryFeeAmountSnapshot: 1500,
+      entryFeeCurrencySnapshot: 'chf',
       tournament: {
         title: 'Tournoi Alpha',
+        slug: 'tournoi-alpha',
         format: TournamentFormat.SOLO,
         status: TournamentStatus.PUBLISHED,
       },
       team: null,
+      payments: [
+        {
+          id: 'pay-1',
+          amount: 1500,
+          currency: 'chf',
+          status: PaymentStatus.PAID,
+          paidAt: new Date('2026-01-16'),
+          refundAmount: null,
+        },
+      ],
     },
   ],
 }

@@ -34,3 +34,8 @@ export const deleteSponsorSchema = z.object({
 export const updateSponsorSchema = sponsorSchema.extend({
   id: z.uuid('ID de sponsor invalide.'),
 })
+
+/** Schema for toggling a sponsor's enabled status. */
+export const toggleSponsorStatusSchema = z.object({
+  id: z.uuid('ID de sponsor invalide.'),
+})

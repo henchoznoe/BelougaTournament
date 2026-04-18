@@ -23,12 +23,17 @@ import type {
   TournamentListItem,
   TournamentRegistrationItem,
   UserRegistrationItem,
+  UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  RegistrationStatus,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Shared select for the landing hero badge. */
 const HERO_BADGE_SELECT = {
@@ -54,6 +59,9 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
         format: true,
         teamSize: true,
         maxTeams: true,
+        registrationType: true,
+        entryFeeAmount: true,
+        entryFeeCurrency: true,
         status: true,
         startDate: true,
         endDate: true,
@@ -169,19 +177,25 @@ export const getRegistrations = async (
 
   try {
     const rows = (await prisma.tournamentRegistration.findMany({
-      where: { tournamentId },
+      where: {
+        tournamentId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         fieldValues: true,
         createdAt: true,
+        status: true,
+        paymentStatus: true,
         user: {
           select: {
             id: true,
             name: true,
             displayName: true,
             image: true,
-            bannedUntil: true,
             teamMembers: {
               where: { team: { tournamentId } },
               select: {
@@ -265,68 +279,12 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
             },
           },
         },
-        registration: {
-          select: {
-            id: true,
-          },
-        },
       },
     })
     return rows as unknown as TeamItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching teams')
     return []
-  }
-}
-
-/** Fetches a single team by ID (for admin team detail page). */
-export const getTeamById = async (teamId: string): Promise<TeamItem | null> => {
-  'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
-
-  try {
-    const row = await prisma.team.findUnique({
-      where: { id: teamId },
-      select: {
-        id: true,
-        name: true,
-        isFull: true,
-        createdAt: true,
-        captain: {
-          select: {
-            id: true,
-            name: true,
-            displayName: true,
-            image: true,
-          },
-        },
-        members: {
-          orderBy: { joinedAt: 'asc' },
-          select: {
-            id: true,
-            joinedAt: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                displayName: true,
-                image: true,
-              },
-            },
-          },
-        },
-        registration: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    })
-    return row as unknown as TeamItem | null
-  } catch (error) {
-    logger.error({ error }, 'Error fetching team by ID')
-    return null
   }
 }
 
@@ -345,6 +303,9 @@ const PUBLIC_LIST_SELECT = {
   format: true,
   teamSize: true,
   maxTeams: true,
+  registrationType: true,
+  entryFeeAmount: true,
+  entryFeeCurrency: true,
   status: true,
   startDate: true,
   endDate: true,
@@ -505,23 +466,35 @@ export const getAvailableTeams = async (
 }
 
 // ---------------------------------------------------------------------------
-// User registration check (public tournament detail page)
+// User registration state (public tournament detail page)
 // ---------------------------------------------------------------------------
 
-/** Checks whether a user is already registered for a given tournament (non-cached, user-specific). */
-export const isUserRegisteredForTournament = async (
+/** Fetches the current registration state for a user on a tournament, if any active record exists. */
+export const getUserTournamentRegistrationState = async (
   userId: string,
   tournamentId: string,
-): Promise<boolean> => {
+): Promise<UserTournamentRegistrationState | null> => {
   try {
-    const row = await prisma.tournamentRegistration.findUnique({
-      where: { tournamentId_userId: { tournamentId, userId } },
-      select: { id: true },
+    const row = await prisma.tournamentRegistration.findFirst({
+      where: {
+        tournamentId,
+        userId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        expiresAt: true,
+      },
     })
-    return row !== null
+
+    return row as UserTournamentRegistrationState | null
   } catch (error) {
-    logger.error({ error }, 'Error checking user registration status')
-    return false
+    logger.error({ error }, 'Error fetching user tournament registration state')
+    return null
   }
 }
 
@@ -534,6 +507,8 @@ const USER_REGISTRATION_SELECT = {
   id: true,
   fieldValues: true,
   createdAt: true,
+  status: true,
+  paymentStatus: true,
   tournament: {
     select: {
       id: true,
@@ -569,6 +544,9 @@ export const getUserRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
         tournament: { status: TournamentStatus.PUBLISHED },
       },
       orderBy: { createdAt: 'desc' },
@@ -593,7 +571,16 @@ export const getUserPastRegistrations = async (
     const rows = await prisma.tournamentRegistration.findMany({
       where: {
         userId,
-        tournament: { status: TournamentStatus.ARCHIVED },
+        OR: [
+          {
+            status: RegistrationStatus.CONFIRMED,
+            tournament: { status: TournamentStatus.ARCHIVED },
+          },
+          {
+            status: RegistrationStatus.CANCELLED,
+            paymentStatus: PaymentStatus.REFUNDED,
+          },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       select: USER_REGISTRATION_SELECT,

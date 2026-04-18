@@ -9,9 +9,8 @@
 import { Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
-import { SponsorForm } from '@/components/features/admin/sponsor-form'
-import AdminGuard from '@/components/features/auth/admin-guard'
+import { SponsorForm } from '@/components/admin/forms/sponsor-form'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'
 
@@ -38,30 +37,18 @@ const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
   }
 
   return (
-    <AdminGuard>
-      <div className="mx-auto max-w-5xl space-y-6">
-        <AdminBreadcrumb
-          segments={[
-            { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
-            { label: sponsor.name, href: ROUTES.ADMIN_SPONSORS },
-            { label: 'Modifier' },
-          ]}
-        />
-
-        {/* Page heading */}
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Pencil className="size-6 text-blue-400" />
-            Modifier {sponsor.name}
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Modifiez les informations du sponsor.
-          </p>
-        </div>
-
-        <SponsorForm sponsor={sponsor} />
-      </div>
-    </AdminGuard>
+    <AdminContentLayout
+      segments={[
+        { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
+        { label: sponsor.name, href: ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id) },
+        { label: 'Modifier' },
+      ]}
+      icon={Pencil}
+      title={`Modifier ${sponsor.name}`}
+      subtitle="Modifiez les informations du sponsor."
+    >
+      <SponsorForm sponsor={sponsor} />
+    </AdminContentLayout>
   )
 }
 

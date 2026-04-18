@@ -8,7 +8,7 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { LegalSection } from '@/components/features/legal/legal-section'
+import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
 import { AUTHOR, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'

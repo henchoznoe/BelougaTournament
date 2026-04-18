@@ -27,31 +27,9 @@ describe('ROUTES', () => {
     expect(ROUTES.ADMIN_DASHBOARD).toBe('/admin')
   })
 
-  it('PROFILE_TOURNAMENTS is /profile/tournaments', () => {
-    expect(ROUTES.PROFILE_TOURNAMENTS).toBe('/profile/tournaments')
-  })
-
   it('ADMIN_TOURNAMENT_DETAIL builds slug-based path', () => {
     expect(ROUTES.ADMIN_TOURNAMENT_DETAIL('my-tourney')).toBe(
       '/admin/tournaments/my-tourney',
-    )
-  })
-
-  it('ADMIN_TOURNAMENT_EDIT builds slug-based path', () => {
-    expect(ROUTES.ADMIN_TOURNAMENT_EDIT('my-tourney')).toBe(
-      '/admin/tournaments/my-tourney/edit',
-    )
-  })
-
-  it('ADMIN_TOURNAMENT_REGISTRATIONS builds slug-based path', () => {
-    expect(ROUTES.ADMIN_TOURNAMENT_REGISTRATIONS('cup-2026')).toBe(
-      '/admin/tournaments/cup-2026/registrations',
-    )
-  })
-
-  it('ADMIN_TOURNAMENT_TEAMS builds slug-based path', () => {
-    expect(ROUTES.ADMIN_TOURNAMENT_TEAMS('cup-2026')).toBe(
-      '/admin/tournaments/cup-2026/teams',
     )
   })
 
@@ -62,18 +40,6 @@ describe('ROUTES', () => {
   it('ADMIN_SPONSOR_EDIT builds id-based path', () => {
     expect(ROUTES.ADMIN_SPONSOR_EDIT('sponsor-123')).toBe(
       '/admin/sponsors/sponsor-123/edit',
-    )
-  })
-
-  it('ADMIN_REGISTRATION_DETAIL builds id-based path', () => {
-    expect(ROUTES.ADMIN_REGISTRATION_DETAIL('reg-456')).toBe(
-      '/admin/registrations/reg-456',
-    )
-  })
-
-  it('ADMIN_TOURNAMENT_TEAM_DETAIL builds slug and teamId-based path', () => {
-    expect(ROUTES.ADMIN_TOURNAMENT_TEAM_DETAIL('cup-2026', 'team-789')).toBe(
-      '/admin/tournaments/cup-2026/teams/team-789',
     )
   })
 
@@ -96,7 +62,6 @@ describe('ADMIN_ROUTE_ROLES', () => {
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_DASHBOARD]).toBe(Role.ADMIN)
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_TOURNAMENTS]).toBe(Role.ADMIN)
     expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_USERS]).toBe(Role.ADMIN)
-    expect(ADMIN_ROUTE_ROLES[ROUTES.ADMIN_REGISTRATIONS]).toBe(Role.ADMIN)
   })
 
   it('maps configuration routes to ADMIN', () => {

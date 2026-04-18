@@ -17,6 +17,7 @@ import { toNullable } from '@/lib/utils/formatting'
 import {
   deleteSponsorSchema,
   sponsorSchema,
+  toggleSponsorStatusSchema,
   updateSponsorSchema,
 } from '@/lib/validations/sponsors'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -35,7 +36,6 @@ export const createSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été créé.' }
   },
@@ -56,7 +56,6 @@ export const updateSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été mis à jour.' }
   },
@@ -71,8 +70,32 @@ export const deleteSponsor = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS, 'minutes')
 
     return { success: true, message: 'Le sponsor a été supprimé.' }
+  },
+})
+
+export const toggleSponsorStatus = authenticatedAction({
+  schema: toggleSponsorStatusSchema,
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
+    const sponsor = await prisma.sponsor.findUnique({
+      where: { id: data.id },
+      select: { enabled: true },
+    })
+
+    if (!sponsor) {
+      return { success: false, message: 'Sponsor introuvable.' }
+    }
+
+    await prisma.sponsor.update({
+      where: { id: data.id },
+      data: { enabled: !sponsor.enabled },
+    })
+
+    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+
+    const statusLabel = sponsor.enabled ? 'désactivé' : 'activé'
+    return { success: true, message: `Le sponsor a été ${statusLabel}.` }
   },
 })

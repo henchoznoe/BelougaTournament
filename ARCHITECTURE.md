@@ -21,6 +21,7 @@
 | Hosting | Vercel (Analytics, SpeedInsights, Blob storage) | — |
 | Database | PostgreSQL 18 (local Docker, Vercel Postgres in prod) | 18 |
 | Icons | Lucide React + Font Awesome (brand icons) | — |
+| Markdown | React Markdown | 10.x |
 | Animations | Framer Motion | 12.x |
 
 ---
@@ -31,8 +32,9 @@
 .
 ├── app/                    # Next.js App Router — pages, layouts, API routes, SEO
 ├── components/
-│   ├── features/           # Domain components (admin, auth, landing, layout, profile, tournaments, ...)
-│   └── ui/                 # shadcn/ui primitives (button, dialog, input, table, tabs, ...)
+│   ├── admin/              # Admin domain components (dashboard, forms, lists, ui)
+│   ├── public/             # Public domain components (auth, contact, landing, layout, legal, profile, stream, tournaments)
+│   └── ui/                 # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 ├── lib/
 │   ├── actions/            # Server actions (authenticatedAction wrapper)
 │   ├── config/             # Routes, constants (CACHE_TAGS, METADATA), admin sidebar nav
@@ -83,14 +85,17 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 |---|---|---|
 | `/admin` | Dashboard (stats, upcoming tournaments, recent registrations) | ADMIN+ |
 | `/admin/tournaments` | Tournament list (CRUD, status management) | ADMIN+ |
-| `/admin/tournaments/new` | Create tournament | ADMIN+ |
-| `/admin/tournaments/:slug` | Edit tournament (tabbed: general, registrations, teams) | ADMIN+ |
-| `/admin/tournaments/:slug/registrations` | Manage registrations (view and moderation) | ADMIN+ |
-| `/admin/tournaments/:slug/teams` | Manage teams (dissolve, kick) | ADMIN+ |
-| `/admin/players` | Player management (edit, ban/unban) | ADMIN+ |
+| `/admin/tournaments/new` | Create tournament *(planned)* | ADMIN+ |
+| `/admin/tournaments/:slug` | Tournament detail / edit | ADMIN+ |
+| `/admin/tournaments/:slug/registrations` | Manage registrations *(planned)* | ADMIN+ |
+| `/admin/tournaments/:slug/teams` | Manage teams *(planned)* | ADMIN+ |
 | `/admin/users` | User management (promote/demote, ban/unban, delete) | ADMIN |
+| `/admin/users/:id` | User detail | ADMIN |
 | `/admin/settings` | Global settings (logo, Twitch, socials, features) | ADMIN |
-| `/admin/sponsors` | Sponsor management (CRUD, image upload) | ADMIN |
+| `/admin/sponsors` | Sponsor list | ADMIN |
+| `/admin/sponsors/new` | Create sponsor | ADMIN |
+| `/admin/sponsors/:id` | Sponsor detail | ADMIN |
+| `/admin/sponsors/:id/edit` | Edit sponsor | ADMIN |
 
 ### API Routes
 
@@ -98,6 +103,7 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 |---|---|---|
 | `/api/auth/[...all]` | GET, POST | BetterAuth catch-all handler (OAuth, session) |
 | `/api/admin/blobs` | GET, POST, DELETE | Vercel Blob CRUD (ADMIN only) |
+| `/api/webhook` | POST | Stripe webhook handler (payment events) |
 
 ### SEO
 
@@ -242,17 +248,21 @@ Request to /admin/*
 
 ```
 components/
-├── features/
-│   ├── admin/          # 26 components — dashboard panels, tournament/player/admin/sponsor management
+├── admin/
+│   ├── dashboard/      # Dashboard panels (stats, recent)
+│   ├── forms/          # Admin forms (logo-picker, settings, sponsor)
+│   ├── lists/          # Admin lists (sponsors, tournaments, users)
+│   └── ui/             # Admin UI (shell, sidebar, topbar, breadcrumb, dropdowns, badges)
+├── public/
 │   ├── auth/           # AdminGuard (RSC), LoginScreen, SocialLogin
+│   ├── contact/        # ContactBento
 │   ├── landing/        # Hero, features, sponsors, stream, tournaments sections
 │   ├── layout/         # PublicNavbar, PublicFooter
-│   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, ProfileTournamentHistory, RegistrationEditDialog
-│   ├── tournaments/    # TournamentCard, TournamentDetail, TournamentRegistrationForm
-│   ├── contact/        # ContactBento
 │   ├── legal/          # LegalSection
-│   └── stream/         # TwitchPlayer
-└── ui/                 # 21 shadcn/ui primitives (new-york style, zinc base, lucide icons)
+│   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
+│   ├── stream/         # TwitchPlayer
+│   └── tournaments/    # TournamentCard, TournamentDetail, TournamentRegistrationForm
+└── ui/                 # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 ```
 
 ---
@@ -269,7 +279,6 @@ components/
 | `users.ts` | `hours` | `USERS` | User profile and admin user management queries |
 | `sponsors.ts` | `hours` | `SPONSORS` | Sponsor listing |
 | `auth.ts` | — | — | `getSession()` (no cache, reads from cookies) |
-| `users.ts` | `hours` | — | User profile queries |
 
 ### Actions (`lib/actions/`)
 

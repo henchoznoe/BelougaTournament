@@ -46,7 +46,7 @@ const auth = betterAuth({
     },
   },
   rateLimit: {
-    enabled: true,
+    enabled: env.NODE_ENV === 'production',
     window: AUTH_CONFIG.RATE_LIMIT_WINDOW,
     max: AUTH_CONFIG.RATE_LIMIT_MAX,
   },

@@ -40,3 +40,49 @@ export const TournamentStatus = {
 } as const
 
 export type TournamentStatus = (typeof TournamentStatus)[keyof typeof TournamentStatus]
+
+
+export const RegistrationType = {
+  FREE: 'FREE',
+  PAID: 'PAID'
+} as const
+
+export type RegistrationType = (typeof RegistrationType)[keyof typeof RegistrationType]
+
+
+export const RegistrationStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
+
+
+export const PaymentStatus = {
+  NOT_REQUIRED: 'NOT_REQUIRED',
+  UNPAID: 'UNPAID',
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const RefundPolicyType = {
+  NONE: 'NONE',
+  BEFORE_DEADLINE: 'BEFORE_DEADLINE'
+} as const
+
+export type RefundPolicyType = (typeof RefundPolicyType)[keyof typeof RefundPolicyType]
+
+
+export const PaymentProvider = {
+  STRIPE: 'STRIPE'
+} as const
+
+export type PaymentProvider = (typeof PaymentProvider)[keyof typeof PaymentProvider]

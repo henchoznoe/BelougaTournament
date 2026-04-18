@@ -8,9 +8,20 @@
 
 import type {
   FieldType,
+  PaymentStatus,
+  RefundPolicyType,
+  RegistrationStatus,
+  RegistrationType,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
+
+export type UserTournamentRegistrationState = {
+  id: string
+  status: RegistrationStatus
+  paymentStatus: PaymentStatus
+  expiresAt: Date | null
+}
 
 // ---------------------------------------------------------------------------
 // User registration types (profile page)
@@ -21,6 +32,8 @@ export type UserRegistrationItem = {
   id: string
   fieldValues: Record<string, string | number>
   createdAt: Date
+  status: RegistrationStatus
+  paymentStatus: PaymentStatus
   tournament: {
     id: string
     title: string
@@ -42,6 +55,9 @@ export type TournamentListItem = {
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
   status: TournamentStatus
   startDate: Date
   endDate: Date
@@ -64,6 +80,11 @@ export type TournamentDetail = {
   registrationOpen: Date
   registrationClose: Date
   maxTeams: number | null
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
   format: TournamentFormat
   teamSize: number
   game: string | null
@@ -105,12 +126,13 @@ export type TournamentRegistrationItem = {
   id: string
   fieldValues: Record<string, string | number>
   createdAt: Date
+  status: RegistrationStatus
+  paymentStatus: PaymentStatus
   user: {
     id: string
     name: string
     displayName: string
     image: string | null
-    bannedUntil: Date | null
   }
   team: {
     id: string
@@ -145,9 +167,6 @@ export type TeamItem = {
     image: string | null
   }
   members: TeamMemberItem[]
-  registration: {
-    id: string
-  } | null
 }
 
 // ---------------------------------------------------------------------------
@@ -165,6 +184,9 @@ export type PublicTournamentListItem = {
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
   status: TournamentStatus
   startDate: Date
   endDate: Date
@@ -187,6 +209,11 @@ export type PublicTournamentDetail = {
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
   status: TournamentStatus
   startDate: Date
   endDate: Date

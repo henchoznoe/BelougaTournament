@@ -8,11 +8,8 @@
 
 import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
-import { TournamentsList } from '@/components/features/admin/tournaments-list'
-import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth'
+import { TournamentsList } from '@/components/admin/lists/tournaments-list'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getTournaments } from '@/lib/services/tournaments'
 
 export const metadata: Metadata = {
@@ -20,32 +17,17 @@ export const metadata: Metadata = {
 }
 
 const AdminTournamentsPage = async () => {
-  const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const tournaments = await getTournaments()
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      {/* Breadcrumb */}
-      <AdminBreadcrumb segments={[{ label: 'Tournois' }]} />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Trophy className="size-6 text-blue-400" />
-          Tournois
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Gérez les tournois de la plateforme.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[{ label: 'Tournois' }]}
+      icon={Trophy}
+      title="Tournois"
+      subtitle="Gérez les tournois de la plateforme."
+    >
       <TournamentsList tournaments={tournaments} />
-    </div>
+    </AdminContentLayout>
   )
 }
 

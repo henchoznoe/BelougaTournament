@@ -29,6 +29,37 @@ enum TournamentStatus {
   ARCHIVED
 }
 
+enum RegistrationType {
+  FREE
+  PAID
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  NOT_REQUIRED
+  UNPAID
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum RefundPolicyType {
+  NONE
+  BEFORE_DEADLINE
+}
+
+enum PaymentProvider {
+  STRIPE
+}
+
 model User {
   id            String                   @id @default(uuid())
   name          String
@@ -41,8 +72,6 @@ model User {
   lastLoginAt   DateTime?
   updatedAt     DateTime                 @updatedAt
   role          Role                     @default(USER)
-  bannedUntil   DateTime?
-  banReason     String?
   sessions      Session[]
   accounts      Account[]
   registrations TournamentRegistration[]
@@ -112,6 +141,11 @@ model Tournament {
   imageUrl          String? // Tournament banner image
   rules             String? // Full tournament ruleset
   prize             String? // Cash prize or rewards
+  registrationType  RegistrationType         @default(FREE)
+  entryFeeAmount    Int?
+  entryFeeCurrency  String? // ISO currency code, V1 uses CHF only
+  refundPolicyType  RefundPolicyType         @default(NONE)
+  refundDeadlineDays Int?
   toornamentId      String?
   streamUrl         String? // Optional per-tournament stream URL override
   status            TournamentStatus         @default(DRAFT)
@@ -156,7 +190,7 @@ model Team {
   isFull       Boolean                 @default(false)
   createdAt    DateTime                @default(now())
   members      TeamMember[]
-  registration TournamentRegistration?
+  registrations TournamentRegistration[]
 
   @@unique([name, tournamentId])
   @@map("team")
@@ -178,17 +212,62 @@ model TournamentRegistration {
   id                String             @id @default(uuid())
   tournamentId      String
   tournament        Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  teamId            String?            @unique
-  team              Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId            String?
+  team              Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
   userId            String
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldValues       Json               @default("{}")
+  status            RegistrationStatus @default(CONFIRMED)
+  paymentStatus     PaymentStatus      @default(NOT_REQUIRED)
+  paymentRequiredSnapshot Boolean      @default(false)
+  entryFeeAmountSnapshot Int?
+  entryFeeCurrencySnapshot String?
+  refundDeadlineDaysSnapshot Int?
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  expiresAt         DateTime?
   createdAt         DateTime           @default(now())
+  payments          Payment[]
 
   @@unique([tournamentId, userId])
   @@index([tournamentId])
+  @@index([status, expiresAt])
   @@index([createdAt])
   @@map("tournament_registration")
+}
+
+model Payment {
+  id                      String             @id @default(uuid())
+  registrationId          String
+  registration            TournamentRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  provider                PaymentProvider
+  status                  PaymentStatus      @default(PENDING)
+  amount                  Int
+  currency                String
+  stripeCheckoutSessionId String?            @unique
+  stripePaymentIntentId   String?            @unique
+  stripeChargeId          String?            @unique
+  stripeCustomerId        String?
+  refundAmount            Int?
+  paidAt                  DateTime?
+  refundedAt              DateTime?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  @@index([registrationId, status])
+  @@map("payment")
+}
+
+model StripeWebhookEvent {
+  id            String   @id @default(uuid())
+  stripeEventId String   @unique
+  type          String
+  payload       Json?
+  processedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@index([type, processedAt])
+  @@map("stripe_webhook_event")
 }
 
 model GlobalSettings {
@@ -215,6 +294,7 @@ model Sponsor {
   name           String
   imageUrls      String[]
   url            String?
+  enabled        Boolean  @default(true)
   supportedSince DateTime @default(now())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

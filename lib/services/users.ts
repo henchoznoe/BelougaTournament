@@ -34,7 +34,7 @@ export const getUserProfile = async (userId: string) => {
   }
 }
 
-/** Fetches all users for the admin users table (lightweight, with registration count). */
+/** Fetches all users for the admin users table (lightweight). */
 export const getUsers = async (): Promise<UserRow[]> => {
   'use cache'
   cacheLife('minutes')
@@ -42,7 +42,7 @@ export const getUsers = async (): Promise<UserRow[]> => {
 
   try {
     const rows = await prisma.user.findMany({
-      orderBy: [{ role: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ role: 'desc' }, { name: 'asc' }],
       select: {
         id: true,
         name: true,
@@ -53,9 +53,6 @@ export const getUsers = async (): Promise<UserRow[]> => {
         role: true,
         createdAt: true,
         lastLoginAt: true,
-        bannedUntil: true,
-        banReason: true,
-        _count: { select: { registrations: true } },
       },
     })
     return rows as unknown as UserRow[]
@@ -86,16 +83,19 @@ export const getUserById = async (
         role: true,
         createdAt: true,
         lastLoginAt: true,
-        bannedUntil: true,
-        banReason: true,
         registrations: {
           orderBy: { createdAt: 'desc' },
           select: {
             id: true,
             createdAt: true,
+            status: true,
+            paymentStatus: true,
+            entryFeeAmountSnapshot: true,
+            entryFeeCurrencySnapshot: true,
             tournament: {
               select: {
                 title: true,
+                slug: true,
                 format: true,
                 status: true,
               },
@@ -103,6 +103,17 @@ export const getUserById = async (
             team: {
               select: {
                 name: true,
+              },
+            },
+            payments: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                amount: true,
+                currency: true,
+                status: true,
+                paidAt: true,
+                refundAmount: true,
               },
             },
           },

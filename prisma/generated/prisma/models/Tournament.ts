@@ -29,11 +29,15 @@ export type AggregateTournament = {
 export type TournamentAvgAggregateOutputType = {
   maxTeams: number | null
   teamSize: number | null
+  entryFeeAmount: number | null
+  refundDeadlineDays: number | null
 }
 
 export type TournamentSumAggregateOutputType = {
   maxTeams: number | null
   teamSize: number | null
+  entryFeeAmount: number | null
+  refundDeadlineDays: number | null
 }
 
 export type TournamentMinAggregateOutputType = {
@@ -52,6 +56,11 @@ export type TournamentMinAggregateOutputType = {
   imageUrl: string | null
   rules: string | null
   prize: string | null
+  registrationType: $Enums.RegistrationType | null
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: $Enums.RefundPolicyType | null
+  refundDeadlineDays: number | null
   toornamentId: string | null
   streamUrl: string | null
   status: $Enums.TournamentStatus | null
@@ -75,6 +84,11 @@ export type TournamentMaxAggregateOutputType = {
   imageUrl: string | null
   rules: string | null
   prize: string | null
+  registrationType: $Enums.RegistrationType | null
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: $Enums.RefundPolicyType | null
+  refundDeadlineDays: number | null
   toornamentId: string | null
   streamUrl: string | null
   status: $Enums.TournamentStatus | null
@@ -98,6 +112,11 @@ export type TournamentCountAggregateOutputType = {
   imageUrl: number
   rules: number
   prize: number
+  registrationType: number
+  entryFeeAmount: number
+  entryFeeCurrency: number
+  refundPolicyType: number
+  refundDeadlineDays: number
   toornamentId: number
   streamUrl: number
   status: number
@@ -110,11 +129,15 @@ export type TournamentCountAggregateOutputType = {
 export type TournamentAvgAggregateInputType = {
   maxTeams?: true
   teamSize?: true
+  entryFeeAmount?: true
+  refundDeadlineDays?: true
 }
 
 export type TournamentSumAggregateInputType = {
   maxTeams?: true
   teamSize?: true
+  entryFeeAmount?: true
+  refundDeadlineDays?: true
 }
 
 export type TournamentMinAggregateInputType = {
@@ -133,6 +156,11 @@ export type TournamentMinAggregateInputType = {
   imageUrl?: true
   rules?: true
   prize?: true
+  registrationType?: true
+  entryFeeAmount?: true
+  entryFeeCurrency?: true
+  refundPolicyType?: true
+  refundDeadlineDays?: true
   toornamentId?: true
   streamUrl?: true
   status?: true
@@ -156,6 +184,11 @@ export type TournamentMaxAggregateInputType = {
   imageUrl?: true
   rules?: true
   prize?: true
+  registrationType?: true
+  entryFeeAmount?: true
+  entryFeeCurrency?: true
+  refundPolicyType?: true
+  refundDeadlineDays?: true
   toornamentId?: true
   streamUrl?: true
   status?: true
@@ -179,6 +212,11 @@ export type TournamentCountAggregateInputType = {
   imageUrl?: true
   rules?: true
   prize?: true
+  registrationType?: true
+  entryFeeAmount?: true
+  entryFeeCurrency?: true
+  refundPolicyType?: true
+  refundDeadlineDays?: true
   toornamentId?: true
   streamUrl?: true
   status?: true
@@ -289,6 +327,11 @@ export type TournamentGroupByOutputType = {
   imageUrl: string | null
   rules: string | null
   prize: string | null
+  registrationType: $Enums.RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  refundPolicyType: $Enums.RefundPolicyType
+  refundDeadlineDays: number | null
   toornamentId: string | null
   streamUrl: string | null
   status: $Enums.TournamentStatus
@@ -335,6 +378,11 @@ export type TournamentWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   rules?: Prisma.StringNullableFilter<"Tournament"> | string | null
   prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFilter<"Tournament"> | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  entryFeeCurrency?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFilter<"Tournament"> | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.IntNullableFilter<"Tournament"> | number | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
@@ -362,6 +410,11 @@ export type TournamentOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   rules?: Prisma.SortOrderInput | Prisma.SortOrder
   prize?: Prisma.SortOrderInput | Prisma.SortOrder
+  registrationType?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  entryFeeCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundPolicyType?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -392,6 +445,11 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   rules?: Prisma.StringNullableFilter<"Tournament"> | string | null
   prize?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFilter<"Tournament"> | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  entryFeeCurrency?: Prisma.StringNullableFilter<"Tournament"> | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFilter<"Tournament"> | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.IntNullableFilter<"Tournament"> | number | null
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
@@ -419,6 +477,11 @@ export type TournamentOrderByWithAggregationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   rules?: Prisma.SortOrderInput | Prisma.SortOrder
   prize?: Prisma.SortOrderInput | Prisma.SortOrder
+  registrationType?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  entryFeeCurrency?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundPolicyType?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrderInput | Prisma.SortOrder
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -450,6 +513,11 @@ export type TournamentScalarWhereWithAggregatesInput = {
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   rules?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   prize?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  registrationType?: Prisma.EnumRegistrationTypeWithAggregatesFilter<"Tournament"> | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  entryFeeCurrency?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeWithAggregatesFilter<"Tournament"> | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   toornamentId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
@@ -473,6 +541,11 @@ export type TournamentCreateInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -500,6 +573,11 @@ export type TournamentUncheckedCreateInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -527,6 +605,11 @@ export type TournamentUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -554,6 +637,11 @@ export type TournamentUncheckedUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -581,6 +669,11 @@ export type TournamentCreateManyInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -604,6 +697,11 @@ export type TournamentUpdateManyMutationInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -627,6 +725,11 @@ export type TournamentUncheckedUpdateManyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -650,6 +753,11 @@ export type TournamentCountOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   rules?: Prisma.SortOrder
   prize?: Prisma.SortOrder
+  registrationType?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrder
+  entryFeeCurrency?: Prisma.SortOrder
+  refundPolicyType?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -660,6 +768,8 @@ export type TournamentCountOrderByAggregateInput = {
 export type TournamentAvgOrderByAggregateInput = {
   maxTeams?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrder
 }
 
 export type TournamentMaxOrderByAggregateInput = {
@@ -678,6 +788,11 @@ export type TournamentMaxOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   rules?: Prisma.SortOrder
   prize?: Prisma.SortOrder
+  registrationType?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrder
+  entryFeeCurrency?: Prisma.SortOrder
+  refundPolicyType?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -701,6 +816,11 @@ export type TournamentMinOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   rules?: Prisma.SortOrder
   prize?: Prisma.SortOrder
+  registrationType?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrder
+  entryFeeCurrency?: Prisma.SortOrder
+  refundPolicyType?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrder
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -711,6 +831,8 @@ export type TournamentMinOrderByAggregateInput = {
 export type TournamentSumOrderByAggregateInput = {
   maxTeams?: Prisma.SortOrder
   teamSize?: Prisma.SortOrder
+  entryFeeAmount?: Prisma.SortOrder
+  refundDeadlineDays?: Prisma.SortOrder
 }
 
 export type TournamentScalarRelationFilter = {
@@ -736,6 +858,14 @@ export type IntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type EnumRegistrationTypeFieldUpdateOperationsInput = {
+  set?: $Enums.RegistrationType
+}
+
+export type EnumRefundPolicyTypeFieldUpdateOperationsInput = {
+  set?: $Enums.RefundPolicyType
 }
 
 export type EnumTournamentStatusFieldUpdateOperationsInput = {
@@ -814,6 +944,11 @@ export type TournamentCreateWithoutToornamentStagesInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -840,6 +975,11 @@ export type TournamentUncheckedCreateWithoutToornamentStagesInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -882,6 +1022,11 @@ export type TournamentUpdateWithoutToornamentStagesInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -908,6 +1053,11 @@ export type TournamentUncheckedUpdateWithoutToornamentStagesInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -934,6 +1084,11 @@ export type TournamentCreateWithoutFieldsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -960,6 +1115,11 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -1002,6 +1162,11 @@ export type TournamentUpdateWithoutFieldsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1028,6 +1193,11 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1054,6 +1224,11 @@ export type TournamentCreateWithoutTeamsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -1080,6 +1255,11 @@ export type TournamentUncheckedCreateWithoutTeamsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -1122,6 +1302,11 @@ export type TournamentUpdateWithoutTeamsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1148,6 +1333,11 @@ export type TournamentUncheckedUpdateWithoutTeamsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1174,6 +1364,11 @@ export type TournamentCreateWithoutRegistrationsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -1200,6 +1395,11 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   imageUrl?: string | null
   rules?: string | null
   prize?: string | null
+  registrationType?: $Enums.RegistrationType
+  entryFeeAmount?: number | null
+  entryFeeCurrency?: string | null
+  refundPolicyType?: $Enums.RefundPolicyType
+  refundDeadlineDays?: number | null
   toornamentId?: string | null
   streamUrl?: string | null
   status?: $Enums.TournamentStatus
@@ -1242,6 +1442,11 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1268,6 +1473,11 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationType?: Prisma.EnumRegistrationTypeFieldUpdateOperationsInput | $Enums.RegistrationType
+  entryFeeAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  entryFeeCurrency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundPolicyType?: Prisma.EnumRefundPolicyTypeFieldUpdateOperationsInput | $Enums.RefundPolicyType
+  refundDeadlineDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
@@ -1352,6 +1562,11 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   imageUrl?: boolean
   rules?: boolean
   prize?: boolean
+  registrationType?: boolean
+  entryFeeAmount?: boolean
+  entryFeeCurrency?: boolean
+  refundPolicyType?: boolean
+  refundDeadlineDays?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   status?: boolean
@@ -1380,6 +1595,11 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   imageUrl?: boolean
   rules?: boolean
   prize?: boolean
+  registrationType?: boolean
+  entryFeeAmount?: boolean
+  entryFeeCurrency?: boolean
+  refundPolicyType?: boolean
+  refundDeadlineDays?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   status?: boolean
@@ -1403,6 +1623,11 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   imageUrl?: boolean
   rules?: boolean
   prize?: boolean
+  registrationType?: boolean
+  entryFeeAmount?: boolean
+  entryFeeCurrency?: boolean
+  refundPolicyType?: boolean
+  refundDeadlineDays?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   status?: boolean
@@ -1426,6 +1651,11 @@ export type TournamentSelectScalar = {
   imageUrl?: boolean
   rules?: boolean
   prize?: boolean
+  registrationType?: boolean
+  entryFeeAmount?: boolean
+  entryFeeCurrency?: boolean
+  refundPolicyType?: boolean
+  refundDeadlineDays?: boolean
   toornamentId?: boolean
   streamUrl?: boolean
   status?: boolean
@@ -1433,7 +1663,7 @@ export type TournamentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "game" | "imageUrl" | "rules" | "prize" | "toornamentId" | "streamUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "game" | "imageUrl" | "rules" | "prize" | "registrationType" | "entryFeeAmount" | "entryFeeCurrency" | "refundPolicyType" | "refundDeadlineDays" | "toornamentId" | "streamUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
   toornamentStages?: boolean | Prisma.Tournament$toornamentStagesArgs<ExtArgs>
@@ -1468,6 +1698,11 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     imageUrl: string | null
     rules: string | null
     prize: string | null
+    registrationType: $Enums.RegistrationType
+    entryFeeAmount: number | null
+    entryFeeCurrency: string | null
+    refundPolicyType: $Enums.RefundPolicyType
+    refundDeadlineDays: number | null
     toornamentId: string | null
     streamUrl: string | null
     status: $Enums.TournamentStatus
@@ -1915,6 +2150,11 @@ export interface TournamentFieldRefs {
   readonly imageUrl: Prisma.FieldRef<"Tournament", 'String'>
   readonly rules: Prisma.FieldRef<"Tournament", 'String'>
   readonly prize: Prisma.FieldRef<"Tournament", 'String'>
+  readonly registrationType: Prisma.FieldRef<"Tournament", 'RegistrationType'>
+  readonly entryFeeAmount: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly entryFeeCurrency: Prisma.FieldRef<"Tournament", 'String'>
+  readonly refundPolicyType: Prisma.FieldRef<"Tournament", 'RefundPolicyType'>
+  readonly refundDeadlineDays: Prisma.FieldRef<"Tournament", 'Int'>
   readonly toornamentId: Prisma.FieldRef<"Tournament", 'String'>
   readonly streamUrl: Prisma.FieldRef<"Tournament", 'String'>
   readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>

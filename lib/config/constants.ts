@@ -77,10 +77,8 @@ export const TOURNAMENT_STATUS_STYLES: Record<TournamentStatus, string> = {
 /** Centralized cache tag names used with cacheTag() and revalidateTag(). */
 export const CACHE_TAGS = {
   DASHBOARD_STATS: 'dashboard-stats',
-  DASHBOARD_UPCOMING: 'dashboard-upcoming',
   DASHBOARD_REGISTRATIONS: 'dashboard-registrations',
   DASHBOARD_RECENT_USERS: 'dashboard-recent-users',
-  DASHBOARD_RECENT_SPONSORS: 'dashboard-recent-sponsors',
   REGISTRATIONS: 'registrations',
   SETTINGS: 'settings',
   SPONSORS: 'sponsors',
@@ -88,16 +86,3 @@ export const CACHE_TAGS = {
   TOURNAMENT_OPTIONS: 'tournament-options',
   USERS: 'users',
 } as const
-
-/** Sentinel date used for permanent bans. */
-export const PERMANENT_BAN_DATE = new Date('9999-12-31T23:59:59.999Z')
-
-/** Predefined ban duration options for the admin ban dialog. */
-export const BAN_DURATION_OPTIONS = [
-  { label: 'Permanent', value: 'permanent' },
-  { label: '1 jour', value: '1d' },
-  { label: '7 jours', value: '7d' },
-  { label: '30 jours', value: '30d' },
-  { label: '90 jours', value: '90d' },
-  { label: 'Date personnalisée', value: 'custom' },
-] as const

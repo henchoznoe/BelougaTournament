@@ -8,7 +8,7 @@
 
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { ProfilePage } from '@/components/features/profile/profile-page'
+import { ProfilePage } from '@/components/public/profile/profile-page'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 

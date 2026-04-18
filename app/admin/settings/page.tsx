@@ -8,9 +8,8 @@
 
 import { Settings } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
-import { SettingsForm } from '@/components/features/admin/settings-form'
-import AdminGuard from '@/components/features/auth/admin-guard'
+import { SettingsForm } from '@/components/admin/forms/settings-form'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 export const metadata: Metadata = {
@@ -21,25 +20,14 @@ const AdminSettingsPage = async () => {
   const settings = await getGlobalSettings()
 
   return (
-    <AdminGuard>
-      <div className="mx-auto max-w-3xl space-y-6">
-        {/* Breadcrumb */}
-        <AdminBreadcrumb segments={[{ label: 'Paramètres' }]} />
-
-        {/* Page heading */}
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Settings className="size-6 text-blue-400" />
-            Paramètres
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Configurez les paramètres globaux de la plateforme.
-          </p>
-        </div>
-
-        <SettingsForm settings={settings} />
-      </div>
-    </AdminGuard>
+    <AdminContentLayout
+      segments={[{ label: 'Paramètres' }]}
+      icon={Settings}
+      title="Paramètres"
+      subtitle="Configurez les paramètres globaux de la plateforme."
+    >
+      <SettingsForm settings={settings} />
+    </AdminContentLayout>
   )
 }
 

@@ -13,10 +13,8 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
   DashboardStats,
+  RecentLogin,
   RecentRegistration,
-  RecentSponsor,
-  RecentUser,
-  UpcomingTournament,
 } from '@/lib/types/dashboard'
 import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
@@ -35,11 +33,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       totalUsers,
       players,
       admins,
-      ghosts,
-      totalRegistrations,
-      soloRegistrations,
-      teamRegistrations,
-      sponsors,
+      totalSponsors,
+      enabledSponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
       prisma.tournament.count({ where: { status: TournamentStatus.DRAFT } }),
@@ -52,15 +47,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       prisma.user.count({
         where: { role: Role.ADMIN },
       }),
-      prisma.user.count({
-        where: { registrations: { none: {} } },
-      }),
-      prisma.tournamentRegistration.count(),
-      prisma.tournamentRegistration.count({ where: { teamId: null } }),
-      prisma.tournamentRegistration.count({
-        where: { teamId: { not: null } },
-      }),
       prisma.sponsor.count(),
+      prisma.sponsor.count({ where: { enabled: true } }),
     ])
 
     return {
@@ -76,14 +64,12 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: totalUsers,
         players,
         admins,
-        ghosts,
       },
-      registrations: {
-        total: totalRegistrations,
-        solo: soloRegistrations,
-        team: teamRegistrations,
+      sponsors: {
+        total: totalSponsors,
+        enabled: enabledSponsors,
+        disabled: totalSponsors - enabledSponsors,
       },
-      sponsors,
     }
   } catch (error) {
     logger.error({ error }, 'Error fetching dashboard stats')
@@ -100,54 +86,39 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: 0,
         players: 0,
         admins: 0,
-        ghosts: 0,
       },
-      registrations: {
+      sponsors: {
         total: 0,
-        solo: 0,
-        team: 0,
+        enabled: 0,
+        disabled: 0,
       },
-      sponsors: 0,
     }
   }
 }
 
-/** Fetches the next upcoming published tournaments (by start date). */
-export const getUpcomingTournaments = async (
-  limit = 8,
-): Promise<UpcomingTournament[]> => {
+/** Fetches users with the most recent login activity. */
+export const getRecentLogins = async (limit = 8): Promise<RecentLogin[]> => {
   'use cache'
   cacheLife('minutes')
-  cacheTag(CACHE_TAGS.DASHBOARD_UPCOMING)
+  cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
   try {
-    const rows = await prisma.tournament.findMany({
-      where: {
-        status: TournamentStatus.PUBLISHED,
-        startDate: { gte: new Date() },
-      },
-      orderBy: { startDate: 'asc' },
+    const rows = await prisma.user.findMany({
+      where: { lastLoginAt: { not: null } },
+      orderBy: { lastLoginAt: 'desc' },
       take: limit,
       select: {
         id: true,
-        title: true,
-        slug: true,
-        game: true,
-        format: true,
-        teamSize: true,
-        startDate: true,
-        status: true,
-        _count: {
-          select: {
-            registrations: true,
-            teams: true,
-          },
-        },
+        name: true,
+        displayName: true,
+        image: true,
+        role: true,
+        lastLoginAt: true,
       },
     })
-    return rows as unknown as UpcomingTournament[]
+    return rows as unknown as RecentLogin[]
   } catch (error) {
-    logger.error({ error }, 'Error fetching upcoming tournaments')
+    logger.error({ error }, 'Error fetching recent logins')
     return []
   }
 }
@@ -190,59 +161,6 @@ export const getRecentRegistrations = async (
     return rows as unknown as RecentRegistration[]
   } catch (error) {
     logger.error({ error }, 'Error fetching recent registrations')
-    return []
-  }
-}
-
-/** Fetches the most recently registered users on the platform. */
-export const getRecentUsers = async (limit = 8): Promise<RecentUser[]> => {
-  'use cache'
-  cacheLife('minutes')
-  cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
-
-  try {
-    const rows = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      select: {
-        id: true,
-        name: true,
-        displayName: true,
-        image: true,
-        role: true,
-        createdAt: true,
-      },
-    })
-    return rows as unknown as RecentUser[]
-  } catch (error) {
-    logger.error({ error }, 'Error fetching recent users')
-    return []
-  }
-}
-
-/** Fetches the most recently added sponsors. */
-export const getRecentSponsors = async (
-  limit = 8,
-): Promise<RecentSponsor[]> => {
-  'use cache'
-  cacheLife('minutes')
-  cacheTag(CACHE_TAGS.DASHBOARD_RECENT_SPONSORS)
-
-  try {
-    const rows = await prisma.sponsor.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      select: {
-        id: true,
-        name: true,
-        imageUrls: true,
-        url: true,
-        createdAt: true,
-      },
-    })
-    return rows as unknown as RecentSponsor[]
-  } catch (error) {
-    logger.error({ error }, 'Error fetching recent sponsors')
     return []
   }
 }

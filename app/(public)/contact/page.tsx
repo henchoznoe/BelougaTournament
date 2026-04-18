@@ -7,7 +7,7 @@
  */
 
 import type { Metadata } from 'next'
-import { ContactBento } from '@/components/features/contact/contact-bento'
+import { ContactBento } from '@/components/public/contact/contact-bento'
 import { PageHeader } from '@/components/ui/page-header'
 import { getGlobalSettings } from '@/lib/services/settings'
 

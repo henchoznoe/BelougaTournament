@@ -19,9 +19,13 @@ vi.mock('@/lib/core/logger', () => ({
 }))
 
 const mockFindMany = vi.fn()
+const mockFindUnique = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
-    sponsor: { findMany: (...args: unknown[]) => mockFindMany(...args) },
+    sponsor: {
+      findMany: (...args: unknown[]) => mockFindMany(...args),
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
+    },
   },
 }))
 
@@ -29,7 +33,9 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getSponsors } = await import('@/lib/services/sponsors')
+const { getSponsors, getAllSponsors, getSponsorById } = await import(
+  '@/lib/services/sponsors'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -61,13 +67,14 @@ describe('getSponsors', () => {
     vi.clearAllMocks()
   })
 
-  it('returns sponsors ordered by supportedSince field', async () => {
+  it('returns only enabled sponsors ordered by supportedSince asc', async () => {
     mockFindMany.mockResolvedValue(MOCK_SPONSORS)
 
     const result = await getSponsors()
 
     expect(result).toEqual(MOCK_SPONSORS)
     expect(mockFindMany).toHaveBeenCalledWith({
+      where: { enabled: true },
       orderBy: { supportedSince: 'asc' },
     })
   })
@@ -86,5 +93,77 @@ describe('getSponsors', () => {
     const result = await getSponsors()
 
     expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getAllSponsors
+// ---------------------------------------------------------------------------
+
+describe('getAllSponsors', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns all sponsors ordered by supportedSince desc', async () => {
+    mockFindMany.mockResolvedValue(MOCK_SPONSORS)
+
+    const result = await getAllSponsors()
+
+    expect(result).toEqual(MOCK_SPONSORS)
+    expect(mockFindMany).toHaveBeenCalledWith({
+      orderBy: { supportedSince: 'desc' },
+    })
+  })
+
+  it('returns an empty array when no sponsors exist', async () => {
+    mockFindMany.mockResolvedValue([])
+
+    const result = await getAllSponsors()
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getAllSponsors()
+
+    expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getSponsorById
+// ---------------------------------------------------------------------------
+
+describe('getSponsorById', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns the sponsor when found', async () => {
+    mockFindUnique.mockResolvedValue(MOCK_SPONSORS[0])
+
+    const result = await getSponsorById('uuid-1')
+
+    expect(result).toEqual(MOCK_SPONSORS[0])
+    expect(mockFindUnique).toHaveBeenCalledWith({ where: { id: 'uuid-1' } })
+  })
+
+  it('returns null when sponsor is not found', async () => {
+    mockFindUnique.mockResolvedValue(null)
+
+    const result = await getSponsorById('non-existent')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null on database error', async () => {
+    mockFindUnique.mockRejectedValue(new Error('DB error'))
+
+    const result = await getSponsorById('uuid-1')
+
+    expect(result).toBeNull()
   })
 })

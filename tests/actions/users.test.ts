@@ -57,18 +57,12 @@ vi.mock('@/lib/core/prisma', () => ({
   },
 }))
 
-const {
-  promoteToAdmin,
-  demoteAdmin,
-  updateUser,
-  banUser,
-  unbanUser,
-  deleteUser,
-} = await import('@/lib/actions/users')
+const { promoteToAdmin, demoteAdmin, updateUser, deleteUser } = await import(
+  '@/lib/actions/users'
+)
 
 const VALID_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 const OTHER_UUID = 'b1ffc299-9c0b-4ef8-bb6d-6bb9bd380a22'
-const BAN_DATE = new Date('2027-01-01T00:00:00Z')
 
 const ADMIN_SESSION = {
   user: {
@@ -183,45 +177,6 @@ describe('updateUser', () => {
     expect(mockUserUpdate).toHaveBeenCalledWith({
       where: { id: OTHER_UUID },
       data: { displayName: 'CarolNew' },
-    })
-  })
-})
-
-describe('banUser and unbanUser', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(ADMIN_SESSION)
-    mockTransaction.mockResolvedValue([])
-  })
-
-  it('rejects banning an admin target', async () => {
-    mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Boss' })
-
-    expect(
-      await banUser({
-        userId: OTHER_UUID,
-        bannedUntil: BAN_DATE,
-        banReason: 'Spam',
-      }),
-    ).toEqual({
-      success: false,
-      message: 'Impossible de bannir un administrateur.',
-    })
-  })
-
-  it('clears the ban for a banned user', async () => {
-    mockUserFindUnique.mockResolvedValue({
-      name: 'Alice',
-      bannedUntil: BAN_DATE,
-    })
-    mockUserUpdate.mockResolvedValue({})
-
-    const result = await unbanUser({ userId: OTHER_UUID })
-
-    expect(result).toEqual({ success: true, message: 'Alice a été débanni.' })
-    expect(mockUserUpdate).toHaveBeenCalledWith({
-      where: { id: OTHER_UUID },
-      data: { bannedUntil: null, banReason: null },
     })
   })
 })
