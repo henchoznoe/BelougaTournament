@@ -238,7 +238,7 @@ describe('authenticatedAction — error handling', () => {
 
     expect(result).toEqual({
       success: false,
-      message: 'This value already exists.',
+      message: 'Cette valeur existe déjà.',
     })
   })
 

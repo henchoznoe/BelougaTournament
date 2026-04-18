@@ -327,6 +327,7 @@ describe('POST /api/webhook', () => {
       data: {
         object: {
           id: 'ch_refund_1',
+          amount: 1500,
           amount_refunded: 1500,
         },
       },

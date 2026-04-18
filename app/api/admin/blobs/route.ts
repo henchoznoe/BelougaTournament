@@ -96,11 +96,20 @@ export const POST = async (request: Request) => {
       )
     }
 
+    // Sanitize filename: keep only safe characters, collapse separators
+    const sanitizedName =
+      file.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'file'
+
     // Build the pathname with optional folder prefix
     const pathname =
       typeof folder === 'string' && ALLOWED_FOLDERS.has(folder)
-        ? `${folder}/${file.name}`
-        : file.name
+        ? `${folder}/${sanitizedName}`
+        : sanitizedName
 
     const blob = await put(pathname, file, {
       access: 'public',

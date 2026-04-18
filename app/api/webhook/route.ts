@@ -117,7 +117,14 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
     },
   })
 
-  if (!payment || payment.status === PaymentStatus.PAID) {
+  const terminalStatuses = new Set<PaymentStatus>([
+    PaymentStatus.PAID,
+    PaymentStatus.CANCELLED,
+    PaymentStatus.FAILED,
+    PaymentStatus.REFUNDED,
+  ])
+
+  if (!payment || terminalStatuses.has(payment.status)) {
     return
   }
 
@@ -169,7 +176,14 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
     },
   })
 
-  if (!payment || payment.status === PaymentStatus.PAID) {
+  const terminalStatuses = new Set<PaymentStatus>([
+    PaymentStatus.PAID,
+    PaymentStatus.CANCELLED,
+    PaymentStatus.FAILED,
+    PaymentStatus.REFUNDED,
+  ])
+
+  if (!payment || terminalStatuses.has(payment.status)) {
     return
   }
 
@@ -203,33 +217,46 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
 const handleChargeRefunded = async (event: Stripe.Event) => {
   const charge = event.data.object as Stripe.Charge
 
-  const payment = await prisma.payment.findFirst({
+  // H4: Fallback lookup by stripePaymentIntentId when stripeChargeId is not found
+  let payment = await prisma.payment.findFirst({
     where: { stripeChargeId: charge.id },
     include: { registration: { select: { id: true } } },
   })
+
+  if (!payment && typeof charge.payment_intent === 'string') {
+    payment = await prisma.payment.findFirst({
+      where: { stripePaymentIntentId: charge.payment_intent },
+      include: { registration: { select: { id: true } } },
+    })
+  }
 
   if (!payment) {
     return
   }
 
+  // C2: Only cancel the registration on a full refund; partial refunds only update the payment
+  const isFullRefund = charge.amount_refunded >= charge.amount
+
   await prisma.$transaction(async tx => {
     await tx.payment.update({
       where: { id: payment.id },
       data: {
-        status: PaymentStatus.REFUNDED,
+        status: isFullRefund ? PaymentStatus.REFUNDED : payment.status,
         refundAmount: charge.amount_refunded,
         refundedAt: new Date(),
       },
     })
 
-    await tx.tournamentRegistration.update({
-      where: { id: payment.registration.id },
-      data: {
-        status: RegistrationStatus.CANCELLED,
-        paymentStatus: PaymentStatus.REFUNDED,
-        cancelledAt: new Date(),
-      },
-    })
+    if (isFullRefund) {
+      await tx.tournamentRegistration.update({
+        where: { id: payment.registration.id },
+        data: {
+          status: RegistrationStatus.CANCELLED,
+          paymentStatus: PaymentStatus.REFUNDED,
+          cancelledAt: new Date(),
+        },
+      })
+    }
   })
 }
 
@@ -304,7 +331,6 @@ export const POST = async (request: Request) => {
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')

@@ -9,6 +9,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
@@ -212,6 +213,7 @@ describe('registration admin actions', () => {
     mockRegistrationFindUnique.mockResolvedValue({
       id: REG_UUID,
       userId: USER_UUID,
+      status: RegistrationStatus.CONFIRMED,
       tournament: { id: TOURN_UUID, format: TournamentFormat.TEAM },
       user: { name: 'Alice' },
     })

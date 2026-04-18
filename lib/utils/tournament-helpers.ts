@@ -13,6 +13,17 @@ export const validateFieldValues = (
   fields: { label: string; type: string; required: boolean }[],
   fieldValues: Record<string, string | number>,
 ): { valid: true } | { valid: false; message: string } => {
+  // Reject keys that don't correspond to any defined field
+  const definedLabels = new Set(fields.map(f => f.label))
+  for (const key of Object.keys(fieldValues)) {
+    if (!definedLabels.has(key)) {
+      return {
+        valid: false,
+        message: `Le champ « ${key} » n'est pas défini pour ce tournoi.`,
+      }
+    }
+  }
+
   for (const field of fields) {
     const value = fieldValues[field.label]
     if (field.required && (value === undefined || value === '')) {

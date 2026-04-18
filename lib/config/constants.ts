@@ -80,10 +80,8 @@ export const CACHE_TAGS = {
   DASHBOARD_PAYMENTS: 'dashboard-payments',
   DASHBOARD_REGISTRATIONS: 'dashboard-registrations',
   DASHBOARD_RECENT_USERS: 'dashboard-recent-users',
-  REGISTRATIONS: 'registrations',
   SETTINGS: 'settings',
   SPONSORS: 'sponsors',
   TOURNAMENTS: 'tournaments',
-  TOURNAMENT_OPTIONS: 'tournament-options',
   USERS: 'users',
 } as const

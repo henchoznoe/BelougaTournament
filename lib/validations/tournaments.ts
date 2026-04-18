@@ -306,7 +306,10 @@ export const registerForTournamentSchema = z.object({
     .trim()
     .min(1, 'Le chemin de retour est requis.')
     .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
+    .max(500, 'Le chemin de retour est trop long.')
+    .refine(val => !val.startsWith('//'), {
+      message: 'Le chemin de retour est invalide.',
+    }),
   fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
 })
 
@@ -329,7 +332,10 @@ export const createTeamSchema = z.object({
     .trim()
     .min(1, 'Le chemin de retour est requis.')
     .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
+    .max(500, 'Le chemin de retour est trop long.')
+    .refine(val => !val.startsWith('//'), {
+      message: 'Le chemin de retour est invalide.',
+    }),
   teamName: z
     .string()
     .trim()
@@ -346,7 +352,10 @@ export const joinTeamSchema = z.object({
     .trim()
     .min(1, 'Le chemin de retour est requis.')
     .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
+    .max(500, 'Le chemin de retour est trop long.')
+    .refine(val => !val.startsWith('//'), {
+      message: 'Le chemin de retour est invalide.',
+    }),
   teamId: z.uuid("ID d'équipe invalide."),
   fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
 })

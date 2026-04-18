@@ -102,7 +102,6 @@ export const adminDeleteRegistration = authenticatedAction({
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return {
@@ -147,7 +146,6 @@ export const adminDeleteRegistration = authenticatedAction({
 
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
       return {
@@ -205,7 +203,6 @@ export const adminDeleteRegistration = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
@@ -245,7 +242,6 @@ export const adminUpdateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
 
     return {
@@ -292,6 +288,14 @@ export const adminRefundRegistration = authenticatedAction({
       return {
         success: false,
         message: 'Aucun paiement Stripe associé à cette inscription.',
+      }
+    }
+
+    if (!latestPayment.stripePaymentIntentId && !latestPayment.stripeChargeId) {
+      return {
+        success: false,
+        message:
+          'Aucune référence Stripe (PaymentIntent ou Charge) trouvée pour ce paiement.',
       }
     }
 
@@ -418,7 +422,6 @@ export const adminRefundRegistration = authenticatedAction({
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
@@ -437,6 +440,7 @@ export const adminRefundRegistration = authenticatedAction({
 type ChangeTeamRegistration = {
   id: string
   userId: string
+  status: RegistrationStatus
   tournament: { id: string; format: TournamentFormat }
   user: { name: string }
 }
@@ -466,6 +470,16 @@ export const adminChangeTeam = authenticatedAction({
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
+    }
+
+    if (
+      registration.status !== RegistrationStatus.PENDING &&
+      registration.status !== RegistrationStatus.CONFIRMED
+    ) {
+      return {
+        success: false,
+        message: "Cette inscription n'est plus active.",
+      }
     }
 
     if (registration.tournament.format !== TournamentFormat.TEAM) {
@@ -576,7 +590,8 @@ export const adminChangeTeam = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
       success: true,
@@ -632,7 +647,8 @@ export const adminPromoteCaptain = authenticatedAction({
     })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
 
     return {
       success: true,
