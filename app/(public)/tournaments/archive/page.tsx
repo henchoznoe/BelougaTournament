@@ -27,11 +27,30 @@ export const metadata: Metadata = {
   description: 'Consultez les tournois passés de la communauté Belouga.',
 }
 
+type PublicSearchParams = Record<string, string | string[] | undefined>
+
 interface ArchivePageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<PublicSearchParams>
 }
 
-const ArchivePage = async ({ searchParams }: ArchivePageProps) => {
+const TournamentArchiveFallback = () => {
+  return (
+    <>
+      <div className="h-10" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: PUBLIC_TOURNAMENTS_PAGE_SIZE }).map((_, i) => (
+          <Skeleton
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
+            key={i}
+            className="h-64 rounded-3xl border border-white/5 bg-white/2"
+          />
+        ))}
+      </div>
+    </>
+  )
+}
+
+const ArchiveContent = async ({ searchParams }: ArchivePageProps) => {
   const params = await searchParams
   const filters = parsePublicTournamentFilters(params, 'date_desc')
   const { tournaments, total, page, pageSize, totalPages } =
@@ -41,6 +60,41 @@ const ArchivePage = async ({ searchParams }: ArchivePageProps) => {
     filters.search !== '' || filters.format !== '' || filters.type !== ''
 
   return (
+    <>
+      <div className="flex justify-center">
+        <Link
+          href={ROUTES.TOURNAMENTS}
+          className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
+        >
+          <ArrowLeft className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
+          Retour aux tournois
+        </Link>
+      </div>
+      <TournamentFilters
+        filters={filters}
+        basePath={ROUTES.TOURNAMENTS_ARCHIVE}
+      />
+      <TournamentGrid
+        tournaments={tournaments}
+        hasActiveFilters={hasActiveFilters}
+        emptyIcon={<Clock className="size-8 text-zinc-600" />}
+        emptyTitle="Aucun tournoi archivé"
+        emptyDescription="Il n'y a pas encore de tournoi archivé. Les tournois terminés apparaîtront ici."
+      />
+      <TournamentPagination
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        basePath={ROUTES.TOURNAMENTS_ARCHIVE}
+        filters={filters}
+      />
+    </>
+  )
+}
+
+const ArchivePage = ({ searchParams }: ArchivePageProps) => {
+  return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <PageHeader
         title="Archives"
@@ -48,60 +102,8 @@ const ArchivePage = async ({ searchParams }: ArchivePageProps) => {
       />
 
       <div className="mx-auto w-full max-w-5xl space-y-6">
-        {/* Back link */}
-        <div className="flex justify-center">
-          <Link
-            href={ROUTES.TOURNAMENTS}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
-          >
-            <ArrowLeft className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
-            Retour aux tournois
-          </Link>
-        </div>
-
-        {/* Filters toolbar */}
-        <Suspense fallback={<div className="h-10" />}>
-          <TournamentFilters
-            filters={filters}
-            basePath={ROUTES.TOURNAMENTS_ARCHIVE}
-          />
-        </Suspense>
-
-        {/* Tournament grid */}
-        <Suspense
-          fallback={
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: PUBLIC_TOURNAMENTS_PAGE_SIZE }).map(
-                (_, i) => (
-                  <Skeleton
-                    // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
-                    key={i}
-                    className="h-64 rounded-3xl border border-white/5 bg-white/2"
-                  />
-                ),
-              )}
-            </div>
-          }
-        >
-          <TournamentGrid
-            tournaments={tournaments}
-            hasActiveFilters={hasActiveFilters}
-            emptyIcon={<Clock className="size-8 text-zinc-600" />}
-            emptyTitle="Aucun tournoi archivé"
-            emptyDescription="Il n'y a pas encore de tournoi archivé. Les tournois terminés apparaîtront ici."
-          />
-        </Suspense>
-
-        {/* Pagination */}
-        <Suspense fallback={null}>
-          <TournamentPagination
-            total={total}
-            page={page}
-            pageSize={pageSize}
-            totalPages={totalPages}
-            basePath={ROUTES.TOURNAMENTS_ARCHIVE}
-            filters={filters}
-          />
+        <Suspense fallback={<TournamentArchiveFallback />}>
+          <ArchiveContent searchParams={searchParams} />
         </Suspense>
       </div>
     </section>

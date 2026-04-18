@@ -27,11 +27,30 @@ export const metadata: Metadata = {
   description: 'Découvrez les tournois à venir et inscrivez-vous.',
 }
 
+type PublicSearchParams = Record<string, string | string[] | undefined>
+
 interface TournamentsPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<PublicSearchParams>
 }
 
-const TournamentsPage = async ({ searchParams }: TournamentsPageProps) => {
+const TournamentListFallback = () => {
+  return (
+    <>
+      <div className="h-10" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: PUBLIC_TOURNAMENTS_PAGE_SIZE }).map((_, i) => (
+          <Skeleton
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
+            key={i}
+            className="h-64 rounded-3xl border border-white/5 bg-white/2"
+          />
+        ))}
+      </div>
+    </>
+  )
+}
+
+const TournamentsContent = async ({ searchParams }: TournamentsPageProps) => {
   const params = await searchParams
   const filters = parsePublicTournamentFilters(params, 'date_asc')
   const { tournaments, total, page, pageSize, totalPages } =
@@ -41,6 +60,38 @@ const TournamentsPage = async ({ searchParams }: TournamentsPageProps) => {
     filters.search !== '' || filters.format !== '' || filters.type !== ''
 
   return (
+    <>
+      <TournamentFilters filters={filters} basePath={ROUTES.TOURNAMENTS} />
+      <TournamentGrid
+        tournaments={tournaments}
+        hasActiveFilters={hasActiveFilters}
+        emptyIcon={<Trophy className="size-8 text-zinc-600" />}
+        emptyTitle="Aucun tournoi pour le moment"
+        emptyDescription="Aucun tournoi n'est actuellement disponible. Revenez bientôt pour découvrir nos prochaines compétitions."
+      />
+      <TournamentPagination
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        basePath={ROUTES.TOURNAMENTS}
+        filters={filters}
+      />
+      <div className="flex justify-center pt-2">
+        <Link
+          href={ROUTES.TOURNAMENTS_ARCHIVE}
+          className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
+        >
+          <Archive className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
+          Voir les tournois passés
+        </Link>
+      </div>
+    </>
+  )
+}
+
+const TournamentsPage = ({ searchParams }: TournamentsPageProps) => {
+  return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <PageHeader
         title="Tournois"
@@ -48,58 +99,9 @@ const TournamentsPage = async ({ searchParams }: TournamentsPageProps) => {
       />
 
       <div className="mx-auto w-full max-w-5xl space-y-6">
-        {/* Filters toolbar */}
-        <Suspense fallback={<div className="h-10" />}>
-          <TournamentFilters filters={filters} basePath={ROUTES.TOURNAMENTS} />
+        <Suspense fallback={<TournamentListFallback />}>
+          <TournamentsContent searchParams={searchParams} />
         </Suspense>
-
-        {/* Tournament grid */}
-        <Suspense
-          fallback={
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: PUBLIC_TOURNAMENTS_PAGE_SIZE }).map(
-                (_, i) => (
-                  <Skeleton
-                    // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
-                    key={i}
-                    className="h-64 rounded-3xl border border-white/5 bg-white/2"
-                  />
-                ),
-              )}
-            </div>
-          }
-        >
-          <TournamentGrid
-            tournaments={tournaments}
-            hasActiveFilters={hasActiveFilters}
-            emptyIcon={<Trophy className="size-8 text-zinc-600" />}
-            emptyTitle="Aucun tournoi pour le moment"
-            emptyDescription="Aucun tournoi n'est actuellement disponible. Revenez bientôt pour découvrir nos prochaines compétitions."
-          />
-        </Suspense>
-
-        {/* Pagination */}
-        <Suspense fallback={null}>
-          <TournamentPagination
-            total={total}
-            page={page}
-            pageSize={pageSize}
-            totalPages={totalPages}
-            basePath={ROUTES.TOURNAMENTS}
-            filters={filters}
-          />
-        </Suspense>
-
-        {/* Link to archive */}
-        <div className="flex justify-center pt-2">
-          <Link
-            href={ROUTES.TOURNAMENTS_ARCHIVE}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
-          >
-            <Archive className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
-            Voir les tournois passés
-          </Link>
-        </div>
       </div>
     </section>
   )

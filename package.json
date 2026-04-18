@@ -11,6 +11,7 @@
     "lint": "biome lint .",
     "format": "biome format . --write",
     "check": "biome check --write .",
+    "check:all": "biome check --write . && knip",
     "knip": "knip",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
