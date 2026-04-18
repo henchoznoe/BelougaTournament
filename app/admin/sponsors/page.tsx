@@ -24,7 +24,7 @@ const AdminSponsorsPage = async () => {
       segments={[{ label: 'Sponsors' }]}
       icon={Handshake}
       title="Sponsors"
-      subtitle="Gérez les sponsors affichés sur la plateforme."
+      subtitle="Gérez les sponsors de la plateforme."
     >
       <SponsorsList sponsors={sponsors} />
     </AdminContentLayout>

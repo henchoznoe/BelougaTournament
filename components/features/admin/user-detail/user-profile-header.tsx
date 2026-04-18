@@ -60,7 +60,7 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
           <Calendar className="size-4 shrink-0 text-zinc-500" />
           <div className="flex min-w-0 flex-col">
             <span className="text-[10px] uppercase tracking-wider text-zinc-600">
-              Inscrit le
+              Membre depuis le
             </span>
             <span className="text-sm text-zinc-300">
               {formatDate(user.createdAt)}
@@ -74,9 +74,7 @@ export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
               Dernière connexion
             </span>
             <span className="text-sm text-zinc-300">
-              {user.lastLoginAt
-                ? formatDateTime(user.lastLoginAt)
-                : 'Aucune connexion enregistrée'}
+              {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Aucune'}
             </span>
           </div>
         </div>

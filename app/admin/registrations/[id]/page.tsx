@@ -8,8 +8,8 @@
 
 import { ClipboardList } from 'lucide-react'
 import type { Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { notFound } from 'next/navigation'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { RegistrationDetail } from '@/components/features/admin/registration-detail'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -41,11 +41,6 @@ const AdminRegistrationDetailPage = async ({
 }: AdminRegistrationDetailPageProps) => {
   const { id } = await params
   const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
   const registration = await getRegistrationById(id)
 
   if (!registration) {
@@ -59,33 +54,21 @@ const AdminRegistrationDetailPage = async ({
       : {}
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      {/* Breadcrumb */}
-      <AdminBreadcrumb
-        segments={[
-          { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD },
-          { label: registration.user.displayName },
-        ]}
-      />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <ClipboardList className="size-6 text-blue-400" />
-          Inscription
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Details de l'inscription de {registration.user.displayName} au tournoi{' '}
-          {registration.tournament.title}.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[
+        { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD },
+        { label: registration.user.displayName },
+      ]}
+      icon={ClipboardList}
+      title="Inscription"
+      subtitle={`Détails de l'inscription de ${registration.user.displayName} au tournoi ${registration.tournament.title}.`}
+    >
       <RegistrationDetail
         registration={registration}
         teamsByTournament={teamsByTournament}
-        viewerRole={session.user.role as Role}
+        viewerRole={session?.user.role as Role}
       />
-    </div>
+    </AdminContentLayout>
   )
 }
 

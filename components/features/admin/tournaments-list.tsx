@@ -205,17 +205,15 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
     <>
       {/* Search + status filter + create button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <div className="relative max-w-xs flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
-            <Input
-              placeholder="Rechercher un tournoi..."
-              aria-label="Rechercher un tournoi"
-              value={search}
-              onChange={e => handleSearch(e.target.value)}
-              className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
-            />
-          </div>
+        <div className="relative max-w-xs flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+          <Input
+            placeholder="Rechercher un tournoi..."
+            aria-label="Rechercher un tournoi"
+            value={search}
+            onChange={e => handleSearch(e.target.value)}
+            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
+          />
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={handleStatusFilter}>

@@ -8,45 +8,27 @@
 
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { TournamentForm } from '@/components/features/admin/tournament-form'
 import { ROUTES } from '@/lib/config/routes'
-import { getSession } from '@/lib/services/auth'
 
 export const metadata: Metadata = {
   title: 'Nouveau tournoi',
 }
 
-const AdminNewTournamentPage = async () => {
-  const session = await getSession()
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN)
-  }
-
+const AdminNewTournamentPage = () => {
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <AdminBreadcrumb
-        segments={[
-          { label: 'Tournois', href: ROUTES.ADMIN_TOURNAMENTS },
-          { label: 'Nouveau tournoi' },
-        ]}
-      />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Plus className="size-6 text-blue-400" />
-          Nouveau tournoi
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Créez un nouveau tournoi sur la plateforme.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[
+        { label: 'Tournois', href: ROUTES.ADMIN_TOURNAMENTS },
+        { label: 'Nouveau tournoi' },
+      ]}
+      icon={Plus}
+      title="Nouveau tournoi"
+      subtitle="Créez un nouveau tournoi sur la plateforme."
+    >
       <TournamentForm />
-    </div>
+    </AdminContentLayout>
   )
 }
 

@@ -18,6 +18,7 @@ interface AdminContentLayoutProps {
   segments: BreadcrumbSegment[]
   icon: LucideIcon
   title: string
+  titleExtra?: React.ReactNode
   subtitle?: string
   headerRight?: React.ReactNode
   children: React.ReactNode
@@ -27,6 +28,7 @@ export const AdminContentLayout = ({
   segments,
   icon: Icon,
   title,
+  titleExtra,
   subtitle,
   headerRight,
   children,
@@ -42,6 +44,7 @@ export const AdminContentLayout = ({
           <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
             <Icon className="size-6 text-blue-400" />
             {title}
+            {titleExtra}
           </h1>
           {subtitle && <p className="text-sm text-zinc-400">{subtitle}</p>}
         </div>

@@ -9,7 +9,7 @@
 import { Trophy } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { AdminBreadcrumb } from '@/components/features/admin/admin-breadcrumb'
+import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import { TournamentDetailTabs } from '@/components/features/admin/tournament-detail-tabs'
 import { TournamentStatusBadge } from '@/components/features/admin/tournament-status-badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -25,8 +25,10 @@ interface AdminTournamentLayoutProps {
 /** Async component that fetches tournament data for the heading and tabs. */
 const TournamentHeader = async ({
   params,
+  children,
 }: {
   params: Promise<{ slug: string }>
+  children: React.ReactNode
 }) => {
   const { slug } = await params
   const tournament = await getTournamentBySlug(slug)
@@ -36,33 +38,25 @@ const TournamentHeader = async ({
   }
 
   return (
-    <>
-      {/* Breadcrumb */}
-      <AdminBreadcrumb
-        segments={[
-          { label: 'Tournois', href: ROUTES.ADMIN_TOURNAMENTS },
-          { label: tournament.title },
-        ]}
-      />
-
-      {/* Page heading */}
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-          <Trophy className="size-6 text-blue-400" />
-          {tournament.title}
-          <TournamentStatusBadge status={tournament.status} />
-        </h1>
-        <p className="text-sm text-zinc-400">
-          Gérez les détails, inscriptions et équipes de ce tournoi.
-        </p>
-      </div>
-
+    <AdminContentLayout
+      segments={[
+        { label: 'Tournois', href: ROUTES.ADMIN_TOURNAMENTS },
+        { label: tournament.title },
+      ]}
+      icon={Trophy}
+      title={tournament.title}
+      titleExtra={<TournamentStatusBadge status={tournament.status} />}
+      subtitle="Gérez les détails, inscriptions et équipes de ce tournoi."
+    >
       {/* Tab navigation */}
       <TournamentDetailTabs
         slug={slug}
         showTeamsTab={tournament.format === TournamentFormat.TEAM}
       />
-    </>
+
+      {/* Page content */}
+      {children}
+    </AdminContentLayout>
   )
 }
 
@@ -71,25 +65,20 @@ const AdminTournamentLayout = ({
   children,
 }: AdminTournamentLayoutProps) => {
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <Suspense
-        fallback={
-          <div className="space-y-6">
-            <Skeleton className="h-4 w-48 rounded-lg" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-64 rounded-lg" />
-              <Skeleton className="h-4 w-96 rounded-lg" />
-            </div>
-            <Skeleton className="h-10 w-72 rounded-xl" />
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-6xl space-y-6">
+          <Skeleton className="h-4 w-48 rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64 rounded-lg" />
+            <Skeleton className="h-4 w-96 rounded-lg" />
           </div>
-        }
-      >
-        <TournamentHeader params={params} />
-      </Suspense>
-
-      {/* Page content */}
-      {children}
-    </div>
+          <Skeleton className="h-10 w-72 rounded-xl" />
+        </div>
+      }
+    >
+      <TournamentHeader params={params}>{children}</TournamentHeader>
+    </Suspense>
   )
 }
 

@@ -27,6 +27,7 @@ interface AdminSidebarProps {
   onToggle: () => void
   mobile?: boolean
   onNavigate?: () => void
+  logoUrl: string | null
 }
 
 export const AdminSidebar = ({
@@ -34,6 +35,7 @@ export const AdminSidebar = ({
   onToggle,
   mobile = false,
   onNavigate,
+  logoUrl,
 }: AdminSidebarProps) => {
   const pathname = usePathname()
 
@@ -57,7 +59,7 @@ export const AdminSidebar = ({
           onClick={onNavigate}
         >
           <Image
-            src={DEFAULT_ASSETS.LOGO}
+            src={logoUrl ?? DEFAULT_ASSETS.LOGO}
             alt="Belouga"
             width={28}
             height={28}
