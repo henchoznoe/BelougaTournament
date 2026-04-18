@@ -18,6 +18,11 @@ export type DashboardStats = {
     players: number
     admins: number
   }
+  sponsors: {
+    total: number
+    enabled: number
+    disabled: number
+  }
 }
 
 export type RecentLogin = {

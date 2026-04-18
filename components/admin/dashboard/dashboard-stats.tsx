@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Swords, Users } from 'lucide-react'
+import { Handshake, Swords, Users } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
@@ -39,11 +39,22 @@ const STAT_CARDS = [
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
   },
+  {
+    key: 'sponsors',
+    label: 'Sponsors',
+    href: ROUTES.ADMIN_SPONSORS,
+    icon: Handshake,
+    getValue: (s: DashboardStats) => s.sponsors.total,
+    getDetail: (s: DashboardStats) =>
+      `${s.sponsors.enabled} actifs · ${s.sponsors.disabled} inactifs`,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+  },
 ] as const
 
 export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-3">
       {STAT_CARDS.map(card => {
         const Icon = card.icon
         const value = card.getValue(stats)

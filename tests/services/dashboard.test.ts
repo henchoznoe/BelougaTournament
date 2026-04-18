@@ -21,6 +21,7 @@ vi.mock('@/lib/core/logger', () => ({
 
 const mockTournamentCount = vi.fn()
 const mockUserCount = vi.fn()
+const mockSponsorCount = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockUserFindMany = vi.fn()
 
@@ -32,6 +33,9 @@ vi.mock('@/lib/core/prisma', () => ({
     user: {
       count: (...args: unknown[]) => mockUserCount(...args),
       findMany: (...args: unknown[]) => mockUserFindMany(...args),
+    },
+    sponsor: {
+      count: (...args: unknown[]) => mockSponsorCount(...args),
     },
     tournamentRegistration: {
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
@@ -63,6 +67,9 @@ describe('getDashboardStats', () => {
       .mockResolvedValueOnce(50) // total users
       .mockResolvedValueOnce(42) // players (role USER)
       .mockResolvedValueOnce(3) // admins
+    mockSponsorCount
+      .mockResolvedValueOnce(6) // total sponsors
+      .mockResolvedValueOnce(4) // enabled sponsors
 
     const result = await getDashboardStats()
 
@@ -75,6 +82,11 @@ describe('getDashboardStats', () => {
         total: 50,
         players: 42,
         admins: 3,
+      },
+      sponsors: {
+        total: 6,
+        enabled: 4,
+        disabled: 2,
       },
     })
   })
@@ -93,6 +105,11 @@ describe('getDashboardStats', () => {
         total: 0,
         players: 0,
         admins: 0,
+      },
+      sponsors: {
+        total: 0,
+        enabled: 0,
+        disabled: 0,
       },
     })
   })

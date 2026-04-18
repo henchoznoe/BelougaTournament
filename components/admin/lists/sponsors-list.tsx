@@ -39,6 +39,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
+import { cn } from '@/lib/utils/cn'
 import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
@@ -253,6 +254,12 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                   onClick={() =>
                     router.push(ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id))
                   }
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      router.push(ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id))
+                    }
+                  }}
                 >
                   <TableCell className="font-medium text-zinc-200">
                     {sponsor.name}
@@ -277,11 +284,12 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <span
-                      className={
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-[10px] font-medium',
                         sponsor.enabled
-                          ? 'rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400'
-                          : 'rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-400'
-                      }
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : 'bg-zinc-500/10 text-zinc-400',
+                      )}
                     >
                       {sponsor.enabled ? 'Activé' : 'Désactivé'}
                     </span>

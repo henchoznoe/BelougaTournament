@@ -86,6 +86,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
       setBlobs(data.blobs)
     } catch (error) {
       console.error('Error fetching blobs:', error)
+      toast.error('Erreur lors du chargement des images.')
     } finally {
       setIsLoadingBlobs(false)
     }
@@ -206,7 +207,11 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
 
       if (result.success) {
         toast.success(result.message)
-        router.push(ROUTES.ADMIN_SPONSORS)
+        router.push(
+          isEditing
+            ? ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id)
+            : ROUTES.ADMIN_SPONSORS,
+        )
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
@@ -227,7 +232,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
 
         {/* Image grid */}
         {imageUrls.length > 0 && (
-          <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mb-4 grid grid-cols-4 gap-3 sm:grid-cols-6">
             {imageUrls.map((url, index) => (
               <div key={url} className="group relative">
                 <div
@@ -329,7 +334,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp"
           className="hidden"
           onChange={handleUpload}
         />

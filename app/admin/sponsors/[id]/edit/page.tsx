@@ -40,7 +40,7 @@ const AdminEditSponsorPage = async ({ params }: AdminEditSponsorPageProps) => {
     <AdminContentLayout
       segments={[
         { label: 'Sponsors', href: ROUTES.ADMIN_SPONSORS },
-        { label: sponsor.name, href: ROUTES.ADMIN_SPONSORS },
+        { label: sponsor.name, href: ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id) },
         { label: 'Modifier' },
       ]}
       icon={Pencil}

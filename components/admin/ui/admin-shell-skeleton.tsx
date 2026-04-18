@@ -68,9 +68,9 @@ export const AdminShellSkeleton = () => {
               <Skeleton className="h-4 w-72 rounded bg-zinc-800" />
             </div>
 
-            {/* Stats grid (2 cards) */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              {Array.from({ length: 2 }).map((_, i) => (
+            {/* Stats grid (3 cards) */}
+            <div className="grid gap-4 sm:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={`stat-${i.toString()}`}
                   className="rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm"

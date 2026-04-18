@@ -1,6 +1,6 @@
 /**
  * File: app/admin/sponsors/[id]/page.tsx
- * Description: Admin page for viewing sponsor details (placeholder).
+ * Description: Admin page for viewing sponsor details with image gallery, info, and actions.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -9,6 +9,11 @@
 import { Handshake } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import {
+  SponsorDetail,
+  SponsorDetailActions,
+  SponsorStatusBadge,
+} from '@/components/admin/detail/sponsor-detail'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'
@@ -45,12 +50,10 @@ const AdminSponsorDetailPage = async ({
       ]}
       icon={Handshake}
       title={sponsor.name}
+      titleExtra={<SponsorStatusBadge sponsor={sponsor} />}
+      headerRight={<SponsorDetailActions sponsor={sponsor} />}
     >
-      <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-        <p className="text-sm text-zinc-500">
-          La page de détail du sponsor sera implémentée prochainement.
-        </p>
-      </div>
+      <SponsorDetail sponsor={sponsor} />
     </AdminContentLayout>
   )
 }

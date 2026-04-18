@@ -33,6 +33,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       totalUsers,
       players,
       admins,
+      totalSponsors,
+      enabledSponsors,
     ] = await Promise.all([
       prisma.tournament.count(),
       prisma.tournament.count({ where: { status: TournamentStatus.DRAFT } }),
@@ -45,6 +47,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       prisma.user.count({
         where: { role: Role.ADMIN },
       }),
+      prisma.sponsor.count(),
+      prisma.sponsor.count({ where: { enabled: true } }),
     ])
 
     return {
@@ -60,6 +64,11 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: totalUsers,
         players,
         admins,
+      },
+      sponsors: {
+        total: totalSponsors,
+        enabled: enabledSponsors,
+        disabled: totalSponsors - enabledSponsors,
       },
     }
   } catch (error) {
@@ -77,6 +86,11 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: 0,
         players: 0,
         admins: 0,
+      },
+      sponsors: {
+        total: 0,
+        enabled: 0,
+        disabled: 0,
       },
     }
   }

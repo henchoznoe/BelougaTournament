@@ -19,9 +19,13 @@ vi.mock('@/lib/core/logger', () => ({
 }))
 
 const mockFindMany = vi.fn()
+const mockFindUnique = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
-    sponsor: { findMany: (...args: unknown[]) => mockFindMany(...args) },
+    sponsor: {
+      findMany: (...args: unknown[]) => mockFindMany(...args),
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
+    },
   },
 }))
 
@@ -29,7 +33,9 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { getSponsors, getAllSponsors } = await import('@/lib/services/sponsors')
+const { getSponsors, getAllSponsors, getSponsorById } = await import(
+  '@/lib/services/sponsors'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -124,5 +130,40 @@ describe('getAllSponsors', () => {
     const result = await getAllSponsors()
 
     expect(result).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getSponsorById
+// ---------------------------------------------------------------------------
+
+describe('getSponsorById', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns the sponsor when found', async () => {
+    mockFindUnique.mockResolvedValue(MOCK_SPONSORS[0])
+
+    const result = await getSponsorById('uuid-1')
+
+    expect(result).toEqual(MOCK_SPONSORS[0])
+    expect(mockFindUnique).toHaveBeenCalledWith({ where: { id: 'uuid-1' } })
+  })
+
+  it('returns null when sponsor is not found', async () => {
+    mockFindUnique.mockResolvedValue(null)
+
+    const result = await getSponsorById('non-existent')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null on database error', async () => {
+    mockFindUnique.mockRejectedValue(new Error('DB error'))
+
+    const result = await getSponsorById('uuid-1')
+
+    expect(result).toBeNull()
   })
 })
