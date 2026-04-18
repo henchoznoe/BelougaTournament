@@ -72,7 +72,7 @@ import {
 
 const FORMAT_LABELS: Record<TournamentFormat, string> = {
   [TournamentFormat.SOLO]: 'Solo',
-  [TournamentFormat.TEAM]: '\u00c9quipe',
+  [TournamentFormat.TEAM]: 'Équipe',
 } as const
 
 const REGISTRATION_TYPE_LABELS: Record<RegistrationType, string> = {
@@ -82,7 +82,7 @@ const REGISTRATION_TYPE_LABELS: Record<RegistrationType, string> = {
 
 const REFUND_POLICY_LABELS: Record<RefundPolicyType, string> = {
   [RefundPolicyType.NONE]: 'Aucun remboursement',
-  [RefundPolicyType.BEFORE_DEADLINE]: 'Avant d\u00e9lai',
+  [RefundPolicyType.BEFORE_DEADLINE]: 'Avant délai',
 } as const
 
 /** Allowed status transitions for the status badge. */
@@ -112,12 +112,12 @@ const formatAmount = (amount: number, currency: string) => {
 const getDateIndicator = (date: Date): { label: string; className: string } => {
   const now = new Date()
   const d = new Date(date)
-  if (d < now) return { label: 'Pass\u00e9', className: 'text-zinc-500' }
+  if (d < now) return { label: 'Passé', className: 'text-zinc-500' }
   // Within 24h
   const diff = d.getTime() - now.getTime()
   if (diff < 24 * 60 * 60 * 1000)
-    return { label: 'Bient\u00f4t', className: 'text-amber-400' }
-  return { label: '\u00c0 venir', className: 'text-emerald-400' }
+    return { label: 'Bientôt', className: 'text-amber-400' }
+  return { label: 'À venir', className: 'text-emerald-400' }
 }
 
 // ─── Status Badge (clickable with transitions) ──────────────────────────────
@@ -179,7 +179,7 @@ export const TournamentStatusBadge = ({
       selectedTransition.target === TournamentStatus.ARCHIVED &&
       hasRegistrations
     ) {
-      return ' Les inscriptions seront ferm\u00e9es.'
+      return ' Les inscriptions seront fermées.'
     }
     return ''
   }
@@ -221,13 +221,13 @@ export const TournamentStatusBadge = ({
           <AlertDialogHeader>
             <AlertDialogTitle>{selectedTransition?.label}</AlertDialogTitle>
             <AlertDialogDescription>
-              Passer le tournoi de &laquo;&nbsp;
-              {TOURNAMENT_STATUS_LABELS[tournament.status]}&nbsp;&raquo; \u00e0
-              &laquo;&nbsp;
+              Passer le tournoi de «{'\u00a0'}
+              {TOURNAMENT_STATUS_LABELS[tournament.status]}
+              {'\u00a0'}» à «{'\u00a0'}
               {selectedTransition
                 ? TOURNAMENT_STATUS_LABELS[selectedTransition.target]
                 : ''}
-              &nbsp;&raquo; ?{getWarningMessage()}
+              {'\u00a0'}» ?{getWarningMessage()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -279,13 +279,13 @@ export const TournamentStatusBadge = ({
           <AlertDialogHeader>
             <AlertDialogTitle>{selectedTransition?.label}</AlertDialogTitle>
             <AlertDialogDescription>
-              Passer le tournoi de &laquo;&nbsp;
-              {TOURNAMENT_STATUS_LABELS[tournament.status]}&nbsp;&raquo; \u00e0
-              &laquo;&nbsp;
+              Passer le tournoi de «{'\u00a0'}
+              {TOURNAMENT_STATUS_LABELS[tournament.status]}
+              {'\u00a0'}» à «{'\u00a0'}
               {selectedTransition
                 ? TOURNAMENT_STATUS_LABELS[selectedTransition.target]
                 : ''}
-              &nbsp;&raquo; ?{getWarningMessage()}
+              {'\u00a0'}» ?{getWarningMessage()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -349,9 +349,9 @@ export const TournamentDetailActions = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer {tournament.title} ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irr\u00e9versible. Le tournoi et toutes ses
-              donn\u00e9es associ\u00e9es (inscriptions, \u00e9quipes,
-              paiements) seront d\u00e9finitivement supprim\u00e9s.
+              Cette action est irréversible. Le tournoi et toutes ses données
+              associées (inscriptions, équipes, paiements) seront définitivement
+              supprimés.
               {hasRegistrations && (
                 <>
                   {' '}
@@ -399,7 +399,7 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
       ? [
           {
             icon: Swords,
-            label: '\u00c9quipes',
+            label: 'Équipes',
             value: `${tournament._count.teams} ${maxLabel}`,
             color: 'text-purple-400',
             bg: 'bg-purple-500/10',
@@ -411,7 +411,7 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
       label: 'Type',
       value:
         isPaid && tournament.entryFeeAmount && tournament.entryFeeCurrency
-          ? `${REGISTRATION_TYPE_LABELS[tournament.registrationType]} \u2014 ${formatAmount(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
+          ? `${REGISTRATION_TYPE_LABELS[tournament.registrationType]} — ${formatAmount(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
           : REGISTRATION_TYPE_LABELS[tournament.registrationType],
       color: isPaid ? 'text-amber-400' : 'text-emerald-400',
       bg: isPaid ? 'bg-amber-500/10' : 'bg-emerald-500/10',
@@ -508,7 +508,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
       return { label: 'Pas encore ouvertes', className: 'text-zinc-400' }
     if (now >= open && now < close)
       return { label: 'Ouvertes', className: 'text-emerald-400' }
-    return { label: 'Ferm\u00e9es', className: 'text-red-400' }
+    return { label: 'Fermées', className: 'text-red-400' }
   }, [tournament.registrationOpen, tournament.registrationClose])
 
   return (
@@ -556,7 +556,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                 {tournament._count.registrations}
                 {tournament.maxTeams
                   ? ` / ${tournament.maxTeams}`
-                  : ' (illimit\u00e9)'}
+                  : ' (illimité)'}
               </dd>
             </div>
             <div className="flex items-start justify-between gap-2">
@@ -580,7 +580,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
           <dl className="space-y-3 text-sm">
             <DateRow
               icon={CalendarCheck}
-              label="D\u00e9but"
+              label="Début"
               date={tournament.startDate}
             />
             <DateRow icon={CalendarX} label="Fin" date={tournament.endDate} />
@@ -716,7 +716,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
         <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
             <Shield className="size-4 text-blue-400" />
-            R\u00e8gles
+            Règles
           </h2>
           <Markdown content={tournament.rules} />
         </div>
@@ -737,7 +737,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
         <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
             <FileText className="size-4 text-blue-400" />
-            Champs personnalis\u00e9s ({tournament.fields.length})
+            Champs personnalisés ({tournament.fields.length})
           </h2>
           <div className="space-y-2">
             {tournament.fields.map(field => (
@@ -768,8 +768,8 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
             tournament._count.registrations > 0 && (
               <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/5 px-3 py-2 text-xs text-amber-400">
                 <AlertTriangle className="size-3.5 shrink-0" />
-                Les champs ne peuvent pas \u00eatre modifi\u00e9s car le tournoi
-                est publi\u00e9 avec des inscrits.
+                Les champs ne peuvent pas être modifiés car le tournoi est
+                publié avec des inscrits.
               </div>
             )}
         </div>
@@ -805,8 +805,8 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
 
       {/* Metadata footer */}
       <div className="flex flex-wrap gap-4 text-xs text-zinc-600">
-        <span>Cr\u00e9\u00e9 le {formatDate(tournament.createdAt)}</span>
-        <span>Modifi\u00e9 le {formatDate(tournament.updatedAt)}</span>
+        <span>Créé le {formatDate(tournament.createdAt)}</span>
+        <span>Modifié le {formatDate(tournament.updatedAt)}</span>
         <span className="font-mono">ID: {tournament.id}</span>
       </div>
     </div>

@@ -94,9 +94,9 @@ import {
 
 const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
   [RegistrationStatus.PENDING]: 'En attente',
-  [RegistrationStatus.CONFIRMED]: 'Confirm\u00e9',
-  [RegistrationStatus.CANCELLED]: 'Annul\u00e9',
-  [RegistrationStatus.EXPIRED]: 'Expir\u00e9',
+  [RegistrationStatus.CONFIRMED]: 'Confirmée',
+  [RegistrationStatus.CANCELLED]: 'Annulée',
+  [RegistrationStatus.EXPIRED]: 'Expirée',
 } as const
 
 const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
@@ -108,12 +108,12 @@ const REGISTRATION_STATUS_STYLES: Record<RegistrationStatus, string> = {
 
 const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   [PaymentStatus.NOT_REQUIRED]: 'Non requis',
-  [PaymentStatus.UNPAID]: 'Non pay\u00e9',
+  [PaymentStatus.UNPAID]: 'Non payé',
   [PaymentStatus.PENDING]: 'En attente',
-  [PaymentStatus.PAID]: 'Pay\u00e9',
-  [PaymentStatus.FAILED]: '\u00c9chou\u00e9',
-  [PaymentStatus.REFUNDED]: 'Rembours\u00e9',
-  [PaymentStatus.CANCELLED]: 'Annul\u00e9',
+  [PaymentStatus.PAID]: 'Payé',
+  [PaymentStatus.FAILED]: 'Échoué',
+  [PaymentStatus.REFUNDED]: 'Remboursé',
+  [PaymentStatus.CANCELLED]: 'Annulé',
 } as const
 
 const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
@@ -171,7 +171,7 @@ const EditFieldsDialog = ({
         <DialogHeader>
           <DialogTitle>Modifier les champs</DialogTitle>
           <DialogDescription>
-            Modifier les valeurs des champs personnalis\u00e9s de{' '}
+            Modifier les valeurs des champs personnalisés de{' '}
             {registration.user.displayName || registration.user.name}.
           </DialogDescription>
         </DialogHeader>
@@ -200,7 +200,7 @@ const EditFieldsDialog = ({
           ))}
           {fields.length === 0 && (
             <p className="text-sm text-zinc-500">
-              Aucun champ personnalis\u00e9 configur\u00e9.
+              Aucun champ personnalisé configuré.
             </p>
           )}
         </div>
@@ -271,15 +271,14 @@ const ChangeTeamDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Changer d\u2019\u00e9quipe</DialogTitle>
+          <DialogTitle>Changer d'équipe</DialogTitle>
           <DialogDescription>
-            D\u00e9placer{' '}
-            {registration.user.displayName || registration.user.name} vers une
-            autre \u00e9quipe.
+            Déplacer {registration.user.displayName || registration.user.name}{' '}
+            vers une autre équipe.
             {registration.team && (
               <>
                 {' '}
-                \u00c9quipe actuelle :{' '}
+                Équipe actuelle :{' '}
                 <span className="font-semibold text-white">
                   {registration.team.name}
                 </span>
@@ -289,11 +288,11 @@ const ChangeTeamDialog = ({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label>\u00c9quipe cible</Label>
+          <Label>Équipe cible</Label>
           {availableTeams.length > 0 ? (
             <Select value={targetTeamId} onValueChange={setTargetTeamId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="S\u00e9lectionner une \u00e9quipe" />
+                <SelectValue placeholder="Sélectionner une équipe" />
               </SelectTrigger>
               <SelectContent>
                 {availableTeams.map(team => (
@@ -305,7 +304,7 @@ const ChangeTeamDialog = ({
             </Select>
           ) : (
             <p className="text-sm text-zinc-500">
-              Aucune \u00e9quipe disponible (non pleine).
+              Aucune équipe disponible (non pleine).
             </p>
           )}
         </div>
@@ -319,7 +318,7 @@ const ChangeTeamDialog = ({
           </Button>
           <Button onClick={handleChange} disabled={isPending || !targetTeamId}>
             {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-            D\u00e9placer
+            Déplacer
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -411,7 +410,7 @@ const RowActions = ({
           {isTeam && (
             <DropdownMenuItem onSelect={() => setChangeTeamOpen(true)}>
               <ArrowRightLeft className="mr-2 size-4" />
-              Changer d\u2019\u00e9quipe
+              Changer d'équipe
             </DropdownMenuItem>
           )}
           {canRefund && (
@@ -460,19 +459,18 @@ const RowActions = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Supprimer l\u2019inscription de{' '}
+              Supprimer l'inscription de{' '}
               {registration.user.displayName || registration.user.name} ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera l\u2019inscription.
-              {registration.team &&
-                ' Le joueur sera retir\u00e9 de son \u00e9quipe.'}
+              Cette action supprimera l'inscription.
+              {registration.team && ' Le joueur sera retiré de son équipe.'}
               {registration.paymentStatus === PaymentStatus.PAID && (
                 <>
                   {' '}
                   <span className="font-semibold text-amber-400">
                     Attention : le paiement ne sera pas automatiquement
-                    rembours\u00e9.
+                    remboursé.
                   </span>
                 </>
               )}
@@ -497,9 +495,8 @@ const RowActions = ({
               {registration.user.displayName || registration.user.name} ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Un remboursement Stripe sera initi\u00e9 pour cette inscription.
-              Le joueur sera d\u00e9sinscrit et retir\u00e9 de son \u00e9quipe
-              le cas \u00e9ch\u00e9ant.
+              Un remboursement Stripe sera initié pour cette inscription. Le
+              joueur sera désinscrit et retiré de son équipe le cas échéant.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -620,7 +617,7 @@ export const TournamentRegistrations = ({
                 En attente
               </SelectItem>
               <SelectItem value={RegistrationStatus.CONFIRMED}>
-                Confirm\u00e9
+                Confirmé
               </SelectItem>
             </SelectContent>
           </Select>
@@ -631,12 +628,12 @@ export const TournamentRegistrations = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value={PaymentStatus.PAID}>Pay\u00e9</SelectItem>
+                <SelectItem value={PaymentStatus.PAID}>Payé</SelectItem>
                 <SelectItem value={PaymentStatus.PENDING}>
                   En attente
                 </SelectItem>
                 <SelectItem value={PaymentStatus.REFUNDED}>
-                  Rembours\u00e9
+                  Remboursé
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -654,9 +651,7 @@ export const TournamentRegistrations = ({
       {/* Table */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-          <p className="text-sm text-zinc-500">
-            Aucune inscription trouv\u00e9e.
-          </p>
+          <p className="text-sm text-zinc-500">Aucune inscription trouvée.</p>
         </div>
       ) : (
         <div className="rounded-2xl border border-white/5 bg-white/2 backdrop-blur-sm">
@@ -668,7 +663,7 @@ export const TournamentRegistrations = ({
                   <TableHead className="text-zinc-400">Joueur</TableHead>
                   {isTeam && (
                     <TableHead className="hidden text-zinc-400 md:table-cell">
-                      \u00c9quipe
+                      Équipe
                     </TableHead>
                   )}
                   <TableHead className="text-zinc-400">Statut</TableHead>
@@ -724,7 +719,7 @@ export const TournamentRegistrations = ({
               onClick={() => setPage(p => p - 1)}
               disabled={page === 0}
             >
-              Pr\u00e9c\u00e9dent
+              Précédent
             </Button>
             <Button
               variant="outline"
@@ -782,9 +777,7 @@ const RegistrationRow = ({
               onClick={onToggleExpand}
               className="rounded p-1 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
               aria-label={
-                isExpanded
-                  ? 'Masquer les d\u00e9tails'
-                  : 'Afficher les d\u00e9tails'
+                isExpanded ? 'Masquer les détails' : 'Afficher les détails'
               }
             >
               {isExpanded ? (
@@ -830,7 +823,7 @@ const RegistrationRow = ({
                 )}
               </div>
             ) : (
-              <span className="text-sm text-zinc-600">\u2014</span>
+              <span className="text-sm text-zinc-600">—</span>
             )}
           </TableCell>
         )}
@@ -884,7 +877,7 @@ const RegistrationRow = ({
                     {fieldValues[field.label] !== undefined &&
                     fieldValues[field.label] !== ''
                       ? String(fieldValues[field.label])
-                      : '\u2014'}
+                      : '—'}
                   </span>
                 </div>
               ))}

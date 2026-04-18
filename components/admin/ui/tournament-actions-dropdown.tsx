@@ -239,13 +239,13 @@ export const TournamentActionsDropdown = ({
           <AlertDialogHeader>
             <AlertDialogTitle>{selectedTransition?.label}</AlertDialogTitle>
             <AlertDialogDescription>
-              Passer le tournoi de &laquo;&nbsp;
-              {TOURNAMENT_STATUS_LABELS[tournament.status]}&nbsp;&raquo; à
-              &laquo;&nbsp;
+              Passer le tournoi de «{'\u00a0'}
+              {TOURNAMENT_STATUS_LABELS[tournament.status]}
+              {'\u00a0'}» à «{'\u00a0'}
               {selectedTransition
                 ? TOURNAMENT_STATUS_LABELS[selectedTransition.target]
                 : ''}
-              &nbsp;&raquo; ?
+              {'\u00a0'}» ?
               {selectedTransition
                 ? getTransitionWarning(
                     selectedTransition.target,

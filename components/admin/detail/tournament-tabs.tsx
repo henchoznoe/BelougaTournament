@@ -22,9 +22,9 @@ const TABS: {
   icon: typeof LayoutDashboard
   teamOnly?: boolean
 }[] = [
-  { id: 'overview', label: 'Vue d\u2019ensemble', icon: LayoutDashboard },
+  { id: 'overview', label: "Vue d'ensemble", icon: LayoutDashboard },
   { id: 'registrations', label: 'Inscriptions', icon: ClipboardList },
-  { id: 'teams', label: '\u00c9quipes', icon: Users, teamOnly: true },
+  { id: 'teams', label: 'Équipes', icon: Users, teamOnly: true },
 ]
 
 interface TournamentTabNavProps {

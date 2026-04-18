@@ -77,6 +77,7 @@ export const TOURNAMENT_STATUS_STYLES: Record<TournamentStatus, string> = {
 /** Centralized cache tag names used with cacheTag() and revalidateTag(). */
 export const CACHE_TAGS = {
   DASHBOARD_STATS: 'dashboard-stats',
+  DASHBOARD_PAYMENTS: 'dashboard-payments',
   DASHBOARD_REGISTRATIONS: 'dashboard-registrations',
   DASHBOARD_RECENT_USERS: 'dashboard-recent-users',
   REGISTRATIONS: 'registrations',

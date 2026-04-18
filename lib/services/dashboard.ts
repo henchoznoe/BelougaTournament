@@ -13,10 +13,15 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
   DashboardStats,
+  PaymentStats,
   RecentLogin,
   RecentRegistration,
 } from '@/lib/types/dashboard'
-import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  PaymentStatus,
+  Role,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
@@ -162,5 +167,130 @@ export const getRecentRegistrations = async (
   } catch (error) {
     logger.error({ error }, 'Error fetching recent registrations')
     return []
+  }
+}
+
+/** Fetches aggregate payment/revenue stats for the dashboard. */
+export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+
+  const emptyStats: PaymentStats = {
+    totalRevenue: 0,
+    totalRefunded: 0,
+    netRevenue: 0,
+    transactionCount: 0,
+    refundCount: 0,
+    currency: 'CHF',
+    byTournament: [],
+  }
+
+  try {
+    // Fetch all paid and refunded payments with their tournament info
+    const payments = await prisma.payment.findMany({
+      where: {
+        status: { in: [PaymentStatus.PAID, PaymentStatus.REFUNDED] },
+      },
+      select: {
+        amount: true,
+        currency: true,
+        status: true,
+        refundAmount: true,
+        registration: {
+          select: {
+            tournament: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (payments.length === 0) return emptyStats
+
+    // Aggregate totals
+    let totalRevenue = 0
+    let totalRefunded = 0
+    let transactionCount = 0
+    let refundCount = 0
+    const currency = payments[0].currency || 'CHF'
+
+    // Group by tournament
+    const tournamentMap = new Map<
+      string,
+      {
+        id: string
+        title: string
+        slug: string
+        revenue: number
+        refunded: number
+        paidCount: number
+        refundedCount: number
+      }
+    >()
+
+    for (const payment of payments) {
+      const tournament = payment.registration.tournament
+
+      if (!tournamentMap.has(tournament.id)) {
+        tournamentMap.set(tournament.id, {
+          id: tournament.id,
+          title: tournament.title,
+          slug: tournament.slug,
+          revenue: 0,
+          refunded: 0,
+          paidCount: 0,
+          refundedCount: 0,
+        })
+      }
+
+      const entry = tournamentMap.get(tournament.id)
+      if (!entry) continue
+
+      if (payment.status === PaymentStatus.PAID) {
+        totalRevenue += payment.amount
+        transactionCount++
+        entry.revenue += payment.amount
+        entry.paidCount++
+      }
+
+      if (payment.status === PaymentStatus.REFUNDED) {
+        // Refunded payments were originally paid, so count the original amount as revenue
+        totalRevenue += payment.amount
+        transactionCount++
+        entry.revenue += payment.amount
+        entry.paidCount++
+
+        // Then track the refund
+        const refund = payment.refundAmount ?? payment.amount
+        totalRefunded += refund
+        refundCount++
+        entry.refunded += refund
+        entry.refundedCount++
+      }
+    }
+
+    // Sort tournaments by revenue descending
+    const byTournament = [...tournamentMap.values()].sort(
+      (a, b) => b.revenue - a.revenue,
+    )
+
+    return {
+      totalRevenue,
+      totalRefunded,
+      netRevenue: totalRevenue - totalRefunded,
+      transactionCount,
+      refundCount,
+      currency,
+      byTournament,
+    }
+  } catch (error) {
+    logger.error({ error }, 'Error fetching dashboard payment stats')
+    return emptyStats
   }
 }

@@ -8,6 +8,7 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
+import { DashboardPayments } from '@/components/admin/dashboard/dashboard-payments'
 import {
   DashboardRecentLogins,
   DashboardRecentRegistrations,
@@ -15,6 +16,7 @@ import {
 import { DashboardStatsCards } from '@/components/admin/dashboard/dashboard-stats'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import {
+  getDashboardPaymentStats,
   getDashboardStats,
   getRecentLogins,
   getRecentRegistrations,
@@ -25,11 +27,13 @@ export const metadata: Metadata = {
 }
 
 const AdminDashboardPage = async () => {
-  const [stats, recentLogins, recentRegistrations] = await Promise.all([
-    getDashboardStats(),
-    getRecentLogins(),
-    getRecentRegistrations(),
-  ])
+  const [stats, recentLogins, recentRegistrations, paymentStats] =
+    await Promise.all([
+      getDashboardStats(),
+      getRecentLogins(),
+      getRecentRegistrations(),
+      getDashboardPaymentStats(),
+    ])
 
   return (
     <AdminContentLayout
@@ -46,6 +50,9 @@ const AdminDashboardPage = async () => {
         <DashboardRecentLogins logins={recentLogins} />
         <DashboardRecentRegistrations registrations={recentRegistrations} />
       </div>
+
+      {/* Payment revenue */}
+      <DashboardPayments payments={paymentStats} />
     </AdminContentLayout>
   )
 }
