@@ -1,6 +1,6 @@
 /**
  * File: components/features/admin/logo-picker.tsx
- * Description: Logo picker with Vercel Blob upload and gallery of existing images.
+ * Description: Logo picker with Vercel Blob multi-upload and compact gallery of existing images.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Check, ImagePlus, Loader2, Trash2, X } from 'lucide-react'
+import { Check, ImagePlus, Loader2, Trash2, Upload, X } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -31,9 +31,11 @@ interface LogoPickerProps {
 export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
   const [blobs, setBlobs] = useState<BlobItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isUploading, setIsUploading] = useState(false)
+  const [uploadingCount, setUploadingCount] = useState(0)
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const isUploading = uploadingCount > 0
 
   /** Fetch all blobs from the store. */
   const fetchBlobs = useCallback(async () => {
@@ -54,40 +56,64 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
     fetchBlobs()
   }, [fetchBlobs])
 
-  /** Upload a file to Vercel Blob. */
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  /** Upload a single file to Vercel Blob. */
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', 'logos')
 
-    setIsUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'logos')
+    const res = await fetch('/api/admin/blobs', {
+      method: 'POST',
+      body: formData,
+    })
 
-      const res = await fetch('/api/admin/blobs', {
-        method: 'POST',
-        body: formData,
-      })
+    const data = (await res.json()) as { url?: string; error?: string }
 
-      const data = (await res.json()) as { url?: string; error?: string }
-
-      if (!res.ok || !data.url) {
-        toast.error(data.error ?? "Erreur lors de l'upload.")
-        return
-      }
-
-      toast.success('Image importée avec succès.')
-      onChange(data.url)
-      await fetchBlobs()
-    } catch (error) {
-      console.error('Error uploading logo:', error)
-      toast.error('Une erreur inattendue est survenue.')
-    } finally {
-      setIsUploading(false)
-      // Reset file input so the same file can be re-selected
-      if (fileInputRef.current) fileInputRef.current.value = ''
+    if (!res.ok || !data.url) {
+      toast.error(data.error ?? `Erreur lors de l'upload de ${file.name}.`)
+      return null
     }
+
+    return data.url
+  }
+
+  /** Handle file selection — supports multiple files. */
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const fileArray = Array.from(files)
+    setUploadingCount(fileArray.length)
+
+    let lastUploadedUrl: string | null = null
+    let successCount = 0
+
+    for (const file of fileArray) {
+      try {
+        const url = await uploadFile(file)
+        if (url) {
+          lastUploadedUrl = url
+          successCount++
+        }
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error)
+        toast.error(`Erreur lors de l'upload de ${file.name}.`)
+      }
+      setUploadingCount(prev => prev - 1)
+    }
+
+    if (successCount > 0) {
+      const msg =
+        successCount === 1
+          ? 'Image importée avec succès.'
+          : `${successCount.toString()} images importées avec succès.`
+      toast.success(msg)
+      if (lastUploadedUrl) onChange(lastUploadedUrl)
+      await fetchBlobs()
+    }
+
+    // Reset file input so the same files can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   /** Delete a blob from the store. */
@@ -106,7 +132,6 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
       }
 
       toast.success('Image supprimée.')
-      // If the deleted blob was the selected logo, clear the selection
       if (value === url) onChange('')
       setBlobs(prev => prev.filter(b => b.url !== url))
     } catch (error) {
@@ -118,84 +143,107 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Current selection preview */}
-      <div className="flex items-center gap-4">
-        <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
+    <div className="space-y-5">
+      {/* Current logo preview + actions */}
+      <div className="flex items-start gap-5">
+        {/* Preview */}
+        <div
+          className={cn(
+            'flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors',
+            value
+              ? 'border-blue-500/30 bg-blue-500/5'
+              : 'border-white/10 bg-white/3',
+          )}
+        >
           {value ? (
             <Image
               src={value}
-              alt="Logo sélectionné"
-              width={80}
-              height={80}
+              alt="Logo actuel"
+              width={96}
+              height={96}
               className="size-full object-contain p-2"
             />
           ) : (
-            <ImagePlus className="size-8 text-zinc-600" />
+            <div className="flex flex-col items-center gap-1">
+              <ImagePlus className="size-6 text-zinc-600" />
+              <span className="text-[10px] text-zinc-600">Aucun</span>
+            </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          {/* Upload button */}
+        {/* Actions */}
+        <div className="flex flex-col gap-2 pt-1">
           <Button
             type="button"
             variant="outline"
             size="sm"
             disabled={isUploading}
-            className="gap-2 border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
+            className="cursor-pointer gap-2 border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
             onClick={() => fileInputRef.current?.click()}
           >
             {isUploading ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin" />
             ) : (
-              <ImagePlus className="size-4" />
+              <Upload className="size-3.5" />
             )}
-            {isUploading ? 'Import en cours...' : 'Importer une image'}
+            {isUploading
+              ? `Import en cours (${uploadingCount.toString()})...`
+              : 'Importer des logos'}
           </Button>
 
-          {/* Clear selection */}
           {value && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="gap-2 text-zinc-500 hover:text-zinc-300"
+              className="cursor-pointer justify-center gap-2 text-red-400/80 hover:bg-red-500/10 hover:text-red-400"
               onClick={() => onChange('')}
             >
-              <X className="size-4" />
-              Retirer le logo
+              <X className="size-3.5" />
+              Retirer le logo actuel
             </Button>
           )}
-        </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          className="hidden"
-          onChange={handleUpload}
-        />
+          <p className="text-[10px] leading-relaxed text-zinc-600">
+            PNG, JPEG ou WebP. Préférez un logo carré.
+          </p>
+        </div>
       </div>
 
-      {/* Gallery of existing blobs */}
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-zinc-500">Images disponibles</p>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        multiple
+        className="hidden"
+        onChange={handleUpload}
+      />
+
+      {/* Gallery */}
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <div className="h-px flex-1 bg-white/5" />
+          <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
+            Galerie{!isLoading && ` · ${blobs.length.toString()}`}
+          </span>
+          <div className="h-px flex-1 bg-white/5" />
+        </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 md:grid-cols-8">
+            {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton
                 key={`skeleton-${i.toString()}`}
-                className="aspect-square rounded-lg bg-white/5"
+                className="size-16 rounded-lg bg-white/5"
               />
             ))}
           </div>
         ) : blobs.length === 0 ? (
-          <p className="text-xs text-zinc-600">
-            Aucune image uploadée. Importez votre première image ci-dessus.
+          <p className="py-2 text-center text-xs text-zinc-600">
+            Aucun logo importé pour le moment.
           </p>
         ) : (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 md:grid-cols-8">
             {blobs.map(blob => {
               const isSelected = value === blob.url
               const isDeleting = deletingUrl === blob.url
@@ -207,22 +255,22 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
                     onClick={() => onChange(blob.url)}
                     aria-label={`Sélectionner ${blob.pathname}`}
                     className={cn(
-                      'relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border bg-white/5 transition-all duration-200',
+                      'relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-all',
                       isSelected
-                        ? 'border-blue-500/50 ring-2 ring-blue-500/20'
-                        : 'border-white/10 hover:border-white/20',
+                        ? 'border-blue-500/50 bg-blue-500/10 ring-2 ring-blue-500/20'
+                        : 'border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/5',
                     )}
                   >
                     <Image
                       src={blob.url}
                       alt={blob.pathname}
-                      width={120}
-                      height={120}
-                      className="size-full object-contain p-1"
+                      width={64}
+                      height={64}
+                      className="size-full object-contain p-1.5"
                     />
                     {isSelected && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-blue-500/10">
-                        <Check className="size-5 text-blue-400" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-blue-500/15">
+                        <Check className="size-4 text-blue-400" />
                       </div>
                     )}
                   </button>
