@@ -19,7 +19,6 @@ export const ROUTES = {
   TERMS: '/terms',
   CONTACT: '/contact',
   PROFILE: '/profile',
-  PROFILE_TOURNAMENTS: '/profile/tournaments',
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
   ADMIN_DASHBOARD: '/admin',
@@ -27,23 +26,12 @@ export const ROUTES = {
   ADMIN_USER_DETAIL: (id: string) => `/admin/users/${id}` as const,
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_TOURNAMENTS: '/admin/tournaments',
-  ADMIN_NEW_TOURNAMENT: '/admin/tournaments/new',
   ADMIN_TOURNAMENT_DETAIL: (slug: string) =>
     `/admin/tournaments/${slug}` as const,
-  ADMIN_TOURNAMENT_EDIT: (slug: string) =>
-    `/admin/tournaments/${slug}/edit` as const,
-  ADMIN_TOURNAMENT_REGISTRATIONS: (slug: string) =>
-    `/admin/tournaments/${slug}/registrations` as const,
-  ADMIN_TOURNAMENT_TEAMS: (slug: string) =>
-    `/admin/tournaments/${slug}/teams` as const,
   ADMIN_SPONSORS: '/admin/sponsors',
   ADMIN_SPONSOR_NEW: '/admin/sponsors/new',
   ADMIN_SPONSOR_DETAIL: (id: string) => `/admin/sponsors/${id}` as const,
   ADMIN_SPONSOR_EDIT: (id: string) => `/admin/sponsors/${id}/edit` as const,
-  ADMIN_REGISTRATION_DETAIL: (id: string) =>
-    `/admin/registrations/${id}` as const,
-  ADMIN_TOURNAMENT_TEAM_DETAIL: (slug: string, teamId: string) =>
-    `/admin/tournaments/${slug}/teams/${teamId}` as const,
 } as const
 
 /**

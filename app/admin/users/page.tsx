@@ -8,8 +8,8 @@
 
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { UsersList } from '@/components/features/admin/users-list'
+import { UsersList } from '@/components/admin/lists/users-list'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getSession } from '@/lib/services/auth'
 import { getUsers } from '@/lib/services/users'
 import { isOwner } from '@/lib/utils/owner'

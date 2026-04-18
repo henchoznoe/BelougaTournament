@@ -9,8 +9,8 @@
 import { Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { SponsorForm } from '@/components/features/admin/sponsor-form'
+import { SponsorForm } from '@/components/admin/forms/sponsor-form'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'
 

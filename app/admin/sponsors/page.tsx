@@ -8,8 +8,8 @@
 
 import { Handshake } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { SponsorsList } from '@/components/features/admin/sponsors-list'
+import { SponsorsList } from '@/components/admin/lists/sponsors-list'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getAllSponsors } from '@/lib/services/sponsors'
 
 export const metadata: Metadata = {

@@ -8,12 +8,12 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
 import {
   DashboardRecentLogins,
   DashboardRecentRegistrations,
-} from '@/components/features/admin/dashboard-recent'
-import { DashboardStatsCards } from '@/components/features/admin/dashboard-stats'
+} from '@/components/admin/dashboard/dashboard-recent'
+import { DashboardStatsCards } from '@/components/admin/dashboard/dashboard-stats'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import {
   getDashboardStats,
   getRecentLogins,

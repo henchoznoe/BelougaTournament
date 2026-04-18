@@ -8,8 +8,8 @@
 
 import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { TournamentsList } from '@/components/features/admin/tournaments-list'
+import { TournamentsList } from '@/components/admin/lists/tournaments-list'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getTournaments } from '@/lib/services/tournaments'
 
 export const metadata: Metadata = {

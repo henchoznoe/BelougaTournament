@@ -9,7 +9,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { LoginScreen } from '@/components/features/auth/login-screen'
+import { LoginScreen } from '@/components/public/auth/login-screen'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 

@@ -8,8 +8,8 @@
 
 import { Settings } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdminContentLayout } from '@/components/features/admin/admin-content-layout'
-import { SettingsForm } from '@/components/features/admin/settings-form'
+import { SettingsForm } from '@/components/admin/forms/settings-form'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 export const metadata: Metadata = {

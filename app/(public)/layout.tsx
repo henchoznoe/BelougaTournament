@@ -7,8 +7,8 @@
  */
 
 import { Suspense } from 'react'
-import { PublicFooter } from '@/components/features/layout/public-footer'
-import { PublicNavbar } from '@/components/features/layout/public-navbar'
+import { PublicFooter } from '@/components/public/layout/public-footer'
+import { PublicNavbar } from '@/components/public/layout/public-navbar'
 
 interface LayoutProps {
   children: React.ReactNode

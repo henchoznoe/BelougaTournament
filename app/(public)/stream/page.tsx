@@ -7,7 +7,7 @@
  */
 
 import type { Metadata } from 'next'
-import { TwitchPlayer } from '@/components/features/stream/twitch-player'
+import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 import { PageHeader } from '@/components/ui/page-header'
 import { getGlobalSettings } from '@/lib/services/settings'
 

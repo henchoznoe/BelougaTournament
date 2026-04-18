@@ -9,7 +9,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { TournamentDetail } from '@/components/features/tournaments/tournament-detail'
+import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSession } from '@/lib/services/auth'
