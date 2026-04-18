@@ -29,9 +29,15 @@ import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
+import type {
+  PublicTournamentFilters,
+  TournamentSortOption,
+} from '@/lib/validations/tournaments'
 import {
   PaymentStatus,
   RegistrationStatus,
+  type RegistrationType,
+  type TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
@@ -590,5 +596,164 @@ export const getUserPastRegistrations = async (
   } catch (error) {
     logger.error({ error }, 'Error fetching user past registrations')
     return []
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public filtered + paginated tournament lists
+// ---------------------------------------------------------------------------
+
+export const PUBLIC_TOURNAMENTS_PAGE_SIZE = 6
+
+/** Result type for filtered + paginated public tournament queries. */
+type PublicTournamentPage = {
+  tournaments: PublicTournamentListItem[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+/** Builds the Prisma orderBy clause from a sort option. */
+const buildOrderBy = (sort: TournamentSortOption) => {
+  switch (sort) {
+    case 'date_asc':
+      return { startDate: 'asc' as const }
+    case 'date_desc':
+      return { startDate: 'desc' as const }
+    case 'title_asc':
+      return { title: 'asc' as const }
+    case 'title_desc':
+      return { title: 'desc' as const }
+    case 'registrations_desc':
+      // Prisma doesn't support count-based orderBy directly; fallback to startDate desc
+      return { startDate: 'desc' as const }
+  }
+}
+
+/** Fetches PUBLISHED tournaments with search, format/type filters, sort, and pagination. */
+export const getPublishedTournamentsFiltered = async (
+  filters: PublicTournamentFilters,
+): Promise<PublicTournamentPage> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  const { search, format, type, sort, page } = filters
+  const skip = (page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE
+
+  const where = {
+    status: TournamentStatus.PUBLISHED,
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as const } },
+            { game: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+    ...(format ? { format: format as TournamentFormat } : {}),
+    ...(type ? { registrationType: type as RegistrationType } : {}),
+  }
+
+  try {
+    const [rows, total] = await Promise.all([
+      prisma.tournament.findMany({
+        where,
+        orderBy: buildOrderBy(sort),
+        skip,
+        take: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+        select: PUBLIC_LIST_SELECT,
+      }),
+      prisma.tournament.count({ where }),
+    ])
+
+    // For registrations_desc, sort in-memory after fetch
+    const sorted =
+      sort === 'registrations_desc'
+        ? (rows as unknown as PublicTournamentListItem[]).sort(
+            (a, b) => b._count.registrations - a._count.registrations,
+          )
+        : (rows as unknown as PublicTournamentListItem[])
+
+    return {
+      tournaments: sorted,
+      total,
+      page,
+      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+      totalPages: Math.max(1, Math.ceil(total / PUBLIC_TOURNAMENTS_PAGE_SIZE)),
+    }
+  } catch (error) {
+    logger.error({ error }, 'Error fetching filtered published tournaments')
+    return {
+      tournaments: [],
+      total: 0,
+      page,
+      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+      totalPages: 1,
+    }
+  }
+}
+
+/** Fetches ARCHIVED tournaments with search, format/type filters, sort, and pagination. */
+export const getArchivedTournamentsFiltered = async (
+  filters: PublicTournamentFilters,
+): Promise<PublicTournamentPage> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  const { search, format, type, sort, page } = filters
+  const skip = (page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE
+
+  const where = {
+    status: TournamentStatus.ARCHIVED,
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as const } },
+            { game: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+    ...(format ? { format: format as TournamentFormat } : {}),
+    ...(type ? { registrationType: type as RegistrationType } : {}),
+  }
+
+  try {
+    const [rows, total] = await Promise.all([
+      prisma.tournament.findMany({
+        where,
+        orderBy: buildOrderBy(sort),
+        skip,
+        take: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+        select: PUBLIC_LIST_SELECT,
+      }),
+      prisma.tournament.count({ where }),
+    ])
+
+    const sorted =
+      sort === 'registrations_desc'
+        ? (rows as unknown as PublicTournamentListItem[]).sort(
+            (a, b) => b._count.registrations - a._count.registrations,
+          )
+        : (rows as unknown as PublicTournamentListItem[])
+
+    return {
+      tournaments: sorted,
+      total,
+      page,
+      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+      totalPages: Math.max(1, Math.ceil(total / PUBLIC_TOURNAMENTS_PAGE_SIZE)),
+    }
+  } catch (error) {
+    logger.error({ error }, 'Error fetching filtered archived tournaments')
+    return {
+      tournaments: [],
+      total: 0,
+      page,
+      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
+      totalPages: 1,
+    }
   }
 }

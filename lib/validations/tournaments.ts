@@ -319,3 +319,69 @@ export const dissolveTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
   teamId: z.uuid("ID d'équipe invalide."),
 })
+
+// ---------------------------------------------------------------------------
+// Public tournament list filters (URL search params)
+// ---------------------------------------------------------------------------
+
+/** Sort options for the public tournament list pages. */
+export type TournamentSortOption =
+  | 'date_asc'
+  | 'date_desc'
+  | 'title_asc'
+  | 'title_desc'
+  | 'registrations_desc'
+
+/** Parsed and validated filters for the public tournament list pages. */
+export type PublicTournamentFilters = {
+  search: string
+  format: TournamentFormat | ''
+  type: 'FREE' | 'PAID' | ''
+  sort: TournamentSortOption
+  page: number
+}
+
+/** Parse and validate URL search params for the public tournament list pages.
+ *  Falls back to safe defaults for any invalid/missing value. */
+export const parsePublicTournamentFilters = (
+  params: Record<string, string | string[] | undefined>,
+  defaultSort: TournamentSortOption = 'date_asc',
+): PublicTournamentFilters => {
+  const raw = (key: string) => {
+    const v = params[key]
+    return typeof v === 'string' ? v.trim() : ''
+  }
+
+  const search = raw('search').slice(0, 100)
+
+  const formatRaw = raw('format')
+  const format: TournamentFormat | '' =
+    formatRaw === TournamentFormat.SOLO || formatRaw === TournamentFormat.TEAM
+      ? formatRaw
+      : ''
+
+  const typeRaw = raw('type')
+  const type: 'FREE' | 'PAID' | '' =
+    typeRaw === RegistrationType.FREE || typeRaw === RegistrationType.PAID
+      ? typeRaw
+      : ''
+
+  const VALID_SORTS: TournamentSortOption[] = [
+    'date_asc',
+    'date_desc',
+    'title_asc',
+    'title_desc',
+    'registrations_desc',
+  ]
+  const sortRaw = raw('sort')
+  const sort: TournamentSortOption = (
+    VALID_SORTS.includes(sortRaw as TournamentSortOption)
+      ? sortRaw
+      : defaultSort
+  ) as TournamentSortOption
+
+  const pageRaw = Number.parseInt(raw('page'), 10)
+  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? pageRaw : 1
+
+  return { search, format, type, sort, page }
+}
