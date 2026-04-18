@@ -88,9 +88,14 @@ export const getUserById = async (
           select: {
             id: true,
             createdAt: true,
+            status: true,
+            paymentStatus: true,
+            entryFeeAmountSnapshot: true,
+            entryFeeCurrencySnapshot: true,
             tournament: {
               select: {
                 title: true,
+                slug: true,
                 format: true,
                 status: true,
               },
@@ -98,6 +103,17 @@ export const getUserById = async (
             team: {
               select: {
                 name: true,
+              },
+            },
+            payments: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                amount: true,
+                currency: true,
+                status: true,
+                paidAt: true,
+                refundAmount: true,
               },
             },
           },

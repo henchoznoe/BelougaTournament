@@ -8,6 +8,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentFormat,
   TournamentStatus,
@@ -83,12 +85,27 @@ const MOCK_USER_DETAIL = {
     {
       id: 'reg-1',
       createdAt: new Date('2026-01-15'),
+      status: RegistrationStatus.CONFIRMED,
+      paymentStatus: PaymentStatus.PAID,
+      entryFeeAmountSnapshot: 1500,
+      entryFeeCurrencySnapshot: 'chf',
       tournament: {
         title: 'Tournoi Alpha',
+        slug: 'tournoi-alpha',
         format: TournamentFormat.SOLO,
         status: TournamentStatus.PUBLISHED,
       },
       team: null,
+      payments: [
+        {
+          id: 'pay-1',
+          amount: 1500,
+          currency: 'chf',
+          status: PaymentStatus.PAID,
+          paidAt: new Date('2026-01-16'),
+          refundAmount: null,
+        },
+      ],
     },
   ],
 }
