@@ -37,6 +37,7 @@ import {
   joinTeamAndRegister,
   registerForTournament,
 } from '@/lib/actions/tournament-registration'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
@@ -122,9 +123,12 @@ export const TournamentRegistrationForm = ({
     if (format === TournamentFormat.TEAM) {
       if (teamMode === 'create') {
         const trimmed = teamName.trim()
-        if (trimmed.length < 2 || trimmed.length > 30) {
+        if (
+          trimmed.length < VALIDATION_LIMITS.TEAM_NAME_MIN ||
+          trimmed.length > VALIDATION_LIMITS.TEAM_NAME_MAX
+        ) {
           toast.error(
-            "Le nom de l'équipe doit contenir entre 2 et 30 caractères.",
+            `Le nom de l'équipe doit contenir entre ${VALIDATION_LIMITS.TEAM_NAME_MIN} et ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
           )
           return
         }
@@ -139,30 +143,30 @@ export const TournamentRegistrationForm = ({
     startTransition(async () => {
       const fieldValues = buildFieldValues(data, fields)
 
-      let result: ActionState<{ checkoutUrl?: string }>
+      let result: ActionState<{ checkoutUrl: string }>
 
       if (format === TournamentFormat.TEAM) {
         if (teamMode === 'create') {
-          result = (await createTeamAndRegister({
+          result = await createTeamAndRegister({
             tournamentId,
             returnPath: currentPath,
             teamName: teamName.trim(),
             fieldValues,
-          })) as ActionState<{ checkoutUrl?: string }>
+          })
         } else {
-          result = (await joinTeamAndRegister({
+          result = await joinTeamAndRegister({
             tournamentId,
             returnPath: currentPath,
             teamId: selectedTeamId,
             fieldValues,
-          })) as ActionState<{ checkoutUrl?: string }>
+          })
         }
       } else {
-        result = (await registerForTournament({
+        result = await registerForTournament({
           tournamentId,
           returnPath: currentPath,
           fieldValues,
-        })) as ActionState<{ checkoutUrl?: string }>
+        })
       }
 
       if (result.success) {
@@ -321,7 +325,7 @@ export const TournamentRegistrationForm = ({
                 onChange={e => setTeamName(e.target.value)}
                 disabled={isPending}
                 placeholder="Entrez le nom de votre équipe"
-                maxLength={30}
+                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
                 className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
               />
             </div>

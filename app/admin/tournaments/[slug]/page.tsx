@@ -13,7 +13,7 @@ import { Suspense } from 'react'
 import { TournamentOverview } from '@/components/admin/tournaments/tournament-detail'
 import {
   TournamentDetailActions,
-  TournamentStatusBadge,
+  TournamentStatusControl,
 } from '@/components/admin/tournaments/tournament-detail-actions'
 import { TournamentRegistrations } from '@/components/admin/tournaments/tournament-registrations'
 import type { TournamentTab } from '@/components/admin/tournaments/tournament-tabs'
@@ -78,7 +78,7 @@ const AdminTournamentDetailPage = async ({
       ]}
       icon={Trophy}
       title={tournament.title}
-      titleExtra={<TournamentStatusBadge tournament={tournament} />}
+      titleExtra={<TournamentStatusControl tournament={tournament} />}
       headerRight={<TournamentDetailActions tournament={tournament} />}
     >
       <Suspense>

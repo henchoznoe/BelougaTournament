@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { type FieldErrors, useForm } from 'react-hook-form'
+import { type FieldErrors, type Resolver, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { TournamentFormContent } from '@/components/admin/tournaments/form/tournament-form-content'
 import { TournamentFormDates } from '@/components/admin/tournaments/form/tournament-form-dates'
@@ -43,7 +43,6 @@ import {
   updateTournamentSchema,
 } from '@/lib/validations/tournaments'
 import {
-  type FieldType,
   RefundPolicyType,
   RegistrationType,
   TournamentFormat,
@@ -144,10 +143,11 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     reset,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<TournamentFormValues>({
+    // zodResolver cannot statically unify create/update schema types against TournamentFormValues;
+    // cast through unknown to the concrete Resolver type to satisfy react-hook-form's generics.
     resolver: zodResolver(
       isEditing ? updateTournamentSchema : tournamentSchema,
-      // biome-ignore lint/suspicious/noExplicitAny: union of create/update schemas; TournamentFormValues is the common subset
-    ) as any,
+    ) as unknown as Resolver<TournamentFormValues>,
     defaultValues: {
       id: tournament?.id ?? '',
       title: tournament?.title ?? '',
@@ -180,7 +180,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         tournament?.fields.map(f => ({
           id: f.id,
           label: f.label,
-          type: f.type as FieldType,
+          type: f.type,
           required: f.required,
           order: f.order,
         })) ?? [],

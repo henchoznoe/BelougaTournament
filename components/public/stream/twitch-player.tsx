@@ -48,8 +48,7 @@ export const TwitchPlayer = ({
     // Clean up any existing instances
     embedRef.current.innerHTML = ''
 
-    // biome-ignore lint/suspicious/noExplicitAny: Twitch API is loaded globally via external script
-    const Twitch = (window as any).Twitch
+    const Twitch = window.Twitch
     if (!Twitch?.Player) return
 
     // Fallback: If after 8 seconds we haven't received any state, assume offline

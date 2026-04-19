@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 
 /** Schema for promoting a user to ADMIN. */
 export const promoteUserSchema = z.object({
@@ -24,9 +25,12 @@ export const updateUserSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .max(32, 'Le pseudo ne peut pas dépasser 32 caractères.')
-    .refine(v => v === '' || v.length >= 2, {
-      message: 'Le pseudo doit contenir au moins 2 caractères.',
+    .max(
+      VALIDATION_LIMITS.DISPLAY_NAME_MAX,
+      `Le pseudo ne peut pas dépasser ${VALIDATION_LIMITS.DISPLAY_NAME_MAX} caractères.`,
+    )
+    .refine(v => v === '' || v.length >= VALIDATION_LIMITS.DISPLAY_NAME_MIN, {
+      message: `Le pseudo doit contenir au moins ${VALIDATION_LIMITS.DISPLAY_NAME_MIN} caractères.`,
     }),
 })
 

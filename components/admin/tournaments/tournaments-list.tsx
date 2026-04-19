@@ -8,16 +8,18 @@
 
 'use client'
 
-import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
 import {
   applySortToList,
   useListSort,
 } from '@/components/admin/hooks/use-list-sort'
 import { TournamentActionsDropdown } from '@/components/admin/tournaments/tournament-actions-dropdown'
 import { TournamentStatusBadge } from '@/components/admin/tournaments/tournament-status-badge'
+import { AdminPagination } from '@/components/admin/ui/admin-pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -115,8 +117,9 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [page, setPage] = useState(1)
-  const resetPage = useCallback(() => setPage(1), [])
+
+  const { paginate, resetPage } =
+    useClientPagination<TournamentListItem>(PAGE_SIZE)
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
@@ -139,14 +142,25 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
     return applySortToList(result, sort, compareValues, defaultSort)
   }, [tournaments, search, statusFilter, sort])
 
+  const {
+    page,
+    totalPages,
+    paginated,
+    rangeStart,
+    rangeEnd,
+    total,
+    prevPage,
+    nextPage,
+  } = paginate(filtered)
+
   const handleSearch = (value: string) => {
     setSearch(value)
-    setPage(1)
+    resetPage()
   }
 
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value as StatusFilter)
-    setPage(1)
+    resetPage()
   }
 
   const draftCount = tournaments.filter(
@@ -158,13 +172,6 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   const archivedCount = tournaments.filter(
     t => t.status === TournamentStatus.ARCHIVED,
   ).length
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  )
 
   return (
     <>
@@ -363,40 +370,15 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-zinc-500">
-            {(safePage - 1) * PAGE_SIZE + 1}&ndash;
-            {Math.min(safePage * PAGE_SIZE, filtered.length)} sur{' '}
-            {filtered.length}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage <= 1}
-              onClick={() => setPage(p => p - 1)}
-              aria-label="Page précédente"
-              className="text-zinc-400"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="px-2 text-xs text-zinc-400">
-              {safePage} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage >= totalPages}
-              onClick={() => setPage(p => p + 1)}
-              aria-label="Page suivante"
-              className="text-zinc-400"
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPrev={prevPage}
+        onNext={nextPage}
+        rangeStart={rangeStart}
+        rangeEnd={rangeEnd}
+        total={total}
+      />
     </>
   )
 }

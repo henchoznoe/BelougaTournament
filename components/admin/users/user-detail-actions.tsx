@@ -41,6 +41,7 @@ import {
   promoteToAdmin,
   updateUser,
 } from '@/lib/actions/users'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserDetail } from '@/lib/types/user'
 import { cn } from '@/lib/utils/cn'
@@ -206,7 +207,7 @@ export const UserDetailActions = ({
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
               placeholder={user.name}
-              maxLength={32}
+              maxLength={VALIDATION_LIMITS.DISPLAY_NAME_MAX}
             />
           </div>
           <DialogFooter>

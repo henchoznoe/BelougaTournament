@@ -37,6 +37,7 @@ import type {
   TournamentFieldItem,
   TournamentRegistrationItem,
 } from '@/lib/types/tournament'
+import { parseFieldValues } from '@/lib/utils/tournament-helpers'
 import { FieldType } from '@/prisma/generated/prisma/enums'
 
 // ─── Edit Fields Dialog ──────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export const EditFieldsDialog = ({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [values, setValues] = useState<Record<string, string | number>>(
-    registration.fieldValues as Record<string, string | number>,
+    parseFieldValues(registration.fieldValues),
   )
 
   const handleSave = () => {

@@ -109,11 +109,13 @@ export const TournamentFormFields = ({
               {/* Type */}
               <Select
                 value={watch(`fields.${index}.type`)}
-                onValueChange={val =>
-                  setValue(`fields.${index}.type`, val as FieldType, {
-                    shouldValidate: true,
-                  })
-                }
+                onValueChange={val => {
+                  if (val === FieldType.TEXT || val === FieldType.NUMBER) {
+                    setValue(`fields.${index}.type`, val, {
+                      shouldValidate: true,
+                    })
+                  }
+                }}
                 disabled={fieldsLocked}
               >
                 <SelectTrigger

@@ -31,12 +31,17 @@ interface TournamentTabNavProps {
   format: TournamentFormat
 }
 
+const VALID_TABS = new Set<string>(['overview', 'registrations', 'teams'])
+const isValidTab = (tab: string | null): tab is TournamentTab =>
+  tab !== null && VALID_TABS.has(tab)
+
 export const TournamentTabNav = ({ format }: TournamentTabNavProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const currentTab = (searchParams.get('tab') as TournamentTab) || 'overview'
+  const rawTab = searchParams.get('tab')
+  const currentTab: TournamentTab = isValidTab(rawTab) ? rawTab : 'overview'
 
   const handleTabChange = useCallback(
     (tab: TournamentTab) => {

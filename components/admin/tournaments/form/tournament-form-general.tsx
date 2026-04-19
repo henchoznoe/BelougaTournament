@@ -26,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 
 interface TournamentFormGeneralProps {
   register: UseFormRegister<TournamentFormValues>
@@ -54,7 +55,7 @@ export const TournamentFormGeneral = ({
           <Input
             id="tournament-title"
             placeholder="Nom du tournoi"
-            maxLength={200}
+            maxLength={VALIDATION_LIMITS.TITLE_MAX}
             className={INPUT_CLASSES}
             {...register('title')}
           />

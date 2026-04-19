@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { optionalUrl } from '@/lib/validations/shared'
 
 /** Schema for creating or updating a sponsor. */
@@ -15,7 +16,10 @@ export const sponsorSchema = z.object({
     .string()
     .trim()
     .min(1, 'Le nom est requis.')
-    .max(100, 'Le nom ne peut pas dépasser 100 caractères.'),
+    .max(
+      VALIDATION_LIMITS.SPONSOR_NAME_MAX,
+      `Le nom ne peut pas dépasser ${VALIDATION_LIMITS.SPONSOR_NAME_MAX} caractères.`,
+    ),
   imageUrls: z
     .array(z.url("URL d'image invalide."))
     .min(1, 'Au moins une image est requise.'),

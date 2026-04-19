@@ -68,3 +68,14 @@ export type UserDetail = {
   lastLoginAt: Date | null
   registrations: UserRegistrationRow[]
 }
+
+/** User profile data displayed on the public profile page. */
+export type UserProfile = {
+  name: string
+  displayName: string
+  email: string
+  image: string | null
+  role: Role
+  createdAt: Date
+  lastLoginAt: Date | null
+}

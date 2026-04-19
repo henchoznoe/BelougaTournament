@@ -7,7 +7,10 @@
  */
 
 import { z } from 'zod'
-import { TWITCH_USERNAME_MAX_LENGTH } from '@/lib/config/constants'
+import {
+  TWITCH_USERNAME_MAX_LENGTH,
+  VALIDATION_LIMITS,
+} from '@/lib/config/constants'
 import { optionalUrl } from '@/lib/validations/shared'
 
 /** Optional trimmed text field with a max length. */
@@ -22,12 +25,12 @@ export const settingsSchema = z.object({
   instagramUrl: optionalUrl,
   tiktokUrl: optionalUrl,
   youtubeUrl: optionalUrl,
-  feature1Title: optionalText(50),
-  feature1Description: optionalText(200),
-  feature2Title: optionalText(50),
-  feature2Description: optionalText(200),
-  feature3Title: optionalText(50),
-  feature3Description: optionalText(200),
+  feature1Title: optionalText(VALIDATION_LIMITS.FEATURE_TITLE_MAX),
+  feature1Description: optionalText(VALIDATION_LIMITS.FEATURE_DESCRIPTION_MAX),
+  feature2Title: optionalText(VALIDATION_LIMITS.FEATURE_TITLE_MAX),
+  feature2Description: optionalText(VALIDATION_LIMITS.FEATURE_DESCRIPTION_MAX),
+  feature3Title: optionalText(VALIDATION_LIMITS.FEATURE_TITLE_MAX),
+  feature3Description: optionalText(VALIDATION_LIMITS.FEATURE_DESCRIPTION_MAX),
 })
 
 export type SettingsInput = z.infer<typeof settingsSchema>

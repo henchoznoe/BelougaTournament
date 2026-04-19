@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateRegistrationFields } from '@/lib/actions/tournament-registration'
 import { updateTeamName } from '@/lib/actions/tournament-team'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import type {
   TournamentFieldItem,
   UserRegistrationItem,
@@ -230,7 +231,7 @@ export const RegistrationEditDialog = ({
                 disabled={isPending}
                 value={teamName}
                 onChange={e => setTeamName(e.target.value)}
-                maxLength={30}
+                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
                 className="h-9 border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
               />
             </div>

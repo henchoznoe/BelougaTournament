@@ -8,21 +8,17 @@
 
 'use client'
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Plus,
-  Search,
-} from 'lucide-react'
+import { ExternalLink, Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
 import {
   applySortToList,
   useListSort,
 } from '@/components/admin/hooks/use-list-sort'
 import { SponsorActionsDropdown } from '@/components/admin/sponsors/sponsor-actions-dropdown'
+import { AdminPagination } from '@/components/admin/ui/admin-pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -79,8 +75,8 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [page, setPage] = useState(1)
-  const resetPage = useCallback(() => setPage(1), [])
+
+  const { paginate, resetPage } = useClientPagination<Sponsor>(PAGE_SIZE)
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
@@ -100,25 +96,20 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
     return applySortToList(result, sort, compareValues, defaultSort)
   }, [sponsors, search, statusFilter, sort])
 
+  const { page, totalPages, paginated, prevPage, nextPage } = paginate(filtered)
+
   const handleSearch = (value: string) => {
     setSearch(value)
-    setPage(1)
+    resetPage()
   }
 
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value as StatusFilter)
-    setPage(1)
+    resetPage()
   }
 
   const enabledCount = sponsors.filter(s => s.enabled).length
   const disabledCount = sponsors.filter(s => !s.enabled).length
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  )
 
   return (
     <>
@@ -276,35 +267,12 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-zinc-500">
-          <span>
-            Page {safePage} sur {totalPages}
-          </span>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage <= 1}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              aria-label="Page précédente"
-              className="text-zinc-400 hover:text-zinc-200"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage >= totalPages}
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              aria-label="Page suivante"
-              className="text-zinc-400 hover:text-zinc-200"
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPrev={prevPage}
+        onNext={nextPage}
+      />
     </>
   )
 }

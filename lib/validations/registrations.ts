@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { fieldValuesSchema } from '@/lib/validations/shared'
 
 /** Schema for admin-deleting a registration. */
@@ -43,8 +44,14 @@ export const adminUpdateTeamNameSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Le nom d'équipe doit contenir au moins 2 caractères.")
-    .max(30, "Le nom d'équipe ne peut pas dépasser 30 caractères."),
+    .min(
+      VALIDATION_LIMITS.TEAM_NAME_MIN,
+      `Le nom d'équipe doit contenir au moins ${VALIDATION_LIMITS.TEAM_NAME_MIN} caractères.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_NAME_MAX,
+      `Le nom d'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
+    ),
 })
 
 /** Schema for admin-deleting a team logo. */

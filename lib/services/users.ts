@@ -11,12 +11,14 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
-import type { UserDetail, UserRow } from '@/lib/types/user'
+import type { UserDetail, UserProfile, UserRow } from '@/lib/types/user'
 
 /** Fetches the profile data for a given user ID. Returns null if not found. */
-export const getUserProfile = async (userId: string) => {
+export const getUserProfile = async (
+  userId: string,
+): Promise<UserProfile | null> => {
   try {
-    return await prisma.user.findUnique({
+    return (await prisma.user.findUnique({
       where: { id: userId },
       select: {
         name: true,
@@ -27,7 +29,7 @@ export const getUserProfile = async (userId: string) => {
         createdAt: true,
         lastLoginAt: true,
       },
-    })
+    })) as UserProfile | null
   } catch (error) {
     logger.error({ error }, 'Error fetching user profile')
     return null
@@ -120,7 +122,7 @@ export const getUserById = async (
         },
       },
     })
-    return user as unknown as UserDetail | null
+    return user as UserDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching user by ID')
     return null

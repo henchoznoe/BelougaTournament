@@ -9,6 +9,25 @@
 import { DAY_IN_MS } from '@/lib/config/constants'
 import { FieldType, RefundPolicyType } from '@/prisma/generated/prisma/enums'
 
+/** Type alias for parsed dynamic field values from Prisma JSON columns. */
+type FieldValues = Record<string, string | number>
+
+/**
+ * Safely parses a Prisma `Json` field value into a typed `FieldValues` record.
+ * Returns an empty object for null/undefined/non-object values.
+ */
+export const parseFieldValues = (raw: unknown): FieldValues => {
+  if (
+    raw === null ||
+    raw === undefined ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) {
+    return {}
+  }
+  return raw as FieldValues
+}
+
 /** Validates dynamic field values against tournament field definitions. */
 export const validateFieldValues = (
   fields: { label: string; type: string; required: boolean }[],

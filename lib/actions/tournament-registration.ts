@@ -502,13 +502,17 @@ export const updateRegistrationFields = authenticatedAction({
 /** Registers the current user for a tournament (solo format). */
 export const registerForTournament = authenticatedAction({
   schema: registerForTournamentSchema,
-  handler: async (data, session): Promise<ActionState> => {
+  handler: async (
+    data,
+    session,
+  ): Promise<ActionState<{ checkoutUrl: string }>> => {
     // 1. Shared pre-checks (ban, tournament, window, duplicate)
     const result = await fetchTournamentForRegistration(
       session.user.id,
       data.tournamentId,
     )
-    if ('error' in result) return result.error
+    if ('error' in result)
+      return result.error as ActionState<{ checkoutUrl: string }>
     const { tournament, existingRegistration } = result
 
     // 2. Reject TEAM format — use createTeamAndRegister or joinTeamAndRegister instead
@@ -589,13 +593,17 @@ export const registerForTournament = authenticatedAction({
 /** Creates a team and registers the current user as captain. */
 export const createTeamAndRegister = authenticatedAction({
   schema: createTeamSchema,
-  handler: async (data, session): Promise<ActionState> => {
+  handler: async (
+    data,
+    session,
+  ): Promise<ActionState<{ checkoutUrl: string }>> => {
     // 1. Shared pre-checks (ban, tournament, window, duplicate)
     const result = await fetchTournamentForRegistration(
       session.user.id,
       data.tournamentId,
     )
-    if ('error' in result) return result.error
+    if ('error' in result)
+      return result.error as ActionState<{ checkoutUrl: string }>
     const { tournament, existingRegistration } = result
 
     // 2. Reject SOLO format
@@ -689,13 +697,17 @@ export const createTeamAndRegister = authenticatedAction({
 /** Joins an existing team and registers the current user. */
 export const joinTeamAndRegister = authenticatedAction({
   schema: joinTeamSchema,
-  handler: async (data, session): Promise<ActionState> => {
+  handler: async (
+    data,
+    session,
+  ): Promise<ActionState<{ checkoutUrl: string }>> => {
     // 1. Shared pre-checks (ban, tournament, window, duplicate)
     const result = await fetchTournamentForRegistration(
       session.user.id,
       data.tournamentId,
     )
-    if ('error' in result) return result.error
+    if ('error' in result)
+      return result.error as ActionState<{ checkoutUrl: string }>
     const { tournament, existingRegistration } = result
 
     // 2. Reject SOLO format

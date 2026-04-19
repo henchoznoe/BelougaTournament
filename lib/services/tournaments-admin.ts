@@ -105,7 +105,7 @@ export const getTournamentBySlug = async (
         },
       },
     })
-    return row as unknown as TournamentDetail | null
+    return row as TournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament by slug')
     return null
@@ -138,7 +138,7 @@ export const getTournamentById = async (
         },
       },
     })
-    return row as unknown as TournamentDetail | null
+    return row as TournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament by ID')
     return null

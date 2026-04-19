@@ -1,6 +1,6 @@
 /**
  * File: components/admin/tournaments/tournament-detail-actions.tsx
- * Description: Tournament status badge with transitions and delete/edit action buttons.
+ * Description: Interactive tournament status control with transitions and delete/edit action buttons.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -57,15 +57,15 @@ const STATUS_TRANSITIONS: Record<
   ],
 } as const
 
-// ─── Status Badge (clickable with transitions) ──────────────────────────────
+// ─── Status Control (clickable badge with status transitions) ──────────────────────────────
 
-interface TournamentStatusBadgeProps {
+interface TournamentStatusControlProps {
   tournament: TournamentDetail
 }
 
-export const TournamentStatusBadge = ({
+export const TournamentStatusControl = ({
   tournament,
-}: TournamentStatusBadgeProps) => {
+}: TournamentStatusControlProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)

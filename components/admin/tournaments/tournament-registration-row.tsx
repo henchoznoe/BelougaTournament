@@ -67,6 +67,7 @@ import {
   adminDeleteTeamLogo,
   adminUpdateTeamName,
 } from '@/lib/actions/registrations-team'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type {
   TeamItem,
@@ -76,6 +77,7 @@ import type {
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
+import { parseFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -375,7 +377,7 @@ const RowActions = ({
                 id="admin-rename-team"
                 value={newTeamName}
                 onChange={e => setNewTeamName(e.target.value)}
-                maxLength={30}
+                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
                 disabled={isPending}
               />
             </div>
@@ -391,7 +393,7 @@ const RowActions = ({
                 onClick={handleRenameTeam}
                 disabled={
                   isPending ||
-                  newTeamName.trim().length < 2 ||
+                  newTeamName.trim().length < VALIDATION_LIMITS.TEAM_NAME_MIN ||
                   newTeamName.trim() === registration.team.name
                 }
               >
@@ -434,10 +436,7 @@ export const RegistrationRow = ({
   onToggleExpand,
 }: RegistrationRowProps) => {
   const displayName = registration.user.displayName || registration.user.name
-  const fieldValues = registration.fieldValues as Record<
-    string,
-    string | number
-  >
+  const fieldValues = parseFieldValues(registration.fieldValues)
 
   return (
     <>

@@ -104,11 +104,14 @@ export const TournamentFormEntry = ({
             </Label>
             <Select
               value={watchRegistrationType}
-              onValueChange={val =>
-                setValue('registrationType', val as RegistrationType, {
-                  shouldValidate: true,
-                })
-              }
+              onValueChange={val => {
+                if (
+                  val === RegistrationType.FREE ||
+                  val === RegistrationType.PAID
+                ) {
+                  setValue('registrationType', val, { shouldValidate: true })
+                }
+              }}
               disabled={isEditing}
             >
               <SelectTrigger

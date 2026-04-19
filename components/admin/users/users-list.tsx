@@ -8,16 +8,17 @@
 
 'use client'
 
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
 import {
   applySortToList,
   useListSort,
 } from '@/components/admin/hooks/use-list-sort'
+import { AdminPagination } from '@/components/admin/ui/admin-pagination'
 import { UserActionsDropdown } from '@/components/admin/users/user-actions-dropdown'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RoleBadge } from '@/components/ui/role-badge'
 import {
@@ -81,8 +82,8 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
-  const [page, setPage] = useState(1)
-  const resetPage = useCallback(() => setPage(1), [])
+
+  const { paginate, resetPage } = useClientPagination<UserRow>(PAGE_SIZE)
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
@@ -106,25 +107,31 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
     return applySortToList(result, sort, compareValues, defaultSort)
   }, [users, search, roleFilter, sort])
 
+  const {
+    page,
+    totalPages,
+    paginated,
+    rangeStart,
+    rangeEnd,
+    total,
+    prevPage,
+    nextPage,
+  } = paginate(filtered)
+
   const handleSearch = (value: string) => {
     setSearch(value)
-    setPage(1)
+    resetPage()
   }
 
   const handleRoleFilter = (value: string) => {
-    setRoleFilter(value as RoleFilter)
-    setPage(1)
+    if (value === 'all' || value === Role.ADMIN || value === Role.USER) {
+      setRoleFilter(value)
+    }
+    resetPage()
   }
 
   const adminCount = users.filter(t => t.role === Role.ADMIN).length
   const userCount = users.filter(t => t.role === Role.USER).length
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  )
 
   return (
     <>
@@ -287,40 +294,15 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-zinc-500">
-            {(safePage - 1) * PAGE_SIZE + 1}&ndash;
-            {Math.min(safePage * PAGE_SIZE, filtered.length)} sur{' '}
-            {filtered.length}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage <= 1}
-              onClick={() => setPage(p => p - 1)}
-              aria-label="Page précédente"
-              className="text-zinc-400"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="px-2 text-xs text-zinc-400">
-              {safePage} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={safePage >= totalPages}
-              onClick={() => setPage(p => p + 1)}
-              aria-label="Page suivante"
-              className="text-zinc-400"
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPrev={prevPage}
+        onNext={nextPage}
+        rangeStart={rangeStart}
+        rangeEnd={rangeEnd}
+        total={total}
+      />
     </>
   )
 }

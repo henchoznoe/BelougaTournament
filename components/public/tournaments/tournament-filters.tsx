@@ -106,9 +106,16 @@ export const TournamentFilters = ({
         {/* Format filter */}
         <Select
           value={filters.format || 'all'}
-          onValueChange={v =>
-            navigate({ format: v === 'all' ? '' : (v as TournamentFormat) })
-          }
+          onValueChange={v => {
+            if (v === 'all') {
+              navigate({ format: '' })
+            } else if (
+              v === TournamentFormat.SOLO ||
+              v === TournamentFormat.TEAM
+            ) {
+              navigate({ format: v })
+            }
+          }}
         >
           <SelectTrigger
             aria-label="Filtrer par format"
@@ -127,9 +134,16 @@ export const TournamentFilters = ({
         {/* Type filter */}
         <Select
           value={filters.type || 'all'}
-          onValueChange={v =>
-            navigate({ type: v === 'all' ? '' : (v as 'FREE' | 'PAID') })
-          }
+          onValueChange={v => {
+            if (v === 'all') {
+              navigate({ type: '' })
+            } else if (
+              v === RegistrationType.FREE ||
+              v === RegistrationType.PAID
+            ) {
+              navigate({ type: v })
+            }
+          }}
         >
           <SelectTrigger
             aria-label="Filtrer par type d'inscription"

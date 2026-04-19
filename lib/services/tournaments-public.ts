@@ -172,7 +172,7 @@ export const getPublicTournamentBySlug = async (
         },
       },
     })
-    return row as unknown as PublicTournamentDetail | null
+    return row as PublicTournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching public tournament by slug')
     return null

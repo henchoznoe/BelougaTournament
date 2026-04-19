@@ -10,6 +10,7 @@ import { z } from 'zod'
 import {
   ENTRY_FEE_MAX_AMOUNT,
   ENTRY_FEE_MIN_AMOUNT,
+  VALIDATION_LIMITS,
 } from '@/lib/config/constants'
 import {
   fieldValuesSchema,
@@ -31,12 +32,18 @@ export const toornamentStageSchema = z.object({
     .string()
     .trim()
     .min(1, 'Le nom du stage est requis.')
-    .max(30, 'Le nom du stage ne peut pas dépasser 30 caractères.'),
+    .max(
+      VALIDATION_LIMITS.STAGE_NAME_MAX,
+      `Le nom du stage ne peut pas dépasser ${VALIDATION_LIMITS.STAGE_NAME_MAX} caractères.`,
+    ),
   stageId: z
     .string()
     .trim()
     .min(1, "L'ID du stage Toornament est requis.")
-    .max(200, "L'ID du stage ne peut pas dépasser 200 caractères."),
+    .max(
+      VALIDATION_LIMITS.EXTERNAL_ID_MAX,
+      `L'ID du stage ne peut pas dépasser ${VALIDATION_LIMITS.EXTERNAL_ID_MAX} caractères.`,
+    ),
   number: z.number().int().min(0, "L'ordre doit être positif."),
 })
 
@@ -47,7 +54,10 @@ export const tournamentFieldSchema = z.object({
     .string()
     .trim()
     .min(1, 'Le libellé est requis.')
-    .max(100, 'Le libellé ne peut pas dépasser 100 caractères.'),
+    .max(
+      VALIDATION_LIMITS.FIELD_LABEL_MAX,
+      `Le libellé ne peut pas dépasser ${VALIDATION_LIMITS.FIELD_LABEL_MAX} caractères.`,
+    ),
   type: z.enum([FieldType.TEXT, FieldType.NUMBER], {
     message: 'Le type doit être TEXT ou NUMBER.',
   }),
@@ -61,12 +71,18 @@ const baseTournamentFields = {
     .string()
     .trim()
     .min(1, 'Le titre est requis.')
-    .max(200, 'Le titre ne peut pas dépasser 200 caractères.'),
+    .max(
+      VALIDATION_LIMITS.TITLE_MAX,
+      `Le titre ne peut pas dépasser ${VALIDATION_LIMITS.TITLE_MAX} caractères.`,
+    ),
   slug: z
     .string()
     .trim()
     .min(1, 'Le slug est requis.')
-    .max(200, 'Le slug ne peut pas dépasser 200 caractères.')
+    .max(
+      VALIDATION_LIMITS.SLUG_MAX,
+      `Le slug ne peut pas dépasser ${VALIDATION_LIMITS.SLUG_MAX} caractères.`,
+    )
     .regex(
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
@@ -75,7 +91,10 @@ const baseTournamentFields = {
     .string()
     .trim()
     .min(1, 'La description est requise.')
-    .max(15000, 'La description ne peut pas dépasser 15000 caractères.'),
+    .max(
+      VALIDATION_LIMITS.DESCRIPTION_MAX,
+      `La description ne peut pas dépasser ${VALIDATION_LIMITS.DESCRIPTION_MAX} caractères.`,
+    ),
   startDate: z
     .string()
     .min(1, 'La date de début est requise.')
@@ -103,7 +122,10 @@ const baseTournamentFields = {
   maxTeams: z
     .number()
     .int()
-    .min(2, 'Le nombre maximum doit être au moins 2.')
+    .min(
+      VALIDATION_LIMITS.MAX_TEAMS_MIN,
+      `Le nombre maximum doit être au moins ${VALIDATION_LIMITS.MAX_TEAMS_MIN}.`,
+    )
     .nullable(),
   format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
     message: 'Le format doit être SOLO ou TEAM.',
@@ -111,24 +133,39 @@ const baseTournamentFields = {
   teamSize: z
     .number()
     .int()
-    .min(1, 'La taille doit être au moins 1.')
-    .max(20, 'La taille ne peut pas dépasser 20.'),
+    .min(
+      VALIDATION_LIMITS.TEAM_SIZE_MIN,
+      `La taille doit être au moins ${VALIDATION_LIMITS.TEAM_SIZE_MIN}.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_SIZE_MAX,
+      `La taille ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_SIZE_MAX}.`,
+    ),
   game: z
     .string()
     .trim()
-    .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
+    .max(
+      VALIDATION_LIMITS.GAME_MAX,
+      `Le jeu ne peut pas dépasser ${VALIDATION_LIMITS.GAME_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   rules: z
     .string()
     .trim()
-    .max(30000, 'Les règles ne peuvent pas dépasser 30000 caractères.')
+    .max(
+      VALIDATION_LIMITS.RULES_MAX,
+      `Les règles ne peuvent pas dépasser ${VALIDATION_LIMITS.RULES_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   prize: z
     .string()
     .trim()
-    .max(5000, 'Les prix ne peuvent pas dépasser 5000 caractères.')
+    .max(
+      VALIDATION_LIMITS.PRIZE_MAX,
+      `Les prix ne peuvent pas dépasser ${VALIDATION_LIMITS.PRIZE_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   registrationType: z.enum([RegistrationType.FREE, RegistrationType.PAID], {
@@ -153,13 +190,22 @@ const baseTournamentFields = {
   refundDeadlineDays: z
     .number()
     .int()
-    .min(1, 'Le délai de remboursement doit être d\u2019au moins 1 jour.')
-    .max(90, 'Le délai de remboursement ne peut pas dépasser 90 jours.')
+    .min(
+      VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS,
+      `Le délai de remboursement doit être d\u2019au moins ${VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS} jour.`,
+    )
+    .max(
+      VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS,
+      `Le délai de remboursement ne peut pas dépasser ${VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS} jours.`,
+    )
     .nullable(),
   toornamentId: z
     .string()
     .trim()
-    .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
+    .max(
+      VALIDATION_LIMITS.EXTERNAL_ID_MAX,
+      `L'ID Toornament ne peut pas dépasser ${VALIDATION_LIMITS.EXTERNAL_ID_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   imageUrls: z.array(z.url('URL invalide.')).default([]),
@@ -305,8 +351,14 @@ export const createTeamSchema = z.object({
   teamName: z
     .string()
     .trim()
-    .min(2, "Le nom de l'équipe doit contenir au moins 2 caractères.")
-    .max(30, "Le nom de l'équipe ne peut pas dépasser 30 caractères."),
+    .min(
+      VALIDATION_LIMITS.TEAM_NAME_MIN,
+      `Le nom de l'équipe doit contenir au moins ${VALIDATION_LIMITS.TEAM_NAME_MIN} caractères.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_NAME_MAX,
+      `Le nom de l'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
+    ),
   fieldValues: fieldValuesSchema,
 })
 
@@ -333,8 +385,14 @@ export const updateTeamNameSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Le nom d'équipe doit contenir au moins 2 caractères.")
-    .max(30, "Le nom d'équipe ne peut pas dépasser 30 caractères."),
+    .min(
+      VALIDATION_LIMITS.TEAM_NAME_MIN,
+      `Le nom d'équipe doit contenir au moins ${VALIDATION_LIMITS.TEAM_NAME_MIN} caractères.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_NAME_MAX,
+      `Le nom d'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
+    ),
 })
 
 // ---------------------------------------------------------------------------
@@ -386,7 +444,7 @@ export const parsePublicTournamentFilters = (
     return typeof v === 'string' ? v.trim() : ''
   }
 
-  const search = raw('search').slice(0, 100)
+  const search = raw('search').slice(0, VALIDATION_LIMITS.SEARCH_QUERY_MAX)
 
   const formatRaw = raw('format')
   const format: TournamentFormat | '' =

@@ -10,8 +10,9 @@
 
 import { CreditCard, Search } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
+import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
 import { RegistrationRow } from '@/components/admin/tournaments/tournament-registration-row'
-import { Button } from '@/components/ui/button'
+import { AdminPagination } from '@/components/admin/ui/admin-pagination'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -32,6 +33,7 @@ import type {
   TournamentDetail,
   TournamentRegistrationItem,
 } from '@/lib/types/tournament'
+import { parseFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -59,8 +61,10 @@ export const TournamentRegistrations = ({
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [paymentFilter, setPaymentFilter] = useState<string>('all')
-  const [page, setPage] = useState(0)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const { paginate, resetPage } =
+    useClientPagination<TournamentRegistrationItem>(PAGE_SIZE)
 
   const isTeam = tournament.format === TournamentFormat.TEAM
   const isPaid = tournament.registrationType === RegistrationType.PAID
@@ -87,24 +91,32 @@ export const TournamentRegistrations = ({
     return result
   }, [registrations, search, statusFilter, paymentFilter])
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const { page, totalPages, paginated, prevPage, nextPage } = paginate(filtered)
 
   // Reset page when filters change
-  const handleSearch = useCallback((value: string) => {
-    setSearch(value)
-    setPage(0)
-  }, [])
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearch(value)
+      resetPage()
+    },
+    [resetPage],
+  )
 
-  const handleStatusFilter = useCallback((value: string) => {
-    setStatusFilter(value)
-    setPage(0)
-  }, [])
+  const handleStatusFilter = useCallback(
+    (value: string) => {
+      setStatusFilter(value)
+      resetPage()
+    },
+    [resetPage],
+  )
 
-  const handlePaymentFilter = useCallback((value: string) => {
-    setPaymentFilter(value)
-    setPage(0)
-  }, [])
+  const handlePaymentFilter = useCallback(
+    (value: string) => {
+      setPaymentFilter(value)
+      resetPage()
+    },
+    [resetPage],
+  )
 
   const toggleExpanded = (id: string) => {
     setExpandedId(prev => (prev === id ? null : id))
@@ -214,8 +226,7 @@ export const TournamentRegistrations = ({
                   const isExpanded = expandedId === reg.id
                   const hasFieldValues =
                     fields.length > 0 &&
-                    Object.keys(reg.fieldValues as Record<string, unknown>)
-                      .length > 0
+                    Object.keys(parseFieldValues(reg.fieldValues)).length > 0
                   return (
                     <RegistrationRow
                       key={reg.id}
@@ -238,31 +249,12 @@ export const TournamentRegistrations = ({
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-zinc-500">
-            Page {page + 1} / {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => p - 1)}
-              disabled={page === 0}
-            >
-              Précédent
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => p + 1)}
-              disabled={page >= totalPages - 1}
-            >
-              Suivant
-            </Button>
-          </div>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPrev={prevPage}
+        onNext={nextPage}
+      />
     </div>
   )
 }

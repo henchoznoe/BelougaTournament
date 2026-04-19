@@ -78,11 +78,14 @@ export const TournamentFormGame = ({
           </Label>
           <Select
             value={watchFormat}
-            onValueChange={val =>
-              setValue('format', val as TournamentFormat, {
-                shouldValidate: true,
-              })
-            }
+            onValueChange={val => {
+              if (
+                val === TournamentFormat.SOLO ||
+                val === TournamentFormat.TEAM
+              ) {
+                setValue('format', val, { shouldValidate: true })
+              }
+            }}
             disabled={isEditing}
           >
             <SelectTrigger
