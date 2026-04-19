@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { unregisterFromTournament } from '@/lib/actions/tournaments'
+import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { formatDate } from '@/lib/utils/formatting'

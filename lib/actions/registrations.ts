@@ -14,9 +14,9 @@ import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
-import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
+import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
@@ -292,8 +292,6 @@ export const adminRefundRegistration = authenticatedAction({
       }
     }
 
-    const stripe = getStripe()
-
     // DB-first pattern: update DB to REFUNDED state before calling Stripe
     // Track team state for potential Stripe revert (TEAM format only)
     let teamRevertInfo: {
@@ -412,83 +410,48 @@ export const adminRefundRegistration = authenticatedAction({
     }
 
     // Issue Stripe refund after DB update; revert DB on failure
-    try {
-      await stripe.refunds.create(
-        latestPayment.stripePaymentIntentId
-          ? {
-              payment_intent: latestPayment.stripePaymentIntentId,
-              reason: 'requested_by_customer',
+    await issueStripeRefundAfterDbUpdate({
+      registrationId: registration.id,
+      latestPayment,
+      previousPaymentStatus: PaymentStatus.PAID,
+      idempotencyPrefix: 'admin-refund',
+      onRevert: teamRevertInfo
+        ? async tx => {
+            if (teamRevertInfo.teamWasDeleted) {
+              await tx.team.create({
+                data: {
+                  id: teamRevertInfo.teamId,
+                  name: teamRevertInfo.teamName,
+                  tournamentId: teamRevertInfo.tournamentId,
+                  captainId: teamRevertInfo.captainId,
+                  isFull: teamRevertInfo.isFull,
+                },
+              })
+            } else {
+              await tx.team.update({
+                where: { id: teamRevertInfo.teamId },
+                data: {
+                  captainId: teamRevertInfo.captainId,
+                  isFull: teamRevertInfo.isFull,
+                },
+              })
             }
-          : {
-              charge: latestPayment.stripeChargeId ?? undefined,
-              reason: 'requested_by_customer',
-            },
-        {
-          idempotencyKey: `admin-refund-${registration.id}-${latestPayment.id}`,
-        },
-      )
-    } catch (error) {
-      // Stripe refund failed — revert DB records back to pre-refund state
-      logger.error(
-        { error, registrationId: registration.id },
-        'Admin Stripe refund failed, reverting DB state',
-      )
-      await prisma.$transaction(async tx => {
-        await tx.tournamentRegistration.update({
-          where: { id: registration.id },
-          data: {
-            status: RegistrationStatus.CONFIRMED,
-            paymentStatus: PaymentStatus.PAID,
-            cancelledAt: null,
-          },
-        })
-        await tx.payment.update({
-          where: { id: latestPayment.id },
-          data: {
-            status: PaymentStatus.PAID,
-            refundAmount: null,
-            refundedAt: null,
-          },
-        })
 
-        // Restore team membership if it was removed during the DB-first phase
-        if (teamRevertInfo) {
-          if (teamRevertInfo.teamWasDeleted) {
-            await tx.team.create({
+            await tx.teamMember.create({
               data: {
-                id: teamRevertInfo.teamId,
-                name: teamRevertInfo.teamName,
-                tournamentId: teamRevertInfo.tournamentId,
-                captainId: teamRevertInfo.captainId,
-                isFull: teamRevertInfo.isFull,
+                teamId: teamRevertInfo.teamId,
+                userId: teamRevertInfo.userId,
+                joinedAt: teamRevertInfo.joinedAt,
               },
             })
-          } else {
-            await tx.team.update({
-              where: { id: teamRevertInfo.teamId },
-              data: {
-                captainId: teamRevertInfo.captainId,
-                isFull: teamRevertInfo.isFull,
-              },
+
+            await tx.tournamentRegistration.update({
+              where: { id: registration.id },
+              data: { teamId: teamRevertInfo.teamId },
             })
           }
-
-          await tx.teamMember.create({
-            data: {
-              teamId: teamRevertInfo.teamId,
-              userId: teamRevertInfo.userId,
-              joinedAt: teamRevertInfo.joinedAt,
-            },
-          })
-
-          await tx.tournamentRegistration.update({
-            where: { id: registration.id },
-            data: { teamId: teamRevertInfo.teamId },
-          })
-        }
-      })
-      throw error
-    }
+        : undefined,
+    })
 
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')

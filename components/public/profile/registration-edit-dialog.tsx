@@ -25,10 +25,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  updateRegistrationFields,
-  updateTeamName,
-} from '@/lib/actions/tournaments'
+import { updateRegistrationFields } from '@/lib/actions/tournament-registration'
+import { updateTeamName } from '@/lib/actions/tournament-team'
 import type {
   TournamentFieldItem,
   UserRegistrationItem,

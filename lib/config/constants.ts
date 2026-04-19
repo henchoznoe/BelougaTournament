@@ -85,3 +85,17 @@ export const CACHE_TAGS = {
   TOURNAMENTS: 'tournaments',
   USERS: 'users',
 } as const
+
+/** Common time durations in milliseconds. */
+export const SECOND_IN_MS = 1000
+export const MINUTE_IN_MS = SECOND_IN_MS * 60
+const HOUR_IN_MS = MINUTE_IN_MS * 60
+export const DAY_IN_MS = HOUR_IN_MS * 24
+
+/** Maximum upload file sizes in bytes. */
+export const MAX_ADMIN_UPLOAD_SIZE = 5 * 1024 * 1024 // 5 MB
+export const MAX_TEAM_LOGO_SIZE = 2 * 1024 * 1024 // 2 MB
+
+/** Entry fee amount bounds in centimes. */
+export const ENTRY_FEE_MIN_AMOUNT = 100 // 1 CHF
+export const ENTRY_FEE_MAX_AMOUNT = 100_000 // 1000 CHF

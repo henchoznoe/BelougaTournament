@@ -8,6 +8,10 @@
 
 import { z } from 'zod'
 import {
+  ENTRY_FEE_MAX_AMOUNT,
+  ENTRY_FEE_MIN_AMOUNT,
+} from '@/lib/config/constants'
+import {
   fieldValuesSchema,
   optionalUrl,
   returnPathSchema,
@@ -133,8 +137,11 @@ const baseTournamentFields = {
   entryFeeAmount: z
     .number()
     .int()
-    .min(100, "Le prix d'entrée doit être d'au moins 1 CHF.")
-    .max(100000, "Le prix d'entrée ne peut pas dépasser 1000 CHF.")
+    .min(ENTRY_FEE_MIN_AMOUNT, "Le prix d'entrée doit être d'au moins 1 CHF.")
+    .max(
+      ENTRY_FEE_MAX_AMOUNT,
+      "Le prix d'entrée ne peut pas dépasser 1000 CHF.",
+    )
     .nullable(),
   entryFeeCurrency: z.literal('CHF'),
   refundPolicyType: z.enum(

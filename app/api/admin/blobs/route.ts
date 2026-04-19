@@ -9,10 +9,10 @@
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { MAX_ADMIN_UPLOAD_SIZE } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import { verifyAdmin } from '@/lib/utils/verify-admin'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 const ALLOWED_FOLDER_ROOTS = new Set(['logos', 'sponsors', 'tournaments'])
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
@@ -84,7 +84,7 @@ export const POST = async (request: Request) => {
       )
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > MAX_ADMIN_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: 'Le fichier dépasse la taille maximale de 5 Mo.' },
         { status: 400 },

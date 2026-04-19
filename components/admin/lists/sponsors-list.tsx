@@ -9,17 +9,19 @@
 'use client'
 
 import {
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   ExternalLink,
   Plus,
   Search,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import {
+  applySortToList,
+  useListSort,
+} from '@/components/admin/lists/use-list-sort'
 import { SponsorActionsDropdown } from '@/components/admin/ui/sponsor-actions-dropdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -47,12 +49,6 @@ const PAGE_SIZE = 8
 
 type StatusFilter = 'all' | 'enabled' | 'disabled'
 type SortKey = 'name' | 'supportedSince' | 'enabled'
-type SortDirection = 'asc' | 'desc'
-
-interface SortState {
-  key: SortKey | null
-  direction: SortDirection
-}
 
 interface SponsorsListProps {
   sponsors: Sponsor[]
@@ -83,25 +79,9 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [sort, setSort] = useState<SortState>({ key: null, direction: 'asc' })
   const [page, setPage] = useState(1)
-
-  const handleSort = (columnKey: SortKey) => {
-    setSort(prev => {
-      if (prev.key !== columnKey) return { key: columnKey, direction: 'asc' }
-      if (prev.direction === 'asc') return { key: columnKey, direction: 'desc' }
-      return { key: null, direction: 'asc' }
-    })
-  }
-
-  const sortIcon = (columnKey: SortKey) => {
-    if (sort.key !== columnKey) return null
-    return sort.direction === 'asc' ? (
-      <ChevronUp className="inline size-3" />
-    ) : (
-      <ChevronDown className="inline size-3" />
-    )
-  }
+  const resetPage = useCallback(() => setPage(1), [])
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
     let result = sponsors
@@ -117,16 +97,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       result = result.filter(s => s.name.toLowerCase().includes(q))
     }
 
-    const sorted = [...result]
-    if (sort.key) {
-      const key = sort.key
-      const dir = sort.direction === 'asc' ? 1 : -1
-      sorted.sort((a, b) => compareValues(a, b, key) * dir)
-    } else {
-      sorted.sort(defaultSort)
-    }
-
-    return sorted
+    return applySortToList(result, sort, compareValues, defaultSort)
   }, [sponsors, search, statusFilter, sort])
 
   const handleSearch = (value: string) => {
@@ -222,7 +193,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                   className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300"
                   onClick={() => handleSort('name')}
                 >
-                  Nom {sortIcon('name')}
+                  Nom {sortIndicator('name')}
                 </TableHead>
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
                   Lien
@@ -231,13 +202,13 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300 sm:table-cell"
                   onClick={() => handleSort('supportedSince')}
                 >
-                  Depuis {sortIcon('supportedSince')}
+                  Depuis {sortIndicator('supportedSince')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300 md:table-cell"
                   onClick={() => handleSort('enabled')}
                 >
-                  Statut {sortIcon('enabled')}
+                  Statut {sortIndicator('enabled')}
                 </TableHead>
                 <TableHead className="w-10">
                   <span className="sr-only">Actions</span>

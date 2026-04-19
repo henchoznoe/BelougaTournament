@@ -8,17 +8,14 @@
 
 'use client'
 
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Plus,
-  Search,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import {
+  applySortToList,
+  useListSort,
+} from '@/components/admin/lists/use-list-sort'
 import { TournamentActionsDropdown } from '@/components/admin/ui/tournament-actions-dropdown'
 import { TournamentStatusBadge } from '@/components/admin/ui/tournament-status-badge'
 import { Button } from '@/components/ui/button'
@@ -62,12 +59,6 @@ type SortKey =
   | 'startDate'
   | 'registrations'
   | 'status'
-type SortDirection = 'asc' | 'desc'
-
-interface SortState {
-  key: SortKey | null
-  direction: SortDirection
-}
 
 interface TournamentsListProps {
   tournaments: TournamentListItem[]
@@ -125,25 +116,8 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState<SortState>({ key: null, direction: 'asc' })
-
-  const handleSort = (key: SortKey) => {
-    setSort(prev => {
-      if (prev.key !== key) return { key, direction: 'asc' }
-      if (prev.direction === 'asc') return { key, direction: 'desc' }
-      return { key: null, direction: 'asc' }
-    })
-    setPage(1)
-  }
-
-  const SortIndicator = ({ columnKey }: { columnKey: SortKey }) => {
-    if (sort.key !== columnKey) return null
-    return sort.direction === 'asc' ? (
-      <ChevronUp className="inline size-3" />
-    ) : (
-      <ChevronDown className="inline size-3" />
-    )
-  }
+  const resetPage = useCallback(() => setPage(1), [])
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
     let result = tournaments
@@ -162,16 +136,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       )
     }
 
-    const sorted = [...result]
-    if (sort.key) {
-      const key = sort.key
-      const dir = sort.direction === 'asc' ? 1 : -1
-      sorted.sort((a, b) => compareValues(a, b, key) * dir)
-    } else {
-      sorted.sort(defaultSort)
-    }
-
-    return sorted
+    return applySortToList(result, sort, compareValues, defaultSort)
   }, [tournaments, search, statusFilter, sort])
 
   const handleSearch = (value: string) => {
@@ -279,37 +244,37 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
                   onClick={() => handleSort('title')}
                 >
-                  Tournoi <SortIndicator columnKey="title" />
+                  Tournoi {sortIndicator('title')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 sm:table-cell"
                   onClick={() => handleSort('format')}
                 >
-                  Format <SortIndicator columnKey="format" />
+                  Format {sortIndicator('format')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
                   onClick={() => handleSort('registrationType')}
                 >
-                  Type <SortIndicator columnKey="registrationType" />
+                  Type {sortIndicator('registrationType')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
                   onClick={() => handleSort('startDate')}
                 >
-                  Date de début <SortIndicator columnKey="startDate" />
+                  Date de début {sortIndicator('startDate')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-center text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 lg:table-cell"
                   onClick={() => handleSort('registrations')}
                 >
-                  Inscriptions <SortIndicator columnKey="registrations" />
+                  Inscriptions {sortIndicator('registrations')}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
                   onClick={() => handleSort('status')}
                 >
-                  Statut <SortIndicator columnKey="status" />
+                  Statut {sortIndicator('status')}
                 </TableHead>
                 <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   <span className="sr-only">Actions</span>

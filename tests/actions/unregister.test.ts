@@ -80,7 +80,9 @@ vi.mock('@/lib/core/prisma', () => ({
   },
 }))
 
-const { unregisterFromTournament } = await import('@/lib/actions/tournaments')
+const { unregisterFromTournament } = await import(
+  '@/lib/actions/tournament-unregistration'
+)
 
 // ---------------------------------------------------------------------------
 // Helpers

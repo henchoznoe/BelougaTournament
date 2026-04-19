@@ -36,7 +36,7 @@ import {
   createTeamAndRegister,
   joinTeamAndRegister,
   registerForTournament,
-} from '@/lib/actions/tournaments'
+} from '@/lib/actions/tournament-registration'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'

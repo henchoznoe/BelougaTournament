@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { adminPromoteCaptain } from '@/lib/actions/registrations'
-import { dissolveTeam, kickPlayer } from '@/lib/actions/tournaments'
+import { dissolveTeam, kickPlayer } from '@/lib/actions/tournament-team'
 import { ROUTES } from '@/lib/config/routes'
 import type {
   TeamItem,

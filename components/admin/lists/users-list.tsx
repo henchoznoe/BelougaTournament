@@ -8,16 +8,14 @@
 
 'use client'
 
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Search,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import {
+  applySortToList,
+  useListSort,
+} from '@/components/admin/lists/use-list-sort'
 import { UserActionsDropdown } from '@/components/admin/ui/user-actions-dropdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,12 +44,6 @@ const PAGE_SIZE = 20
 
 type RoleFilter = 'all' | Role
 type SortKey = 'user' | 'role' | 'createdAt' | 'lastLoginAt'
-type SortDirection = 'asc' | 'desc'
-
-interface SortState {
-  key: SortKey | null
-  direction: SortDirection
-}
 
 interface UsersListProps {
   users: UserRow[]
@@ -90,25 +82,8 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState<SortState>({ key: null, direction: 'asc' })
-
-  const handleSort = (key: SortKey) => {
-    setSort(prev => {
-      if (prev.key !== key) return { key, direction: 'asc' }
-      if (prev.direction === 'asc') return { key, direction: 'desc' }
-      return { key: null, direction: 'asc' }
-    })
-    setPage(1)
-  }
-
-  const SortIndicator = ({ columnKey }: { columnKey: SortKey }) => {
-    if (sort.key !== columnKey) return null
-    return sort.direction === 'asc' ? (
-      <ChevronUp className="inline size-3" />
-    ) : (
-      <ChevronDown className="inline size-3" />
-    )
-  }
+  const resetPage = useCallback(() => setPage(1), [])
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
     let result = users
@@ -128,17 +103,7 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
       )
     }
 
-    // Sort
-    const sorted = [...result]
-    if (sort.key) {
-      const key = sort.key
-      const dir = sort.direction === 'asc' ? 1 : -1
-      sorted.sort((a, b) => compareValues(a, b, key) * dir)
-    } else {
-      sorted.sort(defaultSort)
-    }
-
-    return sorted
+    return applySortToList(result, sort, compareValues, defaultSort)
   }, [users, search, roleFilter, sort])
 
   const handleSearch = (value: string) => {
@@ -223,25 +188,25 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
                   className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
                   onClick={() => handleSort('user')}
                 >
-                  Utilisateur <SortIndicator columnKey="user" />
+                  Utilisateur {sortIndicator('user')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 sm:table-cell"
                   onClick={() => handleSort('role')}
                 >
-                  Rôle <SortIndicator columnKey="role" />
+                  Rôle {sortIndicator('role')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
                   onClick={() => handleSort('createdAt')}
                 >
-                  Inscrit le <SortIndicator columnKey="createdAt" />
+                  Inscrit le {sortIndicator('createdAt')}
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 lg:table-cell"
                   onClick={() => handleSort('lastLoginAt')}
                 >
-                  Dernière connexion <SortIndicator columnKey="lastLoginAt" />
+                  Dernière connexion {sortIndicator('lastLoginAt')}
                 </TableHead>
                 <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   <span className="sr-only">Actions</span>

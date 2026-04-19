@@ -31,6 +31,8 @@ interface TournamentFiltersProps {
   basePath: string
 }
 
+const SEARCH_DEBOUNCE_MS = 350
+
 /** Builds a new URLSearchParams string, resetting page to 1 on filter change. */
 const buildQuery = (
   current: PublicTournamentFilters,
@@ -75,7 +77,7 @@ export const TournamentFilters = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       navigate({ search: value })
-    }, 350)
+    }, SEARCH_DEBOUNCE_MS)
   }
 
   const hasActiveFilters =

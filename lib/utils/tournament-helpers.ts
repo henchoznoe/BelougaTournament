@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { DAY_IN_MS } from '@/lib/config/constants'
 import { FieldType, RefundPolicyType } from '@/prisma/generated/prisma/enums'
 
 /** Validates dynamic field values against tournament field definitions. */
@@ -63,8 +64,5 @@ export const isRefundEligible = (
     return false
   }
 
-  return (
-    startDate.getTime() - now.getTime() >=
-    refundDeadlineDays * 24 * 60 * 60 * 1000
-  )
+  return startDate.getTime() - now.getTime() >= refundDeadlineDays * DAY_IN_MS
 }

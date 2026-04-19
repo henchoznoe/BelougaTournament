@@ -182,7 +182,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     netRevenue: 0,
     transactionCount: 0,
     refundCount: 0,
-    currency: 'CHF',
+    currency: DEFAULT_CURRENCY,
     byTournament: [],
   }
 

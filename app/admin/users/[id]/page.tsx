@@ -9,11 +9,11 @@
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { UserDetail } from '@/components/admin/detail/user-detail'
 import {
-  UserDetail,
   UserDetailActions,
   UserRoleBadge,
-} from '@/components/admin/detail/user-detail'
+} from '@/components/admin/detail/user-detail-actions'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'

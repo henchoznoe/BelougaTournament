@@ -690,8 +690,9 @@ const buildOrderBy = (sort: TournamentSortOption) => {
   }
 }
 
-/** Fetches PUBLISHED tournaments with search, format/type filters, sort, and pagination. */
-export const getPublishedTournamentsFiltered = async (
+/** Shared implementation for filtered + paginated public tournament queries by status. */
+const getTournamentsFilteredByStatus = async (
+  status: TournamentStatus,
   filters: PublicTournamentFilters,
 ): Promise<PublicTournamentPage> => {
   'use cache'
@@ -702,7 +703,7 @@ export const getPublishedTournamentsFiltered = async (
   const skip = (page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE
 
   const where = {
-    status: TournamentStatus.PUBLISHED,
+    status,
     ...(search
       ? {
           OR: [
@@ -743,7 +744,10 @@ export const getPublishedTournamentsFiltered = async (
       totalPages: Math.max(1, Math.ceil(total / PUBLIC_TOURNAMENTS_PAGE_SIZE)),
     }
   } catch (error) {
-    logger.error({ error }, 'Error fetching filtered published tournaments')
+    logger.error(
+      { error },
+      `Error fetching filtered ${status.toLowerCase()} tournaments`,
+    )
     return {
       tournaments: [],
       total: 0,
@@ -754,65 +758,16 @@ export const getPublishedTournamentsFiltered = async (
   }
 }
 
+/** Fetches PUBLISHED tournaments with search, format/type filters, sort, and pagination. */
+export const getPublishedTournamentsFiltered = async (
+  filters: PublicTournamentFilters,
+): Promise<PublicTournamentPage> => {
+  return getTournamentsFilteredByStatus(TournamentStatus.PUBLISHED, filters)
+}
+
 /** Fetches ARCHIVED tournaments with search, format/type filters, sort, and pagination. */
 export const getArchivedTournamentsFiltered = async (
   filters: PublicTournamentFilters,
 ): Promise<PublicTournamentPage> => {
-  'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
-
-  const { search, format, type, sort, page } = filters
-  const skip = (page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE
-
-  const where = {
-    status: TournamentStatus.ARCHIVED,
-    ...(search
-      ? {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' as const } },
-            { game: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }
-      : {}),
-    ...(format ? { format: format as TournamentFormat } : {}),
-    ...(type ? { registrationType: type as RegistrationType } : {}),
-  }
-
-  try {
-    const [rows, total] = await Promise.all([
-      prisma.tournament.findMany({
-        where,
-        orderBy: buildOrderBy(sort),
-        skip,
-        take: PUBLIC_TOURNAMENTS_PAGE_SIZE,
-        select: PUBLIC_LIST_SELECT,
-      }),
-      prisma.tournament.count({ where }),
-    ])
-
-    const sorted =
-      sort === 'registrations_desc'
-        ? (rows as unknown as PublicTournamentListItem[]).sort(
-            (a, b) => b._count.registrations - a._count.registrations,
-          )
-        : (rows as unknown as PublicTournamentListItem[])
-
-    return {
-      tournaments: sorted,
-      total,
-      page,
-      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
-      totalPages: Math.max(1, Math.ceil(total / PUBLIC_TOURNAMENTS_PAGE_SIZE)),
-    }
-  } catch (error) {
-    logger.error({ error }, 'Error fetching filtered archived tournaments')
-    return {
-      tournaments: [],
-      total: 0,
-      page,
-      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
-      totalPages: 1,
-    }
-  }
+  return getTournamentsFilteredByStatus(TournamentStatus.ARCHIVED, filters)
 }

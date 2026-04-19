@@ -6,15 +6,11 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { DAY_IN_MS, MINUTE_IN_MS, SECOND_IN_MS } from '@/lib/config/constants'
 import type {
   HeroTournamentBadge,
   HeroTournamentBadgeTournament,
 } from '@/lib/types/tournament'
-
-const SECOND_IN_MS = 1000
-const MINUTE_IN_MS = SECOND_IN_MS * 60
-const HOUR_IN_MS = MINUTE_IN_MS * 60
-const DAY_IN_MS = HOUR_IN_MS * 24
 
 export const DEFAULT_HERO_TOURNAMENT_BADGE: HeroTournamentBadge = {
   label: 'Aucun tournoi en cours',

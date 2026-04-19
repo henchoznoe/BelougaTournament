@@ -104,9 +104,11 @@ const {
   updateTournament,
   deleteTournament,
   updateTournamentStatus,
-  kickPlayer,
-  dissolveTeam,
 } = await import('@/lib/actions/tournaments')
+
+const { kickPlayer, dissolveTeam } = await import(
+  '@/lib/actions/tournament-team'
+)
 
 const ADMIN_SESSION = {
   user: {

@@ -9,13 +9,13 @@
 import { del, put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { z } from 'zod'
+import { CACHE_TAGS, MAX_TEAM_LOGO_SIZE } from '@/lib/config/constants'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 
 /** POST — Upload a team logo. Expects FormData with "file" and "teamId" fields. */
@@ -51,7 +51,7 @@ export const POST = async (request: Request) => {
       )
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > MAX_TEAM_LOGO_SIZE) {
       return NextResponse.json(
         { error: 'Le fichier dépasse la taille maximale de 2 Mo.' },
         { status: 400 },
@@ -141,6 +141,11 @@ export const POST = async (request: Request) => {
   }
 }
 
+/** Zod schema for the DELETE request body. */
+const deleteBodySchema = z.object({
+  teamId: z.uuid("ID d'\u00e9quipe invalide."),
+})
+
 /** DELETE — Remove a team logo. Expects JSON body with { teamId: string }. */
 export const DELETE = async (request: Request) => {
   const session = await auth.api.getSession({ headers: request.headers })
@@ -149,15 +154,17 @@ export const DELETE = async (request: Request) => {
   }
 
   try {
-    const body = (await request.json()) as { teamId?: string }
-    const teamId = body.teamId
+    const body = await request.json()
+    const parsed = deleteBodySchema.safeParse(body)
 
-    if (!teamId || typeof teamId !== 'string') {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "ID d'équipe manquant." },
+        { error: "ID d'\u00e9quipe manquant." },
         { status: 400 },
       )
     }
+
+    const { teamId } = parsed.data
 
     const team = await prisma.team.findUnique({
       where: { id: teamId },

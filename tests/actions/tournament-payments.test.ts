@@ -109,7 +109,7 @@ vi.mock('@/lib/core/prisma', () => ({
 }))
 
 const { registerForTournament, createTeamAndRegister, joinTeamAndRegister } =
-  await import('@/lib/actions/tournaments')
+  await import('@/lib/actions/tournament-registration')
 
 describe('paid tournament registration actions', () => {
   beforeEach(() => {

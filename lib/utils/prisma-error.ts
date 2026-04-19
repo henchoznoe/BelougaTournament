@@ -7,6 +7,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import type { ActionState } from '@/lib/types/actions'
 import { Prisma } from '@/prisma/generated/prisma/client'
 

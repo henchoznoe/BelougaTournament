@@ -10,11 +10,11 @@ import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { TournamentOverview } from '@/components/admin/detail/tournament-detail'
 import {
   TournamentDetailActions,
-  TournamentOverview,
   TournamentStatusBadge,
-} from '@/components/admin/detail/tournament-detail'
+} from '@/components/admin/detail/tournament-detail-actions'
 import { TournamentRegistrations } from '@/components/admin/detail/tournament-registrations'
 import type { TournamentTab } from '@/components/admin/detail/tournament-tabs'
 import { TournamentTabNav } from '@/components/admin/detail/tournament-tabs'
@@ -56,7 +56,8 @@ const AdminTournamentDetailPage = async ({
     notFound()
   }
 
-  const activeTab = (tab as TournamentTab) || 'overview'
+  const activeTab: TournamentTab =
+    tab === 'registrations' || tab === 'teams' ? tab : 'overview'
   const isTeam = tournament.format === TournamentFormat.TEAM
 
   // Fetch data based on active tab to avoid unnecessary queries
