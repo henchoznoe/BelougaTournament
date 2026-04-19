@@ -10,6 +10,7 @@ import { Handshake, Swords, Users } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
+import { pluralize } from '@/lib/utils/formatting'
 import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface DashboardStatsProps {
@@ -24,7 +25,7 @@ const STAT_CARDS = [
     icon: Users,
     getValue: (s: DashboardStats) => s.users.total,
     getDetail: (s: DashboardStats) =>
-      `${s.users.players} joueurs · ${s.users.admins} admins`,
+      `${s.users.players} joueur${pluralize(s.users.players)} · ${s.users.admins} admin${pluralize(s.users.admins)}`,
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/10',
   },
@@ -35,7 +36,7 @@ const STAT_CARDS = [
     icon: Swords,
     getValue: (s: DashboardStats) => s.tournaments.total,
     getDetail: (s: DashboardStats) =>
-      `${s.tournaments.byStatus[TournamentStatus.PUBLISHED]} publiés · ${s.tournaments.byStatus[TournamentStatus.DRAFT]} brouillons · ${s.tournaments.byStatus[TournamentStatus.ARCHIVED]} archivés`,
+      `${s.tournaments.byStatus[TournamentStatus.PUBLISHED]} publié${pluralize(s.tournaments.byStatus[TournamentStatus.PUBLISHED])} · ${s.tournaments.byStatus[TournamentStatus.DRAFT]} brouillon${pluralize(s.tournaments.byStatus[TournamentStatus.DRAFT])} · ${s.tournaments.byStatus[TournamentStatus.ARCHIVED]} archivé${pluralize(s.tournaments.byStatus[TournamentStatus.ARCHIVED])}`,
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
   },
@@ -46,7 +47,7 @@ const STAT_CARDS = [
     icon: Handshake,
     getValue: (s: DashboardStats) => s.sponsors.total,
     getDetail: (s: DashboardStats) =>
-      `${s.sponsors.enabled} actifs · ${s.sponsors.disabled} inactifs`,
+      `${s.sponsors.enabled} actif${pluralize(s.sponsors.enabled)} · ${s.sponsors.disabled} inactif${pluralize(s.sponsors.disabled)}`,
     color: 'text-amber-400',
     bg: 'bg-amber-500/10',
   },

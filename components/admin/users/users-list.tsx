@@ -39,7 +39,11 @@ import {
 import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRow } from '@/lib/types/user'
-import { formatDateTime, formatShortDate } from '@/lib/utils/formatting'
+import {
+  formatDateTime,
+  formatShortDate,
+  pluralize,
+} from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.USERS
@@ -167,15 +171,15 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
       {/* Stats line */}
       <div className="flex items-center gap-3 text-xs text-zinc-500">
         <span className="mr-2">
-          {filtered.length} utilisateur{filtered.length > 0 ? 's' : ''}
+          {filtered.length} utilisateur{pluralize(filtered.length)}
         </span>
 
         <span className="text-amber-400">
-          {adminCount} admin{adminCount > 0 ? 's' : ''}
+          {adminCount} admin{pluralize(adminCount)}
         </span>
 
         <span className="text-emerald-400">
-          {userCount} joueur{userCount > 0 ? 's' : ''}
+          {userCount} joueur{pluralize(userCount)}
         </span>
       </div>
 

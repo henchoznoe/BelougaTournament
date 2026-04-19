@@ -51,3 +51,6 @@ export const formatCentimes = (centimes: number, currency = 'CHF'): string =>
 /** Converts a decimal currency value to centimes integer (e.g. 10.5 → 1050). */
 export const parseCentimes = (value: number): number =>
   Math.round(value * CENTIMES_PER_UNIT)
+
+/** Returns 's' when count > 1 (French rule: 0 and 1 are singular, 2+ are plural). */
+export const pluralize = (count: number): string => (count > 1 ? 's' : '')

@@ -39,7 +39,7 @@ import {
 import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'
-import { formatShortDate } from '@/lib/utils/formatting'
+import { formatShortDate, pluralize } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.SPONSORS
@@ -160,15 +160,15 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       {/* Stats line */}
       <div className="flex items-center gap-3 text-xs text-zinc-500">
         <span className="mr-2">
-          {sponsors.length} sponsor{sponsors.length !== 1 ? 's' : ''}
+          {sponsors.length} sponsor{pluralize(sponsors.length)}
         </span>
 
         <span className="text-emerald-400">
-          {enabledCount} activé{enabledCount !== 1 ? 's' : ''}
+          {enabledCount} activé{pluralize(enabledCount)}
         </span>
 
         <span className="text-zinc-400">
-          {disabledCount} désactivé{disabledCount !== 1 ? 's' : ''}
+          {disabledCount} désactivé{pluralize(disabledCount)}
         </span>
       </div>
 

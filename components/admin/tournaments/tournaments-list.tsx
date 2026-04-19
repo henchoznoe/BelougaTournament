@@ -40,7 +40,11 @@ import {
 import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
-import { formatCentimes, formatShortDate } from '@/lib/utils/formatting'
+import {
+  formatCentimes,
+  formatShortDate,
+  pluralize,
+} from '@/lib/utils/formatting'
 import {
   RegistrationType,
   TournamentFormat,
@@ -223,19 +227,19 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       {/* Stats line */}
       <div className="flex items-center gap-3 text-xs text-zinc-500">
         <span className="mr-2">
-          {tournaments.length} tournoi{tournaments.length > 0 ? 's' : ''}
+          {tournaments.length} tournoi{pluralize(tournaments.length)}
         </span>
 
         <span className="text-amber-400">
-          {draftCount} brouillon{draftCount > 0 ? 's' : ''}
+          {draftCount} brouillon{pluralize(draftCount)}
         </span>
 
         <span className="text-emerald-400">
-          {publishedCount} publié{publishedCount > 0 ? 's' : ''}
+          {publishedCount} publié{pluralize(publishedCount)}
         </span>
 
         <span className="text-zinc-400">
-          {archivedCount} archivé{archivedCount > 0 ? 's' : ''}
+          {archivedCount} archivé{pluralize(archivedCount)}
         </span>
       </div>
 

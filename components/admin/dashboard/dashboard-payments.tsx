@@ -10,7 +10,7 @@ import { ArrowDownRight, ArrowUpRight, CreditCard, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PaymentStats } from '@/lib/types/dashboard'
-import { formatCentimes } from '@/lib/utils/formatting'
+import { formatCentimes, pluralize } from '@/lib/utils/formatting'
 
 interface DashboardPaymentsProps {
   payments: PaymentStats
@@ -36,7 +36,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
             {payments.transactionCount} transaction
-            {payments.transactionCount !== 1 ? 's' : ''}
+            {pluralize(payments.transactionCount)}
           </p>
         </div>
 
@@ -50,7 +50,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
             {payments.refundCount} remboursement
-            {payments.refundCount !== 1 ? 's' : ''}
+            {pluralize(payments.refundCount)}
           </p>
         </div>
 
@@ -83,12 +83,12 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
                   {t.title}
                 </p>
                 <p className="mt-0.5 text-xs text-zinc-500">
-                  {t.paidCount} paiement{t.paidCount !== 1 ? 's' : ''}
+                  {t.paidCount} paiement{pluralize(t.paidCount)}
                   {t.refundedCount > 0 && (
                     <span className="text-red-400/70">
                       {' '}
                       · {t.refundedCount} remboursement
-                      {t.refundedCount !== 1 ? 's' : ''}
+                      {pluralize(t.refundedCount)}
                     </span>
                   )}
                 </p>

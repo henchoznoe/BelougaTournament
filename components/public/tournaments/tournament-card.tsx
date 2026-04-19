@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate, stripHtml } from '@/lib/utils/formatting'
+import { formatDate, pluralize, stripHtml } from '@/lib/utils/formatting'
 import {
   TournamentFormat,
   TournamentStatus,
@@ -164,7 +164,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
               <span className="inline-flex items-center gap-1.5">
                 <Users className="size-3.5" />
                 {tournament._count.registrations} joueur
-                {tournament._count.registrations !== 1 ? 's' : ''}
+                {pluralize(tournament._count.registrations)}
               </span>
             )}
           </div>
