@@ -145,7 +145,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
         t =>
           t.title.toLowerCase().includes(searchQuery) ||
           t.slug.toLowerCase().includes(searchQuery) ||
-          t.game?.toLowerCase().includes(searchQuery),
+          t.games.some(g => g.toLowerCase().includes(searchQuery)),
       )
     }
 
@@ -323,9 +323,9 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                       <p className="truncate text-sm font-medium text-zinc-200">
                         {tournament.title}
                       </p>
-                      {tournament.game && (
+                      {tournament.games.length > 0 && (
                         <p className="truncate text-xs text-zinc-500">
-                          {tournament.game}
+                          {tournament.games.join(', ')}
                         </p>
                       )}
                     </div>

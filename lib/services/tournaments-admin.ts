@@ -53,7 +53,7 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
         id: true,
         title: true,
         slug: true,
-        game: true,
+        games: true,
         format: true,
         teamSize: true,
         maxTeams: true,

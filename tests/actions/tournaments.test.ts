@@ -151,7 +151,7 @@ const VALID_TOURNAMENT_INPUT = {
   maxTeams: 16,
   format: TournamentFormat.TEAM,
   teamSize: 5,
-  game: 'Valorant',
+  games: ['Valorant'],
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
   registrationType: RegistrationType.FREE,
@@ -176,6 +176,7 @@ const MEMBER_UUID = '44444444-4444-4444-8444-444444444444'
 
 const EXISTING_TOURNAMENT = {
   id: TOURNAMENT_UUID,
+  slug: 'valorant-cup',
   format: TournamentFormat.TEAM,
   registrationType: RegistrationType.FREE,
   entryFeeAmount: null,
@@ -229,10 +230,12 @@ describe('tournament admin actions', () => {
   })
 
   it('creates a tournament for admins', async () => {
-    expect(await createTournament(VALID_TOURNAMENT_INPUT)).toEqual({
-      success: true,
-      message: 'Le tournoi a été créé.',
-    })
+    // Slug uniqueness check: no existing tournament with that slug
+    mockTournamentFindUnique.mockResolvedValueOnce(null)
+    const result = await createTournament(VALID_TOURNAMENT_INPUT)
+    expect(result.success).toBe(true)
+    expect(result.message).toBe('Le tournoi a été créé.')
+    expect(result.data).toMatchObject({ slug: 'valorant-cup' })
     expect(mockTournamentCreate).toHaveBeenCalledOnce()
   })
 

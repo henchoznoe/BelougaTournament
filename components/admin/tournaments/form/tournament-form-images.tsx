@@ -47,7 +47,9 @@ export const TournamentFormImages = ({
   watchSlug,
 }: TournamentFormImagesProps) => {
   const [isUploading, setIsUploading] = useState(false)
-  const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList('tournaments')
+  const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList(
+    watchSlug ? `tournaments/${watchSlug}/images` : 'tournaments',
+  )
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -199,7 +201,7 @@ export const TournamentFormImages = ({
             onClick={() => setGalleryOpen(prev => !prev)}
             className="flex w-full items-center justify-between text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
           >
-            <span>Images existantes (tournaments)</span>
+            <span>Images de ce tournoi</span>
             <ChevronDown
               className={cn(
                 'size-4 transition-transform duration-200',
@@ -220,7 +222,7 @@ export const TournamentFormImages = ({
               </div>
             ) : blobs.length === 0 ? (
               <p className="py-2 text-center text-xs text-zinc-600">
-                Aucune image dans le dossier tournaments.
+                Aucune image pour ce tournoi.
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">

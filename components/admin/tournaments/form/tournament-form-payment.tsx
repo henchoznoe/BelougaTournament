@@ -1,6 +1,6 @@
 /**
- * File: components/admin/tournaments/form/tournament-form-entry.tsx
- * Description: Registration and payment section of the tournament form.
+ * File: components/admin/tournaments/form/tournament-form-payment.tsx
+ * Description: Payment and refund section of the tournament form (registration type, entry fee, refund policy).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -27,78 +27,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
 import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
 import {
   RefundPolicyType,
   RegistrationType,
-  TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
 
 const isRefundPolicyType = (val: string): val is RefundPolicyType =>
   (Object.values(RefundPolicyType) as string[]).includes(val)
 
-interface TournamentFormEntryProps {
+interface TournamentFormPaymentProps {
   errors: FieldErrors<TournamentFormValues>
   setValue: UseFormSetValue<TournamentFormValues>
   watchRegistrationType: RegistrationType
   watchRefundPolicyType: RefundPolicyType
-  watchMaxTeams: number | null
   watchEntryFeeAmount: number | null
   watchRefundDeadlineDays: number | null
-  watchFormat: TournamentFormat
-  watchTeamLogoEnabled: boolean
   isEditing: boolean
 }
 
-export const TournamentFormEntry = ({
+export const TournamentFormPayment = ({
   errors,
   setValue,
   watchRegistrationType,
   watchRefundPolicyType,
-  watchMaxTeams,
   watchEntryFeeAmount,
   watchRefundDeadlineDays,
-  watchFormat,
-  watchTeamLogoEnabled,
   isEditing,
-}: TournamentFormEntryProps) => {
+}: TournamentFormPaymentProps) => {
   const isPaid = watchRegistrationType === RegistrationType.PAID
 
   return (
     <div className={SECTION_CLASSES}>
-      <SectionHeader icon={CreditCard} title="Inscription et paiement" />
+      <SectionHeader icon={CreditCard} title="Type d'inscription" />
       <div className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Max Teams */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tournament-maxTeams" className={LABEL_CLASSES}>
-              Nombre max. de places
-            </Label>
-            <Input
-              id="tournament-maxTeams"
-              type="number"
-              min={2}
-              placeholder="Illimité"
-              className={INPUT_CLASSES}
-              value={watchMaxTeams ?? ''}
-              onChange={e => {
-                const val =
-                  e.target.value === '' ? null : Number(e.target.value)
-                setValue('maxTeams', val, { shouldValidate: true })
-              }}
-            />
-            {errors.maxTeams?.message && (
-              <p className="text-xs text-red-400">{errors.maxTeams.message}</p>
-            )}
-            <p className="text-xs text-zinc-500">
-              En solo : nombre de joueurs. En équipe : nombre d&apos;équipes
-              (ex. 4 pour un 5v5 avec 4 équipes).
-            </p>
-          </div>
-
+        <div className="flex flex-col gap-4">
           {/* Registration Type */}
           <div className="space-y-1.5">
             <Label
@@ -134,6 +99,10 @@ export const TournamentFormEntry = ({
                 <SelectItem value={RegistrationType.PAID}>Payant</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-zinc-500">
+              Le type d&apos;inscription ne peut pas être modifié après la
+              création du tournoi.
+            </p>
             {errors.registrationType?.message && (
               <p className="text-xs text-red-400">
                 {errors.registrationType.message}
@@ -150,39 +119,48 @@ export const TournamentFormEntry = ({
               >
                 Prix d&apos;entrée (CHF) * {isEditing && <LockedIndicator />}
               </Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="tournament-entryFeeAmount"
-                  type="number"
-                  min={1}
-                  step={0.01}
-                  placeholder="5.00"
-                  disabled={isEditing}
-                  className={cn(
-                    INPUT_CLASSES,
-                    'flex-1',
-                    isEditing && 'opacity-60',
-                  )}
-                  value={
-                    watchEntryFeeAmount !== null
-                      ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
-                      : ''
-                  }
-                  onChange={e => {
-                    const val =
-                      e.target.value === ''
-                        ? null
-                        : parseCentimes(Number(e.target.value))
-                    setValue('entryFeeAmount', val, { shouldValidate: true })
-                  }}
-                />
-                <span className="text-xs font-medium text-zinc-500">CHF</span>
-              </div>
+              <Input
+                id="tournament-entryFeeAmount"
+                type="number"
+                min={1}
+                step={0.01}
+                placeholder="5.00"
+                disabled={isEditing}
+                className={cn(
+                  INPUT_CLASSES,
+                  'flex-1',
+                  isEditing && 'opacity-60',
+                )}
+                value={
+                  watchEntryFeeAmount !== null
+                    ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
+                    : ''
+                }
+                onChange={e => {
+                  const val =
+                    e.target.value === ''
+                      ? null
+                      : parseCentimes(Number(e.target.value))
+                  setValue('entryFeeAmount', val, { shouldValidate: true })
+                }}
+              />
               {errors.entryFeeAmount?.message && (
                 <p className="text-xs text-red-400">
                   {errors.entryFeeAmount.message}
                 </p>
               )}
+              <p className="text-xs text-zinc-500">
+                Le prix d&apos;entrée ne peut pas être modifié après la création
+                du tournoi. Les frais de transaction de Stripe s&apos;appliquent
+                sur chaque transaction et s&apos;élèvent à 2.9% + 0.30 CHF. Pour
+                le montant sélectionné, vous recevrez pour chaque inscription{' '}
+                <b className="text-red-400 underline">
+                  {watchEntryFeeAmount !== null
+                    ? `${formatCentimes(watchEntryFeeAmount - (2.9 * watchEntryFeeAmount) / 100 - 30)}`
+                    : 'X CHF'}
+                </b>
+                .
+              </p>
             </div>
           )}
         </div>
@@ -195,15 +173,13 @@ export const TournamentFormEntry = ({
                 htmlFor="tournament-refundPolicyType"
                 className={LABEL_CLASSES}
               >
-                Politique de remboursement {isEditing && <LockedIndicator />}
+                Politique de remboursement * {isEditing && <LockedIndicator />}
               </Label>
               <Select
                 value={watchRefundPolicyType}
                 onValueChange={val => {
                   if (isRefundPolicyType(val))
-                    setValue('refundPolicyType', val, {
-                      shouldValidate: true,
-                    })
+                    setValue('refundPolicyType', val, { shouldValidate: true })
                 }}
                 disabled={isEditing}
               >
@@ -222,30 +198,27 @@ export const TournamentFormEntry = ({
                     Aucun remboursement
                   </SelectItem>
                   <SelectItem value={RefundPolicyType.BEFORE_DEADLINE}>
-                    Avant délai
+                    Remboursement avant le délai
                   </SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-zinc-500">
+                La politique de remboursement ne peut pas être modifiée après la
+                création du tournoi.
+              </p>
               {errors.refundPolicyType?.message && (
                 <p className="text-xs text-red-400">
                   {errors.refundPolicyType.message}
                 </p>
               )}
-              {watchRefundPolicyType === RefundPolicyType.BEFORE_DEADLINE && (
-                <p className="text-xs text-zinc-500">
-                  Les joueurs peuvent demander un remboursement jusqu&apos;à X
-                  jours avant le début du tournoi.
-                </p>
-              )}
             </div>
-
             {watchRefundPolicyType === RefundPolicyType.BEFORE_DEADLINE && (
               <div className="space-y-1.5">
                 <Label
                   htmlFor="tournament-refundDeadlineDays"
                   className={LABEL_CLASSES}
                 >
-                  Délai (jours avant début) * {isEditing && <LockedIndicator />}
+                  Délai * {isEditing && <LockedIndicator />}
                 </Label>
                 <Input
                   id="tournament-refundDeadlineDays"
@@ -255,7 +228,7 @@ export const TournamentFormEntry = ({
                   disabled={isEditing}
                   className={cn(
                     INPUT_CLASSES,
-                    'w-32',
+                    'w-full',
                     isEditing && 'opacity-60',
                   )}
                   value={watchRefundDeadlineDays ?? ''}
@@ -276,25 +249,24 @@ export const TournamentFormEntry = ({
             )}
           </div>
         )}
-
-        {/* Team logo toggle (only for team format) */}
-        {watchFormat === TournamentFormat.TEAM && (
-          <div className="flex items-center gap-3">
-            <Switch
-              id="tournament-teamLogoEnabled"
-              checked={watchTeamLogoEnabled}
-              onCheckedChange={val =>
-                setValue('teamLogoEnabled', val, { shouldValidate: true })
-              }
-            />
-            <Label
-              htmlFor="tournament-teamLogoEnabled"
-              className="cursor-pointer text-sm text-zinc-300"
-            >
-              Autoriser les capitaines à uploader un logo d&apos;équipe
-            </Label>
-          </div>
-        )}
+        {watchRegistrationType === RegistrationType.PAID &&
+          watchRefundPolicyType === RefundPolicyType.BEFORE_DEADLINE && (
+            <p className="text-xs text-zinc-500">
+              La sélection actuelle précise que les joueurs peuvent se retirer
+              du tournoi et demander un remboursement s'ils se retirent{' '}
+              <b className="text-red-400 underline">
+                {watchRefundDeadlineDays ?? 'X'}
+              </b>{' '}
+              jours avant le début du tournoi.
+            </p>
+          )}
+        {watchRegistrationType === RegistrationType.PAID &&
+          watchRefundPolicyType === RefundPolicyType.NONE && (
+            <p className="text-xs text-zinc-500">
+              La sélection actuelle précise qu&apos;aucun remboursement ne sera
+              accordé aux joueurs qui se retirent du tournoi.
+            </p>
+          )}
       </div>
     </div>
   )

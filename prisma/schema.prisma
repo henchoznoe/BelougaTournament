@@ -137,7 +137,7 @@ model Tournament {
   maxTeams          Int?
   format            TournamentFormat
   teamSize          Int                      @default(1)
-  game              String? // e.g. Valorant, Rocket League
+  games             String[] // e.g. ["Valorant", "Rocket League"] — at least one required
   imageUrls         String[] // Tournament images (Vercel Blob URLs)
   rules             String? // Full tournament ruleset
   prize             String? // Cash prize or rewards

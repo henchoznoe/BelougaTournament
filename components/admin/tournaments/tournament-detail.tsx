@@ -297,14 +297,14 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
             Informations
           </h2>
           <dl className="space-y-3 text-sm">
-            {tournament.game && (
+            {tournament.games.length > 0 && (
               <div className="flex items-start justify-between gap-2">
                 <dt className="flex items-center gap-2 text-zinc-500">
                   <Gamepad2 className="size-3.5" />
-                  Jeu
+                  Jeux
                 </dt>
                 <dd className="text-right font-medium text-white">
-                  {tournament.game}
+                  {tournament.games.join(', ')}
                 </dd>
               </div>
             )}

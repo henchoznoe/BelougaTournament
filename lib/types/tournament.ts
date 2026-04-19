@@ -41,7 +41,7 @@ type TournamentListBase = {
   id: string
   title: string
   slug: string
-  game: string | null
+  games: string[]
   format: TournamentFormat
   teamSize: number
   maxTeams: number | null
@@ -97,7 +97,7 @@ export type UserRegistrationItem = {
     id: string
     title: string
     slug: string
-    game: string | null
+    games: string[]
     format: TournamentFormat
     teamSize: number
     startDate: Date
@@ -234,7 +234,7 @@ export type UserActiveTournament = {
   id: string
   title: string
   slug: string
-  game: string | null
+  games: string[]
   startDate: Date
   imageUrls: string[]
 }

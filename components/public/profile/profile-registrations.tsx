@@ -93,10 +93,10 @@ export const ProfileRegistrations = ({
                     {registration.tournament.title}
                   </span>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                    {registration.tournament.game && (
+                    {registration.tournament.games.length > 0 && (
                       <span className="inline-flex items-center gap-1">
                         <Gamepad2 className="size-3" />
-                        {registration.tournament.game}
+                        {registration.tournament.games.join(', ')}
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1">

@@ -40,7 +40,7 @@ const VALID_TOURNAMENT = {
   maxTeams: 16,
   format: 'TEAM' as const,
   teamSize: 5,
-  game: 'Valorant',
+  games: ['Valorant'],
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
   registrationType: 'FREE' as const,

@@ -86,7 +86,8 @@ export const TournamentStatusControl = ({
       })
       if (result.success) {
         toast.success(result.message)
-        router.refresh()
+        // Navigate to force re-fetch of cached Server Component
+        router.push(ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug))
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }

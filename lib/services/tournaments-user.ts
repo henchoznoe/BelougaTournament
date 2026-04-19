@@ -186,7 +186,7 @@ export const getUserActiveTournaments = async (
         id: true,
         title: true,
         slug: true,
-        game: true,
+        games: true,
         startDate: true,
         imageUrls: true,
       },

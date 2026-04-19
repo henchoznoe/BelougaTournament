@@ -37,6 +37,7 @@ import {
 /** Tournament with its dynamic fields and a registration count. Used by updateTournament. */
 type TournamentWithFieldsAndCount = {
   id: string
+  slug: string
   format: TournamentFormat
   registrationType: RegistrationType
   entryFeeAmount: number | null
@@ -57,10 +58,19 @@ export const createTournament = authenticatedAction({
   schema: tournamentSchema,
   role: Role.ADMIN,
   handler: async (data): Promise<ActionState> => {
+    // Generate a unique slug: if the base slug is taken, append -2, -3, etc.
+    const baseSlug = data.slug
+    let slug = baseSlug
+    let suffix = 2
+    while (await prisma.tournament.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${suffix}`
+      suffix++
+    }
+
     await prisma.tournament.create({
       data: {
         title: data.title,
-        slug: data.slug,
+        slug,
         description: data.description,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
@@ -84,7 +94,7 @@ export const createTournament = authenticatedAction({
         format: data.format,
         teamSize: data.teamSize,
         teamLogoEnabled: data.teamLogoEnabled,
-        game: toNullable(data.game),
+        games: data.games,
         rules: toNullable(data.rules),
         prize: toNullable(data.prize),
         toornamentId: toNullable(data.toornamentId),
@@ -114,6 +124,7 @@ export const createTournament = authenticatedAction({
     return {
       success: true,
       message: 'Le tournoi a été créé.',
+      data: { slug },
     }
   },
 })
@@ -135,6 +146,9 @@ export const updateTournament = authenticatedAction({
     if (!existing) {
       return { success: false, message: 'Tournoi introuvable.' }
     }
+
+    // Slug is immutable after creation — always use the existing slug
+    const slug = existing.slug
 
     // Format is immutable after creation
     if (data.format !== existing.format) {
@@ -229,7 +243,7 @@ export const updateTournament = authenticatedAction({
         where: { id: data.id },
         data: {
           title: data.title,
-          slug: data.slug,
+          slug,
           description: data.description,
           startDate: new Date(data.startDate),
           endDate: new Date(data.endDate),
@@ -253,7 +267,7 @@ export const updateTournament = authenticatedAction({
           format: data.format,
           teamSize: data.teamSize,
           teamLogoEnabled: data.teamLogoEnabled,
-          game: toNullable(data.game),
+          games: data.games,
           rules: toNullable(data.rules),
           prize: toNullable(data.prize),
           toornamentId: toNullable(data.toornamentId),

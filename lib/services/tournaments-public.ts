@@ -48,7 +48,7 @@ const PUBLIC_LIST_SELECT = {
   title: true,
   slug: true,
   description: true,
-  game: true,
+  games: true,
   imageUrls: true,
   format: true,
   teamSize: true,
@@ -265,7 +265,7 @@ const getTournamentsFilteredByStatus = async (
       ? {
           OR: [
             { title: { contains: search, mode: 'insensitive' as const } },
-            { game: { contains: search, mode: 'insensitive' as const } },
+            { games: { has: search } },
           ],
         }
       : {}),

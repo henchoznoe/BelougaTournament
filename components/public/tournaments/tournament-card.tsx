@@ -132,10 +132,10 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           {/* Info pills */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Game */}
-            {tournament.game && (
+            {tournament.games.length > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/2 px-3 py-1.5 text-xs text-zinc-400">
                 <Gamepad2 className="size-3" />
-                {tournament.game}
+                {tournament.games.join(', ')}
               </span>
             )}
 

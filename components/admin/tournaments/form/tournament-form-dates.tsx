@@ -45,7 +45,7 @@ export const TournamentFormDates = ({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Début du tournoi"
-                className={`${INPUT_CLASSES} w-56`}
+                className={`${INPUT_CLASSES} w-full`}
               />
             )}
           />
@@ -66,7 +66,7 @@ export const TournamentFormDates = ({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Fin du tournoi"
-                className={`${INPUT_CLASSES} w-56`}
+                className={`${INPUT_CLASSES} w-full`}
               />
             )}
           />
@@ -90,7 +90,7 @@ export const TournamentFormDates = ({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Ouverture des inscriptions"
-                className={`${INPUT_CLASSES} w-56`}
+                className={`${INPUT_CLASSES} w-full`}
               />
             )}
           />
@@ -116,7 +116,7 @@ export const TournamentFormDates = ({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Fermeture des inscriptions"
-                className={`${INPUT_CLASSES} w-56`}
+                className={`${INPUT_CLASSES} w-full`}
               />
             )}
           />
@@ -127,10 +127,6 @@ export const TournamentFormDates = ({
           )}
         </div>
       </div>
-      <p className="mt-3 text-[10px] text-zinc-600">
-        Les heures sont en fuseau horaire suisse (Europe/Zurich) et converties
-        automatiquement en UTC pour le stockage.
-      </p>
     </div>
   )
 }

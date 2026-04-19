@@ -184,10 +184,10 @@ export const TournamentDetail = ({
               />
               {registrationStatus.label}
             </span>
-            {tournament.game && (
+            {tournament.games.length > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300">
                 <Gamepad2 className="size-3" />
-                {tournament.game}
+                {tournament.games.join(', ')}
               </span>
             )}
           </div>

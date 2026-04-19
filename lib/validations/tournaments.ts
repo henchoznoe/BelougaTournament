@@ -142,15 +142,9 @@ const baseTournamentFields = {
       VALIDATION_LIMITS.TEAM_SIZE_MAX,
       `La taille ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_SIZE_MAX}.`,
     ),
-  game: z
-    .string()
-    .trim()
-    .max(
-      VALIDATION_LIMITS.GAME_MAX,
-      `Le jeu ne peut pas dépasser ${VALIDATION_LIMITS.GAME_MAX} caractères.`,
-    )
-    .optional()
-    .default(''),
+  games: z
+    .array(z.string().trim().min(1))
+    .min(1, 'Au moins un jeu est requis.'),
   rules: z
     .string()
     .trim()

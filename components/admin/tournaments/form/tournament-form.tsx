@@ -16,11 +16,12 @@ import { type FieldErrors, type Resolver, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { TournamentFormContent } from '@/components/admin/tournaments/form/tournament-form-content'
 import { TournamentFormDates } from '@/components/admin/tournaments/form/tournament-form-dates'
-import { TournamentFormEntry } from '@/components/admin/tournaments/form/tournament-form-entry'
 import { TournamentFormFields } from '@/components/admin/tournaments/form/tournament-form-fields'
-import { TournamentFormGame } from '@/components/admin/tournaments/form/tournament-form-game'
+import { TournamentFormFormat } from '@/components/admin/tournaments/form/tournament-form-format'
+import { TournamentFormGames } from '@/components/admin/tournaments/form/tournament-form-games'
 import { TournamentFormGeneral } from '@/components/admin/tournaments/form/tournament-form-general'
 import { TournamentFormImages } from '@/components/admin/tournaments/form/tournament-form-images'
+import { TournamentFormPayment } from '@/components/admin/tournaments/form/tournament-form-payment'
 import { TournamentFormStages } from '@/components/admin/tournaments/form/tournament-form-stages'
 import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
@@ -164,7 +165,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       maxTeams: tournament?.maxTeams ?? null,
       format: tournament?.format ?? TournamentFormat.SOLO,
       teamSize: tournament?.teamSize ?? 1,
-      game: fromNullable(tournament?.game ?? null),
+      games: tournament?.games ?? [],
       rules: fromNullable(tournament?.rules ?? null),
       prize: fromNullable(tournament?.prize ?? null),
       registrationType: tournament?.registrationType ?? RegistrationType.FREE,
@@ -281,7 +282,9 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         router.push(
           isEditing
             ? ROUTES.ADMIN_TOURNAMENT_DETAIL(data.slug)
-            : ROUTES.ADMIN_TOURNAMENTS,
+            : ROUTES.ADMIN_TOURNAMENT_DETAIL(
+                (result.data as { slug: string }).slug,
+              ),
         )
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
@@ -298,31 +301,31 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         control={control}
         errors={errors}
         setValue={setValue}
-        isEditing={isEditing}
       />
 
-      <TournamentFormGame
+      <TournamentFormGames errors={errors} setValue={setValue} watch={watch} />
+
+      <TournamentFormFormat
         register={register}
         errors={errors}
         setValue={setValue}
         watchFormat={watchFormat}
+        watchMaxTeams={watchMaxTeams}
+        watchTeamLogoEnabled={watchTeamLogoEnabled}
         isEditing={isEditing}
       />
 
-      <TournamentFormDates control={control} errors={errors} />
-
-      <TournamentFormEntry
+      <TournamentFormPayment
         errors={errors}
         setValue={setValue}
         watchRegistrationType={watchRegistrationType}
         watchRefundPolicyType={watchRefundPolicyType}
-        watchMaxTeams={watchMaxTeams}
         watchEntryFeeAmount={watchEntryFeeAmount}
         watchRefundDeadlineDays={watchRefundDeadlineDays}
-        watchFormat={watchFormat}
-        watchTeamLogoEnabled={watchTeamLogoEnabled}
         isEditing={isEditing}
       />
+
+      <TournamentFormDates control={control} errors={errors} />
 
       <TournamentFormImages
         register={register}

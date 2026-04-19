@@ -1,6 +1,6 @@
 /**
  * File: components/admin/tournaments/form/tournament-form-general.tsx
- * Description: General information section of the tournament form (title, slug, description).
+ * Description: General information section of the tournament form (title, description).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -33,7 +33,6 @@ interface TournamentFormGeneralProps {
   control: Control<TournamentFormValues>
   errors: FieldErrors<TournamentFormValues>
   setValue: UseFormSetValue<TournamentFormValues>
-  isEditing: boolean
 }
 
 export const TournamentFormGeneral = ({
@@ -41,7 +40,6 @@ export const TournamentFormGeneral = ({
   control,
   errors,
   setValue,
-  isEditing,
 }: TournamentFormGeneralProps) => {
   return (
     <div className={SECTION_CLASSES}>
@@ -61,32 +59,6 @@ export const TournamentFormGeneral = ({
           />
           {errors.title?.message && (
             <p className="text-xs text-red-400">{errors.title.message}</p>
-          )}
-        </div>
-
-        {/* Slug */}
-        <div className="space-y-1.5">
-          <Label htmlFor="tournament-slug" className={LABEL_CLASSES}>
-            Slug *
-            {!isEditing && (
-              <span className="ml-2 text-[10px] text-zinc-600">
-                (généré automatiquement)
-              </span>
-            )}
-            {isEditing && (
-              <span className="ml-2 text-[10px] text-amber-400/80">
-                Attention : modifier le slug change l&apos;URL
-              </span>
-            )}
-          </Label>
-          <Input
-            id="tournament-slug"
-            placeholder="mon-tournoi"
-            className={`${INPUT_CLASSES} font-mono text-xs`}
-            {...register('slug')}
-          />
-          {errors.slug?.message && (
-            <p className="text-xs text-red-400">{errors.slug.message}</p>
           )}
         </div>
 
