@@ -29,7 +29,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
-import { Markdown } from '@/components/ui/markdown'
+import { RichText } from '@/components/ui/rich-text'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import type {
@@ -308,7 +308,7 @@ export const TournamentDetail = ({
             <h3 className="font-paladins text-lg tracking-wider text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
               Récompenses
             </h3>
-            <Markdown
+            <RichText
               content={tournament.prize}
               className="prose-p:text-amber-200/80 prose-strong:text-amber-200"
             />
@@ -348,14 +348,14 @@ export const TournamentDetail = ({
             {/* Description */}
             {tournament.description && (
               <ContentCard icon={ScrollText} title="Description">
-                <Markdown content={tournament.description} />
+                <RichText content={tournament.description} />
               </ContentCard>
             )}
 
             {/* Rules */}
             {tournament.rules && (
               <ContentCard icon={Shield} title="Règlement">
-                <Markdown content={tournament.rules} />
+                <RichText content={tournament.rules} />
               </ContentCard>
             )}
 

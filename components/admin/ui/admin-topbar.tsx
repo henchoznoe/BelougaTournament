@@ -122,12 +122,12 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
                     'hidden text-sm font-medium text-zinc-300 sm:block',
                   )}
                 >
-                  {session.user.displayName}
+                  {session.user.displayName || session.user.name}
                 </span>
                 {session.user.image ? (
                   <Image
                     src={session.user.image}
-                    alt={session.user.displayName}
+                    alt={session.user.displayName || session.user.name}
                     width={32}
                     height={32}
                     className="rounded-full ring-2 ring-white/10"

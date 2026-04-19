@@ -124,7 +124,7 @@ const NavbarProfile = ({
           {session.user.image ? (
             <Image
               src={session.user.image}
-              alt={session.user.name}
+              alt={session.user.displayName || session.user.name}
               width={32}
               height={32}
               className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
@@ -142,7 +142,7 @@ const NavbarProfile = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="font-medium text-sm leading-none text-white">
-                {session.user.displayName}
+                {session.user.displayName || session.user.name}
               </p>
               <p className="text-xs leading-none text-zinc-400">
                 {session.user.email}

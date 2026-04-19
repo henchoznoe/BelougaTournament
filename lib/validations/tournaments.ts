@@ -71,7 +71,7 @@ const baseTournamentFields = {
     .string()
     .trim()
     .min(1, 'La description est requise.')
-    .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
+    .max(15000, 'La description ne peut pas dépasser 15000 caractères.'),
   startDate: z
     .string()
     .min(1, 'La date de début est requise.')
@@ -118,13 +118,13 @@ const baseTournamentFields = {
   rules: z
     .string()
     .trim()
-    .max(10000, 'Les règles ne peuvent pas dépasser 10000 caractères.')
+    .max(30000, 'Les règles ne peuvent pas dépasser 30000 caractères.')
     .optional()
     .default(''),
   prize: z
     .string()
     .trim()
-    .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
+    .max(5000, 'Les prix ne peuvent pas dépasser 5000 caractères.')
     .optional()
     .default(''),
   registrationType: z.enum([RegistrationType.FREE, RegistrationType.PAID], {

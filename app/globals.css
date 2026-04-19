@@ -163,3 +163,103 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Quill Rich Text Editor — Dark Theme ──────────────────────────────────── */
+
+.rich-text-editor .ql-toolbar.ql-snow {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: rgb(255 255 255 / 0.03);
+}
+
+.rich-text-editor .ql-container.ql-snow {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-top: none;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: rgb(255 255 255 / 0.03);
+  font-size: 0.875rem;
+  color: #d4d4d8;
+  min-height: 8rem;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 8rem;
+  padding: 0.75rem 1rem;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: #52525b;
+  font-style: normal;
+}
+
+.rich-text-editor .ql-snow .ql-stroke {
+  stroke: #a1a1aa;
+}
+
+.rich-text-editor .ql-snow .ql-fill,
+.rich-text-editor .ql-snow .ql-stroke.ql-fill {
+  fill: #a1a1aa;
+}
+
+.rich-text-editor .ql-snow .ql-picker-label {
+  color: #a1a1aa;
+}
+
+.rich-text-editor .ql-snow .ql-picker-options {
+  background: #18181b;
+  border-color: rgb(255 255 255 / 0.1);
+  border-radius: 0.5rem;
+}
+
+.rich-text-editor .ql-snow .ql-picker-item {
+  color: #a1a1aa;
+}
+
+.rich-text-editor .ql-snow .ql-picker-item:hover,
+.rich-text-editor .ql-snow .ql-picker-item.ql-selected {
+  color: #fff;
+}
+
+.rich-text-editor .ql-snow button:hover .ql-stroke,
+.rich-text-editor .ql-snow button.ql-active .ql-stroke {
+  stroke: #60a5fa;
+}
+
+.rich-text-editor .ql-snow button:hover .ql-fill,
+.rich-text-editor .ql-snow button.ql-active .ql-fill {
+  fill: #60a5fa;
+}
+
+.rich-text-editor .ql-snow .ql-picker-label:hover,
+.rich-text-editor .ql-snow .ql-picker-label.ql-active {
+  color: #60a5fa;
+}
+
+.rich-text-editor .ql-snow .ql-picker-label:hover .ql-stroke,
+.rich-text-editor .ql-snow .ql-picker-label.ql-active .ql-stroke {
+  stroke: #60a5fa;
+}
+
+.rich-text-editor .ql-editor a {
+  color: #60a5fa;
+}
+
+.rich-text-editor .ql-snow .ql-tooltip {
+  background: #18181b;
+  border-color: rgb(255 255 255 / 0.1);
+  border-radius: 0.5rem;
+  color: #d4d4d8;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
+}
+
+.rich-text-editor .ql-snow .ql-tooltip input[type="text"] {
+  background: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.1);
+  border-radius: 0.375rem;
+  color: #d4d4d8;
+}
+
+.rich-text-editor .ql-snow .ql-tooltip a.ql-action::after,
+.rich-text-editor .ql-snow .ql-tooltip a.ql-remove::before {
+  color: #60a5fa;
+}

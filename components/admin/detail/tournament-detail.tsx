@@ -50,7 +50,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Markdown } from '@/components/ui/markdown'
+import { RichText } from '@/components/ui/rich-text'
 import {
   deleteTournament,
   updateTournamentStatus,
@@ -772,14 +772,14 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
         </div>
       </div>
 
-      {/* Markdown sections */}
+      {/* Rich text sections */}
       {tournament.description && (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
             <FileText className="size-4 text-blue-400" />
             Description
           </h2>
-          <Markdown content={tournament.description} />
+          <RichText content={tournament.description} />
         </div>
       )}
 
@@ -789,7 +789,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
             <Shield className="size-4 text-blue-400" />
             Règles
           </h2>
-          <Markdown content={tournament.rules} />
+          <RichText content={tournament.rules} />
         </div>
       )}
 
@@ -799,7 +799,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
             <Trophy className="size-4 text-amber-400" />
             Prix
           </h2>
-          <Markdown content={tournament.prize} />
+          <RichText content={tournament.prize} />
         </div>
       )}
 
