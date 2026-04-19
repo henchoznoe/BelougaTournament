@@ -27,10 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils/cn'
 import {
   RefundPolicyType,
   RegistrationType,
+  TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
 
 interface TournamentFormEntryProps {
@@ -41,6 +43,8 @@ interface TournamentFormEntryProps {
   watchMaxTeams: number | null
   watchEntryFeeAmount: number | null
   watchRefundDeadlineDays: number | null
+  watchFormat: TournamentFormat
+  watchTeamLogoEnabled: boolean
   isEditing: boolean
 }
 
@@ -52,6 +56,8 @@ export const TournamentFormEntry = ({
   watchMaxTeams,
   watchEntryFeeAmount,
   watchRefundDeadlineDays,
+  watchFormat,
+  watchTeamLogoEnabled,
   isEditing,
 }: TournamentFormEntryProps) => {
   const isPaid = watchRegistrationType === RegistrationType.PAID
@@ -259,6 +265,25 @@ export const TournamentFormEntry = ({
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Team logo toggle (only for team format) */}
+        {watchFormat === TournamentFormat.TEAM && (
+          <div className="flex items-center gap-3">
+            <Switch
+              id="tournament-teamLogoEnabled"
+              checked={watchTeamLogoEnabled}
+              onCheckedChange={val =>
+                setValue('teamLogoEnabled', val, { shouldValidate: true })
+              }
+            />
+            <Label
+              htmlFor="tournament-teamLogoEnabled"
+              className="cursor-pointer text-sm text-zinc-300"
+            >
+              Autoriser les capitaines à uploader un logo d&apos;équipe
+            </Label>
           </div>
         )}
       </div>

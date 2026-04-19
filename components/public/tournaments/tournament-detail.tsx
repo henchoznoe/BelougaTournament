@@ -217,14 +217,20 @@ export const TournamentDetail = ({
                 }
               />
             ) : (
-              <QuickBadge
-                icon={Users}
-                text={
-                  tournament.maxTeams
-                    ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
-                    : `${tournament._count.teams} équipes`
-                }
-              />
+              <>
+                <QuickBadge
+                  icon={Users}
+                  text={
+                    tournament.maxTeams
+                      ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
+                      : `${tournament._count.teams} équipes`
+                  }
+                />
+                <QuickBadge
+                  icon={Users}
+                  text={`${tournament._count.registrations} joueurs`}
+                />
+              </>
             )}
             {entryFee && <QuickBadge icon={Coins} text={entryFee} />}
           </div>

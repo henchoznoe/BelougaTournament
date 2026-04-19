@@ -157,6 +157,7 @@ const VALID_TOURNAMENT_INPUT = {
   entryFeeCurrency: 'CHF' as const,
   refundPolicyType: RefundPolicyType.NONE,
   refundDeadlineDays: null,
+  teamLogoEnabled: false,
   toornamentId: '',
   streamUrl: '',
   imageUrls: [],

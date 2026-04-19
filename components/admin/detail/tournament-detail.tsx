@@ -461,8 +461,10 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
   const STAT_ITEMS = [
     {
       icon: Users,
-      label: 'Inscriptions',
-      value: `${tournament._count.registrations} ${maxLabel}`,
+      label: isTeam ? 'Joueurs inscrits' : 'Inscriptions',
+      value: isTeam
+        ? `${tournament._count.registrations}`
+        : `${tournament._count.registrations} ${maxLabel}`,
       color: 'text-blue-400',
       bg: 'bg-blue-500/10',
     },
@@ -621,10 +623,12 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
             <div className="flex items-start justify-between gap-2">
               <dt className="flex items-center gap-2 text-zinc-500">
                 <Users className="size-3.5" />
-                Places
+                {isTeam ? 'Équipes' : 'Places'}
               </dt>
               <dd className="text-right text-zinc-300">
-                {tournament._count.registrations}
+                {isTeam
+                  ? tournament._count.teams
+                  : tournament._count.registrations}
                 {tournament.maxTeams
                   ? ` / ${tournament.maxTeams}`
                   : ' (illimité)'}
@@ -727,6 +731,26 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                         ({tournament.refundDeadlineDays}j)
                       </span>
                     )}
+                </dd>
+              </div>
+            )}
+            {isTeam && (
+              <div className="flex items-start justify-between gap-2">
+                <dt className="flex items-center gap-2 text-zinc-500">
+                  <ImageIcon className="size-3.5" />
+                  Logo d'équipe
+                </dt>
+                <dd className="text-right">
+                  <span
+                    className={cn(
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                      tournament.teamLogoEnabled
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'bg-zinc-500/10 text-zinc-400',
+                    )}
+                  >
+                    {tournament.teamLogoEnabled ? 'Activé' : 'Désactivé'}
+                  </span>
                 </dd>
               </div>
             )}

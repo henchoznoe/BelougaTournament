@@ -37,6 +37,7 @@ import { unregisterFromTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
 import { formatDate } from '@/lib/utils/formatting'
+import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -45,10 +46,12 @@ import {
 
 interface ProfileRegistrationsProps {
   registrations: UserRegistrationItem[]
+  userId: string
 }
 
 export const ProfileRegistrations = ({
   registrations,
+  userId,
 }: ProfileRegistrationsProps) => {
   const [editingRegistration, setEditingRegistration] =
     useState<UserRegistrationItem | null>(null)
@@ -67,8 +70,8 @@ export const ProfileRegistrations = ({
 
       if (result.success) {
         toast.success(result.message)
-        setUnregisterTarget(null)
         router.refresh()
+        setUnregisterTarget(null)
       } else {
         toast.error(result.message)
       }
@@ -191,6 +194,7 @@ export const ProfileRegistrations = ({
             if (!open) setEditingRegistration(null)
           }}
           registration={editingRegistration}
+          userId={userId}
         />
       )}
 
@@ -218,6 +222,30 @@ export const ProfileRegistrations = ({
                   dissoute.
                 </span>
               )}
+              {unregisterTarget?.paymentRequiredSnapshot &&
+                unregisterTarget.paymentStatus === PaymentStatus.PAID &&
+                (() => {
+                  const t = unregisterTarget.tournament
+                  const eligible = isRefundEligible(
+                    new Date(t.startDate),
+                    t.refundPolicyType,
+                    t.refundDeadlineDays,
+                    new Date(),
+                  )
+                  const amount =
+                    t.entryFeeAmount !== null
+                      ? `${(t.entryFeeAmount / 100).toFixed(2)} ${t.entryFeeCurrency ?? 'CHF'}`
+                      : null
+                  return eligible ? (
+                    <span className="mt-2 block text-emerald-400">
+                      Vous serez remboursé de {amount}.
+                    </span>
+                  ) : (
+                    <span className="mt-2 block text-red-400">
+                      Attention : vous ne serez pas remboursé.
+                    </span>
+                  )
+                })()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -14,6 +14,7 @@ import {
   tournamentFieldSchema,
   tournamentSchema,
   unregisterFromTournamentSchema,
+  updateTeamNameSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
@@ -47,6 +48,7 @@ const VALID_TOURNAMENT = {
   entryFeeCurrency: 'CHF' as const,
   refundPolicyType: 'NONE' as const,
   refundDeadlineDays: null,
+  teamLogoEnabled: false,
   toornamentId: '',
   streamUrl: '',
   imageUrl: '',
@@ -710,5 +712,58 @@ describe('unregisterFromTournamentSchema', () => {
     expect(
       unregisterFromTournamentSchema.safeParse({ tournamentId: '' }).success,
     ).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateTeamNameSchema
+// ---------------------------------------------------------------------------
+
+describe('updateTeamNameSchema', () => {
+  it('accepts a valid team name', () => {
+    expect(
+      updateTeamNameSchema.safeParse({
+        teamId: VALID_UUID,
+        name: 'Alpha Squad',
+      }).success,
+    ).toBe(true)
+  })
+
+  it('rejects a name that is too short', () => {
+    expect(
+      updateTeamNameSchema.safeParse({
+        teamId: VALID_UUID,
+        name: 'A',
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects a name that is too long', () => {
+    expect(
+      updateTeamNameSchema.safeParse({
+        teamId: VALID_UUID,
+        name: 'A'.repeat(31),
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects an invalid team ID', () => {
+    expect(
+      updateTeamNameSchema.safeParse({
+        teamId: INVALID_UUID,
+        name: 'Alpha Squad',
+      }).success,
+    ).toBe(false)
+  })
+
+  it('trims whitespace from the name', () => {
+    const result = updateTeamNameSchema.safeParse({
+      teamId: VALID_UUID,
+      name: '  Alpha Squad  ',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.name).toBe('Alpha Squad')
+    }
   })
 })

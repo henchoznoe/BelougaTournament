@@ -172,6 +172,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       entryFeeCurrency: 'CHF',
       refundPolicyType: tournament?.refundPolicyType ?? RefundPolicyType.NONE,
       refundDeadlineDays: tournament?.refundDeadlineDays ?? null,
+      teamLogoEnabled: tournament?.teamLogoEnabled ?? false,
       toornamentId: fromNullable(tournament?.toornamentId ?? null),
       imageUrls: tournament?.imageUrls ?? [],
       streamUrl: fromNullable(tournament?.streamUrl ?? null),
@@ -194,6 +195,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   })
 
   const watchTitle = watch('title')
+  const watchSlug = watch('slug')
   const watchFormat = watch('format')
   const watchRegistrationType = watch('registrationType')
   const watchRefundPolicyType = watch('refundPolicyType')
@@ -201,6 +203,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const watchMaxTeams = watch('maxTeams')
   const watchEntryFeeAmount = watch('entryFeeAmount')
   const watchRefundDeadlineDays = watch('refundDeadlineDays')
+  const watchTeamLogoEnabled = watch('teamLogoEnabled')
 
   // Auto-generate slug from title in create mode
   useEffect(() => {
@@ -316,6 +319,8 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         watchMaxTeams={watchMaxTeams}
         watchEntryFeeAmount={watchEntryFeeAmount}
         watchRefundDeadlineDays={watchRefundDeadlineDays}
+        watchFormat={watchFormat}
+        watchTeamLogoEnabled={watchTeamLogoEnabled}
         isEditing={isEditing}
       />
 
@@ -324,6 +329,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         errors={errors}
         setValue={setValue}
         watchImageUrls={watchImageUrls}
+        watchSlug={watchSlug}
       />
 
       <TournamentFormContent

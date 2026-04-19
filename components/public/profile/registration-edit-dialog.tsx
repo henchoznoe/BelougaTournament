@@ -1,6 +1,6 @@
 /**
  * File: components/public/profile/registration-edit-dialog.tsx
- * Description: Dialog for editing own registration field values from the profile page.
+ * Description: Dialog for editing own registration field values and team name (captain) from the profile page.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,9 +8,10 @@
 
 'use client'
 
-import { Loader2, Save } from 'lucide-react'
+import { ImagePlus, Loader2, Save, Trash2 } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { updateRegistrationFields } from '@/lib/actions/tournaments'
+import {
+  updateRegistrationFields,
+  updateTeamName,
+} from '@/lib/actions/tournaments'
 import type {
   TournamentFieldItem,
   UserRegistrationItem,
@@ -35,6 +39,7 @@ interface RegistrationEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   registration: UserRegistrationItem
+  userId: string
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -58,14 +63,24 @@ export const RegistrationEditDialog = ({
   open,
   onOpenChange,
   registration,
+  userId,
 }: RegistrationEditDialogProps) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const fields = registration.tournament.fields
+  const isCaptain =
+    !!registration.team && registration.team.captainId === userId
 
   const defaultValues = Object.fromEntries(
     fields.map(f => [f.label, String(registration.fieldValues[f.label] ?? '')]),
   )
+
+  const [teamName, setTeamName] = useState(registration.team?.name ?? '')
+  const [logoUrl, setLogoUrl] = useState(registration.team?.logoUrl ?? null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const logoInputRef = useRef<HTMLInputElement>(null)
+
+  const showLogoUpload = isCaptain && registration.tournament.teamLogoEnabled
 
   const {
     register,
@@ -75,6 +90,10 @@ export const RegistrationEditDialog = ({
   } = useForm<Record<string, string>>({
     defaultValues,
   })
+
+  // Track whether the team name has changed
+  const teamNameDirty =
+    isCaptain && teamName !== (registration.team?.name ?? '')
 
   // Re-populate the form each time the dialog opens
   useEffect(() => {
@@ -87,25 +106,105 @@ export const RegistrationEditDialog = ({
           ]),
         ),
       )
+      setTeamName(registration.team?.name ?? '')
+      setLogoUrl(registration.team?.logoUrl ?? null)
     }
   }, [open, registration, fields, reset])
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !registration.team) return
+
+    setIsUploadingLogo(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('teamId', registration.team.id)
+
+      const res = await fetch('/api/blobs/team-logo', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = (await res.json()) as { url?: string; error?: string }
+
+      if (!res.ok || !data.url) {
+        toast.error(data.error ?? "Erreur lors de l'upload du logo.")
+        return
+      }
+
+      setLogoUrl(data.url)
+      toast.success('Logo importé avec succès.')
+      router.refresh()
+    } catch (error) {
+      console.error('Error uploading team logo:', error)
+      toast.error('Une erreur inattendue est survenue.')
+    } finally {
+      setIsUploadingLogo(false)
+      if (logoInputRef.current) logoInputRef.current.value = ''
+    }
+  }
+
+  const handleLogoDelete = async () => {
+    if (!registration.team) return
+
+    setIsUploadingLogo(true)
+    try {
+      const res = await fetch('/api/blobs/team-logo', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamId: registration.team.id }),
+      })
+      const data = (await res.json()) as { success?: boolean; error?: string }
+
+      if (!res.ok || !data.success) {
+        toast.error(data.error ?? 'Erreur lors de la suppression du logo.')
+        return
+      }
+
+      setLogoUrl(null)
+      toast.success('Logo supprimé.')
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting team logo:', error)
+      toast.error('Une erreur inattendue est survenue.')
+    } finally {
+      setIsUploadingLogo(false)
+    }
+  }
+
   const onSubmit = (data: Record<string, string>) => {
     startTransition(async () => {
-      const fieldValues = buildFieldValues(data, fields)
-      const result = await updateRegistrationFields({
-        registrationId: registration.id,
-        tournamentId: registration.tournament.id,
-        fieldValues,
-      })
+      // Update field values if changed
+      if (isDirty) {
+        const fieldValues = buildFieldValues(data, fields)
+        const result = await updateRegistrationFields({
+          registrationId: registration.id,
+          tournamentId: registration.tournament.id,
+          fieldValues,
+        })
 
-      if (result.success) {
-        toast.success(result.message)
-        onOpenChange(false)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
+        if (!result.success) {
+          toast.error(result.message ?? 'Une erreur est survenue.')
+          return
+        }
       }
+
+      // Update team name if captain changed it
+      if (teamNameDirty && registration.team) {
+        const result = await updateTeamName({
+          teamId: registration.team.id,
+          name: teamName.trim(),
+        })
+
+        if (!result.success) {
+          toast.error(result.message ?? 'Une erreur est survenue.')
+          return
+        }
+      }
+
+      toast.success('Modifications enregistrées.')
+      onOpenChange(false)
+      router.refresh()
     })
   }
 
@@ -122,6 +221,98 @@ export const RegistrationEditDialog = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {isCaptain && (
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-team-name" className="text-xs text-zinc-400">
+                Nom d'équipe
+              </Label>
+              <Input
+                id="edit-team-name"
+                type="text"
+                disabled={isPending}
+                value={teamName}
+                onChange={e => setTeamName(e.target.value)}
+                maxLength={30}
+                className="h-9 border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600"
+              />
+            </div>
+          )}
+
+          {showLogoUpload && (
+            <div className="space-y-2">
+              <Label className="text-xs text-zinc-400">Logo d'équipe</Label>
+              {logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative size-12 overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                    <Image
+                      src={logoUrl}
+                      alt="Logo d'équipe"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isUploadingLogo || isPending}
+                    className="gap-1.5 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                    onClick={handleLogoDelete}
+                  >
+                    {isUploadingLogo ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="size-3.5" />
+                    )}
+                    Supprimer
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isUploadingLogo || isPending}
+                    className="gap-1.5 text-zinc-400 hover:bg-white/5 hover:text-zinc-300"
+                    onClick={() => logoInputRef.current?.click()}
+                  >
+                    {isUploadingLogo ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <ImagePlus className="size-3.5" />
+                    )}
+                    Changer
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploadingLogo || isPending}
+                  className="gap-2 border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  {isUploadingLogo ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="size-4" />
+                  )}
+                  {isUploadingLogo ? 'Import en cours...' : 'Uploader un logo'}
+                </Button>
+              )}
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                aria-label="Sélectionner un logo d'équipe"
+                onChange={handleLogoUpload}
+              />
+              <p className="text-xs text-zinc-500">
+                PNG, JPEG ou WebP. 2 Mo maximum.
+              </p>
+            </div>
+          )}
+
           {fields.length > 0 ? (
             <div className="space-y-3">
               {fields.map(field => (
@@ -155,15 +346,17 @@ export const RegistrationEditDialog = ({
               ))}
             </div>
           ) : (
-            <p className="text-center text-sm text-zinc-500">
-              Aucun champ supplémentaire à modifier.
-            </p>
+            !isCaptain && (
+              <p className="text-center text-sm text-zinc-500">
+                Aucun champ supplémentaire à modifier.
+              </p>
+            )
           )}
 
           <DialogFooter>
             <Button
               type="submit"
-              disabled={isPending || !isDirty}
+              disabled={isPending || (!isDirty && !teamNameDirty)}
               className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
             >
               {isPending ? (

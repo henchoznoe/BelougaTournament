@@ -15,9 +15,6 @@ export const METADATA = {
   TEMPLATE_TITLE: '%s | Belouga Tournament',
 } as const
 
-/** Computed once at build time — safe for prerendered components. */
-export const CURRENT_YEAR = new Date().getFullYear()
-
 export const DEFAULT_ASSETS = {
   LOGO: '/assets/logo-blue.png',
   BG_IMAGE: '/assets/wall.png',

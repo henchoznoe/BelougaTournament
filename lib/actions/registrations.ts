@@ -8,6 +8,7 @@
 
 'use server'
 
+import { del } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -19,7 +20,9 @@ import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
+  adminDeleteTeamLogoSchema,
   adminUpdateRegistrationFieldsSchema,
+  adminUpdateTeamNameSchema,
   changeTeamSchema,
   deleteRegistrationSchema,
   promoteCaptainSchema,
@@ -704,5 +707,91 @@ export const adminPromoteCaptain = authenticatedAction({
       success: true,
       message: 'Le capitaine a été mis à jour.',
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Admin — update team name
+// ---------------------------------------------------------------------------
+
+/** Allows an admin to rename any team. */
+export const adminUpdateTeamName = authenticatedAction({
+  schema: adminUpdateTeamNameSchema,
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
+    const team = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      select: { id: true, tournamentId: true },
+    })
+
+    if (!team) {
+      return { success: false, message: 'Équipe introuvable.' }
+    }
+
+    // Check for duplicate team name within the same tournament
+    const duplicate = await prisma.team.findFirst({
+      where: {
+        tournamentId: team.tournamentId,
+        name: data.name,
+        id: { not: team.id },
+      },
+      select: { id: true },
+    })
+
+    if (duplicate) {
+      return {
+        success: false,
+        message: "Ce nom d'équipe est déjà pris dans ce tournoi.",
+      }
+    }
+
+    await prisma.team.update({
+      where: { id: team.id },
+      data: { name: data.name },
+    })
+
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+
+    return { success: true, message: "Le nom de l'équipe a été mis à jour." }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Admin — delete team logo
+// ---------------------------------------------------------------------------
+
+/** Allows an admin to delete a team's logo. */
+export const adminDeleteTeamLogo = authenticatedAction({
+  schema: adminDeleteTeamLogoSchema,
+  role: Role.ADMIN,
+  handler: async (data): Promise<ActionState> => {
+    const team = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      select: { id: true, logoUrl: true },
+    })
+
+    if (!team) {
+      return { success: false, message: 'Équipe introuvable.' }
+    }
+
+    if (!team.logoUrl) {
+      return { success: false, message: 'Aucun logo à supprimer.' }
+    }
+
+    try {
+      await del(team.logoUrl)
+    } catch (error) {
+      logger.error({ error }, 'Error deleting team logo blob')
+    }
+
+    await prisma.team.update({
+      where: { id: team.id },
+      data: { logoUrl: null },
+    })
+
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+
+    return { success: true, message: "Le logo de l'équipe a été supprimé." }
   },
 })

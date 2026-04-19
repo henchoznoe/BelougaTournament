@@ -14,7 +14,7 @@ import { verifyAdmin } from '@/lib/utils/verify-admin'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
-const ALLOWED_FOLDERS = new Set(['logos', 'sponsors', 'tournaments'])
+const ALLOWED_FOLDER_ROOTS = new Set(['logos', 'sponsors', 'tournaments'])
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
 
 /** Validates that a URL belongs to the app's Vercel Blob store. */
@@ -29,6 +29,12 @@ const isValidBlobUrl = (url: string): boolean => {
   }
 }
 
+/** Checks whether a folder string starts with an allowed root folder. */
+const isAllowedFolder = (folder: string): boolean => {
+  const root = folder.split('/')[0]
+  return ALLOWED_FOLDER_ROOTS.has(root)
+}
+
 /** GET — List blobs, optionally filtered by folder prefix. */
 export const GET = async (request: Request) => {
   const session = await verifyAdmin(request)
@@ -40,8 +46,7 @@ export const GET = async (request: Request) => {
     const { searchParams } = new URL(request.url)
     const folder = searchParams.get('folder')
 
-    const prefix =
-      folder && ALLOWED_FOLDERS.has(folder) ? `${folder}/` : undefined
+    const prefix = folder && isAllowedFolder(folder) ? `${folder}/` : undefined
     const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
@@ -97,7 +102,7 @@ export const POST = async (request: Request) => {
 
     // Build the pathname with optional folder prefix
     const pathname =
-      typeof folder === 'string' && ALLOWED_FOLDERS.has(folder)
+      typeof folder === 'string' && isAllowedFolder(folder)
         ? `${folder}/${sanitizedName}`
         : sanitizedName
 

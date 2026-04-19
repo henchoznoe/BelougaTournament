@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Calendar, Gamepad2, Swords, Trophy, Users } from 'lucide-react'
+import { Calendar, Gamepad2, Swords, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
@@ -54,18 +54,28 @@ const getRegistrationInfo = (tournament: PublicTournamentListItem) => {
   }
 }
 
-/** Computes the spots label (e.g. "12 / 32 inscrits"). */
-const getSpotsLabel = (tournament: PublicTournamentListItem) => {
-  const count = tournament._count.registrations
-  if (tournament.maxTeams) {
-    return `${count} / ${tournament.maxTeams}`
-  }
-  return `${count}`
+/** Computes the spots label (e.g. "12 / 32 inscrits" or "3 / 4 équipes"). */
+const getSpotsInfo = (tournament: PublicTournamentListItem) => {
+  const isTeam = tournament.format === TournamentFormat.TEAM
+  const count = isTeam
+    ? tournament._count.teams
+    : tournament._count.registrations
+  const label = isTeam
+    ? count !== 1
+      ? 'équipes'
+      : 'équipe'
+    : count !== 1
+      ? 'inscrits'
+      : 'inscrit'
+  const value = tournament.maxTeams
+    ? `${count} / ${tournament.maxTeams}`
+    : `${count}`
+  return { value, label }
 }
 
 export const TournamentCard = ({ tournament }: TournamentCardProps) => {
   const registrationInfo = getRegistrationInfo(tournament)
-  const spotsLabel = getSpotsLabel(tournament)
+  const spotsInfo = getSpotsInfo(tournament)
 
   return (
     <Link
@@ -148,14 +158,13 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           <div className="flex items-center gap-4 border-t border-white/5 pt-4 text-xs text-zinc-500">
             <span className="inline-flex items-center gap-1.5">
               <Users className="size-3.5" />
-              {spotsLabel} inscrit
-              {tournament._count.registrations !== 1 ? 's' : ''}
+              {spotsInfo.value} {spotsInfo.label}
             </span>
             {tournament.format === TournamentFormat.TEAM && (
               <span className="inline-flex items-center gap-1.5">
-                <Trophy className="size-3.5" />
-                {tournament._count.teams} équipe
-                {tournament._count.teams !== 1 ? 's' : ''}
+                <Users className="size-3.5" />
+                {tournament._count.registrations} joueur
+                {tournament._count.registrations !== 1 ? 's' : ''}
               </span>
             )}
           </div>

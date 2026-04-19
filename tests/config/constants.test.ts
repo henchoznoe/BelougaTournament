@@ -10,7 +10,6 @@ import { describe, expect, it } from 'vitest'
 import {
   AUTH_CONFIG,
   CACHE_TAGS,
-  CURRENT_YEAR,
   DEFAULT_ASSETS,
   DISCORD,
   METADATA,
@@ -34,12 +33,6 @@ describe('METADATA', () => {
 
   it('has a template title containing %s placeholder', () => {
     expect(METADATA.TEMPLATE_TITLE).toContain('%s')
-  })
-})
-
-describe('CURRENT_YEAR', () => {
-  it('is a number >= 2026', () => {
-    expect(CURRENT_YEAR).toBeGreaterThanOrEqual(2026)
   })
 })
 

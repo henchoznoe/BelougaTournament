@@ -37,6 +37,7 @@ import {
   tournamentSchema,
   unregisterFromTournamentSchema,
   updateRegistrationFieldsSchema,
+  updateTeamNameSchema,
   updateTournamentSchema,
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
@@ -563,6 +564,7 @@ export const createTournament = authenticatedAction({
             : null,
         format: data.format,
         teamSize: data.teamSize,
+        teamLogoEnabled: data.teamLogoEnabled,
         game: toNullable(data.game),
         rules: toNullable(data.rules),
         prize: toNullable(data.prize),
@@ -731,6 +733,7 @@ export const updateTournament = authenticatedAction({
               : null,
           format: data.format,
           teamSize: data.teamSize,
+          teamLogoEnabled: data.teamLogoEnabled,
           game: toNullable(data.game),
           rules: toNullable(data.rules),
           prize: toNullable(data.prize),
@@ -1664,5 +1667,72 @@ export const dissolveTeam = authenticatedAction({
     revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
     return { success: true, message: "L'équipe a été dissoute." }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Player — update team name (captain only)
+// ---------------------------------------------------------------------------
+
+/** Allows the team captain to rename their team. */
+export const updateTeamName = authenticatedAction({
+  schema: updateTeamNameSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    const userId = session.user.id
+
+    const team = await prisma.team.findUnique({
+      where: { id: data.teamId },
+      select: { id: true, captainId: true, tournamentId: true },
+    })
+
+    if (!team) {
+      return { success: false, message: 'Équipe introuvable.' }
+    }
+
+    if (team.captainId !== userId) {
+      return {
+        success: false,
+        message: "Seul le capitaine peut renommer l'équipe.",
+      }
+    }
+
+    // Ensure the tournament is still published
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: team.tournamentId },
+      select: { status: true },
+    })
+
+    if (!tournament || tournament.status !== TournamentStatus.PUBLISHED) {
+      return {
+        success: false,
+        message: 'Ce tournoi ne permet plus de modifications.',
+      }
+    }
+
+    // Check for duplicate team name within the same tournament
+    const duplicate = await prisma.team.findFirst({
+      where: {
+        tournamentId: team.tournamentId,
+        name: data.name,
+        id: { not: team.id },
+      },
+      select: { id: true },
+    })
+
+    if (duplicate) {
+      return {
+        success: false,
+        message: "Ce nom d'équipe est déjà pris dans ce tournoi.",
+      }
+    }
+
+    await prisma.team.update({
+      where: { id: team.id },
+      data: { name: data.name },
+    })
+
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+
+    return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },
 })

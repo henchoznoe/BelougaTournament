@@ -157,6 +157,7 @@ const baseTournamentFields = {
     .default(''),
   imageUrls: z.array(z.url('URL invalide.')).default([]),
   streamUrl: optionalUrl,
+  teamLogoEnabled: z.boolean(),
   fields: z.array(tournamentFieldSchema),
   toornamentStages: z.array(toornamentStageSchema),
 } as const
@@ -317,6 +318,16 @@ export const joinTeamSchema = z.object({
 /** Schema for a player cancelling their own registration. */
 export const unregisterFromTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+})
+
+/** Schema for a captain updating their team name. */
+export const updateTeamNameSchema = z.object({
+  teamId: z.uuid("ID d'équipe invalide."),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Le nom d'équipe doit contenir au moins 2 caractères.")
+    .max(30, "Le nom d'équipe ne peut pas dépasser 30 caractères."),
 })
 
 // ---------------------------------------------------------------------------

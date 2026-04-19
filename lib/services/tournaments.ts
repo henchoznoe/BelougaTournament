@@ -168,6 +168,7 @@ type RawTournamentRegistrationRow = Omit<
         name: string
         captainId: string
         isFull: boolean
+        logoUrl: string | null
       }
     }[]
   }
@@ -212,6 +213,7 @@ export const getRegistrations = async (
                     name: true,
                     captainId: true,
                     isFull: true,
+                    logoUrl: true,
                   },
                 },
               },
@@ -236,6 +238,7 @@ export const getRegistrations = async (
             name: membership.team.name,
             captainId: membership.team.captainId,
             isFull: membership.team.isFull,
+            logoUrl: membership.team.logoUrl,
           }
         : null
 
@@ -261,6 +264,7 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
       select: {
         id: true,
         name: true,
+        logoUrl: true,
         isFull: true,
         createdAt: true,
         captain: {
@@ -518,6 +522,7 @@ const USER_REGISTRATION_SELECT = {
   createdAt: true,
   status: true,
   paymentStatus: true,
+  paymentRequiredSnapshot: true,
   tournament: {
     select: {
       id: true,
@@ -525,8 +530,15 @@ const USER_REGISTRATION_SELECT = {
       slug: true,
       game: true,
       format: true,
+      teamSize: true,
       startDate: true,
       status: true,
+      registrationType: true,
+      entryFeeAmount: true,
+      entryFeeCurrency: true,
+      refundPolicyType: true,
+      refundDeadlineDays: true,
+      teamLogoEnabled: true,
       fields: {
         orderBy: { order: 'asc' as const },
         select: {
@@ -537,6 +549,14 @@ const USER_REGISTRATION_SELECT = {
           order: true,
         },
       },
+    },
+  },
+  team: {
+    select: {
+      id: true,
+      name: true,
+      captainId: true,
+      logoUrl: true,
     },
   },
 } as const

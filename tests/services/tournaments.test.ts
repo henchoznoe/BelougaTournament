@@ -487,6 +487,7 @@ const MOCK_REGISTRATION = {
     name: 'Alpha Squad',
     captainId: 'user-1',
     isFull: false,
+    logoUrl: null,
   },
 }
 
@@ -509,6 +510,7 @@ const MOCK_RAW_REGISTRATION = {
           name: 'Alpha Squad',
           captainId: 'user-1',
           isFull: false,
+          logoUrl: null,
         },
       },
     ],
@@ -522,6 +524,7 @@ const MOCK_RAW_REGISTRATION = {
 const MOCK_TEAM = {
   id: 'team-1',
   name: 'Alpha Squad',
+  logoUrl: null,
   isFull: false,
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   captain: {
@@ -586,6 +589,7 @@ describe('getRegistrations', () => {
                     name: true,
                     captainId: true,
                     isFull: true,
+                    logoUrl: true,
                   },
                 },
               },
@@ -640,6 +644,7 @@ describe('getTeams', () => {
       select: {
         id: true,
         name: true,
+        logoUrl: true,
         isFull: true,
         createdAt: true,
         captain: {
@@ -1087,16 +1092,25 @@ const MOCK_USER_REGISTRATION = {
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
+  paymentRequiredSnapshot: false,
   tournament: {
     id: 'uuid-1',
     title: 'Valorant Cup',
     slug: 'valorant-cup',
     game: 'Valorant',
     format: 'TEAM',
+    teamSize: 5,
     startDate: new Date('2026-06-15T10:00:00.000Z'),
     status: 'PUBLISHED',
+    registrationType: 'FREE',
+    entryFeeAmount: null,
+    entryFeeCurrency: null,
+    refundPolicyType: 'NONE',
+    refundDeadlineDays: null,
+    teamLogoEnabled: false,
     fields: [],
   },
+  team: null,
 }
 
 const MOCK_USER_PAST_REGISTRATION = {
@@ -1105,16 +1119,25 @@ const MOCK_USER_PAST_REGISTRATION = {
   createdAt: new Date('2025-11-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
+  paymentRequiredSnapshot: false,
   tournament: {
     id: 'uuid-2',
     title: 'CS2 Winter Cup',
     slug: 'cs2-winter-cup',
     game: 'CS2',
     format: 'TEAM',
+    teamSize: 5,
     startDate: new Date('2025-12-01T10:00:00.000Z'),
     status: 'ARCHIVED',
+    registrationType: 'FREE',
+    entryFeeAmount: null,
+    entryFeeCurrency: null,
+    refundPolicyType: 'NONE',
+    refundDeadlineDays: null,
+    teamLogoEnabled: false,
     fields: [],
   },
+  team: null,
 }
 
 const USER_REGISTRATION_SELECT = {
@@ -1123,6 +1146,7 @@ const USER_REGISTRATION_SELECT = {
   createdAt: true,
   status: true,
   paymentStatus: true,
+  paymentRequiredSnapshot: true,
   tournament: {
     select: {
       id: true,
@@ -1130,8 +1154,15 @@ const USER_REGISTRATION_SELECT = {
       slug: true,
       game: true,
       format: true,
+      teamSize: true,
       startDate: true,
       status: true,
+      registrationType: true,
+      entryFeeAmount: true,
+      entryFeeCurrency: true,
+      refundPolicyType: true,
+      refundDeadlineDays: true,
+      teamLogoEnabled: true,
       fields: {
         orderBy: { order: 'asc' },
         select: {
@@ -1142,6 +1173,14 @@ const USER_REGISTRATION_SELECT = {
           order: true,
         },
       },
+    },
+  },
+  team: {
+    select: {
+      id: true,
+      name: true,
+      captainId: true,
+      logoUrl: true,
     },
   },
 }

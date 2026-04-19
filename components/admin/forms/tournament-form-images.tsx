@@ -38,6 +38,7 @@ interface TournamentFormImagesProps {
   errors: FieldErrors<TournamentFormValues>
   setValue: UseFormSetValue<TournamentFormValues>
   watchImageUrls: string[]
+  watchSlug: string
 }
 
 export const TournamentFormImages = ({
@@ -45,6 +46,7 @@ export const TournamentFormImages = ({
   errors,
   setValue,
   watchImageUrls,
+  watchSlug,
 }: TournamentFormImagesProps) => {
   const [isUploading, setIsUploading] = useState(false)
   const [blobs, setBlobs] = useState<BlobItem[]>([])
@@ -81,7 +83,10 @@ export const TournamentFormImages = ({
       for (const file of files) {
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('folder', 'tournaments')
+        const folder = watchSlug
+          ? `tournaments/${watchSlug}/images`
+          : 'tournaments'
+        formData.append('folder', folder)
 
         const res = await fetch('/api/admin/blobs', {
           method: 'POST',

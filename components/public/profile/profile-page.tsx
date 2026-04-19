@@ -234,7 +234,10 @@ export const ProfilePage = async () => {
 
             <TabsContent value="current">
               {registrations.length > 0 ? (
-                <ProfileRegistrations registrations={registrations} />
+                <ProfileRegistrations
+                  registrations={registrations}
+                  userId={session.user.id}
+                />
               ) : (
                 <div className="flex flex-col items-center gap-3 py-4 text-center">
                   <p className="max-w-sm text-sm text-zinc-500">
@@ -252,7 +255,10 @@ export const ProfilePage = async () => {
 
             <TabsContent value="history">
               {pastRegistrations.length > 0 ? (
-                <ProfileRegistrations registrations={pastRegistrations} />
+                <ProfileRegistrations
+                  registrations={pastRegistrations}
+                  userId={session.user.id}
+                />
               ) : (
                 <div className="flex flex-col items-center gap-3 py-4 text-center">
                   <p className="max-w-sm text-sm text-zinc-500">

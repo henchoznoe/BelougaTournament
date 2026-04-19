@@ -34,16 +34,30 @@ export type UserRegistrationItem = {
   createdAt: Date
   status: RegistrationStatus
   paymentStatus: PaymentStatus
+  paymentRequiredSnapshot: boolean
   tournament: {
     id: string
     title: string
     slug: string
     game: string | null
     format: TournamentFormat
+    teamSize: number
     startDate: Date
     status: TournamentStatus
+    registrationType: RegistrationType
+    entryFeeAmount: number | null
+    entryFeeCurrency: string | null
+    refundPolicyType: RefundPolicyType
+    refundDeadlineDays: number | null
+    teamLogoEnabled: boolean
     fields: TournamentFieldItem[]
   }
+  team: {
+    id: string
+    name: string
+    captainId: string
+    logoUrl: string | null
+  } | null
 }
 
 /** Tournament as displayed in the admin list table. */
@@ -93,6 +107,7 @@ export type TournamentDetail = {
   prize: string | null
   toornamentId: string | null
   streamUrl: string | null
+  teamLogoEnabled: boolean
   status: TournamentStatus
   createdAt: Date
   updatedAt: Date
@@ -139,6 +154,7 @@ export type TournamentRegistrationItem = {
     name: string
     captainId: string
     isFull: boolean
+    logoUrl: string | null
   } | null
 }
 
@@ -158,6 +174,7 @@ export type TeamMemberItem = {
 export type TeamItem = {
   id: string
   name: string
+  logoUrl: string | null
   isFull: boolean
   createdAt: Date
   captain: {
@@ -214,6 +231,7 @@ export type PublicTournamentDetail = {
   entryFeeCurrency: string | null
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
+  teamLogoEnabled: boolean
   status: TournamentStatus
   startDate: Date
   endDate: Date

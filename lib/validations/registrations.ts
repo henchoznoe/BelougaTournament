@@ -36,3 +36,18 @@ export const promoteCaptainSchema = z.object({
 export const refundRegistrationSchema = z.object({
   registrationId: z.uuid('ID inscription invalide.'),
 })
+
+/** Schema for admin-renaming a team. */
+export const adminUpdateTeamNameSchema = z.object({
+  teamId: z.uuid("ID d'équipe invalide."),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Le nom d'équipe doit contenir au moins 2 caractères.")
+    .max(30, "Le nom d'équipe ne peut pas dépasser 30 caractères."),
+})
+
+/** Schema for admin-deleting a team logo. */
+export const adminDeleteTeamLogoSchema = z.object({
+  teamId: z.uuid("ID d'équipe invalide."),
+})

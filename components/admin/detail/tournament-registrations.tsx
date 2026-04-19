@@ -13,12 +13,14 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
+  ImageOff,
   Loader2,
   MoreHorizontal,
   Pencil,
   RefreshCw,
   Search,
   Trash2,
+  Type,
   UserRound,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -72,8 +74,10 @@ import {
 import {
   adminChangeTeam,
   adminDeleteRegistration,
+  adminDeleteTeamLogo,
   adminRefundRegistration,
   adminUpdateRegistrationFields,
+  adminUpdateTeamName,
 } from '@/lib/actions/registrations'
 import { ROUTES } from '@/lib/config/routes'
 import type {
@@ -349,6 +353,8 @@ const RowActions = ({
   const [changeTeamOpen, setChangeTeamOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [refundOpen, setRefundOpen] = useState(false)
+  const [renameTeamOpen, setRenameTeamOpen] = useState(false)
+  const [newTeamName, setNewTeamName] = useState(registration.team?.name ?? '')
 
   const isTeam = tournament.format === TournamentFormat.TEAM
   const canRefund = registration.paymentStatus === PaymentStatus.PAID
@@ -383,6 +389,40 @@ const RowActions = ({
     })
   }
 
+  const handleRenameTeam = () => {
+    const teamId = registration.team?.id
+    if (!teamId) return
+    startTransition(async () => {
+      const result = await adminUpdateTeamName({
+        teamId,
+        name: newTeamName.trim(),
+      })
+      if (result.success) {
+        toast.success(result.message)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+      setRenameTeamOpen(false)
+    })
+  }
+
+  const handleDeleteLogo = () => {
+    const teamId = registration.team?.id
+    if (!teamId) return
+    startTransition(async () => {
+      const result = await adminDeleteTeamLogo({
+        teamId,
+      })
+      if (result.success) {
+        toast.success(result.message)
+        router.refresh()
+      } else {
+        toast.error(result.message ?? 'Une erreur est survenue.')
+      }
+    })
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -413,6 +453,26 @@ const RowActions = ({
             <DropdownMenuItem onSelect={() => setChangeTeamOpen(true)}>
               <ArrowRightLeft className="mr-2 size-4" />
               Changer d'équipe
+            </DropdownMenuItem>
+          )}
+          {isTeam && registration.team && (
+            <DropdownMenuItem
+              onSelect={() => {
+                setNewTeamName(registration.team?.name ?? '')
+                setRenameTeamOpen(true)
+              }}
+            >
+              <Type className="mr-2 size-4" />
+              Renommer l'équipe
+            </DropdownMenuItem>
+          )}
+          {isTeam && registration.team?.logoUrl && (
+            <DropdownMenuItem
+              onSelect={handleDeleteLogo}
+              className="text-amber-400 focus:text-amber-300"
+            >
+              <ImageOff className="mr-2 size-4" />
+              Supprimer le logo
             </DropdownMenuItem>
           )}
           {canRefund && (
@@ -510,6 +570,54 @@ const RowActions = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Rename team dialog */}
+      {isTeam && registration.team && (
+        <Dialog open={renameTeamOpen} onOpenChange={setRenameTeamOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Renommer l'équipe</DialogTitle>
+              <DialogDescription>
+                Équipe actuelle : {registration.team.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="admin-rename-team" className="text-sm">
+                Nouveau nom
+              </Label>
+              <Input
+                id="admin-rename-team"
+                value={newTeamName}
+                onChange={e => setNewTeamName(e.target.value)}
+                maxLength={30}
+                disabled={isPending}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRenameTeamOpen(false)}
+                disabled={isPending}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleRenameTeam}
+                disabled={
+                  isPending ||
+                  newTeamName.trim().length < 2 ||
+                  newTeamName.trim() === registration.team.name
+                }
+              >
+                {isPending ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : null}
+                Renommer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   )
 }
@@ -815,6 +923,16 @@ const RegistrationRow = ({
           <TableCell className="hidden md:table-cell">
             {registration.team ? (
               <div className="flex items-center gap-1.5">
+                {registration.team.logoUrl && (
+                  <div className="relative size-5 shrink-0 overflow-hidden rounded">
+                    <Image
+                      src={registration.team.logoUrl}
+                      alt={`Logo ${registration.team.name}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <span className="text-sm text-zinc-300">
                   {registration.team.name}
                 </span>

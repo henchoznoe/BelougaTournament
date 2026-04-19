@@ -148,6 +148,7 @@ model Tournament {
   refundDeadlineDays Int?
   toornamentId      String?
   streamUrl         String? // Optional per-tournament stream URL override
+  teamLogoEnabled   Boolean                  @default(false)
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
@@ -183,6 +184,7 @@ model TournamentField {
 model Team {
   id           String                  @id @default(uuid())
   name         String
+  logoUrl      String?
   tournamentId String
   tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   captainId    String
