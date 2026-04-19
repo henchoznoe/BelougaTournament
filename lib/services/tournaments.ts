@@ -475,7 +475,9 @@ export const getAvailableTeams = async (
 // User registration state (public tournament detail page)
 // ---------------------------------------------------------------------------
 
-/** Fetches the current registration state for a user on a tournament, if any active record exists. */
+/** Fetches the current registration state for a user on a tournament, if any active record exists.
+ *  NOTE: 'use cache' is intentionally absent — this is user-specific data that must never be shared
+ *  across users via the shared cache. It is called per-request with the user's session. */
 export const getUserTournamentRegistrationState = async (
   userId: string,
   tournamentId: string,

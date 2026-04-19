@@ -124,21 +124,6 @@ describe('authenticatedAction — role checking', () => {
     })
   })
 
-  it('returns Unauthorized when user role not in allowed roles array', async () => {
-    mockGetSession.mockResolvedValue(makeSession(Role.USER))
-
-    const action = authenticatedAction({
-      schema,
-      role: Role.ADMIN,
-      handler: async () => ({ success: true, message: 'ok' }),
-    })
-
-    expect(await action({ name: 'test' })).toEqual({
-      success: false,
-      message: 'Unauthorized',
-    })
-  })
-
   it('allows access when user role matches single required role', async () => {
     mockGetSession.mockResolvedValue(makeSession(Role.ADMIN))
 

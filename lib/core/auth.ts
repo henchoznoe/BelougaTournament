@@ -23,6 +23,13 @@ interface DiscordProfile {
   avatar: string | null
 }
 
+if (env.NODE_ENV !== 'production') {
+  logger.warn(
+    { NODE_ENV: env.NODE_ENV },
+    'Auth rate limiting is disabled — this is expected outside production',
+  )
+}
+
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
@@ -47,6 +54,7 @@ const auth = betterAuth({
     },
   },
   rateLimit: {
+    /** Rate limiting is disabled outside production to avoid blocking dev/test flows. */
     enabled: env.NODE_ENV === 'production',
     window: AUTH_CONFIG.RATE_LIMIT_WINDOW,
     max: AUTH_CONFIG.RATE_LIMIT_MAX,

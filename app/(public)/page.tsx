@@ -14,13 +14,14 @@ import { SponsorsSection } from '@/components/public/landing/sponsors-section'
 import { StreamSection } from '@/components/public/landing/stream-section'
 import { TournamentsSection } from '@/components/public/landing/tournaments-section'
 import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
+import { METADATA } from '@/lib/config/constants'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
 import { getHeroTournamentBadgeData } from '@/lib/services/tournaments'
 
 export const metadata: Metadata = {
   title: 'Accueil',
-  description: 'Accueil',
+  description: METADATA.DESCRIPTION,
 }
 
 const LandingPage = async () => {

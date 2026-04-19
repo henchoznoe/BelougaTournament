@@ -193,7 +193,10 @@ describe('registration admin actions', () => {
   it('updates registration field values for admins', async () => {
     mockRegistrationFindUnique.mockResolvedValue({
       id: REG_UUID,
-      tournament: { id: TOURN_UUID },
+      tournament: {
+        id: TOURN_UUID,
+        fields: [{ label: 'Rang', type: 'TEXT', required: false }],
+      },
       user: { name: 'Alice' },
     })
     mockRegistrationUpdate.mockResolvedValue({})

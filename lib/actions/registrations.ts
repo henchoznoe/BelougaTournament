@@ -17,6 +17,7 @@ import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
+import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   adminUpdateRegistrationFieldsSchema,
   changeTeamSchema,
@@ -194,17 +195,36 @@ export const adminUpdateRegistrationFields = authenticatedAction({
     const registration = (await prisma.tournamentRegistration.findUnique({
       where: { id: data.registrationId },
       include: {
-        tournament: { select: { id: true } },
+        tournament: {
+          select: {
+            id: true,
+            fields: {
+              orderBy: { order: 'asc' },
+              select: { label: true, type: true, required: true },
+            },
+          },
+        },
         user: { select: { name: true } },
       },
     })) as {
       id: string
-      tournament: { id: string }
+      tournament: {
+        id: string
+        fields: { label: string; type: string; required: boolean }[]
+      }
       user: { name: string }
     } | null
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
+    }
+
+    const fieldValidation = validateFieldValues(
+      registration.tournament.fields,
+      data.fieldValues,
+    )
+    if (!fieldValidation.valid) {
+      return { success: false, message: fieldValidation.message }
     }
 
     await prisma.tournamentRegistration.update({

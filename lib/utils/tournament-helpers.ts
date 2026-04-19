@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import 'server-only'
 import { FieldType, RefundPolicyType } from '@/prisma/generated/prisma/enums'
 
 /** Validates dynamic field values against tournament field definitions. */

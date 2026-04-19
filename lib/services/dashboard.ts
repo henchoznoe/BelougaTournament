@@ -8,7 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, DEFAULT_CURRENCY } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -218,7 +218,13 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     let totalRefunded = 0
     let transactionCount = 0
     let refundCount = 0
-    const currency = payments[0].currency || 'CHF'
+    const currency = payments[0].currency || DEFAULT_CURRENCY
+    if (payments[0].currency && payments[0].currency !== DEFAULT_CURRENCY) {
+      logger.warn(
+        { currency: payments[0].currency },
+        `Unexpected currency detected in payment stats (expected ${DEFAULT_CURRENCY})`,
+      )
+    }
 
     // Group by tournament
     const tournamentMap = new Map<

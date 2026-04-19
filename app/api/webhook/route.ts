@@ -14,6 +14,7 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
 import { removeUserFromTeam } from '@/lib/utils/team'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -295,25 +296,33 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 400 })
   }
 
-  const alreadyProcessed = await prisma.stripeWebhookEvent.findUnique({
-    where: { stripeEventId: event.id },
-    select: { id: true },
-  })
-
-  if (alreadyProcessed) {
-    logger.info({ eventId: event.id }, 'Stripe webhook already processed')
-    return NextResponse.json({ received: true, duplicate: true })
-  }
-
   try {
-    // Insert idempotency record BEFORE processing to prevent double-processing on retries
+    // Atomic idempotency guard: insert before processing; P2002 = duplicate, return early
     await prisma.stripeWebhookEvent.create({
       data: {
         stripeEventId: event.id,
         type: event.type,
       },
     })
+  } catch (idempotencyError) {
+    if (
+      idempotencyError instanceof Prisma.PrismaClientKnownRequestError &&
+      idempotencyError.code === 'P2002'
+    ) {
+      logger.info({ eventId: event.id }, 'Stripe webhook already processed')
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    logger.error(
+      { error: idempotencyError, eventId: event.id },
+      'Failed to insert Stripe webhook idempotency record',
+    )
+    return NextResponse.json(
+      { error: 'Webhook processing failed.' },
+      { status: 500 },
+    )
+  }
 
+  try {
     switch (event.type) {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(event)

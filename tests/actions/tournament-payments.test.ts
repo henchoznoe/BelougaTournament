@@ -68,6 +68,11 @@ const mockPaymentUpdateMany = vi.fn()
 const mockPaymentCreate = vi.fn()
 const mockPaymentUpdate = vi.fn()
 const mockTransaction = vi.fn()
+const mockTeamFindUnique = vi.fn()
+const mockTeamCreate = vi.fn()
+const mockTeamCount = vi.fn()
+const mockTeamMemberCreate = vi.fn()
+const mockTeamMemberDeleteMany = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
@@ -88,11 +93,21 @@ vi.mock('@/lib/core/prisma', () => ({
       create: (...args: unknown[]) => mockPaymentCreate(...args),
       update: (...args: unknown[]) => mockPaymentUpdate(...args),
     },
+    team: {
+      findUnique: (...args: unknown[]) => mockTeamFindUnique(...args),
+      create: (...args: unknown[]) => mockTeamCreate(...args),
+      count: (...args: unknown[]) => mockTeamCount(...args),
+    },
+    teamMember: {
+      create: (...args: unknown[]) => mockTeamMemberCreate(...args),
+      deleteMany: (...args: unknown[]) => mockTeamMemberDeleteMany(...args),
+    },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
 }))
 
-const { registerForTournament } = await import('@/lib/actions/tournaments')
+const { registerForTournament, createTeamAndRegister, joinTeamAndRegister } =
+  await import('@/lib/actions/tournaments')
 
 describe('paid tournament registration actions', () => {
   beforeEach(() => {
@@ -152,6 +167,15 @@ describe('paid tournament registration actions', () => {
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
         },
+        team: {
+          findUnique: mockTeamFindUnique,
+          create: mockTeamCreate,
+          count: mockTeamCount,
+        },
+        teamMember: {
+          create: mockTeamMemberCreate,
+          deleteMany: mockTeamMemberDeleteMany,
+        },
       }),
     )
 
@@ -176,5 +200,315 @@ describe('paid tournament registration actions', () => {
     expect(mockRegistrationCreate).toHaveBeenCalledOnce()
     expect(mockPaymentCreate).toHaveBeenCalledOnce()
     expect(mockCheckoutCreate).toHaveBeenCalledOnce()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// createTeamAndRegister (TEAM free)
+// ---------------------------------------------------------------------------
+
+const TEAM_TOURNAMENT_UUID = '22222222-2222-4222-8222-222222222222'
+const TEAM_UUID = '33333333-3333-4333-8333-333333333333'
+
+describe('createTeamAndRegister — TEAM free tournament', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+
+    mockGetSession.mockResolvedValue({
+      user: {
+        id: 'user-1',
+        role: Role.USER,
+        email: 'user@test.com',
+        name: 'User',
+      },
+      session: {
+        id: 'sess-1',
+        userId: 'user-1',
+        token: 'tok',
+        expiresAt: '2027-01-01',
+      },
+    })
+
+    mockUserFindUnique.mockResolvedValue({ bannedAt: null })
+
+    mockTournamentFindUnique.mockResolvedValue({
+      id: TEAM_TOURNAMENT_UUID,
+      title: 'Team Cup',
+      status: TournamentStatus.PUBLISHED,
+      format: TournamentFormat.TEAM,
+      registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
+      registrationClose: new Date('2026-05-01T00:00:00.000Z'),
+      maxTeams: null,
+      teamSize: 5,
+      registrationType: RegistrationType.FREE,
+      entryFeeAmount: null,
+      entryFeeCurrency: null,
+      refundPolicyType: RefundPolicyType.NONE,
+      refundDeadlineDays: null,
+      fields: [],
+    })
+
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationCount.mockResolvedValue(0)
+    mockRegistrationCreate.mockResolvedValue({ id: 'reg-team-1' })
+    mockTeamCreate.mockResolvedValue({
+      id: 'team-1',
+      _count: { members: 1 },
+      isFull: false,
+    })
+    mockTeamCount.mockResolvedValue(0)
+    mockTeamMemberCreate.mockResolvedValue({})
+
+    mockTransaction.mockImplementation(async callback =>
+      callback({
+        payment: {
+          updateMany: mockPaymentUpdateMany,
+          create: mockPaymentCreate,
+          update: mockPaymentUpdate,
+        },
+        tournamentRegistration: {
+          count: mockRegistrationCount,
+          create: mockRegistrationCreate,
+          update: mockRegistrationUpdate,
+          findUnique: mockRegistrationFindUnique,
+        },
+        team: {
+          findUnique: mockTeamFindUnique,
+          create: mockTeamCreate,
+          count: mockTeamCount,
+          update: vi.fn().mockResolvedValue({}),
+        },
+        teamMember: {
+          create: mockTeamMemberCreate,
+          deleteMany: mockTeamMemberDeleteMany,
+          findFirst: vi.fn().mockResolvedValue(null),
+          count: vi.fn().mockResolvedValue(1),
+        },
+      }),
+    )
+
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('creates a team and registers the captain for a free TEAM tournament', async () => {
+    const result = await createTeamAndRegister({
+      tournamentId: TEAM_TOURNAMENT_UUID,
+      returnPath: '/tournaments/team-cup',
+      teamName: 'Les Wolves',
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.message).toContain('équipe')
+    expect(mockCheckoutCreate).not.toHaveBeenCalled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// joinTeamAndRegister (TEAM free — team full)
+// ---------------------------------------------------------------------------
+
+describe('joinTeamAndRegister — team full rejection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+
+    mockGetSession.mockResolvedValue({
+      user: {
+        id: 'user-2',
+        role: Role.USER,
+        email: 'user2@test.com',
+        name: 'User2',
+      },
+      session: {
+        id: 'sess-2',
+        userId: 'user-2',
+        token: 'tok2',
+        expiresAt: '2027-01-01',
+      },
+    })
+
+    mockUserFindUnique.mockResolvedValue({ bannedAt: null })
+
+    mockTournamentFindUnique.mockResolvedValue({
+      id: TEAM_TOURNAMENT_UUID,
+      title: 'Team Cup',
+      status: TournamentStatus.PUBLISHED,
+      format: TournamentFormat.TEAM,
+      registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
+      registrationClose: new Date('2026-05-01T00:00:00.000Z'),
+      maxTeams: null,
+      teamSize: 2,
+      registrationType: RegistrationType.FREE,
+      entryFeeAmount: null,
+      entryFeeCurrency: null,
+      refundPolicyType: RefundPolicyType.NONE,
+      refundDeadlineDays: null,
+      fields: [],
+    })
+
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationCount.mockResolvedValue(0)
+
+    // Team exists and belongs to the tournament (outer check passes)
+    mockTeamFindUnique.mockResolvedValue({
+      id: TEAM_UUID,
+      tournamentId: TEAM_TOURNAMENT_UUID,
+      _count: { members: 1 },
+    })
+
+    // Inside transaction: team is now full (2/2)
+    mockTransaction.mockImplementation(async callback => {
+      return callback({
+        payment: {
+          updateMany: mockPaymentUpdateMany,
+          create: mockPaymentCreate,
+          update: mockPaymentUpdate,
+        },
+        tournamentRegistration: {
+          count: mockRegistrationCount,
+          create: mockRegistrationCreate,
+          update: mockRegistrationUpdate,
+        },
+        team: {
+          findUnique: vi
+            .fn()
+            .mockResolvedValue({ id: TEAM_UUID, _count: { members: 2 } }),
+          create: mockTeamCreate,
+          count: mockTeamCount,
+        },
+        teamMember: {
+          create: mockTeamMemberCreate,
+          deleteMany: mockTeamMemberDeleteMany,
+          findFirst: vi.fn().mockResolvedValue(null),
+          count: vi.fn().mockResolvedValue(2),
+        },
+      })
+    })
+
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns failure when team is full at transaction time', async () => {
+    const result = await joinTeamAndRegister({
+      tournamentId: TEAM_TOURNAMENT_UUID,
+      returnPath: '/tournaments/team-cup',
+      teamId: TEAM_UUID,
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('complète')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// startPaidRegistrationCheckout — Stripe failure rollback
+// ---------------------------------------------------------------------------
+
+describe('paid tournament registration — Stripe failure rollback', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+
+    mockGetSession.mockResolvedValue({
+      user: {
+        id: 'user-1',
+        role: Role.USER,
+        email: 'user@test.com',
+        name: 'User',
+      },
+      session: {
+        id: 'sess-1',
+        userId: 'user-1',
+        token: 'tok',
+        expiresAt: '2027-01-01',
+      },
+    })
+
+    mockUserFindUnique.mockResolvedValue({ bannedAt: null })
+
+    mockTournamentFindUnique.mockResolvedValue({
+      id: TOURNAMENT_UUID,
+      title: 'PUBG Duo Cup',
+      status: TournamentStatus.PUBLISHED,
+      format: TournamentFormat.SOLO,
+      registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
+      registrationClose: new Date('2026-05-01T00:00:00.000Z'),
+      maxTeams: null,
+      teamSize: 1,
+      registrationType: RegistrationType.PAID,
+      entryFeeAmount: 500,
+      entryFeeCurrency: 'CHF',
+      refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+      refundDeadlineDays: 14,
+      fields: [],
+    })
+
+    mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationCount.mockResolvedValue(0)
+    mockRegistrationCreate.mockResolvedValue({ id: 'reg-1' })
+    mockPaymentCreate.mockResolvedValue({ id: 'pay-1' })
+
+    // Stripe throws
+    mockCheckoutCreate.mockRejectedValue(new Error('Stripe network error'))
+
+    mockTransaction.mockImplementation(async callback =>
+      callback({
+        payment: {
+          updateMany: mockPaymentUpdateMany,
+          create: mockPaymentCreate,
+          update: mockPaymentUpdate,
+        },
+        tournamentRegistration: {
+          count: mockRegistrationCount,
+          create: mockRegistrationCreate,
+          update: mockRegistrationUpdate,
+        },
+        team: {
+          findUnique: mockTeamFindUnique,
+          create: mockTeamCreate,
+          count: mockTeamCount,
+        },
+        teamMember: {
+          create: mockTeamMemberCreate,
+          deleteMany: mockTeamMemberDeleteMany,
+          findFirst: vi.fn().mockResolvedValue(null),
+        },
+      }),
+    )
+
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns failure and rolls back DB when Stripe checkout creation fails', async () => {
+    const result = await registerForTournament({
+      tournamentId: TOURNAMENT_UUID,
+      returnPath: '/tournaments/pubg-duo-cup',
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('Stripe')
+    // Rollback transaction called three times: (1) initial DB write, (2) payment create, (3) rollback
+    expect(mockTransaction).toHaveBeenCalledTimes(3)
+    expect(mockPaymentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: 'FAILED' }),
+      }),
+    )
   })
 })

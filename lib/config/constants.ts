@@ -60,6 +60,9 @@ export const SEARCH_CONFIG = {
 /** Maximum length for Twitch username. */
 export const TWITCH_USERNAME_MAX_LENGTH = 25
 
+/** Default currency for tournament entry fees. Extend this if multi-currency support is added. */
+export const DEFAULT_CURRENCY = 'CHF' as const
+
 /** French labels for tournament statuses. */
 export const TOURNAMENT_STATUS_LABELS: Record<TournamentStatus, string> = {
   [TournamentStatus.DRAFT]: 'Brouillon',

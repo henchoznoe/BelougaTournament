@@ -72,14 +72,30 @@ const baseTournamentFields = {
     .trim()
     .min(1, 'La description est requise.')
     .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
-  startDate: z.string().min(1, 'La date de début est requise.'),
-  endDate: z.string().min(1, 'La date de fin est requise.'),
+  startDate: z
+    .string()
+    .min(1, 'La date de début est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de début invalide.',
+    }),
+  endDate: z
+    .string()
+    .min(1, 'La date de fin est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de fin invalide.',
+    }),
   registrationOpen: z
     .string()
-    .min(1, "La date d'ouverture des inscriptions est requise."),
+    .min(1, "La date d'ouverture des inscriptions est requise.")
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: "Date d'ouverture invalide.",
+    }),
   registrationClose: z
     .string()
-    .min(1, 'La date de fermeture des inscriptions est requise.'),
+    .min(1, 'La date de fermeture des inscriptions est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de fermeture invalide.',
+    }),
   maxTeams: z
     .number()
     .int()
@@ -150,7 +166,7 @@ const baseTournamentFields = {
  * Extracted to avoid duplicating ~65 lines of .refine() calls.
  */
 const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
-  // biome-ignore lint/suspicious/noExplicitAny: generic schema refinement requires any for data parameter
+  // biome-ignore lint/suspicious/noExplicitAny: generic refinement helper — inferred type is safe at call site
   type D = any
   return schema
     .refine((data: D) => new Date(data.endDate) > new Date(data.startDate), {

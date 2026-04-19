@@ -7,6 +7,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -74,6 +75,7 @@ describe('POST /api/webhook', () => {
     vi.clearAllMocks()
 
     mockWebhookFindUnique.mockResolvedValue(null)
+    mockWebhookCreate.mockResolvedValue({ id: 'stored-event' })
     mockPaymentIntentRetrieve.mockResolvedValue({ latest_charge: 'ch_123' })
     mockPaymentFindUnique.mockResolvedValue({
       id: 'pay-1',
@@ -134,7 +136,11 @@ describe('POST /api/webhook', () => {
   })
 
   it('ignores duplicate events', async () => {
-    mockWebhookFindUnique.mockResolvedValue({ id: 'stored-event' })
+    const duplicateError = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      { code: 'P2002', clientVersion: '0.0.0' },
+    )
+    mockWebhookCreate.mockRejectedValue(duplicateError)
     mockConstructEvent.mockReturnValue({
       id: 'evt_duplicate',
       type: 'checkout.session.completed',
@@ -151,7 +157,7 @@ describe('POST /api/webhook', () => {
 
     expect(response.status).toBe(200)
     expect(mockPaymentUpdate).not.toHaveBeenCalled()
-    expect(mockWebhookCreate).not.toHaveBeenCalled()
+    expect(mockWebhookCreate).toHaveBeenCalledOnce()
   })
 
   // -------------------------------------------------------------------------

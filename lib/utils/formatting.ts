@@ -21,9 +21,9 @@ export const formatShortDate = (date: Date | string | number) => {
   return format(new Date(date), 'dd.MM.yyyy')
 }
 
-/** Converts empty strings to null for nullable Prisma fields. */
+/** Converts empty strings or undefined to null for nullable Prisma fields. */
 export const toNullable = (val: string | undefined): string | null =>
-  val || null
+  val === '' || val === undefined ? null : val
 
 /** Converts null to empty string for form default values. */
 export const fromNullable = (val: string | null): string => val ?? ''

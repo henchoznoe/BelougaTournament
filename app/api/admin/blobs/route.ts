@@ -9,9 +9,8 @@
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { verifyAdmin } from '@/lib/utils/verify-admin'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
@@ -28,15 +27,6 @@ const isValidBlobUrl = (url: string): boolean => {
   } catch {
     return false
   }
-}
-
-/** Verifies that the request comes from an authenticated admin. */
-const verifyAdmin = async (request: Request) => {
-  const session = await auth.api.getSession({ headers: request.headers })
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    return null
-  }
-  return session
 }
 
 /** GET — List blobs, optionally filtered by folder prefix. */
