@@ -11,7 +11,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { type FieldErrors, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { TournamentFormContent } from '@/components/admin/forms/tournament-form-content'
@@ -23,6 +23,16 @@ import { TournamentFormGeneral } from '@/components/admin/forms/tournament-form-
 import { TournamentFormImages } from '@/components/admin/forms/tournament-form-images'
 import { TournamentFormStages } from '@/components/admin/forms/tournament-form-stages'
 import type { TournamentFormValues } from '@/components/admin/forms/tournament-form-types'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { createTournament, updateTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
@@ -117,6 +127,7 @@ interface TournamentFormProps {
 export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isEditing = !!tournament
   const [isPending, startTransition] = useTransition()
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false)
   const router = useRouter()
 
   const fieldsLocked =
@@ -131,7 +142,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     setValue,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<TournamentFormValues>({
     resolver: zodResolver(
       isEditing ? updateTournamentSchema : tournamentSchema,
@@ -220,6 +231,16 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       setValue('teamSize', 1)
     }
   }, [watchFormat, setValue])
+
+  // Warn before closing/refreshing when form has unsaved changes
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   // ─── Form submission ────────────────────────────────────────────────────────
 
@@ -331,7 +352,13 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push(ROUTES.ADMIN_TOURNAMENTS)}
+          onClick={() => {
+            if (isDirty) {
+              setShowLeaveDialog(true)
+            } else {
+              router.push(ROUTES.ADMIN_TOURNAMENTS)
+            }
+          }}
           className="text-zinc-400"
         >
           Annuler
@@ -349,6 +376,31 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
           {isEditing ? 'Enregistrer' : 'Créer'}
         </Button>
       </div>
+
+      {/* ── Unsaved changes dialog ─────────────────────────────────────────── */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Modifications non sauvegardées</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous avez des modifications non sauvegardées. Voulez-vous vraiment
+              quitter sans enregistrer ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Rester</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                reset()
+                router.push(ROUTES.ADMIN_TOURNAMENTS)
+              }}
+              className="bg-red-600 text-white hover:bg-red-500"
+            >
+              Quitter sans enregistrer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   )
 }

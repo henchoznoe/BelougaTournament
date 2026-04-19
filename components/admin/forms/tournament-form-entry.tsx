@@ -70,7 +70,7 @@ export const TournamentFormEntry = ({
               id="tournament-maxTeams"
               type="number"
               min={2}
-              placeholder="Illimite"
+              placeholder="Illimité"
               className={INPUT_CLASSES}
               value={watchMaxTeams ?? ''}
               onChange={e => {
@@ -83,8 +83,8 @@ export const TournamentFormEntry = ({
               <p className="text-xs text-red-400">{errors.maxTeams.message}</p>
             )}
             <p className="text-xs text-zinc-500">
-              En solo : nombre de joueurs. En equipe : nombre d&apos;equipes
-              (ex. 4 pour un 5v5 avec 4 equipes).
+              En solo : nombre de joueurs. En équipe : nombre d&apos;équipes
+              (ex. 4 pour un 5v5 avec 4 équipes).
             </p>
           </div>
 
@@ -134,7 +134,7 @@ export const TournamentFormEntry = ({
                 htmlFor="tournament-entryFeeAmount"
                 className={LABEL_CLASSES}
               >
-                Prix d&apos;entree (CHF) * {isEditing && <LockedIndicator />}
+                Prix d&apos;entrée (CHF) * {isEditing && <LockedIndicator />}
               </Label>
               <div className="flex items-center gap-2">
                 <Input
@@ -207,7 +207,7 @@ export const TournamentFormEntry = ({
                     Aucun remboursement
                   </SelectItem>
                   <SelectItem value={RefundPolicyType.BEFORE_DEADLINE}>
-                    Avant delai
+                    Avant délai
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -218,8 +218,8 @@ export const TournamentFormEntry = ({
               )}
               {watchRefundPolicyType === RefundPolicyType.BEFORE_DEADLINE && (
                 <p className="text-xs text-zinc-500">
-                  Les joueurs peuvent demander un remboursement jusqu&apos;a X
-                  jours avant le debut du tournoi.
+                  Les joueurs peuvent demander un remboursement jusqu&apos;à X
+                  jours avant le début du tournoi.
                 </p>
               )}
             </div>
@@ -230,7 +230,7 @@ export const TournamentFormEntry = ({
                   htmlFor="tournament-refundDeadlineDays"
                   className={LABEL_CLASSES}
                 >
-                  Delai (jours avant debut) * {isEditing && <LockedIndicator />}
+                  Délai (jours avant début) * {isEditing && <LockedIndicator />}
                 </Label>
                 <Input
                   id="tournament-refundDeadlineDays"

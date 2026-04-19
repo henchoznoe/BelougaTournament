@@ -41,7 +41,7 @@ export const TournamentFormContent = ({
       <div className="space-y-4">
         {/* Rules */}
         <div className="space-y-1.5">
-          <Label className={LABEL_CLASSES}>Regles</Label>
+          <Label className={LABEL_CLASSES}>Règles</Label>
           <Controller
             name="rules"
             control={control}
@@ -52,7 +52,7 @@ export const TournamentFormContent = ({
                 onChange={val =>
                   setValue('rules', val, { shouldValidate: true })
                 }
-                placeholder="Regles du tournoi..."
+                placeholder="Règles du tournoi..."
               />
             )}
           />

@@ -8,21 +8,16 @@
 
 'use client'
 
-import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Settings,
-  Trash2,
-} from 'lucide-react'
+import { AlertTriangle, Plus, Settings } from 'lucide-react'
 import {
   type Control,
   type FieldErrors,
+  type UseFormRegister,
   type UseFormSetValue,
   type UseFormWatch,
   useFieldArray,
 } from 'react-hook-form'
+import { OrderableItem } from '@/components/admin/forms/tournament-form-orderable-item'
 import type { TournamentFormValues } from '@/components/admin/forms/tournament-form-types'
 import {
   INPUT_CLASSES,
@@ -44,9 +39,7 @@ import { FieldType } from '@/prisma/generated/prisma/enums'
 
 interface TournamentFormFieldsProps {
   control: Control<TournamentFormValues>
-  register: ReturnType<
-    typeof import('react-hook-form').useForm<TournamentFormValues>
-  >['register']
+  register: UseFormRegister<TournamentFormValues>
   errors: FieldErrors<TournamentFormValues>
   setValue: UseFormSetValue<TournamentFormValues>
   watch: UseFormWatch<TournamentFormValues>
@@ -70,52 +63,35 @@ export const TournamentFormFields = ({
 
   return (
     <div className={SECTION_CLASSES}>
-      <SectionHeader icon={Settings} title="Champs personnalises" />
+      <SectionHeader icon={Settings} title="Champs personnalisés" />
 
       {fieldsLocked && (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-amber-500/5 px-3 py-2 text-xs text-amber-400">
           <AlertTriangle className="size-3.5 shrink-0" />
-          Les champs ne peuvent pas etre modifies car le tournoi est publie avec
+          Les champs ne peuvent pas être modifiés car le tournoi est publié avec
           des inscrits.
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {fieldArrayFields.map((field, index) => (
-          <div
+          <OrderableItem
             key={field.id}
-            className="flex items-start gap-2 rounded-lg border border-white/5 bg-white/2 p-3"
+            index={index}
+            total={fieldArrayFields.length}
+            disabled={fieldsLocked}
+            onMoveUp={() => moveField(index, index - 1)}
+            onMoveDown={() => moveField(index, index + 1)}
+            onRemove={() => removeField(index)}
+            removeLabel={`Supprimer le champ ${index + 1}`}
           >
-            <div className="mt-1 flex shrink-0 flex-col gap-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                disabled={index === 0 || fieldsLocked}
-                onClick={() => moveField(index, index - 1)}
-                className="text-zinc-500 hover:text-zinc-300"
-                aria-label="Monter le champ"
-              >
-                <ChevronUp className="size-3" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                disabled={index === fieldArrayFields.length - 1 || fieldsLocked}
-                onClick={() => moveField(index, index + 1)}
-                className="text-zinc-500 hover:text-zinc-300"
-                aria-label="Descendre le champ"
-              >
-                <ChevronDown className="size-3" />
-              </Button>
-            </div>
-            <div className="grid flex-1 gap-3 sm:grid-cols-4">
-              <div className="sm:col-span-2">
+            <div className="grid items-center gap-3 sm:grid-cols-[1fr_8rem_5rem]">
+              {/* Label */}
+              <div>
                 <Input
-                  placeholder="Libelle"
+                  placeholder="Libellé du champ"
                   disabled={fieldsLocked}
-                  aria-label={`Libelle du champ ${index + 1}`}
+                  aria-label={`Libellé du champ ${index + 1}`}
                   className={cn(
                     INPUT_CLASSES,
                     'h-9 text-xs',
@@ -129,6 +105,8 @@ export const TournamentFormFields = ({
                   </p>
                 )}
               </div>
+
+              {/* Type */}
               <Select
                 value={watch(`fields.${index}.type`)}
                 onValueChange={val =>
@@ -153,34 +131,23 @@ export const TournamentFormFields = ({
                   <SelectItem value={FieldType.NUMBER}>Nombre</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <Switch
-                    size="sm"
-                    checked={watch(`fields.${index}.required`)}
-                    onCheckedChange={val =>
-                      setValue(`fields.${index}.required`, val, {
-                        shouldValidate: true,
-                      })
-                    }
-                    disabled={fieldsLocked}
-                  />
-                  <span className="text-[10px] text-zinc-500">Requis</span>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
+
+              {/* Required toggle */}
+              <div className="flex items-center gap-1.5">
+                <Switch
                   size="sm"
+                  checked={watch(`fields.${index}.required`)}
+                  onCheckedChange={val =>
+                    setValue(`fields.${index}.required`, val, {
+                      shouldValidate: true,
+                    })
+                  }
                   disabled={fieldsLocked}
-                  onClick={() => removeField(index)}
-                  className="size-8 p-0 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
-                  aria-label="Supprimer le champ"
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
+                />
+                <span className="text-[10px] text-zinc-500">Requis</span>
               </div>
             </div>
-          </div>
+          </OrderableItem>
         ))}
 
         <Button
@@ -196,7 +163,7 @@ export const TournamentFormFields = ({
               order: fieldArrayFields.length,
             })
           }
-          className="gap-2 border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
+          className="mt-1 gap-2 border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
         >
           <Plus className="size-3.5" />
           Ajouter un champ

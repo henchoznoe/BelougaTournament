@@ -97,7 +97,7 @@ export const TournamentFormImages = ({
       }
 
       if (newUrls.length > 0) {
-        toast.success(`${newUrls.length} image(s) importee(s) avec succes.`)
+        toast.success(`${newUrls.length} image(s) importée(s) avec succès.`)
         setValue('imageUrls', [...watchImageUrls, ...newUrls], {
           shouldDirty: true,
           shouldValidate: true,
@@ -115,7 +115,7 @@ export const TournamentFormImages = ({
 
   return (
     <div className={SECTION_CLASSES}>
-      <SectionHeader icon={ImagePlus} title="Images et medias" />
+      <SectionHeader icon={ImagePlus} title="Images et médias" />
       <div className="space-y-4">
         {/* Selected images grid */}
         {watchImageUrls.length > 0 && (
@@ -147,7 +147,7 @@ export const TournamentFormImages = ({
                       type="button"
                       variant="ghost"
                       size="icon-xs"
-                      aria-label="Definir comme principale"
+                      aria-label="Définir comme principale"
                       className="text-white hover:bg-white/20"
                       onClick={() => {
                         const updated = [...watchImageUrls]
@@ -204,7 +204,7 @@ export const TournamentFormImages = ({
             accept="image/png,image/jpeg,image/webp"
             multiple
             className="hidden"
-            aria-label="Selectionner des images a uploader"
+            aria-label="Sélectionner des images à uploader"
             onChange={handleUpload}
           />
         </div>

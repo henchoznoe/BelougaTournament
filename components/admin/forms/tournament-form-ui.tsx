@@ -43,6 +43,6 @@ export const SectionHeader = ({
 export const LockedIndicator = () => (
   <span className="inline-flex items-center gap-1 text-[10px] text-zinc-600">
     <Lock className="size-2.5" />
-    Verrouille
+    Verrouillé
   </span>
 )

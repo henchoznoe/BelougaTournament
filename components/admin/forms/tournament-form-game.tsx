@@ -93,7 +93,7 @@ export const TournamentFormGame = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={TournamentFormat.SOLO}>Solo</SelectItem>
-              <SelectItem value={TournamentFormat.TEAM}>Equipe</SelectItem>
+              <SelectItem value={TournamentFormat.TEAM}>Équipe</SelectItem>
             </SelectContent>
           </Select>
           {errors.format?.message && (
@@ -104,7 +104,7 @@ export const TournamentFormGame = ({
         {/* Team Size */}
         <div className="space-y-1.5">
           <Label htmlFor="tournament-teamSize" className={LABEL_CLASSES}>
-            Taille d&apos;equipe *
+            Taille d&apos;équipe *
           </Label>
           <Input
             id="tournament-teamSize"

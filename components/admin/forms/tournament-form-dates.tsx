@@ -35,7 +35,7 @@ export const TournamentFormDates = ({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="tournament-startDate" className={LABEL_CLASSES}>
-            Debut du tournoi *
+            Début du tournoi *
           </Label>
           <Controller
             name="startDate"
@@ -44,7 +44,7 @@ export const TournamentFormDates = ({
               <DateTimePicker
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Debut du tournoi"
+                placeholder="Début du tournoi"
                 className={`${INPUT_CLASSES} w-56`}
               />
             )}

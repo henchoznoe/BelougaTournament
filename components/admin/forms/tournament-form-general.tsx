@@ -44,7 +44,7 @@ export const TournamentFormGeneral = ({
 }: TournamentFormGeneralProps) => {
   return (
     <div className={SECTION_CLASSES}>
-      <SectionHeader icon={FileText} title="Informations generales" />
+      <SectionHeader icon={FileText} title="Informations générales" />
       <div className="space-y-4">
         {/* Title */}
         <div className="space-y-1.5">
@@ -69,7 +69,7 @@ export const TournamentFormGeneral = ({
             Slug *
             {!isEditing && (
               <span className="ml-2 text-[10px] text-zinc-600">
-                (genere automatiquement)
+                (généré automatiquement)
               </span>
             )}
             {isEditing && (
