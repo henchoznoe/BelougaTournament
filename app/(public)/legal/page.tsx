@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { AUTHOR, METADATA } from '@/lib/config/constants'
+import { AUTHOR, METADATA, OWNER } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 6 mars 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 19 avril 2026."
         />
 
         <div className="space-y-6">
@@ -35,11 +35,11 @@ const LegalPage = () => {
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Nom :</span> Noé Henchoz
+                <span className="text-zinc-300">Nom :</span> {OWNER.NAME}
               </li>
               <li>
                 <span className="text-zinc-300">Statut :</span> Personne
-                physique — projet e-sport amateur non commercial
+                physique — projet e-sport amateur
               </li>
               <li>
                 <span className="text-zinc-300">Domicile :</span> Canton de
@@ -49,34 +49,22 @@ const LegalPage = () => {
                 <span className="text-zinc-300">
                   Directeur de la publication :
                 </span>{' '}
-                Noé Henchoz
+                {OWNER.NAME}
               </li>
               <li>
                 <span className="text-zinc-300">Contact :</span>{' '}
                 <Link
-                  href={`mailto:${AUTHOR.EMAIL}`}
+                  href={`mailto:${OWNER.EMAIL}`}
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  {AUTHOR.EMAIL}
+                  {OWNER.EMAIL}
                 </Link>
-              </li>
-              <li>
-                <span className="text-zinc-300">Site web de l'éditeur :</span>{' '}
-                <a
-                  href={AUTHOR.URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
-                >
-                  {AUTHOR.URL}
-                </a>
               </li>
             </ul>
             <p className="text-sm text-zinc-400">
               En tant que personne physique domiciliée en Suisse, l'éditeur
               n'est pas soumis à immatriculation au Registre du commerce ni à
-              l'obligation de détenir un numéro de TVA pour ce projet non
-              commercial.
+              l'obligation de détenir un numéro de TVA pour ce projet.
             </p>
           </LegalSection>
 
@@ -109,6 +97,42 @@ const LegalPage = () => {
               aux États-Unis ou dans d'autres pays. Des garanties contractuelles
               sont en place pour assurer la protection des données conformément
               aux standards suisses et européens (clauses contractuelles types).
+            </p>
+            <p>Les paiements sont traités par :</p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> Stripe, Inc.
+              </li>
+              <li>
+                <span className="text-zinc-300">Adresse :</span> 354 Oyster
+                Point Blvd, South San Francisco, CA 94080, États-Unis
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://stripe.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  stripe.com
+                </a>
+              </li>
+            </ul>
+            <p>
+              Stripe agit en tant que prestataire de paiement tiers. Aucune
+              donnée bancaire ou de carte de crédit n'est stockée sur les
+              serveurs de la Plateforme. Le traitement des paiements est soumis
+              aux{' '}
+              <a
+                href="https://stripe.com/legal/ssa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                Conditions d'utilisation de Stripe
+              </a>
+              .
             </p>
           </LegalSection>
 

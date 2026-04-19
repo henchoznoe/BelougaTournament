@@ -265,7 +265,6 @@ export const TournamentRegistrationForm = ({
           </p>
         </div>
       )}
-
       {isPendingRegistration && (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
           <p className="font-medium text-amber-300">Paiement en attente</p>
@@ -281,7 +280,6 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
-
       {/* Team mode selector (TEAM format only) */}
       {format === TournamentFormat.TEAM && (
         <div className="space-y-4">
@@ -375,7 +373,6 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
-
       {/* Dynamic fields */}
       {fields.length > 0 ? (
         <div className="space-y-4">
@@ -417,14 +414,12 @@ export const TournamentRegistrationForm = ({
           Aucun champ supplémentaire n'est requis.
         </p>
       )}
-
       <p className="text-center text-xs text-zinc-500">
         <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
         {isPaidTournament
           ? 'Votre inscription sera confirmée après paiement Stripe.'
           : 'Votre inscription sera enregistrée.'}
       </p>
-
       <Button type="submit" disabled={isPending} className="w-full gap-2">
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
@@ -445,6 +440,14 @@ export const TournamentRegistrationForm = ({
             ? 'Payer et s’inscrire'
             : "S'inscrire"}
       </Button>
+      <p className="text-center text-xs text-zinc-500">
+        En procédant {isPaidTournament ? 'au paiement' : "à l'inscription"},
+        vous confirmez accepter nos{' '}
+        <Link href={ROUTES.TERMS} className="text-blue-500 hover:underline">
+          conditions générales
+        </Link>
+        .
+      </p>
     </form>
   )
 }

@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { AUTHOR, METADATA } from '@/lib/config/constants'
+import { METADATA, OWNER } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 6 mars 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 19 avril 2026."
         />
 
         <div className="space-y-6">
@@ -35,7 +35,7 @@ const PrivacyPage = () => {
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Nom :</span> Noé Henchoz
+                <span className="text-zinc-300">Nom :</span> {OWNER.NAME}
               </li>
               <li>
                 <span className="text-zinc-300">Domicile :</span> Canton de
@@ -44,19 +44,18 @@ const PrivacyPage = () => {
               <li>
                 <span className="text-zinc-300">Contact :</span>{' '}
                 <Link
-                  href={`mailto:${AUTHOR.EMAIL}`}
+                  href={`mailto:${OWNER.EMAIL}`}
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  {AUTHOR.EMAIL}
+                  {OWNER.EMAIL}
                 </Link>
               </li>
             </ul>
             <p className="text-sm text-zinc-400">
-              En tant que projet non commercial géré par une personne physique,{' '}
-              {METADATA.NAME} n'est pas tenu de désigner un Délégué à la
-              Protection des Données (DPO). Pour toute question relative à vos
-              données, contactez directement le responsable du traitement à
-              l'adresse ci-dessus.
+              En tant que projet géré par une personne physique, {METADATA.NAME}{' '}
+              n'est pas tenu de désigner un Délégué à la Protection des Données
+              (DPO). Pour toute question relative à vos données, contactez
+              directement le responsable du traitement à l'adresse ci-dessus.
             </p>
           </LegalSection>
 
@@ -85,12 +84,22 @@ const PrivacyPage = () => {
                 éventuels champs personnalisés remplis lors de l'inscription
                 (dont le contenu dépend de chaque tournoi)
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données de paiement (tournois payants uniquement) :
+                </span>{' '}
+                Identifiant de session Stripe, identifiant de paiement (Payment
+                Intent), identifiant de charge, identifiant client Stripe, et
+                statut du paiement. Ces identifiants sont des références
+                techniques transmises par Stripe — aucune donnée bancaire
+                (numéro de carte, IBAN, etc.) n'est stockée sur les serveurs de
+                la Plateforme
+              </li>
             </ul>
             <p>
-              Nous ne collectons aucune donnée de paiement, aucun document
-              d'identité officiel, et n'effectuons aucun profilage ni prise de
-              décision automatisée produisant des effets juridiques sur les
-              utilisateurs.
+              Nous ne collectons aucun document d'identité officiel et
+              n'effectuons aucun profilage ni prise de décision automatisée
+              produisant des effets juridiques sur les utilisateurs.
             </p>
           </LegalSection>
 
@@ -108,6 +117,10 @@ const PrivacyPage = () => {
               <li>
                 Communication relative aux tournois (confirmations
                 d'inscription, résultats, annonces)
+              </li>
+              <li>
+                Traitement des paiements et gestion des remboursements pour les
+                tournois payants
               </li>
               <li>
                 Modération de la communauté et application des sanctions prévues
@@ -138,7 +151,8 @@ const PrivacyPage = () => {
                 <span className="text-zinc-300">
                   Exécution d'un contrat (art. 6.1.b RGPD / LPD) :
                 </span>{' '}
-                Pour la gestion de votre participation aux tournois et
+                Pour la gestion de votre participation aux tournois, le
+                traitement des paiements, la gestion des remboursements et
                 l'exécution des CGU
               </li>
               <li>
@@ -147,6 +161,13 @@ const PrivacyPage = () => {
                 </span>{' '}
                 Pour la sécurité, la modération et la prévention de la fraude
                 sur la Plateforme
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Obligation légale (art. 6.1.c RGPD / LPD) :
+                </span>{' '}
+                Conservation des données de paiement conformément aux
+                obligations comptables et fiscales applicables
               </li>
             </ul>
           </LegalSection>
@@ -191,6 +212,23 @@ const PrivacyPage = () => {
                   discord.com/privacy
                 </a>
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  Stripe, Inc. (États-Unis) :
+                </span>{' '}
+                Prestataire de paiement tiers pour les tournois payants. Stripe
+                traite les données de paiement en son nom propre et est certifié
+                PCI DSS niveau 1. Aucune donnée bancaire n'est stockée sur les
+                serveurs de la Plateforme. Politique de confidentialité :{' '}
+                <a
+                  href="https://stripe.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  stripe.com/privacy
+                </a>
+              </li>
             </ul>
             <p>
               Ces transferts vers des pays tiers (États-Unis) sont encadrés par
@@ -214,6 +252,14 @@ const PrivacyPage = () => {
                 <span className="text-zinc-300">Données de tournoi :</span> 2
                 ans après la fin du tournoi, à des fins d'archivage et de
                 résolution de litiges
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données de paiement (identifiants Stripe) :
+                </span>{' '}
+                10 ans après la transaction, conformément aux obligations
+                légales en matière de comptabilité et de conservation des pièces
+                justificatives (art. 958f CO)
               </li>
               <li>
                 <span className="text-zinc-300">Logs de session :</span> 6 mois
@@ -253,7 +299,8 @@ const PrivacyPage = () => {
                   Droit à l'effacement (« droit à l'oubli ») :
                 </span>{' '}
                 Demander la suppression de vos données dans les cas prévus par
-                la loi
+                la loi (sous réserve des obligations de conservation légales,
+                notamment pour les données de paiement)
               </li>
               <li>
                 <span className="text-zinc-300">Droit à la portabilité :</span>{' '}
@@ -283,10 +330,10 @@ const PrivacyPage = () => {
             <p>
               Pour exercer vos droits, adressez votre demande par e-mail à{' '}
               <Link
-                href={`mailto:${AUTHOR.EMAIL}`}
+                href={`mailto:${OWNER.EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {AUTHOR.EMAIL}
+                {OWNER.EMAIL}
               </Link>{' '}
               ou via le{' '}
               <Link
@@ -397,6 +444,10 @@ const PrivacyPage = () => {
                 Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et
                 ISO 27001
               </li>
+              <li>
+                Paiements traités par Stripe, certifié PCI DSS niveau 1 — aucune
+                donnée bancaire ne transite par nos serveurs
+              </li>
             </ul>
             <p>
               En cas de violation de données à caractère personnel susceptible
@@ -409,16 +460,16 @@ const PrivacyPage = () => {
 
           <LegalSection title="10. Mineurs">
             <p>
-              La Plateforme est accessible aux personnes âgées d'au moins 13
+              La Plateforme est accessible aux personnes âgées d'au moins 16
               ans. Nous ne collectons pas sciemment de données personnelles
-              concernant des enfants de moins de 13 ans. Si vous êtes parent ou
+              concernant des enfants de moins de 16 ans. Si vous êtes parent ou
               tuteur légal et que vous pensez que votre enfant nous a fourni des
               données personnelles sans votre consentement, contactez-nous à{' '}
               <Link
-                href={`mailto:${AUTHOR.EMAIL}`}
+                href={`mailto:${OWNER.EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {AUTHOR.EMAIL}
+                {OWNER.EMAIL}
               </Link>{' '}
               afin que nous puissions prendre les mesures nécessaires.
             </p>

@@ -26,6 +26,12 @@ export const AUTHOR = {
   EMAIL: 'henchoznoe@gmail.com',
 } as const
 
+/** Site owner (Quentin Rutscho) — used on legal pages as the editor and data controller. */
+export const OWNER = {
+  NAME: 'Quentin Rutscho',
+  EMAIL: 'rutschoquentin@gmail.com',
+} as const
+
 /** Singleton ID for the GlobalSettings row (single-row table pattern). */
 export const SETTINGS_SINGLETON_ID = 1
 

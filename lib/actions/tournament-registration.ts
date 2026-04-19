@@ -166,6 +166,9 @@ const startPaidRegistrationCheckout = async ({
     const session = await stripe.checkout.sessions.create(
       {
         mode: 'payment',
+        consent_collection: {
+          terms_of_service: 'required',
+        },
         client_reference_id: registrationId,
         success_url: buildAbsoluteAppUrl(
           `${returnPath}${returnPath.includes('?') ? '&' : '?'}stripe=success`,
