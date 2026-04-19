@@ -22,9 +22,10 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { useBlobList } from '@/components/admin/hooks/use-blob-list'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,13 +36,6 @@ import { cn } from '@/lib/utils/cn'
 import { type SponsorInput, sponsorSchema } from '@/lib/validations/sponsors'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
-interface BlobItem {
-  url: string
-  pathname: string
-  size: number
-  uploadedAt: string
-}
-
 interface SponsorFormProps {
   sponsor?: Sponsor
 }
@@ -50,8 +44,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
   const isEditing = !!sponsor
   const [isPending, startTransition] = useTransition()
   const [isUploading, setIsUploading] = useState(false)
-  const [blobs, setBlobs] = useState<BlobItem[]>([])
-  const [isLoadingBlobs, setIsLoadingBlobs] = useState(false)
+  const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList('sponsors')
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -75,27 +68,6 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
   })
 
   const imageUrls = watch('imageUrls')
-
-  /** Fetch existing blobs from the sponsors/ folder. */
-  const fetchBlobs = useCallback(async () => {
-    setIsLoadingBlobs(true)
-    try {
-      const res = await fetch('/api/admin/blobs?folder=sponsors')
-      if (!res.ok) throw new Error('Failed to fetch blobs')
-      const data = (await res.json()) as { blobs: BlobItem[] }
-      setBlobs(data.blobs)
-    } catch (error) {
-      console.error('Error fetching blobs:', error)
-      toast.error('Erreur lors du chargement des images.')
-    } finally {
-      setIsLoadingBlobs(false)
-    }
-  }, [])
-
-  // Fetch blobs on mount
-  useEffect(() => {
-    fetchBlobs()
-  }, [fetchBlobs])
 
   /** Upload one or more images to Vercel Blob and add them to the list. */
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +108,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
           shouldDirty: true,
           shouldValidate: true,
         })
-        await fetchBlobs()
+        await refetchBlobs()
       }
     } catch (error) {
       console.error('Error uploading sponsor images:', error)

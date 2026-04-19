@@ -10,13 +10,10 @@ import { ArrowDownRight, ArrowUpRight, CreditCard, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PaymentStats } from '@/lib/types/dashboard'
+import { formatCentimes } from '@/lib/utils/formatting'
 
 interface DashboardPaymentsProps {
   payments: PaymentStats
-}
-
-const formatCHF = (centimes: number) => {
-  return `${(centimes / 100).toFixed(2)} CHF`
 }
 
 export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
@@ -35,7 +32,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
             Revenu brut
           </div>
           <p className="mt-1 text-lg font-semibold text-emerald-400">
-            {formatCHF(payments.totalRevenue)}
+            {formatCentimes(payments.totalRevenue)}
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
             {payments.transactionCount} transaction
@@ -49,7 +46,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
             Remboursé
           </div>
           <p className="mt-1 text-lg font-semibold text-red-400">
-            {formatCHF(payments.totalRefunded)}
+            {formatCentimes(payments.totalRefunded)}
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
             {payments.refundCount} remboursement
@@ -63,7 +60,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
             Revenu net
           </div>
           <p className="mt-1 text-lg font-semibold text-white">
-            {formatCHF(payments.netRevenue)}
+            {formatCentimes(payments.netRevenue)}
           </p>
         </div>
       </div>
@@ -98,11 +95,11 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
               </div>
               <div className="ml-4 shrink-0 text-right">
                 <p className="text-sm font-medium text-emerald-400">
-                  {formatCHF(t.revenue)}
+                  {formatCentimes(t.revenue)}
                 </p>
                 {t.refunded > 0 && (
                   <p className="text-[10px] text-red-400/70">
-                    -{formatCHF(t.refunded)}
+                    -{formatCentimes(t.refunded)}
                   </p>
                 )}
               </div>

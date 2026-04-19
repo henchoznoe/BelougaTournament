@@ -37,7 +37,10 @@ import {
   joinTeamAndRegister,
   registerForTournament,
 } from '@/lib/actions/tournament-registration'
-import { VALIDATION_LIMITS } from '@/lib/config/constants'
+import {
+  REGISTRATION_HOLD_MINUTES,
+  VALIDATION_LIMITS,
+} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
@@ -48,6 +51,7 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
+import { formatCentimes } from '@/lib/utils/formatting'
 import {
   FieldType,
   PaymentStatus,
@@ -240,7 +244,10 @@ export const TournamentRegistrationForm = ({
   const isPaidTournament = tournament.registrationType === RegistrationType.PAID
   const entryFeeLabel =
     tournament.entryFeeAmount !== null
-      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency ?? 'CHF'}`
+      ? formatCentimes(
+          tournament.entryFeeAmount,
+          tournament.entryFeeCurrency ?? 'CHF',
+        )
       : null
 
   // Registration form
@@ -253,8 +260,8 @@ export const TournamentRegistrationForm = ({
             Inscription payante: {entryFeeLabel}
           </p>
           <p className="mt-1 text-xs text-zinc-400">
-            Votre place est réservée pendant 30 minutes au moment de la
-            redirection vers Stripe.
+            Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
+            au moment de la redirection vers Stripe.
           </p>
         </div>
       )}

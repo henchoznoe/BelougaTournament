@@ -10,12 +10,10 @@ import 'server-only'
 import Stripe from 'stripe'
 import { env } from '@/lib/core/env'
 
-export const REGISTRATION_HOLD_MINUTES = 30
-
 let stripeClient: Stripe | null = null
 
 /** Returns a singleton Stripe client once the project is configured. */
-export const getStripe = () => {
+export const getStripe = (): Stripe => {
   if (!env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY is not configured.')
   }
@@ -28,7 +26,7 @@ export const getStripe = () => {
 }
 
 /** Returns the webhook secret or throws when Stripe webhooks are not configured. */
-export const getStripeWebhookSecret = () => {
+export const getStripeWebhookSecret = (): string => {
   if (!env.STRIPE_WEBHOOK_SECRET) {
     throw new Error('STRIPE_WEBHOOK_SECRET is not configured.')
   }

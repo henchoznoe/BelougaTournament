@@ -14,10 +14,3 @@ import type { tournamentSchema } from '@/lib/validations/tournaments'
 export type TournamentFormValues = z.output<typeof tournamentSchema> & {
   id?: string
 }
-
-export interface BlobItem {
-  url: string
-  pathname: string
-  size: number
-  uploadedAt: string
-}

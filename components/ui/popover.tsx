@@ -1,3 +1,10 @@
+/**
+ * File: components/ui/popover.tsx
+ * Description: shadcn/ui Popover primitive with trigger and content components.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
 'use client'
 
 import { Popover as PopoverPrimitive } from 'radix-ui'

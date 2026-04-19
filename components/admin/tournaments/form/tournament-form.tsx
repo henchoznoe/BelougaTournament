@@ -62,7 +62,7 @@ const slugify = (text: string): string =>
 
 /** Convert ISO datetime string to datetime-local value in Swiss timezone (YYYY-MM-DDTHH:mm). */
 const toDatetimeLocalValue = (iso: string | Date): string => {
-  const d = new Date(iso)
+  const date = new Date(iso)
   const formatter = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'Europe/Zurich',
     year: 'numeric',
@@ -72,7 +72,7 @@ const toDatetimeLocalValue = (iso: string | Date): string => {
     minute: '2-digit',
     hour12: false,
   })
-  return formatter.format(d).replace(' ', 'T')
+  return formatter.format(date).replace(' ', 'T')
 }
 
 /** Convert datetime-local string (Swiss timezone) to ISO UTC datetime string.

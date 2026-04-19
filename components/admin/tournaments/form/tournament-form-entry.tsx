@@ -28,12 +28,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
+import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
 import {
   RefundPolicyType,
   RegistrationType,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
+
+const isRefundPolicyType = (val: string): val is RefundPolicyType =>
+  Object.values(RefundPolicyType).includes(val as RefundPolicyType)
 
 interface TournamentFormEntryProps {
   errors: FieldErrors<TournamentFormValues>
@@ -160,14 +165,14 @@ export const TournamentFormEntry = ({
                   )}
                   value={
                     watchEntryFeeAmount !== null
-                      ? (watchEntryFeeAmount / 100).toFixed(2)
+                      ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
                       : ''
                   }
                   onChange={e => {
                     const val =
                       e.target.value === ''
                         ? null
-                        : Math.round(Number(e.target.value) * 100)
+                        : parseCentimes(Number(e.target.value))
                     setValue('entryFeeAmount', val, { shouldValidate: true })
                   }}
                 />
@@ -194,11 +199,12 @@ export const TournamentFormEntry = ({
               </Label>
               <Select
                 value={watchRefundPolicyType}
-                onValueChange={val =>
-                  setValue('refundPolicyType', val as RefundPolicyType, {
-                    shouldValidate: true,
-                  })
-                }
+                onValueChange={val => {
+                  if (isRefundPolicyType(val))
+                    setValue('refundPolicyType', val, {
+                      shouldValidate: true,
+                    })
+                }}
                 disabled={isEditing}
               >
                 <SelectTrigger
@@ -244,8 +250,8 @@ export const TournamentFormEntry = ({
                 <Input
                   id="tournament-refundDeadlineDays"
                   type="number"
-                  min={1}
-                  max={90}
+                  min={VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS}
+                  max={VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS}
                   disabled={isEditing}
                   className={cn(
                     INPUT_CLASSES,

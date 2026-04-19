@@ -386,16 +386,16 @@ export const TournamentTeams = ({
 
   const filtered = useMemo(() => {
     if (!search) return teams
-    const q = search.toLowerCase()
+    const searchQuery = search.toLowerCase()
     return teams.filter(
       t =>
-        t.name.toLowerCase().includes(q) ||
-        t.captain.displayName.toLowerCase().includes(q) ||
-        t.captain.name.toLowerCase().includes(q) ||
+        t.name.toLowerCase().includes(searchQuery) ||
+        t.captain.displayName.toLowerCase().includes(searchQuery) ||
+        t.captain.name.toLowerCase().includes(searchQuery) ||
         t.members.some(
           m =>
-            m.user.displayName.toLowerCase().includes(q) ||
-            m.user.name.toLowerCase().includes(q),
+            m.user.displayName.toLowerCase().includes(searchQuery) ||
+            m.user.name.toLowerCase().includes(searchQuery),
         ),
     )
   }, [teams, search])

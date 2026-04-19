@@ -87,24 +87,24 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
-    let result = users
+    let items = users
 
     if (roleFilter !== 'all') {
-      result = result.filter(u => u.role === roleFilter)
+      items = items.filter(u => u.role === roleFilter)
     }
 
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
+      const searchQuery = search.toLowerCase()
+      items = items.filter(
         u =>
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
-          u.displayName?.toLowerCase().includes(q) ||
-          u.discordId?.includes(q),
+          u.name.toLowerCase().includes(searchQuery) ||
+          u.email.toLowerCase().includes(searchQuery) ||
+          u.displayName?.toLowerCase().includes(searchQuery) ||
+          u.discordId?.includes(searchQuery),
       )
     }
 
-    return applySortToList(result, sort, compareValues, defaultSort)
+    return applySortToList(items, sort, compareValues, defaultSort)
   }, [users, search, roleFilter, sort])
 
   const {

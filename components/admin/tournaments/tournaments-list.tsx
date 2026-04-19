@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/table'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
-import { formatShortDate } from '@/lib/utils/formatting'
+import { formatCentimes, formatShortDate } from '@/lib/utils/formatting'
 import {
   RegistrationType,
   TournamentFormat,
@@ -54,6 +54,11 @@ const FORMAT_LABELS = {
 } as const
 
 type StatusFilter = 'all' | TournamentStatus
+
+const isStatusFilter = (val: string): val is StatusFilter =>
+  val === 'all' ||
+  Object.values(TournamentStatus).includes(val as TournamentStatus)
+
 type SortKey =
   | 'title'
   | 'format'
@@ -108,9 +113,10 @@ const compareValues = (
 
 const formatRegistrationType = (t: TournamentListItem): string => {
   if (t.registrationType === RegistrationType.FREE) return 'Gratuit'
-  const amount = t.entryFeeAmount ? (t.entryFeeAmount / 100).toString() : '?'
-  const currency = t.entryFeeCurrency ?? ''
-  return `Payant (${amount} ${currency})`.trim()
+  const amount = t.entryFeeAmount
+    ? formatCentimes(t.entryFeeAmount, t.entryFeeCurrency ?? '')
+    : '?'
+  return `Payant (${amount})`.trim()
 }
 
 export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
@@ -123,23 +129,23 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
-    let result = tournaments
+    let items = tournaments
 
     if (statusFilter !== 'all') {
-      result = result.filter(t => t.status === statusFilter)
+      items = items.filter(t => t.status === statusFilter)
     }
 
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
+      const searchQuery = search.toLowerCase()
+      items = items.filter(
         t =>
-          t.title.toLowerCase().includes(q) ||
-          t.slug.toLowerCase().includes(q) ||
-          t.game?.toLowerCase().includes(q),
+          t.title.toLowerCase().includes(searchQuery) ||
+          t.slug.toLowerCase().includes(searchQuery) ||
+          t.game?.toLowerCase().includes(searchQuery),
       )
     }
 
-    return applySortToList(result, sort, compareValues, defaultSort)
+    return applySortToList(items, sort, compareValues, defaultSort)
   }, [tournaments, search, statusFilter, sort])
 
   const {
@@ -159,7 +165,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
   }
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as StatusFilter)
+    if (isStatusFilter(value)) setStatusFilter(value)
     resetPage()
   }
 

@@ -33,9 +33,14 @@ import {
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import { RichText } from '@/components/ui/rich-text'
+import { TOORNAMENT_ID_DISPLAY_LENGTH } from '@/lib/config/constants'
 import type { TournamentDetail as TournamentDetailType } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  formatCentimes,
+  formatDate,
+  formatDateTime,
+} from '@/lib/utils/formatting'
 import {
   RefundPolicyType,
   RegistrationType,
@@ -62,17 +67,13 @@ const REFUND_POLICY_LABELS: Record<RefundPolicyType, string> = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const formatAmount = (amount: number, currency: string) => {
-  return `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`
-}
-
 /** Returns a temporal indicator for a date relative to now. */
 const getDateIndicator = (date: Date): { label: string; className: string } => {
   const now = new Date()
-  const d = new Date(date)
-  if (d < now) return { label: 'Passé', className: 'text-zinc-500' }
+  const targetDate = new Date(date)
+  if (targetDate < now) return { label: 'Passé', className: 'text-zinc-500' }
   // Within 24h
-  const diff = d.getTime() - now.getTime()
+  const diff = targetDate.getTime() - now.getTime()
   if (diff < 24 * 60 * 60 * 1000)
     return { label: 'Bientôt', className: 'text-amber-400' }
   return { label: 'À venir', className: 'text-emerald-400' }
@@ -182,7 +183,7 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
       label: 'Type',
       value:
         isPaid && tournament.entryFeeAmount && tournament.entryFeeCurrency
-          ? `${REGISTRATION_TYPE_LABELS[tournament.registrationType]} — ${formatAmount(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
+          ? `${REGISTRATION_TYPE_LABELS[tournament.registrationType]} — ${formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
           : REGISTRATION_TYPE_LABELS[tournament.registrationType],
       color: isPaid ? 'text-amber-400' : 'text-emerald-400',
       bg: isPaid ? 'bg-amber-500/10' : 'bg-emerald-500/10',
@@ -409,7 +410,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                   {isPaid &&
                   tournament.entryFeeAmount &&
                   tournament.entryFeeCurrency
-                    ? `${formatAmount(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
+                    ? `${formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
                     : REGISTRATION_TYPE_LABELS[tournament.registrationType]}
                 </span>
               </dd>
@@ -465,7 +466,11 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-blue-400 transition-colors hover:text-blue-300"
                   >
-                    {tournament.toornamentId.slice(0, 12)}...
+                    {tournament.toornamentId.slice(
+                      0,
+                      TOORNAMENT_ID_DISPLAY_LENGTH,
+                    )}
+                    ...
                     <ExternalLink className="size-3" />
                   </a>
                 </dd>

@@ -36,7 +36,7 @@ import {
 import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatCentimes, formatDate } from '@/lib/utils/formatting'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
@@ -225,16 +225,19 @@ export const ProfileRegistrations = ({
               {unregisterTarget?.paymentRequiredSnapshot &&
                 unregisterTarget.paymentStatus === PaymentStatus.PAID &&
                 (() => {
-                  const t = unregisterTarget.tournament
+                  const tournament = unregisterTarget.tournament
                   const eligible = isRefundEligible(
-                    new Date(t.startDate),
-                    t.refundPolicyType,
-                    t.refundDeadlineDays,
+                    new Date(tournament.startDate),
+                    tournament.refundPolicyType,
+                    tournament.refundDeadlineDays,
                     new Date(),
                   )
                   const amount =
-                    t.entryFeeAmount !== null
-                      ? `${(t.entryFeeAmount / 100).toFixed(2)} ${t.entryFeeCurrency ?? 'CHF'}`
+                    tournament.entryFeeAmount !== null
+                      ? formatCentimes(
+                          tournament.entryFeeAmount,
+                          tournament.entryFeeCurrency ?? 'CHF',
+                        )
                       : null
                   return eligible ? (
                     <span className="mt-2 block text-emerald-400">

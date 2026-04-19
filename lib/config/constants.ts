@@ -57,6 +57,9 @@ export const SEARCH_CONFIG = {
 /** Maximum length for Twitch username. */
 export const TWITCH_USERNAME_MAX_LENGTH = 25
 
+/** Milliseconds to wait before assuming a Twitch channel is offline if no state event fires. */
+export const TWITCH_FALLBACK_TIMEOUT_MS = 8000
+
 /** Default currency for tournament entry fees. Extend this if multi-currency support is added. */
 export const DEFAULT_CURRENCY = 'CHF' as const
 
@@ -92,9 +95,21 @@ export const MINUTE_IN_MS = SECOND_IN_MS * 60
 const HOUR_IN_MS = MINUTE_IN_MS * 60
 export const DAY_IN_MS = HOUR_IN_MS * 24
 
+/** Minutes in one hour, used for sub-day time formatting. */
+export const MINUTES_PER_HOUR = 60
+
+/** Number of characters to display for Toornament IDs in the admin UI. */
+export const TOORNAMENT_ID_DISPLAY_LENGTH = 12
+
+/** Stripe slot hold duration in minutes — how long a registration is reserved during Stripe Checkout. */
+export const REGISTRATION_HOLD_MINUTES = 30
+
 /** Maximum upload file sizes in bytes. */
 export const MAX_ADMIN_UPLOAD_SIZE = 5 * 1024 * 1024 // 5 MB
 export const MAX_TEAM_LOGO_SIZE = 2 * 1024 * 1024 // 2 MB
+
+/** Number of centimes in one currency unit (e.g. 100 centimes = 1 CHF). */
+export const CENTIMES_PER_UNIT = 100
 
 /** Entry fee amount bounds in centimes. */
 export const ENTRY_FEE_MIN_AMOUNT = 100 // 1 CHF

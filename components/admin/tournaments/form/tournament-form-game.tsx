@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -112,8 +113,8 @@ export const TournamentFormGame = ({
           <Input
             id="tournament-teamSize"
             type="number"
-            min={1}
-            max={20}
+            min={VALIDATION_LIMITS.TEAM_SIZE_MIN}
+            max={VALIDATION_LIMITS.TEAM_SIZE_MAX}
             disabled={!isTeam}
             className={cn(INPUT_CLASSES, !isTeam && 'opacity-60')}
             {...register('teamSize', { valueAsNumber: true })}

@@ -41,7 +41,7 @@ export const issueStripeRefundAfterDbUpdate = async ({
   previousPaymentStatus: PaymentStatus
   idempotencyPrefix: string
   onRevert?: (tx: PrismaTransaction) => Promise<void>
-}) => {
+}): Promise<void> => {
   try {
     const stripe = getStripe()
     await stripe.refunds.create(

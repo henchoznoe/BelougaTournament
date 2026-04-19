@@ -7,6 +7,8 @@
  */
 
 import 'server-only'
+// $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
+// because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
@@ -29,7 +31,7 @@ export const getUserProfile = async (
         createdAt: true,
         lastLoginAt: true,
       },
-    })) as UserProfile | null
+    })) as UserProfile | null // Prisma select narrows to a subset; cast aligns it with our domain type
   } catch (error) {
     logger.error({ error }, 'Error fetching user profile')
     return null

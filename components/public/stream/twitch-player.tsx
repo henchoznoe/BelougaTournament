@@ -13,6 +13,7 @@ import Link from 'next/link'
 import Script from 'next/script'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { TWITCH_FALLBACK_TIMEOUT_MS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
 
 interface TwitchPlayerProps {
@@ -55,7 +56,7 @@ export const TwitchPlayer = ({
     // (covers invalid channels and deferred offline events)
     const fallbackTimeout = setTimeout(() => {
       setIsLive(prev => (prev === null ? false : prev))
-    }, 8000)
+    }, TWITCH_FALLBACK_TIMEOUT_MS)
 
     const player = new Twitch.Player(containerId, {
       width: '100%',

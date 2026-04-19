@@ -15,7 +15,7 @@ export const syncTeamFullState = async (
   tx: Pick<typeof prisma, 'team' | 'teamMember'>,
   teamId: string,
   teamSize: number,
-) => {
+): Promise<void> => {
   const memberCount = await tx.teamMember.count({ where: { teamId } })
 
   await tx.team.update({
@@ -34,7 +34,7 @@ export const handleCaptainSuccession = async (
   tx: Pick<typeof prisma, 'team' | 'teamMember'>,
   team: TeamWithMembers,
   removedUserId: string,
-) => {
+): Promise<void> => {
   const otherMembers = team.members.filter(m => m.userId !== removedUserId)
 
   if (otherMembers.length === 0) {
@@ -57,7 +57,7 @@ export const removeUserFromTeam = async (
   tx: Pick<typeof prisma, 'team' | 'teamMember'>,
   userId: string,
   tournamentId: string,
-) => {
+): Promise<void> => {
   const teamMember = (await tx.teamMember.findFirst({
     where: { userId, team: { tournamentId } },
     include: {

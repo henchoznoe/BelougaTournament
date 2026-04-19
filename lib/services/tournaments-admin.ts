@@ -7,6 +7,8 @@
  */
 
 import 'server-only'
+// $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
+// because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
@@ -197,7 +199,7 @@ export const getRegistrations = async (
           },
         },
       },
-    })) as unknown as RawTournamentRegistrationRow[]
+    })) as unknown as RawTournamentRegistrationRow[] // Prisma nested include loses strict typing; cast to our raw row type
 
     // Post-process: resolve team from TeamMember for all players (not just captains)
     return rows.map(row => {

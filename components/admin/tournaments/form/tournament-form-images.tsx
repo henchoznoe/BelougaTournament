@@ -10,17 +10,15 @@
 
 import { ChevronDown, ImagePlus, Loader2, Trophy, X } from 'lucide-react'
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type {
   FieldErrors,
   UseFormRegister,
   UseFormSetValue,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import type {
-  BlobItem,
-  TournamentFormValues,
-} from '@/components/admin/tournaments/form/tournament-form-types'
+import { useBlobList } from '@/components/admin/hooks/use-blob-list'
+import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -49,29 +47,9 @@ export const TournamentFormImages = ({
   watchSlug,
 }: TournamentFormImagesProps) => {
   const [isUploading, setIsUploading] = useState(false)
-  const [blobs, setBlobs] = useState<BlobItem[]>([])
-  const [isLoadingBlobs, setIsLoadingBlobs] = useState(false)
+  const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList('tournaments')
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const fetchBlobs = useCallback(async () => {
-    setIsLoadingBlobs(true)
-    try {
-      const res = await fetch('/api/admin/blobs?folder=tournaments')
-      if (!res.ok) throw new Error('Failed to fetch blobs')
-      const data = (await res.json()) as { blobs: BlobItem[] }
-      setBlobs(data.blobs)
-    } catch (error) {
-      console.error('Error fetching blobs:', error)
-      toast.error('Erreur lors du chargement des images.')
-    } finally {
-      setIsLoadingBlobs(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchBlobs()
-  }, [fetchBlobs])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -108,7 +86,7 @@ export const TournamentFormImages = ({
           shouldValidate: true,
         })
       }
-      await fetchBlobs()
+      await refetchBlobs()
     } catch (error) {
       console.error('Error uploading tournament image:', error)
       toast.error('Une erreur inattendue est survenue.')

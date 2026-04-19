@@ -72,23 +72,23 @@ export const TournamentRegistrations = ({
 
   // Filter registrations
   const filtered = useMemo(() => {
-    let result = registrations
+    let items = registrations
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
+      const searchQuery = search.toLowerCase()
+      items = items.filter(
         r =>
-          r.user.name.toLowerCase().includes(q) ||
-          r.user.displayName.toLowerCase().includes(q) ||
-          (r.team?.name.toLowerCase().includes(q) ?? false),
+          r.user.name.toLowerCase().includes(searchQuery) ||
+          r.user.displayName.toLowerCase().includes(searchQuery) ||
+          (r.team?.name.toLowerCase().includes(searchQuery) ?? false),
       )
     }
     if (statusFilter !== 'all') {
-      result = result.filter(r => r.status === statusFilter)
+      items = items.filter(r => r.status === statusFilter)
     }
     if (paymentFilter !== 'all') {
-      result = result.filter(r => r.paymentStatus === paymentFilter)
+      items = items.filter(r => r.paymentStatus === paymentFilter)
     }
-    return result
+    return items
   }, [registrations, search, statusFilter, paymentFilter])
 
   const { page, totalPages, paginated, prevPage, nextPage } = paginate(filtered)

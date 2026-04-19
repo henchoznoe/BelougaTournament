@@ -7,6 +7,8 @@
  */
 
 import 'server-only'
+// $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
+// because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS, DEFAULT_CURRENCY } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'

@@ -44,6 +44,11 @@ import type { Sponsor } from '@/prisma/generated/prisma/client'
 const PAGE_SIZE = 8
 
 type StatusFilter = 'all' | 'enabled' | 'disabled'
+
+const STATUS_FILTER_VALUES: StatusFilter[] = ['all', 'enabled', 'disabled']
+const isStatusFilter = (val: string): val is StatusFilter =>
+  STATUS_FILTER_VALUES.includes(val as StatusFilter)
+
 type SortKey = 'name' | 'supportedSince' | 'enabled'
 
 interface SponsorsListProps {
@@ -80,20 +85,20 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
   const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
 
   const filtered = useMemo(() => {
-    let result = sponsors
+    let items = sponsors
 
     if (statusFilter === 'enabled') {
-      result = result.filter(s => s.enabled)
+      items = items.filter(s => s.enabled)
     } else if (statusFilter === 'disabled') {
-      result = result.filter(s => !s.enabled)
+      items = items.filter(s => !s.enabled)
     }
 
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(s => s.name.toLowerCase().includes(q))
+      const searchQuery = search.toLowerCase()
+      items = items.filter(s => s.name.toLowerCase().includes(searchQuery))
     }
 
-    return applySortToList(result, sort, compareValues, defaultSort)
+    return applySortToList(items, sort, compareValues, defaultSort)
   }, [sponsors, search, statusFilter, sort])
 
   const { page, totalPages, paginated, prevPage, nextPage } = paginate(filtered)
@@ -104,7 +109,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
   }
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as StatusFilter)
+    if (isStatusFilter(value)) setStatusFilter(value)
     resetPage()
   }
 

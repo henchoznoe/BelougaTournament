@@ -10,18 +10,12 @@
 
 import { Check, ImagePlus, Loader2, Trash2, Upload, X } from 'lucide-react'
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useBlobList } from '@/components/admin/hooks/use-blob-list'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils/cn'
-
-interface BlobItem {
-  url: string
-  pathname: string
-  size: number
-  uploadedAt: string
-}
 
 interface LogoPickerProps {
   value: string
@@ -29,32 +23,16 @@ interface LogoPickerProps {
 }
 
 export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
-  const [blobs, setBlobs] = useState<BlobItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    blobs,
+    isLoadingBlobs: isLoading,
+    refetchBlobs,
+  } = useBlobList('logos')
   const [uploadingCount, setUploadingCount] = useState(0)
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isUploading = uploadingCount > 0
-
-  /** Fetch all blobs from the store. */
-  const fetchBlobs = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/blobs?folder=logos')
-      if (!res.ok) throw new Error('Failed to fetch blobs')
-      const data = (await res.json()) as { blobs: BlobItem[] }
-      setBlobs(data.blobs)
-    } catch (error) {
-      console.error('Error fetching blobs:', error)
-      toast.error('Erreur lors du chargement des images.')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchBlobs()
-  }, [fetchBlobs])
 
   /** Upload a single file to Vercel Blob. */
   const uploadFile = async (file: File): Promise<string | null> => {
@@ -109,7 +87,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
           : `${successCount.toString()} images importées avec succès.`
       toast.success(msg)
       if (lastUploadedUrl) onChange(lastUploadedUrl)
-      await fetchBlobs()
+      await refetchBlobs()
     }
 
     // Reset file input so the same files can be re-selected
@@ -133,7 +111,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
 
       toast.success('Image supprimée.')
       if (value === url) onChange('')
-      setBlobs(prev => prev.filter(b => b.url !== url))
+      await refetchBlobs()
     } catch (error) {
       console.error('Error deleting blob:', error)
       toast.error('Une erreur inattendue est survenue.')

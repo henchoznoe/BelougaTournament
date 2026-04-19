@@ -8,6 +8,7 @@
 
 import { z } from 'zod'
 import {
+  CENTIMES_PER_UNIT,
   ENTRY_FEE_MAX_AMOUNT,
   ENTRY_FEE_MIN_AMOUNT,
   VALIDATION_LIMITS,
@@ -177,7 +178,8 @@ const baseTournamentFields = {
     .min(ENTRY_FEE_MIN_AMOUNT, "Le prix d'entrée doit être d'au moins 1 CHF.")
     .max(
       ENTRY_FEE_MAX_AMOUNT,
-      "Le prix d'entrée ne peut pas dépasser 1000 CHF.",
+      "Le prix d'entrée ne peut pas dépasser " +
+        `${ENTRY_FEE_MAX_AMOUNT / CENTIMES_PER_UNIT} CHF.`,
     )
     .nullable(),
   entryFeeCurrency: z.literal('CHF'),
@@ -423,6 +425,15 @@ export type TournamentSortOption =
   | 'title_asc'
   | 'title_desc'
   | 'registrations_desc'
+
+/** All valid values for the sort option — used for runtime type-guarding. */
+export const VALID_SORT_OPTIONS: TournamentSortOption[] = [
+  'date_asc',
+  'date_desc',
+  'title_asc',
+  'title_desc',
+  'registrations_desc',
+] as const
 
 /** Parsed and validated filters for the public tournament list pages. */
 export type PublicTournamentFilters = {

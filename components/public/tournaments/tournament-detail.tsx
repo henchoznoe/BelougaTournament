@@ -38,7 +38,11 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  formatCentimes,
+  formatDate,
+  formatDateTime,
+} from '@/lib/utils/formatting'
 import {
   TournamentFormat,
   TournamentStatus,
@@ -126,7 +130,7 @@ export const TournamentDetail = ({
 
   const entryFee =
     tournament.entryFeeAmount && tournament.entryFeeCurrency
-      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency}`
+      ? formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)
       : null
 
   return (

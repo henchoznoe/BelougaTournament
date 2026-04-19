@@ -10,11 +10,16 @@
 
 import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import {
+  CACHE_TAGS,
+  MINUTE_IN_MS,
+  REGISTRATION_HOLD_MINUTES,
+  SECOND_IN_MS,
+} from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
-import { getStripe, REGISTRATION_HOLD_MINUTES } from '@/lib/core/stripe'
+import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -115,7 +120,9 @@ const startPaidRegistrationCheckout = async ({
     }
   }
 
-  const expiresAt = new Date(Date.now() + REGISTRATION_HOLD_MINUTES * 60 * 1000)
+  const expiresAt = new Date(
+    Date.now() + REGISTRATION_HOLD_MINUTES * MINUTE_IN_MS,
+  )
   const amount = tournament.entryFeeAmount
   const currency = tournament.entryFeeCurrency
 
@@ -166,7 +173,7 @@ const startPaidRegistrationCheckout = async ({
         cancel_url: buildAbsoluteAppUrl(
           `${returnPath}${returnPath.includes('?') ? '&' : '?'}stripe=cancelled`,
         ),
-        expires_at: Math.floor(expiresAt.getTime() / 1000),
+        expires_at: Math.floor(expiresAt.getTime() / SECOND_IN_MS),
         currency: currency.toLowerCase(),
         line_items: [
           {
@@ -381,7 +388,7 @@ const upsertRegistrationAttempt = async ({
         confirmedAt: isPaid ? null : new Date(),
         cancelledAt: null,
         expiresAt: isPaid
-          ? new Date(Date.now() + REGISTRATION_HOLD_MINUTES * 60 * 1000)
+          ? new Date(Date.now() + REGISTRATION_HOLD_MINUTES * MINUTE_IN_MS)
           : null,
       },
     })
@@ -405,7 +412,7 @@ const upsertRegistrationAttempt = async ({
       refundDeadlineDaysSnapshot: isPaid ? tournament.refundDeadlineDays : null,
       confirmedAt: isPaid ? null : new Date(),
       expiresAt: isPaid
-        ? new Date(Date.now() + REGISTRATION_HOLD_MINUTES * 60 * 1000)
+        ? new Date(Date.now() + REGISTRATION_HOLD_MINUTES * MINUTE_IN_MS)
         : null,
     },
   })

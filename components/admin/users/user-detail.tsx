@@ -37,7 +37,7 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import type { UserDetail as UserDetailType } from '@/lib/types/user'
 import { cn } from '@/lib/utils/cn'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatCentimes, formatDate } from '@/lib/utils/formatting'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -86,11 +86,6 @@ const FORMAT_LABELS: Record<TournamentFormat, string> = {
 } as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const formatAmount = (amount: number, currency: string) => {
-  // Amount is in smallest unit (cents), convert to main unit
-  return `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`
-}
 
 // ─── Stats Summary ───────────────────────────────────────────────────────────
 
@@ -147,7 +142,7 @@ const StatsSummary = ({ user }: StatsSummaryProps) => {
       value:
         stats.totalPaid > 0
           ? stats.currencies
-              .map(c => formatAmount(stats.totalPaid, c))
+              .map(c => formatCentimes(stats.totalPaid, c))
               .join(', ')
           : '—',
       color: 'text-amber-400',
@@ -270,7 +265,7 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
                 </TableCell>
                 <TableCell className="hidden text-sm text-zinc-400 lg:table-cell">
                   {reg.entryFeeAmountSnapshot && reg.entryFeeCurrencySnapshot
-                    ? formatAmount(
+                    ? formatCentimes(
                         reg.entryFeeAmountSnapshot,
                         reg.entryFeeCurrencySnapshot,
                       )

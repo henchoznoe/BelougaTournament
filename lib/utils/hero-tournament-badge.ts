@@ -6,7 +6,12 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { DAY_IN_MS, MINUTE_IN_MS, SECOND_IN_MS } from '@/lib/config/constants'
+import {
+  DAY_IN_MS,
+  MINUTE_IN_MS,
+  MINUTES_PER_HOUR,
+  SECOND_IN_MS,
+} from '@/lib/config/constants'
 import type {
   HeroTournamentBadge,
   HeroTournamentBadgeTournament,
@@ -35,8 +40,8 @@ const formatHeroBadgeDelay = (startDate: Date | string, now: Date): string => {
   }
 
   const totalMinutes = Math.max(1, Math.ceil(diffMs / MINUTE_IN_MS))
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
+  const hours = Math.floor(totalMinutes / MINUTES_PER_HOUR)
+  const minutes = totalMinutes % MINUTES_PER_HOUR
 
   if (hours === 0) {
     return `${minutes} minute${minutes > 1 ? 's' : ''}`

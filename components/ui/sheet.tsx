@@ -1,3 +1,10 @@
+/**
+ * File: components/ui/sheet.tsx
+ * Description: shadcn/ui Sheet primitive (slide-over panel) with all side variants.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
 'use client'
 
 import { XIcon } from 'lucide-react'

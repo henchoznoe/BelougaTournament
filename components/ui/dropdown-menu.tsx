@@ -1,3 +1,10 @@
+/**
+ * File: components/ui/dropdown-menu.tsx
+ * Description: shadcn/ui DropdownMenu primitive with full item, label, separator, and sub-menu support.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
 'use client'
 
 import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'

@@ -20,7 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { PublicTournamentFilters } from '@/lib/validations/tournaments'
+import type {
+  PublicTournamentFilters,
+  TournamentSortOption,
+} from '@/lib/validations/tournaments'
+import { VALID_SORT_OPTIONS } from '@/lib/validations/tournaments'
 import {
   RegistrationType,
   TournamentFormat,
@@ -30,6 +34,9 @@ interface TournamentFiltersProps {
   filters: PublicTournamentFilters
   basePath: string
 }
+
+const isTournamentSortOption = (val: string): val is TournamentSortOption =>
+  VALID_SORT_OPTIONS.includes(val as TournamentSortOption)
 
 const SEARCH_DEBOUNCE_MS = 350
 
@@ -106,14 +113,14 @@ export const TournamentFilters = ({
         {/* Format filter */}
         <Select
           value={filters.format || 'all'}
-          onValueChange={v => {
-            if (v === 'all') {
+          onValueChange={value => {
+            if (value === 'all') {
               navigate({ format: '' })
             } else if (
-              v === TournamentFormat.SOLO ||
-              v === TournamentFormat.TEAM
+              value === TournamentFormat.SOLO ||
+              value === TournamentFormat.TEAM
             ) {
-              navigate({ format: v })
+              navigate({ format: value })
             }
           }}
         >
@@ -134,14 +141,14 @@ export const TournamentFilters = ({
         {/* Type filter */}
         <Select
           value={filters.type || 'all'}
-          onValueChange={v => {
-            if (v === 'all') {
+          onValueChange={value => {
+            if (value === 'all') {
               navigate({ type: '' })
             } else if (
-              v === RegistrationType.FREE ||
-              v === RegistrationType.PAID
+              value === RegistrationType.FREE ||
+              value === RegistrationType.PAID
             ) {
-              navigate({ type: v })
+              navigate({ type: value })
             }
           }}
         >
@@ -161,9 +168,9 @@ export const TournamentFilters = ({
         {/* Sort */}
         <Select
           value={filters.sort}
-          onValueChange={v =>
-            navigate({ sort: v as PublicTournamentFilters['sort'] })
-          }
+          onValueChange={value => {
+            if (isTournamentSortOption(value)) navigate({ sort: value })
+          }}
         >
           <SelectTrigger
             aria-label="Trier les tournois"
