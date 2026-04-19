@@ -2,6 +2,14 @@
 
 <img src="public/assets/logo-blue.png" alt="Logo" width="auto" height="200">
 
+[![CI](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml/badge.svg)](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml)
+[![main](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/main?token=XTVICSSEDD&label=main&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)
+[![develop](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/develop?token=XTVICSSEDD&label=develop&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)
+[![Biome](https://img.shields.io/badge/formatter|linter-biome-39B420?style=flat&logo=biome)](https://biomejs.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fbelougatournament.ch&label=Site%20Web)](https://belougatournament.ch)
+
 ## Modern Tournament Management Platform
 
 Built with Next.js 16, Prisma 7, and TailwindCSS v4.
