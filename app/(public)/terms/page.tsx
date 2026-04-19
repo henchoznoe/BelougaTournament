@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { AUTHOR, METADATA } from '@/lib/config/constants'
+import { METADATA, OWNER } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const TermsPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONDITIONS GÉNÉRALES"
-          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 6 mars 2026."
+          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 19 avril 2026."
         />
 
         <div className="space-y-6">
@@ -46,9 +46,10 @@ const TermsPage = () => {
             </p>
             <p>
               La Plateforme permet l'organisation, la gestion et la
-              participation à des tournois e-sport amateurs, et est fournie à
-              titre <strong>entièrement gratuit</strong> par l'éditeur, personne
-              physique, à des fins non commerciales.
+              participation à des tournois e-sport amateurs. Certains tournois
+              sont accessibles gratuitement ; d'autres peuvent être soumis à des
+              frais d'inscription dont les modalités sont définies à la section
+              3 des présentes CGU.
             </p>
             <p>
               En accédant à la Plateforme ou en créant un compte, vous
@@ -96,10 +97,10 @@ const TermsPage = () => {
               Pour demander la suppression de votre compte, contactez l'éditeur
               à l'adresse{' '}
               <Link
-                href={`mailto:${AUTHOR.EMAIL}`}
+                href={`mailto:${OWNER.EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {AUTHOR.EMAIL}
+                {OWNER.EMAIL}
               </Link>
               . Les données seront traitées conformément à la{' '}
               <Link
@@ -112,23 +113,114 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="3. Gratuité du service">
+          <LegalSection title="3. Tarification et paiements">
             <p>
-              L'accès à la Plateforme et la participation aux tournois sont
-              entièrement <strong>gratuits</strong>. Aucun frais d'inscription,
-              d'abonnement ou de participation n'est perçu par l'éditeur.
+              L'accès à la Plateforme est gratuit. La participation à certains
+              tournois peut être soumise à des{' '}
+              <strong>frais d'inscription payants</strong>, dont le montant est
+              fixé par l'organisateur et indiqué sur la page du tournoi avant
+              toute inscription.
             </p>
+            <p>Les paiements sont soumis aux règles suivantes :</p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                Les transactions sont effectuées en{' '}
+                <strong>francs suisses (CHF)</strong> via{' '}
+                <strong>Stripe</strong>, prestataire de paiement tiers sécurisé
+              </li>
+              <li>
+                Lors de l'inscription, une session de paiement Stripe est
+                ouverte et maintenue pendant <strong>30 minutes</strong>. Passé
+                ce délai, la session expire et la place n'est plus réservée
+              </li>
+              <li>
+                L'inscription n'est confirmée qu'à réception du paiement par
+                Stripe. Tant que le paiement n'est pas complété, la
+                participation au tournoi n'est pas garantie
+              </li>
+              <li>
+                Aucune donnée bancaire ou de carte de crédit n'est stockée sur
+                les serveurs de la Plateforme — ces données sont gérées
+                exclusivement par Stripe
+              </li>
+            </ul>
             <p>
-              Certains tournois peuvent prévoir des dotations ou récompenses
-              (prix, lots, trophées). Le cas échéant, les modalités de remise
-              des récompenses sont précisées dans le règlement spécifique du
-              tournoi concerné. L'éditeur ne saurait être tenu responsable en
-              cas d'impossibilité de verser une récompense due à des
-              circonstances indépendantes de sa volonté.
+              Le traitement des paiements est soumis aux{' '}
+              <a
+                href="https://stripe.com/legal/ssa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                Conditions d'utilisation de Stripe
+              </a>{' '}
+              et à la{' '}
+              <a
+                href="https://stripe.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                Politique de confidentialité de Stripe
+              </a>
+              .
             </p>
           </LegalSection>
 
-          <LegalSection title="4. Participation aux tournois">
+          <LegalSection title="4. Politique de remboursement">
+            <p>
+              Chaque tournoi payant dispose d'une{' '}
+              <strong>politique de remboursement propre</strong>, configurée par
+              l'organisateur et affichée sur la page du tournoi avant
+              inscription. Les règles générales sont les suivantes :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                Si vous vous désinscrivez d'un tournoi{' '}
+                <strong>avant la date limite de remboursement</strong> définie
+                pour ce tournoi, vous serez remboursé(e) automatiquement du
+                montant intégral des frais d'inscription via Stripe, sur le
+                moyen de paiement utilisé lors de l'inscription
+              </li>
+              <li>
+                Si vous vous désinscrivez{' '}
+                <strong>après la date limite de remboursement</strong>, aucun
+                remboursement ne sera effectué, sauf décision contraire de
+                l'organisateur du tournoi
+              </li>
+              <li>
+                En cas d'<strong>annulation du tournoi</strong> par
+                l'organisateur, les participants inscrits ayant payé des frais
+                d'inscription seront remboursés intégralement
+              </li>
+              <li>
+                Les délais de remboursement via Stripe peuvent varier selon
+                votre établissement bancaire (généralement 5 à 10 jours
+                ouvrables)
+              </li>
+            </ul>
+            <p>
+              Conformément au droit suisse des obligations (CO), le{' '}
+              <strong>droit de rétractation</strong> prévu par certaines
+              législations européennes (directive 2011/83/UE) ne s'applique pas
+              aux présentes CGU, régies exclusivement par le droit suisse. Aucun
+              délai légal de rétractation n'est applicable à l'inscription aux
+              tournois.
+            </p>
+            <p>
+              Pour toute contestation relative à un remboursement, contactez
+              l'éditeur à l'adresse{' '}
+              <Link
+                href={`mailto:${OWNER.EMAIL}`}
+                className="text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {OWNER.EMAIL}
+              </Link>
+              .
+            </p>
+          </LegalSection>
+
+          <LegalSection title="5. Participation aux tournois">
             <p>
               La participation aux tournois est soumise aux conditions suivantes
               :
@@ -166,7 +258,7 @@ const TermsPage = () => {
             </ul>
           </LegalSection>
 
-          <LegalSection title="5. Comportement et règles de conduite">
+          <LegalSection title="6. Comportement et règles de conduite">
             <p>
               Les utilisateurs s'engagent à adopter un comportement respectueux
               envers les autres participants, les administrateurs et l'éditeur.
@@ -193,7 +285,7 @@ const TermsPage = () => {
             </ul>
           </LegalSection>
 
-          <LegalSection title="6. Sanctions">
+          <LegalSection title="7. Sanctions">
             <p>
               En cas de non-respect des présentes CGU ou du règlement d'un
               tournoi, les administrateurs peuvent appliquer des sanctions
@@ -216,16 +308,16 @@ const TermsPage = () => {
               L'utilisateur peut contester une sanction en contactant l'éditeur
               à l'adresse{' '}
               <Link
-                href={`mailto:${AUTHOR.EMAIL}`}
+                href={`mailto:${OWNER.EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {AUTHOR.EMAIL}
+                {OWNER.EMAIL}
               </Link>
               .
             </p>
           </LegalSection>
 
-          <LegalSection title="7. Propriété intellectuelle">
+          <LegalSection title="8. Propriété intellectuelle">
             <p>
               L'ensemble des éléments de la Plateforme (design, code, textes,
               logos, graphismes) est la propriété de l'éditeur ou de ses
@@ -246,7 +338,7 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="8. Disponibilité du service">
+          <LegalSection title="9. Disponibilité du service">
             <p>
               L'éditeur s'efforce de maintenir la Plateforme accessible en
               continu, mais ne garantit pas une disponibilité ininterrompue. La
@@ -261,7 +353,7 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="9. Limitation de responsabilité">
+          <LegalSection title="10. Limitation de responsabilité">
             <p>
               La Plateforme est fournie « en l'état » et « selon disponibilité
               ». {METADATA.NAME} ne garantit pas un fonctionnement ininterrompu
@@ -280,10 +372,14 @@ const TermsPage = () => {
                 Pertes de gains espérés ou préjudices indirects de quelque
                 nature que ce soit
               </li>
+              <li>
+                Dysfonctionnements ou indisponibilités du service Stripe
+                affectant le traitement des paiements
+              </li>
             </ul>
           </LegalSection>
 
-          <LegalSection title="10. Force majeure">
+          <LegalSection title="11. Force majeure">
             <p>
               L'éditeur ne pourra être tenu responsable de l'inexécution totale
               ou partielle de ses obligations au titre des présentes CGU,
@@ -296,7 +392,7 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="11. Modification des CGU">
+          <LegalSection title="12. Modification des CGU">
             <p>
               {METADATA.NAME} se réserve le droit de modifier les présentes CGU
               à tout moment. Les utilisateurs seront informés de toute
@@ -307,7 +403,7 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="12. Divisibilité">
+          <LegalSection title="13. Divisibilité">
             <p>
               Si l'une quelconque des dispositions des présentes CGU était
               déclarée nulle ou non applicable par une juridiction compétente,
@@ -317,17 +413,17 @@ const TermsPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="13. Droit applicable">
+          <LegalSection title="14. Droit applicable">
             <p>
               Les présentes CGU sont soumises au droit suisse. En cas de litige
               relatif à leur interprétation ou leur exécution, et à défaut de
-              résolution amiable, les tribunaux du canton de Vaud (Suisse)
+              résolution amiable, les tribunaux du canton de Fribourg (Suisse)
               seront seuls compétents, sauf disposition légale impérative
               contraire.
             </p>
           </LegalSection>
 
-          <LegalSection title="14. Contact">
+          <LegalSection title="15. Contact">
             <p>
               Pour toute question relative aux présentes CGU, ou pour exercer
               vos droits, vous pouvez nous contacter :
@@ -336,10 +432,10 @@ const TermsPage = () => {
               <li>
                 Par e-mail :{' '}
                 <Link
-                  href={`mailto:${AUTHOR.EMAIL}`}
+                  href={`mailto:${OWNER.EMAIL}`}
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  {AUTHOR.EMAIL}
+                  {OWNER.EMAIL}
                 </Link>
               </li>
               <li>Via le formulaire de contact disponible sur la Plateforme</li>

@@ -8,7 +8,7 @@
 
 import { Handshake } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SponsorsList } from '@/components/admin/lists/sponsors-list'
+import { SponsorsList } from '@/components/admin/sponsors/sponsors-list'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getAllSponsors } from '@/lib/services/sponsors'
 

@@ -14,13 +14,14 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/core/auth-client'
 
+/** Extension point: add more OAuth providers here as needed (e.g. 'google', 'twitch'). */
 type SocialProvider = 'discord'
 
 interface SocialLoginProps {
   redirectTo: string
 }
 
-const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
+export const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleLogin = async (provider: SocialProvider) => {
@@ -33,11 +34,11 @@ const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
 
       if (error) {
         console.error('Social login error:', error)
-        toast.error(error.message || 'Erreur lors de la connexion')
+        toast.error('Une erreur est survenue lors de la connexion.')
       }
     } catch (error) {
       console.error('Unexpected social login error:', error)
-      toast.error('Une erreur inattendue est survenue')
+      toast.error('Une erreur inattendue est survenue.')
     } finally {
       setIsLoading(false)
     }
@@ -56,5 +57,3 @@ const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
     </div>
   )
 }
-
-export default SocialLogin

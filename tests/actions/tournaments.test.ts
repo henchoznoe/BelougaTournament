@@ -63,6 +63,7 @@ const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockRegistrationDelete = vi.fn()
 const mockRegistrationDeleteMany = vi.fn()
+const mockRegistrationCount = vi.fn()
 const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
@@ -92,6 +93,7 @@ vi.mock('@/lib/core/prisma', () => ({
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
       deleteMany: (...args: unknown[]) => mockRegistrationDeleteMany(...args),
+      count: (...args: unknown[]) => mockRegistrationCount(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
@@ -102,9 +104,11 @@ const {
   updateTournament,
   deleteTournament,
   updateTournamentStatus,
-  kickPlayer,
-  dissolveTeam,
 } = await import('@/lib/actions/tournaments')
+
+const { kickPlayer, dissolveTeam } = await import(
+  '@/lib/actions/tournament-team'
+)
 
 const ADMIN_SESSION = {
   user: {
@@ -147,7 +151,7 @@ const VALID_TOURNAMENT_INPUT = {
   maxTeams: 16,
   format: TournamentFormat.TEAM,
   teamSize: 5,
-  game: 'Valorant',
+  games: ['Valorant'],
   rules: 'Double élimination BO3.',
   prize: '500 CHF',
   registrationType: RegistrationType.FREE,
@@ -155,9 +159,10 @@ const VALID_TOURNAMENT_INPUT = {
   entryFeeCurrency: 'CHF' as const,
   refundPolicyType: RefundPolicyType.NONE,
   refundDeadlineDays: null,
+  teamLogoEnabled: false,
   toornamentId: '',
   streamUrl: '',
-  imageUrl: '',
+  imageUrls: [],
   fields: [
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
@@ -171,6 +176,7 @@ const MEMBER_UUID = '44444444-4444-4444-8444-444444444444'
 
 const EXISTING_TOURNAMENT = {
   id: TOURNAMENT_UUID,
+  slug: 'valorant-cup',
   format: TournamentFormat.TEAM,
   registrationType: RegistrationType.FREE,
   entryFeeAmount: null,
@@ -192,6 +198,7 @@ describe('tournament admin actions', () => {
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])
     mockTeamMemberCount.mockResolvedValue(1)
+    mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationFindUnique.mockResolvedValue({
       id: 'reg-1',
       paymentRequiredSnapshot: false,
@@ -223,10 +230,12 @@ describe('tournament admin actions', () => {
   })
 
   it('creates a tournament for admins', async () => {
-    expect(await createTournament(VALID_TOURNAMENT_INPUT)).toEqual({
-      success: true,
-      message: 'Le tournoi a été créé.',
-    })
+    // Slug uniqueness check: no existing tournament with that slug
+    mockTournamentFindUnique.mockResolvedValueOnce(null)
+    const result = await createTournament(VALID_TOURNAMENT_INPUT)
+    expect(result.success).toBe(true)
+    expect(result.message).toBe('Le tournoi a été créé.')
+    expect(result.data).toMatchObject({ slug: 'valorant-cup' })
     expect(mockTournamentCreate).toHaveBeenCalledOnce()
   })
 

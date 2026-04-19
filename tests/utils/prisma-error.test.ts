@@ -6,7 +6,10 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('server-only', () => ({}))
+
 import { handlePrismaError } from '@/lib/utils/prisma-error'
 import { Prisma } from '@/prisma/generated/prisma/client'
 
@@ -38,35 +41,35 @@ describe('handlePrismaError', () => {
   it('handles P2002 (unique constraint)', () => {
     expect(handlePrismaError(makeKnownError('P2002'))).toEqual({
       success: false,
-      message: 'This value already exists.',
+      message: 'Cette valeur existe déjà.',
     })
   })
 
   it('handles P2025 (record not found)', () => {
     expect(handlePrismaError(makeKnownError('P2025'))).toEqual({
       success: false,
-      message: 'Record not found.',
+      message: 'Enregistrement introuvable.',
     })
   })
 
   it('handles P2003 (foreign key violation)', () => {
     expect(handlePrismaError(makeKnownError('P2003'))).toEqual({
       success: false,
-      message: 'A related record could not be found.',
+      message: 'Un enregistrement lié est introuvable.',
     })
   })
 
   it('handles P2000 (value too long)', () => {
     expect(handlePrismaError(makeKnownError('P2000'))).toEqual({
       success: false,
-      message: 'The provided value is too long.',
+      message: 'La valeur fournie est trop longue.',
     })
   })
 
   it('returns generic message for unknown Prisma codes', () => {
     expect(handlePrismaError(makeKnownError('P9999'))).toEqual({
       success: false,
-      message: 'An unexpected error occurred. Please try again.',
+      message: 'Une erreur inattendue est survenue. Veuillez réessayer.',
     })
   })
 
@@ -76,7 +79,7 @@ describe('handlePrismaError', () => {
     })
     expect(handlePrismaError(error)).toEqual({
       success: false,
-      message: 'An unexpected error occurred. Please try again.',
+      message: 'Une erreur inattendue est survenue. Veuillez réessayer.',
     })
   })
 })

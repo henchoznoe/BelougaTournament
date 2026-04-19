@@ -36,7 +36,11 @@ import {
   createTeamAndRegister,
   joinTeamAndRegister,
   registerForTournament,
-} from '@/lib/actions/tournaments'
+} from '@/lib/actions/tournament-registration'
+import {
+  REGISTRATION_HOLD_MINUTES,
+  VALIDATION_LIMITS,
+} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
@@ -47,6 +51,7 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
+import { formatCentimes } from '@/lib/utils/formatting'
 import {
   FieldType,
   PaymentStatus,
@@ -122,9 +127,12 @@ export const TournamentRegistrationForm = ({
     if (format === TournamentFormat.TEAM) {
       if (teamMode === 'create') {
         const trimmed = teamName.trim()
-        if (trimmed.length < 2 || trimmed.length > 30) {
+        if (
+          trimmed.length < VALIDATION_LIMITS.TEAM_NAME_MIN ||
+          trimmed.length > VALIDATION_LIMITS.TEAM_NAME_MAX
+        ) {
           toast.error(
-            "Le nom de l'équipe doit contenir entre 2 et 30 caractères.",
+            `Le nom de l'équipe doit contenir entre ${VALIDATION_LIMITS.TEAM_NAME_MIN} et ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
           )
           return
         }
@@ -139,30 +147,30 @@ export const TournamentRegistrationForm = ({
     startTransition(async () => {
       const fieldValues = buildFieldValues(data, fields)
 
-      let result: ActionState<{ checkoutUrl?: string }>
+      let result: ActionState<{ checkoutUrl: string }>
 
       if (format === TournamentFormat.TEAM) {
         if (teamMode === 'create') {
-          result = (await createTeamAndRegister({
+          result = await createTeamAndRegister({
             tournamentId,
             returnPath: currentPath,
             teamName: teamName.trim(),
             fieldValues,
-          })) as ActionState<{ checkoutUrl?: string }>
+          })
         } else {
-          result = (await joinTeamAndRegister({
+          result = await joinTeamAndRegister({
             tournamentId,
             returnPath: currentPath,
             teamId: selectedTeamId,
             fieldValues,
-          })) as ActionState<{ checkoutUrl?: string }>
+          })
         }
       } else {
-        result = (await registerForTournament({
+        result = await registerForTournament({
           tournamentId,
           returnPath: currentPath,
           fieldValues,
-        })) as ActionState<{ checkoutUrl?: string }>
+        })
       }
 
       if (result.success) {
@@ -236,7 +244,10 @@ export const TournamentRegistrationForm = ({
   const isPaidTournament = tournament.registrationType === RegistrationType.PAID
   const entryFeeLabel =
     tournament.entryFeeAmount !== null
-      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency ?? 'CHF'}`
+      ? formatCentimes(
+          tournament.entryFeeAmount,
+          tournament.entryFeeCurrency ?? 'CHF',
+        )
       : null
 
   // Registration form
@@ -249,12 +260,11 @@ export const TournamentRegistrationForm = ({
             Inscription payante: {entryFeeLabel}
           </p>
           <p className="mt-1 text-xs text-zinc-400">
-            Votre place est réservée pendant 30 minutes au moment de la
-            redirection vers Stripe.
+            Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
+            au moment de la redirection vers Stripe.
           </p>
         </div>
       )}
-
       {isPendingRegistration && (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
           <p className="font-medium text-amber-300">Paiement en attente</p>
@@ -270,7 +280,6 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
-
       {/* Team mode selector (TEAM format only) */}
       {format === TournamentFormat.TEAM && (
         <div className="space-y-4">
@@ -321,7 +330,7 @@ export const TournamentRegistrationForm = ({
                 onChange={e => setTeamName(e.target.value)}
                 disabled={isPending}
                 placeholder="Entrez le nom de votre équipe"
-                maxLength={30}
+                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
                 className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
               />
             </div>
@@ -364,7 +373,6 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
-
       {/* Dynamic fields */}
       {fields.length > 0 ? (
         <div className="space-y-4">
@@ -406,14 +414,12 @@ export const TournamentRegistrationForm = ({
           Aucun champ supplémentaire n'est requis.
         </p>
       )}
-
       <p className="text-center text-xs text-zinc-500">
         <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
         {isPaidTournament
           ? 'Votre inscription sera confirmée après paiement Stripe.'
           : 'Votre inscription sera enregistrée.'}
       </p>
-
       <Button type="submit" disabled={isPending} className="w-full gap-2">
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
@@ -434,6 +440,14 @@ export const TournamentRegistrationForm = ({
             ? 'Payer et s’inscrire'
             : "S'inscrire"}
       </Button>
+      <p className="text-center text-xs text-zinc-500">
+        En procédant {isPaidTournament ? 'au paiement' : "à l'inscription"},
+        vous confirmez accepter nos{' '}
+        <Link href={ROUTES.TERMS} className="text-blue-500 hover:underline">
+          conditions générales
+        </Link>
+        .
+      </p>
     </form>
   )
 }

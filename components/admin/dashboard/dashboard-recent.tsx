@@ -92,7 +92,7 @@ export const DashboardRecentRegistrations = ({
       <div className="mb-4 flex items-center gap-2">
         <Trophy className="size-4 text-sky-400" />
         <h2 className="text-sm font-semibold text-white">
-          Inscriptions récentes aux tournois
+          Inscriptions récentes
         </h2>
       </div>
 

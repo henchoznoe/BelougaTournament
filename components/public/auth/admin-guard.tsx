@@ -9,7 +9,7 @@
 import { redirect } from 'next/navigation'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
-import { isAdmin } from '@/lib/utils/auth.helpers'
+import { isAdmin } from '@/lib/utils/role'
 
 /** Server component guard: redirects non-admin users before rendering children. */
 const AdminGuard = async ({ children }: { children: React.ReactNode }) => {
@@ -26,4 +26,4 @@ const AdminGuard = async ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-export default AdminGuard
+export { AdminGuard }

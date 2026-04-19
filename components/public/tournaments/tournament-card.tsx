@@ -8,13 +8,13 @@
 
 'use client'
 
-import { Calendar, Gamepad2, Swords, Trophy, Users } from 'lucide-react'
+import { Calendar, Gamepad2, Swords, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatDate, pluralize, stripHtml } from '@/lib/utils/formatting'
 import {
   TournamentFormat,
   TournamentStatus,
@@ -54,18 +54,28 @@ const getRegistrationInfo = (tournament: PublicTournamentListItem) => {
   }
 }
 
-/** Computes the spots label (e.g. "12 / 32 inscrits"). */
-const getSpotsLabel = (tournament: PublicTournamentListItem) => {
-  const count = tournament._count.registrations
-  if (tournament.maxTeams) {
-    return `${count} / ${tournament.maxTeams}`
-  }
-  return `${count}`
+/** Computes the spots label (e.g. "12 / 32 inscrits" or "3 / 4 équipes"). */
+const getSpotsInfo = (tournament: PublicTournamentListItem) => {
+  const isTeam = tournament.format === TournamentFormat.TEAM
+  const count = isTeam
+    ? tournament._count.teams
+    : tournament._count.registrations
+  const label = isTeam
+    ? count !== 1
+      ? 'équipes'
+      : 'équipe'
+    : count !== 1
+      ? 'inscrits'
+      : 'inscrit'
+  const value = tournament.maxTeams
+    ? `${count} / ${tournament.maxTeams}`
+    : `${count}`
+  return { value, label }
 }
 
 export const TournamentCard = ({ tournament }: TournamentCardProps) => {
   const registrationInfo = getRegistrationInfo(tournament)
-  const spotsLabel = getSpotsLabel(tournament)
+  const spotsInfo = getSpotsInfo(tournament)
 
   return (
     <Link
@@ -73,10 +83,10 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
       className="group relative block overflow-hidden rounded-3xl border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:shadow-[0_0_30px_rgba(59,130,246,0.08)]"
     >
       {/* Image banner */}
-      {tournament.imageUrl && (
+      {tournament.imageUrls.length > 0 ? (
         <div className="relative h-40 w-full overflow-hidden">
           <Image
-            src={tournament.imageUrl}
+            src={tournament.imageUrls[0]}
             alt={tournament.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -84,10 +94,15 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
         </div>
+      ) : (
+        <div className="relative flex h-40 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
+          <Gamepad2 className="size-12 text-zinc-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
+        </div>
       )}
 
       {/* Content */}
-      <div className={cn('relative p-6', !tournament.imageUrl && 'pt-8')}>
+      <div className="relative p-6">
         {/* Background glow */}
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
 
@@ -110,17 +125,17 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           {/* Description */}
           {tournament.description && (
             <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
-              {tournament.description}
+              {stripHtml(tournament.description)}
             </p>
           )}
 
           {/* Info pills */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Game */}
-            {tournament.game && (
+            {tournament.games.length > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/2 px-3 py-1.5 text-xs text-zinc-400">
                 <Gamepad2 className="size-3" />
-                {tournament.game}
+                {tournament.games.join(', ')}
               </span>
             )}
 
@@ -143,14 +158,13 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           <div className="flex items-center gap-4 border-t border-white/5 pt-4 text-xs text-zinc-500">
             <span className="inline-flex items-center gap-1.5">
               <Users className="size-3.5" />
-              {spotsLabel} inscrit
-              {tournament._count.registrations !== 1 ? 's' : ''}
+              {spotsInfo.value} {spotsInfo.label}
             </span>
             {tournament.format === TournamentFormat.TEAM && (
               <span className="inline-flex items-center gap-1.5">
-                <Trophy className="size-3.5" />
-                {tournament._count.teams} équipe
-                {tournament._count.teams !== 1 ? 's' : ''}
+                <Users className="size-3.5" />
+                {tournament._count.registrations} joueur
+                {pluralize(tournament._count.registrations)}
               </span>
             )}
           </div>

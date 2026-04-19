@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { env } from '@/lib/core/env'
@@ -21,6 +22,8 @@ const createPrismaClient = () => {
 
 type PrismaWithAccelerate = ReturnType<typeof createPrismaClient>
 
+// Cast `global` to a typed object to safely store the Prisma singleton across
+// hot-reloads in development without creating multiple client instances.
 const globalForPrisma = global as unknown as {
   prisma: PrismaWithAccelerate | undefined
 }

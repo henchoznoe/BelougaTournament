@@ -48,4 +48,4 @@ export const ADMIN_NAV: AdminNavItem[] = [
     href: ROUTES.ADMIN_SETTINGS,
     icon: Settings,
   },
-] as const
+]

@@ -21,6 +21,7 @@ vi.mock('@/lib/core/logger', () => ({
 const mockFindMany = vi.fn()
 const mockFindUnique = vi.fn()
 const mockFindFirst = vi.fn()
+const mockCount = vi.fn()
 const mockRegistrationFindMany = vi.fn()
 const mockTeamFindMany = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
@@ -29,6 +30,7 @@ vi.mock('@/lib/core/prisma', () => ({
       findMany: (...args: unknown[]) => mockFindMany(...args),
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
       findFirst: (...args: unknown[]) => mockFindFirst(...args),
+      count: (...args: unknown[]) => mockCount(...args),
     },
     tournamentRegistration: {
       findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
@@ -57,6 +59,8 @@ const {
   getPublicTournamentBySlug,
   getUserRegistrations,
   getUserPastRegistrations,
+  getPublishedTournamentsFiltered,
+  getArchivedTournamentsFiltered,
 } = await import('@/lib/services/tournaments')
 
 // ---------------------------------------------------------------------------
@@ -67,7 +71,7 @@ const MOCK_LIST_ITEM = {
   id: 'uuid-1',
   title: 'Valorant Cup',
   slug: 'valorant-cup',
-  game: 'Valorant',
+  games: ['Valorant'],
   format: 'TEAM',
   teamSize: 5,
   maxTeams: 16,
@@ -85,7 +89,7 @@ const MOCK_LIST_ITEM = {
 const MOCK_DETAIL = {
   ...MOCK_LIST_ITEM,
   description: 'Tournoi Valorant 5v5.',
-  imageUrl: null,
+  imageUrls: [],
   rules: 'Double élimination.',
   prize: '500 CHF',
   refundPolicyType: 'NONE',
@@ -126,7 +130,7 @@ describe('getTournaments', () => {
         id: true,
         title: true,
         slug: true,
-        game: true,
+        games: true,
         format: true,
         teamSize: true,
         maxTeams: true,
@@ -155,16 +159,211 @@ describe('getTournaments', () => {
 
     expect(result).toEqual([])
   })
+})
 
-  it('returns an empty array on database error', async () => {
+// ---------------------------------------------------------------------------
+// Shared fixture for filtered tournament pages
+// ---------------------------------------------------------------------------
+
+const MOCK_FILTERED_LIST_ITEM = {
+  id: 'uuid-pub-1',
+  title: 'Valorant Cup',
+  slug: 'valorant-cup',
+  games: ['Valorant'],
+  format: 'TEAM',
+  teamSize: 5,
+  maxTeams: 16,
+  registrationType: 'FREE',
+  entryFeeAmount: null,
+  entryFeeCurrency: null,
+  startDate: new Date('2026-06-15T10:00:00.000Z'),
+  endDate: new Date('2026-06-17T18:00:00.000Z'),
+  registrationOpen: new Date('2026-05-01T00:00:00.000Z'),
+  registrationClose: new Date('2026-06-01T00:00:00.000Z'),
+  imageUrls: [],
+  _count: { registrations: 12 },
+}
+
+const DEFAULT_FILTERS = {
+  search: '',
+  format: '' as const,
+  type: '' as const,
+  sort: 'date_asc' as const,
+  page: 1,
+}
+
+// ---------------------------------------------------------------------------
+// getPublishedTournamentsFiltered
+// ---------------------------------------------------------------------------
+
+describe('getPublishedTournamentsFiltered', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockFindMany.mockResolvedValue([MOCK_FILTERED_LIST_ITEM])
+    mockCount.mockResolvedValue(1)
+  })
+
+  it('returns tournaments and pagination metadata', async () => {
+    const result = await getPublishedTournamentsFiltered(DEFAULT_FILTERS)
+
+    expect(result.tournaments).toHaveLength(1)
+    expect(result.total).toBe(1)
+    expect(result.page).toBe(1)
+    expect(result.totalPages).toBe(1)
+  })
+
+  it('passes search filter to where clause', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      search: 'Valorant',
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.where.OR).toBeDefined()
+    expect(call.where.OR[0].title.contains).toBe('Valorant')
+  })
+
+  it('passes format filter to where clause', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      format: 'TEAM' as const,
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.where.format).toBe('TEAM')
+  })
+
+  it('passes type filter to where clause', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      type: 'FREE' as const,
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.where.registrationType).toBe('FREE')
+  })
+
+  it('computes correct skip for page 2', async () => {
+    mockCount.mockResolvedValue(20)
+    await getPublishedTournamentsFiltered({ ...DEFAULT_FILTERS, page: 2 })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.skip).toBeGreaterThan(0)
+  })
+
+  it('sorts by registrations_desc in-memory', async () => {
+    const itemA = {
+      ...MOCK_FILTERED_LIST_ITEM,
+      id: 'a',
+      _count: { registrations: 5 },
+    }
+    const itemB = {
+      ...MOCK_FILTERED_LIST_ITEM,
+      id: 'b',
+      _count: { registrations: 20 },
+    }
+    mockFindMany.mockResolvedValue([itemA, itemB])
+    mockCount.mockResolvedValue(2)
+
+    const result = await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      sort: 'registrations_desc',
+    })
+
+    expect(result.tournaments[0]._count.registrations).toBe(20)
+    expect(result.tournaments[1]._count.registrations).toBe(5)
+  })
+
+  it('returns empty result on database error', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournaments()
+    const result = await getPublishedTournamentsFiltered(DEFAULT_FILTERS)
 
-    expect(result).toEqual([])
+    expect(result.tournaments).toEqual([])
+    expect(result.total).toBe(0)
+    expect(result.totalPages).toBe(1)
+  })
+
+  it('returns at least 1 total page when there are no results', async () => {
+    mockFindMany.mockResolvedValue([])
+    mockCount.mockResolvedValue(0)
+
+    const result = await getPublishedTournamentsFiltered(DEFAULT_FILTERS)
+
+    expect(result.totalPages).toBe(1)
   })
 })
 
+// ---------------------------------------------------------------------------
+// getArchivedTournamentsFiltered
+// ---------------------------------------------------------------------------
+
+describe('getArchivedTournamentsFiltered', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockFindMany.mockResolvedValue([MOCK_FILTERED_LIST_ITEM])
+    mockCount.mockResolvedValue(1)
+  })
+
+  it('returns archived tournaments and pagination metadata', async () => {
+    const result = await getArchivedTournamentsFiltered(DEFAULT_FILTERS)
+
+    expect(result.tournaments).toHaveLength(1)
+    expect(result.total).toBe(1)
+    expect(result.page).toBe(1)
+    expect(result.totalPages).toBe(1)
+  })
+
+  it('passes search filter to where clause with ARCHIVED status', async () => {
+    await getArchivedTournamentsFiltered({ ...DEFAULT_FILTERS, search: 'CS2' })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.where.status).toBe('ARCHIVED')
+    expect(call.where.OR).toBeDefined()
+  })
+
+  it('passes format filter to where clause', async () => {
+    await getArchivedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      format: 'SOLO' as const,
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.where.format).toBe('SOLO')
+  })
+
+  it('sorts by registrations_desc in-memory', async () => {
+    const itemA = {
+      ...MOCK_FILTERED_LIST_ITEM,
+      id: 'a',
+      _count: { registrations: 3 },
+    }
+    const itemB = {
+      ...MOCK_FILTERED_LIST_ITEM,
+      id: 'b',
+      _count: { registrations: 15 },
+    }
+    mockFindMany.mockResolvedValue([itemA, itemB])
+    mockCount.mockResolvedValue(2)
+
+    const result = await getArchivedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      sort: 'registrations_desc',
+    })
+
+    expect(result.tournaments[0]._count.registrations).toBe(15)
+  })
+
+  it('returns empty result on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getArchivedTournamentsFiltered(DEFAULT_FILTERS)
+
+    expect(result.tournaments).toEqual([])
+    expect(result.total).toBe(0)
+    expect(result.totalPages).toBe(1)
+  })
+})
 // ---------------------------------------------------------------------------
 // getTournamentBySlug
 // ---------------------------------------------------------------------------
@@ -288,6 +487,7 @@ const MOCK_REGISTRATION = {
     name: 'Alpha Squad',
     captainId: 'user-1',
     isFull: false,
+    logoUrl: null,
   },
 }
 
@@ -310,6 +510,7 @@ const MOCK_RAW_REGISTRATION = {
           name: 'Alpha Squad',
           captainId: 'user-1',
           isFull: false,
+          logoUrl: null,
         },
       },
     ],
@@ -323,6 +524,7 @@ const MOCK_RAW_REGISTRATION = {
 const MOCK_TEAM = {
   id: 'team-1',
   name: 'Alpha Squad',
+  logoUrl: null,
   isFull: false,
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   captain: {
@@ -387,6 +589,7 @@ describe('getRegistrations', () => {
                     name: true,
                     captainId: true,
                     isFull: true,
+                    logoUrl: true,
                   },
                 },
               },
@@ -441,6 +644,7 @@ describe('getTeams', () => {
       select: {
         id: true,
         name: true,
+        logoUrl: true,
         isFull: true,
         createdAt: true,
         captain: {
@@ -559,8 +763,8 @@ const MOCK_PUBLIC_LIST_ITEM = {
   title: 'Valorant Cup',
   slug: 'valorant-cup',
   description: 'Tournoi Valorant 5v5.',
-  game: 'Valorant',
-  imageUrl: null,
+  games: ['Valorant'],
+  imageUrls: [],
   format: 'TEAM',
   teamSize: 5,
   maxTeams: 16,
@@ -720,8 +924,8 @@ describe('getPublishedTournaments', () => {
         title: true,
         slug: true,
         description: true,
-        game: true,
-        imageUrl: true,
+        games: true,
+        imageUrls: true,
         format: true,
         teamSize: true,
         maxTeams: true,
@@ -784,8 +988,8 @@ describe('getArchivedTournaments', () => {
         title: true,
         slug: true,
         description: true,
-        game: true,
-        imageUrl: true,
+        games: true,
+        imageUrls: true,
         format: true,
         teamSize: true,
         maxTeams: true,
@@ -888,16 +1092,25 @@ const MOCK_USER_REGISTRATION = {
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
+  paymentRequiredSnapshot: false,
   tournament: {
     id: 'uuid-1',
     title: 'Valorant Cup',
     slug: 'valorant-cup',
-    game: 'Valorant',
+    games: ['Valorant'],
     format: 'TEAM',
+    teamSize: 5,
     startDate: new Date('2026-06-15T10:00:00.000Z'),
     status: 'PUBLISHED',
+    registrationType: 'FREE',
+    entryFeeAmount: null,
+    entryFeeCurrency: null,
+    refundPolicyType: 'NONE',
+    refundDeadlineDays: null,
+    teamLogoEnabled: false,
     fields: [],
   },
+  team: null,
 }
 
 const MOCK_USER_PAST_REGISTRATION = {
@@ -906,16 +1119,25 @@ const MOCK_USER_PAST_REGISTRATION = {
   createdAt: new Date('2025-11-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
+  paymentRequiredSnapshot: false,
   tournament: {
     id: 'uuid-2',
     title: 'CS2 Winter Cup',
     slug: 'cs2-winter-cup',
-    game: 'CS2',
+    games: ['CS2'],
     format: 'TEAM',
+    teamSize: 5,
     startDate: new Date('2025-12-01T10:00:00.000Z'),
     status: 'ARCHIVED',
+    registrationType: 'FREE',
+    entryFeeAmount: null,
+    entryFeeCurrency: null,
+    refundPolicyType: 'NONE',
+    refundDeadlineDays: null,
+    teamLogoEnabled: false,
     fields: [],
   },
+  team: null,
 }
 
 const USER_REGISTRATION_SELECT = {
@@ -924,6 +1146,7 @@ const USER_REGISTRATION_SELECT = {
   createdAt: true,
   status: true,
   paymentStatus: true,
+  paymentRequiredSnapshot: true,
   tournament: {
     select: {
       id: true,
@@ -931,8 +1154,15 @@ const USER_REGISTRATION_SELECT = {
       slug: true,
       game: true,
       format: true,
+      teamSize: true,
       startDate: true,
       status: true,
+      registrationType: true,
+      entryFeeAmount: true,
+      entryFeeCurrency: true,
+      refundPolicyType: true,
+      refundDeadlineDays: true,
+      teamLogoEnabled: true,
       fields: {
         orderBy: { order: 'asc' },
         select: {
@@ -943,6 +1173,14 @@ const USER_REGISTRATION_SELECT = {
           order: true,
         },
       },
+    },
+  },
+  team: {
+    select: {
+      id: true,
+      name: true,
+      captainId: true,
+      logoUrl: true,
     },
   },
 }
@@ -1016,6 +1254,7 @@ describe('getUserPastRegistrations', () => {
           {
             status: 'CANCELLED',
             paymentStatus: 'REFUNDED',
+            tournament: { status: 'ARCHIVED' },
           },
         ],
       },

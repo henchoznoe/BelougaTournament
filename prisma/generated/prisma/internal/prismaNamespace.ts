@@ -1565,8 +1565,8 @@ export const TournamentScalarFieldEnum = {
   maxTeams: 'maxTeams',
   format: 'format',
   teamSize: 'teamSize',
-  game: 'game',
-  imageUrl: 'imageUrl',
+  games: 'games',
+  imageUrls: 'imageUrls',
   rules: 'rules',
   prize: 'prize',
   registrationType: 'registrationType',
@@ -1576,6 +1576,7 @@ export const TournamentScalarFieldEnum = {
   refundDeadlineDays: 'refundDeadlineDays',
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
+  teamLogoEnabled: 'teamLogoEnabled',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1610,6 +1611,7 @@ export type TournamentFieldScalarFieldEnum = (typeof TournamentFieldScalarFieldE
 export const TeamScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  logoUrl: 'logoUrl',
   tournamentId: 'tournamentId',
   captainId: 'captainId',
   isFull: 'isFull',

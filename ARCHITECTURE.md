@@ -8,19 +8,20 @@
 
 | Layer | Technology | Version |
 |---|---|---|
-| Framework | Next.js (App Router, RSC, Server Actions) | 16.x |
+| Framework | Next.js (App Router, RSC, Server Actions, `cacheComponents`) | 16.x |
 | UI Library | React | 19.x |
 | Language | TypeScript (strict) | 5.9 |
 | ORM | Prisma (PostgreSQL, PrismaPg adapter) | 7.x |
 | Auth | BetterAuth (Discord OAuth) | 1.4 |
+| Payments | Stripe (Checkout, Webhooks, Refunds) | — |
 | Validation | Zod v4 | 4.3 |
-| Styling | TailwindCSS v4 + shadcn/ui (new-york, zinc) | 4.2 |
+| Styling | TailwindCSS v4 + shadcn/ui (new-york, zinc) | 4.x |
 | Forms | react-hook-form + @hookform/resolvers | 7.x |
 | Linter/Formatter | Biome (replaces ESLint + Prettier) | 2.4 |
 | Tests | Vitest + @vitest/coverage-v8 | 4.x |
 | Hosting | Vercel (Analytics, SpeedInsights, Blob storage) | — |
-| Database | PostgreSQL 18 (local Docker, Vercel Postgres in prod) | 18 |
-| Icons | Lucide React + Font Awesome (brand icons) | — |
+| Database | PostgreSQL (local Docker, Supabase in prod) | 18 |
+| Icons | Lucide React | — |
 | Markdown | React Markdown | 10.x |
 | Animations | Framer Motion | 12.x |
 
@@ -32,24 +33,31 @@
 .
 ├── app/                    # Next.js App Router — pages, layouts, API routes, SEO
 ├── components/
-│   ├── admin/              # Admin domain components (dashboard, forms, lists, ui)
+│   ├── admin/              # Admin domain components
+│   │   ├── dashboard/      # Stats, recent logins, payments panels
+│   │   ├── hooks/          # Shared admin hooks (useListSort, useBlobList, useLogout, useClientPagination)
+│   │   ├── tournaments/    # Tournament list, detail, registrations, teams, form tabs
+│   │   ├── users/          # User list, detail, dropdown
+│   │   ├── sponsors/       # Sponsor list, form, detail
+│   │   ├── settings/       # Settings form, logo picker
+│   │   └── ui/             # Admin shell (sidebar, topbar, breadcrumb, skeleton)
 │   ├── public/             # Public domain components (auth, contact, landing, layout, legal, profile, stream, tournaments)
 │   └── ui/                 # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 ├── lib/
 │   ├── actions/            # Server actions (authenticatedAction wrapper)
-│   ├── config/             # Routes, constants (CACHE_TAGS, METADATA), admin sidebar nav
-│   ├── core/               # Auth, Prisma client, env validation, structured logger
+│   ├── config/             # Routes, constants (CACHE_TAGS, VALIDATION_LIMITS, time helpers), admin nav
+│   ├── core/               # Auth, Prisma client, env validation, structured logger, Stripe client
 │   ├── services/           # Data access with 'use cache' + cacheTag + cacheLife
 │   ├── types/              # TypeScript types (ActionState, AuthSession, domain types)
-│   ├── utils/              # cn, formatting, prisma-error, auth helpers, toNullable
-│   └── validations/        # Zod v4 schemas
+│   ├── utils/              # cn, formatting (formatCentimes/parseCentimes), prisma-error, auth helpers, team helpers
+│   └── validations/        # Zod v4 schemas (VALID_SORT_OPTIONS exported from tournaments.ts)
 ├── prisma/                 # Schema, migrations, seed scripts, generated client (gitignored)
 ├── public/                 # Static assets (logo, backgrounds, fonts)
 ├── tests/                  # Unit tests organized by layer (NOT colocated)
 ├── proxy.ts                # Edge middleware — /admin/* route protection
 ├── next.config.ts          # CSP headers, cacheComponents, remote image patterns
 ├── biome.json              # Linter + formatter config
-├── docker-compose.yml      # Local PostgreSQL 18-alpine
+├── docker-compose.yml      # Local PostgreSQL
 └── .github/workflows/      # CI pipeline
 ```
 
@@ -83,12 +91,11 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 
 | Route | Page | Role |
 |---|---|---|
-| `/admin` | Dashboard (stats, upcoming tournaments, recent registrations) | ADMIN+ |
+| `/admin` | Dashboard (stats, upcoming tournaments, recent registrations, payments) | ADMIN+ |
 | `/admin/tournaments` | Tournament list (CRUD, status management) | ADMIN+ |
-| `/admin/tournaments/new` | Create tournament *(planned)* | ADMIN+ |
 | `/admin/tournaments/:slug` | Tournament detail / edit | ADMIN+ |
-| `/admin/tournaments/:slug/registrations` | Manage registrations *(planned)* | ADMIN+ |
-| `/admin/tournaments/:slug/teams` | Manage teams *(planned)* | ADMIN+ |
+| `/admin/tournaments/:slug/registrations` | Manage registrations (delete, refund, update fields) | ADMIN+ |
+| `/admin/tournaments/:slug/teams` | Manage teams (kick, dissolve, change, promote captain, rename) | ADMIN+ |
 | `/admin/users` | User management (promote/demote, ban/unban, delete) | ADMIN |
 | `/admin/users/:id` | User detail | ADMIN |
 | `/admin/settings` | Global settings (logo, Twitch, socials, features) | ADMIN |
@@ -124,6 +131,12 @@ Protected by edge middleware (`proxy.ts`) + `AdminGuard` server component. Wrapp
 | `TournamentFormat` | `SOLO`, `TEAM` |
 | `FieldType` | `TEXT`, `NUMBER` |
 | `TournamentStatus` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
+| `RegistrationType` | `FREE`, `PAID` |
+| `RefundPolicyType` | `NONE`, `BEFORE_DEADLINE` |
+| `RegistrationStatus` | `PENDING`, `CONFIRMED`, `CANCELLED` |
+| `PaymentStatus` | `UNPAID`, `PAID`, `REFUNDED` |
+
+All enum values are imported from `@/prisma/generated/prisma/enums` — **never** use string literals.
 
 ### Models & Relationships
 
@@ -165,7 +178,7 @@ Client Component (form submit)
   └─> Server Action
        └─> authenticatedAction
             ├─ 1. Auth check (getSession via headers)
-            ├─ 2. Role check (ADMIN / array)
+            ├─ 2. Role check (Role.ADMIN / array)
             ├─ 3. Zod validation (schema.safeParse)
             ├─ 4. Handler execution (business logic)
             ├─ 5. Error handling (Prisma error mapping + logger)
@@ -184,10 +197,10 @@ Service Function
   └─ Prisma query
 
 Server Action (after mutation)
-  └─ revalidateTag(CACHE_TAGS.XYZ, 'hours')  // Must match cacheLife profile
+  └─ revalidateTag(CACHE_TAGS.XYZ, 'hours')  // Must match cacheLife profile — two args required
 ```
 
-Cache tags are centralized in `CACHE_TAGS` (`lib/config/constants.ts`): `admins`, `dashboard-stats`, `dashboard-upcoming`, `dashboard-registrations`, `players`, `settings`, `sponsors`, `tournaments`, `tournament-options`.
+Cache tags are centralized in `CACHE_TAGS` (`lib/config/constants.ts`): `dashboard-stats`, `dashboard-payments`, `dashboard-registrations`, `dashboard-recent-users`, `settings`, `sponsors`, `tournaments`, `users`.
 
 ### 3. Auth Flow (BetterAuth + Discord OAuth)
 
@@ -230,7 +243,30 @@ Request to /admin/*
       └─ Renders AdminShell (sidebar + topbar) on success
 ```
 
-### 5. RSC vs Client Component Boundary
+### 5. Stripe Payment Flow
+
+```
+User clicks "S'inscrire" (paid tournament)
+  │
+  ├─ registerForTournament / createTeamAndRegister / joinTeamAndRegister (server action)
+  │   ├─ Creates TournamentRegistration with status=PENDING, paymentStatus=UNPAID
+  │   ├─ Holds slot for REGISTRATION_HOLD_MINUTES (30 min) via expiresAt timestamp
+  │   └─ Creates Stripe Checkout Session → returns URL
+  │
+  ├─ User redirected to Stripe Checkout
+  │
+  ├─ Stripe webhook (/api/webhook) handles events:
+  │   ├─ checkout.session.completed → status=CONFIRMED, paymentStatus=PAID
+  │   └─ checkout.session.expired  → registration deleted, slot released
+  │
+  └─ Refund (unregister / admin action)
+      ├─ DB update first (status=CANCELLED, paymentStatus=REFUNDED)
+      └─ issueStripeRefundAfterDbUpdate() — Stripe refund issued after DB commit
+```
+
+**Constants:** `REGISTRATION_HOLD_MINUTES = 30` (exported from `lib/core/stripe.ts`).
+
+### 6. RSC vs Client Component Boundary
 
 | Server Components | Client Components (`'use client'`) |
 |---|---|
@@ -240,7 +276,7 @@ Request to /admin/*
 | Data fetching via services | `authClient.useSession()` for client-side session |
 | SEO files (robots, sitemap) | Toast notifications (Sonner) |
 
-`cacheComponents: true` in `next.config.ts` enables component-level RSC caching. This means **no `new Date()` in components** — use constants or compute at build time. Dynamic APIs (`headers()`, `cookies()`) require `<Suspense>` wrapping.
+`cacheComponents: true` in `next.config.ts` enables component-level RSC caching. **No `new Date()` in components** — use constants or compute at build time. Dynamic APIs (`headers()`, `cookies()`) require `<Suspense>` wrapping.
 
 ---
 
@@ -249,10 +285,18 @@ Request to /admin/*
 ```
 components/
 ├── admin/
-│   ├── dashboard/      # Dashboard panels (stats, recent)
-│   ├── forms/          # Admin forms (logo-picker, settings, sponsor)
-│   ├── lists/          # Admin lists (sponsors, tournaments, users)
-│   └── ui/             # Admin UI (shell, sidebar, topbar, breadcrumb, dropdowns, badges)
+│   ├── dashboard/      # Dashboard panels (stats, recent logins, payments)
+│   ├── hooks/          # Shared admin hooks
+│   │   ├── use-list-sort.ts          # Column sort state for admin tables
+│   │   ├── use-blob-list.ts          # Vercel Blob fetch + refresh (returns { blobs, isLoadingBlobs, refetchBlobs })
+│   │   ├── use-logout.ts             # BetterAuth signOut + toast + optional onSuccess callback
+│   │   └── use-client-pagination.ts  # Client-side pagination with page state
+│   ├── tournaments/    # Tournament domain (detail, registrations, teams, list, dropdown, badge)
+│   │   └── form/       # Form tabs (general, game, dates, entry, content, fields, stages, images)
+│   ├── users/          # User domain (detail, list, dropdown)
+│   ├── sponsors/       # Sponsor domain (detail, form, list, dropdown)
+│   ├── settings/       # Settings domain (settings-form, logo-picker)
+│   └── ui/             # Admin shell (shell, sidebar, topbar, breadcrumb, content-layout, skeleton)
 ├── public/
 │   ├── auth/           # AdminGuard (RSC), LoginScreen, SocialLogin
 │   ├── contact/        # ContactBento
@@ -260,7 +304,7 @@ components/
 │   ├── layout/         # PublicNavbar, PublicFooter
 │   ├── legal/          # LegalSection
 │   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
-│   ├── stream/         # TwitchPlayer
+│   ├── stream/         # TwitchPlayer (with TWITCH_FALLBACK_TIMEOUT_MS offline detection)
 │   └── tournaments/    # TournamentCard, TournamentDetail, TournamentRegistrationForm
 └── ui/                 # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 ```
@@ -273,32 +317,78 @@ components/
 
 | Service | Cache Profile | Tags | Key Queries |
 |---|---|---|---|
-| `tournaments.ts` | `hours` | `TOURNAMENTS` | Admin list, by-slug detail, public lists, registrations, teams, user registrations |
-| `dashboard.ts` | `minutes` | `DASHBOARD_*` | Aggregate stats, upcoming tournaments, recent registrations |
+| `tournaments-admin.ts` | `hours` | `TOURNAMENTS` | Admin list, by-slug detail, registrations, teams |
+| `tournaments-public.ts` | `hours` | `TOURNAMENTS` | Public list, filtered/paginated list, detail, hero badge, available teams |
+| `tournaments-user.ts` | `hours` | `TOURNAMENTS`, `USERS` | User registration state, profile history |
+| `tournaments.ts` | `hours` | `TOURNAMENTS` | Shared options list (for selects) |
+| `dashboard.ts` | `minutes` | `DASHBOARD_*` | Aggregate stats, recent logins, recent registrations, payments |
 | `settings.ts` | `hours` | `SETTINGS` | Singleton global settings with fallback defaults |
 | `users.ts` | `hours` | `USERS` | User profile and admin user management queries |
 | `sponsors.ts` | `hours` | `SPONSORS` | Sponsor listing |
 | `auth.ts` | — | — | `getSession()` (no cache, reads from cookies) |
 
+All service files using `$queryRaw` include a file-level comment explaining that casts to domain types are necessary because Prisma cannot infer types from raw SQL at compile time.
+
 ### Actions (`lib/actions/`)
 
 | Action File | Operations |
 |---|---|
-| `tournaments.ts` | Create, update, delete tournament; update status; register/unregister; create/join/dissolve team; kick player; update fields |
-| `users.ts` | Promote, demote, update, ban/unban, delete |
-| `sponsors.ts` | Create, update, delete sponsor |
-| `settings.ts` | Update global settings |
-| `profile.ts` | Update own display name |
+| `safe-action.ts` | `authenticatedAction` pipeline |
+| `tournaments.ts` | `createTournament`, `updateTournament`, `deleteTournament`, `updateTournamentStatus` |
+| `tournament-registration.ts` | `registerForTournament`, `createTeamAndRegister`, `joinTeamAndRegister`, `updateRegistrationFields` |
+| `tournament-unregistration.ts` | `unregisterFromTournament` (with Stripe refund logic) |
+| `tournament-team.ts` | `kickPlayer`, `dissolveTeam`, `updateTeamName` |
+| `registrations.ts` | `adminDeleteRegistration`, `adminRefundRegistration`, `adminUpdateRegistrationFields` |
+| `registrations-team.ts` | `adminChangeTeam`, `adminPromoteCaptain`, `adminUpdateTeamName`, `adminDeleteTeamLogo` |
+| `users.ts` | `promoteToAdmin`, `demoteAdmin`, `updateUser`, `deleteUser` |
+| `sponsors.ts` | `createSponsor`, `updateSponsor`, `deleteSponsor`, `toggleSponsorStatus` |
+| `settings.ts` | `updateSettings` |
+| `profile.ts` | `updateProfile` |
 
 ---
 
 ## Validation Layer
 
-All Zod v4 schemas live in `lib/validations/`. Each action file references its corresponding schema. Key patterns:
+All Zod v4 schemas live in `lib/validations/`. Key patterns:
 
 - `z.url()`, `z.uuid()` for URL/UUID validation
-- Numeric fields: `z.number()` + `register('field', { valueAsNumber: true })`
-- Enum values used in `z.enum([...])` via imports from `@/prisma/generated/prisma/enums`
+- Numeric fields: `z.number()` + `register('field', { valueAsNumber: true })` — not `z.coerce.number()`
+- Enum values: `z.enum([...])` via imports from `@/prisma/generated/prisma/enums`
+- Bounds: all min/max from `VALIDATION_LIMITS` in `lib/config/constants.ts`
+- `VALID_SORT_OPTIONS` (tournament sort options array) exported from `lib/validations/tournaments.ts`
+
+---
+
+## Constants Reference (`lib/config/constants.ts`)
+
+| Constant | Value | Purpose |
+|---|---|---|
+| `CENTIMES_PER_UNIT` | `100` | CHF ↔ centimes conversion factor |
+| `ENTRY_FEE_MIN_AMOUNT` | `100` (1 CHF) | Minimum paid entry fee in centimes |
+| `ENTRY_FEE_MAX_AMOUNT` | `100_000` (1000 CHF) | Maximum paid entry fee in centimes |
+| `SECOND_IN_MS` | `1000` | One second in milliseconds |
+| `MINUTE_IN_MS` | `60_000` | One minute in milliseconds |
+| `DAY_IN_MS` | `86_400_000` | One day in milliseconds |
+| `MINUTES_PER_HOUR` | `60` | Sub-day time formatting |
+| `TWITCH_FALLBACK_TIMEOUT_MS` | `8000` | Twitch offline fallback delay |
+| `TOORNAMENT_ID_DISPLAY_LENGTH` | `12` | Truncation length for Toornament IDs in admin UI |
+| `REGISTRATION_HOLD_MINUTES` | `30` | Stripe slot hold duration (in `lib/config/constants.ts`) |
+| `CACHE_TAGS` | object | Tag names for `cacheTag()` / `revalidateTag()` |
+| `VALIDATION_LIMITS` | object | All shared min/max bounds for Zod + HTML inputs |
+| `TOURNAMENT_STATUS_LABELS` | object | French labels per `TournamentStatus` |
+| `TOURNAMENT_STATUS_STYLES` | object | Tailwind classes per `TournamentStatus` |
+
+### Money / Centimes
+
+```ts
+import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
+
+formatCentimes(5000)          // "50.00 CHF"
+formatCentimes(5000, 'EUR')   // "50.00 EUR"
+parseCentimes(50)             // 5000  (CHF input → centimes)
+```
+
+Never divide/multiply by `100` directly — use `CENTIMES_PER_UNIT`.
 
 ---
 
@@ -320,10 +410,11 @@ All Zod v4 schemas live in `lib/validations/`. Each action file references its c
 - REST API at `/api/admin/blobs` (not server actions — requires FormData multipart)
 - **Folder prefixes:** `logos/`, `sponsors/`
 - **Allowed types:** PNG, JPEG, WebP (no SVG)
-- **Max size:** 5 MB
+- **Max size:** 5 MB (admin uploads), 2 MB (team logos)
 - **Access:** ADMIN only
 - **Security:** DELETE validates URL domain (`*.public.blob.vercel-storage.com`)
 - **Next.js:** Remote image patterns configured in `next.config.ts`
+- **Hook:** `useBlobList(folder)` in `components/admin/hooks/use-blob-list.ts` provides `{ blobs, isLoadingBlobs, refetchBlobs }` — used by `tournament-form-images.tsx`, `sponsor-form.tsx`, `logo-picker.tsx`
 
 ---
 
@@ -334,15 +425,15 @@ Tests live in `tests/` (top-level, NOT colocated), organized by layer:
 ```
 tests/
 ├── utils/          # Pure utility functions (cn, formatting, prisma-error, auth helpers, commit-hash)
-├── validations/    # Zod schema validation (tournaments, settings, admins, players, sponsors, profile)
-├── services/       # Data access mocking (tournaments, dashboard, admins, players, auth)
-├── actions/        # Server action testing (tournaments, admins, players, sponsors, settings, profile, safe-action)
+├── validations/    # Zod schema validation (tournaments, settings, users, sponsors, profile, shared)
+├── services/       # Data access mocking (tournaments, dashboard, users, sponsors, auth)
+├── actions/        # Server action testing (tournaments, registrations, team, users, sponsors, settings, profile, safe-action)
 ├── api/            # API route handlers (blobs)
 ├── seo/            # SEO files (robots.ts, sitemap.ts)
 └── proxy.test.ts   # Edge middleware guard
 ```
 
-**Config:** Vitest with `globals: true` (no imports for `describe`/`it`/`expect`), `node` environment, v8 coverage, `@/` path alias.
+**Config:** Vitest with `globals: true` (no imports for `describe`/`it`/`expect`), `node` environment, v8 coverage, `@/` path alias. **494 tests across 37 files.**
 
 ---
 
@@ -377,8 +468,11 @@ Node 22 + pnpm 10
 | `DATABASE_URL` | Server | Pooled PostgreSQL connection (PrismaClient) |
 | `DIRECT_URL` | Server | Direct PostgreSQL connection (Prisma CLI migrations) |
 | `BLOB_READ_WRITE_TOKEN` | Server | Vercel Blob storage token |
+| `STRIPE_SECRET_KEY` | Server | Stripe API secret key |
+| `STRIPE_WEBHOOK_SECRET` | Server | Stripe webhook signing secret |
 | `ADMIN_EMAILS` | Server | Comma-separated emails for seed admin promotion |
 | `NEXT_PUBLIC_APP_URL` | Client | Public-facing app URL |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client | Stripe publishable key |
 | `VERCEL_ENV` | Server (optional) | Vercel runtime environment |
 | `VERCEL_GIT_COMMIT_SHA` | Server (optional) | Git commit SHA for version display |
 

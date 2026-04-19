@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { AUTH_CONFIG, DISCORD } from '@/lib/config/constants'
@@ -46,6 +47,7 @@ const auth = betterAuth({
     },
   },
   rateLimit: {
+    /** Rate limiting is disabled outside production to avoid blocking dev/test flows. */
     enabled: env.NODE_ENV === 'production',
     window: AUTH_CONFIG.RATE_LIMIT_WINDOW,
     max: AUTH_CONFIG.RATE_LIMIT_MAX,

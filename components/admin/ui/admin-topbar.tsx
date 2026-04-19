@@ -12,7 +12,7 @@ import { ArrowLeft, LogOut, Menu } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -31,26 +31,9 @@ interface AdminTopbarProps {
 export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
-
-  const handleLogout = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success('Déconnexion réussie')
-            router.push(ROUTES.HOME)
-          },
-          onError: ctx => {
-            console.error('Logout error:', ctx.error)
-            toast.error('Erreur lors de la déconnexion')
-          },
-        },
-      })
-    } catch (error) {
-      console.error('Unexpected logout error:', error)
-      toast.error('Une erreur inattendue est survenue')
-    }
-  }
+  const { handleLogout } = useLogout({
+    onSuccess: () => router.push(ROUTES.HOME),
+  })
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/80 px-4 backdrop-blur-xl md:px-6">
@@ -74,7 +57,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-400"
+              className="cursor-pointer text-zinc-400"
               onClick={() => router.push(ROUTES.HOME)}
               aria-label="Retour au site"
             >
@@ -91,7 +74,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-400 hover:text-red-400"
+              className="cursor-pointer text-zinc-400 hover:text-red-400"
               onClick={handleLogout}
               aria-label="Se déconnecter"
             >
@@ -122,12 +105,12 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
                     'hidden text-sm font-medium text-zinc-300 sm:block',
                   )}
                 >
-                  {session.user.displayName}
+                  {session.user.displayName || session.user.name}
                 </span>
                 {session.user.image ? (
                   <Image
                     src={session.user.image}
-                    alt={session.user.displayName}
+                    alt={session.user.displayName || session.user.name}
                     width={32}
                     height={32}
                     className="rounded-full ring-2 ring-white/10"

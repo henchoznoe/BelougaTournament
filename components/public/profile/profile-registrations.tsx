@@ -33,10 +33,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { unregisterFromTournament } from '@/lib/actions/tournaments'
+import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatCentimes, formatDate } from '@/lib/utils/formatting'
+import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -45,10 +46,12 @@ import {
 
 interface ProfileRegistrationsProps {
   registrations: UserRegistrationItem[]
+  userId: string
 }
 
 export const ProfileRegistrations = ({
   registrations,
+  userId,
 }: ProfileRegistrationsProps) => {
   const [editingRegistration, setEditingRegistration] =
     useState<UserRegistrationItem | null>(null)
@@ -67,8 +70,8 @@ export const ProfileRegistrations = ({
 
       if (result.success) {
         toast.success(result.message)
-        setUnregisterTarget(null)
         router.refresh()
+        setUnregisterTarget(null)
       } else {
         toast.error(result.message)
       }
@@ -90,10 +93,10 @@ export const ProfileRegistrations = ({
                     {registration.tournament.title}
                   </span>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                    {registration.tournament.game && (
+                    {registration.tournament.games.length > 0 && (
                       <span className="inline-flex items-center gap-1">
                         <Gamepad2 className="size-3" />
-                        {registration.tournament.game}
+                        {registration.tournament.games.join(', ')}
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1">
@@ -191,6 +194,7 @@ export const ProfileRegistrations = ({
             if (!open) setEditingRegistration(null)
           }}
           registration={editingRegistration}
+          userId={userId}
         />
       )}
 
@@ -218,6 +222,33 @@ export const ProfileRegistrations = ({
                   dissoute.
                 </span>
               )}
+              {unregisterTarget?.paymentRequiredSnapshot &&
+                unregisterTarget.paymentStatus === PaymentStatus.PAID &&
+                (() => {
+                  const tournament = unregisterTarget.tournament
+                  const eligible = isRefundEligible(
+                    new Date(tournament.startDate),
+                    tournament.refundPolicyType,
+                    tournament.refundDeadlineDays,
+                    new Date(),
+                  )
+                  const amount =
+                    tournament.entryFeeAmount !== null
+                      ? formatCentimes(
+                          tournament.entryFeeAmount,
+                          tournament.entryFeeCurrency ?? 'CHF',
+                        )
+                      : null
+                  return eligible ? (
+                    <span className="mt-2 block text-emerald-400">
+                      Vous serez remboursé de {amount}.
+                    </span>
+                  ) : (
+                    <span className="mt-2 block text-red-400">
+                      Attention : vous ne serez pas remboursé.
+                    </span>
+                  )
+                })()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

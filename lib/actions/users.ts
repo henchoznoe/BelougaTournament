@@ -172,7 +172,6 @@ export const deleteUser = authenticatedAction({
     revalidateTag(CACHE_TAGS.USERS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
 
     return {

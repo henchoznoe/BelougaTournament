@@ -8,7 +8,7 @@
 
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SponsorForm } from '@/components/admin/forms/sponsor-form'
+import { SponsorForm } from '@/components/admin/sponsors/sponsor-form'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 

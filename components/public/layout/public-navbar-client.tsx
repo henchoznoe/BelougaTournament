@@ -25,7 +25,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -66,31 +66,16 @@ const NavbarProfile = ({
   const router = useRouter()
   const pathname = usePathname()
   const mounted = useRef(false)
+  const { handleLogout: logout } = useLogout({
+    onSuccess: () => {
+      router.refresh()
+      if (onClick) onClick()
+    },
+  })
 
   useEffect(() => {
     mounted.current = true
   }, [])
-
-  const handleLogout = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success('Déconnexion réussie')
-            router.refresh()
-            if (onClick) onClick()
-          },
-          onError: ctx => {
-            console.error('Logout error:', ctx.error)
-            toast.error('Erreur lors de la déconnexion')
-          },
-        },
-      })
-    } catch (error) {
-      console.error('Unexpected logout error:', error)
-      toast.error('Une erreur inattendue est survenue')
-    }
-  }
 
   if (isPending || !mounted.current) {
     return (
@@ -124,7 +109,7 @@ const NavbarProfile = ({
           {session.user.image ? (
             <Image
               src={session.user.image}
-              alt={session.user.name}
+              alt={session.user.displayName || session.user.name}
               width={32}
               height={32}
               className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
@@ -142,7 +127,7 @@ const NavbarProfile = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="font-medium text-sm leading-none text-white">
-                {session.user.displayName}
+                {session.user.displayName || session.user.name}
               </p>
               <p className="text-xs leading-none text-zinc-400">
                 {session.user.email}
@@ -176,7 +161,7 @@ const NavbarProfile = ({
           <DropdownMenuSeparator className="bg-white/10" />
           <DropdownMenuItem
             className="cursor-pointer text-red-400 focus:bg-red-500/10 focus:text-red-300"
-            onClick={handleLogout}
+            onClick={logout}
           >
             <LogOut className="mr-2 size-4" />
             <span>Déconnexion</span>
@@ -240,7 +225,7 @@ const NavbarProfile = ({
         <Button
           variant="ghost"
           className="justify-start gap-3 h-10 px-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 mt-2"
-          onClick={handleLogout}
+          onClick={logout}
         >
           <LogOut className="size-4" />
           Déconnexion

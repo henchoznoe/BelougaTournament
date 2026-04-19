@@ -50,3 +50,21 @@ export type RecentRegistration = {
     name: string
   } | null
 }
+
+export type PaymentStats = {
+  totalRevenue: number
+  totalRefunded: number
+  netRevenue: number
+  transactionCount: number
+  refundCount: number
+  currency: string
+  byTournament: {
+    id: string
+    title: string
+    slug: string
+    revenue: number
+    refunded: number
+    paidCount: number
+    refundedCount: number
+  }[]
+}

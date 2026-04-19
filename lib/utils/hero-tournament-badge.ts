@@ -6,15 +6,16 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import {
+  DAY_IN_MS,
+  MINUTE_IN_MS,
+  MINUTES_PER_HOUR,
+  SECOND_IN_MS,
+} from '@/lib/config/constants'
 import type {
   HeroTournamentBadge,
   HeroTournamentBadgeTournament,
 } from '@/lib/types/tournament'
-
-const SECOND_IN_MS = 1000
-const MINUTE_IN_MS = SECOND_IN_MS * 60
-const HOUR_IN_MS = MINUTE_IN_MS * 60
-const DAY_IN_MS = HOUR_IN_MS * 24
 
 export const DEFAULT_HERO_TOURNAMENT_BADGE: HeroTournamentBadge = {
   label: 'Aucun tournoi en cours',
@@ -39,8 +40,8 @@ const formatHeroBadgeDelay = (startDate: Date | string, now: Date): string => {
   }
 
   const totalMinutes = Math.max(1, Math.ceil(diffMs / MINUTE_IN_MS))
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
+  const hours = Math.floor(totalMinutes / MINUTES_PER_HOUR)
+  const minutes = totalMinutes % MINUTES_PER_HOUR
 
   if (hours === 0) {
     return `${minutes} minute${minutes > 1 ? 's' : ''}`

@@ -9,13 +9,12 @@
 import { del, list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import auth from '@/lib/core/auth'
+import { MAX_ADMIN_UPLOAD_SIZE } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { verifyAdmin } from '@/lib/utils/verify-admin'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
-const ALLOWED_FOLDERS = new Set(['logos', 'sponsors', 'tournaments'])
+const ALLOWED_FOLDER_ROOTS = new Set(['logos', 'sponsors', 'tournaments'])
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
 
 /** Validates that a URL belongs to the app's Vercel Blob store. */
@@ -30,13 +29,10 @@ const isValidBlobUrl = (url: string): boolean => {
   }
 }
 
-/** Verifies that the request comes from an authenticated admin. */
-const verifyAdmin = async (request: Request) => {
-  const session = await auth.api.getSession({ headers: request.headers })
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    return null
-  }
-  return session
+/** Checks whether a folder string starts with an allowed root folder. */
+const isAllowedFolder = (folder: string): boolean => {
+  const root = folder.split('/')[0]
+  return ALLOWED_FOLDER_ROOTS.has(root)
 }
 
 /** GET — List blobs, optionally filtered by folder prefix. */
@@ -50,8 +46,7 @@ export const GET = async (request: Request) => {
     const { searchParams } = new URL(request.url)
     const folder = searchParams.get('folder')
 
-    const prefix =
-      folder && ALLOWED_FOLDERS.has(folder) ? `${folder}/` : undefined
+    const prefix = folder && isAllowedFolder(folder) ? `${folder}/` : undefined
     const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
@@ -89,18 +84,27 @@ export const POST = async (request: Request) => {
       )
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > MAX_ADMIN_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: 'Le fichier dépasse la taille maximale de 5 Mo.' },
         { status: 400 },
       )
     }
 
+    // Sanitize filename: keep only safe characters, collapse separators
+    const sanitizedName =
+      file.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'file'
+
     // Build the pathname with optional folder prefix
     const pathname =
-      typeof folder === 'string' && ALLOWED_FOLDERS.has(folder)
-        ? `${folder}/${file.name}`
-        : file.name
+      typeof folder === 'string' && isAllowedFolder(folder)
+        ? `${folder}/${sanitizedName}`
+        : sanitizedName
 
     const blob = await put(pathname, file, {
       access: 'public',

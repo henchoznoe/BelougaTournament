@@ -7,7 +7,17 @@
  */
 
 import { z } from 'zod'
-import { optionalUrl } from '@/lib/validations/shared'
+import {
+  CENTIMES_PER_UNIT,
+  ENTRY_FEE_MAX_AMOUNT,
+  ENTRY_FEE_MIN_AMOUNT,
+  VALIDATION_LIMITS,
+} from '@/lib/config/constants'
+import {
+  fieldValuesSchema,
+  optionalUrl,
+  returnPathSchema,
+} from '@/lib/validations/shared'
 import {
   FieldType,
   RefundPolicyType,
@@ -23,12 +33,18 @@ export const toornamentStageSchema = z.object({
     .string()
     .trim()
     .min(1, 'Le nom du stage est requis.')
-    .max(30, 'Le nom du stage ne peut pas dépasser 30 caractères.'),
+    .max(
+      VALIDATION_LIMITS.STAGE_NAME_MAX,
+      `Le nom du stage ne peut pas dépasser ${VALIDATION_LIMITS.STAGE_NAME_MAX} caractères.`,
+    ),
   stageId: z
     .string()
     .trim()
     .min(1, "L'ID du stage Toornament est requis.")
-    .max(200, "L'ID du stage ne peut pas dépasser 200 caractères."),
+    .max(
+      VALIDATION_LIMITS.EXTERNAL_ID_MAX,
+      `L'ID du stage ne peut pas dépasser ${VALIDATION_LIMITS.EXTERNAL_ID_MAX} caractères.`,
+    ),
   number: z.number().int().min(0, "L'ordre doit être positif."),
 })
 
@@ -39,7 +55,10 @@ export const tournamentFieldSchema = z.object({
     .string()
     .trim()
     .min(1, 'Le libellé est requis.')
-    .max(100, 'Le libellé ne peut pas dépasser 100 caractères.'),
+    .max(
+      VALIDATION_LIMITS.FIELD_LABEL_MAX,
+      `Le libellé ne peut pas dépasser ${VALIDATION_LIMITS.FIELD_LABEL_MAX} caractères.`,
+    ),
   type: z.enum([FieldType.TEXT, FieldType.NUMBER], {
     message: 'Le type doit être TEXT ou NUMBER.',
   }),
@@ -53,12 +72,18 @@ const baseTournamentFields = {
     .string()
     .trim()
     .min(1, 'Le titre est requis.')
-    .max(200, 'Le titre ne peut pas dépasser 200 caractères.'),
+    .max(
+      VALIDATION_LIMITS.TITLE_MAX,
+      `Le titre ne peut pas dépasser ${VALIDATION_LIMITS.TITLE_MAX} caractères.`,
+    ),
   slug: z
     .string()
     .trim()
     .min(1, 'Le slug est requis.')
-    .max(200, 'Le slug ne peut pas dépasser 200 caractères.')
+    .max(
+      VALIDATION_LIMITS.SLUG_MAX,
+      `Le slug ne peut pas dépasser ${VALIDATION_LIMITS.SLUG_MAX} caractères.`,
+    )
     .regex(
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
@@ -67,19 +92,41 @@ const baseTournamentFields = {
     .string()
     .trim()
     .min(1, 'La description est requise.')
-    .max(5000, 'La description ne peut pas dépasser 5000 caractères.'),
-  startDate: z.string().datetime({ message: 'Date de début invalide.' }),
-  endDate: z.string().datetime({ message: 'Date de fin invalide.' }),
-  registrationOpen: z.string().datetime({
-    message: "Date d'ouverture des inscriptions invalide.",
-  }),
-  registrationClose: z.string().datetime({
-    message: 'Date de fermeture des inscriptions invalide.',
-  }),
+    .max(
+      VALIDATION_LIMITS.DESCRIPTION_MAX,
+      `La description ne peut pas dépasser ${VALIDATION_LIMITS.DESCRIPTION_MAX} caractères.`,
+    ),
+  startDate: z
+    .string()
+    .min(1, 'La date de début est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de début invalide.',
+    }),
+  endDate: z
+    .string()
+    .min(1, 'La date de fin est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de fin invalide.',
+    }),
+  registrationOpen: z
+    .string()
+    .min(1, "La date d'ouverture des inscriptions est requise.")
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: "Date d'ouverture invalide.",
+    }),
+  registrationClose: z
+    .string()
+    .min(1, 'La date de fermeture des inscriptions est requise.')
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de fermeture invalide.',
+    }),
   maxTeams: z
     .number()
     .int()
-    .min(2, 'Le nombre maximum doit être au moins 2.')
+    .min(
+      VALIDATION_LIMITS.MAX_TEAMS_MIN,
+      `Le nombre maximum doit être au moins ${VALIDATION_LIMITS.MAX_TEAMS_MIN}.`,
+    )
     .nullable(),
   format: z.enum([TournamentFormat.SOLO, TournamentFormat.TEAM], {
     message: 'Le format doit être SOLO ou TEAM.',
@@ -87,34 +134,47 @@ const baseTournamentFields = {
   teamSize: z
     .number()
     .int()
-    .min(1, 'La taille doit être au moins 1.')
-    .max(20, 'La taille ne peut pas dépasser 20.'),
-  game: z
-    .string()
-    .trim()
-    .max(100, 'Le jeu ne peut pas dépasser 100 caractères.')
-    .optional()
-    .default(''),
+    .min(
+      VALIDATION_LIMITS.TEAM_SIZE_MIN,
+      `La taille doit être au moins ${VALIDATION_LIMITS.TEAM_SIZE_MIN}.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_SIZE_MAX,
+      `La taille ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_SIZE_MAX}.`,
+    ),
+  games: z
+    .array(z.string().trim().min(1))
+    .min(1, 'Au moins un jeu est requis.'),
   rules: z
     .string()
     .trim()
-    .max(10000, 'Les règles ne peuvent pas dépasser 10000 caractères.')
+    .max(
+      VALIDATION_LIMITS.RULES_MAX,
+      `Les règles ne peuvent pas dépasser ${VALIDATION_LIMITS.RULES_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   prize: z
     .string()
     .trim()
-    .max(500, 'Les prix ne peuvent pas dépasser 500 caractères.')
+    .max(
+      VALIDATION_LIMITS.PRIZE_MAX,
+      `Les prix ne peuvent pas dépasser ${VALIDATION_LIMITS.PRIZE_MAX} caractères.`,
+    )
     .optional()
     .default(''),
   registrationType: z.enum([RegistrationType.FREE, RegistrationType.PAID], {
-    message: 'Le type d’inscription doit être FREE ou PAID.',
+    message: 'Le type d\u2019inscription doit être FREE ou PAID.',
   }),
   entryFeeAmount: z
     .number()
     .int()
-    .min(100, "Le prix d'entrée doit être d'au moins 1 CHF.")
-    .max(100000, "Le prix d'entrée ne peut pas dépasser 1000 CHF.")
+    .min(ENTRY_FEE_MIN_AMOUNT, "Le prix d'entrée doit être d'au moins 1 CHF.")
+    .max(
+      ENTRY_FEE_MAX_AMOUNT,
+      "Le prix d'entrée ne peut pas dépasser " +
+        `${ENTRY_FEE_MAX_AMOUNT / CENTIMES_PER_UNIT} CHF.`,
+    )
     .nullable(),
   entryFeeCurrency: z.literal('CHF'),
   refundPolicyType: z.enum(
@@ -126,85 +186,134 @@ const baseTournamentFields = {
   refundDeadlineDays: z
     .number()
     .int()
-    .min(1, 'Le délai de remboursement doit être d’au moins 1 jour.')
-    .max(90, 'Le délai de remboursement ne peut pas dépasser 90 jours.')
+    .min(
+      VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS,
+      `Le délai de remboursement doit être d\u2019au moins ${VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS} jour.`,
+    )
+    .max(
+      VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS,
+      `Le délai de remboursement ne peut pas dépasser ${VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS} jours.`,
+    )
     .nullable(),
   toornamentId: z
     .string()
     .trim()
-    .max(200, "L'ID Toornament ne peut pas dépasser 200 caractères.")
+    .max(
+      VALIDATION_LIMITS.EXTERNAL_ID_MAX,
+      `L'ID Toornament ne peut pas dépasser ${VALIDATION_LIMITS.EXTERNAL_ID_MAX} caractères.`,
+    )
     .optional()
     .default(''),
-  imageUrl: optionalUrl,
+  imageUrls: z.array(z.url('URL invalide.')).default([]),
   streamUrl: optionalUrl,
+  teamLogoEnabled: z.boolean(),
   fields: z.array(tournamentFieldSchema),
   toornamentStages: z.array(toornamentStageSchema),
 } as const
 
+/**
+ * Shape of the date-related fields accessed inside refinement callbacks.
+ * Both create and update schemas include these fields, so this interface is
+ * safe to use as the data type in the generic `applyTournamentRefinements` helper.
+ */
+interface TournamentDateFields {
+  startDate: string
+  endDate: string
+  registrationOpen: string
+  registrationClose: string
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
+  toornamentId?: string
+  toornamentStages: unknown[]
+}
+
+/**
+ * Shared refinements applied to both create and update tournament schemas.
+ * Extracted to avoid duplicating ~65 lines of .refine() calls.
+ *
+ * The `.refine()` callback receives `output<T>` which TypeScript types as `unknown`
+ * when `T` is a generic `ZodTypeAny`. We cast to `TournamentDateFields` inside each
+ * callback because both `tournamentBaseSchema` and `updateTournamentSchema` are guaranteed
+ * to include all fields declared in that interface.
+ */
+const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
+  const d = (data: unknown) => data as TournamentDateFields
+  return schema
+    .refine(data => new Date(d(data).endDate) > new Date(d(data).startDate), {
+      message: 'La date de fin doit être après la date de début.',
+      path: ['endDate'],
+    })
+    .refine(
+      data =>
+        new Date(d(data).registrationClose) >
+        new Date(d(data).registrationOpen),
+      {
+        message: "La fermeture des inscriptions doit être après l'ouverture.",
+        path: ['registrationClose'],
+      },
+    )
+    .refine(
+      data =>
+        new Date(d(data).registrationClose) <= new Date(d(data).startDate),
+      {
+        message:
+          'La fermeture des inscriptions doit être avant ou égale à la date de début.',
+        path: ['registrationClose'],
+      },
+    )
+    .refine(
+      data =>
+        d(data).registrationType === RegistrationType.FREE
+          ? d(data).entryFeeAmount === null
+          : d(data).entryFeeAmount !== null,
+      {
+        message: 'Le prix est requis pour un tournoi payant.',
+        path: ['entryFeeAmount'],
+      },
+    )
+    .refine(
+      data =>
+        d(data).registrationType === RegistrationType.FREE
+          ? d(data).refundPolicyType === RefundPolicyType.NONE &&
+            d(data).refundDeadlineDays === null
+          : true,
+      {
+        message:
+          'Les tournois gratuits ne peuvent pas définir de remboursement automatique.',
+        path: ['refundPolicyType'],
+      },
+    )
+    .refine(
+      data =>
+        d(data).refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
+          ? d(data).refundDeadlineDays !== null
+          : d(data).refundDeadlineDays === null,
+      {
+        message:
+          'Le délai de remboursement est requis uniquement pour une politique avec délai.',
+        path: ['refundDeadlineDays'],
+      },
+    )
+    .refine(
+      data =>
+        d(data).toornamentStages.length === 0 ||
+        (d(data).toornamentId !== undefined &&
+          d(data).toornamentId?.trim() !== ''),
+      {
+        message:
+          "L'ID Toornament est requis lorsque des stages sont configurés.",
+        path: ['toornamentId'],
+      },
+    )
+}
+
+/** Internal base object schema (used for type inference in refinements). */
+const tournamentBaseSchema = z.object(baseTournamentFields)
+
 /** Schema for creating a tournament. */
-export const tournamentSchema = z
-  .object(baseTournamentFields)
-  .refine(data => new Date(data.endDate) > new Date(data.startDate), {
-    message: 'La date de fin doit être après la date de début.',
-    path: ['endDate'],
-  })
-  .refine(
-    data => new Date(data.registrationClose) > new Date(data.registrationOpen),
-    {
-      message: "La fermeture des inscriptions doit être après l'ouverture.",
-      path: ['registrationClose'],
-    },
-  )
-  .refine(
-    data => new Date(data.registrationClose) <= new Date(data.startDate),
-    {
-      message:
-        'La fermeture des inscriptions doit être avant ou égale à la date de début.',
-      path: ['registrationClose'],
-    },
-  )
-  .refine(
-    data =>
-      data.registrationType === RegistrationType.FREE
-        ? data.entryFeeAmount === null
-        : data.entryFeeAmount !== null,
-    {
-      message: 'Le prix est requis pour un tournoi payant.',
-      path: ['entryFeeAmount'],
-    },
-  )
-  .refine(
-    data =>
-      data.registrationType === RegistrationType.FREE
-        ? data.refundPolicyType === RefundPolicyType.NONE &&
-          data.refundDeadlineDays === null
-        : true,
-    {
-      message:
-        'Les tournois gratuits ne peuvent pas définir de remboursement automatique.',
-      path: ['refundPolicyType'],
-    },
-  )
-  .refine(
-    data =>
-      data.refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
-        ? data.refundDeadlineDays !== null
-        : data.refundDeadlineDays === null,
-    {
-      message:
-        'Le délai de remboursement est requis uniquement pour une politique avec délai.',
-      path: ['refundDeadlineDays'],
-    },
-  )
-  .refine(
-    data =>
-      data.toornamentStages.length === 0 ||
-      (data.toornamentId !== undefined && data.toornamentId.trim() !== ''),
-    {
-      message: "L'ID Toornament est requis lorsque des stages sont configurés.",
-      path: ['toornamentId'],
-    },
-  )
+export const tournamentSchema = applyTournamentRefinements(tournamentBaseSchema)
 
 /** Schema for deleting a tournament (just the ID). */
 export const deleteTournamentSchema = z.object({
@@ -212,72 +321,12 @@ export const deleteTournamentSchema = z.object({
 })
 
 /** Schema for updating a tournament (includes the ID). */
-export const updateTournamentSchema = z
-  .object({
+export const updateTournamentSchema = applyTournamentRefinements(
+  z.object({
     id: z.uuid('ID de tournoi invalide.'),
     ...baseTournamentFields,
-  })
-  .refine(data => new Date(data.endDate) > new Date(data.startDate), {
-    message: 'La date de fin doit être après la date de début.',
-    path: ['endDate'],
-  })
-  .refine(
-    data => new Date(data.registrationClose) > new Date(data.registrationOpen),
-    {
-      message: "La fermeture des inscriptions doit être après l'ouverture.",
-      path: ['registrationClose'],
-    },
-  )
-  .refine(
-    data => new Date(data.registrationClose) <= new Date(data.startDate),
-    {
-      message:
-        'La fermeture des inscriptions doit être avant ou égale à la date de début.',
-      path: ['registrationClose'],
-    },
-  )
-  .refine(
-    data =>
-      data.registrationType === RegistrationType.FREE
-        ? data.entryFeeAmount === null
-        : data.entryFeeAmount !== null,
-    {
-      message: 'Le prix est requis pour un tournoi payant.',
-      path: ['entryFeeAmount'],
-    },
-  )
-  .refine(
-    data =>
-      data.registrationType === RegistrationType.FREE
-        ? data.refundPolicyType === RefundPolicyType.NONE &&
-          data.refundDeadlineDays === null
-        : true,
-    {
-      message:
-        'Les tournois gratuits ne peuvent pas définir de remboursement automatique.',
-      path: ['refundPolicyType'],
-    },
-  )
-  .refine(
-    data =>
-      data.refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
-        ? data.refundDeadlineDays !== null
-        : data.refundDeadlineDays === null,
-    {
-      message:
-        'Le délai de remboursement est requis uniquement pour une politique avec délai.',
-      path: ['refundDeadlineDays'],
-    },
-  )
-  .refine(
-    data =>
-      data.toornamentStages.length === 0 ||
-      (data.toornamentId !== undefined && data.toornamentId.trim() !== ''),
-    {
-      message: "L'ID Toornament est requis lorsque des stages sont configurés.",
-      path: ['toornamentId'],
-    },
-  )
+  }),
+)
 
 /** Schema for updating a tournament's status. */
 export const updateTournamentStatusSchema = z.object({
@@ -301,20 +350,15 @@ export const updateTournamentStatusSchema = z.object({
 /** Schema for a user registering for a tournament (solo). */
 export const registerForTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  returnPath: z
-    .string()
-    .trim()
-    .min(1, 'Le chemin de retour est requis.')
-    .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
-  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+  returnPath: returnPathSchema,
+  fieldValues: fieldValuesSchema,
 })
 
 /** Schema for a user editing their existing registration field values. */
 export const updateRegistrationFieldsSchema = z.object({
   registrationId: z.uuid("ID d'inscription invalide."),
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+  fieldValues: fieldValuesSchema,
 })
 
 // ---------------------------------------------------------------------------
@@ -324,31 +368,27 @@ export const updateRegistrationFieldsSchema = z.object({
 /** Schema for creating a team and registering as captain. */
 export const createTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  returnPath: z
-    .string()
-    .trim()
-    .min(1, 'Le chemin de retour est requis.')
-    .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
+  returnPath: returnPathSchema,
   teamName: z
     .string()
     .trim()
-    .min(2, "Le nom de l'équipe doit contenir au moins 2 caractères.")
-    .max(30, "Le nom de l'équipe ne peut pas dépasser 30 caractères."),
-  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+    .min(
+      VALIDATION_LIMITS.TEAM_NAME_MIN,
+      `Le nom de l'équipe doit contenir au moins ${VALIDATION_LIMITS.TEAM_NAME_MIN} caractères.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_NAME_MAX,
+      `Le nom de l'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
+    ),
+  fieldValues: fieldValuesSchema,
 })
 
 /** Schema for joining an existing team and registering. */
 export const joinTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
-  returnPath: z
-    .string()
-    .trim()
-    .min(1, 'Le chemin de retour est requis.')
-    .startsWith('/', 'Le chemin de retour doit commencer par /.')
-    .max(500, 'Le chemin de retour est trop long.'),
+  returnPath: returnPathSchema,
   teamId: z.uuid("ID d'équipe invalide."),
-  fieldValues: z.record(z.string(), z.union([z.string(), z.number()])),
+  fieldValues: fieldValuesSchema,
 })
 
 // ---------------------------------------------------------------------------
@@ -358,6 +398,22 @@ export const joinTeamSchema = z.object({
 /** Schema for a player cancelling their own registration. */
 export const unregisterFromTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+})
+
+/** Schema for a captain updating their team name. */
+export const updateTeamNameSchema = z.object({
+  teamId: z.uuid("ID d'équipe invalide."),
+  name: z
+    .string()
+    .trim()
+    .min(
+      VALIDATION_LIMITS.TEAM_NAME_MIN,
+      `Le nom d'équipe doit contenir au moins ${VALIDATION_LIMITS.TEAM_NAME_MIN} caractères.`,
+    )
+    .max(
+      VALIDATION_LIMITS.TEAM_NAME_MAX,
+      `Le nom d'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
+    ),
 })
 
 // ---------------------------------------------------------------------------
@@ -376,3 +432,71 @@ export const dissolveTeamSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
   teamId: z.uuid("ID d'équipe invalide."),
 })
+
+// ---------------------------------------------------------------------------
+// Public tournament list filters (URL search params)
+// ---------------------------------------------------------------------------
+
+/** Sort options for the public tournament list pages. */
+export type TournamentSortOption =
+  | 'date_asc'
+  | 'date_desc'
+  | 'title_asc'
+  | 'title_desc'
+  | 'registrations_desc'
+
+/** All valid values for the sort option — used for runtime type-guarding. */
+export const VALID_SORT_OPTIONS: TournamentSortOption[] = [
+  'date_asc',
+  'date_desc',
+  'title_asc',
+  'title_desc',
+  'registrations_desc',
+] as const
+
+/** Parsed and validated filters for the public tournament list pages. */
+export type PublicTournamentFilters = {
+  search: string
+  format: TournamentFormat | ''
+  type: 'FREE' | 'PAID' | ''
+  sort: TournamentSortOption
+  page: number
+}
+
+/** Parse and validate URL search params for the public tournament list pages.
+ *  Falls back to safe defaults for any invalid/missing value. */
+export const parsePublicTournamentFilters = (
+  params: Record<string, string | string[] | undefined>,
+  defaultSort: TournamentSortOption = 'date_asc',
+): PublicTournamentFilters => {
+  const raw = (key: string) => {
+    const v = params[key]
+    return typeof v === 'string' ? v.trim() : ''
+  }
+
+  const search = raw('search').slice(0, VALIDATION_LIMITS.SEARCH_QUERY_MAX)
+
+  const formatRaw = raw('format')
+  const format: TournamentFormat | '' =
+    formatRaw === TournamentFormat.SOLO || formatRaw === TournamentFormat.TEAM
+      ? formatRaw
+      : ''
+
+  const typeRaw = raw('type')
+  const type: 'FREE' | 'PAID' | '' =
+    typeRaw === RegistrationType.FREE || typeRaw === RegistrationType.PAID
+      ? typeRaw
+      : ''
+
+  const sortRaw = raw('sort')
+  const sort: TournamentSortOption = (
+    VALID_SORT_OPTIONS.includes(sortRaw as TournamentSortOption)
+      ? sortRaw
+      : defaultSort
+  ) as TournamentSortOption
+
+  const pageRaw = Number.parseInt(raw('page'), 10)
+  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? pageRaw : 1
+
+  return { search, format, type, sort, page }
+}

@@ -9,6 +9,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
@@ -109,10 +110,12 @@ vi.mock('@/lib/core/prisma', () => ({
 const {
   adminDeleteRegistration,
   adminUpdateRegistrationFields,
-  adminChangeTeam,
-  adminPromoteCaptain,
   adminRefundRegistration,
 } = await import('@/lib/actions/registrations')
+
+const { adminChangeTeam, adminPromoteCaptain } = await import(
+  '@/lib/actions/registrations-team'
+)
 
 const REG_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 const USER_UUID = 'b1ffc299-9c0b-4ef8-bb6d-6bb9bd380a22'
@@ -192,7 +195,10 @@ describe('registration admin actions', () => {
   it('updates registration field values for admins', async () => {
     mockRegistrationFindUnique.mockResolvedValue({
       id: REG_UUID,
-      tournament: { id: TOURN_UUID },
+      tournament: {
+        id: TOURN_UUID,
+        fields: [{ label: 'Rang', type: 'TEXT', required: false }],
+      },
       user: { name: 'Alice' },
     })
     mockRegistrationUpdate.mockResolvedValue({})
@@ -212,6 +218,7 @@ describe('registration admin actions', () => {
     mockRegistrationFindUnique.mockResolvedValue({
       id: REG_UUID,
       userId: USER_UUID,
+      status: RegistrationStatus.CONFIRMED,
       tournament: { id: TOURN_UUID, format: TournamentFormat.TEAM },
       user: { name: 'Alice' },
     })

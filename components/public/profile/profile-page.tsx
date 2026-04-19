@@ -1,20 +1,34 @@
 /**
  * File: components/public/profile/profile-page.tsx
- * Description: Server Component displaying user profile information and active inscriptions.
+ * Description: Server Component displaying user profile information, active tournaments, and registration tabs.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Calendar, Lock, Mail, Shield, Trophy, User } from 'lucide-react'
+import {
+  Calendar,
+  Lock,
+  Mail,
+  Shield,
+  Swords,
+  Trophy,
+  User,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { ProfileActiveTournaments } from '@/components/public/profile/profile-active-tournaments'
 import { ProfileEditForm } from '@/components/public/profile/profile-edit-form'
 import { ProfileRegistrations } from '@/components/public/profile/profile-registrations'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
-import { getUserRegistrations } from '@/lib/services/tournaments'
+import {
+  getUserActiveTournaments,
+  getUserPastRegistrations,
+  getUserRegistrations,
+} from '@/lib/services/tournaments'
 import { getUserProfile } from '@/lib/services/users'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
@@ -40,10 +54,13 @@ export const ProfilePage = async () => {
     redirect(ROUTES.LOGIN)
   }
 
-  const [dbUser, registrations] = await Promise.all([
-    getUserProfile(session.user.id),
-    getUserRegistrations(session.user.id),
-  ])
+  const [dbUser, registrations, pastRegistrations, activeTournaments] =
+    await Promise.all([
+      getUserProfile(session.user.id),
+      getUserRegistrations(session.user.id),
+      getUserPastRegistrations(session.user.id),
+      getUserActiveTournaments(session.user.id),
+    ])
 
   if (!dbUser) {
     redirect(ROUTES.LOGIN)
@@ -146,7 +163,30 @@ export const ProfilePage = async () => {
         </div>
       </div>
 
-      {/* Card 2: Mes inscriptions */}
+      {/* Card 2: Mes tournois actifs */}
+      {activeTournaments.length > 0 && (
+        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
+          <div className="relative z-10">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
+                <Swords className="size-5 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  Mes tournois actifs
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  {activeTournaments.length} tournoi
+                  {activeTournaments.length > 1 ? 's' : ''} en cours
+                </p>
+              </div>
+            </div>
+            <ProfileActiveTournaments tournaments={activeTournaments} />
+          </div>
+        </div>
+      )}
+
+      {/* Card 3: Mes inscriptions (tabs En cours / Historique) */}
       <div
         id="inscriptions"
         className="relative scroll-mt-32 overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8"
@@ -159,28 +199,75 @@ export const ProfilePage = async () => {
             <div>
               <h3 className="text-lg font-bold text-white">Mes inscriptions</h3>
               <p className="text-xs text-zinc-500">
-                {registrations.length > 0
-                  ? `${registrations.length} tournoi${registrations.length > 1 ? 's' : ''} en cours`
-                  : 'Aucune inscription active'}
+                {registrations.length + pastRegistrations.length > 0
+                  ? `${registrations.length} en cours, ${pastRegistrations.length} terminée${pastRegistrations.length > 1 ? 's' : ''}`
+                  : 'Aucune inscription'}
               </p>
             </div>
           </div>
 
-          {registrations.length > 0 ? (
-            <ProfileRegistrations registrations={registrations} />
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-4 text-center">
-              <p className="max-w-sm text-sm text-zinc-500">
-                Vous n'êtes inscrit à aucun tournoi pour le moment.
-              </p>
-              <Link
-                href={ROUTES.TOURNAMENTS}
-                className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/10"
+          <Tabs defaultValue="current" className="space-y-4">
+            <TabsList className="w-full rounded-xl bg-white/5 p-1">
+              <TabsTrigger
+                value="current"
+                className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
               >
-                Voir les tournois
-              </Link>
-            </div>
-          )}
+                En cours
+                {registrations.length > 0 && (
+                  <span className="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px]">
+                    {registrations.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger
+                value="history"
+                className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400"
+              >
+                Historique
+                {pastRegistrations.length > 0 && (
+                  <span className="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px]">
+                    {pastRegistrations.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="current">
+              {registrations.length > 0 ? (
+                <ProfileRegistrations
+                  registrations={registrations}
+                  userId={session.user.id}
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-4 text-center">
+                  <p className="max-w-sm text-sm text-zinc-500">
+                    Vous n'êtes inscrit à aucun tournoi pour le moment.
+                  </p>
+                  <Link
+                    href={ROUTES.TOURNAMENTS}
+                    className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/10"
+                  >
+                    Voir les tournois
+                  </Link>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history">
+              {pastRegistrations.length > 0 ? (
+                <ProfileRegistrations
+                  registrations={pastRegistrations}
+                  userId={session.user.id}
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-4 text-center">
+                  <p className="max-w-sm text-sm text-zinc-500">
+                    Aucun historique de tournoi pour le moment.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

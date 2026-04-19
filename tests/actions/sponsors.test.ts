@@ -312,7 +312,10 @@ describe('deleteSponsor', () => {
 
     const result = await deleteSponsor({ id: VALID_UUID })
 
-    expect(result).toEqual({ success: false, message: 'Record not found.' })
+    expect(result).toEqual({
+      success: false,
+      message: 'Enregistrement introuvable.',
+    })
   })
 })
 

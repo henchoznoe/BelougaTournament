@@ -8,7 +8,7 @@
 
 import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
-import { TournamentsList } from '@/components/admin/lists/tournaments-list'
+import { TournamentsList } from '@/components/admin/tournaments/tournaments-list'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getTournaments } from '@/lib/services/tournaments'
 

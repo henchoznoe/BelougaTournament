@@ -26,9 +26,10 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
-import { Markdown } from '@/components/ui/markdown'
+import { RichText } from '@/components/ui/rich-text'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import type {
@@ -37,7 +38,11 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate, formatDateTime } from '@/lib/utils/formatting'
+import {
+  formatCentimes,
+  formatDate,
+  formatDateTime,
+} from '@/lib/utils/formatting'
 import {
   TournamentFormat,
   TournamentStatus,
@@ -117,6 +122,7 @@ export const TournamentDetail = ({
 }: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const twitchChannel = tournament.streamUrl
     ? extractTwitchChannel(tournament.streamUrl)
@@ -124,7 +130,7 @@ export const TournamentDetail = ({
 
   const entryFee =
     tournament.entryFeeAmount && tournament.entryFeeCurrency
-      ? `${(tournament.entryFeeAmount / 100).toFixed(2)} ${tournament.entryFeeCurrency}`
+      ? formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)
       : null
 
   return (
@@ -141,10 +147,10 @@ export const TournamentDetail = ({
       {/* ===== HERO SECTION ===== */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5">
         {/* Background image or gradient */}
-        {tournament.imageUrl ? (
+        {tournament.imageUrls.length > 0 ? (
           <div className="relative h-56 sm:h-72 md:h-80">
             <Image
-              src={tournament.imageUrl}
+              src={tournament.imageUrls[activeImageIndex]}
               alt={tournament.title}
               fill
               className="object-cover"
@@ -178,10 +184,10 @@ export const TournamentDetail = ({
               />
               {registrationStatus.label}
             </span>
-            {tournament.game && (
+            {tournament.games.length > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300">
                 <Gamepad2 className="size-3" />
-                {tournament.game}
+                {tournament.games.join(', ')}
               </span>
             )}
           </div>
@@ -215,19 +221,51 @@ export const TournamentDetail = ({
                 }
               />
             ) : (
-              <QuickBadge
-                icon={Users}
-                text={
-                  tournament.maxTeams
-                    ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
-                    : `${tournament._count.teams} équipes`
-                }
-              />
+              <>
+                <QuickBadge
+                  icon={Users}
+                  text={
+                    tournament.maxTeams
+                      ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
+                      : `${tournament._count.teams} équipes`
+                  }
+                />
+                <QuickBadge
+                  icon={Users}
+                  text={`${tournament._count.registrations} joueurs`}
+                />
+              </>
             )}
             {entryFee && <QuickBadge icon={Coins} text={entryFee} />}
           </div>
         </div>
       </div>
+
+      {/* ===== IMAGE GALLERY THUMBNAILS ===== */}
+      {tournament.imageUrls.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {tournament.imageUrls.map((url, index) => (
+            <button
+              key={url}
+              type="button"
+              onClick={() => setActiveImageIndex(index)}
+              className={cn(
+                'relative size-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200',
+                index === activeImageIndex
+                  ? 'border-blue-500 ring-1 ring-blue-500/30'
+                  : 'border-white/10 opacity-60 hover:opacity-100',
+              )}
+            >
+              <Image
+                src={url}
+                alt={`${tournament.title} ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ===== STATS GRID ===== */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -280,7 +318,7 @@ export const TournamentDetail = ({
             <h3 className="font-paladins text-lg tracking-wider text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
               Récompenses
             </h3>
-            <Markdown
+            <RichText
               content={tournament.prize}
               className="prose-p:text-amber-200/80 prose-strong:text-amber-200"
             />
@@ -320,14 +358,14 @@ export const TournamentDetail = ({
             {/* Description */}
             {tournament.description && (
               <ContentCard icon={ScrollText} title="Description">
-                <Markdown content={tournament.description} />
+                <RichText content={tournament.description} />
               </ContentCard>
             )}
 
             {/* Rules */}
             {tournament.rules && (
               <ContentCard icon={Shield} title="Règlement">
-                <Markdown content={tournament.rules} />
+                <RichText content={tournament.rules} />
               </ContentCard>
             )}
 
@@ -361,6 +399,65 @@ export const TournamentDetail = ({
                 </p>
               </div>
             )}
+
+            {/* Registration */}
+            <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
+              <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
+
+              <div className="relative z-10 space-y-4">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                  <Clock className="size-4 text-blue-400" />
+                  Inscription
+                </h3>
+
+                {registrationOpen ? (
+                  <>
+                    <p className="text-center text-sm text-zinc-400">
+                      Les inscriptions sont ouvertes jusqu&apos;au{' '}
+                      <span className="font-medium text-zinc-300">
+                        {formatDateTime(tournament.registrationClose)}
+                      </span>
+                      .
+                    </p>
+                    <TournamentRegistrationForm
+                      tournamentId={tournament.id}
+                      fields={tournament.fields}
+                      format={tournament.format}
+                      teamSize={tournament.teamSize}
+                      availableTeams={availableTeams}
+                      tournament={tournament}
+                      registrationState={registrationState}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 py-4 text-center">
+                    {tournament.status === TournamentStatus.ARCHIVED ? (
+                      <p className="text-sm text-zinc-500">
+                        Ce tournoi est terminé.
+                      </p>
+                    ) : new Date() < new Date(tournament.registrationOpen) ? (
+                      <p className="text-sm text-zinc-500">
+                        Les inscriptions ouvriront le{' '}
+                        <span className="font-medium text-zinc-400">
+                          {formatDateTime(tournament.registrationOpen)}
+                        </span>
+                        .
+                      </p>
+                    ) : (
+                      <p className="text-sm text-zinc-500">
+                        Les inscriptions sont fermées depuis le{' '}
+                        <span className="font-medium text-zinc-400">
+                          {formatDateTime(tournament.registrationClose)}
+                        </span>
+                        .
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
@@ -449,63 +546,6 @@ export const TournamentDetail = ({
           </ContentCard>
         </TabsContent>
       </Tabs>
-
-      {/* ===== REGISTRATION SECTION ===== */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
-
-        <div className="relative z-10 space-y-4">
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-            <Clock className="size-4 text-blue-400" />
-            Inscription
-          </h3>
-
-          {registrationOpen ? (
-            <>
-              <p className="text-center text-sm text-zinc-400">
-                Les inscriptions sont ouvertes jusqu&apos;au{' '}
-                <span className="font-medium text-zinc-300">
-                  {formatDate(tournament.registrationClose)}
-                </span>
-                .
-              </p>
-              <TournamentRegistrationForm
-                tournamentId={tournament.id}
-                fields={tournament.fields}
-                format={tournament.format}
-                teamSize={tournament.teamSize}
-                availableTeams={availableTeams}
-                tournament={tournament}
-                registrationState={registrationState}
-                isAuthenticated={isAuthenticated}
-              />
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-4 text-center">
-              {tournament.status === TournamentStatus.ARCHIVED ? (
-                <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
-              ) : new Date() < new Date(tournament.registrationOpen) ? (
-                <p className="text-sm text-zinc-500">
-                  Les inscriptions ouvriront le{' '}
-                  <span className="font-medium text-zinc-400">
-                    {formatDate(tournament.registrationOpen)}
-                  </span>
-                  .
-                </p>
-              ) : (
-                <p className="text-sm text-zinc-500">
-                  Les inscriptions sont fermées depuis le{' '}
-                  <span className="font-medium text-zinc-400">
-                    {formatDate(tournament.registrationClose)}
-                  </span>
-                  .
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

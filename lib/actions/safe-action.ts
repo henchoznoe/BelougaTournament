@@ -20,22 +20,22 @@ type ActionHandler<TInput, TOutput> = (
   session: AuthSession,
 ) => Promise<ActionState<TOutput>>
 
-type ActionOptions<T extends z.ZodType> = {
+type ActionOptions<T extends z.ZodType, TOutput = unknown> = {
   schema: T
   role?: Role | Role[]
-  handler: ActionHandler<z.infer<T>, unknown>
+  handler: ActionHandler<z.infer<T>, TOutput>
 }
 
 /**
  * Wraps a server action with authentication, role checking, input validation,
  * structured logging, and error capturing.
  */
-export function authenticatedAction<T extends z.ZodType>({
+export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
   schema,
   role,
   handler,
-}: ActionOptions<T>) {
-  return async (data: z.infer<T>): Promise<ActionState> => {
+}: ActionOptions<T, TOutput>) {
+  return async (data: z.infer<T>): Promise<ActionState<TOutput>> => {
     try {
       // 1. Authentication Check
       const session = await auth.api.getSession({
@@ -61,6 +61,8 @@ export function authenticatedAction<T extends z.ZodType>({
       if (!validatedFields.success) {
         return {
           success: false,
+          // Zod's flatten().fieldErrors is typed as Partial<Record<string, string[]>>;
+          // cast to non-partial Record since we only use it for display, not exhaustive access
           errors: validatedFields.error.flatten().fieldErrors as Record<
             string,
             string[]
@@ -70,12 +72,14 @@ export function authenticatedAction<T extends z.ZodType>({
       }
 
       // 4. Execute Handler
+      // BetterAuth returns a generic session shape; cast to our typed AuthSession
       return await handler(validatedFields.data, session as AuthSession)
     } catch (error) {
       const prismaResult = handlePrismaError(error)
       if (prismaResult) {
         logger.warn({ error }, 'Prisma error in server action')
-        return prismaResult
+        // handlePrismaError returns ActionState without the TOutput generic; safe to cast
+        return prismaResult as ActionState<TOutput>
       }
 
       logger.error({ error }, 'Unexpected error in server action')

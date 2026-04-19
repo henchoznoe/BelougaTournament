@@ -1,3 +1,10 @@
+/**
+ * File: components/ui/button.tsx
+ * Description: shadcn/ui Button primitive with variant and size support.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 import type * as React from 'react'

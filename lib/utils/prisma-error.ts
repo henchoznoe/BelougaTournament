@@ -7,18 +7,20 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import 'server-only'
 import type { ActionState } from '@/lib/types/actions'
 import { Prisma } from '@/prisma/generated/prisma/client'
 
 /** Known Prisma error codes mapped to user-facing messages. */
 const PRISMA_ERROR_MESSAGES: Record<string, string> = {
-  P2000: 'The provided value is too long.',
-  P2002: 'This value already exists.',
-  P2003: 'A related record could not be found.',
-  P2025: 'Record not found.',
+  P2000: 'La valeur fournie est trop longue.',
+  P2002: 'Cette valeur existe déjà.',
+  P2003: 'Un enregistrement lié est introuvable.',
+  P2025: 'Enregistrement introuvable.',
 }
 
-const GENERIC_ERROR_MESSAGE = 'An unexpected error occurred. Please try again.'
+const GENERIC_ERROR_MESSAGE =
+  'Une erreur inattendue est survenue. Veuillez réessayer.'
 
 /**
  * Converts a Prisma error into a typed ActionState failure.

@@ -137,8 +137,8 @@ model Tournament {
   maxTeams          Int?
   format            TournamentFormat
   teamSize          Int                      @default(1)
-  game              String? // e.g. Valorant, Rocket League
-  imageUrl          String? // Tournament banner image
+  games             String[] // e.g. ["Valorant", "Rocket League"] — at least one required
+  imageUrls         String[] // Tournament images (Vercel Blob URLs)
   rules             String? // Full tournament ruleset
   prize             String? // Cash prize or rewards
   registrationType  RegistrationType         @default(FREE)
@@ -148,6 +148,7 @@ model Tournament {
   refundDeadlineDays Int?
   toornamentId      String?
   streamUrl         String? // Optional per-tournament stream URL override
+  teamLogoEnabled   Boolean                  @default(false)
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
@@ -183,6 +184,7 @@ model TournamentField {
 model Team {
   id           String                  @id @default(uuid())
   name         String
+  logoUrl      String?
   tournamentId String
   tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   captainId    String

@@ -40,6 +40,16 @@ const getRequiredRole = (pathname: string): Role => {
   return match ? match[1] : Role.ADMIN
 }
 
+/**
+ * Roles that satisfy a given minimum role requirement.
+ * Any role listed here (or higher) is considered authorized.
+ * Currently only ADMIN exists; extend this map when new privileged roles are added.
+ */
+const ROLE_ALLOWLIST: Record<Role, Set<Role>> = {
+  [Role.ADMIN]: new Set([Role.ADMIN]),
+  [Role.USER]: new Set([Role.USER]),
+} as const
+
 export const proxy = async (request: NextRequest) => {
   const session = await fetchSession(request)
 
@@ -47,12 +57,9 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (session.user.role !== Role.ADMIN) {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
-  }
-
   const requiredRole = getRequiredRole(request.nextUrl.pathname)
-  if (session.user.role !== requiredRole) {
+  const allowedRoles = ROLE_ALLOWLIST[requiredRole] ?? new Set([requiredRole])
+  if (!allowedRoles.has(session.user.role as Role)) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
