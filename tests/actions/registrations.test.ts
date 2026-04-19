@@ -110,10 +110,12 @@ vi.mock('@/lib/core/prisma', () => ({
 const {
   adminDeleteRegistration,
   adminUpdateRegistrationFields,
-  adminChangeTeam,
-  adminPromoteCaptain,
   adminRefundRegistration,
 } = await import('@/lib/actions/registrations')
+
+const { adminChangeTeam, adminPromoteCaptain } = await import(
+  '@/lib/actions/registrations-team'
+)
 
 const REG_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 const USER_UUID = 'b1ffc299-9c0b-4ef8-bb6d-6bb9bd380a22'

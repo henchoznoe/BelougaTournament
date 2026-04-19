@@ -13,7 +13,7 @@ import {
   SponsorDetail,
   SponsorDetailActions,
   SponsorStatusBadge,
-} from '@/components/admin/detail/sponsor-detail'
+} from '@/components/admin/sponsors/sponsor-detail'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getSponsorById } from '@/lib/services/sponsors'

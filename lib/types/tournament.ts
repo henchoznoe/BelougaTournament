@@ -16,6 +16,64 @@ import type {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
+// ---------------------------------------------------------------------------
+// Shared building blocks
+// ---------------------------------------------------------------------------
+
+/** Minimal user info reused across registration, team member, and captain types. */
+export type UserSummary = {
+  id: string
+  name: string
+  displayName: string
+  image: string | null
+}
+
+/** Registration + team aggregate counts attached to tournaments. */
+type TournamentCounts = {
+  _count: {
+    registrations: number
+    teams: number
+  }
+}
+
+/** Core tournament fields shared between admin and public list items. */
+type TournamentListBase = {
+  id: string
+  title: string
+  slug: string
+  game: string | null
+  format: TournamentFormat
+  teamSize: number
+  maxTeams: number | null
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  entryFeeCurrency: string | null
+  status: TournamentStatus
+  startDate: Date
+  endDate: Date
+  registrationOpen: Date
+  registrationClose: Date
+} & TournamentCounts
+
+/** Core tournament fields shared between admin and public detail types. */
+type TournamentDetailBase = TournamentListBase & {
+  description: string
+  imageUrls: string[]
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
+  teamLogoEnabled: boolean
+  rules: string | null
+  prize: string | null
+  toornamentId: string | null
+  streamUrl: string | null
+  fields: TournamentFieldItem[]
+  toornamentStages: ToornamentStageItem[]
+}
+
+// ---------------------------------------------------------------------------
+// User registration state
+// ---------------------------------------------------------------------------
+
 export type UserTournamentRegistrationState = {
   id: string
   status: RegistrationStatus
@@ -60,63 +118,17 @@ export type UserRegistrationItem = {
   } | null
 }
 
+// ---------------------------------------------------------------------------
+// Admin types
+// ---------------------------------------------------------------------------
+
 /** Tournament as displayed in the admin list table. */
-export type TournamentListItem = {
-  id: string
-  title: string
-  slug: string
-  game: string | null
-  format: TournamentFormat
-  teamSize: number
-  maxTeams: number | null
-  registrationType: RegistrationType
-  entryFeeAmount: number | null
-  entryFeeCurrency: string | null
-  status: TournamentStatus
-  startDate: Date
-  endDate: Date
-  registrationOpen: Date
-  registrationClose: Date
-  _count: {
-    registrations: number
-    teams: number
-  }
-}
+export type TournamentListItem = TournamentListBase
 
 /** Full tournament detail for admin edit page. */
-export type TournamentDetail = {
-  id: string
-  title: string
-  slug: string
-  description: string
-  startDate: Date
-  endDate: Date
-  registrationOpen: Date
-  registrationClose: Date
-  maxTeams: number | null
-  registrationType: RegistrationType
-  entryFeeAmount: number | null
-  entryFeeCurrency: string | null
-  refundPolicyType: RefundPolicyType
-  refundDeadlineDays: number | null
-  format: TournamentFormat
-  teamSize: number
-  game: string | null
-  imageUrls: string[]
-  rules: string | null
-  prize: string | null
-  toornamentId: string | null
-  streamUrl: string | null
-  teamLogoEnabled: boolean
-  status: TournamentStatus
+export type TournamentDetail = TournamentDetailBase & {
   createdAt: Date
   updatedAt: Date
-  fields: TournamentFieldItem[]
-  toornamentStages: ToornamentStageItem[]
-  _count: {
-    registrations: number
-    teams: number
-  }
 }
 
 /** A single dynamic field definition attached to a tournament. */
@@ -129,7 +141,7 @@ export type TournamentFieldItem = {
 }
 
 /** A Toornament stage linked to a tournament. */
-export type ToornamentStageItem = {
+type ToornamentStageItem = {
   id: string
   name: string
   stageId: string
@@ -143,12 +155,7 @@ export type TournamentRegistrationItem = {
   createdAt: Date
   status: RegistrationStatus
   paymentStatus: PaymentStatus
-  user: {
-    id: string
-    name: string
-    displayName: string
-    image: string | null
-  }
+  user: UserSummary
   team: {
     id: string
     name: string
@@ -162,12 +169,7 @@ export type TournamentRegistrationItem = {
 export type TeamMemberItem = {
   id: string
   joinedAt: Date
-  user: {
-    id: string
-    name: string
-    displayName: string
-    image: string | null
-  }
+  user: UserSummary
 }
 
 /** Team row for the admin teams table. */
@@ -177,12 +179,7 @@ export type TeamItem = {
   logoUrl: string | null
   isFull: boolean
   createdAt: Date
-  captain: {
-    id: string
-    name: string
-    displayName: string
-    image: string | null
-  }
+  captain: UserSummary
   members: TeamMemberItem[]
 }
 
@@ -191,63 +188,13 @@ export type TeamItem = {
 // ---------------------------------------------------------------------------
 
 /** Tournament card for the public list pages (published & archived). */
-export type PublicTournamentListItem = {
-  id: string
-  title: string
-  slug: string
+export type PublicTournamentListItem = TournamentListBase & {
   description: string
-  game: string | null
   imageUrls: string[]
-  format: TournamentFormat
-  teamSize: number
-  maxTeams: number | null
-  registrationType: RegistrationType
-  entryFeeAmount: number | null
-  entryFeeCurrency: string | null
-  status: TournamentStatus
-  startDate: Date
-  endDate: Date
-  registrationOpen: Date
-  registrationClose: Date
-  _count: {
-    registrations: number
-    teams: number
-  }
 }
 
 /** Full tournament detail for the public detail page. */
-export type PublicTournamentDetail = {
-  id: string
-  title: string
-  slug: string
-  description: string
-  game: string | null
-  imageUrls: string[]
-  format: TournamentFormat
-  teamSize: number
-  maxTeams: number | null
-  registrationType: RegistrationType
-  entryFeeAmount: number | null
-  entryFeeCurrency: string | null
-  refundPolicyType: RefundPolicyType
-  refundDeadlineDays: number | null
-  teamLogoEnabled: boolean
-  status: TournamentStatus
-  startDate: Date
-  endDate: Date
-  registrationOpen: Date
-  registrationClose: Date
-  rules: string | null
-  prize: string | null
-  toornamentId: string | null
-  streamUrl: string | null
-  fields: TournamentFieldItem[]
-  toornamentStages: ToornamentStageItem[]
-  _count: {
-    registrations: number
-    teams: number
-  }
-}
+export type PublicTournamentDetail = TournamentDetailBase
 
 /** Dynamic badge state displayed in the landing page hero. */
 export type HeroTournamentBadgeVariant = 'idle' | 'upcoming' | 'live'

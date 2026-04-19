@@ -8,7 +8,7 @@
 
 import { Settings } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SettingsForm } from '@/components/admin/forms/settings-form'
+import { SettingsForm } from '@/components/admin/settings/settings-form'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { getGlobalSettings } from '@/lib/services/settings'
 

@@ -8,7 +8,7 @@
 
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
-import { TournamentForm } from '@/components/admin/forms/tournament-form'
+import { TournamentForm } from '@/components/admin/tournaments/form/tournament-form'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 

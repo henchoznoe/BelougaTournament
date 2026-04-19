@@ -10,15 +10,15 @@ import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { TournamentOverview } from '@/components/admin/detail/tournament-detail'
+import { TournamentOverview } from '@/components/admin/tournaments/tournament-detail'
 import {
   TournamentDetailActions,
   TournamentStatusBadge,
-} from '@/components/admin/detail/tournament-detail-actions'
-import { TournamentRegistrations } from '@/components/admin/detail/tournament-registrations'
-import type { TournamentTab } from '@/components/admin/detail/tournament-tabs'
-import { TournamentTabNav } from '@/components/admin/detail/tournament-tabs'
-import { TournamentTeams } from '@/components/admin/detail/tournament-teams'
+} from '@/components/admin/tournaments/tournament-detail-actions'
+import { TournamentRegistrations } from '@/components/admin/tournaments/tournament-registrations'
+import type { TournamentTab } from '@/components/admin/tournaments/tournament-tabs'
+import { TournamentTabNav } from '@/components/admin/tournaments/tournament-tabs'
+import { TournamentTeams } from '@/components/admin/tournaments/tournament-teams'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import {

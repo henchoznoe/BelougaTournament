@@ -151,10 +151,14 @@ app/
 
 components/
 ├── admin/                # Admin domain components
-│   ├── dashboard/        # Dashboard panels (stats, recent)
-│   ├── forms/            # Admin forms (logo-picker, settings, sponsor)
-│   ├── lists/            # Admin lists (sponsors, tournaments, users)
-│   └── ui/               # Admin UI (shell, sidebar, topbar, breadcrumb, dropdowns, badges)
+│   ├── dashboard/        # Dashboard panels (stats, recent, payments)
+│   ├── hooks/            # Shared admin hooks (useListSort)
+│   ├── tournaments/      # Tournament domain (detail, registrations, teams, list, dropdown, badge)
+│   │   └── form/         # Tournament form tabs (general, game, dates, entry, content, fields, stages, images)
+│   ├── users/            # User domain (detail, list, dropdown)
+│   ├── sponsors/         # Sponsor domain (detail, form, list, dropdown)
+│   ├── settings/         # Settings domain (settings-form, logo-picker)
+│   └── ui/               # Admin shell (shell, sidebar, topbar, breadcrumb, content-layout, skeleton)
 ├── public/               # Public domain components
 │   ├── auth/             # AdminGuard, LoginScreen, SocialLogin
 │   ├── contact/          # ContactBento

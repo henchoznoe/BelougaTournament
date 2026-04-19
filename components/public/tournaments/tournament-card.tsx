@@ -6,6 +6,8 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+'use client'
+
 import { Calendar, Gamepad2, Swords, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'

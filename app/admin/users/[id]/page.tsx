@@ -9,12 +9,12 @@
 import { Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { UserDetail } from '@/components/admin/detail/user-detail'
+import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
+import { UserDetail } from '@/components/admin/users/user-detail'
 import {
   UserDetailActions,
   UserRoleBadge,
-} from '@/components/admin/detail/user-detail-actions'
-import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
+} from '@/components/admin/users/user-detail-actions'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUserById } from '@/lib/services/users'
