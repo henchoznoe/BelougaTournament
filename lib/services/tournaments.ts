@@ -22,6 +22,7 @@ import type {
   TournamentDetail,
   TournamentListItem,
   TournamentRegistrationItem,
+  UserActiveTournament,
   UserRegistrationItem,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
@@ -597,6 +598,42 @@ export const getUserPastRegistrations = async (
     return rows as unknown as UserRegistrationItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching user past registrations')
+    return []
+  }
+}
+
+/** Fetches tournaments where the user has a CONFIRMED registration and the tournament is still PUBLISHED. */
+export const getUserActiveTournaments = async (
+  userId: string,
+): Promise<UserActiveTournament[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  try {
+    const rows = await prisma.tournament.findMany({
+      where: {
+        status: TournamentStatus.PUBLISHED,
+        registrations: {
+          some: {
+            userId,
+            status: RegistrationStatus.CONFIRMED,
+          },
+        },
+      },
+      orderBy: { startDate: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        game: true,
+        startDate: true,
+        imageUrls: true,
+      },
+    })
+    return rows as UserActiveTournament[]
+  } catch (error) {
+    logger.error({ error }, 'Error fetching user active tournaments')
     return []
   }
 }

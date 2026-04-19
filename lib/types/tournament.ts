@@ -264,3 +264,12 @@ export type AvailableTeam = {
     members: number
   }
 }
+
+export type UserActiveTournament = {
+  id: string
+  title: string
+  slug: string
+  game: string | null
+  startDate: Date
+  imageUrls: string[]
+}

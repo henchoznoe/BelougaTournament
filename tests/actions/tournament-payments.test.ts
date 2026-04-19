@@ -61,6 +61,7 @@ vi.mock('@/lib/core/stripe', () => ({
 const mockUserFindUnique = vi.fn()
 const mockTournamentFindUnique = vi.fn()
 const mockRegistrationFindUnique = vi.fn()
+const mockRegistrationFindFirst = vi.fn()
 const mockRegistrationCount = vi.fn()
 const mockRegistrationCreate = vi.fn()
 const mockRegistrationUpdate = vi.fn()
@@ -84,6 +85,7 @@ vi.mock('@/lib/core/prisma', () => ({
     },
     tournamentRegistration: {
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
+      findFirst: (...args: unknown[]) => mockRegistrationFindFirst(...args),
       count: (...args: unknown[]) => mockRegistrationCount(...args),
       create: (...args: unknown[]) => mockRegistrationCreate(...args),
       update: (...args: unknown[]) => mockRegistrationUpdate(...args),
@@ -134,6 +136,8 @@ describe('paid tournament registration actions', () => {
       title: 'PUBG Duo Cup',
       status: TournamentStatus.PUBLISHED,
       format: TournamentFormat.SOLO,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
       registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
       registrationClose: new Date('2026-05-01T00:00:00.000Z'),
       maxTeams: null,
@@ -146,6 +150,7 @@ describe('paid tournament registration actions', () => {
       fields: [],
     })
     mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationFindFirst.mockResolvedValue(null)
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-1' })
     mockPaymentCreate.mockResolvedValue({ id: 'pay-1' })
@@ -237,6 +242,8 @@ describe('createTeamAndRegister — TEAM free tournament', () => {
       title: 'Team Cup',
       status: TournamentStatus.PUBLISHED,
       format: TournamentFormat.TEAM,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
       registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
       registrationClose: new Date('2026-05-01T00:00:00.000Z'),
       maxTeams: null,
@@ -250,6 +257,7 @@ describe('createTeamAndRegister — TEAM free tournament', () => {
     })
 
     mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationFindFirst.mockResolvedValue(null)
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-team-1' })
     mockTeamCreate.mockResolvedValue({
@@ -340,6 +348,8 @@ describe('joinTeamAndRegister — team full rejection', () => {
       title: 'Team Cup',
       status: TournamentStatus.PUBLISHED,
       format: TournamentFormat.TEAM,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
       registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
       registrationClose: new Date('2026-05-01T00:00:00.000Z'),
       maxTeams: null,
@@ -353,6 +363,7 @@ describe('joinTeamAndRegister — team full rejection', () => {
     })
 
     mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationFindFirst.mockResolvedValue(null)
     mockRegistrationCount.mockResolvedValue(0)
 
     // Team exists and belongs to the tournament (outer check passes)
@@ -442,6 +453,8 @@ describe('paid tournament registration — Stripe failure rollback', () => {
       title: 'PUBG Duo Cup',
       status: TournamentStatus.PUBLISHED,
       format: TournamentFormat.SOLO,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
       registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
       registrationClose: new Date('2026-05-01T00:00:00.000Z'),
       maxTeams: null,
@@ -455,6 +468,7 @@ describe('paid tournament registration — Stripe failure rollback', () => {
     })
 
     mockRegistrationFindUnique.mockResolvedValue(null)
+    mockRegistrationFindFirst.mockResolvedValue(null)
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-1' })
     mockPaymentCreate.mockResolvedValue({ id: 'pay-1' })

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
 import { Markdown } from '@/components/ui/markdown'
@@ -117,6 +118,7 @@ export const TournamentDetail = ({
 }: TournamentDetailProps) => {
   const registrationStatus = getRegistrationStatus(tournament)
   const registrationOpen = isRegistrationOpen(tournament)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const twitchChannel = tournament.streamUrl
     ? extractTwitchChannel(tournament.streamUrl)
@@ -144,7 +146,7 @@ export const TournamentDetail = ({
         {tournament.imageUrls.length > 0 ? (
           <div className="relative h-56 sm:h-72 md:h-80">
             <Image
-              src={tournament.imageUrls[0]}
+              src={tournament.imageUrls[activeImageIndex]}
               alt={tournament.title}
               fill
               className="object-cover"
@@ -228,6 +230,32 @@ export const TournamentDetail = ({
           </div>
         </div>
       </div>
+
+      {/* ===== IMAGE GALLERY THUMBNAILS ===== */}
+      {tournament.imageUrls.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {tournament.imageUrls.map((url, index) => (
+            <button
+              key={url}
+              type="button"
+              onClick={() => setActiveImageIndex(index)}
+              className={cn(
+                'relative size-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200',
+                index === activeImageIndex
+                  ? 'border-blue-500 ring-1 ring-blue-500/30'
+                  : 'border-white/10 opacity-60 hover:opacity-100',
+              )}
+            >
+              <Image
+                src={url}
+                alt={`${tournament.title} ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ===== STATS GRID ===== */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -361,6 +389,65 @@ export const TournamentDetail = ({
                 </p>
               </div>
             )}
+
+            {/* Registration */}
+            <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
+              <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
+
+              <div className="relative z-10 space-y-4">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                  <Clock className="size-4 text-blue-400" />
+                  Inscription
+                </h3>
+
+                {registrationOpen ? (
+                  <>
+                    <p className="text-center text-sm text-zinc-400">
+                      Les inscriptions sont ouvertes jusqu&apos;au{' '}
+                      <span className="font-medium text-zinc-300">
+                        {formatDate(tournament.registrationClose)}
+                      </span>
+                      .
+                    </p>
+                    <TournamentRegistrationForm
+                      tournamentId={tournament.id}
+                      fields={tournament.fields}
+                      format={tournament.format}
+                      teamSize={tournament.teamSize}
+                      availableTeams={availableTeams}
+                      tournament={tournament}
+                      registrationState={registrationState}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 py-4 text-center">
+                    {tournament.status === TournamentStatus.ARCHIVED ? (
+                      <p className="text-sm text-zinc-500">
+                        Ce tournoi est terminé.
+                      </p>
+                    ) : new Date() < new Date(tournament.registrationOpen) ? (
+                      <p className="text-sm text-zinc-500">
+                        Les inscriptions ouvriront le{' '}
+                        <span className="font-medium text-zinc-400">
+                          {formatDate(tournament.registrationOpen)}
+                        </span>
+                        .
+                      </p>
+                    ) : (
+                      <p className="text-sm text-zinc-500">
+                        Les inscriptions sont fermées depuis le{' '}
+                        <span className="font-medium text-zinc-400">
+                          {formatDate(tournament.registrationClose)}
+                        </span>
+                        .
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
@@ -449,63 +536,6 @@ export const TournamentDetail = ({
           </ContentCard>
         </TabsContent>
       </Tabs>
-
-      {/* ===== REGISTRATION SECTION ===== */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
-
-        <div className="relative z-10 space-y-4">
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-            <Clock className="size-4 text-blue-400" />
-            Inscription
-          </h3>
-
-          {registrationOpen ? (
-            <>
-              <p className="text-center text-sm text-zinc-400">
-                Les inscriptions sont ouvertes jusqu&apos;au{' '}
-                <span className="font-medium text-zinc-300">
-                  {formatDate(tournament.registrationClose)}
-                </span>
-                .
-              </p>
-              <TournamentRegistrationForm
-                tournamentId={tournament.id}
-                fields={tournament.fields}
-                format={tournament.format}
-                teamSize={tournament.teamSize}
-                availableTeams={availableTeams}
-                tournament={tournament}
-                registrationState={registrationState}
-                isAuthenticated={isAuthenticated}
-              />
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-4 text-center">
-              {tournament.status === TournamentStatus.ARCHIVED ? (
-                <p className="text-sm text-zinc-500">Ce tournoi est terminé.</p>
-              ) : new Date() < new Date(tournament.registrationOpen) ? (
-                <p className="text-sm text-zinc-500">
-                  Les inscriptions ouvriront le{' '}
-                  <span className="font-medium text-zinc-400">
-                    {formatDate(tournament.registrationOpen)}
-                  </span>
-                  .
-                </p>
-              ) : (
-                <p className="text-sm text-zinc-500">
-                  Les inscriptions sont fermées depuis le{' '}
-                  <span className="font-medium text-zinc-400">
-                    {formatDate(tournament.registrationClose)}
-                  </span>
-                  .
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

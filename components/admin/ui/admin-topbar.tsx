@@ -74,7 +74,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-400"
+              className="cursor-pointer text-zinc-400"
               onClick={() => router.push(ROUTES.HOME)}
               aria-label="Retour au site"
             >
@@ -91,7 +91,7 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-400 hover:text-red-400"
+              className="cursor-pointer text-zinc-400 hover:text-red-400"
               onClick={handleLogout}
               aria-label="Se déconnecter"
             >

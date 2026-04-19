@@ -76,6 +76,8 @@ type TournamentWithFields = {
   title: string
   status: TournamentStatus
   format: TournamentFormat
+  startDate: Date
+  endDate: Date
   registrationOpen: Date
   registrationClose: Date
   maxTeams: number | null
@@ -426,6 +428,31 @@ const fetchTournamentForRegistration = async (
       error: {
         success: false,
         message: 'Vous êtes déjà inscrit à ce tournoi.',
+      },
+    }
+  }
+
+  // 4. Check for overlapping tournament registrations
+  const overlapping = await prisma.tournamentRegistration.findFirst({
+    where: {
+      userId,
+      tournamentId: { not: tournamentId },
+      status: {
+        in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+      },
+      tournament: {
+        startDate: { lt: tournament.endDate },
+        endDate: { gt: tournament.startDate },
+      },
+    },
+    select: { tournament: { select: { title: true } } },
+  })
+  if (overlapping) {
+    return {
+      error: {
+        success: false,
+        message:
+          'Vous êtes déjà inscrit à un tournoi qui se déroule pendant la même période.',
       },
     }
   }
