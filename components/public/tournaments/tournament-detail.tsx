@@ -406,7 +406,7 @@ export const TournamentDetail = ({
                     <p className="text-center text-sm text-zinc-400">
                       Les inscriptions sont ouvertes jusqu&apos;au{' '}
                       <span className="font-medium text-zinc-300">
-                        {formatDate(tournament.registrationClose)}
+                        {formatDateTime(tournament.registrationClose)}
                       </span>
                       .
                     </p>
@@ -431,7 +431,7 @@ export const TournamentDetail = ({
                       <p className="text-sm text-zinc-500">
                         Les inscriptions ouvriront le{' '}
                         <span className="font-medium text-zinc-400">
-                          {formatDate(tournament.registrationOpen)}
+                          {formatDateTime(tournament.registrationOpen)}
                         </span>
                         .
                       </p>
@@ -439,7 +439,7 @@ export const TournamentDetail = ({
                       <p className="text-sm text-zinc-500">
                         Les inscriptions sont fermées depuis le{' '}
                         <span className="font-medium text-zinc-400">
-                          {formatDate(tournament.registrationClose)}
+                          {formatDateTime(tournament.registrationClose)}
                         </span>
                         .
                       </p>

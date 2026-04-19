@@ -27,3 +27,19 @@ export const toNullable = (val: string | undefined): string | null =>
 
 /** Converts null to empty string for form default values. */
 export const fromNullable = (val: string | null): string => val ?? ''
+
+/** Strips Markdown syntax to produce plain text suitable for previews. */
+export const stripMarkdown = (text: string): string =>
+  text
+    .replace(/^#{1,6}\s+/gm, '') // headings
+    .replace(/(\*{1,3}|_{1,3})(.*?)\1/g, '$2') // bold/italic
+    .replace(/~~(.*?)~~/g, '$1') // strikethrough
+    .replace(/`{1,3}[^`]*`{1,3}/g, '') // inline/block code
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images
+    .replace(/^[\s]*[-*+]\s+/gm, '') // unordered lists
+    .replace(/^[\s]*\d+\.\s+/gm, '') // ordered lists
+    .replace(/^>\s+/gm, '') // blockquotes
+    .replace(/\n{2,}/g, ' ') // collapse multiple newlines
+    .replace(/\n/g, ' ') // remaining newlines to spaces
+    .trim()

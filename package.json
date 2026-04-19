@@ -39,6 +39,7 @@
     "@prisma/client": "^7.7.0",
     "@prisma/extension-accelerate": "^3.0.1",
     "@radix-ui/react-visually-hidden": "^1.2.4",
+    "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.3.3",
     "@vercel/speed-insights": "^2.0.0",

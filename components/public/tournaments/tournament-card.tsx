@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatDate, stripMarkdown } from '@/lib/utils/formatting'
 import {
   TournamentFormat,
   TournamentStatus,
@@ -115,7 +115,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
           {/* Description */}
           {tournament.description && (
             <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
-              {tournament.description}
+              {stripMarkdown(tournament.description)}
             </p>
           )}
 

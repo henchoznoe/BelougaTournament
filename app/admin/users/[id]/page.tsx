@@ -30,7 +30,7 @@ export const generateMetadata = async ({
   const { id } = await params
   const user = await getUserById(id)
   return {
-    title: user ? (user.displayName ?? user.name) : 'Utilisateur introuvable',
+    title: user ? user.displayName || user.name : 'Utilisateur introuvable',
   }
 }
 
@@ -48,10 +48,10 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
     <AdminContentLayout
       segments={[
         { label: 'Utilisateurs', href: ROUTES.ADMIN_USERS },
-        { label: user.displayName ?? user.name },
+        { label: user.displayName || user.name },
       ]}
       icon={Users}
-      title={user.displayName ?? user.name}
+      title={user.displayName || user.name}
       subtitle={`@${user.name}`}
       titleExtra={<UserRoleBadge user={user} isOwner={viewerIsOwner} />}
       headerRight={<UserDetailActions user={user} isOwner={viewerIsOwner} />}

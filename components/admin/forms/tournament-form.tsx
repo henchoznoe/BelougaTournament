@@ -316,6 +316,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     watch,
     setValue,
     control,
+    reset,
     formState: { errors },
   } = useForm<TournamentInput>({
     resolver: zodResolver(
@@ -519,6 +520,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       if (result.success) {
         toast.success(result.message)
+        reset()
         router.push(
           isEditing
             ? ROUTES.ADMIN_TOURNAMENT_DETAIL(data.slug)
@@ -811,6 +813,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                   {errors.maxTeams.message}
                 </p>
               )}
+              <p className="text-xs text-zinc-500">
+                En solo : nombre de joueurs. En équipe : nombre d&apos;équipes
+                (ex. 4 pour un 5v5 avec 4 équipes).
+              </p>
             </div>
 
             {/* Registration Type */}
@@ -931,6 +937,12 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
                 {errors.refundPolicyType?.message && (
                   <p className="text-xs text-red-400">
                     {errors.refundPolicyType.message}
+                  </p>
+                )}
+                {watchRefundPolicyType === RefundPolicyType.BEFORE_DEADLINE && (
+                  <p className="text-xs text-zinc-500">
+                    Les joueurs peuvent demander un remboursement jusqu&apos;à X
+                    jours avant le début du tournoi.
                   </p>
                 )}
               </div>

@@ -52,7 +52,7 @@ const AdminEditTournamentPage = async ({
       title={`Modifier ${tournament.title}`}
       subtitle="Modifiez les informations du tournoi."
     >
-      <TournamentForm tournament={tournament} />
+      <TournamentForm key={tournament.slug} tournament={tournament} />
     </AdminContentLayout>
   )
 }
