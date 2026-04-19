@@ -10,6 +10,66 @@ import 'server-only'
 import type prisma from '@/lib/core/prisma'
 import type { TeamMemberWithTeam, TeamWithMembers } from '@/lib/types/team'
 
+type PrismaTransaction = Parameters<
+  Parameters<typeof prisma.$transaction>[0]
+>[0]
+
+/** Snapshot of team state captured before a cancellation/refund mutation. Used to revert on Stripe failure. */
+export interface TeamRevertInfo {
+  teamId: string
+  userId: string
+  joinedAt: Date
+  captainId: string
+  isFull: boolean
+  teamWasDeleted: boolean
+  tournamentId: string
+  teamName: string
+}
+
+/**
+ * Builds the `onRevert` callback for `issueStripeRefundAfterDbUpdate`.
+ * Restores team membership that was removed during the DB-first phase when Stripe refund fails.
+ */
+export const buildTeamRevertCallback = (
+  registrationId: string,
+  teamRevertInfo: TeamRevertInfo,
+) => {
+  return async (tx: PrismaTransaction): Promise<void> => {
+    if (teamRevertInfo.teamWasDeleted) {
+      await tx.team.create({
+        data: {
+          id: teamRevertInfo.teamId,
+          name: teamRevertInfo.teamName,
+          tournamentId: teamRevertInfo.tournamentId,
+          captainId: teamRevertInfo.captainId,
+          isFull: teamRevertInfo.isFull,
+        },
+      })
+    } else {
+      await tx.team.update({
+        where: { id: teamRevertInfo.teamId },
+        data: {
+          captainId: teamRevertInfo.captainId,
+          isFull: teamRevertInfo.isFull,
+        },
+      })
+    }
+
+    await tx.teamMember.create({
+      data: {
+        teamId: teamRevertInfo.teamId,
+        userId: teamRevertInfo.userId,
+        joinedAt: teamRevertInfo.joinedAt,
+      },
+    })
+
+    await tx.tournamentRegistration.update({
+      where: { id: registrationId },
+      data: { teamId: teamRevertInfo.teamId },
+    })
+  }
+}
+
 /** Recomputes the `isFull` flag for a team after a membership mutation. */
 export const syncTeamFullState = async (
   tx: Pick<typeof prisma, 'team' | 'teamMember'>,

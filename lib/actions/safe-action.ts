@@ -61,6 +61,8 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       if (!validatedFields.success) {
         return {
           success: false,
+          // Zod's flatten().fieldErrors is typed as Partial<Record<string, string[]>>;
+          // cast to non-partial Record since we only use it for display, not exhaustive access
           errors: validatedFields.error.flatten().fieldErrors as Record<
             string,
             string[]
@@ -70,11 +72,13 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       }
 
       // 4. Execute Handler
+      // BetterAuth returns a generic session shape; cast to our typed AuthSession
       return await handler(validatedFields.data, session as AuthSession)
     } catch (error) {
       const prismaResult = handlePrismaError(error)
       if (prismaResult) {
         logger.warn({ error }, 'Prisma error in server action')
+        // handlePrismaError returns ActionState without the TOutput generic; safe to cast
         return prismaResult as ActionState<TOutput>
       }
 

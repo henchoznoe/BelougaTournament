@@ -36,18 +36,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'
 import { formatShortDate } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
 
-const PAGE_SIZE = 8
+const PAGE_SIZE = ADMIN_PAGE_SIZES.SPONSORS
 
 type StatusFilter = 'all' | 'enabled' | 'disabled'
 
 const STATUS_FILTER_VALUES: StatusFilter[] = ['all', 'enabled', 'disabled']
 const isStatusFilter = (val: string): val is StatusFilter =>
-  STATUS_FILTER_VALUES.includes(val as StatusFilter)
+  (STATUS_FILTER_VALUES as string[]).includes(val)
 
 type SortKey = 'name' | 'supportedSince' | 'enabled'
 

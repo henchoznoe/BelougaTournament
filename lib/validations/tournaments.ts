@@ -218,27 +218,51 @@ const baseTournamentFields = {
 } as const
 
 /**
+ * Shape of the date-related fields accessed inside refinement callbacks.
+ * Both create and update schemas include these fields, so this interface is
+ * safe to use as the data type in the generic `applyTournamentRefinements` helper.
+ */
+interface TournamentDateFields {
+  startDate: string
+  endDate: string
+  registrationOpen: string
+  registrationClose: string
+  registrationType: RegistrationType
+  entryFeeAmount: number | null
+  refundPolicyType: RefundPolicyType
+  refundDeadlineDays: number | null
+  toornamentId?: string
+  toornamentStages: unknown[]
+}
+
+/**
  * Shared refinements applied to both create and update tournament schemas.
  * Extracted to avoid duplicating ~65 lines of .refine() calls.
+ *
+ * The `.refine()` callback receives `output<T>` which TypeScript types as `unknown`
+ * when `T` is a generic `ZodTypeAny`. We cast to `TournamentDateFields` inside each
+ * callback because both `tournamentBaseSchema` and `updateTournamentSchema` are guaranteed
+ * to include all fields declared in that interface.
  */
 const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
-  // biome-ignore lint/suspicious/noExplicitAny: generic refinement helper — inferred type is safe at call site
-  type D = any
+  const d = (data: unknown) => data as TournamentDateFields
   return schema
-    .refine((data: D) => new Date(data.endDate) > new Date(data.startDate), {
+    .refine(data => new Date(d(data).endDate) > new Date(d(data).startDate), {
       message: 'La date de fin doit être après la date de début.',
       path: ['endDate'],
     })
     .refine(
-      (data: D) =>
-        new Date(data.registrationClose) > new Date(data.registrationOpen),
+      data =>
+        new Date(d(data).registrationClose) >
+        new Date(d(data).registrationOpen),
       {
         message: "La fermeture des inscriptions doit être après l'ouverture.",
         path: ['registrationClose'],
       },
     )
     .refine(
-      (data: D) => new Date(data.registrationClose) <= new Date(data.startDate),
+      data =>
+        new Date(d(data).registrationClose) <= new Date(d(data).startDate),
       {
         message:
           'La fermeture des inscriptions doit être avant ou égale à la date de début.',
@@ -246,20 +270,20 @@ const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
       },
     )
     .refine(
-      (data: D) =>
-        data.registrationType === RegistrationType.FREE
-          ? data.entryFeeAmount === null
-          : data.entryFeeAmount !== null,
+      data =>
+        d(data).registrationType === RegistrationType.FREE
+          ? d(data).entryFeeAmount === null
+          : d(data).entryFeeAmount !== null,
       {
         message: 'Le prix est requis pour un tournoi payant.',
         path: ['entryFeeAmount'],
       },
     )
     .refine(
-      (data: D) =>
-        data.registrationType === RegistrationType.FREE
-          ? data.refundPolicyType === RefundPolicyType.NONE &&
-            data.refundDeadlineDays === null
+      data =>
+        d(data).registrationType === RegistrationType.FREE
+          ? d(data).refundPolicyType === RefundPolicyType.NONE &&
+            d(data).refundDeadlineDays === null
           : true,
       {
         message:
@@ -268,10 +292,10 @@ const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
       },
     )
     .refine(
-      (data: D) =>
-        data.refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
-          ? data.refundDeadlineDays !== null
-          : data.refundDeadlineDays === null,
+      data =>
+        d(data).refundPolicyType === RefundPolicyType.BEFORE_DEADLINE
+          ? d(data).refundDeadlineDays !== null
+          : d(data).refundDeadlineDays === null,
       {
         message:
           'Le délai de remboursement est requis uniquement pour une politique avec délai.',
@@ -279,9 +303,10 @@ const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
       },
     )
     .refine(
-      (data: D) =>
-        data.toornamentStages.length === 0 ||
-        (data.toornamentId !== undefined && data.toornamentId.trim() !== ''),
+      data =>
+        d(data).toornamentStages.length === 0 ||
+        (d(data).toornamentId !== undefined &&
+          d(data).toornamentId?.trim() !== ''),
       {
         message:
           "L'ID Toornament est requis lorsque des stages sont configurés.",
@@ -469,16 +494,9 @@ export const parsePublicTournamentFilters = (
       ? typeRaw
       : ''
 
-  const VALID_SORTS: TournamentSortOption[] = [
-    'date_asc',
-    'date_desc',
-    'title_asc',
-    'title_desc',
-    'registrations_desc',
-  ]
   const sortRaw = raw('sort')
   const sort: TournamentSortOption = (
-    VALID_SORTS.includes(sortRaw as TournamentSortOption)
+    VALID_SORT_OPTIONS.includes(sortRaw as TournamentSortOption)
       ? sortRaw
       : defaultSort
   ) as TournamentSortOption

@@ -91,8 +91,12 @@ if (!parsedClient.success || !parsedServer.success) {
   }
 }
 
+// Named intersection type for the merged environment object
+type Env = z.infer<typeof clientSchema> & z.infer<typeof serverSchema>
+
 // Export merged and typed
 export const env = {
   ...parsedClient.data,
+  // parsedServer.data is `{}` on the client side (see line 73); cast is safe
   ...(parsedServer.data as z.infer<typeof serverSchema>),
-} as z.infer<typeof clientSchema> & z.infer<typeof serverSchema>
+} as Env

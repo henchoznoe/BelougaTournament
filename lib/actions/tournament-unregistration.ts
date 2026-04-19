@@ -15,7 +15,11 @@ import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
-import { handleCaptainSuccession } from '@/lib/utils/team'
+import type { TeamRevertInfo } from '@/lib/utils/team'
+import {
+  buildTeamRevertCallback,
+  handleCaptainSuccession,
+} from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import { unregisterFromTournamentSchema } from '@/lib/validations/tournaments'
 import {
@@ -255,7 +259,7 @@ export const unregisterFromTournament = authenticatedAction({
     const team = teamMember.team
 
     // Save pre-mutation state for potential Stripe revert
-    const teamRevertInfo = {
+    const teamRevertInfo: TeamRevertInfo = {
       teamId: team.id,
       userId,
       joinedAt: teamMember.joinedAt,
@@ -314,41 +318,7 @@ export const unregisterFromTournament = authenticatedAction({
         latestPayment,
         previousPaymentStatus: registration.paymentStatus,
         idempotencyPrefix: 'refund',
-        onRevert: async tx => {
-          // Restore team membership that was removed during the DB-first phase
-          if (teamRevertInfo.teamWasDeleted) {
-            await tx.team.create({
-              data: {
-                id: teamRevertInfo.teamId,
-                name: teamRevertInfo.teamName,
-                tournamentId: teamRevertInfo.tournamentId,
-                captainId: teamRevertInfo.captainId,
-                isFull: teamRevertInfo.isFull,
-              },
-            })
-          } else {
-            await tx.team.update({
-              where: { id: teamRevertInfo.teamId },
-              data: {
-                captainId: teamRevertInfo.captainId,
-                isFull: teamRevertInfo.isFull,
-              },
-            })
-          }
-
-          await tx.teamMember.create({
-            data: {
-              teamId: teamRevertInfo.teamId,
-              userId: teamRevertInfo.userId,
-              joinedAt: teamRevertInfo.joinedAt,
-            },
-          })
-
-          await tx.tournamentRegistration.update({
-            where: { id: registration.id },
-            data: { teamId: teamRevertInfo.teamId },
-          })
-        },
+        onRevert: buildTeamRevertCallback(registration.id, teamRevertInfo),
       })
     }
 

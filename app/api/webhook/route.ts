@@ -20,8 +20,17 @@ import {
   RegistrationStatus,
 } from '@/prisma/generated/prisma/enums'
 
+/** Payment statuses that are considered final — no further transitions are allowed. */
+const TERMINAL_PAYMENT_STATUSES = new Set<PaymentStatus>([
+  PaymentStatus.PAID,
+  PaymentStatus.CANCELLED,
+  PaymentStatus.FAILED,
+  PaymentStatus.REFUNDED,
+])
+
 const handleCheckoutCompleted = async (event: Stripe.Event) => {
   const stripe = getStripe()
+  // Safe: this handler is only called from the switch branch for 'checkout.session.completed'
   const session = event.data.object as Stripe.Checkout.Session
   const paymentId = session.metadata?.paymentId
 
@@ -95,6 +104,7 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
 }
 
 const handleCheckoutExpired = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'checkout.session.expired'
   const session = event.data.object as Stripe.Checkout.Session
 
   const payment = await prisma.payment.findFirst({
@@ -118,14 +128,7 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
     },
   })
 
-  const terminalStatuses = new Set<PaymentStatus>([
-    PaymentStatus.PAID,
-    PaymentStatus.CANCELLED,
-    PaymentStatus.FAILED,
-    PaymentStatus.REFUNDED,
-  ])
-
-  if (!payment || terminalStatuses.has(payment.status)) {
+  if (!payment || TERMINAL_PAYMENT_STATUSES.has(payment.status)) {
     return
   }
 
@@ -157,6 +160,7 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
 }
 
 const handlePaymentFailed = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'payment_intent.payment_failed'
   const paymentIntent = event.data.object as Stripe.PaymentIntent
   const paymentId = paymentIntent.metadata.paymentId
 
@@ -177,14 +181,7 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
     },
   })
 
-  const terminalStatuses = new Set<PaymentStatus>([
-    PaymentStatus.PAID,
-    PaymentStatus.CANCELLED,
-    PaymentStatus.FAILED,
-    PaymentStatus.REFUNDED,
-  ])
-
-  if (!payment || terminalStatuses.has(payment.status)) {
+  if (!payment || TERMINAL_PAYMENT_STATUSES.has(payment.status)) {
     return
   }
 
@@ -216,6 +213,7 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
 }
 
 const handleChargeRefunded = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'charge.refunded'
   const charge = event.data.object as Stripe.Charge
 
   // H4: Fallback lookup by stripePaymentIntentId when stripeChargeId is not found

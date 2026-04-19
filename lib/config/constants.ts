@@ -141,3 +141,11 @@ export const VALIDATION_LIMITS = {
   FEATURE_TITLE_MAX: 50,
   FEATURE_DESCRIPTION_MAX: 200,
 } as const
+
+/** Per-list pagination sizes for admin list views. */
+export const ADMIN_PAGE_SIZES = {
+  TOURNAMENTS: 10,
+  REGISTRATIONS: 10,
+  USERS: 20,
+  SPONSORS: 8,
+} as const

@@ -72,6 +72,8 @@ const BRAND_STYLES = {
 
 /** Displays the social/contact links in a modern Bento Box layout */
 export const ContactBento = ({ settings }: ContactBentoProps) => {
+  // Cast needed: TypeScript infers a narrow union of literal colorClass types from BRAND_STYLES;
+  // SocialLink.colorClass is typed as string, so the cast widens to the declared interface.
   const socialLinks = (
     [
       {

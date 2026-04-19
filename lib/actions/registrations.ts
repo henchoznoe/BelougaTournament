@@ -15,7 +15,11 @@ import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
-import { handleCaptainSuccession } from '@/lib/utils/team'
+import type { TeamRevertInfo } from '@/lib/utils/team'
+import {
+  buildTeamRevertCallback,
+  handleCaptainSuccession,
+} from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   adminUpdateRegistrationFieldsSchema,
@@ -184,6 +188,16 @@ export const adminDeleteRegistration = authenticatedAction({
 // adminUpdateRegistrationFields
 // ---------------------------------------------------------------------------
 
+/** Registration with tournament fields. Used by adminUpdateRegistrationFields. */
+type RegistrationWithFields = {
+  id: string
+  tournament: {
+    id: string
+    fields: { label: string; type: string; required: boolean }[]
+  }
+  user: { name: string }
+}
+
 /** Updates the custom field values (fieldValues JSON) on a registration. */
 export const adminUpdateRegistrationFields = authenticatedAction({
   schema: adminUpdateRegistrationFieldsSchema,
@@ -203,14 +217,7 @@ export const adminUpdateRegistrationFields = authenticatedAction({
         },
         user: { select: { name: true } },
       },
-    })) as {
-      id: string
-      tournament: {
-        id: string
-        fields: { label: string; type: string; required: boolean }[]
-      }
-      user: { name: string }
-    } | null
+    })) as RegistrationWithFields | null
 
     if (!registration) {
       return { success: false, message: 'Inscription introuvable.' }
@@ -288,17 +295,7 @@ export const adminRefundRegistration = authenticatedAction({
 
     // DB-first pattern: update DB to REFUNDED state before calling Stripe
     // Track team state for potential Stripe revert (TEAM format only)
-    let teamRevertInfo: {
-      teamId: string
-      userId: string
-      joinedAt: Date
-      captainId: string
-      isFull: boolean
-      teamWasDeleted: boolean
-      tournamentId: string
-      teamName: string
-      teamSize: number
-    } | null = null
+    let teamRevertInfo: TeamRevertInfo | null = null
 
     if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.$transaction(async tx => {
@@ -371,7 +368,6 @@ export const adminRefundRegistration = authenticatedAction({
           teamWasDeleted: team.members.length === 1,
           tournamentId: registration.tournament.id,
           teamName: team.name,
-          teamSize: team.tournament.teamSize,
         }
 
         await prisma.$transaction(async tx => {
@@ -410,40 +406,7 @@ export const adminRefundRegistration = authenticatedAction({
       previousPaymentStatus: PaymentStatus.PAID,
       idempotencyPrefix: 'admin-refund',
       onRevert: teamRevertInfo
-        ? async tx => {
-            if (teamRevertInfo.teamWasDeleted) {
-              await tx.team.create({
-                data: {
-                  id: teamRevertInfo.teamId,
-                  name: teamRevertInfo.teamName,
-                  tournamentId: teamRevertInfo.tournamentId,
-                  captainId: teamRevertInfo.captainId,
-                  isFull: teamRevertInfo.isFull,
-                },
-              })
-            } else {
-              await tx.team.update({
-                where: { id: teamRevertInfo.teamId },
-                data: {
-                  captainId: teamRevertInfo.captainId,
-                  isFull: teamRevertInfo.isFull,
-                },
-              })
-            }
-
-            await tx.teamMember.create({
-              data: {
-                teamId: teamRevertInfo.teamId,
-                userId: teamRevertInfo.userId,
-                joinedAt: teamRevertInfo.joinedAt,
-              },
-            })
-
-            await tx.tournamentRegistration.update({
-              where: { id: registration.id },
-              data: { teamId: teamRevertInfo.teamId },
-            })
-          }
+        ? buildTeamRevertCallback(registration.id, teamRevertInfo)
         : undefined,
     })
 

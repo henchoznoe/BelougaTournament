@@ -22,6 +22,8 @@ const createPrismaClient = () => {
 
 type PrismaWithAccelerate = ReturnType<typeof createPrismaClient>
 
+// Cast `global` to a typed object to safely store the Prisma singleton across
+// hot-reloads in development without creating multiple client instances.
 const globalForPrisma = global as unknown as {
   prisma: PrismaWithAccelerate | undefined
 }

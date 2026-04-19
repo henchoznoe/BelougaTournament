@@ -36,7 +36,7 @@ interface TournamentFiltersProps {
 }
 
 const isTournamentSortOption = (val: string): val is TournamentSortOption =>
-  VALID_SORT_OPTIONS.includes(val as TournamentSortOption)
+  (VALID_SORT_OPTIONS as string[]).includes(val)
 
 const SEARCH_DEBOUNCE_MS = 350
 

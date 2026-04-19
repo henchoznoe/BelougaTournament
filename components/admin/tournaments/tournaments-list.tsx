@@ -37,6 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentListItem } from '@/lib/types/tournament'
 import { formatCentimes, formatShortDate } from '@/lib/utils/formatting'
@@ -46,7 +47,7 @@ import {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = ADMIN_PAGE_SIZES.TOURNAMENTS
 
 const FORMAT_LABELS = {
   [TournamentFormat.SOLO]: 'Solo',
@@ -56,8 +57,7 @@ const FORMAT_LABELS = {
 type StatusFilter = 'all' | TournamentStatus
 
 const isStatusFilter = (val: string): val is StatusFilter =>
-  val === 'all' ||
-  Object.values(TournamentStatus).includes(val as TournamentStatus)
+  val === 'all' || (Object.values(TournamentStatus) as string[]).includes(val)
 
 type SortKey =
   | 'title'

@@ -36,12 +36,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ADMIN_PAGE_SIZES } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRow } from '@/lib/types/user'
 import { formatDateTime, formatShortDate } from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = ADMIN_PAGE_SIZES.USERS
 
 type RoleFilter = 'all' | Role
 type SortKey = 'user' | 'role' | 'createdAt' | 'lastLoginAt'

@@ -38,7 +38,7 @@ import {
 } from '@/prisma/generated/prisma/enums'
 
 const isRefundPolicyType = (val: string): val is RefundPolicyType =>
-  Object.values(RefundPolicyType).includes(val as RefundPolicyType)
+  (Object.values(RefundPolicyType) as string[]).includes(val)
 
 interface TournamentFormEntryProps {
   errors: FieldErrors<TournamentFormValues>
