@@ -5,6 +5,7 @@
 [![CI](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml/badge.svg)](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml)
 [![main](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/main?token=XTVICSSEDD&label=main&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)
 [![develop](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/develop?token=XTVICSSEDD&label=develop&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/henchoznoe/BelougaTournament)
 [![Biome](https://img.shields.io/badge/formatter|linter-biome-39B420?style=flat&logo=biome)](https://biomejs.dev/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
