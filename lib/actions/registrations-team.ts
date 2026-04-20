@@ -9,7 +9,7 @@
 'use server'
 
 import { del } from '@vercel/blob'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
@@ -169,9 +169,9 @@ export const adminChangeTeam = authenticatedAction({
       )
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -226,9 +226,9 @@ export const adminPromoteCaptain = authenticatedAction({
       data: { captainId: data.userId },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -277,8 +277,8 @@ export const adminUpdateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },
@@ -317,7 +317,7 @@ export const adminDeleteTeamLogo = authenticatedAction({
       data: { logoUrl: null },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
 
     return { success: true, message: "Le logo de l'équipe a été supprimé." }
   },

@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -43,6 +43,7 @@ type RegistrationWithDetails = {
     id: string
     status: PaymentStatus
     amount: number
+    stripeFee: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -90,10 +91,10 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       }
 
-      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+      updateTag(CACHE_TAGS.TOURNAMENTS)
+      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+      updateTag(CACHE_TAGS.DASHBOARD_STATS)
+      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
       return {
         success: true,
@@ -135,10 +136,10 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       }
 
-      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+      updateTag(CACHE_TAGS.TOURNAMENTS)
+      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+      updateTag(CACHE_TAGS.DASHBOARD_STATS)
+      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
       return {
         success: true,
@@ -175,10 +176,10 @@ export const adminDeleteRegistration = authenticatedAction({
       await handleCaptainSuccession(tx, team, registration.userId)
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
     return {
       success: true,
@@ -239,7 +240,7 @@ export const adminUpdateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
 
     return {
       success: true,
@@ -306,7 +307,7 @@ export const adminRefundRegistration = authenticatedAction({
           where: { id: latestPayment.id },
           data: {
             status: PaymentStatus.REFUNDED,
-            refundAmount: latestPayment.amount,
+            refundAmount: latestPayment.amount - (latestPayment.stripeFee ?? 0),
             refundedAt: new Date(),
           },
         })
@@ -343,7 +344,8 @@ export const adminRefundRegistration = authenticatedAction({
             where: { id: latestPayment.id },
             data: {
               status: PaymentStatus.REFUNDED,
-              refundAmount: latestPayment.amount,
+              refundAmount:
+                latestPayment.amount - (latestPayment.stripeFee ?? 0),
               refundedAt: new Date(),
             },
           })
@@ -382,7 +384,8 @@ export const adminRefundRegistration = authenticatedAction({
             where: { id: latestPayment.id },
             data: {
               status: PaymentStatus.REFUNDED,
-              refundAmount: latestPayment.amount,
+              refundAmount:
+                latestPayment.amount - (latestPayment.stripeFee ?? 0),
               refundedAt: new Date(),
             },
           })
@@ -413,10 +416,10 @@ export const adminRefundRegistration = authenticatedAction({
         : undefined,
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
     return {
       success: true,

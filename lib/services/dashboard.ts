@@ -21,6 +21,7 @@ import type {
 } from '@/lib/types/dashboard'
 import {
   PaymentStatus,
+  RegistrationStatus,
   Role,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -140,6 +141,11 @@ export const getRecentRegistrations = async (
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
+      where: {
+        status: {
+          in: [RegistrationStatus.PENDING, RegistrationStatus.CONFIRMED],
+        },
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
       select: {

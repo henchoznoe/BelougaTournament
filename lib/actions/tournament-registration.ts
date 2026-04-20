@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import {
   CACHE_TAGS,
@@ -500,8 +500,8 @@ export const updateRegistrationFields = authenticatedAction({
       },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return {
       success: true,
@@ -587,8 +587,9 @@ export const registerForTournament = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -694,9 +695,9 @@ export const createTeamAndRegister = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -795,9 +796,9 @@ export const joinTeamAndRegister = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -889,9 +890,9 @@ export const cancelMyPendingRegistrationForTournament = authenticatedAction({
       })
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return { success: true, message: 'Inscription annul\u00e9e.' }
   },

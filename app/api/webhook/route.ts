@@ -268,11 +268,8 @@ const handleChargeUpdated = async (event: Stripe.Event) => {
   // Safe: this handler is only called from the switch branch for 'charge.updated'
   const charge = event.data.object as Stripe.Charge
 
-  // Only process charges that have a settled balance_transaction
-  if (
-    !charge.balance_transaction ||
-    typeof charge.balance_transaction === 'string'
-  ) {
+  // Only process charges that have a balance_transaction (string ID or expanded object)
+  if (!charge.balance_transaction) {
     return
   }
 
@@ -286,9 +283,22 @@ const handleChargeUpdated = async (event: Stripe.Event) => {
     return
   }
 
+  // Stripe webhook events send the balance_transaction as a string ID (not expanded).
+  // We must retrieve the full object from the API to read the fee.
+  let fee: number
+  if (typeof charge.balance_transaction === 'string') {
+    const stripe = getStripe()
+    const bt = await stripe.balanceTransactions.retrieve(
+      charge.balance_transaction,
+    )
+    fee = bt.fee
+  } else {
+    fee = charge.balance_transaction.fee
+  }
+
   await prisma.payment.update({
     where: { id: payment.id },
-    data: { stripeFee: charge.balance_transaction.fee },
+    data: { stripeFee: fee },
   })
 }
 

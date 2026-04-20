@@ -35,6 +35,7 @@ export const StripeReturnToast = ({ tournamentId }: StripeReturnToastProps) => {
 
     if (stripe === 'success') {
       toast.success('Ton inscription est confirm\u00e9e\u00a0!')
+      router.refresh()
     } else if (stripe === 'cancelled') {
       // Cancel the PENDING registration server-side, then notify the user
       cancelMyPendingRegistrationForTournament({ tournamentId })
@@ -42,11 +43,13 @@ export const StripeReturnToast = ({ tournamentId }: StripeReturnToastProps) => {
           toast.error(
             'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
           )
+          router.refresh()
         })
         .catch(() => {
           toast.error(
             'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
           )
+          router.refresh()
         })
     }
   }, [searchParams, router, pathname, tournamentId])

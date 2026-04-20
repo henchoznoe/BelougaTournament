@@ -33,6 +33,7 @@ vi.mock('@/lib/core/logger', () => ({
 const mockRevalidateTag = vi.fn()
 vi.mock('next/cache', () => ({
   revalidateTag: (...args: unknown[]) => mockRevalidateTag(...args),
+  updateTag: (...args: unknown[]) => mockRevalidateTag(...args),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))
@@ -141,10 +142,10 @@ describe('updateSettings', () => {
     expect(upsertArg.update.twitchUsername).toBe('belougagg')
   })
 
-  it('calls revalidateTag with the settings tag', async () => {
+  it('calls updateTag with the settings tag', async () => {
     await updateSettings(VALID_SETTINGS)
 
-    expect(mockRevalidateTag).toHaveBeenCalledWith('settings', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('settings')
   })
 
   it('returns validation error for invalid URL', async () => {

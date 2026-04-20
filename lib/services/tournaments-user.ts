@@ -37,7 +37,7 @@ const USER_REGISTRATION_SELECT = {
       id: true,
       title: true,
       slug: true,
-      game: true,
+      games: true,
       format: true,
       teamSize: true,
       startDate: true,

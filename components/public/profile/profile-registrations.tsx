@@ -241,7 +241,7 @@ export const ProfileRegistrations = ({
                       : null
                   return eligible ? (
                     <span className="mt-2 block text-emerald-400">
-                      Vous serez remboursé de {amount}.
+                      Vous serez remboursé de {amount} (frais Stripe déduits).
                     </span>
                   ) : (
                     <span className="mt-2 block text-red-400">

@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -97,10 +97,10 @@ export const kickPlayer = authenticatedAction({
       await handleCaptainSuccession(tx, team, data.userId)
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
     return {
       success: true,
@@ -162,10 +162,10 @@ export const dissolveTeam = authenticatedAction({
       await tx.team.delete({ where: { id: data.teamId } })
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
     return { success: true, message: "L'équipe a été dissoute." }
   },
@@ -232,7 +232,7 @@ export const updateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },

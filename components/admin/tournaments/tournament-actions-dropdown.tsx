@@ -136,8 +136,8 @@ export const TournamentActionsDropdown = ({
       })
       if (result.success) {
         toast.success(result.message)
-        // Navigate to force re-fetch of cached Server Component
-        router.push(ROUTES.ADMIN_TOURNAMENTS)
+        // Refresh current page to re-fetch the Server Component with updated data
+        router.refresh()
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
@@ -151,8 +151,8 @@ export const TournamentActionsDropdown = ({
       const result = await deleteTournament({ id: tournament.id })
       if (result.success) {
         toast.success(result.message)
-        // Navigate to force re-fetch of cached Server Component
-        router.push(ROUTES.ADMIN_TOURNAMENTS)
+        // Refresh current page to re-fetch the Server Component with updated data
+        router.refresh()
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
