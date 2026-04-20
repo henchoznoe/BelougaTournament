@@ -181,6 +181,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
   const emptyStats: PaymentStats = {
     totalRevenue: 0,
     totalRefunded: 0,
+    totalStripeFees: 0,
     netRevenue: 0,
     transactionCount: 0,
     refundCount: 0,
@@ -199,6 +200,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         currency: true,
         status: true,
         refundAmount: true,
+        stripeFee: true,
         registration: {
           select: {
             tournament: {
@@ -218,6 +220,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     // Aggregate totals
     let totalRevenue = 0
     let totalRefunded = 0
+    let totalStripeFees = 0
     let transactionCount = 0
     let refundCount = 0
     const currency = payments[0].currency || DEFAULT_CURRENCY
@@ -237,6 +240,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         slug: string
         revenue: number
         refunded: number
+        stripeFees: number
         paidCount: number
         refundedCount: number
       }
@@ -252,6 +256,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
           slug: tournament.slug,
           revenue: 0,
           refunded: 0,
+          stripeFees: 0,
           paidCount: 0,
           refundedCount: 0,
         })
@@ -262,16 +267,20 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
 
       if (payment.status === PaymentStatus.PAID) {
         totalRevenue += payment.amount
+        totalStripeFees += payment.stripeFee ?? 0
         transactionCount++
         entry.revenue += payment.amount
+        entry.stripeFees += payment.stripeFee ?? 0
         entry.paidCount++
       }
 
       if (payment.status === PaymentStatus.REFUNDED) {
         // Refunded payments were originally paid, so count the original amount as revenue
         totalRevenue += payment.amount
+        totalStripeFees += payment.stripeFee ?? 0
         transactionCount++
         entry.revenue += payment.amount
+        entry.stripeFees += payment.stripeFee ?? 0
         entry.paidCount++
 
         // Then track the refund
@@ -291,7 +300,8 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     return {
       totalRevenue,
       totalRefunded,
-      netRevenue: totalRevenue - totalRefunded,
+      totalStripeFees,
+      netRevenue: totalRevenue - totalRefunded - totalStripeFees,
       transactionCount,
       refundCount,
       currency,

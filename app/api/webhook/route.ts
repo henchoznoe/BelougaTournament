@@ -89,6 +89,9 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
 
   let chargeId: string | null = null
   let paymentIntentId: string | null = null
+  // Stripe processing fee in the platform currency (centimes). Retrieved from the
+  // balance_transaction so the dashboard can display true net revenue without estimation.
+  let stripeFee: number | null = null
 
   if (typeof session.payment_intent === 'string') {
     paymentIntentId = session.payment_intent
@@ -96,11 +99,20 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
     try {
       const paymentIntent = await stripe.paymentIntents.retrieve(
         session.payment_intent,
+        { expand: ['latest_charge.balance_transaction'] },
       )
-      chargeId =
-        typeof paymentIntent.latest_charge === 'string'
-          ? paymentIntent.latest_charge
-          : null
+
+      if (typeof paymentIntent.latest_charge === 'string') {
+        chargeId = paymentIntent.latest_charge
+      } else if (paymentIntent.latest_charge) {
+        chargeId = paymentIntent.latest_charge.id
+
+        // balance_transaction is expanded — read the fee directly
+        const bt = paymentIntent.latest_charge.balance_transaction
+        if (bt && typeof bt !== 'string') {
+          stripeFee = bt.fee
+        }
+      }
     } catch (error) {
       logger.warn(
         { error, eventId: event.id },
@@ -119,6 +131,7 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
         stripeChargeId: chargeId,
         stripeCustomerId:
           typeof session.customer === 'string' ? session.customer : null,
+        stripeFee,
         paidAt: new Date(),
       },
     })
@@ -328,12 +341,16 @@ export const POST = async (request: Request) => {
 
   // Enforce livemode/environment symmetry so test-mode events signed with a
   // leaked test secret cannot mutate production data (and vice-versa).
-  const expectedLivemode = env.NODE_ENV === 'production'
+  // Use VERCEL_ENV (not NODE_ENV) because Vercel sets NODE_ENV=production on
+  // all deployed environments including preview branches; VERCEL_ENV correctly
+  // distinguishes 'production' from 'preview' and is undefined in local dev.
+  const expectedLivemode = env.VERCEL_ENV === 'production'
   if (event.livemode !== expectedLivemode) {
     logger.warn(
       {
         eventId: event.id,
         livemode: event.livemode,
+        vercelEnv: env.VERCEL_ENV,
         nodeEnv: env.NODE_ENV,
       },
       'Stripe webhook livemode does not match runtime environment — rejecting',

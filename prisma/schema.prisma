@@ -250,6 +250,7 @@ model Payment {
   stripePaymentIntentId   String?            @unique
   stripeChargeId          String?            @unique
   stripeCustomerId        String?
+  stripeFee               Int?
   refundAmount            Int?
   paidAt                  DateTime?
   refundedAt              DateTime?

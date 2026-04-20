@@ -9,6 +9,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { StripeReturnToast } from '@/components/public/tournaments/stripe-return-toast'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSession } from '@/lib/services/auth'
@@ -78,6 +79,9 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
 const TournamentPage = (props: TournamentPageProps) => {
   return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
+      <Suspense fallback={null}>
+        <StripeReturnToast />
+      </Suspense>
       <Suspense
         fallback={
           <div className="mx-auto w-full max-w-4xl space-y-8">

@@ -144,7 +144,11 @@ describe('getTournaments', () => {
         registrationClose: true,
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: { in: ['PENDING', 'CONFIRMED'] },
+              },
+            },
             teams: true,
           },
         },
@@ -390,7 +394,11 @@ describe('getTournamentBySlug', () => {
         },
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: { in: ['PENDING', 'CONFIRMED'] },
+              },
+            },
             teams: true,
           },
         },
@@ -441,7 +449,11 @@ describe('getTournamentById', () => {
         },
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: { in: ['PENDING', 'CONFIRMED'] },
+              },
+            },
             teams: true,
           },
         },

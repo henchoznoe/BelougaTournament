@@ -10,7 +10,7 @@
  */
 
 /** MIME types this module can verify. */
-export type VerifiableImageMime = 'image/png' | 'image/jpeg' | 'image/webp'
+type VerifiableImageMime = 'image/png' | 'image/jpeg' | 'image/webp'
 
 /**
  * Returns the MIME type implied by the file's leading bytes, or null if the
@@ -20,9 +20,7 @@ export type VerifiableImageMime = 'image/png' | 'image/jpeg' | 'image/webp'
  * - JPEG: FF D8 FF
  * - WebP: "RIFF" .... "WEBP"
  */
-export const detectImageMime = (
-  bytes: Uint8Array,
-): VerifiableImageMime | null => {
+const detectImageMime = (bytes: Uint8Array): VerifiableImageMime | null => {
   if (
     bytes.length >= 8 &&
     bytes[0] === 0x89 &&

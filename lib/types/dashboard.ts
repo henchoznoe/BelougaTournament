@@ -54,6 +54,7 @@ export type RecentRegistration = {
 export type PaymentStats = {
   totalRevenue: number
   totalRefunded: number
+  totalStripeFees: number
   netRevenue: number
   transactionCount: number
   refundCount: number
@@ -64,6 +65,7 @@ export type PaymentStats = {
     slug: string
     revenue: number
     refunded: number
+    stripeFees: number
     paidCount: number
     refundedCount: number
   }[]

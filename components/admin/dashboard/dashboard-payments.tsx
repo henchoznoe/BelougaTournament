@@ -6,7 +6,13 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ArrowDownRight, ArrowUpRight, CreditCard, Wallet } from 'lucide-react'
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CreditCard,
+  TrendingDown,
+  Wallet,
+} from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PaymentStats } from '@/lib/types/dashboard'
@@ -25,7 +31,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
       </div>
 
       {/* KPI cards */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <CreditCard className="size-3" />
@@ -56,12 +62,23 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
 
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <TrendingDown className="size-3" />
+            Frais Stripe
+          </div>
+          <p className="mt-1 text-lg font-semibold text-amber-400">
+            {formatCentimes(payments.totalStripeFees)}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
             <ArrowUpRight className="size-3" />
             Revenu net
           </div>
           <p className="mt-1 text-lg font-semibold text-white">
             {formatCentimes(payments.netRevenue)}
           </p>
+          <p className="mt-0.5 text-[10px] text-zinc-600">après frais Stripe</p>
         </div>
       </div>
 
