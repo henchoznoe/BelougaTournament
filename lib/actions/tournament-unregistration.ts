@@ -40,6 +40,7 @@ type RegistrationWithTournamentInfo = {
   paymentStatus: PaymentStatus
   status: RegistrationStatus
   paymentRequiredSnapshot: boolean
+  refundDeadlineDaysSnapshot: number | null
   teamId: string | null
   userId: string
   payments: {
@@ -120,12 +121,21 @@ export const unregisterFromTournament = authenticatedAction({
     }
 
     const latestPayment = registration.payments[0] ?? null
+
+    // Use the snapshot captured at registration time so an admin can't shift
+    // the refund window after a user has already purchased. Fall back to the
+    // live tournament value only for legacy registrations that predate the
+    // snapshot column (never for new registrations, which always populate it).
+    const refundDeadlineDays =
+      registration.refundDeadlineDaysSnapshot ??
+      registration.tournament.refundDeadlineDays
+
     const refundEligible =
       registration.paymentStatus === PaymentStatus.PAID &&
       isRefundEligible(
         registration.tournament.startDate,
         registration.tournament.refundPolicyType,
-        registration.tournament.refundDeadlineDays,
+        refundDeadlineDays,
         new Date(),
       )
     const isPaidRegistration = registration.paymentRequiredSnapshot

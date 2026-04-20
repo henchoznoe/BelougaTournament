@@ -10,6 +10,7 @@ import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
@@ -42,6 +43,21 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
     return
   }
 
+  // Verify the session actually completed with a paid charge. `checkout.session.completed`
+  // also fires for sessions that completed without immediate payment (e.g. async payment
+  // methods still pending), so we must require both status and payment_status.
+  if (session.status !== 'complete' || session.payment_status !== 'paid') {
+    logger.warn(
+      {
+        eventId: event.id,
+        sessionStatus: session.status,
+        paymentStatus: session.payment_status,
+      },
+      'Checkout session not in paid/complete state — skipping confirmation',
+    )
+    return
+  }
+
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
     include: {
@@ -52,6 +68,22 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
   })
 
   if (!payment || payment.status === PaymentStatus.PAID) {
+    return
+  }
+
+  // Verify that the amount Stripe actually collected matches the amount we recorded
+  // when creating the checkout session. A mismatch indicates tampering or a
+  // re-priced session and must never be confirmed.
+  if (session.amount_total !== payment.amount) {
+    logger.error(
+      {
+        eventId: event.id,
+        expected: payment.amount,
+        actual: session.amount_total,
+        paymentId,
+      },
+      'Checkout session amount_total mismatch — refusing to confirm',
+    )
     return
   }
 
@@ -294,6 +326,21 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 400 })
   }
 
+  // Enforce livemode/environment symmetry so test-mode events signed with a
+  // leaked test secret cannot mutate production data (and vice-versa).
+  const expectedLivemode = env.NODE_ENV === 'production'
+  if (event.livemode !== expectedLivemode) {
+    logger.warn(
+      {
+        eventId: event.id,
+        livemode: event.livemode,
+        nodeEnv: env.NODE_ENV,
+      },
+      'Stripe webhook livemode does not match runtime environment — rejecting',
+    )
+    return NextResponse.json({ error: 'Livemode mismatch.' }, { status: 400 })
+  }
+
   try {
     // Atomic idempotency guard: insert before processing; P2002 = duplicate, return early
     await prisma.stripeWebhookEvent.create({
@@ -320,6 +367,10 @@ export const POST = async (request: Request) => {
     )
   }
 
+  // Only handler failures (DB work) should release the idempotency row so
+  // Stripe retries the event. Post-handler cache revalidation runs outside the
+  // try so a failing `revalidateTag` cannot cause the handler's DB mutations
+  // to be replayed on retry.
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -337,15 +388,8 @@ export const POST = async (request: Request) => {
       default:
         break
     }
-
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
-
-    return NextResponse.json({ received: true })
   } catch (error) {
-    // Delete idempotency record on failure so Stripe can retry
+    // Release the idempotency row so Stripe can retry the delivery.
     try {
       await prisma.stripeWebhookEvent.delete({
         where: { stripeEventId: event.id },
@@ -363,4 +407,20 @@ export const POST = async (request: Request) => {
       { status: 500 },
     )
   }
+
+  try {
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+  } catch (error) {
+    // Cache revalidation failures are non-fatal; the mutations have already
+    // been persisted. Logging only — do not release the idempotency row.
+    logger.warn(
+      { error, eventId: event.id, type: event.type },
+      'Stripe webhook cache revalidation failed',
+    )
+  }
+
+  return NextResponse.json({ received: true })
 }

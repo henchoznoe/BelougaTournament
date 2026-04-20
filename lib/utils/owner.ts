@@ -9,7 +9,8 @@
 import 'server-only'
 import { env } from '@/lib/core/env'
 
-/** Returns true if the given email belongs to a platform owner. */
+/** Returns true if the given email belongs to a platform owner. Case-insensitive. */
 export const isOwner = (email: string): boolean => {
-  return env.OWNER_EMAILS.includes(email)
+  if (!email) return false
+  return env.OWNER_EMAILS.includes(email.trim().toLowerCase())
 }

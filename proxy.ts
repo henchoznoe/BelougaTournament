@@ -21,12 +21,30 @@ const SORTED_ROUTE_ENTRIES = Object.entries(ADMIN_ROUTE_ROLES).sort(
   (a, b) => b[0].length - a[0].length,
 )
 
-/** Fetch the active session from the BetterAuth session endpoint. */
-const fetchSession = async (request: NextRequest): Promise<AuthSession | null> => {
+/**
+ * Pinned base URL for the BetterAuth session endpoint.
+ *
+ * Middleware runs on the Edge runtime so we can't import the Prisma-backed
+ * `auth.api.getSession` here. Instead we call the app's own session endpoint,
+ * but we MUST pin the base URL to a trusted value — deriving the host from
+ * `request.url` lets an attacker spoof the `Host` header and redirect the
+ * session fetch to an attacker-controlled origin that forges a session JSON
+ * and returns it to us. We pin to `BETTER_AUTH_URL` (the canonical BetterAuth
+ * base), falling back to `NEXT_PUBLIC_APP_URL`.
+ */
+const TRUSTED_BASE_URL =
+  process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL
+
+/** Fetch the active session from the trusted BetterAuth session endpoint. */
+const fetchSession = async (
+  request: NextRequest,
+): Promise<AuthSession | null> => {
+  if (!TRUSTED_BASE_URL) return null
   try {
-    const response = await fetch(new URL('/api/auth/get-session', request.url), {
-      headers: { cookie: request.headers.get('cookie') ?? '' },
-    })
+    const response = await fetch(
+      new URL('/api/auth/get-session', TRUSTED_BASE_URL),
+      { headers: { cookie: request.headers.get('cookie') ?? '' } },
+    )
     if (!response.ok) return null
     return (await response.json()) as AuthSession
   } catch {

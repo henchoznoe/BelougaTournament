@@ -9,6 +9,7 @@
 'use client'
 
 import DOMPurify from 'isomorphic-dompurify'
+import { useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface RichTextProps {
@@ -16,27 +17,53 @@ interface RichTextProps {
   className?: string
 }
 
-export const RichText = ({ content, className }: RichTextProps) => {
-  const sanitized = DOMPurify.sanitize(content, {
-    ALLOWED_TAGS: [
-      'h2',
-      'h3',
-      'p',
-      'br',
-      'strong',
-      'em',
-      'u',
-      's',
-      'ul',
-      'ol',
-      'li',
-      'blockquote',
-      'pre',
-      'code',
-      'a',
-    ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+/** Only allow safe URL schemes — blocks javascript:, data:, vbscript:, etc. */
+const ALLOWED_URI_REGEXP = /^(?:https?|mailto):/i
+
+/**
+ * After each sanitize, force `rel="noopener noreferrer"` on any anchor that has
+ * `target="_blank"` to prevent reverse-tabnabbing. Registered once as a module
+ * singleton on the isomorphic-dompurify instance.
+ */
+let hookInstalled = false
+const ensureHook = () => {
+  if (hookInstalled) return
+  DOMPurify.addHook('afterSanitizeAttributes', node => {
+    if (node.nodeName !== 'A') return
+    if ((node as Element).getAttribute('target') === '_blank') {
+      ;(node as Element).setAttribute('rel', 'noopener noreferrer')
+    }
   })
+  hookInstalled = true
+}
+
+export const RichText = ({ content, className }: RichTextProps) => {
+  useEffect(ensureHook, [])
+
+  const sanitized = useMemo(() => {
+    ensureHook()
+    return DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: [
+        'h2',
+        'h3',
+        'p',
+        'br',
+        'strong',
+        'em',
+        'u',
+        's',
+        'ul',
+        'ol',
+        'li',
+        'blockquote',
+        'pre',
+        'code',
+        'a',
+      ],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+      ALLOWED_URI_REGEXP,
+    })
+  }, [content])
 
   return (
     <div

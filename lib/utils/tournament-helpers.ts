@@ -83,5 +83,7 @@ export const isRefundEligible = (
     return false
   }
 
-  return startDate.getTime() - now.getTime() >= refundDeadlineDays * DAY_IN_MS
+  // Strictly greater than: the deadline itself is exclusive, so a user at exactly
+  // `refundDeadlineDays * DAY_IN_MS` before start is past the refund window.
+  return startDate.getTime() - now.getTime() > refundDeadlineDays * DAY_IN_MS
 }

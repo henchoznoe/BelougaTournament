@@ -13,6 +13,12 @@ import { Role } from '@/prisma/generated/prisma/enums'
 
 const BASE_URL = 'http://localhost:3000'
 
+// proxy.ts pins the BetterAuth session endpoint to a trusted base URL read
+// from the environment. Set it before the module is imported inside tests so
+// session fetching uses the expected origin.
+process.env.BETTER_AUTH_URL = BASE_URL
+process.env.NEXT_PUBLIC_APP_URL = BASE_URL
+
 const makeRequest = (path = '/admin/tournaments') =>
   new NextRequest(new URL(path, BASE_URL))
 
