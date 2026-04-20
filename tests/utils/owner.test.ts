@@ -39,7 +39,12 @@ describe('isOwner', () => {
     expect(isOwner('')).toBe(false)
   })
 
-  it('is case-sensitive (uppercase does not match)', () => {
-    expect(isOwner('Owner1@test.com')).toBe(false)
+  it('is case-insensitive (uppercase matches normalized owner email)', () => {
+    expect(isOwner('Owner1@test.com')).toBe(true)
+    expect(isOwner('OWNER2@TEST.COM')).toBe(true)
+  })
+
+  it('trims surrounding whitespace before comparing', () => {
+    expect(isOwner('  owner1@test.com  ')).toBe(true)
   })
 })

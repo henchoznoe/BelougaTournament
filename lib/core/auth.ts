@@ -15,6 +15,16 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { Role } from '@/prisma/generated/prisma/enums'
 
+/**
+ * CSRF assumption: mutating endpoints are either
+ *   (1) Server Actions (Next.js enforces an Origin check for these), or
+ *   (2) the Stripe webhook (CSRF-immune via signature verification).
+ * Session cookies are `SameSite=Lax` + `httpOnly` + `secure`, which blocks
+ * cross-site POST with credentials. If a cookie-authenticated JSON endpoint
+ * is ever added (form-like POST accepting JSON from the browser), enable
+ * BetterAuth's CSRF token protection for it — do not rely on SameSite alone.
+ */
+
 /** Shape of the Discord /users/@me API response (relevant fields only). */
 interface DiscordProfile {
   id: string
@@ -121,10 +131,14 @@ const auth = betterAuth({
                 const name =
                   discordProfile.global_name || discordProfile.username
 
-                // Always sync Discord-controlled fields
+                // Always sync Discord-controlled name and avatar.
                 if (user.name !== name) updateData.name = name
                 if (user.image !== avatarUrl) updateData.image = avatarUrl
-                if (user.discordId !== discordProfile.id) {
+
+                // discordId is an immutable identity anchor: only set it when unset.
+                // Rebinding a different Discord account must happen through an
+                // explicit admin flow, not a silent login-side effect.
+                if (!user.discordId) {
                   updateData.discordId = discordProfile.id
                 }
 
@@ -138,8 +152,14 @@ const auth = betterAuth({
               data: updateData,
             })
           } catch (error) {
+            // Log only the error message — avoid serializing request objects that
+            // may carry the Discord bearer token in their headers.
             logger.error(
-              { error, userId: session.userId },
+              {
+                errorMessage:
+                  error instanceof Error ? error.message : 'unknown',
+                userId: session.userId,
+              },
               'Failed to sync Discord profile',
             )
           }

@@ -14,6 +14,7 @@ import { CACHE_TAGS, MAX_TEAM_LOGO_SIZE } from '@/lib/config/constants'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
+import { verifyImageMagicBytes } from '@/lib/utils/image-magic'
 import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
@@ -54,6 +55,15 @@ export const POST = async (request: Request) => {
     if (file.size > MAX_TEAM_LOGO_SIZE) {
       return NextResponse.json(
         { error: 'Le fichier dépasse la taille maximale de 2 Mo.' },
+        { status: 400 },
+      )
+    }
+
+    // Guard against spoofed Content-Type: validate magic bytes match the
+    // declared image format so an HTML/JS payload cannot masquerade as a PNG.
+    if (!(await verifyImageMagicBytes(file, file.type))) {
+      return NextResponse.json(
+        { error: 'Le fichier ne correspond pas à un format image valide.' },
         { status: 400 },
       )
     }
@@ -189,6 +199,23 @@ export const DELETE = async (request: Request) => {
       return NextResponse.json(
         { error: "Seul le capitaine peut supprimer le logo de l'équipe." },
         { status: 403 },
+      )
+    }
+
+    // Mirror the POST-side rules: once a tournament is no longer published or
+    // has team logos disabled, captains must go through an admin flow to
+    // remove the logo — the public endpoint does not accept mutations.
+    if (team.tournament.status !== TournamentStatus.PUBLISHED) {
+      return NextResponse.json(
+        { error: 'Ce tournoi ne permet plus de modifications.' },
+        { status: 400 },
+      )
+    }
+
+    if (!team.tournament.teamLogoEnabled) {
+      return NextResponse.json(
+        { error: "Les logos d'équipe ne sont pas activés pour ce tournoi." },
+        { status: 400 },
       )
     }
 

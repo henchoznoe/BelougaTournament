@@ -159,8 +159,9 @@ describe('isRefundEligible', () => {
     ).toBe(false)
   })
 
-  it('returns true when exactly at the deadline boundary', () => {
-    // Exactly 7 days before start
+  it('returns false when exactly at the deadline boundary (exclusive)', () => {
+    // Exactly 7 days before start — deadline is exclusive so this is no
+    // longer eligible (must be strictly more than 7 days before start).
     const exactDeadline = new Date(
       startDate.getTime() - 7 * 24 * 60 * 60 * 1000,
     )
@@ -170,6 +171,20 @@ describe('isRefundEligible', () => {
         RefundPolicyType.BEFORE_DEADLINE,
         7,
         exactDeadline,
+      ),
+    ).toBe(false)
+  })
+
+  it('returns true when 1ms before the deadline', () => {
+    const justBefore = new Date(
+      startDate.getTime() - 7 * 24 * 60 * 60 * 1000 - 1,
+    )
+    expect(
+      isRefundEligible(
+        startDate,
+        RefundPolicyType.BEFORE_DEADLINE,
+        7,
+        justBefore,
       ),
     ).toBe(true)
   })

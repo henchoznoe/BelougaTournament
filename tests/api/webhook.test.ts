@@ -23,6 +23,13 @@ vi.mock('@/lib/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock('@/lib/core/env', () => ({
+  env: {
+    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+    NODE_ENV: 'test',
+  },
+}))
+
 const mockRemoveUserFromTeam = vi.fn()
 vi.mock('@/lib/utils/team', () => ({
   removeUserFromTeam: (...args: unknown[]) => mockRemoveUserFromTeam(...args),
@@ -80,6 +87,7 @@ describe('POST /api/webhook', () => {
     mockPaymentFindUnique.mockResolvedValue({
       id: 'pay-1',
       status: PaymentStatus.PENDING,
+      amount: 1500,
       registration: { id: 'reg-1' },
     })
 
@@ -95,9 +103,13 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_1',
       type: 'checkout.session.completed',
+      livemode: false,
       data: {
         object: {
           id: 'cs_test_123',
+          status: 'complete',
+          payment_status: 'paid',
+          amount_total: 1500,
           metadata: { paymentId: 'pay-1' },
           payment_intent: 'pi_123',
           customer: 'cus_123',
@@ -144,6 +156,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_duplicate',
       type: 'checkout.session.completed',
+      livemode: false,
       data: { object: {} },
     })
 
@@ -168,6 +181,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_expired',
       type: 'checkout.session.expired',
+      livemode: false,
       data: {
         object: {
           id: 'cs_expired',
@@ -219,6 +233,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_expired_2',
       type: 'checkout.session.expired',
+      livemode: false,
       data: {
         object: {
           id: 'cs_expired_2',
@@ -253,6 +268,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_failed',
       type: 'payment_intent.payment_failed',
+      livemode: false,
       data: {
         object: {
           id: 'pi_failed',
@@ -302,6 +318,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_failed_2',
       type: 'payment_intent.payment_failed',
+      livemode: false,
       data: {
         object: {
           id: 'pi_no_meta',
@@ -330,6 +347,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_refund',
       type: 'charge.refunded',
+      livemode: false,
       data: {
         object: {
           id: 'ch_refund_1',
@@ -373,6 +391,7 @@ describe('POST /api/webhook', () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_refund_2',
       type: 'charge.refunded',
+      livemode: false,
       data: {
         object: {
           id: 'ch_unknown',
