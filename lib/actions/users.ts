@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -55,9 +55,9 @@ export const promoteToAdmin = authenticatedAction({
       prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
+    updateTag(CACHE_TAGS.USERS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
     return { success: true, message: `${user.name} a été promu admin.` }
   },
@@ -100,9 +100,9 @@ export const demoteAdmin = authenticatedAction({
       prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
+    updateTag(CACHE_TAGS.USERS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
     return { success: true, message: `${user.name} a été rétrogradé.` }
   },
@@ -127,8 +127,8 @@ export const updateUser = authenticatedAction({
       data: { displayName: data.displayName },
     })
 
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
+    updateTag(CACHE_TAGS.USERS)
+    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
     return { success: true, message: `${user.name} a été mis à jour.` }
   },
@@ -169,10 +169,10 @@ export const deleteUser = authenticatedAction({
 
     await prisma.user.delete({ where: { id: data.userId } })
 
-    revalidateTag(CACHE_TAGS.USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.USERS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return {
       success: true,

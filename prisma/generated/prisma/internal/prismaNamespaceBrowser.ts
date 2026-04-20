@@ -254,6 +254,7 @@ export const PaymentScalarFieldEnum = {
   stripePaymentIntentId: 'stripePaymentIntentId',
   stripeChargeId: 'stripeChargeId',
   stripeCustomerId: 'stripeCustomerId',
+  stripeFee: 'stripeFee',
   refundAmount: 'refundAmount',
   paidAt: 'paidAt',
   refundedAt: 'refundedAt',

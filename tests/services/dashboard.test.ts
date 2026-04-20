@@ -239,6 +239,7 @@ describe('getDashboardPaymentStats', () => {
   const EMPTY_STATS = {
     totalRevenue: 0,
     totalRefunded: 0,
+    totalStripeFees: 0,
     netRevenue: 0,
     transactionCount: 0,
     refundCount: 0,

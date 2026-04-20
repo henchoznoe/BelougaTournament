@@ -33,6 +33,7 @@ vi.mock('@/lib/core/logger', () => ({
 const mockRevalidateTag = vi.fn()
 vi.mock('next/cache', () => ({
   revalidateTag: (...args: unknown[]) => mockRevalidateTag(...args),
+  updateTag: (...args: unknown[]) => mockRevalidateTag(...args),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))
@@ -140,10 +141,10 @@ describe('createSponsor', () => {
     expect(createArg.data.url).toBeNull()
   })
 
-  it('calls revalidateTag with the sponsors tag', async () => {
+  it('calls updateTag with the sponsors tag', async () => {
     await createSponsor(VALID_SPONSOR_INPUT)
 
-    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
   })
 
   it('returns validation error when name is empty', async () => {
@@ -288,10 +289,10 @@ describe('deleteSponsor', () => {
     })
   })
 
-  it('calls revalidateTag with the sponsors tag', async () => {
+  it('calls updateTag with the sponsors tag', async () => {
     await deleteSponsor({ id: VALID_UUID })
 
-    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
   })
 
   it('returns validation error for invalid UUID', async () => {
@@ -391,10 +392,10 @@ describe('toggleSponsorStatus', () => {
     expect(mockSponsorUpdate).not.toHaveBeenCalled()
   })
 
-  it('calls revalidateTag with the sponsors tag', async () => {
+  it('calls updateTag with the sponsors tag', async () => {
     await toggleSponsorStatus({ id: VALID_UUID })
 
-    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors', 'hours')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
   })
 
   it('returns validation error for invalid UUID', async () => {

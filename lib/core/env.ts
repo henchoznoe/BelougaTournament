@@ -47,11 +47,11 @@ const serverSchema = z.object({
     .min(1, 'STRIPE_WEBHOOK_SECRET is required')
     .optional(),
 
-  // Platform owners (comma-separated emails)
+  // Platform owners (comma-separated emails, normalized to lowercase)
   OWNER_EMAILS: z
     .string()
     .min(1, 'OWNER_EMAILS is required')
-    .transform(val => val.split(',').map(e => e.trim())),
+    .transform(val => val.split(',').map(e => e.trim().toLowerCase())),
 
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
@@ -72,17 +72,16 @@ const parsedServer = isServer
   ? serverSchema.safeParse(process.env)
   : { success: true as const, data: {} as z.infer<typeof serverSchema> }
 
-// Centralized error handling
+// Centralized error handling. Never log raw values — only variable names and validation messages.
 if (!parsedClient.success || !parsedServer.success) {
-  console.error('❌ Invalid environment variables:')
-
   const clientErrors = parsedClient.success ? [] : parsedClient.error.issues
   const serverErrors = parsedServer.success ? [] : parsedServer.error.issues
   const allErrors = [...clientErrors, ...serverErrors]
+  const summary = allErrors
+    .map(issue => `  - ${issue.path.join('.')}: ${issue.message}`)
+    .join('\n')
 
-  allErrors.forEach(issue => {
-    console.error(`- ${issue.path.join('.')}: ${issue.message}`)
-  })
+  console.error(`Invalid environment configuration:\n${summary}`)
 
   if (isServer && process.env.NODE_ENV !== 'test') {
     process.exit(1)

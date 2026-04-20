@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -118,8 +118,8 @@ export const createTournament = authenticatedAction({
       },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -292,7 +292,7 @@ export const updateTournament = authenticatedAction({
       }),
     ])
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
 
     return {
       success: true,
@@ -325,9 +325,9 @@ export const deleteTournament = authenticatedAction({
       where: { id: data.id },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return {
       success: true,
@@ -367,8 +367,8 @@ export const updateTournamentStatus = authenticatedAction({
       data: { status: data.status },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,

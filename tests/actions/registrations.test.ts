@@ -42,6 +42,7 @@ vi.mock('@/lib/core/stripe', () => ({
 
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))

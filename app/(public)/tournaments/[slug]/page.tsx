@@ -9,6 +9,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { StripeReturnToast } from '@/components/public/tournaments/stripe-return-toast'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSession } from '@/lib/services/auth'
@@ -65,13 +66,18 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
     : null
 
   return (
-    <TournamentDetail
-      tournament={tournament}
-      twitchUsername={settings.twitchUsername ?? undefined}
-      availableTeams={availableTeams}
-      registrationState={isRegistered}
-      isAuthenticated={!!session?.user}
-    />
+    <>
+      <Suspense fallback={null}>
+        <StripeReturnToast tournamentId={tournament.id} />
+      </Suspense>
+      <TournamentDetail
+        tournament={tournament}
+        twitchUsername={settings.twitchUsername ?? undefined}
+        availableTeams={availableTeams}
+        registrationState={isRegistered}
+        isAuthenticated={!!session?.user}
+      />
+    </>
   )
 }
 

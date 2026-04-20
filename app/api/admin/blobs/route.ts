@@ -11,11 +11,22 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { MAX_ADMIN_UPLOAD_SIZE } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
+import { verifyImageMagicBytes } from '@/lib/utils/image-magic'
 import { verifyAdmin } from '@/lib/utils/verify-admin'
 
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
-const ALLOWED_FOLDER_ROOTS = new Set(['logos', 'sponsors', 'tournaments'])
+const ALLOWED_FOLDER_ROOTS = ['logos', 'sponsors', 'tournaments'] as const
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
+
+/**
+ * Matches a folder path of the form `root` or `root/sub[/sub...]` where every
+ * segment is [a-z0-9_-]+. This rejects empty segments (double slashes), any
+ * `.` / `..` traversal, backslashes, and Windows-style paths. The root must
+ * be one of `ALLOWED_FOLDER_ROOTS`.
+ */
+const ALLOWED_FOLDER_REGEX = new RegExp(
+  `^(${ALLOWED_FOLDER_ROOTS.join('|')})(?:/[a-z0-9_-]+)*$`,
+)
 
 /** Validates that a URL belongs to the app's Vercel Blob store. */
 const isValidBlobUrl = (url: string): boolean => {
@@ -29,11 +40,9 @@ const isValidBlobUrl = (url: string): boolean => {
   }
 }
 
-/** Checks whether a folder string starts with an allowed root folder. */
-const isAllowedFolder = (folder: string): boolean => {
-  const root = folder.split('/')[0]
-  return ALLOWED_FOLDER_ROOTS.has(root)
-}
+/** Checks whether a folder path is an allowed whitelist entry with safe segments only. */
+const isAllowedFolder = (folder: string): boolean =>
+  ALLOWED_FOLDER_REGEX.test(folder)
 
 /** GET — List blobs, optionally filtered by folder prefix. */
 export const GET = async (request: Request) => {
@@ -87,6 +96,15 @@ export const POST = async (request: Request) => {
     if (file.size > MAX_ADMIN_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: 'Le fichier dépasse la taille maximale de 5 Mo.' },
+        { status: 400 },
+      )
+    }
+
+    // Guard against spoofed Content-Type: the browser-declared MIME cannot be
+    // trusted, so we confirm the magic bytes match the declared image format.
+    if (!(await verifyImageMagicBytes(file, file.type))) {
+      return NextResponse.json(
+        { error: 'Le fichier ne correspond pas à un format image valide.' },
         { status: 400 },
       )
     }

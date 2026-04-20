@@ -1,0 +1,58 @@
+/**
+ * File: components/public/tournaments/stripe-return-toast.tsx
+ * Description: Client component that reads Stripe return query params, cancels any pending
+ *              registration on the cancelled path, and displays a toast notification.
+ * Author: Noé Henchoz
+ * License: MIT
+ * Copyright (c) 2026 Noé Henchoz
+ */
+
+'use client'
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
+import { cancelMyPendingRegistrationForTournament } from '@/lib/actions/tournament-registration'
+
+interface StripeReturnToastProps {
+  tournamentId: string
+}
+
+export const StripeReturnToast = ({ tournamentId }: StripeReturnToastProps) => {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  // Prevent double-execution in React strict mode / concurrent rendering
+  const handledRef = useRef(false)
+
+  useEffect(() => {
+    const stripe = searchParams.get('stripe')
+    if (!stripe || handledRef.current) return
+    handledRef.current = true
+
+    // Clean up the query param from the URL immediately
+    router.replace(pathname)
+
+    if (stripe === 'success') {
+      toast.success('Ton inscription est confirm\u00e9e\u00a0!')
+      router.refresh()
+    } else if (stripe === 'cancelled') {
+      // Cancel the PENDING registration server-side, then notify the user
+      cancelMyPendingRegistrationForTournament({ tournamentId })
+        .then(() => {
+          toast.error(
+            'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
+          )
+          router.refresh()
+        })
+        .catch(() => {
+          toast.error(
+            'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
+          )
+          router.refresh()
+        })
+    }
+  }, [searchParams, router, pathname, tournamentId])
+
+  return null
+}

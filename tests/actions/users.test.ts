@@ -28,6 +28,7 @@ vi.mock('@/lib/core/logger', () => ({
 
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))

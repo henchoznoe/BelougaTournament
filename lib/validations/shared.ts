@@ -17,19 +17,28 @@ export const optionalUrl = z
     message: 'URL invalide (doit commencer par https://)',
   })
 
-/** Application-relative return path (must start with / but not //). */
+/**
+ * Application-relative return path (must start with / but not // or /\).
+ * Blocks both `//evil.com` and `/\evil.com` open-redirect variants.
+ */
 export const returnPathSchema = z
   .string()
   .trim()
   .min(1, 'Le chemin de retour est requis.')
   .startsWith('/', 'Le chemin de retour doit commencer par /.')
   .max(VALIDATION_LIMITS.RETURN_PATH_MAX, 'Le chemin de retour est trop long.')
-  .refine(val => !val.startsWith('//'), {
+  .refine(val => !val.startsWith('//') && !val.startsWith('/\\'), {
     message: 'Le chemin de retour est invalide.',
   })
 
-/** Dynamic field values JSON map (string keys, string or number values). */
+/**
+ * Dynamic field values JSON map (string keys, string or number values).
+ * Keys and string values are bounded to prevent storage DoS and stored-data abuse.
+ */
 export const fieldValuesSchema = z.record(
-  z.string(),
-  z.union([z.string(), z.number()]),
+  z.string().trim().min(1).max(VALIDATION_LIMITS.FIELD_LABEL_MAX),
+  z.union([
+    z.string().trim().max(VALIDATION_LIMITS.FIELD_VALUE_MAX),
+    z.number().finite(),
+  ]),
 )

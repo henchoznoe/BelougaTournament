@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS, SETTINGS_SINGLETON_ID } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -43,7 +43,7 @@ export const updateSettings = authenticatedAction({
       create: { id: SETTINGS_SINGLETON_ID, ...payload },
     })
 
-    revalidateTag(CACHE_TAGS.SETTINGS, 'hours')
+    updateTag(CACHE_TAGS.SETTINGS)
 
     return { success: true, message: 'Les paramètres ont été mis à jour.' }
   },

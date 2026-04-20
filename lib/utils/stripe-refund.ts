@@ -35,6 +35,7 @@ export const issueStripeRefundAfterDbUpdate = async ({
   latestPayment: {
     id: string
     amount: number
+    stripeFee: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }
@@ -44,14 +45,21 @@ export const issueStripeRefundAfterDbUpdate = async ({
 }): Promise<void> => {
   try {
     const stripe = getStripe()
+    // Refund the original amount minus Stripe processing fees (non-recoverable).
+    // When stripeFee is unknown (null), fall back to a full refund.
+    const refundAmount = latestPayment.stripeFee
+      ? latestPayment.amount - latestPayment.stripeFee
+      : latestPayment.amount
     await stripe.refunds.create(
       latestPayment.stripePaymentIntentId
         ? {
             payment_intent: latestPayment.stripePaymentIntentId,
+            amount: refundAmount,
             reason: 'requested_by_customer',
           }
         : {
             charge: latestPayment.stripeChargeId ?? undefined,
+            amount: refundAmount,
             reason: 'requested_by_customer',
           },
       {

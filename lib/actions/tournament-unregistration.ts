@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -40,12 +40,14 @@ type RegistrationWithTournamentInfo = {
   paymentStatus: PaymentStatus
   status: RegistrationStatus
   paymentRequiredSnapshot: boolean
+  refundDeadlineDaysSnapshot: number | null
   teamId: string | null
   userId: string
   payments: {
     id: string
     status: PaymentStatus
     amount: number
+    stripeFee: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -84,6 +86,7 @@ export const unregisterFromTournament = authenticatedAction({
             id: true,
             status: true,
             amount: true,
+            stripeFee: true,
             stripePaymentIntentId: true,
             stripeChargeId: true,
           },
@@ -120,12 +123,21 @@ export const unregisterFromTournament = authenticatedAction({
     }
 
     const latestPayment = registration.payments[0] ?? null
+
+    // Use the snapshot captured at registration time so an admin can't shift
+    // the refund window after a user has already purchased. Fall back to the
+    // live tournament value only for legacy registrations that predate the
+    // snapshot column (never for new registrations, which always populate it).
+    const refundDeadlineDays =
+      registration.refundDeadlineDaysSnapshot ??
+      registration.tournament.refundDeadlineDays
+
     const refundEligible =
       registration.paymentStatus === PaymentStatus.PAID &&
       isRefundEligible(
         registration.tournament.startDate,
         registration.tournament.refundPolicyType,
-        registration.tournament.refundDeadlineDays,
+        refundDeadlineDays,
         new Date(),
       )
     const isPaidRegistration = registration.paymentRequiredSnapshot
@@ -151,7 +163,8 @@ export const unregisterFromTournament = authenticatedAction({
               where: { id: latestPayment.id },
               data: {
                 status: PaymentStatus.REFUNDED,
-                refundAmount: latestPayment.amount,
+                refundAmount:
+                  latestPayment.amount - (latestPayment.stripeFee ?? 0),
                 refundedAt: new Date(),
               },
             })
@@ -173,16 +186,18 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
-      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+      updateTag(CACHE_TAGS.TOURNAMENTS)
+      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+      updateTag(CACHE_TAGS.DASHBOARD_STATS)
+      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
       return {
         success: true,
-        message: refundEligible
-          ? 'Votre inscription a été annulée et remboursée.'
-          : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
+        message: !isPaidRegistration
+          ? 'Votre inscription a été annulée.'
+          : refundEligible
+            ? 'Votre inscription a été annulée et remboursée.'
+            : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
       }
     }
 
@@ -221,7 +236,8 @@ export const unregisterFromTournament = authenticatedAction({
               where: { id: latestPayment.id },
               data: {
                 status: PaymentStatus.REFUNDED,
-                refundAmount: latestPayment.amount,
+                refundAmount:
+                  latestPayment.amount - (latestPayment.stripeFee ?? 0),
                 refundedAt: new Date(),
               },
             })
@@ -243,16 +259,18 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
-      revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-      revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+      updateTag(CACHE_TAGS.TOURNAMENTS)
+      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+      updateTag(CACHE_TAGS.DASHBOARD_STATS)
+      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
       return {
         success: true,
-        message: refundEligible
-          ? 'Votre inscription a été annulée et remboursée.'
-          : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
+        message: !isPaidRegistration
+          ? 'Votre inscription a été annulée.'
+          : refundEligible
+            ? 'Votre inscription a été annulée et remboursée.'
+            : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
       }
     }
 
@@ -322,16 +340,18 @@ export const unregisterFromTournament = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
     return {
       success: true,
-      message: refundEligible
-        ? 'Votre inscription a été annulée et remboursée.'
-        : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
+      message: !isPaidRegistration
+        ? 'Votre inscription a été annulée.'
+        : refundEligible
+          ? 'Votre inscription a été annulée et remboursée.'
+          : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
     }
   },
 })

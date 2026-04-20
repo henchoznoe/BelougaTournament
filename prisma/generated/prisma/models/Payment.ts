@@ -28,11 +28,13 @@ export type AggregatePayment = {
 
 export type PaymentAvgAggregateOutputType = {
   amount: number | null
+  stripeFee: number | null
   refundAmount: number | null
 }
 
 export type PaymentSumAggregateOutputType = {
   amount: number | null
+  stripeFee: number | null
   refundAmount: number | null
 }
 
@@ -47,6 +49,7 @@ export type PaymentMinAggregateOutputType = {
   stripePaymentIntentId: string | null
   stripeChargeId: string | null
   stripeCustomerId: string | null
+  stripeFee: number | null
   refundAmount: number | null
   paidAt: Date | null
   refundedAt: Date | null
@@ -65,6 +68,7 @@ export type PaymentMaxAggregateOutputType = {
   stripePaymentIntentId: string | null
   stripeChargeId: string | null
   stripeCustomerId: string | null
+  stripeFee: number | null
   refundAmount: number | null
   paidAt: Date | null
   refundedAt: Date | null
@@ -83,6 +87,7 @@ export type PaymentCountAggregateOutputType = {
   stripePaymentIntentId: number
   stripeChargeId: number
   stripeCustomerId: number
+  stripeFee: number
   refundAmount: number
   paidAt: number
   refundedAt: number
@@ -94,11 +99,13 @@ export type PaymentCountAggregateOutputType = {
 
 export type PaymentAvgAggregateInputType = {
   amount?: true
+  stripeFee?: true
   refundAmount?: true
 }
 
 export type PaymentSumAggregateInputType = {
   amount?: true
+  stripeFee?: true
   refundAmount?: true
 }
 
@@ -113,6 +120,7 @@ export type PaymentMinAggregateInputType = {
   stripePaymentIntentId?: true
   stripeChargeId?: true
   stripeCustomerId?: true
+  stripeFee?: true
   refundAmount?: true
   paidAt?: true
   refundedAt?: true
@@ -131,6 +139,7 @@ export type PaymentMaxAggregateInputType = {
   stripePaymentIntentId?: true
   stripeChargeId?: true
   stripeCustomerId?: true
+  stripeFee?: true
   refundAmount?: true
   paidAt?: true
   refundedAt?: true
@@ -149,6 +158,7 @@ export type PaymentCountAggregateInputType = {
   stripePaymentIntentId?: true
   stripeChargeId?: true
   stripeCustomerId?: true
+  stripeFee?: true
   refundAmount?: true
   paidAt?: true
   refundedAt?: true
@@ -254,6 +264,7 @@ export type PaymentGroupByOutputType = {
   stripePaymentIntentId: string | null
   stripeChargeId: string | null
   stripeCustomerId: string | null
+  stripeFee: number | null
   refundAmount: number | null
   paidAt: Date | null
   refundedAt: Date | null
@@ -295,6 +306,7 @@ export type PaymentWhereInput = {
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Payment"> | string | null
   stripeChargeId?: Prisma.StringNullableFilter<"Payment"> | string | null
   stripeCustomerId?: Prisma.StringNullableFilter<"Payment"> | string | null
+  stripeFee?: Prisma.IntNullableFilter<"Payment"> | number | null
   refundAmount?: Prisma.IntNullableFilter<"Payment"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
   refundedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -314,6 +326,7 @@ export type PaymentOrderByWithRelationInput = {
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeChargeId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeFee?: Prisma.SortOrderInput | Prisma.SortOrder
   refundAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   refundedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -336,6 +349,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.IntFilter<"Payment"> | number
   currency?: Prisma.StringFilter<"Payment"> | string
   stripeCustomerId?: Prisma.StringNullableFilter<"Payment"> | string | null
+  stripeFee?: Prisma.IntNullableFilter<"Payment"> | number | null
   refundAmount?: Prisma.IntNullableFilter<"Payment"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
   refundedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -355,6 +369,7 @@ export type PaymentOrderByWithAggregationInput = {
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeChargeId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeFee?: Prisma.SortOrderInput | Prisma.SortOrder
   refundAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   refundedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -381,6 +396,7 @@ export type PaymentScalarWhereWithAggregatesInput = {
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   stripeChargeId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   stripeCustomerId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
+  stripeFee?: Prisma.IntNullableWithAggregatesFilter<"Payment"> | number | null
   refundAmount?: Prisma.IntNullableWithAggregatesFilter<"Payment"> | number | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
   refundedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
@@ -398,6 +414,7 @@ export type PaymentCreateInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -417,6 +434,7 @@ export type PaymentUncheckedCreateInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -434,6 +452,7 @@ export type PaymentUpdateInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -453,6 +472,7 @@ export type PaymentUncheckedUpdateInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -471,6 +491,7 @@ export type PaymentCreateManyInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -488,6 +509,7 @@ export type PaymentUpdateManyMutationInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -506,6 +528,7 @@ export type PaymentUncheckedUpdateManyInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -534,6 +557,7 @@ export type PaymentCountOrderByAggregateInput = {
   stripePaymentIntentId?: Prisma.SortOrder
   stripeChargeId?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
+  stripeFee?: Prisma.SortOrder
   refundAmount?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   refundedAt?: Prisma.SortOrder
@@ -543,6 +567,7 @@ export type PaymentCountOrderByAggregateInput = {
 
 export type PaymentAvgOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  stripeFee?: Prisma.SortOrder
   refundAmount?: Prisma.SortOrder
 }
 
@@ -557,6 +582,7 @@ export type PaymentMaxOrderByAggregateInput = {
   stripePaymentIntentId?: Prisma.SortOrder
   stripeChargeId?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
+  stripeFee?: Prisma.SortOrder
   refundAmount?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   refundedAt?: Prisma.SortOrder
@@ -575,6 +601,7 @@ export type PaymentMinOrderByAggregateInput = {
   stripePaymentIntentId?: Prisma.SortOrder
   stripeChargeId?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
+  stripeFee?: Prisma.SortOrder
   refundAmount?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   refundedAt?: Prisma.SortOrder
@@ -584,6 +611,7 @@ export type PaymentMinOrderByAggregateInput = {
 
 export type PaymentSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  stripeFee?: Prisma.SortOrder
   refundAmount?: Prisma.SortOrder
 }
 
@@ -643,6 +671,7 @@ export type PaymentCreateWithoutRegistrationInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -660,6 +689,7 @@ export type PaymentUncheckedCreateWithoutRegistrationInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -707,6 +737,7 @@ export type PaymentScalarWhereInput = {
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Payment"> | string | null
   stripeChargeId?: Prisma.StringNullableFilter<"Payment"> | string | null
   stripeCustomerId?: Prisma.StringNullableFilter<"Payment"> | string | null
+  stripeFee?: Prisma.IntNullableFilter<"Payment"> | number | null
   refundAmount?: Prisma.IntNullableFilter<"Payment"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
   refundedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -724,6 +755,7 @@ export type PaymentCreateManyRegistrationInput = {
   stripePaymentIntentId?: string | null
   stripeChargeId?: string | null
   stripeCustomerId?: string | null
+  stripeFee?: number | null
   refundAmount?: number | null
   paidAt?: Date | string | null
   refundedAt?: Date | string | null
@@ -741,6 +773,7 @@ export type PaymentUpdateWithoutRegistrationInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -758,6 +791,7 @@ export type PaymentUncheckedUpdateWithoutRegistrationInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -775,6 +809,7 @@ export type PaymentUncheckedUpdateManyWithoutRegistrationInput = {
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeFee?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refundAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   refundedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -795,6 +830,7 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   stripePaymentIntentId?: boolean
   stripeChargeId?: boolean
   stripeCustomerId?: boolean
+  stripeFee?: boolean
   refundAmount?: boolean
   paidAt?: boolean
   refundedAt?: boolean
@@ -814,6 +850,7 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   stripePaymentIntentId?: boolean
   stripeChargeId?: boolean
   stripeCustomerId?: boolean
+  stripeFee?: boolean
   refundAmount?: boolean
   paidAt?: boolean
   refundedAt?: boolean
@@ -833,6 +870,7 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   stripePaymentIntentId?: boolean
   stripeChargeId?: boolean
   stripeCustomerId?: boolean
+  stripeFee?: boolean
   refundAmount?: boolean
   paidAt?: boolean
   refundedAt?: boolean
@@ -852,6 +890,7 @@ export type PaymentSelectScalar = {
   stripePaymentIntentId?: boolean
   stripeChargeId?: boolean
   stripeCustomerId?: boolean
+  stripeFee?: boolean
   refundAmount?: boolean
   paidAt?: boolean
   refundedAt?: boolean
@@ -859,7 +898,7 @@ export type PaymentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registrationId" | "provider" | "status" | "amount" | "currency" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "stripeChargeId" | "stripeCustomerId" | "refundAmount" | "paidAt" | "refundedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registrationId" | "provider" | "status" | "amount" | "currency" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "stripeChargeId" | "stripeCustomerId" | "stripeFee" | "refundAmount" | "paidAt" | "refundedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registration?: boolean | Prisma.TournamentRegistrationDefaultArgs<ExtArgs>
 }
@@ -886,6 +925,7 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
     stripeCustomerId: string | null
+    stripeFee: number | null
     refundAmount: number | null
     paidAt: Date | null
     refundedAt: Date | null
@@ -1325,6 +1365,7 @@ export interface PaymentFieldRefs {
   readonly stripePaymentIntentId: Prisma.FieldRef<"Payment", 'String'>
   readonly stripeChargeId: Prisma.FieldRef<"Payment", 'String'>
   readonly stripeCustomerId: Prisma.FieldRef<"Payment", 'String'>
+  readonly stripeFee: Prisma.FieldRef<"Payment", 'Int'>
   readonly refundAmount: Prisma.FieldRef<"Payment", 'Int'>
   readonly paidAt: Prisma.FieldRef<"Payment", 'DateTime'>
   readonly refundedAt: Prisma.FieldRef<"Payment", 'DateTime'>

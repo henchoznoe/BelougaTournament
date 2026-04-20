@@ -10,6 +10,7 @@ import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
@@ -42,6 +43,21 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
     return
   }
 
+  // Verify the session actually completed with a paid charge. `checkout.session.completed`
+  // also fires for sessions that completed without immediate payment (e.g. async payment
+  // methods still pending), so we must require both status and payment_status.
+  if (session.status !== 'complete' || session.payment_status !== 'paid') {
+    logger.warn(
+      {
+        eventId: event.id,
+        sessionStatus: session.status,
+        paymentStatus: session.payment_status,
+      },
+      'Checkout session not in paid/complete state — skipping confirmation',
+    )
+    return
+  }
+
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
     include: {
@@ -55,8 +71,27 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
     return
   }
 
+  // Verify that the amount Stripe actually collected matches the amount we recorded
+  // when creating the checkout session. A mismatch indicates tampering or a
+  // re-priced session and must never be confirmed.
+  if (session.amount_total !== payment.amount) {
+    logger.error(
+      {
+        eventId: event.id,
+        expected: payment.amount,
+        actual: session.amount_total,
+        paymentId,
+      },
+      'Checkout session amount_total mismatch — refusing to confirm',
+    )
+    return
+  }
+
   let chargeId: string | null = null
   let paymentIntentId: string | null = null
+  // Stripe processing fee in the platform currency (centimes). Retrieved from the
+  // balance_transaction so the dashboard can display true net revenue without estimation.
+  let stripeFee: number | null = null
 
   if (typeof session.payment_intent === 'string') {
     paymentIntentId = session.payment_intent
@@ -64,11 +99,20 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
     try {
       const paymentIntent = await stripe.paymentIntents.retrieve(
         session.payment_intent,
+        { expand: ['latest_charge.balance_transaction'] },
       )
-      chargeId =
-        typeof paymentIntent.latest_charge === 'string'
-          ? paymentIntent.latest_charge
-          : null
+
+      if (typeof paymentIntent.latest_charge === 'string') {
+        chargeId = paymentIntent.latest_charge
+      } else if (paymentIntent.latest_charge) {
+        chargeId = paymentIntent.latest_charge.id
+
+        // balance_transaction is expanded — read the fee directly
+        const bt = paymentIntent.latest_charge.balance_transaction
+        if (bt && typeof bt !== 'string') {
+          stripeFee = bt.fee
+        }
+      }
     } catch (error) {
       logger.warn(
         { error, eventId: event.id },
@@ -87,6 +131,7 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
         stripeChargeId: chargeId,
         stripeCustomerId:
           typeof session.customer === 'string' ? session.customer : null,
+        stripeFee,
         paidAt: new Date(),
       },
     })
@@ -212,6 +257,51 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   })
 }
 
+/**
+ * Backfills the Stripe processing fee on a payment record when charge.updated fires.
+ *
+ * The balance_transaction is created asynchronously by Stripe and may not be
+ * available yet when checkout.session.completed is processed. This handler runs
+ * whenever a charge is updated and writes the fee if it is still missing.
+ */
+const handleChargeUpdated = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'charge.updated'
+  const charge = event.data.object as Stripe.Charge
+
+  // Only process charges that have a balance_transaction (string ID or expanded object)
+  if (!charge.balance_transaction) {
+    return
+  }
+
+  const payment = await prisma.payment.findFirst({
+    where: { stripeChargeId: charge.id },
+    select: { id: true, stripeFee: true },
+  })
+
+  // Skip if no matching payment or fee is already stored (idempotent)
+  if (!payment || payment.stripeFee !== null) {
+    return
+  }
+
+  // Stripe webhook events send the balance_transaction as a string ID (not expanded).
+  // We must retrieve the full object from the API to read the fee.
+  let fee: number
+  if (typeof charge.balance_transaction === 'string') {
+    const stripe = getStripe()
+    const bt = await stripe.balanceTransactions.retrieve(
+      charge.balance_transaction,
+    )
+    fee = bt.fee
+  } else {
+    fee = charge.balance_transaction.fee
+  }
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { stripeFee: fee },
+  })
+}
+
 const handleChargeRefunded = async (event: Stripe.Event) => {
   // Safe: this handler is only called from the switch branch for 'charge.refunded'
   const charge = event.data.object as Stripe.Charge
@@ -294,6 +384,25 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 400 })
   }
 
+  // Enforce livemode/environment symmetry so test-mode events signed with a
+  // leaked test secret cannot mutate production data (and vice-versa).
+  // Use VERCEL_ENV (not NODE_ENV) because Vercel sets NODE_ENV=production on
+  // all deployed environments including preview branches; VERCEL_ENV correctly
+  // distinguishes 'production' from 'preview' and is undefined in local dev.
+  const expectedLivemode = env.VERCEL_ENV === 'production'
+  if (event.livemode !== expectedLivemode) {
+    logger.warn(
+      {
+        eventId: event.id,
+        livemode: event.livemode,
+        vercelEnv: env.VERCEL_ENV,
+        nodeEnv: env.NODE_ENV,
+      },
+      'Stripe webhook livemode does not match runtime environment — rejecting',
+    )
+    return NextResponse.json({ error: 'Livemode mismatch.' }, { status: 400 })
+  }
+
   try {
     // Atomic idempotency guard: insert before processing; P2002 = duplicate, return early
     await prisma.stripeWebhookEvent.create({
@@ -320,6 +429,10 @@ export const POST = async (request: Request) => {
     )
   }
 
+  // Only handler failures (DB work) should release the idempotency row so
+  // Stripe retries the event. Post-handler cache revalidation runs outside the
+  // try so a failing `revalidateTag` cannot cause the handler's DB mutations
+  // to be replayed on retry.
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -334,18 +447,14 @@ export const POST = async (request: Request) => {
       case 'charge.refunded':
         await handleChargeRefunded(event)
         break
+      case 'charge.updated':
+        await handleChargeUpdated(event)
+        break
       default:
         break
     }
-
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
-
-    return NextResponse.json({ received: true })
   } catch (error) {
-    // Delete idempotency record on failure so Stripe can retry
+    // Release the idempotency row so Stripe can retry the delivery.
     try {
       await prisma.stripeWebhookEvent.delete({
         where: { stripeEventId: event.id },
@@ -363,4 +472,20 @@ export const POST = async (request: Request) => {
       { status: 500 },
     )
   }
+
+  try {
+    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+  } catch (error) {
+    // Cache revalidation failures are non-fatal; the mutations have already
+    // been persisted. Logging only — do not release the idempotency row.
+    logger.warn(
+      { error, eventId: event.id, type: event.type },
+      'Stripe webhook cache revalidation failed',
+    )
+  }
+
+  return NextResponse.json({ received: true })
 }

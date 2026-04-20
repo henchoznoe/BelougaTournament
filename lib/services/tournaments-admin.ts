@@ -68,7 +68,16 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
 
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: {
+                  in: [
+                    RegistrationStatus.PENDING,
+                    RegistrationStatus.CONFIRMED,
+                  ],
+                },
+              },
+            },
             teams: true,
           },
         },
@@ -101,7 +110,16 @@ export const getTournamentBySlug = async (
         },
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: {
+                  in: [
+                    RegistrationStatus.PENDING,
+                    RegistrationStatus.CONFIRMED,
+                  ],
+                },
+              },
+            },
             teams: true,
           },
         },
@@ -134,7 +152,16 @@ export const getTournamentById = async (
         },
         _count: {
           select: {
-            registrations: true,
+            registrations: {
+              where: {
+                status: {
+                  in: [
+                    RegistrationStatus.PENDING,
+                    RegistrationStatus.CONFIRMED,
+                  ],
+                },
+              },
+            },
             teams: true,
           },
         },

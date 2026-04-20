@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS, NOON_UTC_SUFFIX } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -35,7 +35,7 @@ export const createSponsor = authenticatedAction({
       },
     })
 
-    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    updateTag(CACHE_TAGS.SPONSORS)
 
     return { success: true, message: 'Le sponsor a été créé.' }
   },
@@ -55,7 +55,7 @@ export const updateSponsor = authenticatedAction({
       },
     })
 
-    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    updateTag(CACHE_TAGS.SPONSORS)
 
     return { success: true, message: 'Le sponsor a été mis à jour.' }
   },
@@ -69,7 +69,7 @@ export const deleteSponsor = authenticatedAction({
       where: { id: data.id },
     })
 
-    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    updateTag(CACHE_TAGS.SPONSORS)
 
     return { success: true, message: 'Le sponsor a été supprimé.' }
   },
@@ -93,7 +93,7 @@ export const toggleSponsorStatus = authenticatedAction({
       data: { enabled: !sponsor.enabled },
     })
 
-    revalidateTag(CACHE_TAGS.SPONSORS, 'hours')
+    updateTag(CACHE_TAGS.SPONSORS)
 
     const statusLabel = sponsor.enabled ? 'désactivé' : 'activé'
     return { success: true, message: `Le sponsor a été ${statusLabel}.` }

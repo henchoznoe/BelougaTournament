@@ -8,7 +8,7 @@
 
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import {
   CACHE_TAGS,
@@ -24,6 +24,7 @@ import type { ActionState } from '@/lib/types/actions'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
+  cancelPendingRegistrationSchema,
   createTeamSchema,
   joinTeamSchema,
   registerForTournamentSchema,
@@ -499,8 +500,8 @@ export const updateRegistrationFields = authenticatedAction({
       },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return {
       success: true,
@@ -586,8 +587,9 @@ export const registerForTournament = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -693,9 +695,9 @@ export const createTeamAndRegister = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
@@ -794,14 +796,104 @@ export const joinTeamAndRegister = authenticatedAction({
       })
     }
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
       success: true,
       message:
         "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Pending checkout cancellation
+// ---------------------------------------------------------------------------
+
+/**
+ * Cancels a PENDING (unpaid) registration for the current user.
+ * Called when the user returns from Stripe with ?stripe=cancelled.
+ * Expires the Stripe checkout session (if still active), removes the user from
+ * any team, then marks the payment as CANCELLED and the registration as EXPIRED.
+ * Idempotent: silently succeeds when no PENDING registration is found.
+ */
+export const cancelMyPendingRegistrationForTournament = authenticatedAction({
+  schema: cancelPendingRegistrationSchema,
+  handler: async (data, session): Promise<ActionState> => {
+    const userId = session.user.id
+
+    // Find the user's PENDING registration for this tournament
+    const registration = await prisma.tournamentRegistration.findUnique({
+      where: {
+        tournamentId_userId: {
+          tournamentId: data.tournamentId,
+          userId,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        teamId: true,
+      },
+    })
+
+    // Idempotent: nothing to cancel
+    if (!registration || registration.status !== RegistrationStatus.PENDING) {
+      return { success: true, message: 'Aucune inscription en attente.' }
+    }
+
+    // Fetch the latest pending payment separately to avoid select/include mixing
+    const pendingPayment = await prisma.payment.findFirst({
+      where: {
+        registrationId: registration.id,
+        status: PaymentStatus.PENDING,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        stripeCheckoutSessionId: true,
+      },
+    })
+
+    // Expire the Stripe checkout session if still active (best-effort)
+    if (pendingPayment?.stripeCheckoutSessionId) {
+      try {
+        const stripe = getStripe()
+        await stripe.checkout.sessions.expire(
+          pendingPayment.stripeCheckoutSessionId,
+        )
+      } catch {
+        // Session may already be expired or completed; non-fatal
+      }
+    }
+
+    // Update DB: remove from team if needed, cancel payment and registration
+    await prisma.$transaction(async tx => {
+      await removeUserFromTeam(tx, userId, data.tournamentId)
+
+      if (pendingPayment) {
+        await tx.payment.update({
+          where: { id: pendingPayment.id },
+          data: { status: PaymentStatus.CANCELLED },
+        })
+      }
+
+      await tx.tournamentRegistration.update({
+        where: { id: registration.id },
+        data: {
+          status: RegistrationStatus.EXPIRED,
+          paymentStatus: PaymentStatus.CANCELLED,
+          expiresAt: new Date(),
+        },
+      })
+    })
+
+    updateTag(CACHE_TAGS.TOURNAMENTS)
+    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+
+    return { success: true, message: 'Inscription annul\u00e9e.' }
   },
 })
