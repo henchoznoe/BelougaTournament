@@ -13,6 +13,7 @@ import {
 } from '@/lib/utils/hero-tournament-badge'
 
 const UPCOMING_TOURNAMENT = {
+  slug: 'tournoi-beta',
   title: 'Tournoi Beta',
   startDate: '2026-06-15T10:00:00.000Z',
   endDate: '2026-06-15T18:00:00.000Z',

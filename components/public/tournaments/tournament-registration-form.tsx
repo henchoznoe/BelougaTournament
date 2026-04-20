@@ -384,7 +384,7 @@ export const TournamentRegistrationForm = ({
         tournament.teamLogoEnabled && (
           <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-xs text-zinc-400">
             <p>
-              En tant que capitaine, vous pourrez ajouter un logo d\u2019équipe
+              En tant que capitaine, vous pourrez ajouter un logo d&apos;équipe
               depuis votre profil après inscription.
             </p>
           </div>

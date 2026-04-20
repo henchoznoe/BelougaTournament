@@ -43,6 +43,7 @@ import {
   formatDate,
   formatDateTime,
   pluralize,
+  stripHtml,
 } from '@/lib/utils/formatting'
 import {
   TournamentFormat,
@@ -307,7 +308,7 @@ export const TournamentDetail = ({
       </div>
 
       {/* ===== PRIZE BANNER ===== */}
-      {tournament.prize?.trim() && (
+      {tournament.prize && stripHtml(tournament.prize).trim() && (
         <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 md:p-8">
           <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
