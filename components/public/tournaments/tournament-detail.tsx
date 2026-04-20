@@ -46,6 +46,7 @@ import {
   stripHtml,
 } from '@/lib/utils/formatting'
 import {
+  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -415,13 +416,16 @@ export const TournamentDetail = ({
 
                 {registrationOpen ? (
                   <>
-                    <p className="text-center text-sm text-zinc-400">
-                      Les inscriptions sont ouvertes jusqu&apos;au{' '}
-                      <span className="font-medium text-zinc-300">
-                        {formatDateTime(tournament.registrationClose)}
-                      </span>
-                      .
-                    </p>
+                    {registrationState?.status !==
+                      RegistrationStatus.CONFIRMED && (
+                      <p className="text-center text-sm text-zinc-400">
+                        Les inscriptions sont ouvertes jusqu&apos;au{' '}
+                        <span className="font-medium text-zinc-300">
+                          {formatDateTime(tournament.registrationClose)}
+                        </span>
+                        .
+                      </p>
+                    )}
                     <TournamentRegistrationForm
                       tournamentId={tournament.id}
                       fields={tournament.fields}
