@@ -93,6 +93,7 @@ export const adminDeleteRegistration = authenticatedAction({
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
       return {
         success: true,
@@ -137,6 +138,7 @@ export const adminDeleteRegistration = authenticatedAction({
       revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
       revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
       revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+      revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
       return {
         success: true,
@@ -176,6 +178,7 @@ export const adminDeleteRegistration = authenticatedAction({
     revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
+    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
 
     return {
       success: true,

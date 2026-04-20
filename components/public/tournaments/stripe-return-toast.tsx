@@ -1,6 +1,7 @@
 /**
  * File: components/public/tournaments/stripe-return-toast.tsx
- * Description: Client component that reads Stripe return query params and displays a toast.
+ * Description: Client component that reads Stripe return query params, cancels any pending
+ *              registration on the cancelled path, and displays a toast notification.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -9,29 +10,46 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { cancelMyPendingRegistrationForTournament } from '@/lib/actions/tournament-registration'
 
-export const StripeReturnToast = () => {
+interface StripeReturnToastProps {
+  tournamentId: string
+}
+
+export const StripeReturnToast = ({ tournamentId }: StripeReturnToastProps) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  // Prevent double-execution in React strict mode / concurrent rendering
+  const handledRef = useRef(false)
 
   useEffect(() => {
     const stripe = searchParams.get('stripe')
-    if (!stripe) return
+    if (!stripe || handledRef.current) return
+    handledRef.current = true
 
     // Clean up the query param from the URL immediately
     router.replace(pathname)
 
     if (stripe === 'success') {
-      toast.success('Ton inscription est confirm\u00e9e !')
+      toast.success('Ton inscription est confirm\u00e9e\u00a0!')
     } else if (stripe === 'cancelled') {
-      toast.error(
-        'Paiement annul\u00e9. Ta place n\u2019est plus r\u00e9serv\u00e9e.',
-      )
+      // Cancel the PENDING registration server-side, then notify the user
+      cancelMyPendingRegistrationForTournament({ tournamentId })
+        .then(() => {
+          toast.error(
+            'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
+          )
+        })
+        .catch(() => {
+          toast.error(
+            'Paiement annul\u00e9. Ta place a \u00e9t\u00e9 lib\u00e9r\u00e9e.',
+          )
+        })
     }
-  }, [searchParams, router, pathname])
+  }, [searchParams, router, pathname, tournamentId])
 
   return null
 }

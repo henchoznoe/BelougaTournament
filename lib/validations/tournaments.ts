@@ -400,6 +400,11 @@ export const unregisterFromTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
 })
 
+/** Schema for a player cancelling a pending (unpaid) registration checkout. */
+export const cancelPendingRegistrationSchema = z.object({
+  tournamentId: z.uuid('ID de tournoi invalide.'),
+})
+
 /** Schema for a captain updating their team name. */
 export const updateTeamNameSchema = z.object({
   teamId: z.uuid("ID d'équipe invalide."),

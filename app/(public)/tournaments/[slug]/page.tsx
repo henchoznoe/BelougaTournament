@@ -66,22 +66,24 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
     : null
 
   return (
-    <TournamentDetail
-      tournament={tournament}
-      twitchUsername={settings.twitchUsername ?? undefined}
-      availableTeams={availableTeams}
-      registrationState={isRegistered}
-      isAuthenticated={!!session?.user}
-    />
+    <>
+      <Suspense fallback={null}>
+        <StripeReturnToast tournamentId={tournament.id} />
+      </Suspense>
+      <TournamentDetail
+        tournament={tournament}
+        twitchUsername={settings.twitchUsername ?? undefined}
+        availableTeams={availableTeams}
+        registrationState={isRegistered}
+        isAuthenticated={!!session?.user}
+      />
+    </>
   )
 }
 
 const TournamentPage = (props: TournamentPageProps) => {
   return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
-      <Suspense fallback={null}>
-        <StripeReturnToast />
-      </Suspense>
       <Suspense
         fallback={
           <div className="mx-auto w-full max-w-4xl space-y-8">

@@ -257,6 +257,41 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   })
 }
 
+/**
+ * Backfills the Stripe processing fee on a payment record when charge.updated fires.
+ *
+ * The balance_transaction is created asynchronously by Stripe and may not be
+ * available yet when checkout.session.completed is processed. This handler runs
+ * whenever a charge is updated and writes the fee if it is still missing.
+ */
+const handleChargeUpdated = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'charge.updated'
+  const charge = event.data.object as Stripe.Charge
+
+  // Only process charges that have a settled balance_transaction
+  if (
+    !charge.balance_transaction ||
+    typeof charge.balance_transaction === 'string'
+  ) {
+    return
+  }
+
+  const payment = await prisma.payment.findFirst({
+    where: { stripeChargeId: charge.id },
+    select: { id: true, stripeFee: true },
+  })
+
+  // Skip if no matching payment or fee is already stored (idempotent)
+  if (!payment || payment.stripeFee !== null) {
+    return
+  }
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { stripeFee: charge.balance_transaction.fee },
+  })
+}
+
 const handleChargeRefunded = async (event: Stripe.Event) => {
   // Safe: this handler is only called from the switch branch for 'charge.refunded'
   const charge = event.data.object as Stripe.Charge
@@ -401,6 +436,9 @@ export const POST = async (request: Request) => {
         break
       case 'charge.refunded':
         await handleChargeRefunded(event)
+        break
+      case 'charge.updated':
+        await handleChargeUpdated(event)
         break
       default:
         break

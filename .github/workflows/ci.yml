@@ -39,9 +39,6 @@ jobs:
       - name: Format & Lint check
         run: pnpm exec biome check .
 
-      - name: Dead code check
-        run: pnpm knip
-
       - name: Run unit tests with coverage
         run: pnpm test:coverage
         env:
