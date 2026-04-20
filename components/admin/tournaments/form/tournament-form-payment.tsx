@@ -29,7 +29,11 @@ import {
 } from '@/components/ui/select'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
-import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
+import {
+  calculateStripeNetAmount,
+  formatCentimes,
+  parseCentimes,
+} from '@/lib/utils/formatting'
 import {
   RefundPolicyType,
   RegistrationType,
@@ -156,7 +160,7 @@ export const TournamentFormPayment = ({
                 le montant sélectionné, vous recevrez pour chaque inscription{' '}
                 <b className="text-red-400 underline">
                   {watchEntryFeeAmount !== null
-                    ? `${formatCentimes(watchEntryFeeAmount - (2.9 * watchEntryFeeAmount) / 100 - 30)}`
+                    ? `${formatCentimes(calculateStripeNetAmount(watchEntryFeeAmount))}`
                     : 'X CHF'}
                 </b>
                 .
@@ -257,7 +261,15 @@ export const TournamentFormPayment = ({
               <b className="text-red-400 underline">
                 {watchRefundDeadlineDays ?? 'X'}
               </b>{' '}
-              jours avant le début du tournoi.
+              jours avant le début du tournoi. Le montant remboursé sera de{' '}
+              <b className="text-red-400 underline">
+                {watchEntryFeeAmount !== null
+                  ? formatCentimes(
+                      calculateStripeNetAmount(watchEntryFeeAmount),
+                    )
+                  : 'X CHF'}
+              </b>{' '}
+              (frais Stripe déduits).
             </p>
           )}
         {watchRegistrationType === RegistrationType.PAID &&

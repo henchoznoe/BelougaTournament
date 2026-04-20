@@ -54,3 +54,10 @@ export const parseCentimes = (value: number): number =>
 
 /** Returns 's' when count > 1 (French rule: 0 and 1 are singular, 2+ are plural). */
 export const pluralize = (count: number): string => (count > 1 ? 's' : '')
+
+/**
+ * Calculates the net amount after Stripe fees (2.9% + 0.30 CHF) are deducted.
+ * Both input and output are in centimes.
+ */
+export const calculateStripeNetAmount = (amountCentimes: number): number =>
+  Math.round(amountCentimes - (2.9 * amountCentimes) / 100 - 30)
