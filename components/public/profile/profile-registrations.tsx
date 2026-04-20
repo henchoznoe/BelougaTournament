@@ -36,7 +36,11 @@ import {
 import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
-import { formatCentimes, formatDate } from '@/lib/utils/formatting'
+import {
+  calculateStripeNetAmount,
+  formatCentimes,
+  formatDate,
+} from '@/lib/utils/formatting'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
@@ -235,7 +239,7 @@ export const ProfileRegistrations = ({
                   const amount =
                     tournament.entryFeeAmount !== null
                       ? formatCentimes(
-                          tournament.entryFeeAmount,
+                          calculateStripeNetAmount(tournament.entryFeeAmount),
                           tournament.entryFeeCurrency ?? 'CHF',
                         )
                       : null

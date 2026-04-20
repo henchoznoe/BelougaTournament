@@ -9,6 +9,7 @@
 'use client'
 
 import { CreditCard } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import type { FieldErrors, UseFormSetValue } from 'react-hook-form'
 import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
@@ -29,7 +30,11 @@ import {
 } from '@/components/ui/select'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import { cn } from '@/lib/utils/cn'
-import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
+import {
+  calculateStripeNetAmount,
+  formatCentimes,
+  parseCentimes,
+} from '@/lib/utils/formatting'
 import {
   RefundPolicyType,
   RegistrationType,
@@ -58,6 +63,36 @@ export const TournamentFormPayment = ({
   isEditing,
 }: TournamentFormPaymentProps) => {
   const isPaid = watchRegistrationType === RegistrationType.PAID
+
+  // Local string state for the entry fee input to avoid cursor-jumping
+  // caused by re-converting centimes → decimal on every keystroke.
+  const [feeInput, setFeeInput] = useState<string>(
+    watchEntryFeeAmount !== null
+      ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
+      : '',
+  )
+
+  // Sync the local input only when the external value diverges from what the
+  // user typed (e.g. form reset or programmatic setValue), so that mid-typing
+  // ("1" → 100 centimes → "1.00") does NOT overwrite the raw input.
+  useEffect(() => {
+    const currentParsed =
+      feeInput === ''
+        ? null
+        : (() => {
+            const parsed = Number.parseFloat(feeInput.replace(',', '.'))
+            return Number.isNaN(parsed) || parsed <= 0
+              ? null
+              : parseCentimes(parsed)
+          })()
+    if (currentParsed !== watchEntryFeeAmount) {
+      setFeeInput(
+        watchEntryFeeAmount !== null
+          ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
+          : '',
+      )
+    }
+  }, [watchEntryFeeAmount, feeInput])
 
   return (
     <div className={SECTION_CLASSES}>
@@ -121,9 +156,8 @@ export const TournamentFormPayment = ({
               </Label>
               <Input
                 id="tournament-entryFeeAmount"
-                type="number"
-                min={1}
-                step={0.01}
+                type="text"
+                inputMode="decimal"
                 placeholder="5.00"
                 disabled={isEditing}
                 className={cn(
@@ -131,16 +165,18 @@ export const TournamentFormPayment = ({
                   'flex-1',
                   isEditing && 'opacity-60',
                 )}
-                value={
-                  watchEntryFeeAmount !== null
-                    ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
-                    : ''
-                }
+                value={feeInput}
                 onChange={e => {
+                  const raw = e.target.value
+                  // Allow only digits, one dot or comma, up to 2 decimal places
+                  if (raw !== '' && !/^\d*[.,]?\d{0,2}$/.test(raw)) return
+                  setFeeInput(raw)
+                  const normalized = raw.replace(',', '.')
+                  const parsed = Number.parseFloat(normalized)
                   const val =
-                    e.target.value === ''
+                    raw === '' || Number.isNaN(parsed) || parsed <= 0
                       ? null
-                      : parseCentimes(Number(e.target.value))
+                      : parseCentimes(parsed)
                   setValue('entryFeeAmount', val, { shouldValidate: true })
                 }}
               />
@@ -156,7 +192,7 @@ export const TournamentFormPayment = ({
                 le montant sélectionné, vous recevrez pour chaque inscription{' '}
                 <b className="text-red-400 underline">
                   {watchEntryFeeAmount !== null
-                    ? `${formatCentimes(watchEntryFeeAmount - (2.9 * watchEntryFeeAmount) / 100 - 30)}`
+                    ? `${formatCentimes(calculateStripeNetAmount(watchEntryFeeAmount))}`
                     : 'X CHF'}
                 </b>
                 .
@@ -257,7 +293,15 @@ export const TournamentFormPayment = ({
               <b className="text-red-400 underline">
                 {watchRefundDeadlineDays ?? 'X'}
               </b>{' '}
-              jours avant le début du tournoi.
+              jours avant le début du tournoi. Le montant remboursé sera de{' '}
+              <b className="text-red-400 underline">
+                {watchEntryFeeAmount !== null
+                  ? formatCentimes(
+                      calculateStripeNetAmount(watchEntryFeeAmount),
+                    )
+                  : 'X CHF'}
+              </b>{' '}
+              (frais Stripe déduits).
             </p>
           )}
         {watchRegistrationType === RegistrationType.PAID &&

@@ -37,6 +37,7 @@ import {
 
 /** Shared select for the landing hero badge. */
 const HERO_BADGE_SELECT = {
+  slug: true,
   title: true,
   startDate: true,
   endDate: true,

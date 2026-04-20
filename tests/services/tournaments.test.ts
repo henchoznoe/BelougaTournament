@@ -838,6 +838,7 @@ describe('getHeroTournamentBadge', () => {
       where: { status: 'PUBLISHED' },
       orderBy: { startDate: 'asc' },
       select: {
+        slug: true,
         title: true,
         startDate: true,
         endDate: true,

@@ -42,8 +42,11 @@ import {
   formatCentimes,
   formatDate,
   formatDateTime,
+  pluralize,
+  stripHtml,
 } from '@/lib/utils/formatting'
 import {
+  RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -217,7 +220,7 @@ export const TournamentDetail = ({
                 text={
                   tournament.maxTeams
                     ? `${tournament._count.registrations}/${tournament.maxTeams} inscrits`
-                    : `${tournament._count.registrations} inscrits`
+                    : `${tournament._count.registrations} inscrit${pluralize(tournament._count.registrations)}`
                 }
               />
             ) : (
@@ -227,12 +230,12 @@ export const TournamentDetail = ({
                   text={
                     tournament.maxTeams
                       ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
-                      : `${tournament._count.teams} équipes`
+                      : `${tournament._count.teams} équipe${pluralize(tournament._count.teams)}`
                   }
                 />
                 <QuickBadge
                   icon={Users}
-                  text={`${tournament._count.registrations} joueurs`}
+                  text={`${tournament._count.registrations} joueur${pluralize(tournament._count.registrations)}`}
                 />
               </>
             )}
@@ -306,7 +309,7 @@ export const TournamentDetail = ({
       </div>
 
       {/* ===== PRIZE BANNER ===== */}
-      {tournament.prize && (
+      {tournament.prize && stripHtml(tournament.prize).trim() && (
         <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 md:p-8">
           <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
@@ -413,13 +416,16 @@ export const TournamentDetail = ({
 
                 {registrationOpen ? (
                   <>
-                    <p className="text-center text-sm text-zinc-400">
-                      Les inscriptions sont ouvertes jusqu&apos;au{' '}
-                      <span className="font-medium text-zinc-300">
-                        {formatDateTime(tournament.registrationClose)}
-                      </span>
-                      .
-                    </p>
+                    {registrationState?.status !==
+                      RegistrationStatus.CONFIRMED && (
+                      <p className="text-center text-sm text-zinc-400">
+                        Les inscriptions sont ouvertes jusqu&apos;au{' '}
+                        <span className="font-medium text-zinc-300">
+                          {formatDateTime(tournament.registrationClose)}
+                        </span>
+                        .
+                      </p>
+                    )}
                     <TournamentRegistrationForm
                       tournamentId={tournament.id}
                       fields={tournament.fields}

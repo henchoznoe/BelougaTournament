@@ -63,7 +63,11 @@ import {
 interface TournamentRegistrationFormProps {
   tournament: Pick<
     PublicTournamentDetail,
-    'id' | 'registrationType' | 'entryFeeAmount' | 'entryFeeCurrency'
+    | 'id'
+    | 'registrationType'
+    | 'entryFeeAmount'
+    | 'entryFeeCurrency'
+    | 'teamLogoEnabled'
   >
   tournamentId: string
   fields: TournamentFieldItem[]
@@ -261,7 +265,8 @@ export const TournamentRegistrationForm = ({
           </p>
           <p className="mt-1 text-xs text-zinc-400">
             Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
-            au moment de la redirection vers Stripe.
+            au moment de la redirection vers Stripe. Si vous quittez la page
+            Stripe sans payer, votre place sera libérée.
           </p>
         </div>
       )}
@@ -373,6 +378,17 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
+      {/* Team logo hint — shown only when creating a team and logo upload is enabled */}
+      {format === TournamentFormat.TEAM &&
+        teamMode === 'create' &&
+        tournament.teamLogoEnabled && (
+          <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-xs text-zinc-400">
+            <p>
+              En tant que capitaine, vous pourrez ajouter un logo d&apos;équipe
+              depuis votre profil après inscription.
+            </p>
+          </div>
+        )}
       {/* Dynamic fields */}
       {fields.length > 0 ? (
         <div className="space-y-4">
@@ -412,6 +428,13 @@ export const TournamentRegistrationForm = ({
       ) : (
         <p className="text-center text-sm text-zinc-500">
           Aucun champ supplémentaire n'est requis.
+        </p>
+      )}
+      {/* Fields editable hint — shown only when there are custom fields */}
+      {fields.length > 0 && (
+        <p className="text-center text-xs text-zinc-500">
+          Si un champ venait à changer, vous pouvez modifier vos réponses depuis
+          la page de votre profil.
         </p>
       )}
       <p className="text-center text-xs text-zinc-500">

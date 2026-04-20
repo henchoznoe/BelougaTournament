@@ -67,6 +67,24 @@ const HERO_BADGE_DOT_STYLES: Record<HeroTournamentBadge['variant'], string> = {
   live: 'bg-blue-500',
 }
 
+/** Returns the slug of the currently live or next upcoming tournament, or null if none. */
+const resolveActiveTournamentSlug = (
+  tournaments: HeroTournamentBadgeTournament[],
+  now: Date,
+): string | null => {
+  const nowMs = now.getTime()
+  const getTs = (v: Date | string) => new Date(v).getTime()
+  const sorted = [...tournaments].sort(
+    (a, b) => getTs(a.startDate) - getTs(b.startDate),
+  )
+  const live = sorted.find(
+    t => getTs(t.startDate) <= nowMs && getTs(t.endDate) > nowMs,
+  )
+  if (live) return live.slug
+  const upcoming = sorted.find(t => getTs(t.startDate) > nowMs)
+  return upcoming?.slug ?? null
+}
+
 export const HeroSection = ({
   badge,
   badgeTournaments,
@@ -74,6 +92,9 @@ export const HeroSection = ({
 }: HeroSectionProps) => {
   const { data: session, isPending } = authClient.useSession()
   const [currentBadge, setCurrentBadge] = useState(badge)
+  const [activeTournamentSlug, setActiveTournamentSlug] = useState<
+    string | null
+  >(null)
 
   useEffect(() => {
     let timeoutId: number | undefined
@@ -81,6 +102,9 @@ export const HeroSection = ({
     const refreshBadge = () => {
       const now = new Date()
       setCurrentBadge(resolveHeroTournamentBadge(badgeTournaments, now))
+      setActiveTournamentSlug(
+        resolveActiveTournamentSlug(badgeTournaments, now),
+      )
 
       const nextDelay = getNextHeroTournamentBadgeUpdateDelay(
         badgeTournaments,
@@ -122,30 +146,50 @@ export const HeroSection = ({
         className="relative z-10 max-w-5xl space-y-8"
       >
         <motion.div variants={itemVariants} className="flex justify-center">
-          <span
-            className={cn(
-              'flex max-w-full items-center gap-2.5 rounded-full px-4 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors duration-300',
-              HERO_BADGE_STYLES[currentBadge.variant],
-            )}
-          >
-            <span className="relative flex size-2">
-              {currentBadge.variant !== 'idle' && (
+          {activeTournamentSlug ? (
+            <Link
+              href={`${ROUTES.TOURNAMENTS}/${activeTournamentSlug}`}
+              className={cn(
+                'flex max-w-full items-center gap-2.5 rounded-full border px-4 py-1.5 text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105',
+                HERO_BADGE_STYLES[currentBadge.variant],
+              )}
+            >
+              <span className="relative flex size-2">
+                {currentBadge.variant !== 'idle' && (
+                  <span
+                    className={cn(
+                      'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+                      HERO_BADGE_DOT_STYLES[currentBadge.variant],
+                    )}
+                  />
+                )}
                 <span
                   className={cn(
-                    'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+                    'relative inline-flex size-2 rounded-full',
                     HERO_BADGE_DOT_STYLES[currentBadge.variant],
                   )}
-                ></span>
+                />
+              </span>
+              <span className="truncate">{currentBadge.label}</span>
+            </Link>
+          ) : (
+            <span
+              className={cn(
+                'flex max-w-full items-center gap-2.5 rounded-full border px-4 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors duration-300',
+                HERO_BADGE_STYLES[currentBadge.variant],
               )}
-              <span
-                className={cn(
-                  'relative inline-flex size-2 rounded-full',
-                  HERO_BADGE_DOT_STYLES[currentBadge.variant],
-                )}
-              ></span>
+            >
+              <span className="relative flex size-2">
+                <span
+                  className={cn(
+                    'relative inline-flex size-2 rounded-full',
+                    HERO_BADGE_DOT_STYLES[currentBadge.variant],
+                  )}
+                />
+              </span>
+              <span className="truncate">{currentBadge.label}</span>
             </span>
-            <span className="truncate">{currentBadge.label}</span>
-          </span>
+          )}
         </motion.div>
 
         <motion.h1

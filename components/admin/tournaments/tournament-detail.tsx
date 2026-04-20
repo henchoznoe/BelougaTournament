@@ -37,6 +37,7 @@ import { TOORNAMENT_ID_DISPLAY_LENGTH } from '@/lib/config/constants'
 import type { TournamentDetail as TournamentDetailType } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import {
+  calculateStripeNetAmount,
   formatCentimes,
   formatDate,
   formatDateTime,
@@ -164,6 +165,7 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
       value: isTeam
         ? `${tournament._count.registrations}`
         : `${tournament._count.registrations} ${maxLabel}`,
+      subValue: undefined,
       color: 'text-blue-400',
       bg: 'bg-blue-500/10',
     },
@@ -173,6 +175,7 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
             icon: Swords,
             label: 'Équipes',
             value: `${tournament._count.teams} ${maxLabel}`,
+            subValue: undefined,
             color: 'text-purple-400',
             bg: 'bg-purple-500/10',
           },
@@ -185,6 +188,10 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
         isPaid && tournament.entryFeeAmount && tournament.entryFeeCurrency
           ? `${REGISTRATION_TYPE_LABELS[tournament.registrationType]} — ${formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
           : REGISTRATION_TYPE_LABELS[tournament.registrationType],
+      subValue:
+        isPaid && tournament.entryFeeAmount
+          ? `(net: ${formatCentimes(calculateStripeNetAmount(tournament.entryFeeAmount), tournament.entryFeeCurrency ?? 'CHF')})`
+          : undefined,
       color: isPaid ? 'text-amber-400' : 'text-emerald-400',
       bg: isPaid ? 'bg-amber-500/10' : 'bg-emerald-500/10',
     },
@@ -192,8 +199,9 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
       icon: Trophy,
       label: 'Format',
       value: isTeam
-        ? `${FORMAT_LABELS[tournament.format]} (${tournament.teamSize}v${tournament.teamSize})`
+        ? `${FORMAT_LABELS[tournament.format]} de ${tournament.teamSize}`
         : FORMAT_LABELS[tournament.format],
+      subValue: undefined,
       color: 'text-cyan-400',
       bg: 'bg-cyan-500/10',
     },
@@ -211,6 +219,9 @@ const StatsSummary = ({ tournament }: StatsSummaryProps) => {
           </div>
           <div>
             <p className="text-lg font-bold text-white">{item.value}</p>
+            {item.subValue && (
+              <p className="text-[10px] text-zinc-500">{item.subValue}</p>
+            )}
             <p className="text-xs text-zinc-500">{item.label}</p>
           </div>
         </div>
@@ -398,7 +409,7 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                 <CreditCard className="size-3.5" />
                 Inscription
               </dt>
-              <dd className="text-right">
+              <dd className="flex flex-wrap items-center justify-end gap-1">
                 <span
                   className={cn(
                     'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
@@ -413,6 +424,11 @@ export const TournamentOverview = ({ tournament }: TournamentOverviewProps) => {
                     ? `${formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)}`
                     : REGISTRATION_TYPE_LABELS[tournament.registrationType]}
                 </span>
+                {isPaid && tournament.entryFeeAmount && (
+                  <span className="inline-flex items-center rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400">
+                    {`${formatCentimes(calculateStripeNetAmount(tournament.entryFeeAmount), tournament.entryFeeCurrency ?? 'CHF')} net`}
+                  </span>
+                )}
               </dd>
             </div>
             {isPaid && (
