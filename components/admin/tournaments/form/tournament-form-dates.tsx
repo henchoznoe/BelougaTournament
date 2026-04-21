@@ -10,7 +10,6 @@
 
 import { Calendar } from 'lucide-react'
 import { type Control, Controller, type FieldErrors } from 'react-hook-form'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -19,6 +18,7 @@ import {
 } from '@/components/admin/tournaments/form/tournament-form-ui'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Label } from '@/components/ui/label'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 
 interface TournamentFormDatesProps {
   control: Control<TournamentFormValues>

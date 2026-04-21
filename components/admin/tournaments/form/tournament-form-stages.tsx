@@ -16,7 +16,6 @@ import {
   useFieldArray,
 } from 'react-hook-form'
 import { OrderableItem } from '@/components/admin/tournaments/form/tournament-form-orderable-item'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -26,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
 
 interface TournamentFormStagesProps {

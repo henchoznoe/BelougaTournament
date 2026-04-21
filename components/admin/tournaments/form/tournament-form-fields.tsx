@@ -18,7 +18,6 @@ import {
   useFieldArray,
 } from 'react-hook-form'
 import { OrderableItem } from '@/components/admin/tournaments/form/tournament-form-orderable-item'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   SECTION_CLASSES,
@@ -34,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
 import { FieldType } from '@/prisma/generated/prisma/enums'
 

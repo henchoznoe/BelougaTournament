@@ -25,7 +25,7 @@ import {
   getRegistrations,
   getTeams,
   getTournamentBySlug,
-} from '@/lib/services/tournaments'
+} from '@/lib/services/tournaments-admin'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface AdminTournamentDetailPageProps {

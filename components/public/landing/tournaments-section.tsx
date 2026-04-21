@@ -10,7 +10,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { TournamentCard } from '@/components/public/tournaments/tournament-card'
 import { ROUTES } from '@/lib/config/routes'
-import { getPublishedTournaments } from '@/lib/services/tournaments'
+import { getPublishedTournaments } from '@/lib/services/tournaments-public'
 
 /** Maximum number of tournaments to display on the landing page. */
 const MAX_TOURNAMENTS = 3

@@ -11,7 +11,6 @@
 import { CreditCard } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { FieldErrors, UseFormSetValue } from 'react-hook-form'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -29,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
 import {
   calculateStripeNetAmount,

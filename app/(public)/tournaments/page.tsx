@@ -19,7 +19,7 @@ import { ROUTES } from '@/lib/config/routes'
 import {
   getPublishedTournamentsFiltered,
   PUBLIC_TOURNAMENTS_PAGE_SIZE,
-} from '@/lib/services/tournaments'
+} from '@/lib/services/tournaments-public'
 import { parsePublicTournamentFilters } from '@/lib/validations/tournaments'
 
 export const metadata: Metadata = {

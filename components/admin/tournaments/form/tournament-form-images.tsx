@@ -18,7 +18,6 @@ import type {
 } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useBlobList } from '@/components/admin/hooks/use-blob-list'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -29,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
 
 interface TournamentFormImagesProps {

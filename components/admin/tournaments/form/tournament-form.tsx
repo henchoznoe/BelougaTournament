@@ -23,7 +23,6 @@ import { TournamentFormGeneral } from '@/components/admin/tournaments/form/tourn
 import { TournamentFormImages } from '@/components/admin/tournaments/form/tournament-form-images'
 import { TournamentFormPayment } from '@/components/admin/tournaments/form/tournament-form-payment'
 import { TournamentFormStages } from '@/components/admin/tournaments/form/tournament-form-stages'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +37,7 @@ import { Button } from '@/components/ui/button'
 import { createTournament, updateTournament } from '@/lib/actions/tournaments'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { fromNullable } from '@/lib/utils/formatting'
 import {
   tournamentSchema,
