@@ -11,6 +11,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { ADMIN_ROUTE_ROLES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
+import { isRoleValue } from '@/lib/utils/role'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 /**
@@ -31,6 +32,10 @@ const SORTED_ROUTE_ENTRIES = Object.entries(ADMIN_ROUTE_ROLES).sort(
  * session fetch to an attacker-controlled origin that forges a session JSON
  * and returns it to us. We pin to `BETTER_AUTH_URL` (the canonical BetterAuth
  * base), falling back to `NEXT_PUBLIC_APP_URL`.
+ *
+ * Note: `process.env` is accessed directly here because `lib/core/env.ts` relies
+ * on the Prisma-backed Node.js runtime and cannot be imported on the Edge.
+ * This is the only justified exception to the "never access process.env directly" rule.
  */
 const TRUSTED_BASE_URL =
   process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL
@@ -77,7 +82,8 @@ export const proxy = async (request: NextRequest) => {
 
   const requiredRole = getRequiredRole(request.nextUrl.pathname)
   const allowedRoles = ROLE_ALLOWLIST[requiredRole] ?? new Set([requiredRole])
-  if (!allowedRoles.has(session.user.role as Role)) {
+  // Guard against a malformed/tampered session JSON returning an unknown role string.
+  if (!isRoleValue(session.user.role) || !allowedRoles.has(session.user.role)) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 

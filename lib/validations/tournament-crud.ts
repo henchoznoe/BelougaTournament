@@ -230,13 +230,19 @@ interface TournamentDateFields {
  * Shared refinements applied to both create and update tournament schemas.
  * Extracted to avoid duplicating ~65 lines of .refine() calls.
  *
- * The `.refine()` callback receives `output<T>` which TypeScript types as `unknown`
- * when `T` is a generic `ZodTypeAny`. We cast to `TournamentDateFields` inside each
- * callback because both `tournamentBaseSchema` and `updateTournamentSchema` are guaranteed
- * to include all fields declared in that interface.
+ * Why the cast exists: Zod's `.refine()` callback receives `output<T>`, which
+ * TypeScript widens to `unknown` when `T` is a generic `ZodTypeAny`. This is a
+ * known Zod limitation with generic schema helpers (see zod#2474). The cast to
+ * `TournamentDateFields` is safe because `applyTournamentRefinements` is only
+ * ever called with schemas whose output is a strict superset of that interface
+ * (`tournamentBaseSchema` and `updateTournamentSchema` both include every field).
+ * A runtime shape-check here would duplicate the Zod schema validation that has
+ * already run by the time .refine() executes.
  */
 const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
-  const d = (data: unknown) => data as TournamentDateFields
+  // Narrowing helper: asserts the refined data contains the date-related fields.
+  const d = (data: unknown): TournamentDateFields =>
+    data as TournamentDateFields
   return schema
     .refine(data => new Date(d(data).endDate) > new Date(d(data).startDate), {
       message: 'La date de fin doit être après la date de début.',

@@ -13,6 +13,24 @@
 type VerifiableImageMime = 'image/png' | 'image/jpeg' | 'image/webp'
 
 /**
+ * Runtime set of allowed image MIME types.
+ * Used by upload API routes to validate Content-Type before further processing.
+ * Kept here (alongside the magic-byte detector) so that the allowed type list
+ * is defined in exactly one place and stays in sync with detectImageMime.
+ */
+const ALLOWED_IMAGE_MIME_TYPES = new Set<VerifiableImageMime>([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+])
+
+/** Type guard: returns true and narrows the type when the MIME is an allowed image format. */
+export const isAllowedImageMimeType = (
+  mime: string,
+): mime is VerifiableImageMime =>
+  ALLOWED_IMAGE_MIME_TYPES.has(mime as VerifiableImageMime)
+
+/**
  * Returns the MIME type implied by the file's leading bytes, or null if the
  * bytes do not match any supported image format.
  *

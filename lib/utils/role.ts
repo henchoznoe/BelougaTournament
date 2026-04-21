@@ -8,6 +8,10 @@
 
 import { Role } from '@/prisma/generated/prisma/enums'
 
+/** Type guard: narrows an arbitrary string to a valid Role enum value. */
+export const isRoleValue = (value: string): value is Role =>
+  Object.values(Role).includes(value as Role)
+
 /** Returns true if the given role has admin privileges. */
 export const isAdmin = (role: Role): boolean => {
   return role === Role.ADMIN

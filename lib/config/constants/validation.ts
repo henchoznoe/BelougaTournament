@@ -13,6 +13,13 @@ export const CENTIMES_PER_UNIT = 100
 export const ENTRY_FEE_MIN_AMOUNT = 100 // 1 CHF
 export const ENTRY_FEE_MAX_AMOUNT = 100_000 // 1000 CHF
 
+/** Stripe's percentage fee rate (e.g. 2.9 means 2.9%). */
+export const STRIPE_FEE_PERCENT = 2.9
+/** Divisor to convert a percentage to a decimal multiplier (always 100). */
+export const STRIPE_FEE_PERCENT_DIVISOR = 100
+/** Stripe's fixed fee per transaction in centimes (30 centimes = 0.30 CHF). */
+export const STRIPE_FEE_FIXED_CENTIMES = 30
+
 /** Shared validation limits used in Zod schemas and component maxLength attributes. */
 export const VALIDATION_LIMITS = {
   TEAM_NAME_MIN: 2,

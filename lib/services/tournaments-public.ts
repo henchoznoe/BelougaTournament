@@ -29,11 +29,7 @@ import type {
   PublicTournamentFilters,
   TournamentSortOption,
 } from '@/lib/validations/tournaments'
-import {
-  type RegistrationType,
-  type TournamentFormat,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 /** Shared select for the landing hero badge. */
 const HERO_BADGE_SELECT = {
@@ -270,8 +266,8 @@ const getTournamentsFilteredByStatus = async (
           ],
         }
       : {}),
-    ...(format ? { format: format as TournamentFormat } : {}),
-    ...(type ? { registrationType: type as RegistrationType } : {}),
+    ...(format !== '' ? { format } : {}),
+    ...(type !== '' ? { registrationType: type } : {}),
   }
 
   try {

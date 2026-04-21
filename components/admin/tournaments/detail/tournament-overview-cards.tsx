@@ -27,7 +27,7 @@ import {
   Video,
 } from 'lucide-react'
 import { useMemo } from 'react'
-import { TOORNAMENT_ID_DISPLAY_LENGTH } from '@/lib/config/constants'
+import { DAY_IN_MS, TOORNAMENT_ID_DISPLAY_LENGTH } from '@/lib/config/constants'
 import type { TournamentDetail as TournamentDetailType } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import {
@@ -65,10 +65,9 @@ const getDateIndicator = (date: Date): { label: string; className: string } => {
   const now = new Date()
   const targetDate = new Date(date)
   if (targetDate < now) return { label: 'Passé', className: 'text-zinc-500' }
-  // Within 24h
+  // Within the next 24 hours
   const diff = targetDate.getTime() - now.getTime()
-  if (diff < 24 * 60 * 60 * 1000)
-    return { label: 'Bientôt', className: 'text-amber-400' }
+  if (diff < DAY_IN_MS) return { label: 'Bientôt', className: 'text-amber-400' }
   return { label: 'À venir', className: 'text-emerald-400' }
 }
 

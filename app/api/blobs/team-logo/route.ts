@@ -14,10 +14,11 @@ import { CACHE_TAGS, MAX_TEAM_LOGO_SIZE } from '@/lib/config/constants'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
-import { verifyImageMagicBytes } from '@/lib/utils/image-magic'
+import {
+  isAllowedImageMimeType,
+  verifyImageMagicBytes,
+} from '@/lib/utils/image-magic'
 import { TournamentStatus } from '@/prisma/generated/prisma/enums'
-
-const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 
 /** POST — Upload a team logo. Expects FormData with "file" and "teamId" fields. */
 export const POST = async (request: Request) => {
@@ -45,7 +46,7 @@ export const POST = async (request: Request) => {
       )
     }
 
-    if (!ALLOWED_TYPES.has(file.type)) {
+    if (!isAllowedImageMimeType(file.type)) {
       return NextResponse.json(
         { error: 'Format non supporté. Utilisez PNG, JPEG ou WebP.' },
         { status: 400 },
