@@ -25,6 +25,9 @@ export type UserRow = {
   role: Role
   createdAt: Date
   lastLoginAt: Date | null
+  bannedAt: Date | null
+  bannedUntil: Date | null
+  banReason: string | null
 }
 
 /** A payment entry nested inside a registration row. */
@@ -66,6 +69,9 @@ export type UserDetail = {
   role: Role
   createdAt: Date
   lastLoginAt: Date | null
+  bannedAt: Date | null
+  bannedUntil: Date | null
+  banReason: string | null
   registrations: UserRegistrationRow[]
 }
 
@@ -78,4 +84,7 @@ export type UserProfile = {
   role: Role
   createdAt: Date
   lastLoginAt: Date | null
+  bannedAt: Date | null
+  bannedUntil: Date | null
+  banReason: string | null
 }

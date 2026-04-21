@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Search } from 'lucide-react'
+import { OctagonX, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -45,6 +45,13 @@ import {
   pluralize,
 } from '@/lib/utils/formatting'
 import { Role } from '@/prisma/generated/prisma/enums'
+
+/** Returns true when a user is currently banned (active ban, not expired). */
+const isRowBanned = (user: UserRow): boolean => {
+  if (!user.bannedAt) return false
+  if (!user.bannedUntil) return true
+  return user.bannedUntil > new Date()
+}
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.USERS
 
@@ -137,6 +144,7 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
 
   const adminCount = users.filter(t => t.role === Role.ADMIN).length
   const userCount = users.filter(t => t.role === Role.USER).length
+  const bannedCount = users.filter(isRowBanned).length
 
   return (
     <>
@@ -180,6 +188,10 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
 
         <span className="text-emerald-400">
           {userCount} joueur{pluralize(userCount)}
+        </span>
+
+        <span className="text-red-400">
+          {bannedCount} banni{pluralize(bannedCount)}
         </span>
       </div>
 
@@ -260,6 +272,12 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-zinc-200">
                           {user.name}
+                          {isRowBanned(user) && (
+                            <OctagonX
+                              className="ml-1.5 inline size-3 text-red-400"
+                              aria-label="Banni"
+                            />
+                          )}
                         </p>
                         <p className="truncate text-xs text-zinc-500">
                           {user.email}

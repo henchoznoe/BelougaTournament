@@ -7,6 +7,7 @@
  */
 
 import { Suspense } from 'react'
+import { BanBanner } from '@/components/public/layout/ban-banner'
 import { PublicFooter } from '@/components/public/layout/public-footer'
 import { PublicNavbar } from '@/components/public/layout/public-navbar'
 
@@ -23,6 +24,9 @@ const PublicLayout = (props: Readonly<LayoutProps>) => {
       >
         Aller au contenu principal
       </a>
+      <Suspense>
+        <BanBanner />
+      </Suspense>
       <Suspense>
         <PublicNavbar />
       </Suspense>
