@@ -81,8 +81,14 @@ if (!parsedClient.success || !parsedServer.success) {
     .map(issue => `  - ${issue.path.join('.')}: ${issue.message}`)
     .join('\n')
 
+  // `logger` cannot be used here: it imports `env`, which is this module, creating
+  // a circular dependency at module initialisation time. `console.error` is the
+  // only safe option at this point in the startup sequence.
   console.error(`Invalid environment configuration:\n${summary}`)
 
+  // Use the raw process.env.NODE_ENV here because `parsedServer.data` may not be
+  // available (validation just failed). On the client, `isServer` is false so we
+  // throw instead of calling process.exit (which is Node-only).
   if (isServer && process.env.NODE_ENV !== 'test') {
     process.exit(1)
   } else if (isServer) {

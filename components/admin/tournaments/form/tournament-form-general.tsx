@@ -16,7 +16,6 @@ import {
   type UseFormRegister,
   type UseFormSetValue,
 } from 'react-hook-form'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -27,6 +26,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 
 interface TournamentFormGeneralProps {
   register: UseFormRegister<TournamentFormValues>

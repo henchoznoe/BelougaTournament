@@ -51,17 +51,22 @@ const {
   getTournamentById,
   getRegistrations,
   getTeams,
+} = await import('@/lib/services/tournaments-admin')
+
+const {
   getAvailableTeams,
   getHeroTournamentBadge,
   getHeroTournamentBadgeData,
   getPublishedTournaments,
   getArchivedTournaments,
   getPublicTournamentBySlug,
-  getUserRegistrations,
-  getUserPastRegistrations,
   getPublishedTournamentsFiltered,
   getArchivedTournamentsFiltered,
-} = await import('@/lib/services/tournaments')
+} = await import('@/lib/services/tournaments-public')
+
+const { getUserRegistrations, getUserPastRegistrations } = await import(
+  '@/lib/services/tournaments-user'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures

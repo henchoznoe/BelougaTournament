@@ -13,6 +13,7 @@ import { logger } from '@/lib/core/logger'
 import type { ActionState } from '@/lib/types/actions'
 import type { AuthSession } from '@/lib/types/auth'
 import { handlePrismaError } from '@/lib/utils/prisma-error'
+import { isRoleValue } from '@/lib/utils/role'
 import type { Role } from '@/prisma/generated/prisma/enums'
 
 type ActionHandler<TInput, TOutput> = (
@@ -49,8 +50,14 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       // 2. Role Check
       if (role) {
         const allowedRoles = Array.isArray(role) ? role : [role]
-        // BetterAuth types role as string; cast to Role for enum comparison
-        if (!allowedRoles.includes(session.user.role as Role)) {
+        // BetterAuth types role as string | null | undefined; we guard against
+        // all three non-string cases and unknown enum values before inclusion check.
+        const userRole = session.user.role
+        if (
+          typeof userRole !== 'string' ||
+          !isRoleValue(userRole) ||
+          !allowedRoles.includes(userRole)
+        ) {
           return { success: false, message: 'Unauthorized' }
         }
       }

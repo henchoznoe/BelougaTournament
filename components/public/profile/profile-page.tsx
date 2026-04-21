@@ -28,7 +28,7 @@ import {
   getUserActiveTournaments,
   getUserPastRegistrations,
   getUserRegistrations,
-} from '@/lib/services/tournaments'
+} from '@/lib/services/tournaments-user'
 import { getUserProfile } from '@/lib/services/users'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'

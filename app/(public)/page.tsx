@@ -17,7 +17,7 @@ import { TournamentsSkeleton } from '@/components/public/landing/tournaments-ske
 import { METADATA } from '@/lib/config/constants'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
-import { getHeroTournamentBadgeData } from '@/lib/services/tournaments'
+import { getHeroTournamentBadgeData } from '@/lib/services/tournaments-public'
 
 export const metadata: Metadata = {
   title: 'Accueil',

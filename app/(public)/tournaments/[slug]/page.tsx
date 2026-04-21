@@ -17,8 +17,8 @@ import { getGlobalSettings } from '@/lib/services/settings'
 import {
   getAvailableTeams,
   getPublicTournamentBySlug,
-  getUserTournamentRegistrationState,
-} from '@/lib/services/tournaments'
+} from '@/lib/services/tournaments-public'
+import { getUserTournamentRegistrationState } from '@/lib/services/tournaments-user'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentPageProps {

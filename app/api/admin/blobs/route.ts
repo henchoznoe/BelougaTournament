@@ -11,10 +11,12 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { MAX_ADMIN_UPLOAD_SIZE } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
-import { verifyImageMagicBytes } from '@/lib/utils/image-magic'
+import {
+  isAllowedImageMimeType,
+  verifyImageMagicBytes,
+} from '@/lib/utils/image-magic'
 import { verifyAdmin } from '@/lib/utils/verify-admin'
 
-const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 const ALLOWED_FOLDER_ROOTS = ['logos', 'sponsors', 'tournaments'] as const
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
 
@@ -86,7 +88,7 @@ export const POST = async (request: Request) => {
       )
     }
 
-    if (!ALLOWED_TYPES.has(file.type)) {
+    if (!isAllowedImageMimeType(file.type)) {
       return NextResponse.json(
         { error: 'Format non supporté. Utilisez PNG, JPEG ou WebP.' },
         { status: 400 },

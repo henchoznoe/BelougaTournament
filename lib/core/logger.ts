@@ -44,8 +44,12 @@ const MAX_DEPTH = 6
 /**
  * Recursively clones the context, replacing any value whose key matches a
  * sensitive name with `[REDACTED]`. Safe against cycles via depth-bounding.
+ * The overload ensures that a `LogContext` input always returns a `LogContext`,
+ * eliminating the need for a cast at the call site.
  */
-const redact = (value: unknown, depth = 0): unknown => {
+function redact(value: LogContext, depth?: number): LogContext
+function redact(value: unknown, depth?: number): unknown
+function redact(value: unknown, depth = 0): unknown {
   if (depth > MAX_DEPTH) return REDACTED
   if (value === null || typeof value !== 'object') return value
   if (value instanceof Error) {
@@ -71,7 +75,7 @@ const buildEntry = (
   ctx: LogContext,
   message: string,
 ): string => {
-  const safeCtx = redact(ctx) as LogContext
+  const safeCtx = redact(ctx)
   if (isDev) {
     const ctxStr = Object.keys(safeCtx).length
       ? ` ${JSON.stringify(safeCtx)}`

@@ -8,7 +8,12 @@
 
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { CENTIMES_PER_UNIT } from '@/lib/config/constants'
+import {
+  CENTIMES_PER_UNIT,
+  STRIPE_FEE_FIXED_CENTIMES,
+  STRIPE_FEE_PERCENT,
+  STRIPE_FEE_PERCENT_DIVISOR,
+} from '@/lib/config/constants'
 
 export const formatDate = (date: Date | string | number): string => {
   return format(new Date(date), 'PPP', { locale: fr })
@@ -60,4 +65,8 @@ export const pluralize = (count: number): string => (count > 1 ? 's' : '')
  * Both input and output are in centimes.
  */
 export const calculateStripeNetAmount = (amountCentimes: number): number =>
-  Math.round(amountCentimes - (2.9 * amountCentimes) / 100 - 30)
+  Math.round(
+    amountCentimes -
+      (STRIPE_FEE_PERCENT * amountCentimes) / STRIPE_FEE_PERCENT_DIVISOR -
+      STRIPE_FEE_FIXED_CENTIMES,
+  )

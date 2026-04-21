@@ -15,7 +15,6 @@ import {
   type FieldErrors,
   type UseFormSetValue,
 } from 'react-hook-form'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   LABEL_CLASSES,
   SECTION_CLASSES,
@@ -23,6 +22,7 @@ import {
 } from '@/components/admin/tournaments/form/tournament-form-ui'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 
 interface TournamentFormContentProps {
   control: Control<TournamentFormValues>

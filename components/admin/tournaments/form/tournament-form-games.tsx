@@ -15,7 +15,6 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from 'react-hook-form'
-import type { TournamentFormValues } from '@/components/admin/tournaments/form/tournament-form-types'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
@@ -23,6 +22,7 @@ import {
   SectionHeader,
 } from '@/components/admin/tournaments/form/tournament-form-ui'
 import { Label } from '@/components/ui/label'
+import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
 
 interface TournamentFormGamesProps {

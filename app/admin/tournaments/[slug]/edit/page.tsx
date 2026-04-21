@@ -12,7 +12,7 @@ import { notFound } from 'next/navigation'
 import { TournamentForm } from '@/components/admin/tournaments/form/tournament-form'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
-import { getTournamentBySlug } from '@/lib/services/tournaments'
+import { getTournamentBySlug } from '@/lib/services/tournaments-admin'
 
 interface AdminEditTournamentPageProps {
   params: Promise<{ slug: string }>

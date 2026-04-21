@@ -250,10 +250,10 @@ lib/
 │   ├── tournament-helpers.ts    # parseFieldValues, validateFieldValues, isRefundEligible
 │   ├── hero-tournament-badge.ts # resolveHeroTournamentBadge, getNextHeroTournamentBadgeUpdateDelay
 │   ├── stripe-refund.ts         # issueStripeRefundAfterDbUpdate
-│   ├── auth.ts / role.ts / owner.ts / verify-admin.ts  # Auth helpers
+│   ├── role.ts / owner.ts / verify-admin.ts  # Auth helpers
 │   └── commit-hash.ts           # getCommitHash() for version display
 └── validations/          # Zod v4 schemas (tournaments, settings, users, sponsors, profile, shared)
-    # Note: VALID_SORT_OPTIONS exported from lib/validations/tournaments.ts
+    # Note: VALID_SORT_OPTIONS exported from lib/validations/tournament-filters.ts
 
 prisma/                   # Schema, migrations, seed, generated client (gitignored)
 tests/                    # Unit tests (top-level, NOT colocated)
