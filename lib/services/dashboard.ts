@@ -41,6 +41,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       totalUsers,
       players,
       admins,
+      banned,
       totalSponsors,
       enabledSponsors,
     ] = await Promise.all([
@@ -55,6 +56,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       prisma.user.count({
         where: { role: Role.ADMIN },
       }),
+      prisma.user.count({ where: { bannedAt: { not: null } } }),
       prisma.sponsor.count(),
       prisma.sponsor.count({ where: { enabled: true } }),
     ])
@@ -72,6 +74,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: totalUsers,
         players,
         admins,
+        banned,
       },
       sponsors: {
         total: totalSponsors,
@@ -94,6 +97,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: 0,
         players: 0,
         admins: 0,
+        banned: 0,
       },
       sponsors: {
         total: 0,

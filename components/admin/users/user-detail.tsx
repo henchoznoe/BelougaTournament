@@ -15,6 +15,7 @@ import {
   Info,
   Mail,
   MessageSquare,
+  OctagonX,
   Swords,
   Trophy,
   User,
@@ -37,12 +38,17 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import type { UserDetail as UserDetailType } from '@/lib/types/user'
 import { cn } from '@/lib/utils/cn'
-import { formatCentimes, formatDate } from '@/lib/utils/formatting'
+import {
+  formatCentimes,
+  formatDate,
+  formatDateTime,
+} from '@/lib/utils/formatting'
 import {
   PaymentStatus,
   RegistrationStatus,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
+import { isUserBanned } from './user-detail-actions'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -345,6 +351,26 @@ export const UserDetail = ({ user }: UserDetailProps) => {
                 <dd className="text-right font-mono text-xs text-zinc-400">
                   {user.discordId}
                 </dd>
+              </div>
+            )}
+            {isUserBanned(user) && (
+              <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                <div className="flex items-center gap-2 text-red-400">
+                  <OctagonX className="size-3.5" />
+                  <span className="font-semibold text-xs uppercase tracking-wide">
+                    Banni
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-zinc-400">
+                  {user.bannedUntil
+                    ? `Jusqu'au ${formatDateTime(user.bannedUntil)}`
+                    : 'Bannissement permanent'}
+                </p>
+                {user.banReason && (
+                  <p className="mt-1 text-xs text-zinc-500 italic">
+                    {user.banReason}
+                  </p>
+                )}
               </div>
             )}
           </dl>

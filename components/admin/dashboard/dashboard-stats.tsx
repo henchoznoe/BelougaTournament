@@ -25,7 +25,7 @@ const STAT_CARDS = [
     icon: Users,
     getValue: (s: DashboardStats) => s.users.total,
     getDetail: (s: DashboardStats) =>
-      `${s.users.players} joueur${pluralize(s.users.players)} · ${s.users.admins} admin${pluralize(s.users.admins)}`,
+      `${s.users.players} joueur${pluralize(s.users.players)} · ${s.users.admins} admin${pluralize(s.users.admins)} · ${s.users.banned} banni${pluralize(s.users.banned)}`,
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/10',
   },

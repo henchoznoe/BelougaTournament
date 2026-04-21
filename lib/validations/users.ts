@@ -38,3 +38,27 @@ export const updateUserSchema = z.object({
 export const deleteUserSchema = z.object({
   userId: z.uuid('ID utilisateur invalide.'),
 })
+
+/** Schema for banning a user. bannedUntil is null for a permanent ban, or a "YYYY-MM-DDTHH:mm" local datetime string. */
+export const banUserSchema = z.object({
+  userId: z.uuid('ID utilisateur invalide.'),
+  bannedUntil: z
+    .string()
+    .refine(v => !Number.isNaN(Date.parse(v)), {
+      message: 'Date de fin de ban invalide.',
+    })
+    .nullable(),
+  banReason: z
+    .string()
+    .trim()
+    .max(
+      VALIDATION_LIMITS.BAN_REASON_MAX,
+      `La raison ne peut pas dépasser ${VALIDATION_LIMITS.BAN_REASON_MAX} caractères.`,
+    )
+    .optional(),
+})
+
+/** Schema for lifting a ban. */
+export const unbanUserSchema = z.object({
+  userId: z.uuid('ID utilisateur invalide.'),
+})

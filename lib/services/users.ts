@@ -30,6 +30,9 @@ export const getUserProfile = async (
         role: true,
         createdAt: true,
         lastLoginAt: true,
+        bannedAt: true,
+        bannedUntil: true,
+        banReason: true,
       },
     })) as UserProfile | null // Prisma select narrows to a subset; cast aligns it with our domain type
   } catch (error) {
@@ -57,6 +60,9 @@ export const getUsers = async (): Promise<UserRow[]> => {
         role: true,
         createdAt: true,
         lastLoginAt: true,
+        bannedAt: true,
+        bannedUntil: true,
+        banReason: true,
       },
     })
     return rows as unknown as UserRow[]
@@ -87,6 +93,9 @@ export const getUserById = async (
         role: true,
         createdAt: true,
         lastLoginAt: true,
+        bannedAt: true,
+        bannedUntil: true,
+        banReason: true,
         registrations: {
           orderBy: { createdAt: 'desc' },
           select: {

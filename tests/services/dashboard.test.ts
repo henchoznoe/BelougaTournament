@@ -75,6 +75,7 @@ describe('getDashboardStats', () => {
       .mockResolvedValueOnce(50) // total users
       .mockResolvedValueOnce(42) // players (role USER)
       .mockResolvedValueOnce(3) // admins
+      .mockResolvedValueOnce(2) // banned
     mockSponsorCount
       .mockResolvedValueOnce(6) // total sponsors
       .mockResolvedValueOnce(4) // enabled sponsors
@@ -90,6 +91,7 @@ describe('getDashboardStats', () => {
         total: 50,
         players: 42,
         admins: 3,
+        banned: 2,
       },
       sponsors: {
         total: 6,
@@ -113,6 +115,7 @@ describe('getDashboardStats', () => {
         total: 0,
         players: 0,
         admins: 0,
+        banned: 0,
       },
       sponsors: {
         total: 0,

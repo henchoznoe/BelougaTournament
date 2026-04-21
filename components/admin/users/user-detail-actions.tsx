@@ -1,6 +1,6 @@
 /**
  * File: components/admin/users/user-detail-actions.tsx
- * Description: User role badge toggle and edit/delete action buttons.
+ * Description: User role badge toggle and edit/delete/ban action buttons for the detail page.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,7 +8,7 @@
 
 'use client'
 
-import { Loader2, Pencil, ShieldCheck, Trash2 } from 'lucide-react'
+import { Ban, Loader2, Pencil, ShieldCheck, Trash2, Unlock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -46,6 +46,13 @@ import { ROUTES } from '@/lib/config/routes'
 import type { UserDetail } from '@/lib/types/user'
 import { cn } from '@/lib/utils/cn'
 import { Role } from '@/prisma/generated/prisma/enums'
+import { BanDialog, isActiveBan } from './ban-dialog'
+
+// ─── Public helper: is ban currently active ───────────────────────────────────
+
+export const isUserBanned = (
+  user: Pick<UserDetail, 'bannedAt' | 'bannedUntil'>,
+): boolean => isActiveBan(user)
 
 // ─── Role Badge (clickable toggle) ──────────────────────────────────────────
 
@@ -136,7 +143,7 @@ export const UserRoleBadge = ({ user, isOwner }: UserRoleBadgeProps) => {
   )
 }
 
-// ─── Action Buttons (Edit displayName + Delete) ─────────────────────────────
+// ─── Action Buttons (Edit displayName + Ban + Delete) ────────────────────────
 
 interface UserDetailActionsProps {
   user: UserDetail
@@ -150,9 +157,12 @@ export const UserDetailActions = ({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
+  const [banOpen, setBanOpen] = useState(false)
   const [displayName, setDisplayName] = useState(user.displayName || '')
 
   const canDelete = isOwner && user.role === Role.USER
+  const canBan = user.role === Role.USER
+  const isBanned = isUserBanned(user)
 
   const handleUpdate = () => {
     startTransition(async () => {
@@ -194,14 +204,14 @@ export const UserDetailActions = ({
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modifier le nom d'affichage</DialogTitle>
+            <DialogTitle>Modifier le nom d&apos;affichage</DialogTitle>
             <DialogDescription>
-              Modifiez le nom d'affichage de {user.name}. Laissez vide pour
+              Modifiez le nom d&apos;affichage de {user.name}. Laissez vide pour
               utiliser le nom Discord.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="displayName">Nom d'affichage</Label>
+            <Label htmlFor="displayName">Nom d&apos;affichage</Label>
             <Input
               id="displayName"
               value={displayName}
@@ -226,6 +236,35 @@ export const UserDetailActions = ({
         </DialogContent>
       </Dialog>
 
+      {/* Ban / Unban button */}
+      {canBan && (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setBanOpen(true)}
+            className={cn(
+              isBanned
+                ? 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
+                : 'border-red-500/30 text-red-400 hover:bg-red-500/10',
+            )}
+          >
+            {isBanned ? (
+              <>
+                <Unlock className="size-4" />
+                Banni
+              </>
+            ) : (
+              <>
+                <Ban className="size-4" />
+                Bannir
+              </>
+            )}
+          </Button>
+          <BanDialog user={user} open={banOpen} onOpenChange={setBanOpen} />
+        </>
+      )}
+
       {/* Delete button */}
       {canDelete && (
         <AlertDialog>
@@ -239,7 +278,7 @@ export const UserDetailActions = ({
             <AlertDialogHeader>
               <AlertDialogTitle>Supprimer {user.name} ?</AlertDialogTitle>
               <AlertDialogDescription>
-                Cette action est irréversible. L'utilisateur et toutes ses
+                Cette action est irréversible. L&apos;utilisateur et toutes ses
                 données associées (inscriptions, équipes, etc.) seront
                 définitivement supprimés.
               </AlertDialogDescription>

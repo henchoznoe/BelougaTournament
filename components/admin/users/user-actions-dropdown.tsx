@@ -9,12 +9,14 @@
 'use client'
 
 import {
+  Ban,
   Eye,
   Loader2,
   MoreHorizontal,
   ShieldCheck,
   ShieldOff,
   Trash2,
+  Unlock,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -38,18 +40,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { deleteUser, demoteAdmin, promoteToAdmin } from '@/lib/actions/users'
+import {
+  deleteUser,
+  demoteAdmin,
+  promoteToAdmin,
+  unbanUser,
+} from '@/lib/actions/users'
 import { ROUTES } from '@/lib/config/routes'
 import type { ActionState } from '@/lib/types/actions'
 import type { UserRow } from '@/lib/types/user'
 import { Role } from '@/prisma/generated/prisma/enums'
+import { BanDialog } from './ban-dialog'
 
 interface UserActionsDropdownProps {
   user: UserRow
   viewerIsOwner: boolean
 }
 
-type ConfirmAction = 'promote' | 'demote' | 'delete'
+type ConfirmAction = 'promote' | 'demote' | 'delete' | 'unban'
+
+/** Returns true when a user row has an active ban (not expired). */
+const isRowBanned = (user: UserRow): boolean => {
+  if (!user.bannedAt) return false
+  if (!user.bannedUntil) return true
+  return user.bannedUntil > new Date()
+}
 
 export const UserActionsDropdown = ({
   user,
@@ -58,13 +73,18 @@ export const UserActionsDropdown = ({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+  const [banOpen, setBanOpen] = useState(false)
 
+  const banned = isRowBanned(user)
   const canPromoteToAdmin = viewerIsOwner && user.role === Role.USER
   const canDemoteAdmin = viewerIsOwner && user.role === Role.ADMIN
   const canDelete = viewerIsOwner && user.role === Role.USER
+  const canBan = user.role === Role.USER && !banned
+  const canUnban = user.role === Role.USER && banned
 
   const hasRoleActions = canPromoteToAdmin || canDemoteAdmin
-  const hasActions = hasRoleActions || canDelete
+  const hasBanActions = canBan || canUnban
+  const hasActions = hasRoleActions || canDelete || hasBanActions
 
   if (!hasActions) return null
 
@@ -81,6 +101,9 @@ export const UserActionsDropdown = ({
           break
         case 'delete':
           result = await deleteUser({ userId: user.id })
+          break
+        case 'unban':
+          result = await unbanUser({ userId: user.id })
           break
       }
 
@@ -103,6 +126,8 @@ export const UserActionsDropdown = ({
         return 'Rétrograder à joueur'
       case 'delete':
         return "Supprimer l'utilisateur"
+      case 'unban':
+        return 'Lever le bannissement'
       default:
         return ''
     }
@@ -116,6 +141,8 @@ export const UserActionsDropdown = ({
         return `${user.name} sera rétrogradé à joueur.`
       case 'delete':
         return `${user.name} sera définitivement supprimé. Toutes les données associées (inscriptions, équipes, etc.) seront supprimées.`
+      case 'unban':
+        return `Le bannissement de ${user.name} sera levé immédiatement.`
       default:
         return ''
     }
@@ -165,6 +192,30 @@ export const UserActionsDropdown = ({
             </>
           )}
 
+          {hasBanActions && (
+            <>
+              <DropdownMenuSeparator className="bg-white/5" />
+              {canBan && (
+                <DropdownMenuItem
+                  onClick={() => setBanOpen(true)}
+                  className="text-red-400 focus:text-red-400"
+                >
+                  <Ban className="size-4" />
+                  Bannir
+                </DropdownMenuItem>
+              )}
+              {canUnban && (
+                <DropdownMenuItem
+                  onClick={() => setConfirmAction('unban')}
+                  className="text-emerald-400 focus:text-emerald-400"
+                >
+                  <Unlock className="size-4" />
+                  Lever le ban
+                </DropdownMenuItem>
+              )}
+            </>
+          )}
+
           {canDelete && (
             <>
               <DropdownMenuSeparator className="bg-white/5" />
@@ -179,6 +230,9 @@ export const UserActionsDropdown = ({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Ban dialog (quick ban from table row) */}
+      <BanDialog user={user} open={banOpen} onOpenChange={setBanOpen} />
 
       <AlertDialog
         open={!!confirmAction}

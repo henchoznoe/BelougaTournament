@@ -247,7 +247,8 @@ export const startPaidRegistrationCheckout = async ({
 
 /**
  * Shared pre-checks for all registration actions.
- * Verifies: tournament exists & PUBLISHED, registration window open, no duplicate or overlapping registration.
+ * Verifies: user is not banned, tournament exists & PUBLISHED, registration window open,
+ * no duplicate or overlapping registration.
  * Returns the tournament on success, or an ActionState error on failure.
  */
 export const fetchTournamentForRegistration = async (
@@ -260,6 +261,26 @@ export const fetchTournamentForRegistration = async (
       existingRegistration: ExistingRegistration | null
     }
 > => {
+  // Step 0: Check if the user is currently banned
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { bannedAt: true, bannedUntil: true },
+  })
+
+  if (user?.bannedAt) {
+    const now = new Date()
+    const isBanActive = !user.bannedUntil || user.bannedUntil > now
+    if (isBanActive) {
+      return {
+        error: {
+          success: false,
+          message:
+            'Votre compte est suspendu. Vous ne pouvez pas vous inscrire à des tournois.',
+        },
+      }
+    }
+  }
+
   const tournament = (await prisma.tournament.findUnique({
     where: { id: tournamentId },
     include: { fields: { orderBy: { order: 'asc' } } },
