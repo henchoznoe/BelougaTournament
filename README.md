@@ -166,6 +166,8 @@ The platform enables administrators to host and manage diverse gaming tournament
 | `pnpm db:studio` | Opens Prisma Studio to visualize data. |
 | `pnpm docker:up` | Starts the local infrastructure (PostgreSQL). |
 | `pnpm docker:down` | Stops the local infrastructure. |
+| `pnpm stripe:listen` | Starts Stripe CLI to listen for webhook events. |
+| `pnpm stripe:listen:live` | Starts Stripe CLI to listen for webhook events in live mode. |
 
 ## 🏗️ Deployment (Vercel)
 

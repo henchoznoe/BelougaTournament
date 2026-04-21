@@ -22,8 +22,8 @@
     "db:studio": "prisma studio",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "stripe:listen": "sh -ac '. ./.env.local && stripe listen --api-key \"$STRIPE_SECRET_KEY\" --forward-to localhost:3000/api/webhook'",
-    "stripe:listen:live": "sh -ac '. ./.env.local && stripe listen --live --api-key \"$STRIPE_SECRET_KEY\" --forward-to localhost:3000/api/webhook'"
+    "stripe:listen": "tsx scripts/stripe-listen.ts",
+    "stripe:listen:live": "tsx scripts/stripe-listen.ts --live"
   },
   "lint-staged": {
     "*.{ts,tsx,css}": [
