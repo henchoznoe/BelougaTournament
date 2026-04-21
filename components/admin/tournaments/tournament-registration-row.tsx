@@ -28,27 +28,12 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   ChangeTeamDialog,
+  DeleteRegistrationDialog,
   EditFieldsDialog,
+  RefundRegistrationDialog,
+  RenameTeamDialog,
 } from '@/components/admin/tournaments/tournament-registration-dialogs'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,18 +41,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { TableCell, TableRow } from '@/components/ui/table'
-import {
-  adminDeleteRegistration,
-  adminRefundRegistration,
-} from '@/lib/actions/registrations'
-import {
-  adminDeleteTeamLogo,
-  adminUpdateTeamName,
-} from '@/lib/actions/registrations-team'
-import { VALIDATION_LIMITS } from '@/lib/config/constants'
+import { adminDeleteTeamLogo } from '@/lib/actions/registrations-team'
 import { ROUTES } from '@/lib/config/routes'
 import type {
   TeamItem,
@@ -142,66 +117,15 @@ const RowActions = ({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [refundOpen, setRefundOpen] = useState(false)
   const [renameTeamOpen, setRenameTeamOpen] = useState(false)
-  const [newTeamName, setNewTeamName] = useState(registration.team?.name ?? '')
 
   const isTeam = tournament.format === TournamentFormat.TEAM
   const canRefund = registration.paymentStatus === PaymentStatus.PAID
-
-  const handleDelete = () => {
-    startTransition(async () => {
-      const result = await adminDeleteRegistration({
-        registrationId: registration.id,
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-      setDeleteOpen(false)
-    })
-  }
-
-  const handleRefund = () => {
-    startTransition(async () => {
-      const result = await adminRefundRegistration({
-        registrationId: registration.id,
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-      setRefundOpen(false)
-    })
-  }
-
-  const handleRenameTeam = () => {
-    const teamId = registration.team?.id
-    if (!teamId) return
-    startTransition(async () => {
-      const result = await adminUpdateTeamName({
-        teamId,
-        name: newTeamName.trim(),
-      })
-      if (result.success) {
-        toast.success(result.message)
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
-      }
-      setRenameTeamOpen(false)
-    })
-  }
 
   const handleDeleteLogo = () => {
     const teamId = registration.team?.id
     if (!teamId) return
     startTransition(async () => {
-      const result = await adminDeleteTeamLogo({
-        teamId,
-      })
+      const result = await adminDeleteTeamLogo({ teamId })
       if (result.success) {
         toast.success(result.message)
         router.refresh()
@@ -240,26 +164,26 @@ const RowActions = ({
           {isTeam && (
             <DropdownMenuItem onSelect={() => setChangeTeamOpen(true)}>
               <ArrowRightLeft className="mr-2 size-4" />
-              Changer d'équipe
+              Changer d\u2019équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team && (
-            <DropdownMenuItem
-              onSelect={() => {
-                setNewTeamName(registration.team?.name ?? '')
-                setRenameTeamOpen(true)
-              }}
-            >
+            <DropdownMenuItem onSelect={() => setRenameTeamOpen(true)}>
               <Type className="mr-2 size-4" />
-              Renommer l'équipe
+              Renommer l\u2019équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team?.logoUrl && (
             <DropdownMenuItem
               onSelect={handleDeleteLogo}
               className="text-amber-400 focus:text-amber-300"
+              disabled={isPending}
             >
-              <ImageOff className="mr-2 size-4" />
+              {isPending ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <ImageOff className="mr-2 size-4" />
+              )}
               Supprimer le logo
             </DropdownMenuItem>
           )}
@@ -286,15 +210,12 @@ const RowActions = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Edit fields dialog */}
       <EditFieldsDialog
         open={editFieldsOpen}
         onOpenChange={setEditFieldsOpen}
         registration={registration}
         fields={fields}
       />
-
-      {/* Change team dialog */}
       {isTeam && (
         <ChangeTeamDialog
           open={changeTeamOpen}
@@ -303,108 +224,22 @@ const RowActions = ({
           teams={teams}
         />
       )}
-
-      {/* Delete confirmation */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Supprimer l'inscription de{' '}
-              {registration.user.displayName || registration.user.name} ?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action supprimera l'inscription.
-              {registration.team && ' Le joueur sera retiré de son équipe.'}
-              {registration.paymentStatus === PaymentStatus.PAID && (
-                <>
-                  {' '}
-                  <span className="font-semibold text-amber-400">
-                    Attention : le paiement ne sera pas automatiquement
-                    remboursé.
-                  </span>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isPending}>
-              {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Refund confirmation */}
-      <AlertDialog open={refundOpen} onOpenChange={setRefundOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Rembourser{' '}
-              {registration.user.displayName || registration.user.name} ?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Un remboursement Stripe sera initié pour cette inscription. Le
-              joueur sera désinscrit et retiré de son équipe le cas échéant.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRefund} disabled={isPending}>
-              {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-              Rembourser
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Rename team dialog */}
+      <DeleteRegistrationDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        registration={registration}
+      />
+      <RefundRegistrationDialog
+        open={refundOpen}
+        onOpenChange={setRefundOpen}
+        registration={registration}
+      />
       {isTeam && registration.team && (
-        <Dialog open={renameTeamOpen} onOpenChange={setRenameTeamOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Renommer l'équipe</DialogTitle>
-              <DialogDescription>
-                Équipe actuelle : {registration.team.name}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2">
-              <Label htmlFor="admin-rename-team" className="text-sm">
-                Nouveau nom
-              </Label>
-              <Input
-                id="admin-rename-team"
-                value={newTeamName}
-                onChange={e => setNewTeamName(e.target.value)}
-                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
-                disabled={isPending}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setRenameTeamOpen(false)}
-                disabled={isPending}
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={handleRenameTeam}
-                disabled={
-                  isPending ||
-                  newTeamName.trim().length < VALIDATION_LIMITS.TEAM_NAME_MIN ||
-                  newTeamName.trim() === registration.team.name
-                }
-              >
-                {isPending ? (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                ) : null}
-                Renommer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <RenameTeamDialog
+          open={renameTeamOpen}
+          onOpenChange={setRenameTeamOpen}
+          registration={registration}
+        />
       )}
     </>
   )
