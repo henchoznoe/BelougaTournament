@@ -20,6 +20,16 @@ type PrismaTransaction = Parameters<
 >[0]
 
 /**
+ * Computes the amount to refund in centimes.
+ * Deducts the Stripe processing fee when known; falls back to the full amount
+ * when the fee has not yet been recorded (e.g. balance_transaction not yet created).
+ */
+export const computeRefundAmount = (
+  amount: number,
+  stripeFee: number | null,
+): number => (stripeFee !== null ? amount - stripeFee : amount)
+
+/**
  * Issues a Stripe refund AFTER the DB has already been updated to REFUNDED state.
  * If the Stripe API call fails, reverts the DB records back to their pre-refund state.
  * Uses an idempotency key to ensure the refund is safe to retry.
@@ -45,11 +55,10 @@ export const issueStripeRefundAfterDbUpdate = async ({
 }): Promise<void> => {
   try {
     const stripe = getStripe()
-    // Refund the original amount minus Stripe processing fees (non-recoverable).
-    // When stripeFee is unknown (null), fall back to a full refund.
-    const refundAmount = latestPayment.stripeFee
-      ? latestPayment.amount - latestPayment.stripeFee
-      : latestPayment.amount
+    const refundAmount = computeRefundAmount(
+      latestPayment.amount,
+      latestPayment.stripeFee,
+    )
     await stripe.refunds.create(
       latestPayment.stripePaymentIntentId
         ? {

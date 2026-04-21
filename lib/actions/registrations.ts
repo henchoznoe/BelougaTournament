@@ -14,7 +14,10 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
+import {
+  computeRefundAmount,
+  issueStripeRefundAfterDbUpdate,
+} from '@/lib/utils/stripe-refund'
 import type { TeamRevertInfo } from '@/lib/utils/team'
 import {
   buildTeamRevertCallback,
@@ -307,7 +310,10 @@ export const adminRefundRegistration = authenticatedAction({
           where: { id: latestPayment.id },
           data: {
             status: PaymentStatus.REFUNDED,
-            refundAmount: latestPayment.amount - (latestPayment.stripeFee ?? 0),
+            refundAmount: computeRefundAmount(
+              latestPayment.amount,
+              latestPayment.stripeFee,
+            ),
             refundedAt: new Date(),
           },
         })
@@ -344,8 +350,10 @@ export const adminRefundRegistration = authenticatedAction({
             where: { id: latestPayment.id },
             data: {
               status: PaymentStatus.REFUNDED,
-              refundAmount:
-                latestPayment.amount - (latestPayment.stripeFee ?? 0),
+              refundAmount: computeRefundAmount(
+                latestPayment.amount,
+                latestPayment.stripeFee,
+              ),
               refundedAt: new Date(),
             },
           })
@@ -384,8 +392,10 @@ export const adminRefundRegistration = authenticatedAction({
             where: { id: latestPayment.id },
             data: {
               status: PaymentStatus.REFUNDED,
-              refundAmount:
-                latestPayment.amount - (latestPayment.stripeFee ?? 0),
+              refundAmount: computeRefundAmount(
+                latestPayment.amount,
+                latestPayment.stripeFee,
+              ),
               refundedAt: new Date(),
             },
           })
