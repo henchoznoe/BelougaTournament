@@ -74,6 +74,7 @@ const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   [PaymentStatus.FAILED]: 'Échoué',
   [PaymentStatus.REFUNDED]: 'Remboursé',
   [PaymentStatus.CANCELLED]: 'Annulé',
+  [PaymentStatus.FORFEITED]: 'Donné',
 } as const
 
 const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
@@ -84,6 +85,7 @@ const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
   [PaymentStatus.FAILED]: 'bg-red-500/10 text-red-400',
   [PaymentStatus.REFUNDED]: 'bg-blue-500/10 text-blue-400',
   [PaymentStatus.CANCELLED]: 'bg-zinc-500/10 text-zinc-400',
+  [PaymentStatus.FORFEITED]: 'bg-orange-500/10 text-orange-400',
 } as const
 
 const FORMAT_LABELS: Record<TournamentFormat, string> = {

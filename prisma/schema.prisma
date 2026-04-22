@@ -49,6 +49,7 @@ enum PaymentStatus {
   FAILED
   REFUNDED
   CANCELLED
+  FORFEITED
 }
 
 enum RefundPolicyType {

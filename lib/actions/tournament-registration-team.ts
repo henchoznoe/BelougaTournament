@@ -12,12 +12,12 @@
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import {
-  CACHE_TAGS,
   fetchTournamentForRegistration,
   startPaidRegistrationCheckout,
   type TeamWithMemberCount,
   upsertRegistrationAttempt,
 } from '@/lib/actions/tournament-registration-helpers'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'

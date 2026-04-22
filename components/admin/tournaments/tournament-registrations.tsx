@@ -179,6 +179,7 @@ export const TournamentRegistrations = ({
                 <SelectItem value={PaymentStatus.REFUNDED}>
                   Remboursé
                 </SelectItem>
+                <SelectItem value={PaymentStatus.FORFEITED}>Donné</SelectItem>
               </SelectContent>
             </Select>
           )}

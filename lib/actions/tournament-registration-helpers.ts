@@ -10,7 +10,6 @@
 'use server'
 
 import {
-  CACHE_TAGS,
   MINUTE_IN_MS,
   REGISTRATION_HOLD_MINUTES,
   SECOND_IN_MS,
@@ -422,7 +421,3 @@ export const upsertRegistrationAttempt = async ({
     },
   })
 }
-
-// Re-export cache tags used by all registration action files to avoid
-// importing constants in every sibling file.
-export { CACHE_TAGS }

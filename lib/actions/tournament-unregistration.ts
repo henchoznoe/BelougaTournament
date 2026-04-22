@@ -135,7 +135,7 @@ export const unregisterFromTournament = authenticatedAction({
       registration.refundDeadlineDaysSnapshot ??
       registration.tournament.refundDeadlineDays
 
-    const refundEligible =
+    const isWithinRefundWindow =
       registration.paymentStatus === PaymentStatus.PAID &&
       isRefundEligible(
         registration.tournament.startDate,
@@ -143,6 +143,10 @@ export const unregisterFromTournament = authenticatedAction({
         refundDeadlineDays,
         new Date(),
       )
+    // waiveRefund is only meaningful when within the refund window;
+    // outside the window it has no effect (already no refund).
+    const waiveRefund = data.waiveRefund === true && isWithinRefundWindow
+    const refundEligible = isWithinRefundWindow && !waiveRefund
     const isPaidRegistration = registration.paymentRequiredSnapshot
 
     // 3. SOLO format — cancel paid registrations, delete free registrations
@@ -155,7 +159,9 @@ export const unregisterFromTournament = authenticatedAction({
               status: RegistrationStatus.CANCELLED,
               paymentStatus: refundEligible
                 ? PaymentStatus.REFUNDED
-                : registration.paymentStatus,
+                : waiveRefund
+                  ? PaymentStatus.FORFEITED
+                  : registration.paymentStatus,
               cancelledAt: new Date(),
               expiresAt: null,
             },
@@ -172,6 +178,11 @@ export const unregisterFromTournament = authenticatedAction({
                 ),
                 refundedAt: new Date(),
               },
+            })
+          } else if (waiveRefund && latestPayment) {
+            await tx.payment.update({
+              where: { id: latestPayment.id },
+              data: { status: PaymentStatus.FORFEITED },
             })
           }
         })
@@ -202,7 +213,9 @@ export const unregisterFromTournament = authenticatedAction({
           ? 'Votre inscription a été annulée.'
           : refundEligible
             ? 'Votre inscription a été annulée et remboursée.'
-            : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
+            : waiveRefund
+              ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
+              : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
       }
     }
 
@@ -229,7 +242,9 @@ export const unregisterFromTournament = authenticatedAction({
               status: RegistrationStatus.CANCELLED,
               paymentStatus: refundEligible
                 ? PaymentStatus.REFUNDED
-                : registration.paymentStatus,
+                : waiveRefund
+                  ? PaymentStatus.FORFEITED
+                  : registration.paymentStatus,
               cancelledAt: new Date(),
               teamId: null,
               expiresAt: null,
@@ -247,6 +262,11 @@ export const unregisterFromTournament = authenticatedAction({
                 ),
                 refundedAt: new Date(),
               },
+            })
+          } else if (waiveRefund && latestPayment) {
+            await tx.payment.update({
+              where: { id: latestPayment.id },
+              data: { status: PaymentStatus.FORFEITED },
             })
           }
         })
@@ -277,7 +297,9 @@ export const unregisterFromTournament = authenticatedAction({
           ? 'Votre inscription a été annulée.'
           : refundEligible
             ? 'Votre inscription a été annulée et remboursée.'
-            : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
+            : waiveRefund
+              ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
+              : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
       }
     }
 
@@ -309,7 +331,9 @@ export const unregisterFromTournament = authenticatedAction({
             status: RegistrationStatus.CANCELLED,
             paymentStatus: refundEligible
               ? PaymentStatus.REFUNDED
-              : registration.paymentStatus,
+              : waiveRefund
+                ? PaymentStatus.FORFEITED
+                : registration.paymentStatus,
             cancelledAt: new Date(),
             teamId: null,
             expiresAt: null,
@@ -327,6 +351,11 @@ export const unregisterFromTournament = authenticatedAction({
               ),
               refundedAt: new Date(),
             },
+          })
+        } else if (waiveRefund && latestPayment) {
+          await tx.payment.update({
+            where: { id: latestPayment.id },
+            data: { status: PaymentStatus.FORFEITED },
           })
         }
       } else {
@@ -361,7 +390,9 @@ export const unregisterFromTournament = authenticatedAction({
         ? 'Votre inscription a été annulée.'
         : refundEligible
           ? 'Votre inscription a été annulée et remboursée.'
-          : 'Votre inscription a été annulée. Cette désinscription n\u2019ouvre pas droit à un remboursement automatique.',
+          : waiveRefund
+            ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
+            : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
     }
   },
 })

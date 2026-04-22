@@ -13,6 +13,7 @@ import {
   Calendar,
   CreditCard,
   Gamepad2,
+  Gift,
   Loader2,
   Pencil,
   Swords,
@@ -23,16 +24,15 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { RegistrationEditDialog } from '@/components/public/profile/registration-edit-dialog'
+import { Button } from '@/components/ui/button'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
@@ -64,12 +64,13 @@ export const ProfileRegistrations = ({
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const handleUnregister = () => {
+  const handleUnregister = (waiveRefund: boolean) => {
     if (!unregisterTarget) return
 
     startTransition(async () => {
       const result = await unregisterFromTournament({
         tournamentId: unregisterTarget.tournament.id,
+        waiveRefund,
       })
 
       if (result.success) {
@@ -81,6 +82,35 @@ export const ProfileRegistrations = ({
       }
     })
   }
+
+  // Compute refund eligibility and net amount for the current unregister target
+  const getRefundInfo = (registration: UserRegistrationItem) => {
+    if (
+      !registration.paymentRequiredSnapshot ||
+      registration.paymentStatus !== PaymentStatus.PAID
+    ) {
+      return { eligible: false, amount: null }
+    }
+    const tournament = registration.tournament
+    const eligible = isRefundEligible(
+      new Date(tournament.startDate),
+      tournament.refundPolicyType,
+      tournament.refundDeadlineDays,
+      new Date(),
+    )
+    const amount =
+      tournament.entryFeeAmount !== null
+        ? formatCentimes(
+            calculateStripeNetAmount(tournament.entryFeeAmount),
+            tournament.entryFeeCurrency ?? 'CHF',
+          )
+        : null
+    return { eligible, amount }
+  }
+
+  const refundInfo = unregisterTarget
+    ? getRefundInfo(unregisterTarget)
+    : { eligible: false, amount: null }
 
   return (
     <>
@@ -129,15 +159,19 @@ export const ProfileRegistrations = ({
                         ? 'Paiement validé'
                         : registration.paymentStatus === PaymentStatus.REFUNDED
                           ? 'Paiement remboursé'
-                          : registration.paymentStatus === PaymentStatus.PENDING
-                            ? 'Paiement en attente'
+                          : registration.paymentStatus ===
+                              PaymentStatus.FORFEITED
+                            ? 'Frais offerts'
                             : registration.paymentStatus ===
-                                PaymentStatus.FAILED
-                              ? 'Paiement échoué'
+                                PaymentStatus.PENDING
+                              ? 'Paiement en attente'
                               : registration.paymentStatus ===
-                                  PaymentStatus.CANCELLED
-                                ? 'Paiement annulé'
-                                : 'Tournoi gratuit'}
+                                  PaymentStatus.FAILED
+                                ? 'Paiement échoué'
+                                : registration.paymentStatus ===
+                                    PaymentStatus.CANCELLED
+                                  ? 'Paiement annulé'
+                                  : 'Tournoi gratuit'}
                     </span>
                   </div>
                 </Link>
@@ -174,6 +208,12 @@ export const ProfileRegistrations = ({
                   Cette inscription a été remboursée et n'est plus active.
                 </p>
               )}
+              {registration.paymentStatus === PaymentStatus.FORFEITED && (
+                <p className="px-1 text-xs text-orange-300">
+                  Vous avez offert vos frais d&apos;inscription au Belouga
+                  Tournament. Merci pour votre soutien&nbsp;!
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -202,18 +242,19 @@ export const ProfileRegistrations = ({
         />
       )}
 
-      <AlertDialog
+      {/* Unregister dialog — two-action variant when refund is eligible */}
+      <Dialog
         open={!!unregisterTarget}
         onOpenChange={open => {
           if (!open) setUnregisterTarget(null)
         }}
       >
-        <AlertDialogContent className="border-zinc-800 bg-zinc-950">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">
+        <DialogContent className="border-zinc-800 bg-zinc-950 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white">
               Confirmer la désinscription
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
               Voulez-vous vraiment annuler votre inscription au tournoi{' '}
               <span className="font-semibold text-white">
                 {unregisterTarget?.tournament.title}
@@ -226,55 +267,113 @@ export const ProfileRegistrations = ({
                   dissoute.
                 </span>
               )}
-              {unregisterTarget?.paymentRequiredSnapshot &&
-                unregisterTarget.paymentStatus === PaymentStatus.PAID &&
-                (() => {
-                  const tournament = unregisterTarget.tournament
-                  const eligible = isRefundEligible(
-                    new Date(tournament.startDate),
-                    tournament.refundPolicyType,
-                    tournament.refundDeadlineDays,
-                    new Date(),
-                  )
-                  const amount =
-                    tournament.entryFeeAmount !== null
-                      ? formatCentimes(
-                          calculateStripeNetAmount(tournament.entryFeeAmount),
-                          tournament.entryFeeCurrency ?? 'CHF',
-                        )
-                      : null
-                  return eligible ? (
-                    <span className="mt-2 block text-emerald-400">
-                      Vous serez remboursé de {amount} (frais Stripe déduits).
-                    </span>
+            </DialogDescription>
+          </DialogHeader>
+
+          {refundInfo.eligible ? (
+            /* ── Refund window open: two explicit choices ─────────────── */
+            <div className="space-y-3">
+              <p className="text-sm text-zinc-400">
+                Vous êtes dans la fenêtre de remboursement. Choisissez comment
+                procéder&nbsp;:
+              </p>
+              <div className="space-y-2">
+                {/* Option 1 — refund */}
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleUnregister(false)}
+                  className="flex w-full items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-left transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPending ? (
+                    <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-emerald-400" />
                   ) : (
-                    <span className="mt-2 block text-red-400">
-                      Attention : vous ne serez pas remboursé.
-                    </span>
-                  )
-                })()}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={isPending}
-              className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-            >
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleUnregister}
-              disabled={isPending}
-              className="border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-            >
-              {isPending ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : null}
-              Se désinscrire
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                    <CreditCard className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-emerald-400">
+                      Me désinscrire et être remboursé
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      Vous recevrez{' '}
+                      <span className="font-medium text-zinc-300">
+                        {refundInfo.amount}
+                      </span>{' '}
+                      (frais Stripe déduits).
+                    </p>
+                  </div>
+                </button>
+
+                {/* Option 2 — forfeit */}
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleUnregister(true)}
+                  className="flex w-full items-start gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-3 text-left transition-colors hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPending ? (
+                    <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-orange-400" />
+                  ) : (
+                    <Gift className="mt-0.5 size-4 shrink-0 text-orange-400" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-orange-400">
+                      Me désinscrire sans remboursement
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      Vos frais d&apos;inscription sont offerts au Belouga
+                      Tournament. Cette action est irréversible.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* ── No refund window: single destructive confirm ─────────── */
+            <>
+              {unregisterTarget?.paymentRequiredSnapshot &&
+                unregisterTarget.paymentStatus === PaymentStatus.PAID && (
+                  <p className="text-sm text-red-400">
+                    Attention&nbsp;: vous ne serez pas remboursé.
+                  </p>
+                )}
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  disabled={isPending}
+                  onClick={() => setUnregisterTarget(null)}
+                  className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  disabled={isPending}
+                  onClick={() => handleUnregister(false)}
+                  className="border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                >
+                  {isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  Se désinscrire
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+
+          {refundInfo.eligible && (
+            <DialogFooter>
+              <Button
+                variant="outline"
+                disabled={isPending}
+                onClick={() => setUnregisterTarget(null)}
+                className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+              >
+                Annuler
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

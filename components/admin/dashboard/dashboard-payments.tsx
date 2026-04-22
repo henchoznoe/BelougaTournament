@@ -10,6 +10,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   CreditCard,
+  Gift,
   TrendingDown,
   Wallet,
 } from 'lucide-react'
@@ -31,7 +32,7 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
       </div>
 
       {/* KPI cards */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-4">
+      <div className="mb-6 grid gap-4 sm:grid-cols-5">
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <CreditCard className="size-3" />
@@ -58,6 +59,17 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
             {payments.refundCount} remboursement
             {pluralize(payments.refundCount)}
           </p>
+        </div>
+
+        <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <Gift className="size-3" />
+            Annulations avec don
+          </div>
+          <p className="mt-1 text-lg font-semibold text-orange-400">
+            {payments.forfeitedCount}
+          </p>
+          <p className="mt-0.5 text-[10px] text-zinc-600">frais conservés</p>
         </div>
 
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
@@ -108,6 +120,13 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
                       {pluralize(t.refundedCount)}
                     </span>
                   )}
+                  {t.forfeitedCount > 0 && (
+                    <span className="text-orange-400/70">
+                      {' '}
+                      · {t.forfeitedCount} don
+                      {pluralize(t.forfeitedCount)}
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="ml-4 shrink-0 text-right">
@@ -117,6 +136,11 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
                 {t.refunded > 0 && (
                   <p className="text-[10px] text-red-400/70">
                     -{formatCentimes(t.refunded)}
+                  </p>
+                )}
+                {t.forfeitedCount > 0 && (
+                  <p className="text-[10px] text-orange-400/70">
+                    {t.forfeitedCount} don{pluralize(t.forfeitedCount)}
                   </p>
                 )}
               </div>
