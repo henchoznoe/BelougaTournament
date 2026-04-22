@@ -12,6 +12,7 @@ import { LayoutDashboard, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,6 +33,12 @@ interface NavbarProfileProps {
   mode?: 'desktop' | 'mobile'
 }
 
+const NavbarProfileSkeleton = () => (
+  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
+    <Skeleton className="size-5 rounded-full bg-zinc-700" />
+  </div>
+)
+
 export const NavbarProfile = ({
   onClick,
   mode = 'desktop',
@@ -45,13 +52,14 @@ export const NavbarProfile = ({
       if (onClick) onClick()
     },
   })
+  const [mounted, setMounted] = useState(false)
 
-  if (isPending) {
-    return (
-      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
-        <Skeleton className="size-5 rounded-full bg-zinc-700" />
-      </div>
-    )
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted || isPending) {
+    return <NavbarProfileSkeleton />
   }
 
   if (!session?.user) {
