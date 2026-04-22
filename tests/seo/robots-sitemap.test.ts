@@ -14,9 +14,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const mockEnv = {
+const mockEnv: {
+  NEXT_PUBLIC_APP_URL: string
+  VERCEL_ENV: 'development' | 'preview' | 'production' | undefined
+} = {
   NEXT_PUBLIC_APP_URL: 'https://belouga.test',
-  VERCEL_ENV: 'production' as const,
+  VERCEL_ENV: 'production',
 }
 vi.mock('@/lib/core/env', () => ({ env: mockEnv }))
 
