@@ -184,7 +184,10 @@ For casts on Prisma ORM queries (select subsets, nested includes), add an inline
 ```
 app/
 ├── (public)/             # Public pages (landing, tournaments, stream, leaderboard, profile, contact, legal)
+│   ├── profile/loading.tsx         # Route-level skeleton for profile page
+│   └── tournaments/[slug]/loading.tsx  # Route-level skeleton for tournament detail page
 ├── admin/                # Protected admin (AdminGuard + proxy.ts edge middleware)
+│   └── loading.tsx       # Route-level skeleton for admin pages
 ├── api/admin/blobs/      # Vercel Blob upload/list/delete API
 ├── api/auth/[...all]/    # BetterAuth handler
 ├── api/webhook/          # Stripe webhook handler
@@ -213,7 +216,7 @@ components/
 │   ├── legal/            # LegalSection
 │   ├── profile/          # ProfilePage, ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
 │   ├── stream/           # TwitchPlayer
-│   └── tournaments/      # TournamentCard, TournamentDetail, TournamentRegistrationForm
+│   └── tournaments/      # TournamentCard, TournamentDetail (RSC), TournamentHeroGallery (client island), TournamentRegistrationForm
 └── ui/                   # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 
 lib/
@@ -248,6 +251,7 @@ lib/
 │   ├── prisma-error.ts          # handlePrismaError() — maps Prisma codes to ActionState
 │   ├── team.ts                  # syncTeamFullState, handleCaptainSuccession, removeUserFromTeam
 │   ├── tournament-helpers.ts    # parseFieldValues, validateFieldValues, isRefundEligible
+│   ├── tournament-status.ts     # getTournamentRegistrationBadge, extractTwitchChannel
 │   ├── hero-tournament-badge.ts # resolveHeroTournamentBadge, getNextHeroTournamentBadgeUpdateDelay
 │   ├── stripe-refund.ts         # issueStripeRefundAfterDbUpdate
 │   ├── role.ts / owner.ts / verify-admin.ts  # Auth helpers
@@ -300,8 +304,10 @@ Cache tags are centralized in `CACHE_TAGS` from `lib/config/constants.ts`. `reva
 
 ### Prerender Rules (`cacheComponents: true`)
 
-1. **No `new Date()` in components** — hardcode or compute at build time
+1. **No `new Date()` in RSC** — compute in `'use cache'` services or pass from server to client
 2. **Dynamic APIs** (`headers()`, `cookies()`) **require `<Suspense>`** wrapping the component that calls them
+3. **Route-level `loading.tsx`** files act as automatic Suspense boundaries for the page component — prefer them over inline `<Suspense>` wrapping the entire page content
+4. **Session in pages**: extract `getSession()` into a separate async wrapper component and wrap it in `<Suspense>`, or use a `loading.tsx` file
 
 ### Forms (Client Components)
 
@@ -320,7 +326,7 @@ const isStatus = (val: string): val is TournamentStatus =>
 
 - **`server-only`** import in modules that must not be bundled client-side
 - **Prisma singleton** with global caching in `lib/core/prisma.ts`
-- **Auth**: BetterAuth + Discord OAuth → `getSession()` server-side, `authClient.useSession()` client-side
+- **Auth**: BetterAuth + Discord OAuth → `getSession()` server-side only. Session data is passed to client components as props (`sessionUser`, `isAuthenticated`). `authClient.useSession()` is only used for the logout flow, not for reading session state in public components.
 - **Admin protection**: dual-layer — edge `proxy.ts` + `AdminGuard` server component
 - **Accessibility**: all icon-only buttons use `aria-label` (not `title`); all `<nav>` elements have `aria-label`; search inputs have `aria-label`
 - **Vercel Blob**: images stored via `/api/admin/blobs` with folder prefix (`logos/`, `sponsors/`). Allowed types: PNG, JPEG, WebP (no SVG). Blob DELETE validates URL domain.

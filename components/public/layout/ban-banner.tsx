@@ -6,37 +6,26 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import prisma from '@/lib/core/prisma'
 import { getSession } from '@/lib/services/auth'
+import { getActiveUserBan } from '@/lib/services/users'
 import { formatDateTime } from '@/lib/utils/formatting'
 import { BanBannerClient } from './ban-banner-client'
-
-/** Returns true when a user has an active ban (not expired). */
-const isActiveBan = (
-  bannedAt: Date | null,
-  bannedUntil: Date | null,
-): boolean => {
-  if (!bannedAt) return false
-  if (!bannedUntil) return true
-  return bannedUntil > new Date()
-}
 
 export const BanBanner = async () => {
   const session = await getSession()
   if (!session) return null
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { bannedAt: true, bannedUntil: true, banReason: true },
-  })
+  const activeBan = await getActiveUserBan(session.user.id)
 
-  if (!user || !isActiveBan(user.bannedAt, user.bannedUntil)) return null
+  if (!activeBan) return null
 
   return (
     <BanBannerClient
-      bannedUntil={user.bannedUntil?.toISOString() ?? null}
-      banReason={user.banReason ?? null}
-      formattedDate={user.bannedUntil ? formatDateTime(user.bannedUntil) : null}
+      bannedUntil={activeBan.bannedUntil?.toISOString() ?? null}
+      banReason={activeBan.banReason}
+      formattedDate={
+        activeBan.bannedUntil ? formatDateTime(activeBan.bannedUntil) : null
+      }
     />
   )
 }

@@ -15,10 +15,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
-import { authClient } from '@/lib/core/auth-client'
 import type {
   HeroTournamentBadge,
   HeroTournamentBadgeTournament,
@@ -52,6 +50,7 @@ const itemVariants: Variants = {
 interface HeroSectionProps {
   badge: HeroTournamentBadge
   badgeTournaments: HeroTournamentBadgeTournament[]
+  isAuthenticated: boolean
   twitchUrl?: string
 }
 
@@ -88,9 +87,9 @@ const resolveActiveTournamentSlug = (
 export const HeroSection = ({
   badge,
   badgeTournaments,
+  isAuthenticated,
   twitchUrl,
 }: HeroSectionProps) => {
-  const { data: session, isPending } = authClient.useSession()
   const [currentBadge, setCurrentBadge] = useState(badge)
   const [activeTournamentSlug, setActiveTournamentSlug] = useState<
     string | null
@@ -240,9 +239,7 @@ export const HeroSection = ({
             </Link>
           </Button>
 
-          {isPending ? (
-            <Skeleton className="h-14 w-57.5 rounded-md bg-white/5" />
-          ) : !session?.user ? (
+          {!isAuthenticated ? (
             <Button
               asChild
               variant="outline"

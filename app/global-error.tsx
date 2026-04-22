@@ -32,7 +32,8 @@ const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tight">Erreur critique</h1>
           <p className="mt-2 text-sm text-zinc-400">
-            L&apos;application a rencontré une erreur irrécupérable.
+            L&apos;application a rencontré une erreur critique. Réessayez dans
+            un instant.
           </p>
         </div>
         <button

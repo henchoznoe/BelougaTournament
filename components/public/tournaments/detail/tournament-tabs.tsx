@@ -34,10 +34,8 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { formatDateTime } from '@/lib/utils/formatting'
-import {
-  RegistrationStatus,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import type { TournamentRegistrationPhase } from '@/lib/utils/tournament-status'
+import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
 
 interface TournamentTabsProps {
   tournament: PublicTournamentDetail
@@ -45,7 +43,7 @@ interface TournamentTabsProps {
   availableTeams: AvailableTeam[]
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
-  registrationOpen: boolean
+  registrationPhase: TournamentRegistrationPhase
 }
 
 export const TournamentTabs = ({
@@ -54,7 +52,7 @@ export const TournamentTabs = ({
   availableTeams,
   registrationState,
   isAuthenticated,
-  registrationOpen,
+  registrationPhase,
 }: TournamentTabsProps) => (
   <Tabs defaultValue="details" className="w-full">
     <TabsList className="w-full rounded-2xl border border-white/5 bg-white/5 p-1">
@@ -126,7 +124,7 @@ export const TournamentTabs = ({
         )}
 
         {/* Registration card */}
-        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-linear-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
           <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
           <div className="relative z-10 space-y-4">
@@ -135,7 +133,7 @@ export const TournamentTabs = ({
               Inscription
             </h3>
 
-            {registrationOpen ? (
+            {registrationPhase === 'open' ? (
               <>
                 {registrationState?.status !== RegistrationStatus.CONFIRMED && (
                   <p className="text-center text-sm text-zinc-400">
@@ -159,11 +157,11 @@ export const TournamentTabs = ({
               </>
             ) : (
               <div className="flex flex-col items-center gap-3 py-4 text-center">
-                {tournament.status === TournamentStatus.ARCHIVED ? (
+                {registrationPhase === 'archived' ? (
                   <p className="text-sm text-zinc-500">
                     Ce tournoi est terminé.
                   </p>
-                ) : new Date() < new Date(tournament.registrationOpen) ? (
+                ) : registrationPhase === 'upcoming' ? (
                   <p className="text-sm text-zinc-500">
                     Les inscriptions ouvriront le{' '}
                     <span className="font-medium text-zinc-400">

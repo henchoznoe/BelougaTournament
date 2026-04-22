@@ -32,6 +32,10 @@
 ```
 .
 ├── app/                    # Next.js App Router — pages, layouts, API routes, SEO
+│   ├── (public)/
+│   │   ├── profile/loading.tsx          # Route-level skeleton for profile
+│   │   └── tournaments/[slug]/loading.tsx  # Route-level skeleton for tournament detail
+│   └── admin/loading.tsx                # Route-level skeleton for admin
 ├── components/
 │   ├── admin/              # Admin domain components
 │   │   ├── dashboard/      # Stats, recent logins, payments panels
@@ -49,7 +53,7 @@
 │   ├── core/               # Auth, Prisma client, env validation, structured logger, Stripe client
 │   ├── services/           # Data access with 'use cache' + cacheTag + cacheLife
 │   ├── types/              # TypeScript types (ActionState, AuthSession, domain types)
-│   ├── utils/              # cn, formatting (formatCentimes/parseCentimes), prisma-error, auth helpers, team helpers
+│   ├── utils/              # cn, formatting (formatCentimes/parseCentimes), prisma-error, auth helpers, team helpers, tournament-status
 │   └── validations/        # Zod v4 schemas (VALID_SORT_OPTIONS exported from tournaments.ts)
 ├── prisma/                 # Schema, migrations, seed scripts, generated client (gitignored)
 ├── public/                 # Static assets (logo, backgrounds, fonts)
@@ -222,7 +226,8 @@ Browser                     Server                        Discord
   │  Subsequent requests:     │                              │
   │  ── Cookie ─────────────> │                              │
   │                           ├─ Server: getSession()        │
-  │                           ├─ Client: authClient.useSession()
+  │                           │   (session passed as props   │
+  │                           │    to client components)     │
 ```
 
 **Session config:** 7-day expiry, 24-hour update age, 5-minute cookie cache, 30 requests / 60 seconds rate limit.
@@ -273,10 +278,12 @@ User clicks "S'inscrire" (paid tournament)
 | Pages, layouts | Interactive forms (react-hook-form) |
 | `AdminGuard` (async, server-side redirect) | Dialogs (create, edit, delete, confirm) |
 | `ProfilePage` (fetches data) | Lists with search/filter/status selectors |
-| Data fetching via services | `authClient.useSession()` for client-side session |
-| SEO files (robots, sitemap) | Toast notifications (Sonner) |
+| `TournamentDetail` (RSC orchestrator) | `TournamentHeroGallery` (image gallery client island) |
+| Data fetching via services | Toast notifications (Sonner) |
+| Session props passed to client components | `authClient.useSession()` only for logout flow |
+| SEO files (robots, sitemap) | Framer Motion animations |
 
-`cacheComponents: true` in `next.config.ts` enables component-level RSC caching. **No `new Date()` in components** — use constants or compute at build time. Dynamic APIs (`headers()`, `cookies()`) require `<Suspense>` wrapping.
+`cacheComponents: true` in `next.config.ts` enables component-level RSC caching. **No `new Date()` in RSC** — compute in `'use cache'` services or pass from server to client. Dynamic APIs (`headers()`, `cookies()`) require `<Suspense>` wrapping. Route-level `loading.tsx` files provide automatic Suspense boundaries for pages calling dynamic APIs like `getSession()`.
 
 ---
 
@@ -301,11 +308,11 @@ components/
 │   ├── auth/           # AdminGuard (RSC), LoginScreen, SocialLogin
 │   ├── contact/        # ContactBento
 │   ├── landing/        # Hero, features, sponsors, stream, tournaments sections
-│   ├── layout/         # PublicNavbar, PublicFooter
+│   ├── layout/         # PublicNavbar (RSC), PublicNavbarClient, PublicFooter, BanBanner, NavbarProfile
 │   ├── legal/          # LegalSection
 │   ├── profile/        # ProfilePage (RSC), ProfileEditForm, ProfileRegistrations, RegistrationEditDialog
 │   ├── stream/         # TwitchPlayer (with TWITCH_FALLBACK_TIMEOUT_MS offline detection)
-│   └── tournaments/    # TournamentCard, TournamentDetail, TournamentRegistrationForm
+│   └── tournaments/    # TournamentCard, TournamentDetail (RSC), TournamentHeroGallery (client island), TournamentRegistrationForm
 └── ui/                 # shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
 ```
 
@@ -323,7 +330,7 @@ components/
 | `tournaments.ts` | `hours` | `TOURNAMENTS` | Shared options list (for selects) |
 | `dashboard.ts` | `minutes` | `DASHBOARD_*` | Aggregate stats, recent logins, recent registrations, payments |
 | `settings.ts` | `hours` | `SETTINGS` | Singleton global settings with fallback defaults |
-| `users.ts` | `hours` | `USERS` | User profile and admin user management queries |
+| `users.ts` | `hours` | `USERS` | User profile, admin user management, active ban check |
 | `sponsors.ts` | `hours` | `SPONSORS` | Sponsor listing |
 | `auth.ts` | — | — | `getSession()` (no cache, reads from cookies) |
 

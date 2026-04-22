@@ -7,13 +7,17 @@
  */
 
 import 'server-only'
-// $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
-// because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { UserDetail, UserProfile, UserRow } from '@/lib/types/user'
+
+/** Minimal active ban payload for rendering the public ban banner. */
+interface ActiveUserBan {
+  bannedUntil: Date | null
+  banReason: string | null
+}
 
 /** Fetches the profile data for a given user ID. Returns null if not found. */
 export const getUserProfile = async (
@@ -37,6 +41,34 @@ export const getUserProfile = async (
     })) as UserProfile | null // Prisma select narrows to a subset; cast aligns it with our domain type
   } catch (error) {
     logger.error({ error }, 'Error fetching user profile')
+    return null
+  }
+}
+
+/** Fetches the current active ban for a user, ignoring expired bans. */
+export const getActiveUserBan = async (
+  userId: string,
+): Promise<ActiveUserBan | null> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { bannedAt: true, bannedUntil: true, banReason: true },
+    })
+
+    if (!user?.bannedAt) {
+      return null
+    }
+
+    if (user.bannedUntil && user.bannedUntil <= new Date()) {
+      return null
+    }
+
+    return {
+      bannedUntil: user.bannedUntil,
+      banReason: user.banReason ?? null,
+    }
+  } catch (error) {
+    logger.error({ error, userId }, 'Error fetching active user ban')
     return null
   }
 }

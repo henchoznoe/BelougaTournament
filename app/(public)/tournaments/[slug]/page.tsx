@@ -11,7 +11,6 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { StripeReturnToast } from '@/components/public/tournaments/stripe-return-toast'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
-import { Skeleton } from '@/components/ui/skeleton'
 import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 import {
@@ -42,7 +41,7 @@ export const generateMetadata = async ({
   }
 }
 
-const TournamentContent = async ({ params }: TournamentPageProps) => {
+const TournamentPage = async ({ params }: TournamentPageProps) => {
   const { slug } = await params
   const [tournament, settings, session] = await Promise.all([
     getPublicTournamentBySlug(slug),
@@ -78,31 +77,6 @@ const TournamentContent = async ({ params }: TournamentPageProps) => {
         isAuthenticated={!!session?.user}
       />
     </>
-  )
-}
-
-const TournamentPage = (props: TournamentPageProps) => {
-  return (
-    <section className="relative px-4 pb-20 pt-32 md:pt-40">
-      <Suspense
-        fallback={
-          <div className="mx-auto w-full max-w-4xl space-y-8">
-            <Skeleton className="h-6 w-40 rounded-md bg-white/2" />
-            <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
-              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
-              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
-              <Skeleton className="h-24 rounded-2xl border border-white/5 bg-white/2" />
-            </div>
-            <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
-            <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
-          </div>
-        }
-      >
-        <TournamentContent params={props.params} />
-      </Suspense>
-    </section>
   )
 }
 

@@ -1,6 +1,6 @@
 /**
  * File: components/admin/ui/admin-topbar.tsx
- * Description: Top navigation bar for the admin panel.
+ * Description: Top navigation bar for the admin panel using server-provided session props.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -14,30 +14,34 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { ROUTES } from '@/lib/config/routes'
-import { authClient } from '@/lib/core/auth-client'
+import type { AuthSession } from '@/lib/types/auth'
 import { cn } from '@/lib/utils/cn'
 
 interface AdminTopbarProps {
   onMobileMenuToggle: () => void
+  sessionUser: AuthSession['user'] | null
 }
 
-export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
-  const { data: session, isPending } = authClient.useSession()
+export const AdminTopbar = ({
+  onMobileMenuToggle,
+  sessionUser,
+}: AdminTopbarProps) => {
   const router = useRouter()
   const { handleLogout } = useLogout({
     onSuccess: () => router.push(ROUTES.HOME),
   })
 
+  const resolvedDisplayName =
+    sessionUser?.displayName || sessionUser?.name || ''
+
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/80 px-4 backdrop-blur-xl md:px-6">
-      {/* Left: Mobile menu button */}
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -50,7 +54,6 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
         </Button>
       </div>
 
-      {/* Right: Back to site + Logout + User info */}
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -86,49 +89,46 @@ export const AdminTopbar = ({ onMobileMenuToggle }: AdminTopbarProps) => {
           </TooltipContent>
         </Tooltip>
 
-        <div className="h-6 w-px bg-white/10" />
+        {sessionUser && (
+          <>
+            <div className="h-6 w-px bg-white/10" />
 
-        {isPending ? (
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-4 w-20 rounded bg-zinc-800" />
-            <Skeleton className="size-8 rounded-full bg-zinc-800" />
-          </div>
-        ) : session?.user ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href={ROUTES.PROFILE}
-                className="flex items-center gap-3 rounded-xl px-3 py-1.5 transition-colors duration-200 hover:bg-white/5"
-              >
-                <span
-                  className={cn(
-                    'hidden text-sm font-medium text-zinc-300 sm:block',
-                  )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={ROUTES.PROFILE}
+                  className="flex items-center gap-3 rounded-xl px-3 py-1.5 transition-colors duration-200 hover:bg-white/5"
                 >
-                  {session.user.displayName || session.user.name}
-                </span>
-                {session.user.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.displayName || session.user.name}
-                    width={32}
-                    height={32}
-                    className="rounded-full ring-2 ring-white/10"
-                  />
-                ) : (
-                  <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10">
-                    <span className="text-xs font-medium text-zinc-300">
-                      {session.user.displayName.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={8}>
-              Mon profil
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
+                  <span
+                    className={cn(
+                      'hidden text-sm font-medium text-zinc-300 sm:block',
+                    )}
+                  >
+                    {resolvedDisplayName}
+                  </span>
+                  {sessionUser.image ? (
+                    <Image
+                      src={sessionUser.image}
+                      alt={resolvedDisplayName}
+                      width={32}
+                      height={32}
+                      className="rounded-full ring-2 ring-white/10"
+                    />
+                  ) : (
+                    <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {resolvedDisplayName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={8}>
+                Mon profil
+              </TooltipContent>
+            </Tooltip>
+          </>
+        )}
       </div>
     </header>
   )

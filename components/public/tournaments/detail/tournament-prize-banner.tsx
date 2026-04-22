@@ -6,8 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-'use client'
-
 import { Trophy } from 'lucide-react'
 import { RichText } from '@/components/ui/rich-text'
 import { stripHtml } from '@/lib/utils/formatting'
@@ -22,7 +20,7 @@ export const TournamentPrizeBanner = ({
   if (!stripHtml(prize).trim()) return null
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-linear-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 p-6 md:p-8">
       <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
 

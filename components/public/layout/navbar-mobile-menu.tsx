@@ -19,6 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import type { AuthSession } from '@/lib/types/auth'
 import { cn } from '@/lib/utils/cn'
 
 interface NavLink {
@@ -32,6 +33,7 @@ interface NavbarMobileMenuProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   isLinkActive: (href: string) => boolean
+  sessionUser: AuthSession['user'] | null
 }
 
 export const NavbarMobileMenu = ({
@@ -39,6 +41,7 @@ export const NavbarMobileMenu = ({
   isOpen,
   onOpenChange,
   isLinkActive,
+  sessionUser,
 }: NavbarMobileMenuProps) => (
   <Sheet open={isOpen} onOpenChange={onOpenChange}>
     <SheetTrigger asChild>
@@ -58,7 +61,11 @@ export const NavbarMobileMenu = ({
 
       <div className="flex flex-col gap-6 px-4 pb-6 pt-16">
         <div className="flex justify-center">
-          <NavbarProfile mode="mobile" onClick={() => onOpenChange(false)} />
+          <NavbarProfile
+            mode="mobile"
+            onClick={() => onOpenChange(false)}
+            sessionUser={sessionUser}
+          />
         </div>
 
         <div className="flex flex-col gap-2">

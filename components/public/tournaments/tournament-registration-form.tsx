@@ -44,7 +44,6 @@ import {
   VALIDATION_LIMITS,
 } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
-import { authClient } from '@/lib/core/auth-client'
 import type { ActionState } from '@/lib/types/actions'
 import type {
   AvailableTeam,
@@ -112,7 +111,6 @@ export const TournamentRegistrationForm = ({
   registrationState,
   isAuthenticated,
 }: TournamentRegistrationFormProps) => {
-  const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
   const router = useRouter()
@@ -247,18 +245,8 @@ export const TournamentRegistrationForm = ({
     })
   }
 
-  // Loading state: only show spinner when the client session is still pending
-  // AND the server didn't already resolve the auth state (prevents hydration mismatch)
-  if (isSessionPending && !isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center py-6">
-        <Loader2 className="size-5 animate-spin text-zinc-500" />
-      </div>
-    )
-  }
-
   // Not authenticated: show login CTA
-  if (!session?.user && !isAuthenticated) {
+  if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <p className="text-sm text-zinc-400">

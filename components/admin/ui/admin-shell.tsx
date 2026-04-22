@@ -15,13 +15,19 @@ import { AdminTopbar } from '@/components/admin/ui/admin-topbar'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
+import type { AuthSession } from '@/lib/types/auth'
 
 interface AdminShellProps {
   logoUrl: string | null
+  sessionUser: AuthSession['user'] | null
   children: React.ReactNode
 }
 
-export const AdminShell = ({ logoUrl, children }: AdminShellProps) => {
+export const AdminShell = ({
+  logoUrl,
+  sessionUser,
+  children,
+}: AdminShellProps) => {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
 
   return (
@@ -60,7 +66,10 @@ export const AdminShell = ({ logoUrl, children }: AdminShellProps) => {
 
         {/* Main area (topbar + content) */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <AdminTopbar onMobileMenuToggle={() => setMobileOpen(true)} />
+          <AdminTopbar
+            onMobileMenuToggle={() => setMobileOpen(true)}
+            sessionUser={sessionUser}
+          />
           <main className="relative flex-1 overflow-y-auto p-4 md:p-6">
             <div className="relative">{children}</div>
           </main>
