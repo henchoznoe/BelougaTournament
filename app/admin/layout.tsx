@@ -16,14 +16,18 @@ interface AdminLayoutProps {
   children: React.ReactNode
 }
 
-/** Wraps all admin routes with authentication, role-based access control, and admin shell. */
-const AdminLayout = async ({ children }: Readonly<AdminLayoutProps>) => {
+const AdminShellContent = async ({ children }: Readonly<AdminLayoutProps>) => {
   const globalSettings = await getGlobalSettings()
 
+  return <AdminShell logoUrl={globalSettings.logoUrl}>{children}</AdminShell>
+}
+
+/** Wraps all admin routes with authentication, role-based access control, and admin shell. */
+const AdminLayout = async ({ children }: Readonly<AdminLayoutProps>) => {
   return (
     <Suspense fallback={<AdminShellSkeleton />}>
       <AdminGuard>
-        <AdminShell logoUrl={globalSettings.logoUrl}>{children}</AdminShell>
+        <AdminShellContent>{children}</AdminShellContent>
       </AdminGuard>
     </Suspense>
   )

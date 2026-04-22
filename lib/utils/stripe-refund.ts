@@ -88,25 +88,45 @@ export const issueStripeRefundAfterDbUpdate = async ({
       { error, registrationId },
       'Stripe refund failed, reverting DB state',
     )
-    await prisma.$transaction(async tx => {
-      await tx.tournamentRegistration.update({
-        where: { id: registrationId },
-        data: {
-          status: RegistrationStatus.CONFIRMED,
-          paymentStatus: previousPaymentStatus,
-          cancelledAt: null,
-        },
+    try {
+      await prisma.$transaction(async tx => {
+        await tx.tournamentRegistration.update({
+          where: { id: registrationId },
+          data: {
+            status: RegistrationStatus.CONFIRMED,
+            paymentStatus: previousPaymentStatus,
+            cancelledAt: null,
+          },
+        })
+        await tx.payment.update({
+          where: { id: latestPayment.id },
+          data: {
+            status: previousPaymentStatus,
+            refundAmount: null,
+            refundedAt: null,
+          },
+        })
+        if (onRevert) await onRevert(tx)
       })
-      await tx.payment.update({
-        where: { id: latestPayment.id },
-        data: {
-          status: previousPaymentStatus,
-          refundAmount: null,
-          refundedAt: null,
+    } catch (revertError) {
+      logger.error(
+        {
+          registrationId,
+          stripeErrorMessage:
+            error instanceof Error ? error.message : 'unknown Stripe error',
+          revertErrorMessage:
+            revertError instanceof Error
+              ? revertError.message
+              : 'unknown revert error',
         },
-      })
-      if (onRevert) await onRevert(tx)
-    })
+        'Stripe refund failed and DB revert also failed',
+      )
+
+      throw new Error(
+        `Stripe refund failed and DB revert also failed for registration ${registrationId}. Manual reconciliation required.`,
+      )
+    }
+
     throw error
   }
 }

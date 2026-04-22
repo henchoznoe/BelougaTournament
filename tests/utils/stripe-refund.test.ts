@@ -172,6 +172,24 @@ describe('issueStripeRefundAfterDbUpdate', () => {
     expect(onRevert).toHaveBeenCalledOnce()
   })
 
+  it('surfaces a manual reconciliation error when the DB revert also fails', async () => {
+    mockRefundCreate.mockRejectedValue(new Error('Stripe unavailable'))
+    mockTransaction.mockRejectedValue(new Error('DB revert failed'))
+
+    await expect(
+      issueStripeRefundAfterDbUpdate({
+        registrationId: 'reg-1',
+        latestPayment: PAYMENT,
+        previousPaymentStatus: PaymentStatus.PAID,
+        idempotencyPrefix: 'refund',
+      }),
+    ).rejects.toThrow('Manual reconciliation required.')
+
+    expect(mockTransaction).toHaveBeenCalledOnce()
+    expect(mockRegistrationUpdate).not.toHaveBeenCalled()
+    expect(mockPaymentUpdate).not.toHaveBeenCalled()
+  })
+
   it('does not call onRevert when Stripe succeeds', async () => {
     const onRevert = vi.fn()
 

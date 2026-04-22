@@ -88,6 +88,7 @@ describe('POST /api/webhook', () => {
       id: 'pay-1',
       status: PaymentStatus.PENDING,
       amount: 1500,
+      currency: 'CHF',
       registration: { id: 'reg-1' },
     })
 
@@ -110,6 +111,7 @@ describe('POST /api/webhook', () => {
           status: 'complete',
           payment_status: 'paid',
           amount_total: 1500,
+          currency: 'chf',
           metadata: { paymentId: 'pay-1' },
           payment_intent: 'pi_123',
           customer: 'cus_123',
@@ -145,6 +147,37 @@ describe('POST /api/webhook', () => {
       }),
     })
     expect(mockWebhookCreate).toHaveBeenCalledOnce()
+  })
+
+  it('rejects checkout completion when the Stripe currency does not match the payment record', async () => {
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_currency_mismatch',
+      type: 'checkout.session.completed',
+      livemode: false,
+      data: {
+        object: {
+          id: 'cs_test_currency',
+          status: 'complete',
+          payment_status: 'paid',
+          amount_total: 1500,
+          currency: 'eur',
+          metadata: { paymentId: 'pay-1' },
+          payment_intent: 'pi_123',
+        },
+      },
+    })
+
+    const response = await POST(
+      new Request('http://localhost:3000/api/webhook', {
+        method: 'POST',
+        headers: { 'stripe-signature': 'sig_test' },
+        body: JSON.stringify({}),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(mockPaymentUpdate).not.toHaveBeenCalled()
+    expect(mockRegistrationUpdate).not.toHaveBeenCalled()
   })
 
   it('ignores duplicate events', async () => {
@@ -359,7 +392,11 @@ describe('POST /api/webhook', () => {
 
     mockPaymentFindFirst.mockResolvedValue({
       id: 'pay-1',
-      registration: { id: 'reg-1' },
+      registration: {
+        id: 'reg-1',
+        userId: 'user-1',
+        tournamentId: 'tourn-1',
+      },
     })
 
     const response = await POST(
@@ -378,11 +415,17 @@ describe('POST /api/webhook', () => {
         refundAmount: 1500,
       }),
     })
+    expect(mockRemoveUserFromTeam).toHaveBeenCalledWith(
+      expect.anything(),
+      'user-1',
+      'tourn-1',
+    )
     expect(mockRegistrationUpdate).toHaveBeenCalledWith({
       where: { id: 'reg-1' },
       data: expect.objectContaining({
         status: RegistrationStatus.CANCELLED,
         paymentStatus: PaymentStatus.REFUNDED,
+        teamId: null,
       }),
     })
   })
