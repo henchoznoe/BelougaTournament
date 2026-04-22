@@ -11,6 +11,7 @@
 import { del } from '@vercel/blob'
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
@@ -96,18 +97,18 @@ export const adminChangeTeam = authenticatedAction({
     })) as TargetTeam | null
 
     if (!targetTeam) {
-      return { success: false, message: 'Equipe cible introuvable.' }
+      return { success: false, message: 'Équipe cible introuvable.' }
     }
 
     if (targetTeam.tournamentId !== registration.tournament.id) {
       return {
         success: false,
-        message: "L'equipe cible n'appartient pas au même tournoi.",
+        message: "L'équipe cible n'appartient pas au même tournoi.",
       }
     }
 
     if (targetTeam._count.members >= targetTeam.tournament.teamSize) {
-      return { success: false, message: "L'equipe cible est déjà complète." }
+      return { success: false, message: "L'équipe cible est déjà complète." }
     }
 
     // 3. Find current team membership
@@ -129,45 +130,61 @@ export const adminChangeTeam = authenticatedAction({
     if (!currentMember) {
       return {
         success: false,
-        message: "Le joueur n'appartient à aucune equipe.",
+        message: "Le joueur n'appartient à aucune équipe.",
       }
     }
 
     if (currentMember.team.id === data.targetTeamId) {
       return {
         success: false,
-        message: 'Le joueur est déjà dans cette equipe.',
+        message: 'Le joueur est déjà dans cette équipe.',
       }
     }
 
     const oldTeam = currentMember.team
 
-    // 4. Execute in a transaction
-    await prisma.$transaction(async tx => {
-      // a. Remove from old team
-      await tx.teamMember.deleteMany({
-        where: { teamId: oldTeam.id, userId: registration.userId },
+    // 4. Execute in a serializable transaction so concurrent team moves cannot overfill the target.
+    try {
+      await runSerializableTransaction(async tx => {
+        const freshTargetMemberCount = await tx.teamMember.count({
+          where: { teamId: data.targetTeamId },
+        })
+
+        if (freshTargetMemberCount >= targetTeam.tournament.teamSize) {
+          throw new Error('TARGET_TEAM_FULL')
+        }
+
+        // a. Remove from old team
+        await tx.teamMember.deleteMany({
+          where: { teamId: oldTeam.id, userId: registration.userId },
+        })
+
+        // b. Handle captain succession on old team
+        await handleCaptainSuccession(tx, oldTeam, registration.userId)
+
+        // c. Add to new team
+        await tx.teamMember.create({
+          data: { teamId: data.targetTeamId, userId: registration.userId },
+        })
+
+        await tx.tournamentRegistration.update({
+          where: { id: registration.id },
+          data: { teamId: data.targetTeamId },
+        })
+
+        await syncTeamFullState(
+          tx,
+          data.targetTeamId,
+          targetTeam.tournament.teamSize,
+        )
       })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'TARGET_TEAM_FULL') {
+        return { success: false, message: "L'équipe cible est déjà complète." }
+      }
 
-      // b. Handle captain succession on old team
-      await handleCaptainSuccession(tx, oldTeam, registration.userId)
-
-      // c. Add to new team
-      await tx.teamMember.create({
-        data: { teamId: data.targetTeamId, userId: registration.userId },
-      })
-
-      await tx.tournamentRegistration.update({
-        where: { id: registration.id },
-        data: { teamId: data.targetTeamId },
-      })
-
-      await syncTeamFullState(
-        tx,
-        data.targetTeamId,
-        targetTeam.tournament.teamSize,
-      )
-    })
+      throw error
+    }
 
     updateTag(CACHE_TAGS.TOURNAMENTS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
@@ -204,7 +221,7 @@ export const adminPromoteCaptain = authenticatedAction({
     })) as PromoteTeam | null
 
     if (!team) {
-      return { success: false, message: 'Equipe introuvable.' }
+      return { success: false, message: 'Équipe introuvable.' }
     }
 
     // 2. Verify the user is a member of this team
@@ -212,7 +229,7 @@ export const adminPromoteCaptain = authenticatedAction({
     if (!isMember) {
       return {
         success: false,
-        message: "L'utilisateur n'est pas membre de cette equipe.",
+        message: "L'utilisateur n'est pas membre de cette équipe.",
       }
     }
 

@@ -11,6 +11,7 @@
 
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
   fetchTournamentForRegistration,
   type RegistrationWithTournament,
@@ -139,7 +140,7 @@ export const registerForTournament = authenticatedAction({
 
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
         if (tournament.maxTeams !== null) {
           const count = await tx.tournamentRegistration.count({
             where: {

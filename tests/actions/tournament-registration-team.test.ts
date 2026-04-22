@@ -8,6 +8,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   RefundPolicyType,
   RegistrationStatus,
@@ -330,6 +331,25 @@ describe('createTeamAndRegister', () => {
       checkoutUrl: 'https://checkout.stripe.test/team-session',
     })
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
+  })
+
+  it('should return a friendly error when a concurrent team creation hits the unique team-name constraint', async () => {
+    mockTransaction.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('duplicate', {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+      }),
+    )
+
+    const result = await createTeamAndRegister({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      teamName: TEAM_NAME,
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('déjà pris')
   })
 
   it('should return error when user is banned', async () => {

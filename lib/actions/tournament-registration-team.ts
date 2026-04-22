@@ -11,6 +11,7 @@
 
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
   fetchTournamentForRegistration,
   startPaidRegistrationCheckout,
@@ -23,6 +24,7 @@ import type { ActionState } from '@/lib/types/actions'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import { createTeamSchema, joinTeamSchema } from '@/lib/validations/tournaments'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   RegistrationType,
   TournamentFormat,
@@ -57,7 +59,7 @@ export const createTeamAndRegister = authenticatedAction({
 
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
         if (tournament.maxTeams !== null) {
           const teamCount = await tx.team.count({
             where: { tournamentId: data.tournamentId },
@@ -100,6 +102,15 @@ export const createTeamAndRegister = authenticatedAction({
         return {
           success: false,
           message: "Le nombre maximum d'équipes est atteint.",
+        }
+      }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return {
+          success: false,
+          message: "Ce nom d'équipe est déjà pris dans ce tournoi.",
         }
       }
       throw error
@@ -164,7 +175,7 @@ export const joinTeamAndRegister = authenticatedAction({
 
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
         const freshTeam = await tx.team.findUnique({
           where: { id: data.teamId },
           include: { _count: { select: { members: true } } },

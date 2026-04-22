@@ -250,6 +250,42 @@ describe('registration admin actions', () => {
     })
   })
 
+  it('rejects team change when the target team becomes full inside the transaction', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      id: REG_UUID,
+      userId: USER_UUID,
+      status: RegistrationStatus.CONFIRMED,
+      tournament: { id: TOURN_UUID, format: TournamentFormat.TEAM },
+      user: { name: 'Alice' },
+    })
+    mockTeamFindUnique.mockResolvedValue({
+      id: TARGET_TEAM_UUID,
+      name: 'Team Beta',
+      tournamentId: TOURN_UUID,
+      tournament: { teamSize: 2 },
+      _count: { members: 1 },
+    })
+    mockTeamMemberFindFirst.mockResolvedValue({
+      team: {
+        id: TEAM_UUID,
+        captainId: USER_UUID,
+        tournament: { teamSize: 2 },
+        members: [{ userId: USER_UUID }, { userId: MEMBER_UUID }],
+      },
+    })
+    mockTxTeamMemberCount.mockResolvedValue(2)
+
+    expect(
+      await adminChangeTeam({
+        registrationId: REG_UUID,
+        targetTeamId: TARGET_TEAM_UUID,
+      }),
+    ).toEqual({
+      success: false,
+      message: "L'équipe cible est déjà complète.",
+    })
+  })
+
   it('promotes a team member to captain for admins', async () => {
     mockTeamFindUnique.mockResolvedValue({
       id: TEAM_UUID,
