@@ -195,15 +195,22 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     netRevenue: 0,
     transactionCount: 0,
     refundCount: 0,
+    forfeitedCount: 0,
     currency: DEFAULT_CURRENCY,
     byTournament: [],
   }
 
   try {
-    // Fetch all paid and refunded payments with their tournament info
+    // Fetch all paid, refunded and forfeited payments with their tournament info
     const payments = await prisma.payment.findMany({
       where: {
-        status: { in: [PaymentStatus.PAID, PaymentStatus.REFUNDED] },
+        status: {
+          in: [
+            PaymentStatus.PAID,
+            PaymentStatus.REFUNDED,
+            PaymentStatus.FORFEITED,
+          ],
+        },
       },
       select: {
         amount: true,
@@ -233,6 +240,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     let totalStripeFees = 0
     let transactionCount = 0
     let refundCount = 0
+    let forfeitedCount = 0
     const currency = payments[0].currency || DEFAULT_CURRENCY
     if (payments[0].currency && payments[0].currency !== DEFAULT_CURRENCY) {
       logger.warn(
@@ -250,9 +258,11 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         slug: string
         revenue: number
         refunded: number
+        forfeited: number
         stripeFees: number
         paidCount: number
         refundedCount: number
+        forfeitedCount: number
       }
     >()
 
@@ -266,9 +276,11 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
           slug: tournament.slug,
           revenue: 0,
           refunded: 0,
+          forfeited: 0,
           stripeFees: 0,
           paidCount: 0,
           refundedCount: 0,
+          forfeitedCount: 0,
         })
       }
 
@@ -300,6 +312,20 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         entry.refunded += refund
         entry.refundedCount++
       }
+
+      if (payment.status === PaymentStatus.FORFEITED) {
+        // Forfeited payments: full amount received, Stripe fees still apply, no refund issued.
+        // The organisation keeps the net amount (amount - stripeFee).
+        totalRevenue += payment.amount
+        totalStripeFees += payment.stripeFee ?? 0
+        transactionCount++
+        forfeitedCount++
+        entry.revenue += payment.amount
+        entry.stripeFees += payment.stripeFee ?? 0
+        entry.forfeited += payment.amount
+        entry.paidCount++
+        entry.forfeitedCount++
+      }
     }
 
     // Sort tournaments by revenue descending
@@ -314,6 +340,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
       netRevenue: totalRevenue - totalRefunded - totalStripeFees,
       transactionCount,
       refundCount,
+      forfeitedCount,
       currency,
       byTournament,
     }

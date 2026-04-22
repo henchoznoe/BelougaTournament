@@ -46,6 +46,10 @@ export const metadata: Metadata = {
     icon: DEFAULT_ASSETS.LOGO,
     apple: DEFAULT_ASSETS.LOGO,
   },
+  robots:
+    env.VERCEL_ENV !== 'production'
+      ? { index: false, follow: false }
+      : undefined,
 }
 
 config.autoAddCss = false

@@ -14,7 +14,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const mockEnv = { NEXT_PUBLIC_APP_URL: 'https://belouga.test' }
+const mockEnv: {
+  NEXT_PUBLIC_APP_URL: string
+  VERCEL_ENV: 'development' | 'preview' | 'production' | undefined
+} = {
+  NEXT_PUBLIC_APP_URL: 'https://belouga.test',
+  VERCEL_ENV: 'production',
+}
 vi.mock('@/lib/core/env', () => ({ env: mockEnv }))
 
 vi.mock('@/lib/core/logger', () => ({
@@ -58,6 +64,22 @@ describe('robots', () => {
     const result = robots()
 
     expect(result.sitemap).toBe('https://belouga.test/sitemap.xml')
+  })
+
+  it('blocks all crawling when VERCEL_ENV is preview', () => {
+    mockEnv.VERCEL_ENV = 'preview'
+    const result = robots()
+    expect(result.rules).toEqual([{ userAgent: '*', disallow: '/' }])
+    expect(result.sitemap).toBeUndefined()
+    mockEnv.VERCEL_ENV = 'production'
+  })
+
+  it('blocks all crawling when VERCEL_ENV is undefined', () => {
+    mockEnv.VERCEL_ENV = undefined as never
+    const result = robots()
+    expect(result.rules).toEqual([{ userAgent: '*', disallow: '/' }])
+    expect(result.sitemap).toBeUndefined()
+    mockEnv.VERCEL_ENV = 'production'
   })
 })
 

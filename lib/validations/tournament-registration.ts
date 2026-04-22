@@ -55,6 +55,8 @@ export const joinTeamSchema = z.object({
 /** Schema for a player cancelling their own registration. */
 export const unregisterFromTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
+  /** When true and the player is within the refund window, skip the Stripe refund and mark the payment as FORFEITED. */
+  waiveRefund: z.boolean().optional(),
 })
 
 /** Schema for a player cancelling a pending (unpaid) registration checkout. */

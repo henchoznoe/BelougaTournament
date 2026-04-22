@@ -12,13 +12,13 @@
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import {
-  CACHE_TAGS,
   fetchTournamentForRegistration,
   type RegistrationWithTournament,
   startPaidRegistrationCheckout,
   type TournamentWithFields,
   upsertRegistrationAttempt,
 } from '@/lib/actions/tournament-registration-helpers'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'

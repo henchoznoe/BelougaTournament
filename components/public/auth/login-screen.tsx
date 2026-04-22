@@ -31,6 +31,7 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
           src={DEFAULT_ASSETS.BG_IMAGE}
           fill
           priority
+          sizes="50vw"
           className="object-cover opacity-60 grayscale"
         />
         <div className="absolute inset-0 bg-linear-to-r from-zinc-950/10 via-zinc-950/50 to-zinc-950" />

@@ -125,11 +125,13 @@ const makeSoloPaidRegistration = (refundEligible: boolean) => ({
   userId: USER_UUID,
   paymentRequiredSnapshot: true,
   paymentStatus: PaymentStatus.PAID,
+  refundDeadlineDaysSnapshot: refundEligible ? 30 : null,
   payments: [
     {
       id: 'pay-1',
       status: PaymentStatus.PAID,
       amount: 500,
+      stripeFee: null,
       stripePaymentIntentId: 'pi_test',
       stripeChargeId: null,
     },
@@ -428,5 +430,103 @@ describe('unregisterFromTournament — TEAM last member (team dissolution)', () 
 
     expect(result.success).toBe(true)
     expect(mockTeamMemberDeleteMany).toHaveBeenCalledOnce()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SOLO paid — waiveRefund: true within refund window → FORFEITED, no Stripe call
+// ---------------------------------------------------------------------------
+
+describe('unregisterFromTournament — SOLO paid, waiveRefund within window', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+
+    mockGetSession.mockResolvedValue(makeSession())
+    mockRegistrationFindUnique.mockResolvedValue(makeSoloPaidRegistration(true))
+
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => unknown) =>
+        callback({
+          tournamentRegistration: { update: mockRegistrationUpdate },
+          payment: { update: mockPaymentUpdate },
+        }),
+    )
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('marks registration and payment as FORFEITED without calling Stripe', async () => {
+    const result = await unregisterFromTournament({
+      tournamentId: TOURNAMENT_UUID,
+      waiveRefund: true,
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.message).toContain('offerts')
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: RegistrationStatus.CANCELLED,
+          paymentStatus: PaymentStatus.FORFEITED,
+        }),
+      }),
+    )
+    expect(mockPaymentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: PaymentStatus.FORFEITED }),
+      }),
+    )
+    expect(mockRefundsCreate).not.toHaveBeenCalled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SOLO paid — waiveRefund: true outside refund window → normal cancellation (no FORFEITED)
+// ---------------------------------------------------------------------------
+
+describe('unregisterFromTournament — SOLO paid, waiveRefund outside window', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+
+    mockGetSession.mockResolvedValue(makeSession())
+    // NONE refund policy: never eligible, waiveRefund has no effect
+    mockRegistrationFindUnique.mockResolvedValue(
+      makeSoloPaidRegistration(false),
+    )
+
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => unknown) =>
+        callback({
+          tournamentRegistration: { update: mockRegistrationUpdate },
+          payment: { update: mockPaymentUpdate },
+        }),
+    )
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('ignores waiveRefund and cancels normally without Stripe or FORFEITED status', async () => {
+    const result = await unregisterFromTournament({
+      tournamentId: TOURNAMENT_UUID,
+      waiveRefund: true,
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.message).not.toContain('offerts')
+    expect(mockRefundsCreate).not.toHaveBeenCalled()
+    // Payment should NOT be set to FORFEITED since we're outside the window
+    expect(mockPaymentUpdate).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: PaymentStatus.FORFEITED }),
+      }),
+    )
   })
 })

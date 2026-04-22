@@ -246,6 +246,7 @@ describe('getDashboardPaymentStats', () => {
     netRevenue: 0,
     transactionCount: 0,
     refundCount: 0,
+    forfeitedCount: 0,
     currency: 'CHF',
     byTournament: [],
   }

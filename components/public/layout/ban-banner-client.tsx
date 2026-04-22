@@ -13,6 +13,7 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -80,6 +81,9 @@ export const BanBannerClient = ({
               <OctagonX className="size-5" />
               Compte suspendu
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              D\u00e9tails de la suspension de votre compte.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm text-zinc-300">
             {isPermanent ? (
