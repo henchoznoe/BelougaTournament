@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { NavbarMobileMenu } from '@/components/public/layout/navbar-mobile-menu'
 import { NavbarProfile } from '@/components/public/layout/navbar-profile'
 import { ROUTES } from '@/lib/config/routes'
+import type { AuthSession } from '@/lib/types/auth'
 import { cn } from '@/lib/utils/cn'
 
 const NAV_LINKS = [
@@ -29,9 +30,13 @@ const NAV_LINKS = [
 
 interface PublicNavbarClientProps {
   logoUrl: string
+  sessionUser: AuthSession['user'] | null
 }
 
-export const PublicNavbarClient = ({ logoUrl }: PublicNavbarClientProps) => {
+export const PublicNavbarClient = ({
+  logoUrl,
+  sessionUser,
+}: PublicNavbarClientProps) => {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isScrolled, setIsScrolled] = useState<boolean>(false)
@@ -130,7 +135,7 @@ export const PublicNavbarClient = ({ logoUrl }: PublicNavbarClientProps) => {
             })}
           </nav>
 
-          <NavbarProfile mode="desktop" />
+          <NavbarProfile mode="desktop" sessionUser={sessionUser} />
         </div>
 
         {/* Mobile right: hamburger */}
@@ -140,6 +145,7 @@ export const PublicNavbarClient = ({ logoUrl }: PublicNavbarClientProps) => {
             isOpen={isOpen}
             onOpenChange={setIsOpen}
             isLinkActive={isLinkActive}
+            sessionUser={sessionUser}
           />
         </div>
       </div>

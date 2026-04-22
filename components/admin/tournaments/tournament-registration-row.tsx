@@ -12,6 +12,7 @@ import {
   ArrowRightLeft,
   ChevronDown,
   ChevronUp,
+  HandHeart,
   ImageOff,
   Loader2,
   MoreHorizontal,
@@ -51,7 +52,7 @@ import type {
   TournamentRegistrationItem,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatDate } from '@/lib/utils/formatting'
+import { formatCentimes, formatDate } from '@/lib/utils/formatting'
 import { parseFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   PaymentStatus,
@@ -166,13 +167,13 @@ const RowActions = ({
           {isTeam && (
             <DropdownMenuItem onSelect={() => setChangeTeamOpen(true)}>
               <ArrowRightLeft className="mr-2 size-4" />
-              Changer d\u2019équipe
+              Changer d'équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team && (
             <DropdownMenuItem onSelect={() => setRenameTeamOpen(true)}>
               <Type className="mr-2 size-4" />
-              Renommer l\u2019équipe
+              Renommer l'équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team?.logoUrl && (
@@ -357,14 +358,23 @@ export const RegistrationRow = ({
         </TableCell>
         {isPaid && (
           <TableCell className="hidden sm:table-cell">
-            <span
-              className={cn(
-                'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                PAYMENT_STATUS_STYLES[registration.paymentStatus],
-              )}
-            >
-              {PAYMENT_STATUS_LABELS[registration.paymentStatus]}
-            </span>
+            <div className="flex flex-col gap-1">
+              <span
+                className={cn(
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                  PAYMENT_STATUS_STYLES[registration.paymentStatus],
+                )}
+              >
+                {PAYMENT_STATUS_LABELS[registration.paymentStatus]}
+              </span>
+              {registration.donationAmountSnapshot != null &&
+                registration.donationAmountSnapshot > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-400">
+                    <HandHeart className="size-2.5" />
+                    {formatCentimes(registration.donationAmountSnapshot)}
+                  </span>
+                )}
+            </div>
           </TableCell>
         )}
         <TableCell className="hidden text-sm text-zinc-400 lg:table-cell">

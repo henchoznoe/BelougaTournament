@@ -16,6 +16,7 @@ import {
   CreditCard,
   ExternalLink,
   Gamepad2,
+  HandHeart,
   Hash,
   ImageIcon,
   Info,
@@ -36,6 +37,7 @@ import {
   formatDateTime,
 } from '@/lib/utils/formatting'
 import {
+  DonationType,
   RefundPolicyType,
   RegistrationType,
   TournamentFormat,
@@ -281,11 +283,39 @@ export const TournamentOverviewCards = ({
               </dd>
             </div>
           )}
+          {isPaid && (
+            <div className="flex items-start justify-between gap-2">
+              <dt className="flex items-center gap-2 text-zinc-500">
+                <HandHeart className="size-3.5" />
+                Don optionnel
+              </dt>
+              <dd className="text-right">
+                {tournament.donationEnabled ? (
+                  <span className="inline-flex items-center rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-400">
+                    {tournament.donationType === DonationType.FIXED &&
+                    tournament.donationFixedAmount
+                      ? formatCentimes(
+                          tournament.donationFixedAmount,
+                          tournament.entryFeeCurrency ?? 'CHF',
+                        )
+                      : tournament.donationType === DonationType.FREE &&
+                          tournament.donationMinAmount
+                        ? `Libre (min. ${formatCentimes(tournament.donationMinAmount, tournament.entryFeeCurrency ?? 'CHF')})`
+                        : 'Activé'}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400">
+                    Désactivé
+                  </span>
+                )}
+              </dd>
+            </div>
+          )}
           {isTeam && (
             <div className="flex items-start justify-between gap-2">
               <dt className="flex items-center gap-2 text-zinc-500">
                 <ImageIcon className="size-3.5" />
-                Logo d\u2019équipe
+                Logo d'équipe
               </dt>
               <dd className="text-right">
                 <span

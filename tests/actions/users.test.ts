@@ -338,7 +338,7 @@ describe('unbanUser', () => {
     mockUserFindUnique.mockResolvedValue({ name: 'Alice', bannedAt: null })
     expect(await unbanUser({ userId: OTHER_UUID })).toEqual({
       success: false,
-      message: 'Alice n\u2019est pas banni.',
+      message: "Alice n'est pas banni.",
     })
   })
 

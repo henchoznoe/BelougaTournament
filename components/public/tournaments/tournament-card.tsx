@@ -15,43 +15,11 @@ import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatDate, pluralize, stripHtml } from '@/lib/utils/formatting'
-import {
-  TournamentFormat,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { getTournamentRegistrationBadge } from '@/lib/utils/tournament-status'
+import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentCardProps {
   tournament: PublicTournamentListItem
-}
-
-/** Determines the registration status label and color. */
-const getRegistrationInfo = (tournament: PublicTournamentListItem) => {
-  const now = new Date()
-  const open = new Date(tournament.registrationOpen)
-  const close = new Date(tournament.registrationClose)
-
-  if (tournament.status === TournamentStatus.ARCHIVED) {
-    return {
-      label: 'Terminé',
-      className: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
-    }
-  }
-  if (now < open) {
-    return {
-      label: 'Bientôt',
-      className: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-    }
-  }
-  if (now >= open && now <= close) {
-    return {
-      label: 'Inscriptions ouvertes',
-      className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-    }
-  }
-  return {
-    label: 'Inscriptions fermées',
-    className: 'border-red-500/30 bg-red-500/10 text-red-400',
-  }
 }
 
 /** Computes the spots label (e.g. "12 / 32 inscrits" or "3 / 4 équipes"). */
@@ -74,7 +42,7 @@ const getSpotsInfo = (tournament: PublicTournamentListItem) => {
 }
 
 export const TournamentCard = ({ tournament }: TournamentCardProps) => {
-  const registrationInfo = getRegistrationInfo(tournament)
+  const registrationInfo = getTournamentRegistrationBadge(tournament)
   const spotsInfo = getSpotsInfo(tournament)
 
   return (
@@ -92,12 +60,12 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
         </div>
       ) : (
-        <div className="relative flex h-40 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
+        <div className="relative flex h-40 w-full items-center justify-center overflow-hidden bg-linear-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
           <Gamepad2 className="size-12 text-zinc-700" />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
         </div>
       )}
 
@@ -118,7 +86,11 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
                 registrationInfo.className,
               )}
             >
-              {registrationInfo.label}
+              {registrationInfo.phase === 'archived'
+                ? 'Terminé'
+                : registrationInfo.phase === 'upcoming'
+                  ? 'Bientôt'
+                  : registrationInfo.label}
             </span>
           </div>
 

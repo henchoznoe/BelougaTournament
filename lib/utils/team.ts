@@ -15,7 +15,7 @@ type PrismaTransaction = Parameters<
 >[0]
 
 /** Snapshot of team state captured before a cancellation/refund mutation. Used to revert on Stripe failure. */
-export interface TeamRevertInfo {
+interface TeamRevertInfo {
   teamId: string
   userId: string
   joinedAt: Date
@@ -25,6 +25,28 @@ export interface TeamRevertInfo {
   tournamentId: string
   teamName: string
 }
+
+/** Builds a team snapshot that can restore membership if a later Stripe step fails. */
+export const buildTeamRevertInfo = ({
+  team,
+  joinedAt,
+  userId,
+  tournamentId,
+}: {
+  team: TeamWithMembers
+  joinedAt: Date
+  userId: string
+  tournamentId: string
+}): TeamRevertInfo => ({
+  teamId: team.id,
+  userId,
+  joinedAt,
+  captainId: team.captainId,
+  isFull: team.isFull,
+  teamWasDeleted: team.members.length === 1,
+  tournamentId,
+  teamName: team.name,
+})
 
 /**
  * Builds the `onRevert` callback for `issueStripeRefundAfterDbUpdate`.
@@ -84,6 +106,17 @@ export const syncTeamFullState = async (
   })
 }
 
+/** Deletes a known team membership row, then promotes or dissolves the team as needed. */
+const removeTeamMemberAndHandleSuccession = async (
+  tx: Pick<typeof prisma, 'team' | 'teamMember'>,
+  team: TeamWithMembers,
+  userId: string,
+): Promise<void> => {
+  await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
+
+  await handleCaptainSuccession(tx, team, userId)
+}
+
 /**
  * Handles captain succession and team cleanup after a member has been deleted.
  * Call this AFTER deleting the teamMember row from the database.
@@ -136,7 +169,5 @@ export const removeUserFromTeam = async (
 
   const team = teamMember.team
 
-  await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
-
-  await handleCaptainSuccession(tx, team, userId)
+  await removeTeamMemberAndHandleSuccession(tx, team, userId)
 }

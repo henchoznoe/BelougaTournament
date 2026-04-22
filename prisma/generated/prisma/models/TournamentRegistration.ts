@@ -29,11 +29,13 @@ export type AggregateTournamentRegistration = {
 export type TournamentRegistrationAvgAggregateOutputType = {
   entryFeeAmountSnapshot: number | null
   refundDeadlineDaysSnapshot: number | null
+  donationAmountSnapshot: number | null
 }
 
 export type TournamentRegistrationSumAggregateOutputType = {
   entryFeeAmountSnapshot: number | null
   refundDeadlineDaysSnapshot: number | null
+  donationAmountSnapshot: number | null
 }
 
 export type TournamentRegistrationMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type TournamentRegistrationMinAggregateOutputType = {
   entryFeeAmountSnapshot: number | null
   entryFeeCurrencySnapshot: string | null
   refundDeadlineDaysSnapshot: number | null
+  donationAmountSnapshot: number | null
   confirmedAt: Date | null
   cancelledAt: Date | null
   expiresAt: Date | null
@@ -64,6 +67,7 @@ export type TournamentRegistrationMaxAggregateOutputType = {
   entryFeeAmountSnapshot: number | null
   entryFeeCurrencySnapshot: string | null
   refundDeadlineDaysSnapshot: number | null
+  donationAmountSnapshot: number | null
   confirmedAt: Date | null
   cancelledAt: Date | null
   expiresAt: Date | null
@@ -82,6 +86,7 @@ export type TournamentRegistrationCountAggregateOutputType = {
   entryFeeAmountSnapshot: number
   entryFeeCurrencySnapshot: number
   refundDeadlineDaysSnapshot: number
+  donationAmountSnapshot: number
   confirmedAt: number
   cancelledAt: number
   expiresAt: number
@@ -93,11 +98,13 @@ export type TournamentRegistrationCountAggregateOutputType = {
 export type TournamentRegistrationAvgAggregateInputType = {
   entryFeeAmountSnapshot?: true
   refundDeadlineDaysSnapshot?: true
+  donationAmountSnapshot?: true
 }
 
 export type TournamentRegistrationSumAggregateInputType = {
   entryFeeAmountSnapshot?: true
   refundDeadlineDaysSnapshot?: true
+  donationAmountSnapshot?: true
 }
 
 export type TournamentRegistrationMinAggregateInputType = {
@@ -111,6 +118,7 @@ export type TournamentRegistrationMinAggregateInputType = {
   entryFeeAmountSnapshot?: true
   entryFeeCurrencySnapshot?: true
   refundDeadlineDaysSnapshot?: true
+  donationAmountSnapshot?: true
   confirmedAt?: true
   cancelledAt?: true
   expiresAt?: true
@@ -128,6 +136,7 @@ export type TournamentRegistrationMaxAggregateInputType = {
   entryFeeAmountSnapshot?: true
   entryFeeCurrencySnapshot?: true
   refundDeadlineDaysSnapshot?: true
+  donationAmountSnapshot?: true
   confirmedAt?: true
   cancelledAt?: true
   expiresAt?: true
@@ -146,6 +155,7 @@ export type TournamentRegistrationCountAggregateInputType = {
   entryFeeAmountSnapshot?: true
   entryFeeCurrencySnapshot?: true
   refundDeadlineDaysSnapshot?: true
+  donationAmountSnapshot?: true
   confirmedAt?: true
   cancelledAt?: true
   expiresAt?: true
@@ -251,6 +261,7 @@ export type TournamentRegistrationGroupByOutputType = {
   entryFeeAmountSnapshot: number | null
   entryFeeCurrencySnapshot: string | null
   refundDeadlineDaysSnapshot: number | null
+  donationAmountSnapshot: number | null
   confirmedAt: Date | null
   cancelledAt: Date | null
   expiresAt: Date | null
@@ -292,6 +303,7 @@ export type TournamentRegistrationWhereInput = {
   entryFeeAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   entryFeeCurrencySnapshot?: Prisma.StringNullableFilter<"TournamentRegistration"> | string | null
   refundDeadlineDaysSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
+  donationAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   confirmedAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
@@ -314,6 +326,7 @@ export type TournamentRegistrationOrderByWithRelationInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   entryFeeCurrencySnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -340,6 +353,7 @@ export type TournamentRegistrationWhereUniqueInput = Prisma.AtLeast<{
   entryFeeAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   entryFeeCurrencySnapshot?: Prisma.StringNullableFilter<"TournamentRegistration"> | string | null
   refundDeadlineDaysSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
+  donationAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   confirmedAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
@@ -362,6 +376,7 @@ export type TournamentRegistrationOrderByWithAggregationInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   entryFeeCurrencySnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -388,6 +403,7 @@ export type TournamentRegistrationScalarWhereWithAggregatesInput = {
   entryFeeAmountSnapshot?: Prisma.IntNullableWithAggregatesFilter<"TournamentRegistration"> | number | null
   entryFeeCurrencySnapshot?: Prisma.StringNullableWithAggregatesFilter<"TournamentRegistration"> | string | null
   refundDeadlineDaysSnapshot?: Prisma.IntNullableWithAggregatesFilter<"TournamentRegistration"> | number | null
+  donationAmountSnapshot?: Prisma.IntNullableWithAggregatesFilter<"TournamentRegistration"> | number | null
   confirmedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TournamentRegistration"> | Date | string | null
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TournamentRegistration"> | Date | string | null
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TournamentRegistration"> | Date | string | null
@@ -403,6 +419,7 @@ export type TournamentRegistrationCreateInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -425,6 +442,7 @@ export type TournamentRegistrationUncheckedCreateInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -441,6 +459,7 @@ export type TournamentRegistrationUpdateInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -463,6 +482,7 @@ export type TournamentRegistrationUncheckedUpdateInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -482,6 +502,7 @@ export type TournamentRegistrationCreateManyInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -497,6 +518,7 @@ export type TournamentRegistrationUpdateManyMutationInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -515,6 +537,7 @@ export type TournamentRegistrationUncheckedUpdateManyInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -548,6 +571,7 @@ export type TournamentRegistrationCountOrderByAggregateInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrder
   entryFeeCurrencySnapshot?: Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -557,6 +581,7 @@ export type TournamentRegistrationCountOrderByAggregateInput = {
 export type TournamentRegistrationAvgOrderByAggregateInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrder
 }
 
 export type TournamentRegistrationMaxOrderByAggregateInput = {
@@ -570,6 +595,7 @@ export type TournamentRegistrationMaxOrderByAggregateInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrder
   entryFeeCurrencySnapshot?: Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -587,6 +613,7 @@ export type TournamentRegistrationMinOrderByAggregateInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrder
   entryFeeCurrencySnapshot?: Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -596,6 +623,7 @@ export type TournamentRegistrationMinOrderByAggregateInput = {
 export type TournamentRegistrationSumOrderByAggregateInput = {
   entryFeeAmountSnapshot?: Prisma.SortOrder
   refundDeadlineDaysSnapshot?: Prisma.SortOrder
+  donationAmountSnapshot?: Prisma.SortOrder
 }
 
 export type TournamentRegistrationScalarRelationFilter = {
@@ -760,6 +788,7 @@ export type TournamentRegistrationCreateWithoutUserInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -780,6 +809,7 @@ export type TournamentRegistrationUncheckedCreateWithoutUserInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -828,6 +858,7 @@ export type TournamentRegistrationScalarWhereInput = {
   entryFeeAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   entryFeeCurrencySnapshot?: Prisma.StringNullableFilter<"TournamentRegistration"> | string | null
   refundDeadlineDaysSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
+  donationAmountSnapshot?: Prisma.IntNullableFilter<"TournamentRegistration"> | number | null
   confirmedAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"TournamentRegistration"> | Date | string | null
@@ -843,6 +874,7 @@ export type TournamentRegistrationCreateWithoutTournamentInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -863,6 +895,7 @@ export type TournamentRegistrationUncheckedCreateWithoutTournamentInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -905,6 +938,7 @@ export type TournamentRegistrationCreateWithoutTeamInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -925,6 +959,7 @@ export type TournamentRegistrationUncheckedCreateWithoutTeamInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -967,6 +1002,7 @@ export type TournamentRegistrationCreateWithoutPaymentsInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -988,6 +1024,7 @@ export type TournamentRegistrationUncheckedCreateWithoutPaymentsInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -1019,6 +1056,7 @@ export type TournamentRegistrationUpdateWithoutPaymentsInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1040,6 +1078,7 @@ export type TournamentRegistrationUncheckedUpdateWithoutPaymentsInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1057,6 +1096,7 @@ export type TournamentRegistrationCreateManyUserInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -1072,6 +1112,7 @@ export type TournamentRegistrationUpdateWithoutUserInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1092,6 +1133,7 @@ export type TournamentRegistrationUncheckedUpdateWithoutUserInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1110,6 +1152,7 @@ export type TournamentRegistrationUncheckedUpdateManyWithoutUserInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1127,6 +1170,7 @@ export type TournamentRegistrationCreateManyTournamentInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -1142,6 +1186,7 @@ export type TournamentRegistrationUpdateWithoutTournamentInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1162,6 +1207,7 @@ export type TournamentRegistrationUncheckedUpdateWithoutTournamentInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1180,6 +1226,7 @@ export type TournamentRegistrationUncheckedUpdateManyWithoutTournamentInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1197,6 +1244,7 @@ export type TournamentRegistrationCreateManyTeamInput = {
   entryFeeAmountSnapshot?: number | null
   entryFeeCurrencySnapshot?: string | null
   refundDeadlineDaysSnapshot?: number | null
+  donationAmountSnapshot?: number | null
   confirmedAt?: Date | string | null
   cancelledAt?: Date | string | null
   expiresAt?: Date | string | null
@@ -1212,6 +1260,7 @@ export type TournamentRegistrationUpdateWithoutTeamInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1232,6 +1281,7 @@ export type TournamentRegistrationUncheckedUpdateWithoutTeamInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1250,6 +1300,7 @@ export type TournamentRegistrationUncheckedUpdateManyWithoutTeamInput = {
   entryFeeAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   entryFeeCurrencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundDeadlineDaysSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationAmountSnapshot?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1299,6 +1350,7 @@ export type TournamentRegistrationSelect<ExtArgs extends runtime.Types.Extension
   entryFeeAmountSnapshot?: boolean
   entryFeeCurrencySnapshot?: boolean
   refundDeadlineDaysSnapshot?: boolean
+  donationAmountSnapshot?: boolean
   confirmedAt?: boolean
   cancelledAt?: boolean
   expiresAt?: boolean
@@ -1322,6 +1374,7 @@ export type TournamentRegistrationSelectCreateManyAndReturn<ExtArgs extends runt
   entryFeeAmountSnapshot?: boolean
   entryFeeCurrencySnapshot?: boolean
   refundDeadlineDaysSnapshot?: boolean
+  donationAmountSnapshot?: boolean
   confirmedAt?: boolean
   cancelledAt?: boolean
   expiresAt?: boolean
@@ -1343,6 +1396,7 @@ export type TournamentRegistrationSelectUpdateManyAndReturn<ExtArgs extends runt
   entryFeeAmountSnapshot?: boolean
   entryFeeCurrencySnapshot?: boolean
   refundDeadlineDaysSnapshot?: boolean
+  donationAmountSnapshot?: boolean
   confirmedAt?: boolean
   cancelledAt?: boolean
   expiresAt?: boolean
@@ -1364,13 +1418,14 @@ export type TournamentRegistrationSelectScalar = {
   entryFeeAmountSnapshot?: boolean
   entryFeeCurrencySnapshot?: boolean
   refundDeadlineDaysSnapshot?: boolean
+  donationAmountSnapshot?: boolean
   confirmedAt?: boolean
   cancelledAt?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }
 
-export type TournamentRegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "teamId" | "userId" | "fieldValues" | "status" | "paymentStatus" | "paymentRequiredSnapshot" | "entryFeeAmountSnapshot" | "entryFeeCurrencySnapshot" | "refundDeadlineDaysSnapshot" | "confirmedAt" | "cancelledAt" | "expiresAt" | "createdAt", ExtArgs["result"]["tournamentRegistration"]>
+export type TournamentRegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "teamId" | "userId" | "fieldValues" | "status" | "paymentStatus" | "paymentRequiredSnapshot" | "entryFeeAmountSnapshot" | "entryFeeCurrencySnapshot" | "refundDeadlineDaysSnapshot" | "donationAmountSnapshot" | "confirmedAt" | "cancelledAt" | "expiresAt" | "createdAt", ExtArgs["result"]["tournamentRegistration"]>
 export type TournamentRegistrationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TournamentRegistration$teamArgs<ExtArgs>
@@ -1409,6 +1464,7 @@ export type $TournamentRegistrationPayload<ExtArgs extends runtime.Types.Extensi
     entryFeeAmountSnapshot: number | null
     entryFeeCurrencySnapshot: string | null
     refundDeadlineDaysSnapshot: number | null
+    donationAmountSnapshot: number | null
     confirmedAt: Date | null
     cancelledAt: Date | null
     expiresAt: Date | null
@@ -1851,6 +1907,7 @@ export interface TournamentRegistrationFieldRefs {
   readonly entryFeeAmountSnapshot: Prisma.FieldRef<"TournamentRegistration", 'Int'>
   readonly entryFeeCurrencySnapshot: Prisma.FieldRef<"TournamentRegistration", 'String'>
   readonly refundDeadlineDaysSnapshot: Prisma.FieldRef<"TournamentRegistration", 'Int'>
+  readonly donationAmountSnapshot: Prisma.FieldRef<"TournamentRegistration", 'Int'>
   readonly confirmedAt: Prisma.FieldRef<"TournamentRegistration", 'DateTime'>
   readonly cancelledAt: Prisma.FieldRef<"TournamentRegistration", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"TournamentRegistration", 'DateTime'>

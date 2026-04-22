@@ -194,6 +194,7 @@ export const getRegistrations = async (
       select: {
         id: true,
         fieldValues: true,
+        donationAmountSnapshot: true,
         createdAt: true,
         status: true,
         paymentStatus: true,

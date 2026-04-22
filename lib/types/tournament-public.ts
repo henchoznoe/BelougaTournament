@@ -9,6 +9,7 @@
 
 import type { TournamentFieldItem } from '@/lib/types/tournament-admin'
 import type {
+  DonationType,
   RefundPolicyType,
   RegistrationType,
   TournamentFormat,
@@ -45,6 +46,10 @@ export type PublicTournamentDetail = PublicTournamentListItem & {
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
   teamLogoEnabled: boolean
+  donationEnabled: boolean
+  donationType: DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   rules: string | null
   prize: string | null
   toornamentId: string | null

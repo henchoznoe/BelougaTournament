@@ -57,6 +57,11 @@ enum RefundPolicyType {
   BEFORE_DEADLINE
 }
 
+enum DonationType {
+  FIXED
+  FREE
+}
+
 enum PaymentProvider {
   STRIPE
 }
@@ -153,6 +158,10 @@ model Tournament {
   toornamentId      String?
   streamUrl         String? // Optional per-tournament stream URL override
   teamLogoEnabled   Boolean                  @default(false)
+  donationEnabled   Boolean                  @default(false)
+  donationType      DonationType?
+  donationFixedAmount Int?
+  donationMinAmount Int?
   status            TournamentStatus         @default(DRAFT)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
@@ -229,6 +238,7 @@ model TournamentRegistration {
   entryFeeAmountSnapshot Int?
   entryFeeCurrencySnapshot String?
   refundDeadlineDaysSnapshot Int?
+  donationAmountSnapshot Int?
   confirmedAt       DateTime?
   cancelledAt       DateTime?
   expiresAt         DateTime?
@@ -255,6 +265,7 @@ model Payment {
   stripeChargeId          String?            @unique
   stripeCustomerId        String?
   stripeFee               Int?
+  donationAmount          Int?
   refundAmount            Int?
   paidAt                  DateTime?
   refundedAt              DateTime?

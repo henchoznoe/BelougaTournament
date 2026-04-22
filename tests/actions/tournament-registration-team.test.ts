@@ -8,7 +8,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
+  PaymentStatus,
   RefundPolicyType,
   RegistrationStatus,
   RegistrationType,
@@ -77,9 +79,12 @@ const mockUserFindUnique = vi.fn()
 const mockTournamentFindUnique = vi.fn()
 const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationFindFirst = vi.fn()
+const mockRegistrationFindMany = vi.fn()
+const mockTxRegistrationFindUnique = vi.fn()
 const mockRegistrationCount = vi.fn()
 const mockRegistrationCreate = vi.fn()
 const mockRegistrationUpdate = vi.fn()
+const mockPaymentFindMany = vi.fn()
 const mockPaymentUpdateMany = vi.fn()
 const mockPaymentCreate = vi.fn()
 const mockPaymentUpdate = vi.fn()
@@ -100,11 +105,13 @@ vi.mock('@/lib/core/prisma', () => ({
     tournamentRegistration: {
       findUnique: (...a: unknown[]) => mockRegistrationFindUnique(...a),
       findFirst: (...a: unknown[]) => mockRegistrationFindFirst(...a),
+      findMany: (...a: unknown[]) => mockRegistrationFindMany(...a),
       count: (...a: unknown[]) => mockRegistrationCount(...a),
       create: (...a: unknown[]) => mockRegistrationCreate(...a),
       update: (...a: unknown[]) => mockRegistrationUpdate(...a),
     },
     payment: {
+      findMany: (...a: unknown[]) => mockPaymentFindMany(...a),
       updateMany: (...a: unknown[]) => mockPaymentUpdateMany(...a),
       create: (...a: unknown[]) => mockPaymentCreate(...a),
       update: (...a: unknown[]) => mockPaymentUpdate(...a),
@@ -178,7 +185,7 @@ const makeTxMock = (teamMemberCount = 1) =>
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
-          findUnique: mockRegistrationFindUnique,
+          findUnique: mockTxRegistrationFindUnique,
         },
         payment: {
           updateMany: mockPaymentUpdateMany,
@@ -215,6 +222,13 @@ describe('createTeamAndRegister', () => {
     mockTournamentFindUnique.mockResolvedValue(makeFreeTeamTournament())
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
     mockTeamCount.mockResolvedValue(0)
     mockTeamCreate.mockResolvedValue({ id: TEAM_ID, isFull: false })
@@ -332,6 +346,25 @@ describe('createTeamAndRegister', () => {
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
   })
 
+  it('should return a friendly error when a concurrent team creation hits the unique team-name constraint', async () => {
+    mockTransaction.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('duplicate', {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+      }),
+    )
+
+    const result = await createTeamAndRegister({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      teamName: TEAM_NAME,
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('déjà pris')
+  })
+
   it('should return error when user is banned', async () => {
     mockUserFindUnique.mockResolvedValue({
       bannedAt: new Date('2026-01-01'),
@@ -406,6 +439,13 @@ describe('joinTeamAndRegister', () => {
     )
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     // Outer pre-check: team exists and belongs to the tournament
     mockTeamFindUnique.mockResolvedValue({
       id: TEAM_ID,
@@ -422,6 +462,7 @@ describe('joinTeamAndRegister', () => {
             count: mockRegistrationCount,
             create: mockRegistrationCreate,
             update: mockRegistrationUpdate,
+            findUnique: mockTxRegistrationFindUnique,
           },
           payment: {
             updateMany: mockPaymentUpdateMany,

@@ -490,6 +490,7 @@ describe('getTournamentById', () => {
 const MOCK_REGISTRATION = {
   id: 'reg-1',
   fieldValues: { 'Riot ID': 'Player#1234' },
+  donationAmountSnapshot: null,
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
@@ -512,6 +513,7 @@ const MOCK_REGISTRATION = {
 const MOCK_RAW_REGISTRATION = {
   id: 'reg-1',
   fieldValues: { 'Riot ID': 'Player#1234' },
+  donationAmountSnapshot: null,
   createdAt: new Date('2026-05-10T10:00:00.000Z'),
   status: 'CONFIRMED',
   paymentStatus: 'NOT_REQUIRED',
@@ -588,6 +590,7 @@ describe('getRegistrations', () => {
       select: {
         id: true,
         fieldValues: true,
+        donationAmountSnapshot: true,
         createdAt: true,
         status: true,
         paymentStatus: true,

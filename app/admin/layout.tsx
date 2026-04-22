@@ -10,20 +10,35 @@ import { Suspense } from 'react'
 import { AdminShell } from '@/components/admin/ui/admin-shell'
 import { AdminShellSkeleton } from '@/components/admin/ui/admin-shell-skeleton'
 import { AdminGuard } from '@/components/public/auth/admin-guard'
+import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 interface AdminLayoutProps {
   children: React.ReactNode
 }
 
+const AdminShellContent = async ({ children }: Readonly<AdminLayoutProps>) => {
+  const [globalSettings, session] = await Promise.all([
+    getGlobalSettings(),
+    getSession(),
+  ])
+
+  return (
+    <AdminShell
+      logoUrl={globalSettings.logoUrl}
+      sessionUser={session?.user ?? null}
+    >
+      {children}
+    </AdminShell>
+  )
+}
+
 /** Wraps all admin routes with authentication, role-based access control, and admin shell. */
 const AdminLayout = async ({ children }: Readonly<AdminLayoutProps>) => {
-  const globalSettings = await getGlobalSettings()
-
   return (
     <Suspense fallback={<AdminShellSkeleton />}>
       <AdminGuard>
-        <AdminShell logoUrl={globalSettings.logoUrl}>{children}</AdminShell>
+        <AdminShellContent>{children}</AdminShellContent>
       </AdminGuard>
     </Suspense>
   )

@@ -19,8 +19,11 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { resolveDonationAmount } from '@/lib/utils/donation'
+import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import {
+  type DonationType,
   type FieldType,
   PaymentProvider,
   PaymentStatus,
@@ -52,6 +55,10 @@ export type TournamentWithFields = {
   entryFeeCurrency: string | null
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
+  donationEnabled: boolean
+  donationType: DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   fields: { label: string; type: FieldType; required: boolean; order: number }[]
 }
 
@@ -93,11 +100,13 @@ export const startPaidRegistrationCheckout = async ({
   tournament,
   userId,
   returnPath,
+  donationAmount,
 }: {
   registrationId: string
   tournament: TournamentWithFields
   userId: string
   returnPath: string
+  donationAmount?: number | null
 }): Promise<ActionState<{ checkoutUrl: string }>> => {
   if (
     tournament.entryFeeAmount === null ||
@@ -106,53 +115,132 @@ export const startPaidRegistrationCheckout = async ({
     return {
       success: false,
       message:
-        'Le paiement Stripe n\u2019est pas correctement configuré pour ce tournoi.',
+        "Le paiement Stripe n'est pas correctement configuré pour ce tournoi.",
+    }
+  }
+
+  const donationResolution = resolveDonationAmount({
+    tournament,
+    donationAmount,
+  })
+  if (!donationResolution.valid) {
+    return { success: false, message: donationResolution.message }
+  }
+
+  const existingPendingPayments = await prisma.payment.findMany({
+    where: {
+      registrationId,
+      status: { in: [PaymentStatus.PENDING, PaymentStatus.UNPAID] },
+    },
+    select: {
+      stripeCheckoutSessionId: true,
+    },
+  })
+
+  const stripe = getStripe()
+  for (const payment of existingPendingPayments) {
+    if (!payment.stripeCheckoutSessionId) {
+      continue
+    }
+
+    try {
+      await stripe.checkout.sessions.expire(payment.stripeCheckoutSessionId)
+    } catch {
+      // Session may already be completed or expired; the webhook guard below
+      // prevents stale successes from re-confirming cancelled attempts.
     }
   }
 
   const expiresAt = new Date(
     Date.now() + REGISTRATION_HOLD_MINUTES * MINUTE_IN_MS,
   )
-  const amount = tournament.entryFeeAmount
+  const entryFeeAmount = tournament.entryFeeAmount
+  const resolvedDonationAmount = donationResolution.donationAmount
+  const amount = entryFeeAmount + resolvedDonationAmount
   const currency = tournament.entryFeeCurrency
 
-  const payment = await prisma.$transaction(async tx => {
-    await tx.payment.updateMany({
-      where: {
-        registrationId,
-        status: { in: [PaymentStatus.PENDING, PaymentStatus.UNPAID] },
-      },
-      data: { status: PaymentStatus.CANCELLED },
-    })
+  let payment: { id: string }
+  try {
+    payment = await prisma.$transaction(async tx => {
+      const currentRegistration = await tx.tournamentRegistration.findUnique({
+        where: { id: registrationId },
+        select: {
+          id: true,
+          status: true,
+          paymentStatus: true,
+        },
+      })
 
-    await tx.tournamentRegistration.update({
-      where: { id: registrationId },
-      data: {
-        status: RegistrationStatus.PENDING,
-        paymentStatus: PaymentStatus.PENDING,
-        paymentRequiredSnapshot: true,
-        entryFeeAmountSnapshot: tournament.entryFeeAmount,
-        entryFeeCurrencySnapshot: tournament.entryFeeCurrency,
-        refundDeadlineDaysSnapshot: tournament.refundDeadlineDays,
-        confirmedAt: null,
-        cancelledAt: null,
-        expiresAt,
-      },
-    })
+      if (!currentRegistration) {
+        throw new Error('REGISTRATION_NOT_FOUND')
+      }
 
-    return tx.payment.create({
-      data: {
-        registrationId,
-        provider: PaymentProvider.STRIPE,
-        status: PaymentStatus.PENDING,
-        amount,
-        currency,
-      },
+      if (
+        currentRegistration.status === RegistrationStatus.CONFIRMED ||
+        currentRegistration.paymentStatus === PaymentStatus.PAID
+      ) {
+        throw new Error('REGISTRATION_ALREADY_CONFIRMED')
+      }
+
+      await tx.payment.updateMany({
+        where: {
+          registrationId,
+          status: { in: [PaymentStatus.PENDING, PaymentStatus.UNPAID] },
+        },
+        data: { status: PaymentStatus.CANCELLED },
+      })
+
+      await tx.tournamentRegistration.update({
+        where: { id: registrationId },
+        data: {
+          status: RegistrationStatus.PENDING,
+          paymentStatus: PaymentStatus.PENDING,
+          paymentRequiredSnapshot: true,
+          entryFeeAmountSnapshot: tournament.entryFeeAmount,
+          entryFeeCurrencySnapshot: tournament.entryFeeCurrency,
+          refundDeadlineDaysSnapshot: tournament.refundDeadlineDays,
+          donationAmountSnapshot:
+            resolvedDonationAmount > 0 ? resolvedDonationAmount : null,
+          confirmedAt: null,
+          cancelledAt: null,
+          expiresAt,
+        },
+      })
+
+      return tx.payment.create({
+        data: {
+          registrationId,
+          provider: PaymentProvider.STRIPE,
+          status: PaymentStatus.PENDING,
+          amount,
+          currency,
+          donationAmount:
+            resolvedDonationAmount > 0 ? resolvedDonationAmount : null,
+        },
+      })
     })
-  })
+  } catch (error) {
+    if (error instanceof Error && error.message === 'REGISTRATION_NOT_FOUND') {
+      return {
+        success: false,
+        message: 'Inscription introuvable.',
+      }
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === 'REGISTRATION_ALREADY_CONFIRMED'
+    ) {
+      return {
+        success: false,
+        message: 'Votre inscription est déjà confirmée.',
+      }
+    }
+
+    throw error
+  }
 
   try {
-    const stripe = getStripe()
     const session = await stripe.checkout.sessions.create(
       {
         mode: 'payment',
@@ -171,12 +259,26 @@ export const startPaidRegistrationCheckout = async ({
             quantity: 1,
             price_data: {
               currency: currency.toLowerCase(),
-              unit_amount: amount,
+              unit_amount: entryFeeAmount,
               product_data: {
                 name: `Inscription - ${tournament.title ?? 'Tournoi'}`,
               },
             },
           },
+          ...(resolvedDonationAmount > 0
+            ? [
+                {
+                  quantity: 1,
+                  price_data: {
+                    currency: currency.toLowerCase(),
+                    unit_amount: resolvedDonationAmount,
+                    product_data: {
+                      name: 'Don - Belouga Tournament',
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
         metadata: {
           paymentId: payment.id,
@@ -279,6 +381,8 @@ export const fetchTournamentForRegistration = async (
       }
     }
   }
+
+  await cleanupExpiredPendingRegistrations(userId)
 
   const tournament = (await prisma.tournament.findUnique({
     where: { id: tournamentId },

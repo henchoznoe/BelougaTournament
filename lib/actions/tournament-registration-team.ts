@@ -11,6 +11,7 @@
 
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
   fetchTournamentForRegistration,
   startPaidRegistrationCheckout,
@@ -20,9 +21,11 @@ import {
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import { createTeamSchema, joinTeamSchema } from '@/lib/validations/tournaments'
+import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   RegistrationType,
   TournamentFormat,
@@ -55,9 +58,24 @@ export const createTeamAndRegister = authenticatedAction({
       return { success: false, message: validation.message }
     }
 
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
+    }
+
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
+        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
+
         if (tournament.maxTeams !== null) {
           const teamCount = await tx.team.count({
             where: { tournamentId: data.tournamentId },
@@ -66,8 +84,6 @@ export const createTeamAndRegister = authenticatedAction({
             throw new Error('MAX_TEAMS_REACHED')
           }
         }
-
-        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
 
         const team = await tx.team.create({
           data: {
@@ -99,7 +115,16 @@ export const createTeamAndRegister = authenticatedAction({
       if (error instanceof Error && error.message === 'MAX_TEAMS_REACHED') {
         return {
           success: false,
-          message: 'Le nombre maximum d\u2019équipes est atteint.',
+          message: "Le nombre maximum d'équipes est atteint.",
+        }
+      }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return {
+          success: false,
+          message: "Ce nom d'équipe est déjà pris dans ce tournoi.",
         }
       }
       throw error
@@ -111,6 +136,7 @@ export const createTeamAndRegister = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 
@@ -161,9 +187,22 @@ export const joinTeamAndRegister = authenticatedAction({
       return { success: false, message: validation.message }
     }
 
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
+    }
+
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
         const freshTeam = await tx.team.findUnique({
           where: { id: data.teamId },
           include: { _count: { select: { members: true } } },
@@ -204,6 +243,7 @@ export const joinTeamAndRegister = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 
@@ -214,7 +254,7 @@ export const joinTeamAndRegister = authenticatedAction({
     return {
       success: true,
       message:
-        'Vous avez rejoint l\u2019équipe et votre inscription a été enregistrée.',
+        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
   },
 })

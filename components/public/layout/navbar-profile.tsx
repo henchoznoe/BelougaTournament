@@ -1,6 +1,6 @@
 /**
  * File: components/public/layout/navbar-profile.tsx
- * Description: Auth-aware profile button for the public navbar (desktop dropdown + mobile card).
+ * Description: Auth-aware profile button for the public navbar using server-provided session props.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -12,7 +12,6 @@ import { LayoutDashboard, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,27 +22,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/lib/config/routes'
-import { authClient } from '@/lib/core/auth-client'
+import type { AuthSession } from '@/lib/types/auth'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 interface NavbarProfileProps {
+  sessionUser: AuthSession['user'] | null
   onClick?: () => void
   mode?: 'desktop' | 'mobile'
 }
 
-const NavbarProfileSkeleton = () => (
-  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md">
-    <Skeleton className="size-5 rounded-full bg-zinc-700" />
-  </div>
-)
-
 export const NavbarProfile = ({
+  sessionUser,
   onClick,
   mode = 'desktop',
 }: NavbarProfileProps) => {
-  const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
   const pathname = usePathname()
   const { handleLogout: logout } = useLogout({
@@ -52,17 +45,8 @@ export const NavbarProfile = ({
       if (onClick) onClick()
     },
   })
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted || isPending) {
-    return <NavbarProfileSkeleton />
-  }
-
-  if (!session?.user) {
+  if (!sessionUser) {
     return (
       <Link
         href={`${ROUTES.LOGIN}?from=${encodeURIComponent(pathname)}`}
@@ -75,24 +59,24 @@ export const NavbarProfile = ({
     )
   }
 
-  const isAdmin = session.user.role === Role.ADMIN
+  const resolvedDisplayName = sessionUser.displayName || sessionUser.name
+  const isAdmin = sessionUser.role === Role.ADMIN
 
-  // Desktop: dropdown
   if (mode === 'desktop') {
     return (
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden">
-          {session.user.image ? (
+          {sessionUser.image ? (
             <Image
-              src={session.user.image}
-              alt={session.user.displayName || session.user.name}
+              src={sessionUser.image}
+              alt={resolvedDisplayName}
               width={32}
               height={32}
               className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
             />
           ) : (
             <span className="text-sm font-medium text-zinc-300">
-              {session.user.name.charAt(0).toUpperCase()}
+              {resolvedDisplayName.charAt(0).toUpperCase()}
             </span>
           )}
         </DropdownMenuTrigger>
@@ -103,10 +87,10 @@ export const NavbarProfile = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none text-white">
-                {session.user.displayName || session.user.name}
+                {resolvedDisplayName}
               </p>
               <p className="text-xs leading-none text-zinc-400">
-                {session.user.email}
+                {sessionUser.email}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -147,14 +131,13 @@ export const NavbarProfile = ({
     )
   }
 
-  // Mobile: inline card
   return (
     <div className="flex w-full flex-col gap-4 rounded-3xl border border-white/5 bg-white/2 p-4">
       <div className="flex items-center gap-4">
-        {session.user.image ? (
+        {sessionUser.image ? (
           <Image
-            src={session.user.image}
-            alt={session.user.displayName}
+            src={sessionUser.image}
+            alt={resolvedDisplayName}
             width={48}
             height={48}
             className="rounded-full ring-2 ring-blue-500/20"
@@ -162,12 +145,12 @@ export const NavbarProfile = ({
         ) : (
           <div className="flex size-12 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-blue-500/20">
             <span className="text-lg font-medium text-zinc-300">
-              {session.user.displayName.charAt(0).toUpperCase()}
+              {resolvedDisplayName.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
         <span className="text-lg font-bold text-white">
-          {session.user.displayName}
+          {resolvedDisplayName}
         </span>
       </div>
 

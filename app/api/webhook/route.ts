@@ -27,6 +27,7 @@ const TERMINAL_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.CANCELLED,
   PaymentStatus.FAILED,
   PaymentStatus.REFUNDED,
+  PaymentStatus.FORFEITED,
 ])
 
 const handleCheckoutCompleted = async (event: Stripe.Event) => {
@@ -60,14 +61,27 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
 
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      amount: true,
+      currency: true,
       registration: {
-        select: { id: true },
+        select: {
+          id: true,
+          status: true,
+          paymentStatus: true,
+        },
       },
     },
   })
 
-  if (!payment || payment.status === PaymentStatus.PAID) {
+  if (
+    !payment ||
+    payment.status !== PaymentStatus.PENDING ||
+    payment.registration.status !== RegistrationStatus.PENDING ||
+    payment.registration.paymentStatus !== PaymentStatus.PENDING
+  ) {
     return
   }
 
@@ -83,6 +97,20 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
         paymentId,
       },
       'Checkout session amount_total mismatch — refusing to confirm',
+    )
+    return
+  }
+
+  const sessionCurrency = session.currency?.toUpperCase() ?? null
+  if (sessionCurrency !== payment.currency.toUpperCase()) {
+    logger.error(
+      {
+        eventId: event.id,
+        expectedCurrency: payment.currency,
+        actualCurrency: session.currency ?? null,
+        paymentId,
+      },
+      'Checkout session currency mismatch — refusing to confirm',
     )
     return
   }
@@ -309,13 +337,21 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
   // H4: Fallback lookup by stripePaymentIntentId when stripeChargeId is not found
   let payment = await prisma.payment.findFirst({
     where: { stripeChargeId: charge.id },
-    include: { registration: { select: { id: true } } },
+    include: {
+      registration: {
+        select: { id: true, userId: true, tournamentId: true },
+      },
+    },
   })
 
   if (!payment && typeof charge.payment_intent === 'string') {
     payment = await prisma.payment.findFirst({
       where: { stripePaymentIntentId: charge.payment_intent },
-      include: { registration: { select: { id: true } } },
+      include: {
+        registration: {
+          select: { id: true, userId: true, tournamentId: true },
+        },
+      },
     })
   }
 
@@ -337,12 +373,20 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
     })
 
     if (isFullRefund) {
+      await removeUserFromTeam(
+        tx,
+        payment.registration.userId,
+        payment.registration.tournamentId,
+      )
+
       await tx.tournamentRegistration.update({
         where: { id: payment.registration.id },
         data: {
           status: RegistrationStatus.CANCELLED,
           paymentStatus: PaymentStatus.REFUNDED,
           cancelledAt: new Date(),
+          teamId: null,
+          expiresAt: null,
         },
       })
     }

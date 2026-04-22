@@ -10,6 +10,7 @@ import { Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { TournamentArchivedToast } from '@/components/admin/tournaments/tournament-archived-toast'
 import { TournamentOverview } from '@/components/admin/tournaments/tournament-detail'
 import {
   TournamentDetailActions,
@@ -30,7 +31,7 @@ import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface AdminTournamentDetailPageProps {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; archived?: string }>
 }
 
 export const generateMetadata = async ({
@@ -81,6 +82,9 @@ const AdminTournamentDetailPage = async ({
       titleExtra={<TournamentStatusControl tournament={tournament} />}
       headerRight={<TournamentDetailActions tournament={tournament} />}
     >
+      <Suspense>
+        <TournamentArchivedToast />
+      </Suspense>
       <Suspense>
         <TournamentTabNav format={tournament.format} />
       </Suspense>

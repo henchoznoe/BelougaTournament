@@ -294,10 +294,10 @@ export const DeleteRegistrationDialog = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Supprimer l\u2019inscription de {displayName} ?
+            Supprimer l'inscription de {displayName} ?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action supprimera l\u2019inscription.
+            Cette action supprimera l'inscription.
             {registration.team && ' Le joueur sera retiré de son équipe.'}
             {registration.paymentStatus === PaymentStatus.PAID && (
               <>
@@ -417,7 +417,7 @@ export const RenameTeamDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Renommer l\u2019équipe</DialogTitle>
+          <DialogTitle>Renommer l'équipe</DialogTitle>
           <DialogDescription>
             Équipe actuelle : {registration.team.name}
           </DialogDescription>

@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.7.0
- * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
+ * Prisma Client JS version: 7.8.0
+ * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.7.0",
-  engine: "75cbdc1eb7150937890ad5465d861175c6624711"
+  client: "7.8.0",
+  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
 }
 
 /**
@@ -1580,6 +1580,10 @@ export const TournamentScalarFieldEnum = {
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
   teamLogoEnabled: 'teamLogoEnabled',
+  donationEnabled: 'donationEnabled',
+  donationType: 'donationType',
+  donationFixedAmount: 'donationFixedAmount',
+  donationMinAmount: 'donationMinAmount',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1646,6 +1650,7 @@ export const TournamentRegistrationScalarFieldEnum = {
   entryFeeAmountSnapshot: 'entryFeeAmountSnapshot',
   entryFeeCurrencySnapshot: 'entryFeeCurrencySnapshot',
   refundDeadlineDaysSnapshot: 'refundDeadlineDaysSnapshot',
+  donationAmountSnapshot: 'donationAmountSnapshot',
   confirmedAt: 'confirmedAt',
   cancelledAt: 'cancelledAt',
   expiresAt: 'expiresAt',
@@ -1667,6 +1672,7 @@ export const PaymentScalarFieldEnum = {
   stripeChargeId: 'stripeChargeId',
   stripeCustomerId: 'stripeCustomerId',
   stripeFee: 'stripeFee',
+  donationAmount: 'donationAmount',
   refundAmount: 'refundAmount',
   paidAt: 'paidAt',
   refundedAt: 'refundedAt',
@@ -1883,6 +1889,20 @@ export type ListEnumRefundPolicyTypeFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'DonationType'
+ */
+export type EnumDonationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationType'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationType[]'
+ */
+export type ListEnumDonationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationType[]'>
+    
+
+
+/**
  * Reference to a field of type 'TournamentStatus'
  */
 export type EnumTournamentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TournamentStatus'>
@@ -2072,6 +2092,21 @@ export type PrismaClientOptions = ({
    * ```
    */
   comments?: runtime.SqlCommenterPlugin[]
+  /**
+   * Optional maximum size for the query plan cache. If not provided, a default size will be used.
+   * A value of `0` can be used to disable the cache entirely. A higher cache size can improve
+   * performance for applications that execute a large number of unique queries, while a smaller
+   * cache size can reduce memory usage.
+   * 
+   * @example
+   * ```
+   * const prisma = new PrismaClient({
+   *   adapter,
+   *   queryPlanCacheMaxSize: 100,
+   * })
+   * ```
+   */
+  queryPlanCacheMaxSize?: number
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit

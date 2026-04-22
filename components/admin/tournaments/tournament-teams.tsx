@@ -149,7 +149,7 @@ const MemberActions = ({ tournament, team, member }: MemberActionsProps) => {
               Promouvoir {displayName} capitaine ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {displayName} deviendra le nouveau capitaine de l&apos;equipe{' '}
+              {displayName} deviendra le nouveau capitaine de l&apos;équipe{' '}
               {team.name}. L&apos;ancien capitaine restera membre.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -169,14 +169,14 @@ const MemberActions = ({ tournament, team, member }: MemberActionsProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Exclure {displayName} ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Le joueur sera retire de l&apos;equipe et son inscription sera
-              annulee.
+              Le joueur sera retiré de l&apos;équipe et son inscription sera
+              annulée.
               {isCaptain &&
                 team.members.length > 1 &&
                 ' Le prochain membre sera automatiquement promu capitaine.'}
               {isCaptain &&
                 team.members.length === 1 &&
-                " L'equipe sera dissoute car il est le dernier membre."}
+                " L'équipe sera dissoute car il est le dernier membre."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -227,7 +227,7 @@ const DissolveTeamButton = ({ tournament, team }: DissolveTeamButtonProps) => {
         size="sm"
         onClick={() => setOpen(true)}
         className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-        aria-label={`Dissoudre l'equipe ${team.name}`}
+        aria-label={`Dissoudre l'équipe ${team.name}`}
       >
         <Trash2 className="size-3.5" />
         <span className="hidden sm:inline">Dissoudre</span>
@@ -235,11 +235,11 @@ const DissolveTeamButton = ({ tournament, team }: DissolveTeamButtonProps) => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Dissoudre l&apos;equipe {team.name} ?
+            Dissoudre l&apos;équipe {team.name} ?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Cette action retirera tous les {team.members.length} membre(s) et
-            annulera leurs inscriptions. Cette action est irreversible.
+            annulera leurs inscriptions. Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -296,7 +296,7 @@ const TeamCard = ({ tournament, team }: TeamCardProps) => {
                     : 'bg-amber-500/10 text-amber-400',
                 )}
               >
-                {team.isFull ? 'Complete' : 'Incomplete'}
+                {team.isFull ? 'Complète' : 'Incomplète'}
               </span>
             </div>
           </div>
@@ -361,7 +361,7 @@ const TeamCard = ({ tournament, team }: TeamCardProps) => {
 
       {/* Card footer */}
       <div className="border-t border-white/5 px-5 py-2.5 text-xs text-zinc-600">
-        Cree le {formatDate(team.createdAt)}
+        Créée le {formatDate(team.createdAt)}
       </div>
     </div>
   )
@@ -410,14 +410,14 @@ export const TournamentTeams = ({
         <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/2 px-4 py-2.5 backdrop-blur-sm">
           <Users className="size-4 text-blue-400" />
           <span className="text-sm text-zinc-300">
-            {teams.length} equipe(s)
+            {teams.length} équipe(s)
           </span>
         </div>
         {fullCount > 0 && (
           <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/2 px-4 py-2.5 backdrop-blur-sm">
             <span className="size-2 rounded-full bg-emerald-400" />
             <span className="text-sm text-zinc-300">
-              {fullCount} complete(s)
+              {fullCount} complète(s)
             </span>
           </div>
         )}
@@ -425,7 +425,7 @@ export const TournamentTeams = ({
           <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/2 px-4 py-2.5 backdrop-blur-sm">
             <span className="size-2 rounded-full bg-amber-400" />
             <span className="text-sm text-zinc-300">
-              {incompleteCount} incomplete(s)
+              {incompleteCount} incomplète(s)
             </span>
           </div>
         )}
@@ -435,24 +435,24 @@ export const TournamentTeams = ({
       <div className="relative max-w-sm">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
         <Input
-          placeholder="Rechercher une equipe ou un joueur..."
+          placeholder="Rechercher une équipe ou un joueur..."
           value={search}
           onChange={e => handleSearch(e.target.value)}
           className="pl-9"
-          aria-label="Rechercher une equipe"
+          aria-label="Rechercher une équipe"
         />
       </div>
 
       {/* Count */}
       <p className="text-xs text-zinc-500">
-        {filtered.length} equipe(s)
+        {filtered.length} équipe(s)
         {filtered.length !== teams.length && ` sur ${teams.length}`}
       </p>
 
       {/* Team cards */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-          <p className="text-sm text-zinc-500">Aucune equipe trouvee.</p>
+          <p className="text-sm text-zinc-500">Aucune équipe trouvée.</p>
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

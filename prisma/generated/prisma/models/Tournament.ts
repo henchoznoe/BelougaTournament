@@ -31,6 +31,8 @@ export type TournamentAvgAggregateOutputType = {
   teamSize: number | null
   entryFeeAmount: number | null
   refundDeadlineDays: number | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
 }
 
 export type TournamentSumAggregateOutputType = {
@@ -38,6 +40,8 @@ export type TournamentSumAggregateOutputType = {
   teamSize: number | null
   entryFeeAmount: number | null
   refundDeadlineDays: number | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
 }
 
 export type TournamentMinAggregateOutputType = {
@@ -62,6 +66,10 @@ export type TournamentMinAggregateOutputType = {
   toornamentId: string | null
   streamUrl: string | null
   teamLogoEnabled: boolean | null
+  donationEnabled: boolean | null
+  donationType: $Enums.DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -89,6 +97,10 @@ export type TournamentMaxAggregateOutputType = {
   toornamentId: string | null
   streamUrl: string | null
   teamLogoEnabled: boolean | null
+  donationEnabled: boolean | null
+  donationType: $Enums.DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   status: $Enums.TournamentStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -118,6 +130,10 @@ export type TournamentCountAggregateOutputType = {
   toornamentId: number
   streamUrl: number
   teamLogoEnabled: number
+  donationEnabled: number
+  donationType: number
+  donationFixedAmount: number
+  donationMinAmount: number
   status: number
   createdAt: number
   updatedAt: number
@@ -130,6 +146,8 @@ export type TournamentAvgAggregateInputType = {
   teamSize?: true
   entryFeeAmount?: true
   refundDeadlineDays?: true
+  donationFixedAmount?: true
+  donationMinAmount?: true
 }
 
 export type TournamentSumAggregateInputType = {
@@ -137,6 +155,8 @@ export type TournamentSumAggregateInputType = {
   teamSize?: true
   entryFeeAmount?: true
   refundDeadlineDays?: true
+  donationFixedAmount?: true
+  donationMinAmount?: true
 }
 
 export type TournamentMinAggregateInputType = {
@@ -161,6 +181,10 @@ export type TournamentMinAggregateInputType = {
   toornamentId?: true
   streamUrl?: true
   teamLogoEnabled?: true
+  donationEnabled?: true
+  donationType?: true
+  donationFixedAmount?: true
+  donationMinAmount?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -188,6 +212,10 @@ export type TournamentMaxAggregateInputType = {
   toornamentId?: true
   streamUrl?: true
   teamLogoEnabled?: true
+  donationEnabled?: true
+  donationType?: true
+  donationFixedAmount?: true
+  donationMinAmount?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -217,6 +245,10 @@ export type TournamentCountAggregateInputType = {
   toornamentId?: true
   streamUrl?: true
   teamLogoEnabled?: true
+  donationEnabled?: true
+  donationType?: true
+  donationFixedAmount?: true
+  donationMinAmount?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -333,6 +365,10 @@ export type TournamentGroupByOutputType = {
   toornamentId: string | null
   streamUrl: string | null
   teamLogoEnabled: boolean
+  donationEnabled: boolean
+  donationType: $Enums.DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   status: $Enums.TournamentStatus
   createdAt: Date
   updatedAt: Date
@@ -385,6 +421,10 @@ export type TournamentWhereInput = {
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   teamLogoEnabled?: Prisma.BoolFilter<"Tournament"> | boolean
+  donationEnabled?: Prisma.BoolFilter<"Tournament"> | boolean
+  donationType?: Prisma.EnumDonationTypeNullableFilter<"Tournament"> | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  donationMinAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -418,6 +458,10 @@ export type TournamentOrderByWithRelationInput = {
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   teamLogoEnabled?: Prisma.SortOrder
+  donationEnabled?: Prisma.SortOrder
+  donationType?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -454,6 +498,10 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   toornamentId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableFilter<"Tournament"> | string | null
   teamLogoEnabled?: Prisma.BoolFilter<"Tournament"> | boolean
+  donationEnabled?: Prisma.BoolFilter<"Tournament"> | boolean
+  donationType?: Prisma.EnumDonationTypeNullableFilter<"Tournament"> | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  donationMinAmount?: Prisma.IntNullableFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
@@ -487,6 +535,10 @@ export type TournamentOrderByWithAggregationInput = {
   toornamentId?: Prisma.SortOrderInput | Prisma.SortOrder
   streamUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   teamLogoEnabled?: Prisma.SortOrder
+  donationEnabled?: Prisma.SortOrder
+  donationType?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -524,6 +576,10 @@ export type TournamentScalarWhereWithAggregatesInput = {
   toornamentId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   streamUrl?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   teamLogoEnabled?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
+  donationEnabled?: Prisma.BoolWithAggregatesFilter<"Tournament"> | boolean
+  donationType?: Prisma.EnumDonationTypeNullableWithAggregatesFilter<"Tournament"> | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  donationMinAmount?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
@@ -553,6 +609,10 @@ export type TournamentCreateInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -586,6 +646,10 @@ export type TournamentUncheckedCreateInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -619,6 +683,10 @@ export type TournamentUpdateInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -652,6 +720,10 @@ export type TournamentUncheckedUpdateInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -685,6 +757,10 @@ export type TournamentCreateManyInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -714,6 +790,10 @@ export type TournamentUpdateManyMutationInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -743,6 +823,10 @@ export type TournamentUncheckedUpdateManyInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -780,6 +864,10 @@ export type TournamentCountOrderByAggregateInput = {
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   teamLogoEnabled?: Prisma.SortOrder
+  donationEnabled?: Prisma.SortOrder
+  donationType?: Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -790,6 +878,8 @@ export type TournamentAvgOrderByAggregateInput = {
   teamSize?: Prisma.SortOrder
   entryFeeAmount?: Prisma.SortOrder
   refundDeadlineDays?: Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrder
 }
 
 export type TournamentMaxOrderByAggregateInput = {
@@ -814,6 +904,10 @@ export type TournamentMaxOrderByAggregateInput = {
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   teamLogoEnabled?: Prisma.SortOrder
+  donationEnabled?: Prisma.SortOrder
+  donationType?: Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -841,6 +935,10 @@ export type TournamentMinOrderByAggregateInput = {
   toornamentId?: Prisma.SortOrder
   streamUrl?: Prisma.SortOrder
   teamLogoEnabled?: Prisma.SortOrder
+  donationEnabled?: Prisma.SortOrder
+  donationType?: Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -851,6 +949,8 @@ export type TournamentSumOrderByAggregateInput = {
   teamSize?: Prisma.SortOrder
   entryFeeAmount?: Prisma.SortOrder
   refundDeadlineDays?: Prisma.SortOrder
+  donationFixedAmount?: Prisma.SortOrder
+  donationMinAmount?: Prisma.SortOrder
 }
 
 export type TournamentScalarRelationFilter = {
@@ -902,6 +1002,10 @@ export type EnumRegistrationTypeFieldUpdateOperationsInput = {
 
 export type EnumRefundPolicyTypeFieldUpdateOperationsInput = {
   set?: $Enums.RefundPolicyType
+}
+
+export type NullableEnumDonationTypeFieldUpdateOperationsInput = {
+  set?: $Enums.DonationType | null
 }
 
 export type EnumTournamentStatusFieldUpdateOperationsInput = {
@@ -988,6 +1092,10 @@ export type TournamentCreateWithoutToornamentStagesInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1020,6 +1128,10 @@ export type TournamentUncheckedCreateWithoutToornamentStagesInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1068,6 +1180,10 @@ export type TournamentUpdateWithoutToornamentStagesInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1100,6 +1216,10 @@ export type TournamentUncheckedUpdateWithoutToornamentStagesInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1132,6 +1252,10 @@ export type TournamentCreateWithoutFieldsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1164,6 +1288,10 @@ export type TournamentUncheckedCreateWithoutFieldsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1212,6 +1340,10 @@ export type TournamentUpdateWithoutFieldsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1244,6 +1376,10 @@ export type TournamentUncheckedUpdateWithoutFieldsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1276,6 +1412,10 @@ export type TournamentCreateWithoutTeamsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1308,6 +1448,10 @@ export type TournamentUncheckedCreateWithoutTeamsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1356,6 +1500,10 @@ export type TournamentUpdateWithoutTeamsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1388,6 +1536,10 @@ export type TournamentUncheckedUpdateWithoutTeamsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1420,6 +1572,10 @@ export type TournamentCreateWithoutRegistrationsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1452,6 +1608,10 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   toornamentId?: string | null
   streamUrl?: string | null
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: $Enums.DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
   status?: $Enums.TournamentStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1500,6 +1660,10 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1532,6 +1696,10 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   toornamentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streamUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamLogoEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  donationType?: Prisma.NullableEnumDonationTypeFieldUpdateOperationsInput | $Enums.DonationType | null
+  donationFixedAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  donationMinAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1622,6 +1790,10 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   toornamentId?: boolean
   streamUrl?: boolean
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: boolean
+  donationFixedAmount?: boolean
+  donationMinAmount?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1656,6 +1828,10 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   toornamentId?: boolean
   streamUrl?: boolean
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: boolean
+  donationFixedAmount?: boolean
+  donationMinAmount?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1685,6 +1861,10 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   toornamentId?: boolean
   streamUrl?: boolean
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: boolean
+  donationFixedAmount?: boolean
+  donationMinAmount?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1714,12 +1894,16 @@ export type TournamentSelectScalar = {
   toornamentId?: boolean
   streamUrl?: boolean
   teamLogoEnabled?: boolean
+  donationEnabled?: boolean
+  donationType?: boolean
+  donationFixedAmount?: boolean
+  donationMinAmount?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "games" | "imageUrls" | "rules" | "prize" | "registrationType" | "entryFeeAmount" | "entryFeeCurrency" | "refundPolicyType" | "refundDeadlineDays" | "toornamentId" | "streamUrl" | "teamLogoEnabled" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "startDate" | "endDate" | "registrationOpen" | "registrationClose" | "maxTeams" | "format" | "teamSize" | "games" | "imageUrls" | "rules" | "prize" | "registrationType" | "entryFeeAmount" | "entryFeeCurrency" | "refundPolicyType" | "refundDeadlineDays" | "toornamentId" | "streamUrl" | "teamLogoEnabled" | "donationEnabled" | "donationType" | "donationFixedAmount" | "donationMinAmount" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | Prisma.Tournament$fieldsArgs<ExtArgs>
   toornamentStages?: boolean | Prisma.Tournament$toornamentStagesArgs<ExtArgs>
@@ -1762,6 +1946,10 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     toornamentId: string | null
     streamUrl: string | null
     teamLogoEnabled: boolean
+    donationEnabled: boolean
+    donationType: $Enums.DonationType | null
+    donationFixedAmount: number | null
+    donationMinAmount: number | null
     status: $Enums.TournamentStatus
     createdAt: Date
     updatedAt: Date
@@ -2215,6 +2403,10 @@ export interface TournamentFieldRefs {
   readonly toornamentId: Prisma.FieldRef<"Tournament", 'String'>
   readonly streamUrl: Prisma.FieldRef<"Tournament", 'String'>
   readonly teamLogoEnabled: Prisma.FieldRef<"Tournament", 'Boolean'>
+  readonly donationEnabled: Prisma.FieldRef<"Tournament", 'Boolean'>
+  readonly donationType: Prisma.FieldRef<"Tournament", 'DonationType'>
+  readonly donationFixedAmount: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly donationMinAmount: Prisma.FieldRef<"Tournament", 'Int'>
   readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>
   readonly createdAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tournament", 'DateTime'>

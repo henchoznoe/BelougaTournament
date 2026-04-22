@@ -101,7 +101,7 @@ export const DashboardRecentRegistrations = ({
           Aucune inscription récente.
         </p>
       ) : (
-        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+        <div className="max-h-105 space-y-2 overflow-y-auto pr-1">
           {registrations.map(reg => (
             <Link
               key={reg.id}

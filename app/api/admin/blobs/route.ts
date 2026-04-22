@@ -19,6 +19,7 @@ import { verifyAdmin } from '@/lib/utils/verify-admin'
 
 const ALLOWED_FOLDER_ROOTS = ['logos', 'sponsors', 'tournaments'] as const
 const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com'
+const INVALID_FOLDER_ERROR = 'Dossier invalide.'
 
 /**
  * Matches a folder path of the form `root` or `root/sub[/sub...]` where every
@@ -46,6 +47,23 @@ const isValidBlobUrl = (url: string): boolean => {
 const isAllowedFolder = (folder: string): boolean =>
   ALLOWED_FOLDER_REGEX.test(folder)
 
+/** Validates an optional folder input and normalizes absence to null. */
+const parseFolderInput = (
+  folder: FormDataEntryValue | string | null,
+):
+  | { success: true; folder: string | null }
+  | { success: false; error: string } => {
+  if (folder === null) {
+    return { success: true, folder: null }
+  }
+
+  if (typeof folder !== 'string' || !isAllowedFolder(folder)) {
+    return { success: false, error: INVALID_FOLDER_ERROR }
+  }
+
+  return { success: true, folder }
+}
+
 /** GET — List blobs, optionally filtered by folder prefix. */
 export const GET = async (request: Request) => {
   const session = await verifyAdmin(request)
@@ -55,9 +73,13 @@ export const GET = async (request: Request) => {
 
   try {
     const { searchParams } = new URL(request.url)
-    const folder = searchParams.get('folder')
+    const parsedFolder = parseFolderInput(searchParams.get('folder'))
 
-    const prefix = folder && isAllowedFolder(folder) ? `${folder}/` : undefined
+    if (!parsedFolder.success) {
+      return NextResponse.json({ error: parsedFolder.error }, { status: 400 })
+    }
+
+    const prefix = parsedFolder.folder ? `${parsedFolder.folder}/` : undefined
     const { blobs } = await list({ prefix })
     return NextResponse.json({ blobs })
   } catch (error) {
@@ -79,13 +101,17 @@ export const POST = async (request: Request) => {
   try {
     const formData = await request.formData()
     const file = formData.get('file')
-    const folder = formData.get('folder')
+    const parsedFolder = parseFolderInput(formData.get('folder'))
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
         { error: 'Aucun fichier fourni.' },
         { status: 400 },
       )
+    }
+
+    if (!parsedFolder.success) {
+      return NextResponse.json({ error: parsedFolder.error }, { status: 400 })
     }
 
     if (!isAllowedImageMimeType(file.type)) {
@@ -122,8 +148,8 @@ export const POST = async (request: Request) => {
 
     // Build the pathname with optional folder prefix
     const pathname =
-      typeof folder === 'string' && isAllowedFolder(folder)
-        ? `${folder}/${sanitizedName}`
+      parsedFolder.folder !== null
+        ? `${parsedFolder.folder}/${sanitizedName}`
         : sanitizedName
 
     const blob = await put(pathname, file, {

@@ -196,6 +196,8 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     transactionCount: 0,
     refundCount: 0,
     forfeitedCount: 0,
+    totalDonations: 0,
+    donationCount: 0,
     currency: DEFAULT_CURRENCY,
     byTournament: [],
   }
@@ -218,6 +220,7 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         status: true,
         refundAmount: true,
         stripeFee: true,
+        donationAmount: true,
         registration: {
           select: {
             tournament: {
@@ -238,9 +241,11 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     let totalRevenue = 0
     let totalRefunded = 0
     let totalStripeFees = 0
+    let totalDonations = 0
     let transactionCount = 0
     let refundCount = 0
     let forfeitedCount = 0
+    let donationCount = 0
     const currency = payments[0].currency || DEFAULT_CURRENCY
     if (payments[0].currency && payments[0].currency !== DEFAULT_CURRENCY) {
       logger.warn(
@@ -260,9 +265,11 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         refunded: number
         forfeited: number
         stripeFees: number
+        donations: number
         paidCount: number
         refundedCount: number
         forfeitedCount: number
+        donationCount: number
       }
     >()
 
@@ -278,9 +285,11 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
           refunded: 0,
           forfeited: 0,
           stripeFees: 0,
+          donations: 0,
           paidCount: 0,
           refundedCount: 0,
           forfeitedCount: 0,
+          donationCount: 0,
         })
       }
 
@@ -316,6 +325,8 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
       if (payment.status === PaymentStatus.FORFEITED) {
         // Forfeited payments: full amount received, Stripe fees still apply, no refund issued.
         // The organisation keeps the net amount (amount - stripeFee).
+        // The forfeited entry fee (amount - donationAmount) is also counted as a donation,
+        // since the player voluntarily chose to leave their funds to the organisation.
         totalRevenue += payment.amount
         totalStripeFees += payment.stripeFee ?? 0
         transactionCount++
@@ -325,6 +336,27 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
         entry.forfeited += payment.amount
         entry.paidCount++
         entry.forfeitedCount++
+
+        // Count the forfeited entry fee as a donation
+        const forfeitedEntryFee = payment.amount - (payment.donationAmount ?? 0)
+        if (forfeitedEntryFee > 0) {
+          totalDonations += forfeitedEntryFee
+          donationCount++
+          entry.donations += forfeitedEntryFee
+          entry.donationCount++
+        }
+      }
+
+      // Aggregate optional Stripe donation amounts (PAID payments only; FORFEITED handled above)
+      if (
+        payment.status !== PaymentStatus.FORFEITED &&
+        payment.donationAmount &&
+        payment.donationAmount > 0
+      ) {
+        totalDonations += payment.donationAmount
+        donationCount++
+        entry.donations += payment.donationAmount
+        entry.donationCount++
       }
     }
 
@@ -341,6 +373,8 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
       transactionCount,
       refundCount,
       forfeitedCount,
+      totalDonations,
+      donationCount,
       currency,
       byTournament,
     }

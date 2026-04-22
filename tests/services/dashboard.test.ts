@@ -247,6 +247,8 @@ describe('getDashboardPaymentStats', () => {
     transactionCount: 0,
     refundCount: 0,
     forfeitedCount: 0,
+    totalDonations: 0,
+    donationCount: 0,
     currency: 'CHF',
     byTournament: [],
   }
@@ -264,6 +266,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'PAID',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
         },
@@ -273,6 +277,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'PAID',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
         },
@@ -299,6 +305,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'REFUNDED',
         refundAmount: 1500,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
         },
@@ -321,6 +329,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'REFUNDED',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
         },
@@ -340,6 +350,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'PAID',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'Small', slug: 'small' },
         },
@@ -349,6 +361,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'CHF',
         status: 'PAID',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't2', title: 'Big', slug: 'big' },
         },
@@ -371,6 +385,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'EUR',
         status: 'PAID',
         refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'A', slug: 'a' },
         },
@@ -380,6 +396,8 @@ describe('getDashboardPaymentStats', () => {
         currency: 'EUR',
         status: 'REFUNDED',
         refundAmount: 800,
+        stripeFee: null,
+        donationAmount: null,
         registration: {
           tournament: { id: 't1', title: 'A', slug: 'a' },
         },
@@ -398,6 +416,91 @@ describe('getDashboardPaymentStats', () => {
     expect(result.byTournament[0].refunded).toBe(800)
     expect(result.byTournament[0].paidCount).toBe(2)
     expect(result.byTournament[0].refundedCount).toBe(1)
+  })
+
+  it('aggregates donation amounts across PAID payments', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1500,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: 500,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+      {
+        amount: 1200,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: 200,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+      {
+        amount: 1000,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalDonations).toBe(700)
+    expect(result.donationCount).toBe(2)
+    expect(result.byTournament[0].donations).toBe(700)
+    expect(result.byTournament[0].donationCount).toBe(2)
+  })
+
+  it('counts forfeited entry fees as donations', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        // Player forfeited with no optional donation: full entryFee (1000) becomes a donation
+        amount: 1000,
+        currency: 'CHF',
+        status: 'FORFEITED',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+      {
+        // Player forfeited with an optional donation of 200 on top of 800 entry fee
+        // → forfeited entry fee (800) + optional donation (0, handled via PAID path) = 800 donation
+        amount: 1000,
+        currency: 'CHF',
+        status: 'FORFEITED',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: 200,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    // First payment: 1000 entry fee forfeited → 1000 as donation
+    // Second payment: 1000 - 200 = 800 entry fee forfeited → 800 as donation
+    expect(result.totalDonations).toBe(1800)
+    expect(result.donationCount).toBe(2)
+    expect(result.forfeitedCount).toBe(2)
+    expect(result.byTournament[0].donations).toBe(1800)
+    expect(result.byTournament[0].donationCount).toBe(2)
   })
 
   it('returns empty stats on database error', async () => {

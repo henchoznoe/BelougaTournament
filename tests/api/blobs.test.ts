@@ -134,6 +134,13 @@ describe('GET /api/admin/blobs', () => {
     expect(response.status).toBe(200)
     expect(mockList).toHaveBeenCalledWith({ prefix: 'logos/' })
   })
+
+  it('rejects invalid folder filters instead of listing all blobs', async () => {
+    const response = await GET(makeGetRequest('../secrets'))
+
+    expect(response.status).toBe(400)
+    expect(mockList).not.toHaveBeenCalled()
+  })
 })
 
 describe('POST /api/admin/blobs', () => {
@@ -171,6 +178,17 @@ describe('POST /api/admin/blobs', () => {
       expect.any(File),
       expect.objectContaining({ access: 'public', addRandomSuffix: true }),
     )
+  })
+
+  it('rejects invalid upload folders instead of writing to the blob root', async () => {
+    const formData = new FormData()
+    formData.set('file', createFile('logo.png', 'image/png'))
+    formData.set('folder', '../secrets')
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(400)
+    expect(mockPut).not.toHaveBeenCalled()
   })
 })
 

@@ -16,6 +16,7 @@ const PRISMA_ERROR_MESSAGES: Record<string, string> = {
   P2000: 'La valeur fournie est trop longue.',
   P2002: 'Cette valeur existe déjà.',
   P2003: 'Un enregistrement lié est introuvable.',
+  P2034: 'Cette opération a été modifiée en parallèle. Veuillez réessayer.',
   P2025: 'Enregistrement introuvable.',
 }
 

@@ -9,6 +9,7 @@
 'use server'
 
 import { updateTag } from 'next/cache'
+import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
@@ -20,11 +21,7 @@ import {
   kickPlayerSchema,
   updateTeamNameSchema,
 } from '@/lib/validations/tournaments'
-import {
-  RegistrationStatus,
-  Role,
-  TournamentStatus,
-} from '@/prisma/generated/prisma/enums'
+import { Role, TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
 // Admin team management
@@ -78,14 +75,12 @@ export const kickPlayer = authenticatedAction({
 
       // 2. Remove or cancel tournament registration
       if (registration?.paymentRequiredSnapshot) {
-        await tx.tournamentRegistration.update({
-          where: { id: registration.id },
-          data: {
-            status: RegistrationStatus.CANCELLED,
-            paymentStatus: registration.paymentStatus,
-            cancelledAt: new Date(),
-            teamId: null,
-          },
+        await cancelOrDeleteRegistration({
+          tx,
+          registrationId: registration.id,
+          paymentRequiredSnapshot: true,
+          previousPaymentStatus: registration.paymentStatus,
+          clearTeamId: true,
         })
       } else {
         await tx.tournamentRegistration.deleteMany({
@@ -142,14 +137,12 @@ export const dissolveTeam = authenticatedAction({
       // 1. Delete free registrations and cancel paid ones
       for (const registration of registrations) {
         if (registration.paymentRequiredSnapshot) {
-          await tx.tournamentRegistration.update({
-            where: { id: registration.id },
-            data: {
-              status: RegistrationStatus.CANCELLED,
-              paymentStatus: registration.paymentStatus,
-              cancelledAt: new Date(),
-              teamId: null,
-            },
+          await cancelOrDeleteRegistration({
+            tx,
+            registrationId: registration.id,
+            paymentRequiredSnapshot: true,
+            previousPaymentStatus: registration.paymentStatus,
+            clearTeamId: true,
           })
         } else {
           await tx.tournamentRegistration.delete({

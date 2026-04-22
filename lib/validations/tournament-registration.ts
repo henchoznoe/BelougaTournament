@@ -17,6 +17,7 @@ export const registerForTournamentSchema = z.object({
   tournamentId: z.uuid('ID de tournoi invalide.'),
   returnPath: returnPathSchema,
   fieldValues: fieldValuesSchema,
+  donationAmount: z.number().int().min(0).nullable().optional(),
 })
 
 /** Schema for a user editing their existing registration field values. */
@@ -42,6 +43,7 @@ export const createTeamSchema = z.object({
       `Le nom de l'équipe ne peut pas dépasser ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
     ),
   fieldValues: fieldValuesSchema,
+  donationAmount: z.number().int().min(0).nullable().optional(),
 })
 
 /** Schema for joining an existing team and registering. */
@@ -50,6 +52,7 @@ export const joinTeamSchema = z.object({
   returnPath: returnPathSchema,
   teamId: z.uuid("ID d'équipe invalide."),
   fieldValues: fieldValuesSchema,
+  donationAmount: z.number().int().min(0).nullable().optional(),
 })
 
 /** Schema for a player cancelling their own registration. */

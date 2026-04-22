@@ -9,18 +9,16 @@
 'use server'
 
 import { updateTag } from 'next/cache'
+import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import {
-  computeRefundAmount,
-  issueStripeRefundAfterDbUpdate,
-} from '@/lib/utils/stripe-refund'
-import type { TeamRevertInfo } from '@/lib/utils/team'
+import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
 import {
   buildTeamRevertCallback,
+  buildTeamRevertInfo,
   handleCaptainSuccession,
 } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
@@ -28,7 +26,7 @@ import { unregisterFromTournamentSchema } from '@/lib/validations/tournaments'
 import {
   PaymentStatus,
   type RefundPolicyType,
-  RegistrationStatus,
+  type RegistrationStatus,
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
@@ -51,6 +49,7 @@ type RegistrationWithTournamentInfo = {
     status: PaymentStatus
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -90,6 +89,7 @@ export const unregisterFromTournament = authenticatedAction({
             status: true,
             amount: true,
             stripeFee: true,
+            donationAmount: true,
             stripePaymentIntentId: true,
             stripeChargeId: true,
           },
@@ -148,43 +148,26 @@ export const unregisterFromTournament = authenticatedAction({
     const waiveRefund = data.waiveRefund === true && isWithinRefundWindow
     const refundEligible = isWithinRefundWindow && !waiveRefund
     const isPaidRegistration = registration.paymentRequiredSnapshot
+    const resolution = refundEligible
+      ? 'refund'
+      : waiveRefund
+        ? 'forfeit'
+        : 'cancel'
 
     // 3. SOLO format — cancel paid registrations, delete free registrations
     if (registration.tournament.format === TournamentFormat.SOLO) {
       if (isPaidRegistration) {
         await prisma.$transaction(async tx => {
-          await tx.tournamentRegistration.update({
-            where: { id: registration.id },
-            data: {
-              status: RegistrationStatus.CANCELLED,
-              paymentStatus: refundEligible
-                ? PaymentStatus.REFUNDED
-                : waiveRefund
-                  ? PaymentStatus.FORFEITED
-                  : registration.paymentStatus,
-              cancelledAt: new Date(),
-              expiresAt: null,
-            },
+          await cancelOrDeleteRegistration({
+            tx,
+            registrationId: registration.id,
+            paymentRequiredSnapshot: true,
+            previousPaymentStatus: registration.paymentStatus,
+            latestPayment,
+            resolution,
+            clearTeamId: false,
+            clearExpiresAt: true,
           })
-
-          if (refundEligible && latestPayment) {
-            await tx.payment.update({
-              where: { id: latestPayment.id },
-              data: {
-                status: PaymentStatus.REFUNDED,
-                refundAmount: computeRefundAmount(
-                  latestPayment.amount,
-                  latestPayment.stripeFee,
-                ),
-                refundedAt: new Date(),
-              },
-            })
-          } else if (waiveRefund && latestPayment) {
-            await tx.payment.update({
-              where: { id: latestPayment.id },
-              data: { status: PaymentStatus.FORFEITED },
-            })
-          }
         })
       } else {
         await prisma.tournamentRegistration.delete({
@@ -234,47 +217,18 @@ export const unregisterFromTournament = authenticatedAction({
 
     if (!teamMember) {
       // Edge case: has a registration but no team membership (shouldn't happen, but clean up)
-      if (isPaidRegistration) {
-        await prisma.$transaction(async tx => {
-          await tx.tournamentRegistration.update({
-            where: { id: registration.id },
-            data: {
-              status: RegistrationStatus.CANCELLED,
-              paymentStatus: refundEligible
-                ? PaymentStatus.REFUNDED
-                : waiveRefund
-                  ? PaymentStatus.FORFEITED
-                  : registration.paymentStatus,
-              cancelledAt: new Date(),
-              teamId: null,
-              expiresAt: null,
-            },
-          })
-
-          if (refundEligible && latestPayment) {
-            await tx.payment.update({
-              where: { id: latestPayment.id },
-              data: {
-                status: PaymentStatus.REFUNDED,
-                refundAmount: computeRefundAmount(
-                  latestPayment.amount,
-                  latestPayment.stripeFee,
-                ),
-                refundedAt: new Date(),
-              },
-            })
-          } else if (waiveRefund && latestPayment) {
-            await tx.payment.update({
-              where: { id: latestPayment.id },
-              data: { status: PaymentStatus.FORFEITED },
-            })
-          }
+      await prisma.$transaction(async tx => {
+        await cancelOrDeleteRegistration({
+          tx,
+          registrationId: registration.id,
+          paymentRequiredSnapshot: isPaidRegistration,
+          previousPaymentStatus: registration.paymentStatus,
+          latestPayment,
+          resolution,
+          clearTeamId: true,
+          clearExpiresAt: isPaidRegistration,
         })
-      } else {
-        await prisma.tournamentRegistration.delete({
-          where: { id: registration.id },
-        })
-      }
+      })
 
       // Issue Stripe refund after DB update (DB-first pattern)
       if (refundEligible && latestPayment) {
@@ -306,16 +260,12 @@ export const unregisterFromTournament = authenticatedAction({
     const team = teamMember.team
 
     // Save pre-mutation state for potential Stripe revert
-    const teamRevertInfo: TeamRevertInfo = {
-      teamId: team.id,
-      userId,
+    const teamRevertInfo = buildTeamRevertInfo({
+      team,
       joinedAt: teamMember.joinedAt,
-      captainId: team.captainId,
-      isFull: team.isFull,
-      teamWasDeleted: team.members.length === 1,
-      teamName: team.name,
+      userId,
       tournamentId: data.tournamentId,
-    }
+    })
 
     await prisma.$transaction(async tx => {
       // a. Remove team member record
@@ -324,45 +274,16 @@ export const unregisterFromTournament = authenticatedAction({
       })
 
       // b. Cancel or delete the tournament registration depending on payment history
-      if (isPaidRegistration) {
-        await tx.tournamentRegistration.update({
-          where: { id: registration.id },
-          data: {
-            status: RegistrationStatus.CANCELLED,
-            paymentStatus: refundEligible
-              ? PaymentStatus.REFUNDED
-              : waiveRefund
-                ? PaymentStatus.FORFEITED
-                : registration.paymentStatus,
-            cancelledAt: new Date(),
-            teamId: null,
-            expiresAt: null,
-          },
-        })
-
-        if (refundEligible && latestPayment) {
-          await tx.payment.update({
-            where: { id: latestPayment.id },
-            data: {
-              status: PaymentStatus.REFUNDED,
-              refundAmount: computeRefundAmount(
-                latestPayment.amount,
-                latestPayment.stripeFee,
-              ),
-              refundedAt: new Date(),
-            },
-          })
-        } else if (waiveRefund && latestPayment) {
-          await tx.payment.update({
-            where: { id: latestPayment.id },
-            data: { status: PaymentStatus.FORFEITED },
-          })
-        }
-      } else {
-        await tx.tournamentRegistration.delete({
-          where: { id: registration.id },
-        })
-      }
+      await cancelOrDeleteRegistration({
+        tx,
+        registrationId: registration.id,
+        paymentRequiredSnapshot: isPaidRegistration,
+        previousPaymentStatus: registration.paymentStatus,
+        latestPayment,
+        resolution,
+        clearTeamId: true,
+        clearExpiresAt: isPaidRegistration,
+      })
 
       // c. Handle captain succession / team cleanup
       await handleCaptainSuccession(tx, team, userId)

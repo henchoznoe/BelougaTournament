@@ -20,6 +20,7 @@ export type AuthSession = {
     id: string
     email: string
     name: string
+    displayName?: string | null
     role: Role
     image?: string | null
     discordId?: string | null

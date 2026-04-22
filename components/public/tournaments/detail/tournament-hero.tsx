@@ -14,17 +14,24 @@ import { QuickBadge } from '@/components/public/tournaments/detail/tournament-de
 import type { PublicTournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import { formatCentimes, formatDate, pluralize } from '@/lib/utils/formatting'
+import type { TournamentRegistrationBadge } from '@/lib/utils/tournament-status'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
-interface RegistrationStatus {
-  label: string
-  className: string
-  dotClassName: string
-}
-
 interface TournamentHeroProps {
-  tournament: PublicTournamentDetail
-  registrationStatus: RegistrationStatus
+  tournament: Pick<
+    PublicTournamentDetail,
+    | 'title'
+    | 'games'
+    | 'format'
+    | 'teamSize'
+    | 'maxTeams'
+    | 'entryFeeAmount'
+    | 'entryFeeCurrency'
+    | 'startDate'
+    | 'imageUrls'
+    | '_count'
+  >
+  registrationStatus: TournamentRegistrationBadge
   activeImageIndex: number
 }
 
@@ -51,12 +58,12 @@ export const TournamentHero = ({
             priority
           />
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/20" />
+          <div className="absolute inset-0 bg-linear-to-r from-zinc-950/50 to-transparent" />
         </div>
       ) : (
-        <div className="relative h-44 bg-gradient-to-br from-blue-600/20 via-zinc-950 to-purple-600/10 sm:h-56">
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+        <div className="relative h-44 bg-linear-to-br from-blue-600/20 via-zinc-950 to-purple-600/10 sm:h-56">
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-950 to-transparent" />
         </div>
       )}
 

@@ -59,6 +59,14 @@ describe('handlePrismaError', () => {
     })
   })
 
+  it('handles P2034 (serializable write conflict)', () => {
+    expect(handlePrismaError(makeKnownError('P2034'))).toEqual({
+      success: false,
+      message:
+        'Cette opération a été modifiée en parallèle. Veuillez réessayer.',
+    })
+  })
+
   it('handles P2000 (value too long)', () => {
     expect(handlePrismaError(makeKnownError('P2000'))).toEqual({
       success: false,

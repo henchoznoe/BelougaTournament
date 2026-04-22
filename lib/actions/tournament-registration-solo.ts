@@ -11,6 +11,7 @@
 
 import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
+import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
   fetchTournamentForRegistration,
   type RegistrationWithTournament,
@@ -22,6 +23,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
@@ -137,9 +139,22 @@ export const registerForTournament = authenticatedAction({
       return { success: false, message: validation.message }
     }
 
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
+    }
+
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
-      registration = await prisma.$transaction(async tx => {
+      registration = await runSerializableTransaction(async tx => {
         if (tournament.maxTeams !== null) {
           const count = await tx.tournamentRegistration.count({
             where: {
@@ -179,6 +194,7 @@ export const registerForTournament = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 
@@ -255,6 +271,6 @@ export const cancelMyPendingRegistrationForTournament = authenticatedAction({
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
-    return { success: true, message: 'Inscription annul\u00e9e.' }
+    return { success: true, message: 'Inscription annulée.' }
   },
 })

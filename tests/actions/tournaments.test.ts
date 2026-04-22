@@ -168,6 +168,7 @@ const VALID_TOURNAMENT_INPUT = {
     { label: 'Riot ID', type: 'TEXT' as const, required: true, order: 0 },
   ],
   toornamentStages: [],
+  donationEnabled: false,
 }
 
 const TOURNAMENT_UUID = '11111111-1111-4111-8111-111111111111'

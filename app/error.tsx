@@ -34,8 +34,8 @@ const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
           Une erreur est survenue
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Quelque chose s&apos;est mal passé. Notre équipe a été notifiée
-          automatiquement.
+          Quelque chose s&apos;est mal passé. Vous pouvez réessayer ou revenir
+          plus tard.
         </p>
         {error.digest && (
           <p className="mt-1 font-mono text-xs text-zinc-600">

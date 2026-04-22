@@ -1,6 +1,6 @@
 /**
  * File: components/admin/tournaments/form/tournament-form-payment.tsx
- * Description: Payment and refund section of the tournament form (registration type, entry fee, refund policy).
+ * Description: Payment and refund section of the tournament form (registration type, entry fee, refund policy, optional donation).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { VALIDATION_LIMITS } from '@/lib/config/constants'
 import type { TournamentFormValues } from '@/lib/types/tournament-form'
 import { cn } from '@/lib/utils/cn'
@@ -36,12 +37,16 @@ import {
   parseCentimes,
 } from '@/lib/utils/formatting'
 import {
+  DonationType,
   RefundPolicyType,
   RegistrationType,
 } from '@/prisma/generated/prisma/enums'
 
 const isRefundPolicyType = (val: string): val is RefundPolicyType =>
   (Object.values(RefundPolicyType) as string[]).includes(val)
+
+const isDonationType = (val: string): val is DonationType =>
+  (Object.values(DonationType) as string[]).includes(val)
 
 interface TournamentFormPaymentProps {
   errors: FieldErrors<TournamentFormValues>
@@ -50,6 +55,10 @@ interface TournamentFormPaymentProps {
   watchRefundPolicyType: RefundPolicyType
   watchEntryFeeAmount: number | null
   watchRefundDeadlineDays: number | null
+  watchDonationEnabled: boolean
+  watchDonationType: DonationType | null | undefined
+  watchDonationFixedAmount: number | null | undefined
+  watchDonationMinAmount: number | null | undefined
   isEditing: boolean
 }
 
@@ -60,6 +69,10 @@ export const TournamentFormPayment = ({
   watchRefundPolicyType,
   watchEntryFeeAmount,
   watchRefundDeadlineDays,
+  watchDonationEnabled,
+  watchDonationType,
+  watchDonationFixedAmount,
+  watchDonationMinAmount,
   isEditing,
 }: TournamentFormPaymentProps) => {
   const isPaid = watchRegistrationType === RegistrationType.PAID
@@ -69,6 +82,18 @@ export const TournamentFormPayment = ({
   const [feeInput, setFeeInput] = useState<string>(
     watchEntryFeeAmount !== null
       ? formatCentimes(watchEntryFeeAmount).split(' ')[0]
+      : '',
+  )
+
+  // Local string states for donation amount inputs
+  const [donationFixedInput, setDonationFixedInput] = useState<string>(
+    watchDonationFixedAmount != null
+      ? formatCentimes(watchDonationFixedAmount).split(' ')[0]
+      : '',
+  )
+  const [donationMinInput, setDonationMinInput] = useState<string>(
+    watchDonationMinAmount != null
+      ? formatCentimes(watchDonationMinAmount).split(' ')[0]
       : '',
   )
 
@@ -93,6 +118,46 @@ export const TournamentFormPayment = ({
       )
     }
   }, [watchEntryFeeAmount, feeInput])
+
+  // Sync donation fixed amount input
+  useEffect(() => {
+    const currentParsed =
+      donationFixedInput === ''
+        ? null
+        : (() => {
+            const parsed = Number.parseFloat(
+              donationFixedInput.replace(',', '.'),
+            )
+            return Number.isNaN(parsed) || parsed <= 0
+              ? null
+              : parseCentimes(parsed)
+          })()
+    const target = watchDonationFixedAmount ?? null
+    if (currentParsed !== target) {
+      setDonationFixedInput(
+        target !== null ? formatCentimes(target).split(' ')[0] : '',
+      )
+    }
+  }, [watchDonationFixedAmount, donationFixedInput])
+
+  // Sync donation min amount input
+  useEffect(() => {
+    const currentParsed =
+      donationMinInput === ''
+        ? null
+        : (() => {
+            const parsed = Number.parseFloat(donationMinInput.replace(',', '.'))
+            return Number.isNaN(parsed) || parsed <= 0
+              ? null
+              : parseCentimes(parsed)
+          })()
+    const target = watchDonationMinAmount ?? null
+    if (currentParsed !== target) {
+      setDonationMinInput(
+        target !== null ? formatCentimes(target).split(' ')[0] : '',
+      )
+    }
+  }, [watchDonationMinAmount, donationMinInput])
 
   return (
     <div className={SECTION_CLASSES}>
@@ -311,6 +376,178 @@ export const TournamentFormPayment = ({
               accordé aux joueurs qui se retirent du tournoi.
             </p>
           )}
+
+        {/* Donation section (only for paid tournaments) */}
+        {isPaid && (
+          <div className="space-y-4 border-t border-zinc-800 pt-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="tournament-donationEnabled"
+                  className={LABEL_CLASSES}
+                >
+                  Don optionnel
+                </Label>
+                <p className="text-xs text-zinc-500">
+                  Proposer aux joueurs d&apos;ajouter un don lors de leur
+                  inscription.
+                </p>
+              </div>
+              <Switch
+                id="tournament-donationEnabled"
+                checked={watchDonationEnabled}
+                onCheckedChange={checked => {
+                  setValue('donationEnabled', checked, { shouldValidate: true })
+                  if (!checked) {
+                    setValue('donationType', null, { shouldValidate: true })
+                    setValue('donationFixedAmount', null, {
+                      shouldValidate: true,
+                    })
+                    setValue('donationMinAmount', null, {
+                      shouldValidate: true,
+                    })
+                  }
+                }}
+              />
+            </div>
+            {errors.donationEnabled?.message && (
+              <p className="text-xs text-red-400">
+                {errors.donationEnabled.message}
+              </p>
+            )}
+
+            {watchDonationEnabled && (
+              <div className="space-y-4">
+                {/* Donation Type */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="tournament-donationType"
+                    className={LABEL_CLASSES}
+                  >
+                    Type de don *
+                  </Label>
+                  <Select
+                    value={watchDonationType ?? ''}
+                    onValueChange={val => {
+                      if (isDonationType(val)) {
+                        setValue('donationType', val, { shouldValidate: true })
+                        setValue('donationFixedAmount', null, {
+                          shouldValidate: true,
+                        })
+                        setValue('donationMinAmount', null, {
+                          shouldValidate: true,
+                        })
+                      }
+                    }}
+                  >
+                    <SelectTrigger
+                      id="tournament-donationType"
+                      className={cn(INPUT_CLASSES, 'w-full')}
+                    >
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DonationType.FIXED}>
+                        Montant fixe
+                      </SelectItem>
+                      <SelectItem value={DonationType.FREE}>
+                        Montant libre
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.donationType?.message && (
+                    <p className="text-xs text-red-400">
+                      {errors.donationType.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Fixed donation amount */}
+                {watchDonationType === DonationType.FIXED && (
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="tournament-donationFixedAmount"
+                      className={LABEL_CLASSES}
+                    >
+                      Montant du don (CHF) *
+                    </Label>
+                    <Input
+                      id="tournament-donationFixedAmount"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="5.00"
+                      className={cn(INPUT_CLASSES, 'flex-1')}
+                      value={donationFixedInput}
+                      onChange={e => {
+                        const raw = e.target.value
+                        if (raw !== '' && !/^\d*[.,]?\d{0,2}$/.test(raw)) return
+                        setDonationFixedInput(raw)
+                        const normalized = raw.replace(',', '.')
+                        const parsed = Number.parseFloat(normalized)
+                        const val =
+                          raw === '' || Number.isNaN(parsed) || parsed <= 0
+                            ? null
+                            : parseCentimes(parsed)
+                        setValue('donationFixedAmount', val, {
+                          shouldValidate: true,
+                        })
+                      }}
+                    />
+                    {errors.donationFixedAmount?.message && (
+                      <p className="text-xs text-red-400">
+                        {errors.donationFixedAmount.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Free donation minimum amount */}
+                {watchDonationType === DonationType.FREE && (
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="tournament-donationMinAmount"
+                      className={LABEL_CLASSES}
+                    >
+                      Montant minimum du don (CHF) *
+                    </Label>
+                    <Input
+                      id="tournament-donationMinAmount"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="1.00"
+                      className={cn(INPUT_CLASSES, 'flex-1')}
+                      value={donationMinInput}
+                      onChange={e => {
+                        const raw = e.target.value
+                        if (raw !== '' && !/^\d*[.,]?\d{0,2}$/.test(raw)) return
+                        setDonationMinInput(raw)
+                        const normalized = raw.replace(',', '.')
+                        const parsed = Number.parseFloat(normalized)
+                        const val =
+                          raw === '' || Number.isNaN(parsed) || parsed <= 0
+                            ? null
+                            : parseCentimes(parsed)
+                        setValue('donationMinAmount', val, {
+                          shouldValidate: true,
+                        })
+                      }}
+                    />
+                    {errors.donationMinAmount?.message && (
+                      <p className="text-xs text-red-400">
+                        {errors.donationMinAmount.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-xs text-amber-400">
+                  Le don n&apos;est jamais remboursé, même en cas de désistement
+                  du joueur.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

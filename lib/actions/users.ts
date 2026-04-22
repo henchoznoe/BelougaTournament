@@ -9,18 +9,17 @@
 'use server'
 
 import { updateTag } from 'next/cache'
+import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { isOwner } from '@/lib/utils/owner'
-import {
-  computeRefundAmount,
-  issueStripeRefundAfterDbUpdate,
-} from '@/lib/utils/stripe-refund'
+import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
 import {
   buildTeamRevertCallback,
+  buildTeamRevertInfo,
   handleCaptainSuccession,
 } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
@@ -222,6 +221,7 @@ type RegistrationForBan = {
     status: PaymentStatus
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -293,6 +293,7 @@ export const banUser = authenticatedAction({
             status: true,
             amount: true,
             stripeFee: true,
+            donationAmount: true,
             stripePaymentIntentId: true,
             stripeChargeId: true,
           },
@@ -364,43 +365,23 @@ export const banUser = authenticatedAction({
 
         if (teamMember) {
           const team = teamMember.team
-          const teamWasDeleted = team.members.length === 1
 
           await prisma.$transaction(async tx => {
             await tx.teamMember.deleteMany({
               where: { teamId: team.id, userId: data.userId },
             })
 
-            if (reg.paymentRequiredSnapshot) {
-              await tx.tournamentRegistration.update({
-                where: { id: reg.id },
-                data: {
-                  status: RegistrationStatus.CANCELLED,
-                  paymentStatus: refundEligible
-                    ? PaymentStatus.REFUNDED
-                    : reg.paymentStatus,
-                  cancelledAt: new Date(),
-                  teamId: null,
-                  expiresAt: null,
-                },
-              })
-
-              if (refundEligible && latestPayment) {
-                await tx.payment.update({
-                  where: { id: latestPayment.id },
-                  data: {
-                    status: PaymentStatus.REFUNDED,
-                    refundAmount: computeRefundAmount(
-                      latestPayment.amount,
-                      latestPayment.stripeFee,
-                    ),
-                    refundedAt: new Date(),
-                  },
-                })
-              }
-            } else {
-              await tx.tournamentRegistration.delete({ where: { id: reg.id } })
-            }
+            await cancelOrDeleteRegistration({
+              tx,
+              registrationId: reg.id,
+              paymentRequiredSnapshot: reg.paymentRequiredSnapshot,
+              previousPaymentStatus: reg.paymentStatus,
+              latestPayment,
+              resolution: refundEligible ? 'refund' : 'cancel',
+              clearTeamId: true,
+              clearExpiresAt: reg.paymentRequiredSnapshot,
+              refundIncludesDonation: false,
+            })
 
             await handleCaptainSuccession(tx, team, data.userId)
           })
@@ -410,16 +391,12 @@ export const banUser = authenticatedAction({
               registrationId: reg.id,
               latestPayment,
               previousPaymentStatus: reg.paymentStatus,
-              teamRevertInfo: {
-                teamId: team.id,
-                userId: data.userId,
+              teamRevertInfo: buildTeamRevertInfo({
+                team,
                 joinedAt: teamMember.joinedAt,
-                captainId: team.captainId,
-                isFull: team.isFull,
-                teamWasDeleted,
-                teamName: team.name,
+                userId: data.userId,
                 tournamentId: reg.tournament.id,
-              },
+              }),
             })
           }
         }
@@ -427,31 +404,17 @@ export const banUser = authenticatedAction({
         // SOLO format (or team with no team membership)
         if (reg.paymentRequiredSnapshot) {
           await prisma.$transaction(async tx => {
-            await tx.tournamentRegistration.update({
-              where: { id: reg.id },
-              data: {
-                status: RegistrationStatus.CANCELLED,
-                paymentStatus: refundEligible
-                  ? PaymentStatus.REFUNDED
-                  : reg.paymentStatus,
-                cancelledAt: new Date(),
-                expiresAt: null,
-              },
+            await cancelOrDeleteRegistration({
+              tx,
+              registrationId: reg.id,
+              paymentRequiredSnapshot: true,
+              previousPaymentStatus: reg.paymentStatus,
+              latestPayment,
+              resolution: refundEligible ? 'refund' : 'cancel',
+              clearTeamId: false,
+              clearExpiresAt: true,
+              refundIncludesDonation: false,
             })
-
-            if (refundEligible && latestPayment) {
-              await tx.payment.update({
-                where: { id: latestPayment.id },
-                data: {
-                  status: PaymentStatus.REFUNDED,
-                  refundAmount: computeRefundAmount(
-                    latestPayment.amount,
-                    latestPayment.stripeFee,
-                  ),
-                  refundedAt: new Date(),
-                },
-              })
-            }
           })
         } else {
           await prisma.tournamentRegistration.delete({ where: { id: reg.id } })
@@ -511,7 +474,7 @@ export const unbanUser = authenticatedAction({
     }
 
     if (!user.bannedAt) {
-      return { success: false, message: `${user.name} n\u2019est pas banni.` }
+      return { success: false, message: `${user.name} n'est pas banni.` }
     }
 
     await prisma.user.update({

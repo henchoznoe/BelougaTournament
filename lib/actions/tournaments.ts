@@ -21,6 +21,7 @@ import {
   updateTournamentStatusSchema,
 } from '@/lib/validations/tournaments'
 import {
+  DonationType,
   type FieldType,
   PaymentStatus,
   RefundPolicyType,
@@ -94,6 +95,27 @@ export const createTournament = authenticatedAction({
         format: data.format,
         teamSize: data.teamSize,
         teamLogoEnabled: data.teamLogoEnabled,
+        donationEnabled:
+          data.registrationType === RegistrationType.PAID
+            ? data.donationEnabled
+            : false,
+        donationType:
+          data.registrationType === RegistrationType.PAID &&
+          data.donationEnabled
+            ? (data.donationType ?? null)
+            : null,
+        donationFixedAmount:
+          data.registrationType === RegistrationType.PAID &&
+          data.donationEnabled &&
+          data.donationType === DonationType.FIXED
+            ? (data.donationFixedAmount ?? null)
+            : null,
+        donationMinAmount:
+          data.registrationType === RegistrationType.PAID &&
+          data.donationEnabled &&
+          data.donationType === DonationType.FREE
+            ? (data.donationMinAmount ?? null)
+            : null,
         games: data.games,
         rules: toNullable(data.rules),
         prize: toNullable(data.prize),
@@ -163,15 +185,14 @@ export const updateTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'Le mode d\u2019inscription ne peut pas être modifié après la création.',
+          "Le mode d'inscription ne peut pas être modifié après la création.",
       }
     }
 
     if (data.entryFeeAmount !== existing.entryFeeAmount) {
       return {
         success: false,
-        message:
-          'Le prix d\u2019entrée ne peut pas être modifié après la création.',
+        message: "Le prix d'entrée ne peut pas être modifié après la création.",
       }
     }
 
@@ -183,7 +204,7 @@ export const updateTournament = authenticatedAction({
       return {
         success: false,
         message:
-          'La devise du prix d\u2019entrée ne peut pas être modifiée après la création.',
+          "La devise du prix d'entrée ne peut pas être modifiée après la création.",
       }
     }
 
@@ -267,6 +288,27 @@ export const updateTournament = authenticatedAction({
           format: data.format,
           teamSize: data.teamSize,
           teamLogoEnabled: data.teamLogoEnabled,
+          donationEnabled:
+            data.registrationType === RegistrationType.PAID
+              ? data.donationEnabled
+              : false,
+          donationType:
+            data.registrationType === RegistrationType.PAID &&
+            data.donationEnabled
+              ? (data.donationType ?? null)
+              : null,
+          donationFixedAmount:
+            data.registrationType === RegistrationType.PAID &&
+            data.donationEnabled &&
+            data.donationType === DonationType.FIXED
+              ? (data.donationFixedAmount ?? null)
+              : null,
+          donationMinAmount:
+            data.registrationType === RegistrationType.PAID &&
+            data.donationEnabled &&
+            data.donationType === DonationType.FREE
+              ? (data.donationMinAmount ?? null)
+              : null,
           games: data.games,
           rules: toNullable(data.rules),
           prize: toNullable(data.prize),
