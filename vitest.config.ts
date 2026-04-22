@@ -16,6 +16,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
+      exclude: [
+        'prisma/generated/**',
+        'node_modules/**',
+        'test/**',
+        '**/*.config.ts',
+      ],
     },
   },
   resolve: {

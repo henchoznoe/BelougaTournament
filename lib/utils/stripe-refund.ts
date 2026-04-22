@@ -10,6 +10,7 @@ import 'server-only'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
+import { computeRefundAmount } from '@/lib/utils/refund'
 import {
   type PaymentStatus,
   RegistrationStatus,
@@ -19,20 +20,7 @@ type PrismaTransaction = Parameters<
   Parameters<typeof prisma.$transaction>[0]
 >[0]
 
-/**
- * Computes the amount to refund in centimes.
- * Deducts the donation amount (never refundable) and the Stripe processing fee
- * when known; falls back to the full amount minus donation when the fee has not
- * yet been recorded (e.g. balance_transaction not yet created).
- */
-export const computeRefundAmount = (
-  amount: number,
-  stripeFee: number | null,
-  donationAmount = 0,
-): number => {
-  const refundable = amount - donationAmount
-  return stripeFee !== null ? refundable - stripeFee : refundable
-}
+export { computeRefundAmount } from '@/lib/utils/refund'
 
 /**
  * Issues a Stripe refund AFTER the DB has already been updated to REFUNDED state.
