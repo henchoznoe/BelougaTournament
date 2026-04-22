@@ -255,6 +255,6 @@ export const cancelMyPendingRegistrationForTournament = authenticatedAction({
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
-    return { success: true, message: 'Inscription annul\u00e9e.' }
+    return { success: true, message: 'Inscription annulée.' }
   },
 })

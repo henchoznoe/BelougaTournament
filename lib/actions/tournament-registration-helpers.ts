@@ -106,7 +106,7 @@ export const startPaidRegistrationCheckout = async ({
     return {
       success: false,
       message:
-        'Le paiement Stripe n\u2019est pas correctement configuré pour ce tournoi.',
+        "Le paiement Stripe n'est pas correctement configuré pour ce tournoi.",
     }
   }
 

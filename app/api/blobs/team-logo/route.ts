@@ -154,7 +154,7 @@ export const POST = async (request: Request) => {
 
 /** Zod schema for the DELETE request body. */
 const deleteBodySchema = z.object({
-  teamId: z.uuid("ID d'\u00e9quipe invalide."),
+  teamId: z.uuid("ID d'équipe invalide."),
 })
 
 /** DELETE — Remove a team logo. Expects JSON body with { teamId: string }. */
@@ -170,7 +170,7 @@ export const DELETE = async (request: Request) => {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "ID d'\u00e9quipe manquant." },
+        { error: "ID d'équipe manquant." },
         { status: 400 },
       )
     }

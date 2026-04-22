@@ -161,7 +161,7 @@ const baseTournamentFields = {
     .optional()
     .default(''),
   registrationType: z.enum([RegistrationType.FREE, RegistrationType.PAID], {
-    message: 'Le type d\u2019inscription doit être FREE ou PAID.',
+    message: "Le type d'inscription doit être FREE ou PAID.",
   }),
   entryFeeAmount: z
     .number()
@@ -185,7 +185,7 @@ const baseTournamentFields = {
     .int()
     .min(
       VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS,
-      `Le délai de remboursement doit être d\u2019au moins ${VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS} jour.`,
+      `Le délai de remboursement doit être d'au moins ${VALIDATION_LIMITS.REFUND_DEADLINE_MIN_DAYS} jour.`,
     )
     .max(
       VALIDATION_LIMITS.REFUND_DEADLINE_MAX_DAYS,

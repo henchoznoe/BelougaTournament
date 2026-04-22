@@ -128,7 +128,7 @@ export const UserRoleBadge = ({ user, isOwner }: UserRoleBadgeProps) => {
           <AlertDialogDescription>
             {isAdmin
               ? `${user.name} sera rétrogradé au rôle de joueur. Ses sessions seront invalidées.`
-              : `${user.name} sera promu au rôle d\u2019admin. Ses sessions seront invalidées.`}
+              : `${user.name} sera promu au rôle d'admin. Ses sessions seront invalidées.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

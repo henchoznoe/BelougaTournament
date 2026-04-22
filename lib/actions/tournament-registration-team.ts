@@ -99,7 +99,7 @@ export const createTeamAndRegister = authenticatedAction({
       if (error instanceof Error && error.message === 'MAX_TEAMS_REACHED') {
         return {
           success: false,
-          message: 'Le nombre maximum d\u2019équipes est atteint.',
+          message: "Le nombre maximum d'équipes est atteint.",
         }
       }
       throw error
@@ -214,7 +214,7 @@ export const joinTeamAndRegister = authenticatedAction({
     return {
       success: true,
       message:
-        'Vous avez rejoint l\u2019équipe et votre inscription a été enregistrée.',
+        "Vous avez rejoint l'équipe et votre inscription a été enregistrée.",
     }
   },
 })

@@ -285,7 +285,7 @@ export const TournamentOverviewCards = ({
             <div className="flex items-start justify-between gap-2">
               <dt className="flex items-center gap-2 text-zinc-500">
                 <ImageIcon className="size-3.5" />
-                Logo d\u2019équipe
+                Logo d'équipe
               </dt>
               <dd className="text-right">
                 <span

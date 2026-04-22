@@ -324,7 +324,7 @@ const isStatus = (val: string): val is TournamentStatus =>
 - **Admin protection**: dual-layer — edge `proxy.ts` + `AdminGuard` server component
 - **Accessibility**: all icon-only buttons use `aria-label` (not `title`); all `<nav>` elements have `aria-label`; search inputs have `aria-label`
 - **Vercel Blob**: images stored via `/api/admin/blobs` with folder prefix (`logos/`, `sponsors/`). Allowed types: PNG, JPEG, WebP (no SVG). Blob DELETE validates URL domain.
-- **French strings with apostrophes**: use `\u2019` instead of ASCII apostrophe inside single-quoted string literals to avoid syntax errors.
+- **French strings with apostrophes**: use `\'` to escape apostrophes inside single-quoted string literals (e.g. `'L\'équipe'`). In JSX text content (between tags), write the apostrophe directly — no escaping needed. Never use `\u2019` or other Unicode escapes for apostrophes or accented characters; write them as literal UTF-8 characters.
 
 When making function calls using tools that accept array or object parameters ensure those are structured using JSON. For example:
 ```json

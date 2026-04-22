@@ -511,7 +511,7 @@ export const unbanUser = authenticatedAction({
     }
 
     if (!user.bannedAt) {
-      return { success: false, message: `${user.name} n\u2019est pas banni.` }
+      return { success: false, message: `${user.name} n'est pas banni.` }
     }
 
     await prisma.user.update({

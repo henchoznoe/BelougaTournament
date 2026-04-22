@@ -166,13 +166,13 @@ const RowActions = ({
           {isTeam && (
             <DropdownMenuItem onSelect={() => setChangeTeamOpen(true)}>
               <ArrowRightLeft className="mr-2 size-4" />
-              Changer d\u2019équipe
+              Changer d'équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team && (
             <DropdownMenuItem onSelect={() => setRenameTeamOpen(true)}>
               <Type className="mr-2 size-4" />
-              Renommer l\u2019équipe
+              Renommer l'équipe
             </DropdownMenuItem>
           )}
           {isTeam && registration.team?.logoUrl && (

@@ -8,11 +8,12 @@
 
 import { Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { TournamentForm } from '@/components/admin/tournaments/form/tournament-form'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { ROUTES } from '@/lib/config/routes'
 import { getTournamentBySlug } from '@/lib/services/tournaments-admin'
+import { TournamentStatus } from '@/prisma/generated/prisma/enums'
 
 interface AdminEditTournamentPageProps {
   params: Promise<{ slug: string }>
@@ -36,6 +37,10 @@ const AdminEditTournamentPage = async ({
 
   if (!tournament) {
     notFound()
+  }
+
+  if (tournament.status === TournamentStatus.ARCHIVED) {
+    redirect(`${ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug)}?archived=1`)
   }
 
   return (
