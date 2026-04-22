@@ -208,6 +208,13 @@ export type EnumRefundPolicyTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel> | $Enums.RefundPolicyType
 }
 
+export type EnumDonationTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DonationType | Prisma.EnumDonationTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel> | $Enums.DonationType | null
+}
+
 export type EnumTournamentStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TournamentStatus | Prisma.EnumTournamentStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TournamentStatus[] | Prisma.ListEnumTournamentStatusFieldRefInput<$PrismaModel>
@@ -275,6 +282,16 @@ export type EnumRefundPolicyTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel>
+}
+
+export type EnumDonationTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DonationType | Prisma.EnumDonationTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDonationTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.DonationType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel>
 }
 
 export type EnumTournamentStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -642,6 +659,13 @@ export type NestedEnumRefundPolicyTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel> | $Enums.RefundPolicyType
 }
 
+export type NestedEnumDonationTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DonationType | Prisma.EnumDonationTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel> | $Enums.DonationType | null
+}
+
 export type NestedEnumTournamentStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TournamentStatus | Prisma.EnumTournamentStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TournamentStatus[] | Prisma.ListEnumTournamentStatusFieldRefInput<$PrismaModel>
@@ -731,6 +755,16 @@ export type NestedEnumRefundPolicyTypeWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRefundPolicyTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumDonationTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DonationType | Prisma.EnumDonationTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DonationType[] | Prisma.ListEnumDonationTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDonationTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.DonationType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDonationTypeNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumTournamentStatusWithAggregatesFilter<$PrismaModel = never> = {

@@ -69,6 +69,7 @@ const PAYMENT = {
   id: 'pay-1',
   amount: 5000,
   stripeFee: 150,
+  donationAmount: null,
   stripePaymentIntentId: 'pi_123',
   stripeChargeId: null,
 }

@@ -82,6 +82,14 @@ export const RefundPolicyType = {
 export type RefundPolicyType = (typeof RefundPolicyType)[keyof typeof RefundPolicyType]
 
 
+export const DonationType = {
+  FIXED: 'FIXED',
+  FREE: 'FREE'
+} as const
+
+export type DonationType = (typeof DonationType)[keyof typeof DonationType]
+
+
 export const PaymentProvider = {
   STRIPE: 'STRIPE'
 } as const

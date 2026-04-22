@@ -21,13 +21,18 @@ type PrismaTransaction = Parameters<
 
 /**
  * Computes the amount to refund in centimes.
- * Deducts the Stripe processing fee when known; falls back to the full amount
- * when the fee has not yet been recorded (e.g. balance_transaction not yet created).
+ * Deducts the donation amount (never refundable) and the Stripe processing fee
+ * when known; falls back to the full amount minus donation when the fee has not
+ * yet been recorded (e.g. balance_transaction not yet created).
  */
 export const computeRefundAmount = (
   amount: number,
   stripeFee: number | null,
-): number => (stripeFee !== null ? amount - stripeFee : amount)
+  donationAmount = 0,
+): number => {
+  const refundable = amount - donationAmount
+  return stripeFee !== null ? refundable - stripeFee : refundable
+}
 
 /**
  * Issues a Stripe refund AFTER the DB has already been updated to REFUNDED state.
@@ -46,6 +51,7 @@ export const issueStripeRefundAfterDbUpdate = async ({
     id: string
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }
@@ -58,6 +64,7 @@ export const issueStripeRefundAfterDbUpdate = async ({
     const refundAmount = computeRefundAmount(
       latestPayment.amount,
       latestPayment.stripeFee,
+      latestPayment.donationAmount ?? 0,
     )
     await stripe.refunds.create(
       latestPayment.stripePaymentIntentId

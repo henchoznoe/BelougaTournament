@@ -174,6 +174,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       refundPolicyType: tournament?.refundPolicyType ?? RefundPolicyType.NONE,
       refundDeadlineDays: tournament?.refundDeadlineDays ?? null,
       teamLogoEnabled: tournament?.teamLogoEnabled ?? false,
+      donationEnabled: tournament?.donationEnabled ?? false,
+      donationType: tournament?.donationType ?? null,
+      donationFixedAmount: tournament?.donationFixedAmount ?? null,
+      donationMinAmount: tournament?.donationMinAmount ?? null,
       toornamentId: fromNullable(tournament?.toornamentId ?? null),
       imageUrls: tournament?.imageUrls ?? [],
       streamUrl: fromNullable(tournament?.streamUrl ?? null),
@@ -205,6 +209,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const watchEntryFeeAmount = watch('entryFeeAmount')
   const watchRefundDeadlineDays = watch('refundDeadlineDays')
   const watchTeamLogoEnabled = watch('teamLogoEnabled')
+  const watchDonationEnabled = watch('donationEnabled')
+  const watchDonationType = watch('donationType')
+  const watchDonationFixedAmount = watch('donationFixedAmount')
+  const watchDonationMinAmount = watch('donationMinAmount')
 
   // Auto-generate slug from title in create mode
   useEffect(() => {
@@ -219,6 +227,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       setValue('entryFeeAmount', null)
       setValue('refundPolicyType', RefundPolicyType.NONE)
       setValue('refundDeadlineDays', null)
+      setValue('donationEnabled', false)
+      setValue('donationType', null)
+      setValue('donationFixedAmount', null)
+      setValue('donationMinAmount', null)
     }
   }, [watchRegistrationType, setValue])
 
@@ -322,6 +334,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         watchRefundPolicyType={watchRefundPolicyType}
         watchEntryFeeAmount={watchEntryFeeAmount}
         watchRefundDeadlineDays={watchRefundDeadlineDays}
+        watchDonationEnabled={watchDonationEnabled ?? false}
+        watchDonationType={watchDonationType}
+        watchDonationFixedAmount={watchDonationFixedAmount}
+        watchDonationMinAmount={watchDonationMinAmount}
         isEditing={isEditing}
       />
 

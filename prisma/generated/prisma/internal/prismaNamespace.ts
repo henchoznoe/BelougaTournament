@@ -1580,6 +1580,10 @@ export const TournamentScalarFieldEnum = {
   toornamentId: 'toornamentId',
   streamUrl: 'streamUrl',
   teamLogoEnabled: 'teamLogoEnabled',
+  donationEnabled: 'donationEnabled',
+  donationType: 'donationType',
+  donationFixedAmount: 'donationFixedAmount',
+  donationMinAmount: 'donationMinAmount',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1646,6 +1650,7 @@ export const TournamentRegistrationScalarFieldEnum = {
   entryFeeAmountSnapshot: 'entryFeeAmountSnapshot',
   entryFeeCurrencySnapshot: 'entryFeeCurrencySnapshot',
   refundDeadlineDaysSnapshot: 'refundDeadlineDaysSnapshot',
+  donationAmountSnapshot: 'donationAmountSnapshot',
   confirmedAt: 'confirmedAt',
   cancelledAt: 'cancelledAt',
   expiresAt: 'expiresAt',
@@ -1667,6 +1672,7 @@ export const PaymentScalarFieldEnum = {
   stripeChargeId: 'stripeChargeId',
   stripeCustomerId: 'stripeCustomerId',
   stripeFee: 'stripeFee',
+  donationAmount: 'donationAmount',
   refundAmount: 'refundAmount',
   paidAt: 'paidAt',
   refundedAt: 'refundedAt',
@@ -1879,6 +1885,20 @@ export type EnumRefundPolicyTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'RefundPolicyType[]'
  */
 export type ListEnumRefundPolicyTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RefundPolicyType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationType'
+ */
+export type EnumDonationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationType'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationType[]'
+ */
+export type ListEnumDonationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationType[]'>
     
 
 

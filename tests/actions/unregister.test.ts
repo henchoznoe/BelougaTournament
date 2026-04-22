@@ -131,6 +131,7 @@ const makeSoloPaidRegistration = (refundEligible: boolean) => ({
       id: 'pay-1',
       status: PaymentStatus.PAID,
       amount: 500,
+      donationAmount: null,
       stripeFee: null,
       stripePaymentIntentId: 'pi_test',
       stripeChargeId: null,
@@ -527,6 +528,76 @@ describe('unregisterFromTournament — SOLO paid, waiveRefund outside window', (
       expect.objectContaining({
         data: expect.objectContaining({ status: PaymentStatus.FORFEITED }),
       }),
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SOLO paid with donation — refund excludes donation amount
+// ---------------------------------------------------------------------------
+
+describe('unregisterFromTournament — SOLO paid with donation, refund eligible', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+
+    mockGetSession.mockResolvedValue(makeSession())
+
+    // Registration with a donation of 200 centimes on top of 500 entry fee
+    mockRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-paid-donation',
+      userId: USER_UUID,
+      paymentRequiredSnapshot: true,
+      paymentStatus: PaymentStatus.PAID,
+      refundDeadlineDaysSnapshot: 30,
+      payments: [
+        {
+          id: 'pay-donation',
+          status: PaymentStatus.PAID,
+          amount: 700, // 500 entry + 200 donation
+          donationAmount: 200,
+          stripeFee: null,
+          stripePaymentIntentId: 'pi_donation_test',
+          stripeChargeId: null,
+        },
+      ],
+      tournament: {
+        id: TOURNAMENT_UUID,
+        status: TournamentStatus.PUBLISHED,
+        format: TournamentFormat.SOLO,
+        startDate: new Date('2026-12-01T10:00:00.000Z'),
+        refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+        refundDeadlineDays: 30,
+      },
+    })
+
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => unknown) =>
+        callback({
+          tournamentRegistration: { update: mockRegistrationUpdate },
+          payment: { update: mockPaymentUpdate },
+        }),
+    )
+
+    mockRefundsCreate.mockResolvedValue({ id: 'ref_donation_test' })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('refunds only the entry fee (amount minus donation) and excludes the donation', async () => {
+    const result = await unregisterFromTournament({
+      tournamentId: TOURNAMENT_UUID,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockRefundsCreate).toHaveBeenCalledOnce()
+    // Stripe refund amount should be 500 (700 total - 200 donation)
+    expect(mockRefundsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500 }),
+      expect.any(Object),
     )
   })
 })

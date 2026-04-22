@@ -13,6 +13,10 @@ export const CENTIMES_PER_UNIT = 100
 export const ENTRY_FEE_MIN_AMOUNT = 100 // 1 CHF
 export const ENTRY_FEE_MAX_AMOUNT = 100_000 // 1000 CHF
 
+/** Donation amount bounds in centimes. */
+export const DONATION_MIN_AMOUNT = 100 // 1 CHF
+export const DONATION_MAX_AMOUNT = 100_000 // 1000 CHF
+
 /** Stripe's percentage fee rate (e.g. 2.9 means 2.9%). */
 export const STRIPE_FEE_PERCENT = 2.9
 /** Divisor to convert a percentage to a decimal multiplier (always 100). */

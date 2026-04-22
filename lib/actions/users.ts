@@ -222,6 +222,7 @@ type RegistrationForBan = {
     status: PaymentStatus
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -293,6 +294,7 @@ export const banUser = authenticatedAction({
             status: true,
             amount: true,
             stripeFee: true,
+            donationAmount: true,
             stripePaymentIntentId: true,
             stripeChargeId: true,
           },

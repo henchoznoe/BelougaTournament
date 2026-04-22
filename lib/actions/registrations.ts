@@ -47,6 +47,7 @@ type RegistrationWithDetails = {
     status: PaymentStatus
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]

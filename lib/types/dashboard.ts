@@ -60,6 +60,8 @@ export type PaymentStats = {
   transactionCount: number
   refundCount: number
   forfeitedCount: number
+  totalDonations: number
+  donationCount: number
   currency: string
   byTournament: {
     id: string
@@ -69,8 +71,10 @@ export type PaymentStats = {
     refunded: number
     forfeited: number
     stripeFees: number
+    donations: number
     paidCount: number
     refundedCount: number
     forfeitedCount: number
+    donationCount: number
   }[]
 }

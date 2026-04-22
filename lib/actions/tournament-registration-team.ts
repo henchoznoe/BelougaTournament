@@ -111,6 +111,7 @@ export const createTeamAndRegister = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 
@@ -204,6 +205,7 @@ export const joinTeamAndRegister = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 

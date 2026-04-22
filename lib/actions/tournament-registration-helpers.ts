@@ -21,6 +21,7 @@ import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import {
+  type DonationType,
   type FieldType,
   PaymentProvider,
   PaymentStatus,
@@ -52,6 +53,10 @@ export type TournamentWithFields = {
   entryFeeCurrency: string | null
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
+  donationEnabled: boolean
+  donationType: DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   fields: { label: string; type: FieldType; required: boolean; order: number }[]
 }
 
@@ -93,11 +98,13 @@ export const startPaidRegistrationCheckout = async ({
   tournament,
   userId,
   returnPath,
+  donationAmount,
 }: {
   registrationId: string
   tournament: TournamentWithFields
   userId: string
   returnPath: string
+  donationAmount?: number | null
 }): Promise<ActionState<{ checkoutUrl: string }>> => {
   if (
     tournament.entryFeeAmount === null ||
@@ -113,7 +120,10 @@ export const startPaidRegistrationCheckout = async ({
   const expiresAt = new Date(
     Date.now() + REGISTRATION_HOLD_MINUTES * MINUTE_IN_MS,
   )
-  const amount = tournament.entryFeeAmount
+  const entryFeeAmount = tournament.entryFeeAmount
+  const resolvedDonationAmount =
+    donationAmount != null && donationAmount > 0 ? donationAmount : 0
+  const amount = entryFeeAmount + resolvedDonationAmount
   const currency = tournament.entryFeeCurrency
 
   const payment = await prisma.$transaction(async tx => {
@@ -134,6 +144,8 @@ export const startPaidRegistrationCheckout = async ({
         entryFeeAmountSnapshot: tournament.entryFeeAmount,
         entryFeeCurrencySnapshot: tournament.entryFeeCurrency,
         refundDeadlineDaysSnapshot: tournament.refundDeadlineDays,
+        donationAmountSnapshot:
+          resolvedDonationAmount > 0 ? resolvedDonationAmount : null,
         confirmedAt: null,
         cancelledAt: null,
         expiresAt,
@@ -147,6 +159,8 @@ export const startPaidRegistrationCheckout = async ({
         status: PaymentStatus.PENDING,
         amount,
         currency,
+        donationAmount:
+          resolvedDonationAmount > 0 ? resolvedDonationAmount : null,
       },
     })
   })
@@ -171,12 +185,26 @@ export const startPaidRegistrationCheckout = async ({
             quantity: 1,
             price_data: {
               currency: currency.toLowerCase(),
-              unit_amount: amount,
+              unit_amount: entryFeeAmount,
               product_data: {
                 name: `Inscription - ${tournament.title ?? 'Tournoi'}`,
               },
             },
           },
+          ...(resolvedDonationAmount > 0
+            ? [
+                {
+                  quantity: 1,
+                  price_data: {
+                    currency: currency.toLowerCase(),
+                    unit_amount: resolvedDonationAmount,
+                    product_data: {
+                      name: 'Don - Belouga Tournament',
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
         metadata: {
           paymentId: payment.id,

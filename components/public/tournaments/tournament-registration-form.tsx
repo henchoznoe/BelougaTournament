@@ -3,7 +3,7 @@
  * Description: Client-side registration form for public tournament pages (solo and team formats).
  * Author: Noé Henchoz
  * License: MIT
- * Copyright (c) 2026 Noe Henchoz
+ * Copyright (c) 2026 Noé Henchoz
  */
 
 'use client'
@@ -11,6 +11,7 @@
 import {
   CheckCircle,
   CreditCard,
+  Gift,
   Loader2,
   LogIn,
   Send,
@@ -23,6 +24,7 @@ import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -51,8 +53,9 @@ import type {
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
-import { formatCentimes } from '@/lib/utils/formatting'
+import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
 import {
+  DonationType,
   FieldType,
   PaymentStatus,
   RegistrationStatus,
@@ -68,6 +71,10 @@ interface TournamentRegistrationFormProps {
     | 'entryFeeAmount'
     | 'entryFeeCurrency'
     | 'teamLogoEnabled'
+    | 'donationEnabled'
+    | 'donationType'
+    | 'donationFixedAmount'
+    | 'donationMinAmount'
   >
   tournamentId: string
   fields: TournamentFieldItem[]
@@ -118,6 +125,14 @@ export const TournamentRegistrationForm = ({
   const [teamName, setTeamName] = useState('')
   const [selectedTeamId, setSelectedTeamId] = useState('')
 
+  // Donation state
+  const [donationChecked, setDonationChecked] = useState(false)
+  const [donationInput, setDonationInput] = useState('')
+  const [donationAmountCentimes, setDonationAmountCentimes] = useState<
+    number | null
+  >(null)
+  const [donationError, setDonationError] = useState<string | null>(null)
+
   const {
     register,
     handleSubmit,
@@ -125,6 +140,34 @@ export const TournamentRegistrationForm = ({
   } = useForm<Record<string, string>>({
     defaultValues: Object.fromEntries(fields.map(f => [f.label, ''])),
   })
+
+  /** Returns the resolved donation amount in centimes (0 if not applicable). */
+  const getResolvedDonation = (): number | null => {
+    if (!tournament.donationEnabled) return null
+    if (tournament.donationType === DonationType.FIXED) {
+      return donationChecked ? (tournament.donationFixedAmount ?? null) : null
+    }
+    if (tournament.donationType === DonationType.FREE) {
+      return donationAmountCentimes && donationAmountCentimes > 0
+        ? donationAmountCentimes
+        : null
+    }
+    return null
+  }
+
+  /** Returns true if the donation section has a blocking validation error. */
+  const hasDonationError = (): boolean => {
+    if (!tournament.donationEnabled) return false
+    if (tournament.donationType === DonationType.FREE && donationInput !== '') {
+      const parsed = Number.parseFloat(donationInput.replace(',', '.'))
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        const centimes = parseCentimes(parsed)
+        const min = tournament.donationMinAmount ?? 0
+        if (centimes < min) return true
+      }
+    }
+    return false
+  }
 
   const onSubmit = (data: Record<string, string>) => {
     // Client-side team field validation
@@ -148,6 +191,16 @@ export const TournamentRegistrationForm = ({
       }
     }
 
+    // Block if donation free mode is invalid
+    if (hasDonationError()) {
+      toast.error(
+        `Le montant du don doit être d'au moins ${formatCentimes(tournament.donationMinAmount ?? 0, tournament.entryFeeCurrency ?? 'CHF')}.`,
+      )
+      return
+    }
+
+    const resolvedDonation = getResolvedDonation()
+
     startTransition(async () => {
       const fieldValues = buildFieldValues(data, fields)
 
@@ -160,6 +213,7 @@ export const TournamentRegistrationForm = ({
             returnPath: currentPath,
             teamName: teamName.trim(),
             fieldValues,
+            donationAmount: resolvedDonation,
           })
         } else {
           result = await joinTeamAndRegister({
@@ -167,6 +221,7 @@ export const TournamentRegistrationForm = ({
             returnPath: currentPath,
             teamId: selectedTeamId,
             fieldValues,
+            donationAmount: resolvedDonation,
           })
         }
       } else {
@@ -174,6 +229,7 @@ export const TournamentRegistrationForm = ({
           tournamentId,
           returnPath: currentPath,
           fieldValues,
+          donationAmount: resolvedDonation,
         })
       }
 
@@ -253,6 +309,7 @@ export const TournamentRegistrationForm = ({
           tournament.entryFeeCurrency ?? 'CHF',
         )
       : null
+  const donationBlocksSubmit = hasDonationError()
 
   // Registration form
   return (
@@ -285,6 +342,101 @@ export const TournamentRegistrationForm = ({
           )}
         </div>
       )}
+
+      {/* Optional donation (paid tournaments only) */}
+      {isPaidTournament && tournament.donationEnabled && (
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm">
+          <p className="flex items-center gap-2 font-medium text-emerald-300">
+            <Gift className="size-4" />
+            Don optionnel
+          </p>
+
+          {tournament.donationType === DonationType.FIXED &&
+            tournament.donationFixedAmount !== null && (
+              <div className="mt-3 flex items-center gap-3">
+                <Checkbox
+                  id="donation-fixed"
+                  checked={donationChecked}
+                  onCheckedChange={checked =>
+                    setDonationChecked(checked === true)
+                  }
+                  disabled={isPending}
+                />
+                <Label
+                  htmlFor="donation-fixed"
+                  className="cursor-pointer text-xs text-zinc-300"
+                >
+                  Ajouter un don de{' '}
+                  <span className="font-semibold text-emerald-300">
+                    {formatCentimes(
+                      tournament.donationFixedAmount,
+                      tournament.entryFeeCurrency ?? 'CHF',
+                    )}
+                  </span>
+                </Label>
+              </div>
+            )}
+
+          {tournament.donationType === DonationType.FREE && (
+            <div className="mt-3 space-y-1.5">
+              <Label htmlFor="donation-free" className="text-xs text-zinc-400">
+                Montant du don ({tournament.entryFeeCurrency ?? 'CHF'})
+                {tournament.donationMinAmount !== null && (
+                  <span className="ml-1 text-zinc-500">
+                    (minimum{' '}
+                    {formatCentimes(
+                      tournament.donationMinAmount,
+                      tournament.entryFeeCurrency ?? 'CHF',
+                    )}
+                    )
+                  </span>
+                )}
+              </Label>
+              <Input
+                id="donation-free"
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                disabled={isPending}
+                className={cn(
+                  'h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-emerald-500/30 focus-visible:ring-emerald-500/20',
+                  donationBlocksSubmit && 'border-red-500/50',
+                )}
+                value={donationInput}
+                onChange={e => {
+                  const raw = e.target.value
+                  if (raw !== '' && !/^\d*[.,]?\d{0,2}$/.test(raw)) return
+                  setDonationInput(raw)
+                  const parsed = Number.parseFloat(raw.replace(',', '.'))
+                  if (raw === '' || Number.isNaN(parsed) || parsed <= 0) {
+                    setDonationAmountCentimes(null)
+                    setDonationError(null)
+                  } else {
+                    const centimes = parseCentimes(parsed)
+                    setDonationAmountCentimes(centimes)
+                    const min = tournament.donationMinAmount ?? 0
+                    if (centimes < min) {
+                      setDonationError(
+                        `Le montant doit être d'au moins ${formatCentimes(min, tournament.entryFeeCurrency ?? 'CHF')}.`,
+                      )
+                    } else {
+                      setDonationError(null)
+                    }
+                  }
+                }}
+              />
+              {donationError && (
+                <p className="text-xs text-red-400">{donationError}</p>
+              )}
+            </div>
+          )}
+
+          <p className="mt-2 text-xs text-amber-300/80">
+            Le don n&apos;est jamais remboursé, même en cas de désistement.
+          </p>
+        </div>
+      )}
+
       {/* Team mode selector (TEAM format only) */}
       {format === TournamentFormat.TEAM && (
         <div className="space-y-4">
@@ -443,7 +595,11 @@ export const TournamentRegistrationForm = ({
           ? 'Votre inscription sera confirmée après paiement Stripe.'
           : 'Votre inscription sera enregistrée.'}
       </p>
-      <Button type="submit" disabled={isPending} className="w-full gap-2">
+      <Button
+        type="submit"
+        disabled={isPending || donationBlocksSubmit}
+        className="w-full gap-2"
+      >
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
         ) : isPaidTournament ? (
@@ -460,7 +616,7 @@ export const TournamentRegistrationForm = ({
               ? 'Rejoindre et payer'
               : "Rejoindre et s'inscrire"
           : isPaidTournament
-            ? 'Payer et s’inscrire'
+            ? "Payer et s'inscrire"
             : "S'inscrire"}
       </Button>
       <p className="text-center text-xs text-zinc-500">

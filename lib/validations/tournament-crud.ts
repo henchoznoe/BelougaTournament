@@ -10,12 +10,15 @@
 import { z } from 'zod'
 import {
   CENTIMES_PER_UNIT,
+  DONATION_MAX_AMOUNT,
+  DONATION_MIN_AMOUNT,
   ENTRY_FEE_MAX_AMOUNT,
   ENTRY_FEE_MIN_AMOUNT,
   VALIDATION_LIMITS,
 } from '@/lib/config/constants'
 import { optionalUrl } from '@/lib/validations/shared'
 import {
+  DonationType,
   FieldType,
   RefundPolicyType,
   RegistrationType,
@@ -204,6 +207,36 @@ const baseTournamentFields = {
   imageUrls: z.array(z.url('URL invalide.')).default([]),
   streamUrl: optionalUrl,
   teamLogoEnabled: z.boolean(),
+  donationEnabled: z.boolean().default(false),
+  donationType: z
+    .enum([DonationType.FIXED, DonationType.FREE], {
+      message: 'Le type de don doit être FIXED ou FREE.',
+    })
+    .nullable()
+    .optional(),
+  donationFixedAmount: z
+    .number()
+    .int()
+    .min(DONATION_MIN_AMOUNT, "Le montant du don doit être d'au moins 1 CHF.")
+    .max(
+      DONATION_MAX_AMOUNT,
+      `Le montant du don ne peut pas dépasser ${DONATION_MAX_AMOUNT / CENTIMES_PER_UNIT} CHF.`,
+    )
+    .nullable()
+    .optional(),
+  donationMinAmount: z
+    .number()
+    .int()
+    .min(
+      DONATION_MIN_AMOUNT,
+      "Le montant minimum du don doit être d'au moins 1 CHF.",
+    )
+    .max(
+      DONATION_MAX_AMOUNT,
+      `Le montant minimum du don ne peut pas dépasser ${DONATION_MAX_AMOUNT / CENTIMES_PER_UNIT} CHF.`,
+    )
+    .nullable()
+    .optional(),
   fields: z.array(tournamentFieldSchema),
   toornamentStages: z.array(toornamentStageSchema),
 } as const
@@ -224,6 +257,10 @@ interface TournamentDateFields {
   refundDeadlineDays: number | null
   toornamentId?: string
   toornamentStages: unknown[]
+  donationEnabled: boolean
+  donationType?: DonationType | null
+  donationFixedAmount?: number | null
+  donationMinAmount?: number | null
 }
 
 /**
@@ -308,6 +345,39 @@ const applyTournamentRefinements = <T extends z.ZodTypeAny>(schema: T) => {
         message:
           "L'ID Toornament est requis lorsque des stages sont configurés.",
         path: ['toornamentId'],
+      },
+    )
+    .refine(
+      data =>
+        !d(data).donationEnabled ||
+        d(data).registrationType === RegistrationType.PAID,
+      {
+        message: 'Les dons ne sont disponibles que pour les tournois payants.',
+        path: ['donationEnabled'],
+      },
+    )
+    .refine(data => !d(data).donationEnabled || d(data).donationType != null, {
+      message: 'Le type de don est requis lorsque les dons sont activés.',
+      path: ['donationType'],
+    })
+    .refine(
+      data =>
+        !d(data).donationEnabled ||
+        d(data).donationType !== DonationType.FIXED ||
+        d(data).donationFixedAmount != null,
+      {
+        message: 'Le montant du don fixe est requis.',
+        path: ['donationFixedAmount'],
+      },
+    )
+    .refine(
+      data =>
+        !d(data).donationEnabled ||
+        d(data).donationType !== DonationType.FREE ||
+        d(data).donationMinAmount != null,
+      {
+        message: 'Le montant minimum du don est requis.',
+        path: ['donationMinAmount'],
       },
     )
 }

@@ -51,6 +51,7 @@ type RegistrationWithTournamentInfo = {
     status: PaymentStatus
     amount: number
     stripeFee: number | null
+    donationAmount: number | null
     stripePaymentIntentId: string | null
     stripeChargeId: string | null
   }[]
@@ -90,6 +91,7 @@ export const unregisterFromTournament = authenticatedAction({
             status: true,
             amount: true,
             stripeFee: true,
+            donationAmount: true,
             stripePaymentIntentId: true,
             stripeChargeId: true,
           },
@@ -175,6 +177,7 @@ export const unregisterFromTournament = authenticatedAction({
                 refundAmount: computeRefundAmount(
                   latestPayment.amount,
                   latestPayment.stripeFee,
+                  latestPayment.donationAmount ?? 0,
                 ),
                 refundedAt: new Date(),
               },
@@ -259,6 +262,7 @@ export const unregisterFromTournament = authenticatedAction({
                 refundAmount: computeRefundAmount(
                   latestPayment.amount,
                   latestPayment.stripeFee,
+                  latestPayment.donationAmount ?? 0,
                 ),
                 refundedAt: new Date(),
               },
@@ -348,6 +352,7 @@ export const unregisterFromTournament = authenticatedAction({
               refundAmount: computeRefundAmount(
                 latestPayment.amount,
                 latestPayment.stripeFee,
+                latestPayment.donationAmount ?? 0,
               ),
               refundedAt: new Date(),
             },

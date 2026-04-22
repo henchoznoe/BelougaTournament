@@ -179,6 +179,7 @@ export const registerForTournament = authenticatedAction({
         tournament,
         userId: session.user.id,
         returnPath: data.returnPath,
+        donationAmount: data.donationAmount,
       })
     }
 

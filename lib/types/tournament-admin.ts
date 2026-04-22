@@ -9,6 +9,7 @@
 
 import type { UserSummary } from '@/lib/types/tournament-shared'
 import type {
+  DonationType,
   FieldType,
   PaymentStatus,
   RefundPolicyType,
@@ -65,6 +66,10 @@ export type TournamentDetail = TournamentListItem & {
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
   teamLogoEnabled: boolean
+  donationEnabled: boolean
+  donationType: DonationType | null
+  donationFixedAmount: number | null
+  donationMinAmount: number | null
   rules: string | null
   prize: string | null
   toornamentId: string | null
@@ -79,6 +84,7 @@ export type TournamentDetail = TournamentListItem & {
 export type TournamentRegistrationItem = {
   id: string
   fieldValues: Record<string, string | number>
+  donationAmountSnapshot: number | null
   createdAt: Date
   status: RegistrationStatus
   paymentStatus: PaymentStatus
