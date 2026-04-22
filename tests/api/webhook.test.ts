@@ -89,7 +89,11 @@ describe('POST /api/webhook', () => {
       status: PaymentStatus.PENDING,
       amount: 1500,
       currency: 'CHF',
-      registration: { id: 'reg-1' },
+      registration: {
+        id: 'reg-1',
+        status: RegistrationStatus.PENDING,
+        paymentStatus: PaymentStatus.PENDING,
+      },
     })
 
     mockTransaction.mockImplementation(async callback =>
@@ -164,6 +168,49 @@ describe('POST /api/webhook', () => {
           metadata: { paymentId: 'pay-1' },
           payment_intent: 'pi_123',
         },
+      },
+    })
+
+    const response = await POST(
+      new Request('http://localhost:3000/api/webhook', {
+        method: 'POST',
+        headers: { 'stripe-signature': 'sig_test' },
+        body: JSON.stringify({}),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(mockPaymentUpdate).not.toHaveBeenCalled()
+    expect(mockRegistrationUpdate).not.toHaveBeenCalled()
+  })
+
+  it('ignores a late checkout completion for a cancelled payment attempt', async () => {
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_late_success',
+      type: 'checkout.session.completed',
+      livemode: false,
+      data: {
+        object: {
+          id: 'cs_test_late',
+          status: 'complete',
+          payment_status: 'paid',
+          amount_total: 1500,
+          currency: 'chf',
+          metadata: { paymentId: 'pay-1' },
+          payment_intent: 'pi_123',
+        },
+      },
+    })
+
+    mockPaymentFindUnique.mockResolvedValue({
+      id: 'pay-1',
+      status: PaymentStatus.CANCELLED,
+      amount: 1500,
+      currency: 'CHF',
+      registration: {
+        id: 'reg-1',
+        status: RegistrationStatus.EXPIRED,
+        paymentStatus: PaymentStatus.CANCELLED,
       },
     })
 

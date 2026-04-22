@@ -8,7 +8,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  DonationType,
+  PaymentStatus,
   RefundPolicyType,
+  RegistrationStatus,
   RegistrationType,
   Role,
   TournamentFormat,
@@ -63,9 +66,12 @@ const mockUserFindUnique = vi.fn()
 const mockTournamentFindUnique = vi.fn()
 const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationFindFirst = vi.fn()
+const mockRegistrationFindMany = vi.fn()
+const mockTxRegistrationFindUnique = vi.fn()
 const mockRegistrationCount = vi.fn()
 const mockRegistrationCreate = vi.fn()
 const mockRegistrationUpdate = vi.fn()
+const mockPaymentFindMany = vi.fn()
 const mockPaymentUpdateMany = vi.fn()
 const mockPaymentCreate = vi.fn()
 const mockPaymentUpdate = vi.fn()
@@ -87,11 +93,13 @@ vi.mock('@/lib/core/prisma', () => ({
     tournamentRegistration: {
       findUnique: (...args: unknown[]) => mockRegistrationFindUnique(...args),
       findFirst: (...args: unknown[]) => mockRegistrationFindFirst(...args),
+      findMany: (...args: unknown[]) => mockRegistrationFindMany(...args),
       count: (...args: unknown[]) => mockRegistrationCount(...args),
       create: (...args: unknown[]) => mockRegistrationCreate(...args),
       update: (...args: unknown[]) => mockRegistrationUpdate(...args),
     },
     payment: {
+      findMany: (...args: unknown[]) => mockPaymentFindMany(...args),
       updateMany: (...args: unknown[]) => mockPaymentUpdateMany(...args),
       create: (...args: unknown[]) => mockPaymentCreate(...args),
       update: (...args: unknown[]) => mockPaymentUpdate(...args),
@@ -152,6 +160,13 @@ describe('paid tournament registration actions', () => {
     })
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-1',
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-1' })
     mockPaymentCreate.mockResolvedValue({ id: 'pay-1' })
@@ -172,6 +187,7 @@ describe('paid tournament registration actions', () => {
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
+          findUnique: mockTxRegistrationFindUnique,
         },
         team: {
           findUnique: mockTeamFindUnique,
@@ -259,6 +275,13 @@ describe('createTeamAndRegister — TEAM free tournament', () => {
 
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-team-1',
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-team-1' })
     mockTeamCreate.mockResolvedValue({
@@ -280,7 +303,7 @@ describe('createTeamAndRegister — TEAM free tournament', () => {
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
-          findUnique: mockRegistrationFindUnique,
+          findUnique: mockTxRegistrationFindUnique,
         },
         team: {
           findUnique: mockTeamFindUnique,
@@ -314,6 +337,100 @@ describe('createTeamAndRegister — TEAM free tournament', () => {
 
     expect(result.success).toBe(true)
     expect(result.message).toContain('équipe')
+    expect(mockCheckoutCreate).not.toHaveBeenCalled()
+  })
+
+  it('creates a paid duo checkout with a fixed donation line item', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: TEAM_TOURNAMENT_UUID,
+      title: 'PUBG Duo Cup',
+      status: TournamentStatus.PUBLISHED,
+      format: TournamentFormat.TEAM,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
+      registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
+      registrationClose: new Date('2026-05-01T00:00:00.000Z'),
+      maxTeams: null,
+      teamSize: 2,
+      registrationType: RegistrationType.PAID,
+      entryFeeAmount: 500,
+      entryFeeCurrency: 'CHF',
+      refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+      refundDeadlineDays: 7,
+      donationEnabled: true,
+      donationType: DonationType.FIXED,
+      donationFixedAmount: 1000,
+      donationMinAmount: null,
+      fields: [],
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'pay-donation' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_donation',
+      url: 'https://checkout.stripe.test/donation',
+      customer: null,
+    })
+
+    const result = await createTeamAndRegister({
+      tournamentId: TEAM_TOURNAMENT_UUID,
+      returnPath: '/tournaments/pubg-duo-cup',
+      teamName: 'Les Loups',
+      fieldValues: {},
+      donationAmount: 1000,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockPaymentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          amount: 1500,
+          donationAmount: 1000,
+        }),
+      }),
+    )
+
+    const [checkoutPayload] = mockCheckoutCreate.mock.calls[0] ?? []
+    expect(checkoutPayload.line_items).toHaveLength(2)
+    expect(checkoutPayload.line_items[0].price_data.unit_amount).toBe(500)
+    expect(checkoutPayload.line_items[1].price_data.unit_amount).toBe(1000)
+  })
+
+  it('rejects a forged fixed donation amount before creating the team', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      id: TEAM_TOURNAMENT_UUID,
+      title: 'PUBG Duo Cup',
+      status: TournamentStatus.PUBLISHED,
+      format: TournamentFormat.TEAM,
+      startDate: new Date('2026-04-15T00:00:00.000Z'),
+      endDate: new Date('2026-04-16T00:00:00.000Z'),
+      registrationOpen: new Date('2026-04-01T00:00:00.000Z'),
+      registrationClose: new Date('2026-05-01T00:00:00.000Z'),
+      maxTeams: null,
+      teamSize: 2,
+      registrationType: RegistrationType.PAID,
+      entryFeeAmount: 500,
+      entryFeeCurrency: 'CHF',
+      refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+      refundDeadlineDays: 7,
+      donationEnabled: true,
+      donationType: DonationType.FIXED,
+      donationFixedAmount: 1000,
+      donationMinAmount: null,
+      fields: [],
+    })
+
+    const result = await createTeamAndRegister({
+      tournamentId: TEAM_TOURNAMENT_UUID,
+      returnPath: '/tournaments/pubg-duo-cup',
+      teamName: 'Les Loups',
+      fieldValues: {},
+      donationAmount: 900,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('10.00 CHF')
+    expect(mockTeamCreate).not.toHaveBeenCalled()
+    expect(mockRegistrationCreate).not.toHaveBeenCalled()
+    expect(mockPaymentCreate).not.toHaveBeenCalled()
     expect(mockCheckoutCreate).not.toHaveBeenCalled()
   })
 })
@@ -365,6 +482,13 @@ describe('joinTeamAndRegister — team full rejection', () => {
 
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-team-2',
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
 
     // Team exists and belongs to the tournament (outer check passes)
@@ -386,6 +510,7 @@ describe('joinTeamAndRegister — team full rejection', () => {
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
+          findUnique: mockTxRegistrationFindUnique,
         },
         team: {
           findUnique: vi
@@ -470,6 +595,13 @@ describe('paid tournament registration — Stripe failure rollback', () => {
 
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: 'reg-1',
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: 'reg-1' })
     mockPaymentCreate.mockResolvedValue({ id: 'pay-1' })
@@ -488,6 +620,7 @@ describe('paid tournament registration — Stripe failure rollback', () => {
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
+          findUnique: mockTxRegistrationFindUnique,
         },
         team: {
           findUnique: mockTeamFindUnique,

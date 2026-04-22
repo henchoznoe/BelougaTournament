@@ -289,7 +289,7 @@ export const adminRefundRegistration = authenticatedAction({
           latestPayment,
           resolution: 'refund',
           clearTeamId: true,
-          refundIncludesDonation: false,
+          refundIncludesDonation: true,
         })
       })
     } else {
@@ -318,7 +318,7 @@ export const adminRefundRegistration = authenticatedAction({
             latestPayment,
             resolution: 'refund',
             clearTeamId: true,
-            refundIncludesDonation: false,
+            refundIncludesDonation: true,
           })
         })
       } else {
@@ -345,7 +345,7 @@ export const adminRefundRegistration = authenticatedAction({
             latestPayment,
             resolution: 'refund',
             clearTeamId: true,
-            refundIncludesDonation: false,
+            refundIncludesDonation: true,
           })
 
           await handleCaptainSuccession(tx, team, registration.userId)

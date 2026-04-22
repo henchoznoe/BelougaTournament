@@ -18,6 +18,7 @@ import type {
   UserRegistrationItem,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
+import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -78,6 +79,8 @@ export const getUserTournamentRegistrationState = async (
   tournamentId: string,
 ): Promise<UserTournamentRegistrationState | null> => {
   try {
+    await cleanupExpiredPendingRegistrations(userId)
+
     const row = await prisma.tournamentRegistration.findFirst({
       where: {
         tournamentId,

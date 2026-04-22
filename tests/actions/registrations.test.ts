@@ -326,4 +326,43 @@ describe('registration admin actions', () => {
     )
     expect(mockRefundCreate).toHaveBeenCalledOnce()
   })
+
+  it('stores a refund amount that excludes the donation for admin refunds', async () => {
+    mockRegistrationFindUnique.mockResolvedValue({
+      id: REG_UUID,
+      userId: USER_UUID,
+      paymentRequiredSnapshot: true,
+      paymentStatus: PaymentStatus.PAID,
+      payments: [
+        {
+          id: 'payment-2',
+          status: PaymentStatus.PAID,
+          amount: 700,
+          donationAmount: 200,
+          stripeFee: null,
+          stripePaymentIntentId: 'pi_456',
+          stripeChargeId: 'ch_456',
+        },
+      ],
+      tournament: { id: TOURN_UUID, format: TournamentFormat.SOLO },
+      user: { name: 'Alice' },
+    })
+
+    const result = await adminRefundRegistration({ registrationId: REG_UUID })
+
+    expect(result.success).toBe(true)
+    expect(mockTxPaymentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'payment-2' },
+        data: expect.objectContaining({
+          status: PaymentStatus.REFUNDED,
+          refundAmount: 500,
+        }),
+      }),
+    )
+    expect(mockRefundCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500 }),
+      expect.any(Object),
+    )
+  })
 })

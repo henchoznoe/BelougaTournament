@@ -21,6 +21,7 @@ import {
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import { createTeamSchema, joinTeamSchema } from '@/lib/validations/tournaments'
@@ -57,9 +58,24 @@ export const createTeamAndRegister = authenticatedAction({
       return { success: false, message: validation.message }
     }
 
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
+    }
+
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>
     try {
       registration = await runSerializableTransaction(async tx => {
+        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
+
         if (tournament.maxTeams !== null) {
           const teamCount = await tx.team.count({
             where: { tournamentId: data.tournamentId },
@@ -68,8 +84,6 @@ export const createTeamAndRegister = authenticatedAction({
             throw new Error('MAX_TEAMS_REACHED')
           }
         }
-
-        await removeUserFromTeam(tx, session.user.id, data.tournamentId)
 
         const team = await tx.team.create({
           data: {
@@ -171,6 +185,19 @@ export const joinTeamAndRegister = authenticatedAction({
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
+    }
+
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
     }
 
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>

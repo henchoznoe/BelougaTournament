@@ -27,6 +27,7 @@ const TERMINAL_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.CANCELLED,
   PaymentStatus.FAILED,
   PaymentStatus.REFUNDED,
+  PaymentStatus.FORFEITED,
 ])
 
 const handleCheckoutCompleted = async (event: Stripe.Event) => {
@@ -66,12 +67,21 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       amount: true,
       currency: true,
       registration: {
-        select: { id: true },
+        select: {
+          id: true,
+          status: true,
+          paymentStatus: true,
+        },
       },
     },
   })
 
-  if (!payment || payment.status === PaymentStatus.PAID) {
+  if (
+    !payment ||
+    payment.status !== PaymentStatus.PENDING ||
+    payment.registration.status !== RegistrationStatus.PENDING ||
+    payment.registration.paymentStatus !== PaymentStatus.PENDING
+  ) {
     return
   }
 

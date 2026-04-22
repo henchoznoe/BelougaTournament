@@ -23,6 +23,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
@@ -136,6 +137,19 @@ export const registerForTournament = authenticatedAction({
     const validation = validateFieldValues(tournament.fields, data.fieldValues)
     if (!validation.valid) {
       return { success: false, message: validation.message }
+    }
+
+    if (tournament.registrationType === RegistrationType.PAID) {
+      const donationResolution = resolveDonationAmount({
+        tournament,
+        donationAmount: data.donationAmount,
+      })
+      if (!donationResolution.valid) {
+        return {
+          success: false,
+          message: donationResolution.message,
+        }
+      }
     }
 
     let registration: Awaited<ReturnType<typeof upsertRegistrationAttempt>>

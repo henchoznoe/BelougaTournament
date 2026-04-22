@@ -78,10 +78,13 @@ const mockUserFindUnique = vi.fn()
 const mockTournamentFindUnique = vi.fn()
 const mockRegistrationFindUnique = vi.fn()
 const mockRegistrationFindFirst = vi.fn()
+const mockRegistrationFindMany = vi.fn()
+const mockTxRegistrationFindUnique = vi.fn()
 const mockRegistrationCount = vi.fn()
 const mockRegistrationCreate = vi.fn()
 const mockRegistrationUpdate = vi.fn()
 const mockPaymentFindFirst = vi.fn()
+const mockPaymentFindMany = vi.fn()
 const mockPaymentUpdateMany = vi.fn()
 const mockPaymentCreate = vi.fn()
 const mockPaymentUpdate = vi.fn()
@@ -97,12 +100,14 @@ vi.mock('@/lib/core/prisma', () => ({
     tournamentRegistration: {
       findUnique: (...a: unknown[]) => mockRegistrationFindUnique(...a),
       findFirst: (...a: unknown[]) => mockRegistrationFindFirst(...a),
+      findMany: (...a: unknown[]) => mockRegistrationFindMany(...a),
       count: (...a: unknown[]) => mockRegistrationCount(...a),
       create: (...a: unknown[]) => mockRegistrationCreate(...a),
       update: (...a: unknown[]) => mockRegistrationUpdate(...a),
     },
     payment: {
       findFirst: (...a: unknown[]) => mockPaymentFindFirst(...a),
+      findMany: (...a: unknown[]) => mockPaymentFindMany(...a),
       updateMany: (...a: unknown[]) => mockPaymentUpdateMany(...a),
       create: (...a: unknown[]) => mockPaymentCreate(...a),
       update: (...a: unknown[]) => mockPaymentUpdate(...a),
@@ -168,7 +173,7 @@ const makeTxMock = () =>
           count: mockRegistrationCount,
           create: mockRegistrationCreate,
           update: mockRegistrationUpdate,
-          findUnique: mockRegistrationFindUnique,
+          findUnique: mockTxRegistrationFindUnique,
         },
         payment: {
           updateMany: mockPaymentUpdateMany,
@@ -199,6 +204,13 @@ describe('registerForTournament', () => {
     mockTournamentFindUnique.mockResolvedValue(makeFreeSoloTournament())
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)
+    mockRegistrationFindMany.mockResolvedValue([])
+    mockTxRegistrationFindUnique.mockResolvedValue({
+      id: REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentFindMany.mockResolvedValue([])
     mockRegistrationCount.mockResolvedValue(0)
     mockRegistrationCreate.mockResolvedValue({ id: REGISTRATION_ID })
     makeTxMock()
@@ -412,6 +424,41 @@ describe('registerForTournament', () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it('cleans up expired pending registrations before allowing a new registration', async () => {
+    mockRegistrationFindMany.mockResolvedValue([
+      { id: 'expired-reg', tournamentId: 'old-tournament' },
+    ])
+    mockTxRegistrationFindUnique.mockResolvedValueOnce({
+      id: 'expired-reg',
+      status: RegistrationStatus.PENDING,
+      tournamentId: 'old-tournament',
+      expiresAt: new Date('2026-04-15T11:00:00.000Z'),
+    })
+
+    const result = await registerForTournament({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockPaymentUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ registrationId: 'expired-reg' }),
+        data: expect.objectContaining({ status: PaymentStatus.CANCELLED }),
+      }),
+    )
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'expired-reg' },
+        data: expect.objectContaining({
+          status: RegistrationStatus.EXPIRED,
+          paymentStatus: PaymentStatus.CANCELLED,
+        }),
+      }),
+    )
   })
 
   it('should redirect to Stripe checkout for a PAID tournament', async () => {
