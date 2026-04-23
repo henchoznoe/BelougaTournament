@@ -128,11 +128,12 @@ describe('cancelOrDeleteRegistration', () => {
         teamId: null,
       },
     })
+    // Hypothetical fee on refundable portion: round((4200 * 2.9) / 100 + 30) = 152
     expect(tx.payment.update).toHaveBeenCalledWith({
       where: { id: PAYMENT_ID },
       data: {
         status: PaymentStatus.REFUNDED,
-        refundAmount: TOTAL_AMOUNT - STRIPE_FEE - DONATION_AMOUNT,
+        refundAmount: 4048,
         refundedAt: NOW,
       },
     })

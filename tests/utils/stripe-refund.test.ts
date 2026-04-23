@@ -64,6 +64,32 @@ describe('computeRefundAmount', () => {
   it('returns 0 when the fee equals the full amount', () => {
     expect(computeRefundAmount(100, 100)).toBe(0)
   })
+
+  it('uses hypothetical fee when donation is present', () => {
+    // 5200 total, 200 real fee, 1000 donation
+    // refundable = 5200 - 1000 = 4200
+    // hypotheticalFee = round((4200 * 2.9) / 100 + 30) = round(151.8) = 152
+    // refund = 4200 - 152 = 4048
+    expect(computeRefundAmount(5200, 200, 1000)).toBe(4048)
+  })
+
+  it('uses hypothetical fee for small donation', () => {
+    // 1500 total, 74 real fee, 1000 donation
+    // refundable = 1500 - 1000 = 500
+    // hypotheticalFee = round((500 * 2.9) / 100 + 30) = round(44.5) = 45
+    // refund = 500 - 45 = 455
+    expect(computeRefundAmount(1500, 74, 1000)).toBe(455)
+  })
+
+  it('falls back to refundable without fee when stripeFee is null and donation present', () => {
+    // 1500 total, null fee, 1000 donation → refundable = 500
+    expect(computeRefundAmount(1500, null, 1000)).toBe(500)
+  })
+
+  it('deducts real fee when donation is 0', () => {
+    // Same behaviour as no-donation path
+    expect(computeRefundAmount(5000, 150, 0)).toBe(4850)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -238,6 +264,32 @@ describe('issueStripeRefundAfterDbUpdate', () => {
         revertErrorMessage: 'unknown revert error',
       },
       'Stripe refund failed and DB revert also failed',
+    )
+  })
+
+  it('uses hypothetical fee when donation is present', async () => {
+    await issueStripeRefundAfterDbUpdate({
+      registrationId: 'reg-1',
+      latestPayment: {
+        ...PAYMENT,
+        amount: 1500,
+        stripeFee: 74,
+        donationAmount: 1000,
+      },
+      previousPaymentStatus: PaymentStatus.PAID,
+      idempotencyPrefix: 'refund',
+    })
+
+    // refundable = 1500 - 1000 = 500
+    // hypotheticalFee = round((500 * 2.9) / 100 + 30) = 45
+    // refund = 500 - 45 = 455
+    expect(mockRefundCreate).toHaveBeenCalledWith(
+      {
+        payment_intent: 'pi_123',
+        amount: 455,
+        reason: 'requested_by_customer',
+      },
+      { idempotencyKey: 'refund-reg-1-pay-1' },
     )
   })
 

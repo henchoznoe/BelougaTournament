@@ -380,7 +380,7 @@ export const banUser = authenticatedAction({
               resolution: refundEligible ? 'refund' : 'cancel',
               clearTeamId: true,
               clearExpiresAt: reg.paymentRequiredSnapshot,
-              refundIncludesDonation: false,
+              refundIncludesDonation: true,
             })
 
             await handleCaptainSuccession(tx, team, data.userId)
@@ -413,7 +413,7 @@ export const banUser = authenticatedAction({
               resolution: refundEligible ? 'refund' : 'cancel',
               clearTeamId: false,
               clearExpiresAt: true,
-              refundIncludesDonation: false,
+              refundIncludesDonation: true,
             })
           })
         } else {
