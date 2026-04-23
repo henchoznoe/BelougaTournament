@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -32,9 +32,8 @@ vi.mock('@/lib/core/prisma', () => ({
   },
 }))
 
-const { getUserProfile, getUsers, getUserById } = await import(
-  '@/lib/services/users'
-)
+const { getActiveUserBan, getUserProfile, getUsers, getUserById } =
+  await import('@/lib/services/users')
 
 const MOCK_PROFILE = {
   name: 'TestPlayer',
@@ -126,6 +125,75 @@ describe('getUserProfile', () => {
     mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
     expect(await getUserProfile('user-1')).toBeNull()
+  })
+})
+
+describe('getActiveUserBan', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-23T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns null when the user does not exist or has never been banned', async () => {
+    mockUserFindUnique.mockResolvedValue(null)
+
+    expect(await getActiveUserBan('user-1')).toBeNull()
+
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: null,
+      bannedUntil: null,
+      banReason: null,
+    })
+
+    expect(await getActiveUserBan('user-1')).toBeNull()
+  })
+
+  it('returns null when the ban has expired', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: new Date('2026-04-01T00:00:00.000Z'),
+      bannedUntil: new Date('2026-04-22T23:59:59.000Z'),
+      banReason: 'Spam',
+    })
+
+    expect(await getActiveUserBan('user-1')).toBeNull()
+  })
+
+  it('returns an active temporary ban with its reason', async () => {
+    const bannedUntil = new Date('2026-05-01T00:00:00.000Z')
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: new Date('2026-04-01T00:00:00.000Z'),
+      bannedUntil,
+      banReason: 'Abusive behaviour',
+    })
+
+    expect(await getActiveUserBan('user-1')).toEqual({
+      bannedUntil,
+      banReason: 'Abusive behaviour',
+    })
+  })
+
+  it('returns an active permanent ban when bannedUntil is null', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: new Date('2026-04-01T00:00:00.000Z'),
+      bannedUntil: null,
+      banReason: null,
+    })
+
+    expect(await getActiveUserBan('user-1')).toEqual({
+      bannedUntil: null,
+      banReason: null,
+    })
+  })
+
+  it('returns null on database error', async () => {
+    mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
+
+    expect(await getActiveUserBan('user-1')).toBeNull()
   })
 })
 

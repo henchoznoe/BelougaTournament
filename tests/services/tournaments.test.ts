@@ -168,6 +168,14 @@ describe('getTournaments', () => {
 
     expect(result).toEqual([])
   })
+
+  it('returns an empty array on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getTournaments()
+
+    expect(result).toEqual([])
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -281,6 +289,36 @@ describe('getPublishedTournamentsFiltered', () => {
 
     expect(result.tournaments[0]._count.registrations).toBe(20)
     expect(result.tournaments[1]._count.registrations).toBe(5)
+  })
+
+  it('passes date_desc ordering to the query', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      sort: 'date_desc',
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.orderBy).toEqual({ startDate: 'desc' })
+  })
+
+  it('passes title_asc ordering to the query', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      sort: 'title_asc',
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.orderBy).toEqual({ title: 'asc' })
+  })
+
+  it('passes title_desc ordering to the query', async () => {
+    await getPublishedTournamentsFiltered({
+      ...DEFAULT_FILTERS,
+      sort: 'title_desc',
+    })
+
+    const call = mockFindMany.mock.calls[0][0]
+    expect(call.orderBy).toEqual({ title: 'desc' })
   })
 
   it('returns empty result on database error', async () => {
@@ -540,6 +578,14 @@ const MOCK_RAW_REGISTRATION = {
   },
 }
 
+const MOCK_RAW_REGISTRATION_WITHOUT_MEMBERSHIP = {
+  ...MOCK_RAW_REGISTRATION,
+  user: {
+    ...MOCK_RAW_REGISTRATION.user,
+    teamMembers: [],
+  },
+}
+
 const MOCK_TEAM = {
   id: 'team-1',
   name: 'Alpha Squad',
@@ -632,6 +678,21 @@ describe('getRegistrations', () => {
     const result = await getRegistrations('tournament-1')
 
     expect(result).toEqual([])
+  })
+
+  it('returns a null team when the user has no team membership in the tournament', async () => {
+    mockRegistrationFindMany.mockResolvedValue([
+      MOCK_RAW_REGISTRATION_WITHOUT_MEMBERSHIP,
+    ])
+
+    const result = await getRegistrations('tournament-1')
+
+    expect(result).toEqual([
+      {
+        ...MOCK_REGISTRATION,
+        team: null,
+      },
+    ])
   })
 
   it('returns an empty array on database error', async () => {
@@ -919,6 +980,20 @@ describe('getHeroTournamentBadge', () => {
         endDate: new Date('2026-06-17T18:00:00.000Z'),
       }),
     ])
+  })
+
+  it('returns the default hero badge payload on database error', async () => {
+    mockFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getHeroTournamentBadgeData()
+
+    expect(result).toEqual({
+      badge: {
+        label: 'Aucun tournoi en cours',
+        variant: 'idle',
+      },
+      tournaments: [],
+    })
   })
 })
 
