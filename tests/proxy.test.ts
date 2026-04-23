@@ -22,6 +22,8 @@ process.env.NEXT_PUBLIC_APP_URL = BASE_URL
 const makeRequest = (path = '/admin/tournaments') =>
   new NextRequest(new URL(path, BASE_URL))
 
+const loadProxyModule = async () => import('@/proxy')
+
 const mockSession = (session: AuthSession | null) => {
   vi.stubGlobal(
     'fetch',
@@ -34,12 +36,15 @@ const mockSession = (session: AuthSession | null) => {
 
 describe('proxy — admin route guard', () => {
   beforeEach(() => {
+    vi.resetModules()
     vi.restoreAllMocks()
+    process.env.BETTER_AUTH_URL = BASE_URL
+    process.env.NEXT_PUBLIC_APP_URL = BASE_URL
   })
 
   it('redirects to /login when no session exists', async () => {
     mockSession(null)
-    const { proxy } = await import('@/proxy')
+    const { proxy } = await loadProxyModule()
 
     const response = await proxy(makeRequest())
 
@@ -58,7 +63,7 @@ describe('proxy — admin route guard', () => {
       },
       user: { id: 'u1', email: 'user@test.com', name: 'User', role: Role.USER },
     })
-    const { proxy } = await import('@/proxy')
+    const { proxy } = await loadProxyModule()
 
     const response = await proxy(makeRequest())
 
@@ -81,7 +86,7 @@ describe('proxy — admin route guard', () => {
         role: Role.ADMIN,
       },
     })
-    const { proxy } = await import('@/proxy')
+    const { proxy } = await loadProxyModule()
 
     expect((await proxy(makeRequest())).status).toBe(200)
     expect((await proxy(makeRequest('/admin/sponsors'))).status).toBe(200)
@@ -93,11 +98,90 @@ describe('proxy — admin route guard', () => {
       'fetch',
       vi.fn().mockRejectedValue(new Error('Network error')),
     )
-    const { proxy } = await import('@/proxy')
+    const { proxy } = await loadProxyModule()
 
     const response = await proxy(makeRequest())
 
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toBe(`${BASE_URL}/login`)
+  })
+
+  it('redirects to /login when the trusted session fetch returns a non-ok response', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, json: async () => null }),
+    )
+    const { proxy } = await loadProxyModule()
+
+    const response = await proxy(makeRequest())
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe(`${BASE_URL}/login`)
+  })
+
+  it('redirects to /login without fetching when no trusted base URL is configured', async () => {
+    delete process.env.BETTER_AUTH_URL
+    delete process.env.NEXT_PUBLIC_APP_URL
+    const fetchSpy = vi.fn()
+    vi.stubGlobal('fetch', fetchSpy)
+    const { proxy } = await loadProxyModule()
+
+    const response = await proxy(makeRequest())
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe(`${BASE_URL}/login`)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('falls back to ADMIN for paths outside the configured prefixes', async () => {
+    mockSession({
+      session: {
+        id: 's3',
+        userId: 'u3',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u3',
+        email: 'admin@test.com',
+        name: 'Admin',
+        role: Role.ADMIN,
+      },
+    })
+    const { proxy } = await loadProxyModule()
+
+    const response = await proxy(makeRequest('/backoffice'))
+
+    expect(response.status).toBe(200)
+  })
+
+  it('uses a fallback allowlist when a route maps to an unknown privileged role', async () => {
+    mockSession({
+      session: {
+        id: 's4',
+        userId: 'u4',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u4',
+        email: 'admin@test.com',
+        name: 'Admin',
+        role: Role.ADMIN,
+      },
+    })
+
+    vi.doMock('@/lib/config/routes', () => ({
+      ADMIN_ROUTE_ROLES: { '/admin/owners': 'OWNER' },
+    }))
+
+    const { proxy } = await loadProxyModule()
+
+    const response = await proxy(makeRequest('/admin/owners'))
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get('location')).toBe(`${BASE_URL}/unauthorized`)
+
+    vi.doUnmock('@/lib/config/routes')
   })
 })

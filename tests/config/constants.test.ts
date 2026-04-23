@@ -143,3 +143,13 @@ describe('CACHE_TAGS', () => {
     }
   })
 })
+
+describe('constants barrel', () => {
+  it('re-exports the shared constants module', async () => {
+    const constants = await import('@/lib/config/constants')
+
+    expect(constants.CACHE_TAGS).toBeDefined()
+    expect(constants.METADATA).toBeDefined()
+    expect(constants.AUTH_CONFIG).toBeDefined()
+  })
+})
