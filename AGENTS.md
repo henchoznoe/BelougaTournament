@@ -51,5 +51,5 @@
 
 ## Gotchas
 
-- `ADMIN_EMAILS` seeds admin users in `prisma/seed-admin.ts`. `OWNER_EMAILS` is a separate validated runtime env for owner-only actions. They are not interchangeable.
+- `ADMIN_EMAILS` seeds admin users in `prisma/seed-admin.ts`. `SUPER_ADMIN_EMAILS` seeds super admin users the same way. Both are seed-time only — the `SUPER_ADMIN` role is stored in the database.
 - `pnpm build` and `pnpm db:deploy` both touch the target database and run seed logic. Double-check which environment your `.env.local` points at before running them.

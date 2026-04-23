@@ -69,7 +69,8 @@ const getRequiredRole = (pathname: string): Role => {
  * Currently only ADMIN exists; extend this map when new privileged roles are added.
  */
 const ROLE_ALLOWLIST: Record<Role, Set<Role>> = {
-  [Role.ADMIN]: new Set([Role.ADMIN]),
+  [Role.ADMIN]: new Set([Role.ADMIN, Role.SUPER_ADMIN]),
+  [Role.SUPER_ADMIN]: new Set([Role.SUPER_ADMIN]),
   [Role.USER]: new Set([Role.USER]),
 } as const
 

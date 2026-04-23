@@ -58,16 +58,17 @@ export const isUserBanned = (
 
 interface UserRoleBadgeProps {
   user: UserDetail
-  isOwner: boolean
+  isSuperAdmin: boolean
 }
 
-export const UserRoleBadge = ({ user, isOwner }: UserRoleBadgeProps) => {
+export const UserRoleBadge = ({ user, isSuperAdmin }: UserRoleBadgeProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const isAdmin = user.role === Role.ADMIN
-  const canToggle = isOwner
+  const isUserSuperAdmin = user.role === Role.SUPER_ADMIN
+  const canToggle = isSuperAdmin && !isUserSuperAdmin
 
   const handleToggle = () => {
     startTransition(async () => {
@@ -93,17 +94,19 @@ export const UserRoleBadge = ({ user, isOwner }: UserRoleBadgeProps) => {
           !isPending &&
           (isAdmin ? 'hover:bg-blue-500/20' : 'hover:bg-zinc-500/20'),
         isPending && 'cursor-wait opacity-60',
-        isAdmin
-          ? 'bg-blue-500/10 text-blue-400'
-          : 'bg-zinc-500/10 text-zinc-400',
+        isUserSuperAdmin
+          ? 'bg-amber-500/10 text-amber-400'
+          : isAdmin
+            ? 'bg-blue-500/10 text-blue-400'
+            : 'bg-zinc-500/10 text-zinc-400',
       )}
     >
       {isPending ? (
         <Loader2 className="size-3 animate-spin" />
-      ) : isAdmin ? (
+      ) : isAdmin || isUserSuperAdmin ? (
         <ShieldCheck className="size-3" />
       ) : null}
-      {isAdmin ? 'Admin' : 'Joueur'}
+      {isUserSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Joueur'}
     </span>
   )
 
@@ -147,12 +150,12 @@ export const UserRoleBadge = ({ user, isOwner }: UserRoleBadgeProps) => {
 
 interface UserDetailActionsProps {
   user: UserDetail
-  isOwner: boolean
+  isSuperAdmin: boolean
 }
 
 export const UserDetailActions = ({
   user,
-  isOwner,
+  isSuperAdmin,
 }: UserDetailActionsProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -160,7 +163,7 @@ export const UserDetailActions = ({
   const [banOpen, setBanOpen] = useState(false)
   const [displayName, setDisplayName] = useState(user.displayName || '')
 
-  const canDelete = isOwner && user.role === Role.USER
+  const canDelete = isSuperAdmin && user.role === Role.USER
   const canBan = user.role === Role.USER
   const isBanned = isUserBanned(user)
 

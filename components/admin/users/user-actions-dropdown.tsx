@@ -54,7 +54,7 @@ import { BanDialog } from './ban-dialog'
 
 interface UserActionsDropdownProps {
   user: UserRow
-  viewerIsOwner: boolean
+  viewerIsSuperAdmin: boolean
 }
 
 type ConfirmAction = 'promote' | 'demote' | 'delete' | 'unban'
@@ -68,7 +68,7 @@ const isRowBanned = (user: UserRow): boolean => {
 
 export const UserActionsDropdown = ({
   user,
-  viewerIsOwner,
+  viewerIsSuperAdmin,
 }: UserActionsDropdownProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -76,9 +76,9 @@ export const UserActionsDropdown = ({
   const [banOpen, setBanOpen] = useState(false)
 
   const banned = isRowBanned(user)
-  const canPromoteToAdmin = viewerIsOwner && user.role === Role.USER
-  const canDemoteAdmin = viewerIsOwner && user.role === Role.ADMIN
-  const canDelete = viewerIsOwner && user.role === Role.USER
+  const canPromoteToAdmin = viewerIsSuperAdmin && user.role === Role.USER
+  const canDemoteAdmin = viewerIsSuperAdmin && user.role === Role.ADMIN
+  const canDelete = viewerIsSuperAdmin && user.role === Role.USER
   const canBan = user.role === Role.USER && !banned
   const canUnban = user.role === Role.USER && banned
 

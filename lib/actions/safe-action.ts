@@ -14,7 +14,7 @@ import type { ActionState } from '@/lib/types/actions'
 import type { AuthSession } from '@/lib/types/auth'
 import { handlePrismaError } from '@/lib/utils/prisma-error'
 import { isRoleValue } from '@/lib/utils/role'
-import type { Role } from '@/prisma/generated/prisma/enums'
+import { Role } from '@/prisma/generated/prisma/enums'
 
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
@@ -25,6 +25,13 @@ type ActionOptions<T extends z.ZodType, TOutput = unknown> = {
   schema: T
   role?: Role | Role[]
   handler: ActionHandler<z.infer<T>, TOutput>
+}
+
+/** Returns true if `userRole` satisfies `requiredRole` considering the role hierarchy. */
+const satisfiesRole = (userRole: Role, requiredRole: Role): boolean => {
+  if (userRole === requiredRole) return true
+  if (userRole === Role.SUPER_ADMIN && requiredRole === Role.ADMIN) return true
+  return false
 }
 
 /**
@@ -56,7 +63,7 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
         if (
           typeof userRole !== 'string' ||
           !isRoleValue(userRole) ||
-          !allowedRoles.includes(userRole)
+          !allowedRoles.some(r => satisfiesRole(userRole, r))
         ) {
           return { success: false, message: 'Unauthorized' }
         }

@@ -93,6 +93,28 @@ describe('proxy — admin route guard', () => {
     expect((await proxy(makeRequest('/admin/settings'))).status).toBe(200)
   })
 
+  it('allows access when user has role SUPER_ADMIN', async () => {
+    mockSession({
+      session: {
+        id: 's5',
+        userId: 'u5',
+        expiresAt: new Date().toISOString(),
+        token: 'tok',
+      },
+      user: {
+        id: 'u5',
+        email: 'superadmin@test.com',
+        name: 'SuperAdmin',
+        role: Role.SUPER_ADMIN,
+      },
+    })
+    const { proxy } = await loadProxyModule()
+
+    expect((await proxy(makeRequest())).status).toBe(200)
+    expect((await proxy(makeRequest('/admin/sponsors'))).status).toBe(200)
+    expect((await proxy(makeRequest('/admin/settings'))).status).toBe(200)
+  })
+
   it('redirects to /login when fetch throws', async () => {
     vi.stubGlobal(
       'fetch',

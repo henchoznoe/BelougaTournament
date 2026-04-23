@@ -24,8 +24,6 @@ Tournament management platform for modern e-sports communities.
 
 The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreSQL**, **Better Auth**, and **Stripe**. It supports **Discord login**, **solo and team registrations**, **paid checkouts with refund workflows**, **Toornament stage mapping**, **Twitch embeds**, **sponsor management**, and a full **admin dashboard** for operating the platform end to end.
 
-Version **1.0.0** marks the first complete public release of the new platform.
-
 ## Highlights
 
 - Public landing page with hero badge, featured tournaments, live stream section, sponsors, and configurable marketing content.
@@ -56,21 +54,6 @@ Version **1.0.0** marks the first complete public release of the new platform.
 - User administration including role changes, bans, and cleanup of active registrations.
 - Sponsor CRUD and global platform settings management.
 - Vercel Blob-backed file handling for logos, sponsors, tournaments, and team logos.
-
-## Current Status
-
-### Production-ready in v1.0.0
-
-- Public tournament discovery and registration flows.
-- Admin back office for operating the platform.
-- Discord authentication and role-based admin access.
-- Stripe payment and refund pipeline.
-- Blob uploads for admin assets and team logos.
-- Automated tests, CI, and typed validation across the stack.
-
-### Not fully implemented yet
-
-- `/leaderboard` is currently a placeholder page for a future release.
 
 ## Tech Stack
 
@@ -144,12 +127,12 @@ Important variables:
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` for payments.
 - `BLOB_READ_WRITE_TOKEN` for Vercel Blob.
 - `ADMIN_EMAILS` for seeding admin accounts.
-- `OWNER_EMAILS` for owner-only runtime permissions.
+- `SUPER_ADMIN_EMAILS` for seeding super admin accounts.
 
 Notes:
 
 - Prisma CLI loads `.env.local` through `prisma.config.ts`.
-- `ADMIN_EMAILS` and `OWNER_EMAILS` are separate concerns.
+- `ADMIN_EMAILS` and `SUPER_ADMIN_EMAILS` are both used by `prisma/seed-admin.ts` at seed time.
 - `pnpm build` and `pnpm db:deploy` both run migrations and seed logic against the configured database.
 
 ## Development Commands
@@ -162,6 +145,7 @@ Notes:
 | `pnpm exec tsc --noEmit` | Run TypeScript type-checking |
 | `pnpm exec biome check .` | Run formatter/linter check without writing |
 | `pnpm check` | Run Biome and write fixes |
+| `pnpm check:com` | Run all checks before commit |
 | `pnpm test` | Run Vitest once |
 | `pnpm test:coverage` | Run Vitest with coverage |
 | `pnpm generate` | Generate Prisma client |

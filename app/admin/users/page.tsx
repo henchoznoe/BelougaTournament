@@ -12,7 +12,8 @@ import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
 import { UsersList } from '@/components/admin/users/users-list'
 import { getSession } from '@/lib/services/auth'
 import { getUsers } from '@/lib/services/users'
-import { isOwner } from '@/lib/utils/owner'
+import { isSuperAdmin } from '@/lib/utils/role'
+import type { Role } from '@/prisma/generated/prisma/enums'
 
 export const metadata: Metadata = {
   title: 'Utilisateurs',
@@ -32,7 +33,7 @@ const AdminUsersPage = async () => {
     >
       <UsersList
         users={users}
-        viewerIsOwner={isOwner(session?.user.email ?? '')}
+        viewerIsSuperAdmin={isSuperAdmin(session?.user.role as Role)}
       />
     </AdminContentLayout>
   )

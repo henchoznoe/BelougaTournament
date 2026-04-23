@@ -47,12 +47,6 @@ const serverSchema = z.object({
     .min(1, 'STRIPE_WEBHOOK_SECRET is required')
     .optional(),
 
-  // Platform owners (comma-separated emails, normalized to lowercase)
-  OWNER_EMAILS: z
-    .string()
-    .min(1, 'OWNER_EMAILS is required')
-    .transform(val => val.split(',').map(e => e.trim().toLowerCase())),
-
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),

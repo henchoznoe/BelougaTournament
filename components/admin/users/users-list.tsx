@@ -60,13 +60,19 @@ type SortKey = 'user' | 'role' | 'createdAt' | 'lastLoginAt'
 
 interface UsersListProps {
   users: UserRow[]
-  viewerIsOwner: boolean
+  viewerIsSuperAdmin: boolean
 }
 
-/** Default sort: admins first, then alphabetical by name. */
+const ROLE_WEIGHT: Record<Role, number> = {
+  [Role.SUPER_ADMIN]: 0,
+  [Role.ADMIN]: 1,
+  [Role.USER]: 2,
+}
+
+/** Default sort: super admins first, then admins, then alphabetical by name. */
 const defaultSort = (a: UserRow, b: UserRow): number => {
   if (a.role !== b.role) {
-    return a.role === Role.ADMIN ? -1 : 1
+    return ROLE_WEIGHT[a.role] - ROLE_WEIGHT[b.role]
   }
   return a.name.localeCompare(b.name)
 }
@@ -77,7 +83,7 @@ const compareValues = (a: UserRow, b: UserRow, key: SortKey): number => {
       return a.name.localeCompare(b.name)
     case 'role':
       if (a.role === b.role) return 0
-      return a.role === Role.ADMIN ? -1 : 1
+      return ROLE_WEIGHT[a.role] - ROLE_WEIGHT[b.role]
     case 'createdAt':
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     case 'lastLoginAt': {
@@ -90,7 +96,7 @@ const compareValues = (a: UserRow, b: UserRow, key: SortKey): number => {
   }
 }
 
-export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
+export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
@@ -136,12 +142,18 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
   }
 
   const handleRoleFilter = (value: string) => {
-    if (value === 'all' || value === Role.ADMIN || value === Role.USER) {
+    if (
+      value === 'all' ||
+      value === Role.SUPER_ADMIN ||
+      value === Role.ADMIN ||
+      value === Role.USER
+    ) {
       setRoleFilter(value)
     }
     resetPage()
   }
 
+  const superAdminCount = users.filter(t => t.role === Role.SUPER_ADMIN).length
   const adminCount = users.filter(t => t.role === Role.ADMIN).length
   const userCount = users.filter(t => t.role === Role.USER).length
   const bannedCount = users.filter(isRowBanned).length
@@ -169,6 +181,7 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-zinc-950">
               <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value={Role.SUPER_ADMIN}>Super Admin</SelectItem>
               <SelectItem value={Role.ADMIN}>Admin</SelectItem>
               <SelectItem value={Role.USER}>Joueur</SelectItem>
             </SelectContent>
@@ -182,7 +195,13 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
           {filtered.length} utilisateur{pluralize(filtered.length)}
         </span>
 
-        <span className="text-amber-400">
+        {superAdminCount > 0 && (
+          <span className="text-amber-400">
+            {superAdminCount} super admin{pluralize(superAdminCount)}
+          </span>
+        )}
+
+        <span className="text-blue-400">
           {adminCount} admin{pluralize(adminCount)}
         </span>
 
@@ -307,7 +326,7 @@ export const UsersList = ({ users, viewerIsOwner }: UsersListProps) => {
                   <TableCell onClick={e => e.stopPropagation()}>
                     <UserActionsDropdown
                       user={user}
-                      viewerIsOwner={viewerIsOwner}
+                      viewerIsSuperAdmin={viewerIsSuperAdmin}
                     />
                   </TableCell>
                 </TableRow>
