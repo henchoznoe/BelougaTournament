@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getGlobalSettings } from '@/lib/services/settings'
+import { getAppVersion, getRepoUrl } from '@/lib/utils/app-version'
 import { cn } from '@/lib/utils/cn'
 import { getCommitHash } from '@/lib/utils/commit-hash'
 
@@ -65,6 +66,8 @@ const FooterLogo = (props: { url: string | null }) => {
 
 export const PublicFooter = async () => {
   const globalSettings = await getGlobalSettings()
+  const appVersion = getAppVersion()
+  const repoUrl = getRepoUrl()
   const commitHash = getCommitHash()
 
   const socialLinks: SocialLink[] = [
@@ -211,9 +214,14 @@ export const PublicFooter = async () => {
               <p className="text-sm text-zinc-500 text-center lg:text-left">
                 &copy; 2026 {METADATA.NAME}. Tous droits réservés.
               </p>
-              <span className="font-mono text-xs text-zinc-600 transition-colors hover:text-zinc-400">
-                build: {commitHash}
-              </span>
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer font-mono text-xs text-zinc-600 transition-colors hover:text-zinc-400"
+              >
+                v{appVersion} &middot; build: {commitHash}
+              </a>
             </div>
 
             <div className="flex flex-col items-center gap-4 text-sm text-zinc-500 sm:flex-row sm:gap-6">
