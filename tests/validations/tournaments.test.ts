@@ -56,6 +56,10 @@ const VALID_TOURNAMENT = {
   toornamentStages: [],
 }
 
+const PAID_ENTRY_FEE_AMOUNT = 500
+const FIXED_DONATION_AMOUNT = 200
+const MINIMUM_DONATION_AMOUNT = 100
+
 // ---------------------------------------------------------------------------
 // tournamentFieldSchema
 // ---------------------------------------------------------------------------
@@ -478,6 +482,83 @@ describe('tournamentSchema', () => {
       toornamentId: '',
       toornamentStages: [],
     })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects donations for free tournaments', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      donationEnabled: true,
+      donationType: 'FIXED',
+      donationFixedAmount: FIXED_DONATION_AMOUNT,
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects enabled donations without a donation type', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: PAID_ENTRY_FEE_AMOUNT,
+      donationEnabled: true,
+      donationType: null,
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects fixed donations without a fixed amount', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: PAID_ENTRY_FEE_AMOUNT,
+      donationEnabled: true,
+      donationType: 'FIXED',
+      donationFixedAmount: null,
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects free donations without a minimum amount', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: PAID_ENTRY_FEE_AMOUNT,
+      donationEnabled: true,
+      donationType: 'FREE',
+      donationMinAmount: null,
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts paid tournaments with a valid fixed donation configuration', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: PAID_ENTRY_FEE_AMOUNT,
+      donationEnabled: true,
+      donationType: 'FIXED',
+      donationFixedAmount: FIXED_DONATION_AMOUNT,
+      donationMinAmount: null,
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts paid tournaments with a valid free donation configuration', () => {
+    const result = tournamentSchema.safeParse({
+      ...VALID_TOURNAMENT,
+      registrationType: 'PAID',
+      entryFeeAmount: PAID_ENTRY_FEE_AMOUNT,
+      donationEnabled: true,
+      donationType: 'FREE',
+      donationFixedAmount: null,
+      donationMinAmount: MINIMUM_DONATION_AMOUNT,
+    })
+
     expect(result.success).toBe(true)
   })
 })

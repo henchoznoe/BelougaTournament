@@ -128,6 +128,18 @@ describe('resolveDonationAmount', () => {
     })
   })
 
+  it('should fall back to CHF in fixed donation error messages when currency is null', () => {
+    const result = resolveDonationAmount({
+      tournament: buildTournament({ entryFeeCurrency: null }),
+      donationAmount: VALID_FREE_DONATION_AMOUNT,
+    })
+
+    expect(result).toEqual({
+      valid: false,
+      message: 'Le don doit être de 10.00 CHF.',
+    })
+  })
+
   it('should accept the configured fixed donation amount', () => {
     const result = resolveDonationAmount({
       tournament: buildTournament(),
@@ -167,6 +179,38 @@ describe('resolveDonationAmount', () => {
     expect(result).toEqual({
       valid: true,
       donationAmount: VALID_FREE_DONATION_AMOUNT,
+    })
+  })
+
+  it('should accept free donations when no minimum amount is configured', () => {
+    const result = resolveDonationAmount({
+      tournament: buildTournament({
+        donationType: DonationType.FREE,
+        donationFixedAmount: null,
+        donationMinAmount: null,
+      }),
+      donationAmount: VALID_FREE_DONATION_AMOUNT,
+    })
+
+    expect(result).toEqual({
+      valid: true,
+      donationAmount: VALID_FREE_DONATION_AMOUNT,
+    })
+  })
+
+  it('should fall back to CHF in minimum donation error messages when currency is null', () => {
+    const result = resolveDonationAmount({
+      tournament: buildTournament({
+        entryFeeCurrency: null,
+        donationType: DonationType.FREE,
+        donationFixedAmount: null,
+      }),
+      donationAmount: BELOW_MIN_DONATION_AMOUNT,
+    })
+
+    expect(result).toEqual({
+      valid: false,
+      message: "Le don doit être d'au moins 5.00 CHF.",
     })
   })
 

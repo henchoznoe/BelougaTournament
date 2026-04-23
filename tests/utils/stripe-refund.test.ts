@@ -14,8 +14,13 @@ import {
 
 vi.mock('server-only', () => ({}))
 
+const mockLoggerError = vi.fn()
 vi.mock('@/lib/core/logger', () => ({
-  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
+  logger: {
+    error: (...args: unknown[]) => mockLoggerError(...args),
+    warn: vi.fn(),
+    info: vi.fn(),
+  },
 }))
 
 const mockRefundCreate = vi.fn()
@@ -123,6 +128,28 @@ describe('issueStripeRefundAfterDbUpdate', () => {
     )
   })
 
+  it('passes an undefined charge when neither payment_intent nor charge is present', async () => {
+    await issueStripeRefundAfterDbUpdate({
+      registrationId: 'reg-1',
+      latestPayment: {
+        ...PAYMENT,
+        stripePaymentIntentId: null,
+        stripeChargeId: null,
+      },
+      previousPaymentStatus: PaymentStatus.PAID,
+      idempotencyPrefix: 'refund',
+    })
+
+    expect(mockRefundCreate).toHaveBeenCalledWith(
+      {
+        charge: undefined,
+        amount: 4850,
+        reason: 'requested_by_customer',
+      },
+      { idempotencyKey: 'refund-reg-1-pay-1' },
+    )
+  })
+
   it('reverts DB records and rethrows when Stripe call fails', async () => {
     const stripeError = new Error('Stripe unavailable')
     mockRefundCreate.mockRejectedValue(stripeError)
@@ -188,6 +215,30 @@ describe('issueStripeRefundAfterDbUpdate', () => {
     expect(mockTransaction).toHaveBeenCalledOnce()
     expect(mockRegistrationUpdate).not.toHaveBeenCalled()
     expect(mockPaymentUpdate).not.toHaveBeenCalled()
+  })
+
+  it('logs fallback unknown messages for non-Error Stripe and revert failures', async () => {
+    mockRefundCreate.mockRejectedValue('stripe failure')
+    mockTransaction.mockRejectedValue({ reason: 'db revert failed' })
+
+    await expect(
+      issueStripeRefundAfterDbUpdate({
+        registrationId: 'reg-1',
+        latestPayment: PAYMENT,
+        previousPaymentStatus: PaymentStatus.PAID,
+        idempotencyPrefix: 'refund',
+      }),
+    ).rejects.toThrow('Manual reconciliation required.')
+
+    expect(mockLoggerError).toHaveBeenNthCalledWith(
+      2,
+      {
+        registrationId: 'reg-1',
+        stripeErrorMessage: 'unknown Stripe error',
+        revertErrorMessage: 'unknown revert error',
+      },
+      'Stripe refund failed and DB revert also failed',
+    )
   })
 
   it('does not call onRevert when Stripe succeeds', async () => {
