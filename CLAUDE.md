@@ -60,9 +60,12 @@ CI order: `tsc --noEmit` -> `biome check .` -> `test:coverage`. Pre-commit hook 
 
 ### Auth & Admin Protection
 
+- Three-tier role hierarchy: `USER < ADMIN < SUPER_ADMIN`. Role helpers in `lib/utils/role.ts`: `isSuperAdmin()`, `hasAdminAccess()`, `isAdmin()` (delegates to `hasAdminAccess`).
+- `authenticatedAction()` uses `satisfiesRole()` — `SUPER_ADMIN` automatically satisfies `Role.ADMIN` requirements.
 - Session reads: `getSession()` from `lib/services/auth.ts`. Pass session-derived data as props instead of re-reading in client components.
-- Admin protection is dual-layer: `proxy.ts` (edge) + `AdminGuard` component (app layer).
+- Admin protection is dual-layer: `proxy.ts` (edge) + `AdminGuard` component (app layer). Both allow `ADMIN` and `SUPER_ADMIN`.
 - `proxy.ts` cannot import `lib/core/env.ts` (Node.js only). Direct `process.env` access is the justified exception there.
+- Super-admin-only actions (role management, user deletion) check `isSuperAdmin(session.user.role)` inside the handler.
 
 ### Caching
 
@@ -86,6 +89,6 @@ Paid registrations: create pending -> redirect to Stripe Checkout -> webhook con
 
 ## Gotchas
 
-- `ADMIN_EMAILS` seeds admin users at build time (`prisma/seed-admin.ts`). `OWNER_EMAILS` is runtime authorization for owner-only actions. They are NOT interchangeable.
+- `ADMIN_EMAILS` seeds admin users at build time (`prisma/seed-admin.ts`). `SUPER_ADMIN_EMAILS` seeds super admin users the same way. Both are seed-time only — the `SUPER_ADMIN` role is stored in the database, not checked at runtime via env var.
 - `pnpm build` and `pnpm db:deploy` both touch the target database and run seed logic. Double-check which `.env.local` DB you're pointing at before running.
 - Do NOT run `prisma migrate dev` against remote environments. Use `pnpm migrate` locally, commit the migration, then `pnpm db:deploy` for deploy.

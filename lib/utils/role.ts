@@ -12,7 +12,12 @@ import { Role } from '@/prisma/generated/prisma/enums'
 export const isRoleValue = (value: string): value is Role =>
   Object.values(Role).includes(value as Role)
 
+/** Returns true if the given role is exactly SUPER_ADMIN. */
+export const isSuperAdmin = (role: Role): boolean => role === Role.SUPER_ADMIN
+
+/** Returns true if the given role has admin-level access (ADMIN or SUPER_ADMIN). */
+export const hasAdminAccess = (role: Role): boolean =>
+  role === Role.ADMIN || role === Role.SUPER_ADMIN
+
 /** Returns true if the given role has admin privileges. */
-export const isAdmin = (role: Role): boolean => {
-  return role === Role.ADMIN
-}
+export const isAdmin = (role: Role): boolean => hasAdminAccess(role)

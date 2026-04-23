@@ -41,6 +41,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       totalUsers,
       players,
       admins,
+      superAdmins,
       banned,
       totalSponsors,
       enabledSponsors,
@@ -53,9 +54,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       prisma.tournament.count({ where: { status: TournamentStatus.ARCHIVED } }),
       prisma.user.count(),
       prisma.user.count({ where: { role: Role.USER } }),
-      prisma.user.count({
-        where: { role: Role.ADMIN },
-      }),
+      prisma.user.count({ where: { role: Role.ADMIN } }),
+      prisma.user.count({ where: { role: Role.SUPER_ADMIN } }),
       prisma.user.count({ where: { bannedAt: { not: null } } }),
       prisma.sponsor.count(),
       prisma.sponsor.count({ where: { enabled: true } }),
@@ -74,6 +74,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: totalUsers,
         players,
         admins,
+        superAdmins,
         banned,
       },
       sponsors: {
@@ -97,6 +98,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         total: 0,
         players: 0,
         admins: 0,
+        superAdmins: 0,
         banned: 0,
       },
       sponsors: {

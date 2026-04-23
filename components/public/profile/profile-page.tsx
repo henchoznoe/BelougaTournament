@@ -11,6 +11,7 @@ import {
   Lock,
   Mail,
   Shield,
+  ShieldAlert,
   Swords,
   Trophy,
   User,
@@ -45,6 +46,11 @@ const ROLE_CONFIG = {
     label: 'Admin',
     icon: Shield,
     className: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+  },
+  [Role.SUPER_ADMIN]: {
+    label: 'Super Admin',
+    icon: ShieldAlert,
+    className: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
   },
 } as const
 

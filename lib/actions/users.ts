@@ -15,7 +15,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { isOwner } from '@/lib/utils/owner'
+import { hasAdminAccess, isSuperAdmin } from '@/lib/utils/role'
 import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
 import {
   buildTeamRevertCallback,
@@ -40,15 +40,15 @@ import {
 } from '@/prisma/generated/prisma/enums'
 import { formatDateTime } from '../utils/formatting'
 
-/** Promotes a USER to ADMIN role. Owner-only action. */
+/** Promotes a USER to ADMIN role. Super-admin-only action. */
 export const promoteToAdmin = authenticatedAction({
   schema: promoteUserSchema,
   role: Role.ADMIN,
   handler: async (data, session): Promise<ActionState> => {
-    if (!isOwner(session.user.email)) {
+    if (!isSuperAdmin(session.user.role)) {
       return {
         success: false,
-        message: 'Seuls les owners peuvent modifier les rôles.',
+        message: 'Seuls les super admins peuvent modifier les rôles.',
       }
     }
 
@@ -88,15 +88,15 @@ export const promoteToAdmin = authenticatedAction({
   },
 })
 
-/** Demotes an ADMIN back to USER role. Owner-only action. */
+/** Demotes an ADMIN back to USER role. Super-admin-only action. */
 export const demoteAdmin = authenticatedAction({
   schema: demoteUserSchema,
   role: Role.ADMIN,
   handler: async (data, session): Promise<ActionState> => {
-    if (!isOwner(session.user.email)) {
+    if (!isSuperAdmin(session.user.role)) {
       return {
         success: false,
-        message: 'Seuls les owners peuvent modifier les rôles.',
+        message: 'Seuls les super admins peuvent modifier les rôles.',
       }
     }
 
@@ -159,15 +159,15 @@ export const updateUser = authenticatedAction({
   },
 })
 
-/** Permanently deletes a USER-role user and all associated data. Owner-only action. */
+/** Permanently deletes a USER-role user and all associated data. Super-admin-only action. */
 export const deleteUser = authenticatedAction({
   schema: deleteUserSchema,
   role: Role.ADMIN,
   handler: async (data, session): Promise<ActionState> => {
-    if (!isOwner(session.user.email)) {
+    if (!isSuperAdmin(session.user.role)) {
       return {
         success: false,
-        message: 'Seuls les owners peuvent supprimer un utilisateur.',
+        message: 'Seuls les super admins peuvent supprimer un utilisateur.',
       }
     }
 
@@ -260,7 +260,7 @@ export const banUser = authenticatedAction({
       return { success: false, message: 'Utilisateur introuvable.' }
     }
 
-    if (user.role === Role.ADMIN) {
+    if (hasAdminAccess(user.role)) {
       return {
         success: false,
         message: 'Impossible de bannir un administrateur.',

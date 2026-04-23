@@ -12,12 +12,12 @@ import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
 
 /**
- * Parse the ADMIN_EMAILS env var (comma-separated list of emails)
- * and derive a placeholder name from the local part of each address.
+ * Parse a comma-separated email env var and derive a placeholder name
+ * from the local part of each address.
  * The name is overwritten on first Discord OAuth login.
  */
-const parseAdminEmails = () => {
-  const raw = process.env.ADMIN_EMAILS?.trim()
+const parseEmailsForRole = (envVar: string, role: 'ADMIN' | 'SUPER_ADMIN') => {
+  const raw = process.env[envVar]?.trim()
   if (!raw) return []
 
   return raw
@@ -27,19 +27,24 @@ const parseAdminEmails = () => {
     .map(email => {
       const localPart = email.split('@')[0]
       const name = localPart.charAt(0).toUpperCase() + localPart.slice(1)
-      return { email, name, displayName: name, role: 'ADMIN' as const }
+      return { email, name, displayName: name, role }
     })
 }
 
 /**
- * Seed admin users into the database.
+ * Seed admin and super admin users into the database.
  * Accepts an existing PrismaClient instance (used by the orchestrator).
+ * Processes admins first, then super admins so the higher role wins on conflict.
  */
 export const seedAdmins = async (prisma: PrismaClient) => {
-  const users = parseAdminEmails()
+  const admins = parseEmailsForRole('ADMIN_EMAILS', 'ADMIN')
+  const superAdmins = parseEmailsForRole('SUPER_ADMIN_EMAILS', 'SUPER_ADMIN')
+  const users = [...admins, ...superAdmins]
 
   if (users.length === 0) {
-    console.log('No ADMIN_EMAILS configured — skipping admin seed.')
+    console.log(
+      'No ADMIN_EMAILS or SUPER_ADMIN_EMAILS configured — skipping admin seed.',
+    )
     return
   }
 

@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ROUTES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { hasAdminAccess } from '@/lib/utils/role'
+import type { Role } from '@/prisma/generated/prisma/enums'
 
 interface NavbarProfileProps {
   sessionUser: AuthSession['user'] | null
@@ -60,7 +61,7 @@ export const NavbarProfile = ({
   }
 
   const resolvedDisplayName = sessionUser.displayName || sessionUser.name
-  const isAdmin = sessionUser.role === Role.ADMIN
+  const isAdmin = hasAdminAccess(sessionUser.role as Role)
 
   if (mode === 'desktop') {
     return (

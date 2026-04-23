@@ -17,6 +17,7 @@ export type DashboardStats = {
     total: number
     players: number
     admins: number
+    superAdmins: number
     banned: number
   }
   sponsors: {

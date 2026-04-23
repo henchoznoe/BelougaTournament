@@ -18,7 +18,8 @@ import {
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
 import { getUserById } from '@/lib/services/users'
-import { isOwner } from '@/lib/utils/owner'
+import { isSuperAdmin } from '@/lib/utils/role'
+import type { Role } from '@/prisma/generated/prisma/enums'
 
 interface AdminUserDetailPageProps {
   params: Promise<{ id: string }>
@@ -42,7 +43,7 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
     notFound()
   }
 
-  const viewerIsOwner = isOwner(session?.user?.email ?? '')
+  const viewerIsSuperAdmin = isSuperAdmin(session?.user?.role as Role)
 
   return (
     <AdminContentLayout
@@ -53,8 +54,12 @@ const AdminUserDetailPage = async ({ params }: AdminUserDetailPageProps) => {
       icon={Users}
       title={user.displayName || user.name}
       subtitle={`@${user.name}`}
-      titleExtra={<UserRoleBadge user={user} isOwner={viewerIsOwner} />}
-      headerRight={<UserDetailActions user={user} isOwner={viewerIsOwner} />}
+      titleExtra={
+        <UserRoleBadge user={user} isSuperAdmin={viewerIsSuperAdmin} />
+      }
+      headerRight={
+        <UserDetailActions user={user} isSuperAdmin={viewerIsSuperAdmin} />
+      }
     >
       <UserDetail user={user} />
     </AdminContentLayout>

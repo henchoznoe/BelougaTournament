@@ -39,11 +39,6 @@ vi.mock('next/cache', () => ({
   cacheTag: vi.fn(),
 }))
 
-const mockIsOwner = vi.fn()
-vi.mock('@/lib/utils/owner', () => ({
-  isOwner: (...args: unknown[]) => mockIsOwner(...args),
-}))
-
 const mockIssueStripeRefundAfterDbUpdate = vi.fn()
 vi.mock('@/lib/utils/stripe-refund', () => ({
   computeRefundAmount: vi.fn((amount: number) => amount),
@@ -143,10 +138,25 @@ const ADMIN_SESSION = {
   },
 }
 
+const SUPER_ADMIN_SESSION = {
+  user: {
+    id: VALID_UUID,
+    role: Role.SUPER_ADMIN,
+    email: 'superadmin@test.com',
+    name: 'SuperAdmin',
+  },
+  session: {
+    id: 'sess-sa',
+    userId: VALID_UUID,
+    token: 'tok',
+    expiresAt: '2027-01-01',
+  },
+}
+
 describe('promoteToAdmin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockGetSession.mockResolvedValue(SUPER_ADMIN_SESSION)
     mockTransaction.mockResolvedValue([])
   })
 
@@ -159,17 +169,16 @@ describe('promoteToAdmin', () => {
     })
   })
 
-  it('rejects non-owner callers', async () => {
-    mockIsOwner.mockReturnValue(false)
+  it('rejects non-super-admin callers', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
 
     expect(await promoteToAdmin({ userId: VALID_UUID })).toEqual({
       success: false,
-      message: 'Seuls les owners peuvent modifier les rôles.',
+      message: 'Seuls les super admins peuvent modifier les rôles.',
     })
   })
 
-  it('promotes a USER to ADMIN for owners', async () => {
-    mockIsOwner.mockReturnValue(true)
+  it('promotes a USER to ADMIN for super admins', async () => {
     mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
 
     const result = await promoteToAdmin({ userId: VALID_UUID })
@@ -188,7 +197,6 @@ describe('promoteToAdmin', () => {
   })
 
   it('returns an error when the target user does not exist', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue(null)
 
     expect(await promoteToAdmin({ userId: VALID_UUID })).toEqual({
@@ -198,7 +206,6 @@ describe('promoteToAdmin', () => {
   })
 
   it('returns an error when the target user is already an admin', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Alice' })
 
     expect(await promoteToAdmin({ userId: VALID_UUID })).toEqual({
@@ -208,7 +215,6 @@ describe('promoteToAdmin', () => {
   })
 
   it('returns an error when the target user is currently banned', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({
       role: Role.USER,
       name: 'Alice',
@@ -226,12 +232,11 @@ describe('promoteToAdmin', () => {
 describe('demoteAdmin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockGetSession.mockResolvedValue(SUPER_ADMIN_SESSION)
     mockTransaction.mockResolvedValue([])
   })
 
   it('prevents self-demotion', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Admin' })
 
     expect(await demoteAdmin({ userId: VALID_UUID })).toEqual({
@@ -240,8 +245,7 @@ describe('demoteAdmin', () => {
     })
   })
 
-  it('demotes an ADMIN to USER for owners', async () => {
-    mockIsOwner.mockReturnValue(true)
+  it('demotes an ADMIN to USER for super admins', async () => {
     mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Bob' })
 
     const result = await demoteAdmin({ userId: OTHER_UUID })
@@ -253,17 +257,16 @@ describe('demoteAdmin', () => {
     })
   })
 
-  it('rejects non-owner callers for demotion', async () => {
-    mockIsOwner.mockReturnValue(false)
+  it('rejects non-super-admin callers for demotion', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
 
     expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
       success: false,
-      message: 'Seuls les owners peuvent modifier les rôles.',
+      message: 'Seuls les super admins peuvent modifier les rôles.',
     })
   })
 
   it('returns an error when the demotion target does not exist', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue(null)
 
     expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
@@ -273,7 +276,6 @@ describe('demoteAdmin', () => {
   })
 
   it('returns an error when the target is not an admin', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Bob' })
 
     expect(await demoteAdmin({ userId: OTHER_UUID })).toEqual({
@@ -323,20 +325,19 @@ describe('updateUser', () => {
 describe('deleteUser', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue(ADMIN_SESSION)
+    mockGetSession.mockResolvedValue(SUPER_ADMIN_SESSION)
   })
 
-  it('rejects non-owner callers', async () => {
-    mockIsOwner.mockReturnValue(false)
+  it('rejects non-super-admin callers', async () => {
+    mockGetSession.mockResolvedValue(ADMIN_SESSION)
 
     expect(await deleteUser({ userId: OTHER_UUID })).toEqual({
       success: false,
-      message: 'Seuls les owners peuvent supprimer un utilisateur.',
+      message: 'Seuls les super admins peuvent supprimer un utilisateur.',
     })
   })
 
-  it('deletes a USER target for owners', async () => {
-    mockIsOwner.mockReturnValue(true)
+  it('deletes a USER target for super admins', async () => {
     mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Alice' })
     mockUserDelete.mockResolvedValue({})
 
@@ -350,7 +351,6 @@ describe('deleteUser', () => {
   })
 
   it('returns an error when the target user does not exist', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue(null)
 
     expect(await deleteUser({ userId: OTHER_UUID })).toEqual({
@@ -360,7 +360,6 @@ describe('deleteUser', () => {
   })
 
   it('returns an error when attempting to delete an admin', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({ role: Role.ADMIN, name: 'Alice' })
 
     expect(await deleteUser({ userId: OTHER_UUID })).toEqual({
@@ -371,7 +370,6 @@ describe('deleteUser', () => {
   })
 
   it('returns an error when attempting to delete yourself', async () => {
-    mockIsOwner.mockReturnValue(true)
     mockUserFindUnique.mockResolvedValue({ role: Role.USER, name: 'Admin' })
 
     expect(await deleteUser({ userId: VALID_UUID })).toEqual({
@@ -415,6 +413,19 @@ describe('banUser', () => {
     mockUserFindUnique.mockResolvedValue({
       role: Role.ADMIN,
       name: 'Admin2',
+      bannedAt: null,
+    })
+    const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })
+    expect(result).toEqual({
+      success: false,
+      message: 'Impossible de bannir un administrateur.',
+    })
+  })
+
+  it('refuses to ban a super admin', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.SUPER_ADMIN,
+      name: 'Boss',
       bannedAt: null,
     })
     const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })

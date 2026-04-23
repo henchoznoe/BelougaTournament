@@ -68,6 +68,18 @@ describe('verifyAdmin', () => {
     expect(result).toBeNull()
   })
 
+  it('returns the session when the request comes from a super admin', async () => {
+    const superAdminSession = {
+      user: { id: 'sa-1', role: Role.SUPER_ADMIN },
+      session: { id: 's3', userId: 'sa-1' },
+    }
+    mockGetSession.mockResolvedValue(superAdminSession)
+
+    const result = await verifyAdmin(makeRequest())
+
+    expect(result).toEqual(superAdminSession)
+  })
+
   it('passes request headers to getSession', async () => {
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
     const request = new Request('http://localhost:3000/admin', {

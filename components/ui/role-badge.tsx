@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ShieldCheck } from 'lucide-react'
+import { ShieldAlert, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Role } from '@/prisma/generated/prisma/enums'
 
@@ -24,6 +24,20 @@ const SIZES = {
 
 export const RoleBadge = ({ role, size = 'sm' }: RoleBadgeProps) => {
   const s = SIZES[size]
+
+  if (role === Role.SUPER_ADMIN) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center gap-1 rounded-full bg-amber-500/10 font-semibold text-amber-400',
+          s.text,
+        )}
+      >
+        <ShieldAlert className={s.icon} />
+        Super Admin
+      </span>
+    )
+  }
 
   if (role === Role.ADMIN) {
     return (

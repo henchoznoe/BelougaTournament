@@ -425,9 +425,9 @@ Key operational details:
 - local schema changes should go through `pnpm migrate`
 - `pnpm build` and `pnpm db:deploy` both run migrations and seeds
 - `ADMIN_EMAILS` is used for admin seeding
-- `OWNER_EMAILS` is a separate runtime authorization input
+- `SUPER_ADMIN_EMAILS` is used for super admin seeding
 
-This split is important because the two env variables do not serve the same purpose.
+Both are seed-time only. The `SUPER_ADMIN` role is stored in the database.
 
 ## 19. Deployment Model
 
