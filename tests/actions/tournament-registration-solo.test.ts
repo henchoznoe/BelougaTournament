@@ -508,6 +508,48 @@ describe('registerForTournament', () => {
     expect(result.success).toBe(false)
     expect(result.message).toBeTruthy()
   })
+
+  it('should return a donation validation error before starting paid checkout', async () => {
+    mockTournamentFindUnique.mockResolvedValue(
+      makeFreeSoloTournament({
+        registrationType: RegistrationType.PAID,
+        entryFeeAmount: 1000,
+        entryFeeCurrency: 'CHF',
+        donationEnabled: true,
+        donationType: 'FIXED',
+        donationFixedAmount: 500,
+        donationMinAmount: null,
+        refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+        refundDeadlineDays: 7,
+      }),
+    )
+
+    const result = await registerForTournament({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      fieldValues: {},
+      donationAmount: 400,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('Le don doit être de')
+    expect(mockCheckoutSessionsCreate).not.toHaveBeenCalled()
+  })
+
+  it('should bubble up unexpected transaction errors during registration', async () => {
+    mockTransaction.mockRejectedValueOnce(new Error('Database exploded'))
+
+    await expect(
+      registerForTournament({
+        tournamentId: TOURNAMENT_ID,
+        returnPath: RETURN_PATH,
+        fieldValues: {},
+      }),
+    ).resolves.toEqual({
+      success: false,
+      message: 'Internal server error',
+    })
+  })
 })
 
 // ===========================================================================
@@ -681,6 +723,27 @@ describe('updateRegistrationFields', () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it('should return the field validation error when submitted field values are invalid', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(
+      makeRegistrationWithTournament({
+        tournament: makeFreeSoloTournament({
+          fields: [{ label: 'Pseudo', type: 'TEXT', required: true, order: 0 }],
+        }),
+      }),
+    )
+
+    const result = await updateRegistrationFields({
+      registrationId: REGISTRATION_ID,
+      tournamentId: TOURNAMENT_ID,
+      fieldValues: {},
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le champ « Pseudo » est requis.',
+    })
   })
 })
 

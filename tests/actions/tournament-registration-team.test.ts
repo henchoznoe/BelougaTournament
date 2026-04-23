@@ -315,6 +315,50 @@ describe('createTeamAndRegister', () => {
     expect(result.message).toContain('maximum')
   })
 
+  it('should allow team creation when maxTeams is configured but capacity remains', async () => {
+    mockTournamentFindUnique.mockResolvedValue(
+      makeFreeTeamTournament({ maxTeams: 2 }),
+    )
+    mockTransaction.mockImplementation(
+      async (cb: (tx: unknown) => Promise<unknown>) =>
+        cb({
+          tournamentRegistration: {
+            count: mockRegistrationCount,
+            create: mockRegistrationCreate,
+            update: mockRegistrationUpdate,
+            findUnique: mockTxRegistrationFindUnique,
+          },
+          payment: {
+            updateMany: mockPaymentUpdateMany,
+            create: mockPaymentCreate,
+            update: mockPaymentUpdate,
+          },
+          team: {
+            findUnique: mockTeamFindUnique,
+            create: mockTeamCreate,
+            update: mockTeamUpdate,
+            count: vi.fn().mockResolvedValue(1),
+          },
+          teamMember: {
+            create: mockTeamMemberCreate,
+            deleteMany: mockTeamMemberDeleteMany,
+            findFirst: vi.fn().mockResolvedValue(null),
+            count: vi.fn().mockResolvedValue(1),
+          },
+        }),
+    )
+
+    const result = await createTeamAndRegister({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      teamName: TEAM_NAME,
+      fieldValues: {},
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockTeamCreate).toHaveBeenCalledOnce()
+  })
+
   it('should redirect to Stripe checkout when tournament is PAID', async () => {
     mockTournamentFindUnique.mockResolvedValue(
       makeFreeTeamTournament({
@@ -344,6 +388,34 @@ describe('createTeamAndRegister', () => {
       checkoutUrl: 'https://checkout.stripe.test/team-session',
     })
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
+  })
+
+  it('should return a donation validation error before creating the team for paid tournaments', async () => {
+    mockTournamentFindUnique.mockResolvedValue(
+      makeFreeTeamTournament({
+        registrationType: RegistrationType.PAID,
+        entryFeeAmount: 2000,
+        entryFeeCurrency: 'CHF',
+        donationEnabled: true,
+        donationType: 'FIXED',
+        donationFixedAmount: 500,
+        donationMinAmount: null,
+        refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+        refundDeadlineDays: 7,
+      }),
+    )
+
+    const result = await createTeamAndRegister({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      teamName: TEAM_NAME,
+      fieldValues: {},
+      donationAmount: 400,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('Le don doit être de')
+    expect(mockTeamCreate).not.toHaveBeenCalled()
   })
 
   it('should return a friendly error when a concurrent team creation hits the unique team-name constraint', async () => {
@@ -419,6 +491,22 @@ describe('createTeamAndRegister', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toContain('déjà inscrit')
+  })
+
+  it('should bubble up unexpected team creation errors as internal server errors', async () => {
+    mockTransaction.mockRejectedValueOnce(new Error('Database exploded'))
+
+    await expect(
+      createTeamAndRegister({
+        tournamentId: TOURNAMENT_ID,
+        returnPath: RETURN_PATH,
+        teamName: TEAM_NAME,
+        fieldValues: {},
+      }),
+    ).resolves.toEqual({
+      success: false,
+      message: 'Internal server error',
+    })
   })
 })
 
@@ -632,6 +720,34 @@ describe('joinTeamAndRegister', () => {
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
   })
 
+  it('should return a donation validation error before joining a paid team tournament', async () => {
+    mockTournamentFindUnique.mockResolvedValue(
+      makeFreeTeamTournament({
+        registrationType: RegistrationType.PAID,
+        entryFeeAmount: 1500,
+        entryFeeCurrency: 'CHF',
+        donationEnabled: true,
+        donationType: 'FIXED',
+        donationFixedAmount: 500,
+        donationMinAmount: null,
+        refundPolicyType: RefundPolicyType.BEFORE_DEADLINE,
+        refundDeadlineDays: 7,
+      }),
+    )
+
+    const result = await joinTeamAndRegister({
+      tournamentId: TOURNAMENT_ID,
+      returnPath: RETURN_PATH,
+      teamId: TEAM_ID,
+      fieldValues: {},
+      donationAmount: 400,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('Le don doit être de')
+    expect(mockTeamMemberCreate).not.toHaveBeenCalled()
+  })
+
   it('should validate field values before joining the team', async () => {
     mockTournamentFindUnique.mockResolvedValue(
       makeFreeTeamTournament({
@@ -686,5 +802,21 @@ describe('joinTeamAndRegister', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toContain('déjà inscrit')
+  })
+
+  it('should bubble up unexpected join-team errors as internal server errors', async () => {
+    mockTransaction.mockRejectedValueOnce(new Error('Database exploded'))
+
+    await expect(
+      joinTeamAndRegister({
+        tournamentId: TOURNAMENT_ID,
+        returnPath: RETURN_PATH,
+        teamId: TEAM_ID,
+        fieldValues: {},
+      }),
+    ).resolves.toEqual({
+      success: false,
+      message: 'Internal server error',
+    })
   })
 })

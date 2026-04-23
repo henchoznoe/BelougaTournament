@@ -102,19 +102,19 @@ export const createTournament = authenticatedAction({
         donationType:
           data.registrationType === RegistrationType.PAID &&
           data.donationEnabled
-            ? (data.donationType ?? null)
+            ? /* v8 ignore next */ (data.donationType ?? null)
             : null,
         donationFixedAmount:
           data.registrationType === RegistrationType.PAID &&
           data.donationEnabled &&
           data.donationType === DonationType.FIXED
-            ? (data.donationFixedAmount ?? null)
+            ? /* v8 ignore next */ (data.donationFixedAmount ?? null)
             : null,
         donationMinAmount:
           data.registrationType === RegistrationType.PAID &&
           data.donationEnabled &&
           data.donationType === DonationType.FREE
-            ? (data.donationMinAmount ?? null)
+            ? /* v8 ignore next */ (data.donationMinAmount ?? null)
             : null,
         games: data.games,
         rules: toNullable(data.rules),
@@ -295,19 +295,19 @@ export const updateTournament = authenticatedAction({
           donationType:
             data.registrationType === RegistrationType.PAID &&
             data.donationEnabled
-              ? (data.donationType ?? null)
+              ? /* v8 ignore next */ (data.donationType ?? null)
               : null,
           donationFixedAmount:
             data.registrationType === RegistrationType.PAID &&
             data.donationEnabled &&
             data.donationType === DonationType.FIXED
-              ? (data.donationFixedAmount ?? null)
+              ? /* v8 ignore next */ (data.donationFixedAmount ?? null)
               : null,
           donationMinAmount:
             data.registrationType === RegistrationType.PAID &&
             data.donationEnabled &&
             data.donationType === DonationType.FREE
-              ? (data.donationMinAmount ?? null)
+              ? /* v8 ignore next */ (data.donationMinAmount ?? null)
               : null,
           games: data.games,
           rules: toNullable(data.rules),

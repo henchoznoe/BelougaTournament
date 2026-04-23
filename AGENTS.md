@@ -34,6 +34,8 @@ pnpm vitest run -t "test name pattern"
 
 Tests live in the top-level `tests/` directory (NOT colocated), organized by layer. Vitest `globals: true` (no need to import `describe`/`it`/`expect`). Environment: `node`.
 
+Every new feature, behavior change, or bug fix must ship with automated tests in the same change set. Work is not considered complete without the relevant unit tests, and the project's primary QA objective is to drive the overall test suite toward **100% coverage**.
+
 ```
 tests/
 ├── utils/          # lib/utils/* helpers
