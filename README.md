@@ -12,186 +12,225 @@
 [![Lines of Code](https://img.shields.io/badge/dynamic/json?label=lines%20of%20code&query=%24%5B-1%3A%5D.linesOfCode&url=https%3A%2F%2Fapi.codetabs.com%2Fv1%2Floc%3Fgithub%3Dhenchoznoe%2FBelougaTournament&color=blue)](https://github.com/henchoznoe/BelougaTournament)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Modern Tournament Management Platform
+## Belouga Tournament
 
-Built with Next.js 16, Prisma 7, and TailwindCSS v4.
+Tournament management platform for modern e-sports communities.
 
 </div>
 
-## 📝 Description
+## Overview
 
-**Belouga Tournament** is a robust, full-stack tournament management platform redesigned for modern e-sports communities. Migrated from a legacy stack to **Next.js 16 (App Router)**, it focuses on performance, type safety, developer experience, and a premium "Dark Glass" gamer aesthetic.
+**Belouga Tournament** is a production-ready full-stack platform for running amateur e-sports tournaments with a polished public-facing experience and a complete admin back office.
 
-The platform enables administrators to host and manage diverse gaming tournaments (creation, custom dynamic fields, brackets via Toornament) while providing a frictionless, 1-click Discord registration experience for players (Solo/Team), including Stripe-powered paid registrations with automated refund management.
+The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreSQL**, **Better Auth**, and **Stripe**. It supports **Discord login**, **solo and team registrations**, **paid checkouts with refund workflows**, **Toornament stage mapping**, **Twitch embeds**, **sponsor management**, and a full **admin dashboard** for operating the platform end to end.
 
-## 🚀 Tech Stack
+Version **1.0.0** marks the first complete public release of the new platform.
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, RSC, `cacheComponents`)
-- **Database:** PostgreSQL (via [Supabase](https://supabase.com/))
-- **ORM:** [Prisma 7](https://www.prisma.io/) (PrismaPg adapter, raw SQL via `$queryRaw`)
-- **Authentication:** [BetterAuth](https://better-auth.com/) (Discord OAuth Provider)
-- **Payments:** [Stripe](https://stripe.com/) (Checkout Sessions, Webhooks, Refunds)
-- **Object Storage:** [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob) (Banners, Sponsor Logos)
-- **Types:** TypeScript (Strict)
-- **UI:** [shadcn/ui](https://ui.shadcn.com/) (new-york, zinc) + [TailwindCSS v4](https://tailwindcss.com/)
-- **State/Form:** React Hook Form + Zod v4 + Server Actions
-- **Markdown:** [React Markdown](https://github.com/remarkjs/react-markdown)
-- **Tooling:** [Biome](https://biomejs.dev/) (Linting/Formatting — replaces ESLint + Prettier)
-- **Tests:** [Vitest](https://vitest.dev/) + `@vitest/coverage-v8`
+## Highlights
 
-## ✨ Core Features
+- Public landing page with hero badge, featured tournaments, live stream section, sponsors, and configurable marketing content.
+- Discord OAuth authentication with server-side session handling.
+- Tournament hub with published and archived listings, filters, pagination, and detailed tournament pages.
+- Registration flows for both **solo** and **team** formats.
+- Paid tournaments powered by Stripe Checkout with slot reservation, webhook confirmation, expiration handling, and refunds.
+- Team management flows: create, join, rename, captain actions, and optional team logo upload.
+- Admin dashboard for tournaments, users, sponsors, global settings, registrations, teams, and payment visibility.
+- Cached server-side data layer built around Next.js `cacheComponents`, `cacheLife`, and `cacheTag`.
+- Strict validation and type safety with Zod v4, TypeScript strict mode, Prisma enums, and automated tests.
 
-### 🎮 Public Interface
+## Product Scope
 
-- **Dynamic Landing Page:** Hero tournament badge (live/upcoming state), sponsor showcase, and Twitch stream integration.
-- **1-Click Discord Login:** Frictionless authentication relying on immutable Discord IDs.
-- **Tournament Hub:** Detailed views including rules, cashprize, dynamic format (Solo/Team) with real-time status badges (`PRÉVU`, `EN COURS`, `TERMINÉ`).
-- **Registration Engine:**
-  - **Paid registrations:** Stripe Checkout with a 30-minute slot hold; automatic refunds on cancellation.
-  - **Dynamic Fields:** Admin-defined custom questions (Riot ID, Rank, etc.).
-  - **Team Management:** Full Captain + Teammates flow (create, join, rename, dissolve).
-  - **Validation:** Real-time quota (slot limits) and deadline checks.
-- **Profile Page:** View active registrations, edit display name, manage team membership.
+### Public experience
 
-### 🛡️ Admin Dashboard
+- Landing page with configurable features, sponsor section, and Twitch stream integration.
+- Tournament catalogue with upcoming and archived competitions.
+- Tournament detail pages with rules, prize, stream, bracket stage references, dynamic custom fields, and registration status.
+- User profile with active tournaments, registration history, and editable display name.
+- Legal, privacy, terms, contact, login, unauthorized, and stream pages.
 
-- **Dual-Layer Security:** Edge middleware (`proxy.ts`) + `AdminGuard` server component.
-- **Tournament CRUD:** Full lifecycle management (Draft → Published → Archived).
-- **Form Builder:** Configure custom dynamic registration fields per tournament.
-- **Registration & Team Moderation:** Kick players, dissolve teams, change teams, promote captains, issue refunds.
-- **Platform Management:** Sponsor management, global settings (logo, Twitch, socials, feature flags), user role assignment.
-- **Vercel Blob integration:** Upload/list/delete images (banners, sponsor logos) from the admin UI.
+### Admin experience
 
-## 🗂️ Project Structure
+- Dashboard with platform stats, recent activity, and payment summaries.
+- Tournament CRUD with dynamic registration fields, stage configuration, images, payment options, donation settings, and publication lifecycle.
+- Registration moderation including cancellation, refund, field updates, and team-level management.
+- User administration including role changes, bans, and cleanup of active registrations.
+- Sponsor CRUD and global platform settings management.
+- Vercel Blob-backed file handling for logos, sponsors, tournaments, and team logos.
+
+## Current Status
+
+### Production-ready in v1.0.0
+
+- Public tournament discovery and registration flows.
+- Admin back office for operating the platform.
+- Discord authentication and role-based admin access.
+- Stripe payment and refund pipeline.
+- Blob uploads for admin assets and team logos.
+- Automated tests, CI, and typed validation across the stack.
+
+### Not fully implemented yet
+
+- `/leaderboard` is currently a placeholder page for a future release.
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router, RSC, Server Actions, `cacheComponents`) |
+| UI | React 19, TailwindCSS v4, shadcn/ui |
+| Language | TypeScript (strict) |
+| Database | PostgreSQL |
+| ORM | Prisma 7 with PrismaPg adapter |
+| Auth | Better Auth with Discord OAuth |
+| Payments | Stripe Checkout, Webhooks, Refunds |
+| Storage | Vercel Blob |
+| Validation | Zod v4 + react-hook-form |
+| Quality | Biome, Vitest, Codecov, Husky, lint-staged |
+| Hosting | Vercel |
+
+## Project Structure
 
 ```bash
-├── app/                  # Next.js App Router
-│   ├── (public)/         # Public facing routes (Landing, Tournaments, Profile, Legal, ...)
-│   ├── admin/            # Protected Admin Dashboard routes
-│   └── api/              # API endpoints (Auth, Blob CRUD, Stripe webhook)
-├── components/           # React Components
-│   ├── admin/            # Admin domain components
-│   │   ├── dashboard/    # Stats, recent logins, payments panels
-│   │   ├── hooks/        # Shared admin hooks (useListSort, useBlobList, useLogout, useClientPagination)
-│   │   ├── tournaments/  # Tournament list, detail, registrations, teams, form tabs
-│   │   ├── users/        # User list, detail, dropdown
-│   │   ├── sponsors/     # Sponsor list, form, detail
-│   │   ├── settings/     # Settings form, logo picker
-│   │   └── ui/           # Admin shell (sidebar, topbar, breadcrumb, skeleton)
-│   ├── public/           # Public domain components (auth, contact, landing, layout, legal, profile, stream, tournaments)
-│   └── ui/               # Reusable shadcn/ui primitives + custom (markdown, page-header, role-badge, scroll-to-top)
-├── lib/                  # Core Utilities & Business Logic
-│   ├── actions/          # Server Actions (authenticatedAction wrapper)
-│   ├── config/           # Routes, constants (CACHE_TAGS, VALIDATION_LIMITS, time helpers), admin nav
-│   ├── core/             # Auth, Prisma client, env validation, logger, Stripe client
-│   ├── services/         # Data access with 'use cache' + cacheTag + cacheLife
-│   ├── types/            # TypeScript types (ActionState, AuthSession, domain types)
-│   ├── utils/            # cn, formatting (formatCentimes, parseCentimes), prisma-error, auth helpers, team helpers
-│   └── validations/      # Zod v4 schemas
-├── prisma/               # Database Schema, Migrations & Seed
-├── public/               # Static Assets
-├── tests/                # Unit tests organized by layer (NOT colocated)
-└── proxy.ts              # Edge middleware — /admin/* route protection
+.
+├── app/                  # Next.js routes, layouts, error pages, API routes
+├── components/           # UI split by public/admin/shared domains
+├── lib/
+│   ├── actions/          # Server mutations
+│   ├── services/         # Cached read-side access
+│   ├── core/             # Auth, env, logger, Prisma, Stripe
+│   ├── config/           # Routes and constants
+│   ├── validations/      # Zod schemas
+│   ├── utils/            # Formatting, auth, refund, team, image helpers
+│   └── types/            # Shared TypeScript types
+├── prisma/               # Schema, migrations, seed, generated client
+├── public/               # Static assets and fonts
+├── tests/                # Top-level Vitest suites
+├── proxy.ts              # Edge protection for /admin/*
+└── .github/workflows/ci.yml
 ```
 
-## 🛠️ Getting Started
+For a deeper technical breakdown, see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 22+ (CI uses Node 22)
-- Docker & Docker Compose (for local database)
-- pnpm
+- Node.js 22+
+- pnpm 10+
+- Docker
+- Stripe CLI if you want to test webhooks locally
 
 ### Installation
 
-1. **Clone the repository:**
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm docker:up
+pnpm migrate
+pnpm dev
+```
 
-    ```bash
-    git clone https://github.com/henchoznoe/belouga-tournament.git
-    cd belouga-tournament
-    ```
+The app runs on `http://localhost:3000`.
 
-2. **Install dependencies:**
+## Environment
 
-    ```bash
-    pnpm install
-    ```
+The repo includes a `.env.example` template.
 
-3. **Environment Setup:**
-    Duplicate `.env.example` to `.env.local` and fill in your secrets (Discord OAuth, Stripe keys, Vercel Blob token, ...).
+Important variables:
 
-    ```bash
-    cp .env.example .env.local
-    ```
+- `DATABASE_URL` and `DIRECT_URL` for PostgreSQL.
+- `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` for auth.
+- `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` for Discord OAuth.
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` for payments.
+- `BLOB_READ_WRITE_TOKEN` for Vercel Blob.
+- `ADMIN_EMAILS` for seeding admin accounts.
+- `OWNER_EMAILS` for owner-only runtime permissions.
 
-    *Note: Your local `.env.local` should point to your Docker PostgreSQL instance (`postgresql://postgres:postgres@localhost:5432/belouga_tournament`).*
+Notes:
 
-4. **Database Initialization:**
+- Prisma CLI loads `.env.local` through `prisma.config.ts`.
+- `ADMIN_EMAILS` and `OWNER_EMAILS` are separate concerns.
+- `pnpm build` and `pnpm db:deploy` both run migrations and seed logic against the configured database.
 
-    ```bash
-    # Start local Docker infrastructure
-    pnpm docker:up
+## Development Commands
 
-    # Generate Prisma Client and apply migrations to local DB
-    pnpm migrate
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Start the Next.js dev server |
+| `pnpm build` | Generate Prisma client, deploy migrations, seed, then build Next.js |
+| `pnpm start` | Start the production server |
+| `pnpm exec tsc --noEmit` | Run TypeScript type-checking |
+| `pnpm exec biome check .` | Run formatter/linter check without writing |
+| `pnpm check` | Run Biome and write fixes |
+| `pnpm test` | Run Vitest once |
+| `pnpm test:coverage` | Run Vitest with coverage |
+| `pnpm generate` | Generate Prisma client |
+| `pnpm migrate` | Create and apply a local Prisma migration |
+| `pnpm db:deploy` | Generate Prisma client, deploy migrations, seed database |
+| `pnpm db:studio` | Open Prisma Studio |
+| `pnpm docker:up` | Start local PostgreSQL |
+| `pnpm docker:down` | Stop local PostgreSQL |
+| `pnpm stripe:listen` | Start Stripe webhook forwarding |
 
-    # (Optional) Launch Prisma Studio
-    pnpm db:studio
-    ```
+### Focused test runs
 
-5. **Run Development Server:**
+```bash
+pnpm vitest run tests/path/to/file.test.ts
+pnpm vitest run -t "test name"
+```
 
-    ```bash
-    pnpm dev
-    ```
+## Quality Workflow
 
-    > Visit [http://localhost:3000](http://localhost:3000).
+CI runs the following checks in this order:
 
-## 📜 Scripts
+```bash
+pnpm exec tsc --noEmit
+pnpm exec biome check .
+pnpm test:coverage
+```
 
-| Script | Description |
-| :--- | :--- |
-| `pnpm dev` | Starts the development server. |
-| `pnpm build` | Generates Prisma client, applies pending migrations, seeds admin data, and builds the app. |
-| `pnpm start` | Starts the production server. |
-| `pnpm lint` | Runs **Biome** to check for linting errors. |
-| `pnpm format` | Formatting fix with Biome. |
-| `pnpm check` | Runs **Biome** lint + format and applies fixes. |
-| `pnpm test` | Runs all Vitest tests. |
-| `pnpm test:coverage` | Runs Vitest with v8 coverage report. |
-| `pnpm knip` | Detects dead/unused code. |
-| `pnpm generate` | Generates Prisma client. |
-| `pnpm migrate` | Creates and applies local migrations (`prisma migrate dev`). Use when altering `schema.prisma`. |
-| `pnpm db:deploy` | Applies pending migrations and seeds the database (used automatically during build). |
-| `pnpm db:reset` | Resets the database (Force). |
-| `pnpm db:studio` | Opens Prisma Studio to visualize data. |
-| `pnpm docker:up` | Starts the local infrastructure (PostgreSQL). |
-| `pnpm docker:down` | Stops the local infrastructure. |
-| `pnpm stripe:listen` | Starts Stripe CLI to listen for webhook events. |
-| `pnpm stripe:listen:live` | Starts Stripe CLI to listen for webhook events in live mode. |
+Pre-commit only runs Biome on staged `*.{ts,tsx,css}` files through `lint-staged`, so local type-checking and tests are still your responsibility before shipping changes.
 
-## 🏗️ Deployment (Vercel)
+## Architectural Principles
 
-We use a strict 3-tier database architecture to ensure data safety:
+- **Server mutations** go through `lib/actions/` via `authenticatedAction`.
+- **Read-side data access** lives in `lib/services/` and usually uses `'use cache'` with tagged invalidation.
+- **Admin access control** is enforced both at the edge (`proxy.ts`) and in the app layer (`AdminGuard`).
+- **Session reads** happen server-side through `getSession()` and are passed down as props when possible.
+- **Environment access** is centralized in `lib/core/env.ts`, with edge/Prisma exceptions.
+- **Prisma enum values** are imported from `@/prisma/generated/prisma/enums`, never hardcoded.
+- **Monetary values** are stored in centimes and formatted through shared helpers.
 
-- **Local**: Docker Container (`belouga_tournament_db`)
-- **Preview**: Supabase Staging Project (on branch `develop`)
-- **Production**: Supabase Production Project (on branch `main`)
+## Payment Model
 
-### Vercel configuration
+Paid registrations use a DB-first workflow with Stripe as the payment processor:
 
-1. **Environment variables**
+- a registration and payment record are created server-side,
+- the user is redirected to Stripe Checkout,
+- the webhook confirms or expires the registration,
+- refund flows update the database first and reconcile Stripe afterward.
 
-- Do not use `.env.preview` or `.env.production` files.
-- Go to **Vercel Project Settings > Environment Variables**.
-- Assign variables to the specific **Environment** (Preview or Production).
+This keeps tournament capacity, registration state, and payment state consistent even when external payment steps fail.
 
-2. **Automated migrations**
+## Deployment Notes
 
-- Vercel automatically handles database migrations during deployment.
-- The `build` script (`prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build`) ensures the target database is always up-to-date before compiling.
-- **Important**: Never use `prisma migrate dev` on a remote database. Always use `pnpm migrate` locally and commit the generated SQL files.
+The project is designed for Vercel deployment.
 
-## 📄 License
+- `pnpm build` includes `prisma migrate deploy` and `tsx prisma/seed.ts` before `next build`.
+- Local database changes should be created with `pnpm migrate`, then committed as Prisma migrations.
+- Do not run `prisma migrate dev` against remote environments.
+- The root layout disables indexing outside production via metadata derived from `VERCEL_ENV`.
+
+## Why This Project Exists
+
+Belouga Tournament was built to replace a legacy tournament-management stack with a modern, maintainable, and production-safe architecture while preserving what matters most to the community:
+
+- frictionless player onboarding,
+- clean tournament operations,
+- reliable payment handling,
+- a strong visual identity,
+- and a codebase that remains pleasant to evolve after launch.
+
+## License
 
 This project is licensed under the MIT License.
