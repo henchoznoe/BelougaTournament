@@ -9,7 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MINUTE_IN_MS, REGISTRATION_HOLD_MINUTES } from '@/lib/config/constants'
 import {
-  type DonationType,
+  DonationType,
   FieldType,
   PaymentStatus,
   RefundPolicyType,
@@ -224,6 +224,39 @@ describe('fetchTournamentForRegistration', () => {
     expect(mockCleanupExpiredPendingRegistrations).not.toHaveBeenCalled()
   })
 
+  it('should reject users with a permanent ban when bannedUntil is null', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: new Date('2026-04-20T00:00:00.000Z'),
+      bannedUntil: null,
+    })
+
+    const result = await fetchTournamentForRegistration(USER_ID, TOURNAMENT_ID)
+
+    expect(result).toEqual({
+      error: {
+        success: false,
+        message:
+          'Votre compte est suspendu. Vous ne pouvez pas vous inscrire à des tournois.',
+      },
+    })
+  })
+
+  it('should ignore expired bans and continue with registration pre-checks', async () => {
+    const tournament = createTournament()
+    mockUserFindUnique.mockResolvedValue({
+      bannedAt: new Date('2026-04-20T00:00:00.000Z'),
+      bannedUntil: new Date('2026-04-21T00:00:00.000Z'),
+    })
+    mockTournamentFindUnique.mockResolvedValue(tournament)
+
+    const result = await fetchTournamentForRegistration(USER_ID, TOURNAMENT_ID)
+
+    expect(result).toEqual({
+      tournament,
+      existingRegistration: null,
+    })
+  })
+
   it('should reject unpublished tournaments', async () => {
     mockTournamentFindUnique.mockResolvedValue(
       createTournament({ status: TournamentStatus.DRAFT }),
@@ -394,6 +427,39 @@ describe('startPaidRegistrationCheckout', () => {
     vi.clearAllMocks()
   })
 
+  const createPaidTournament = (
+    overrides: Partial<TournamentForHelpers> = {},
+  ): TournamentForHelpers =>
+    createTournament({
+      registrationType: RegistrationType.PAID,
+      entryFeeAmount: 1500,
+      entryFeeCurrency: 'CHF',
+      ...overrides,
+    })
+
+  const createCheckoutTransaction = (
+    currentRegistration: {
+      id: string
+      status: RegistrationStatus
+      paymentStatus: PaymentStatus
+    } | null,
+  ) => {
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) =>
+        callback({
+          tournamentRegistration: {
+            findUnique: vi.fn().mockResolvedValue(currentRegistration),
+            update: mockRegistrationUpdate,
+          },
+          payment: {
+            updateMany: mockPaymentUpdateMany,
+            create: mockPaymentCreate,
+            update: mockPaymentUpdate,
+          },
+        }),
+    )
+  }
+
   it('should fail fast when the paid tournament is missing Stripe pricing configuration', async () => {
     const result = await startPaidRegistrationCheckout({
       registrationId: EXISTING_REGISTRATION_ID,
@@ -415,5 +481,283 @@ describe('startPaidRegistrationCheckout', () => {
     expect(mockTransaction).not.toHaveBeenCalled()
     expect(mockCheckoutCreate).not.toHaveBeenCalled()
     expect(mockRemoveUserFromTeam).not.toHaveBeenCalled()
+  })
+
+  it('should return the donation validation error before touching Stripe state', async () => {
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament({
+        donationEnabled: true,
+        donationType: DonationType.FIXED,
+        donationFixedAmount: 500,
+        donationMinAmount: null,
+      }),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+      donationAmount: 400,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Le don doit être de 5.00 CHF.',
+    })
+    expect(mockPaymentFindMany).not.toHaveBeenCalled()
+  })
+
+  it('should ignore pending payments without a checkout session id before creating a new checkout', async () => {
+    mockPaymentFindMany.mockResolvedValue([{ stripeCheckoutSessionId: null }])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'payment-1' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_1',
+      url: 'https://checkout.stripe.test/session',
+      customer: null,
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Redirection vers Stripe…',
+      data: { checkoutUrl: 'https://checkout.stripe.test/session' },
+    })
+    expect(mockCheckoutExpire).not.toHaveBeenCalled()
+  })
+
+  it('should build checkout URLs with an ampersand when the return path already contains a query string', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'payment-1' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_3',
+      url: 'https://checkout.stripe.test/session-3',
+      customer: { id: 'cus_obj' },
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: {
+        ...createPaidTournament(),
+        title: undefined as unknown as string,
+      },
+      userId: USER_ID,
+      returnPath: `${RETURN_PATH}?foo=bar`,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockCheckoutCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url:
+          'https://belouga.test/tournaments/belouga-cup?foo=bar&stripe=success',
+        cancel_url:
+          'https://belouga.test/tournaments/belouga-cup?foo=bar&stripe=cancelled',
+        line_items: [
+          expect.objectContaining({
+            price_data: expect.objectContaining({
+              product_data: { name: 'Inscription - Tournoi' },
+            }),
+          }),
+        ],
+      }),
+      { idempotencyKey: 'payment-1' },
+    )
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: 'payment-1' },
+      data: {
+        status: PaymentStatus.PENDING,
+        stripeCheckoutSessionId: 'cs_test_3',
+        stripeCustomerId: null,
+      },
+    })
+  })
+
+  it('should persist a string Stripe customer id when Stripe returns one', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'payment-2' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_4',
+      url: 'https://checkout.stripe.test/session-4',
+      customer: 'cus_string',
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: 'payment-2' },
+      data: {
+        status: PaymentStatus.PENDING,
+        stripeCheckoutSessionId: 'cs_test_4',
+        stripeCustomerId: 'cus_string',
+      },
+    })
+  })
+
+  it('should continue checkout creation when expiring an old Stripe session fails', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      { stripeCheckoutSessionId: 'cs_old_pending' },
+    ])
+    mockCheckoutExpire.mockRejectedValue(new Error('session already closed'))
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'payment-1' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_2',
+      url: 'https://checkout.stripe.test/session-2',
+      customer: null,
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Redirection vers Stripe…',
+      data: { checkoutUrl: 'https://checkout.stripe.test/session-2' },
+    })
+    expect(mockCheckoutExpire).toHaveBeenCalledWith('cs_old_pending')
+  })
+
+  it('should return a friendly error when the registration no longer exists inside the transaction', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction(null)
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Inscription introuvable.',
+    })
+  })
+
+  it('should return a friendly error when the registration is already confirmed', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.CONFIRMED,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre inscription est déjà confirmée.',
+    })
+  })
+
+  it('should return a friendly error when the registration payment is already marked as paid', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PAID,
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Votre inscription est déjà confirmée.',
+    })
+  })
+
+  it('should return a checkout creation error when Stripe does not provide a URL', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    createCheckoutTransaction({
+      id: EXISTING_REGISTRATION_ID,
+      status: RegistrationStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    })
+    mockPaymentCreate.mockResolvedValue({ id: 'payment-1' })
+    mockCheckoutCreate.mockResolvedValue({
+      id: 'cs_test_1',
+      url: null,
+      customer: null,
+    })
+
+    const result = await startPaidRegistrationCheckout({
+      registrationId: EXISTING_REGISTRATION_ID,
+      tournament: createPaidTournament(),
+      userId: USER_ID,
+      returnPath: RETURN_PATH,
+    })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Impossible de créer la session de paiement Stripe.',
+    })
+    expect(mockRemoveUserFromTeam).toHaveBeenCalledOnce()
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: 'payment-1' },
+      data: { status: PaymentStatus.FAILED },
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: EXISTING_REGISTRATION_ID },
+      data: expect.objectContaining({
+        status: RegistrationStatus.EXPIRED,
+        paymentStatus: PaymentStatus.FAILED,
+        teamId: null,
+      }),
+    })
+  })
+
+  it('should rethrow unexpected transaction errors', async () => {
+    mockPaymentFindMany.mockResolvedValue([])
+    mockTransaction.mockRejectedValue(new Error('transaction exploded'))
+
+    await expect(
+      startPaidRegistrationCheckout({
+        registrationId: EXISTING_REGISTRATION_ID,
+        tournament: createPaidTournament(),
+        userId: USER_ID,
+        returnPath: RETURN_PATH,
+      }),
+    ).rejects.toThrow('transaction exploded')
   })
 })

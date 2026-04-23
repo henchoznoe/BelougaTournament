@@ -357,6 +357,18 @@ describe('tournament-team actions', () => {
   // ---------------------------------------------------------------------------
 
   describe('updateTeamName', () => {
+    it('returns an error when the team cannot be found', async () => {
+      mockGetSession.mockResolvedValue(USER_SESSION)
+      mockTeamFindUnique.mockResolvedValue(null)
+
+      expect(
+        await updateTeamName({ teamId: TEAM_UUID, name: 'New Name' }),
+      ).toEqual({
+        success: false,
+        message: 'Équipe introuvable.',
+      })
+    })
+
     it('rejects a non-captain user', async () => {
       mockGetSession.mockResolvedValue(USER_SESSION)
       mockTeamFindUnique.mockResolvedValue({
