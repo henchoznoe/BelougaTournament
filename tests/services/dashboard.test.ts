@@ -7,6 +7,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_CURRENCY } from '@/lib/config/constants'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 // ---------------------------------------------------------------------------
@@ -343,6 +344,26 @@ describe('getDashboardPaymentStats', () => {
     expect(result.netRevenue).toBe(0)
   })
 
+  it('falls back to the default currency when the first payment currency is empty', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1000,
+        currency: '',
+        status: 'PAID',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.currency).toBe(DEFAULT_CURRENCY)
+  })
+
   it('groups payments by tournament and sorts by revenue descending', async () => {
     mockPaymentFindMany.mockResolvedValue([
       {
@@ -501,6 +522,65 @@ describe('getDashboardPaymentStats', () => {
     expect(result.forfeitedCount).toBe(2)
     expect(result.byTournament[0].donations).toBe(1800)
     expect(result.byTournament[0].donationCount).toBe(2)
+  })
+
+  it('does not count forfeited donations when the whole amount is already a donation', async () => {
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 500,
+        currency: 'CHF',
+        status: 'FORFEITED',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: 500,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalDonations).toBe(0)
+    expect(result.donationCount).toBe(0)
+    expect(result.byTournament[0].donations).toBe(0)
+  })
+
+  it('skips payment aggregation safely when a grouped tournament entry is unexpectedly missing', async () => {
+    const originalGet = Map.prototype.get
+    const mapGetSpy = vi
+      .spyOn(Map.prototype, 'get')
+      .mockImplementation(function (this: Map<string, unknown>, key: string) {
+        if (key === 't1') {
+          return undefined
+        }
+
+        return Reflect.apply(originalGet, this, [key]) as unknown
+      })
+
+    mockPaymentFindMany.mockResolvedValue([
+      {
+        amount: 1000,
+        currency: 'CHF',
+        status: 'PAID',
+        refundAmount: null,
+        stripeFee: null,
+        donationAmount: null,
+        registration: {
+          tournament: { id: 't1', title: 'Tournoi A', slug: 'tournoi-a' },
+        },
+      },
+    ])
+
+    const result = await getDashboardPaymentStats()
+
+    expect(result.totalRevenue).toBe(0)
+    expect(result.transactionCount).toBe(0)
+    expect(result.byTournament).toEqual([
+      expect.objectContaining({ id: 't1', revenue: 0 }),
+    ])
+
+    mapGetSpy.mockRestore()
   })
 
   it('returns empty stats on database error', async () => {

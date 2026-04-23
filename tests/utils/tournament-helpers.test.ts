@@ -12,9 +12,29 @@ vi.mock('server-only', () => ({}))
 
 import {
   isRefundEligible,
+  parseFieldValues,
   validateFieldValues,
 } from '@/lib/utils/tournament-helpers'
-import { RefundPolicyType } from '@/prisma/generated/prisma/enums'
+import { FieldType, RefundPolicyType } from '@/prisma/generated/prisma/enums'
+
+const KNOWN_FIELD_LABEL = 'Pseudo'
+const UNKNOWN_FIELD_LABEL = 'Discord'
+
+describe('parseFieldValues', () => {
+  it('returns an empty object for nullish, primitive, and array values', () => {
+    expect(parseFieldValues(null)).toEqual({})
+    expect(parseFieldValues(undefined)).toEqual({})
+    expect(parseFieldValues('Belouga')).toEqual({})
+    expect(parseFieldValues([])).toEqual({})
+  })
+
+  it('returns the original object for valid field values objects', () => {
+    expect(parseFieldValues({ Pseudo: 'Alice', Score: 10 })).toEqual({
+      Pseudo: 'Alice',
+      Score: 10,
+    })
+  })
+})
 
 // ---------------------------------------------------------------------------
 // validateFieldValues
@@ -46,9 +66,21 @@ describe('validateFieldValues', () => {
   })
 
   it('returns invalid when a required field is empty string', () => {
-    const fields = [{ label: 'Pseudo', type: 'TEXT', required: true }]
-    const result = validateFieldValues(fields, { Pseudo: '' })
+    const fields = [{ label: KNOWN_FIELD_LABEL, type: 'TEXT', required: true }]
+    const result = validateFieldValues(fields, { [KNOWN_FIELD_LABEL]: '' })
     expect(result.valid).toBe(false)
+  })
+
+  it('returns invalid when field values contain an undefined field label', () => {
+    const fields = [{ label: KNOWN_FIELD_LABEL, type: 'TEXT', required: false }]
+    const result = validateFieldValues(fields, {
+      [UNKNOWN_FIELD_LABEL]: 'Belouga#1234',
+    })
+
+    expect(result).toEqual({
+      valid: false,
+      message: "Le champ « Discord » n'est pas défini pour ce tournoi.",
+    })
   })
 
   it('accepts optional fields when absent', () => {
@@ -57,7 +89,7 @@ describe('validateFieldValues', () => {
   })
 
   it('returns valid for a NUMBER field with a numeric value', () => {
-    const fields = [{ label: 'ELO', type: 'NUMBER', required: true }]
+    const fields = [{ label: 'ELO', type: FieldType.NUMBER, required: true }]
     expect(validateFieldValues(fields, { ELO: 1500 })).toEqual({ valid: true })
   })
 

@@ -68,4 +68,21 @@ describe('runSerializableTransaction', () => {
     expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(handler).not.toHaveBeenCalled()
   })
+
+  it('throws the fallback error when the retry loop is skipped entirely', async () => {
+    vi.resetModules()
+    vi.doMock('@/lib/config/constants', () => ({
+      SERIALIZABLE_TRANSACTION_MAX_RETRIES: 0,
+    }))
+
+    const { runSerializableTransaction: runWithZeroRetries } = await import(
+      '@/lib/actions/serializable-transaction'
+    )
+
+    await expect(runWithZeroRetries(async () => 'done')).rejects.toThrow(
+      'Serializable transaction retry loop exited unexpectedly.',
+    )
+
+    vi.doUnmock('@/lib/config/constants')
+  })
 })

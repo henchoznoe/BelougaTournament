@@ -12,6 +12,7 @@
     "format": "biome format . --write",
     "check": "biome check --write .",
     "check:all": "biome check --write . && knip",
+    "check:com": "biome check --write . && knip && vitest run && tsc --noEmit && next build",
     "knip": "knip",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

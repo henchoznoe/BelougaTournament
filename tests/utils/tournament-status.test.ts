@@ -71,4 +71,16 @@ describe('extractTwitchChannel', () => {
   it('returns the raw value when the string is not a valid URL', () => {
     expect(extractTwitchChannel('quentadou')).toBe('quentadou')
   })
+
+  it('returns the raw value for valid non-Twitch URLs', () => {
+    expect(extractTwitchChannel('https://www.youtube.com/@belouga')).toBe(
+      'https://www.youtube.com/@belouga',
+    )
+  })
+
+  it('falls back to the raw Twitch URL when no channel segment exists', () => {
+    expect(extractTwitchChannel('https://www.twitch.tv/')).toBe(
+      'https://www.twitch.tv/',
+    )
+  })
 })

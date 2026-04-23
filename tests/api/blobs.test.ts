@@ -7,6 +7,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MAX_ADMIN_UPLOAD_SIZE } from '@/lib/config/constants'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 vi.mock('server-only', () => ({}))
@@ -101,6 +102,11 @@ const createFile = (name: string, type: string, sizeBytes = 100): File => {
   return new File([buffer], name, { type })
 }
 
+const createInvalidImageFile = (name: string, type: string): File => {
+  const buffer = new Uint8Array([0x00, 0x01, 0x02, 0x03])
+  return new File([buffer], name, { type })
+}
+
 describe('GET /api/admin/blobs', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -135,11 +141,26 @@ describe('GET /api/admin/blobs', () => {
     expect(mockList).toHaveBeenCalledWith({ prefix: 'logos/' })
   })
 
+  it('lists blobs without a prefix when no folder is provided', async () => {
+    const response = await GET(makeGetRequest())
+
+    expect(response.status).toBe(200)
+    expect(mockList).toHaveBeenCalledWith({ prefix: undefined })
+  })
+
   it('rejects invalid folder filters instead of listing all blobs', async () => {
     const response = await GET(makeGetRequest('../secrets'))
 
     expect(response.status).toBe(400)
     expect(mockList).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when blob listing fails', async () => {
+    mockList.mockRejectedValue(new Error('blob list failed'))
+
+    const response = await GET(makeGetRequest('logos'))
+
+    expect(response.status).toBe(500)
   })
 })
 
@@ -156,6 +177,14 @@ describe('POST /api/admin/blobs', () => {
     expect(response.status).toBe(400)
   })
 
+  it('returns 401 when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    const response = await POST(makePostRequest(new FormData()))
+
+    expect(response.status).toBe(401)
+  })
+
   it('returns 400 for unsupported file type', async () => {
     const formData = new FormData()
     formData.set('file', createFile('logo.svg', 'image/svg+xml'))
@@ -163,6 +192,29 @@ describe('POST /api/admin/blobs', () => {
     const response = await POST(makePostRequest(formData))
 
     expect(response.status).toBe(400)
+  })
+
+  it('returns 400 when the file exceeds the maximum upload size', async () => {
+    const formData = new FormData()
+    formData.set(
+      'file',
+      createFile('large.png', 'image/png', MAX_ADMIN_UPLOAD_SIZE + 1),
+    )
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(400)
+    expect(mockPut).not.toHaveBeenCalled()
+  })
+
+  it('returns 400 when the image magic bytes do not match the declared mime type', async () => {
+    const formData = new FormData()
+    formData.set('file', createInvalidImageFile('spoofed.png', 'image/png'))
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(400)
+    expect(mockPut).not.toHaveBeenCalled()
   })
 
   it('uploads a valid file for admins', async () => {
@@ -180,6 +232,20 @@ describe('POST /api/admin/blobs', () => {
     )
   })
 
+  it('uploads to the blob root with a sanitized fallback filename when no folder is provided', async () => {
+    const formData = new FormData()
+    formData.set('file', createFile('!!!', 'image/png'))
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(200)
+    expect(mockPut).toHaveBeenCalledWith(
+      'file',
+      expect.any(File),
+      expect.objectContaining({ access: 'public', addRandomSuffix: true }),
+    )
+  })
+
   it('rejects invalid upload folders instead of writing to the blob root', async () => {
     const formData = new FormData()
     formData.set('file', createFile('logo.png', 'image/png'))
@@ -189,6 +255,18 @@ describe('POST /api/admin/blobs', () => {
 
     expect(response.status).toBe(400)
     expect(mockPut).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when the blob upload fails', async () => {
+    mockPut.mockRejectedValue(new Error('blob upload failed'))
+
+    const formData = new FormData()
+    formData.set('file', createFile('logo.png', 'image/png'))
+    formData.set('folder', 'logos')
+
+    const response = await POST(makePostRequest(formData))
+
+    expect(response.status).toBe(500)
   })
 })
 
@@ -207,6 +285,74 @@ describe('DELETE /api/admin/blobs', () => {
     expect(response.status).toBe(400)
   })
 
+  it('returns 400 for non-https blob URLs', async () => {
+    const response = await DELETE(
+      makeDeleteRequest({
+        url: 'http://foo.public.blob.vercel-storage.com/file.png',
+      }),
+    )
+
+    expect(response.status).toBe(400)
+  })
+
+  it('returns 401 when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    const response = await DELETE(makeDeleteRequest({ url: 'not-a-url' }))
+
+    expect(response.status).toBe(401)
+  })
+
+  it('returns 400 when the request body does not contain a valid URL field', async () => {
+    const response = await DELETE(makeDeleteRequest({}))
+
+    expect(response.status).toBe(400)
+  })
+
+  it('returns 400 when the URL cannot be parsed at all', async () => {
+    const response = await DELETE(makeDeleteRequest({ url: 'not-a-url' }))
+
+    expect(response.status).toBe(400)
+  })
+
+  it('returns 400 when blob URL validation throws during URL parsing', async () => {
+    const originalUrl = globalThis.URL
+    const validBlobUrl = 'https://foo.public.blob.vercel-storage.com/file.png'
+    let validationErrorObserved = false
+
+    for (const throwOnCall of [1, 2, 3, 4, 5]) {
+      let constructorCalls = 0
+      const request = makeDeleteRequest({ url: validBlobUrl })
+
+      vi.stubGlobal(
+        'URL',
+        class extends originalUrl {
+          constructor(url: string | URL, base?: string | URL) {
+            constructorCalls += 1
+
+            if (constructorCalls === throwOnCall) {
+              throw new TypeError('URL parsing failed during blob validation')
+            }
+
+            super(url, base)
+          }
+        },
+      )
+
+      const response = await DELETE(request)
+      const body = (await response.json()) as { error: string }
+
+      if (response.status === 400 && body.error === 'URL invalide.') {
+        validationErrorObserved = true
+        break
+      }
+    }
+
+    vi.stubGlobal('URL', originalUrl)
+
+    expect(validationErrorObserved).toBe(true)
+  })
+
   it('deletes a valid blob URL for admins', async () => {
     const url = 'https://foo.public.blob.vercel-storage.com/file.png'
 
@@ -214,5 +360,14 @@ describe('DELETE /api/admin/blobs', () => {
 
     expect(response.status).toBe(200)
     expect(mockDel).toHaveBeenCalledWith(url)
+  })
+
+  it('returns 500 when blob deletion fails', async () => {
+    mockDel.mockRejectedValue(new Error('blob delete failed'))
+    const url = 'https://foo.public.blob.vercel-storage.com/file.png'
+
+    const response = await DELETE(makeDeleteRequest({ url }))
+
+    expect(response.status).toBe(500)
   })
 })

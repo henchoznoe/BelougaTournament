@@ -12,6 +12,8 @@ vi.mock('server-only', () => ({}))
 
 import type prisma from '@/lib/core/prisma'
 import {
+  buildTeamRevertCallback,
+  buildTeamRevertInfo,
   handleCaptainSuccession,
   removeUserFromTeam,
   syncTeamFullState,
@@ -58,6 +60,23 @@ const makeTeam = (
   members: overrides.members ?? [makeMember('user-a'), makeMember('user-b')],
   tournament: { teamSize: overrides.teamSize ?? 3 },
 })
+
+const createRevertTx = () => {
+  const tx = {
+    team: {
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    teamMember: {
+      create: vi.fn(),
+    },
+    tournamentRegistration: {
+      update: vi.fn(),
+    },
+  }
+
+  return tx
+}
 
 // ─── syncTeamFullState ───────────────────────────────────────────────────────
 
@@ -224,5 +243,100 @@ describe('removeUserFromTeam', () => {
 
     expect(tx.teamMember.deleteMany).toHaveBeenCalled()
     expect(tx.team.delete).toHaveBeenCalledWith({ where: { id: 'team-1' } })
+  })
+})
+
+describe('buildTeamRevertInfo', () => {
+  it('marks the team as deleted when the removed member was alone', () => {
+    const result = buildTeamRevertInfo({
+      team: makeTeam({
+        members: [makeMember('user-a', new Date('2026-01-01T00:00:00.000Z'))],
+      }),
+      joinedAt: new Date('2026-01-01T00:00:00.000Z'),
+      userId: 'user-a',
+      tournamentId: 'tournament-1',
+    })
+
+    expect(result.teamWasDeleted).toBe(true)
+    expect(result.teamName).toBe('Team Alpha')
+  })
+
+  it('keeps the team when other members still exist', () => {
+    const result = buildTeamRevertInfo({
+      team: makeTeam(),
+      joinedAt: new Date('2026-01-01T00:00:00.000Z'),
+      userId: 'user-a',
+      tournamentId: 'tournament-1',
+    })
+
+    expect(result.teamWasDeleted).toBe(false)
+    expect(result.captainId).toBe('user-a')
+  })
+})
+
+describe('buildTeamRevertCallback', () => {
+  it('recreates a deleted team before restoring membership', async () => {
+    const tx = createRevertTx()
+    const callback = buildTeamRevertCallback('registration-1', {
+      teamId: 'team-1',
+      userId: 'user-a',
+      joinedAt: new Date('2026-01-01T00:00:00.000Z'),
+      captainId: 'user-a',
+      isFull: false,
+      teamWasDeleted: true,
+      tournamentId: 'tournament-1',
+      teamName: 'Team Alpha',
+    })
+
+    await callback(tx as never)
+
+    expect(tx.team.create).toHaveBeenCalledWith({
+      data: {
+        id: 'team-1',
+        name: 'Team Alpha',
+        tournamentId: 'tournament-1',
+        captainId: 'user-a',
+        isFull: false,
+      },
+    })
+    expect(tx.team.update).not.toHaveBeenCalled()
+    expect(tx.teamMember.create).toHaveBeenCalledWith({
+      data: {
+        teamId: 'team-1',
+        userId: 'user-a',
+        joinedAt: new Date('2026-01-01T00:00:00.000Z'),
+      },
+    })
+    expect(tx.tournamentRegistration.update).toHaveBeenCalledWith({
+      where: { id: 'registration-1' },
+      data: { teamId: 'team-1' },
+    })
+  })
+
+  it('updates an existing team before restoring membership', async () => {
+    const tx = createRevertTx()
+    const callback = buildTeamRevertCallback('registration-1', {
+      teamId: 'team-1',
+      userId: 'user-a',
+      joinedAt: new Date('2026-01-01T00:00:00.000Z'),
+      captainId: 'user-b',
+      isFull: true,
+      teamWasDeleted: false,
+      tournamentId: 'tournament-1',
+      teamName: 'Team Beta',
+    })
+
+    await callback(tx as never)
+
+    expect(tx.team.create).not.toHaveBeenCalled()
+    expect(tx.team.update).toHaveBeenCalledWith({
+      where: { id: 'team-1' },
+      data: {
+        captainId: 'user-b',
+        isFull: true,
+      },
+    })
+    expect(tx.teamMember.create).toHaveBeenCalledOnce()
+    expect(tx.tournamentRegistration.update).toHaveBeenCalledOnce()
   })
 })

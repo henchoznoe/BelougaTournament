@@ -33,8 +33,24 @@ describe('ROUTES', () => {
     )
   })
 
+  it('ADMIN_USER_DETAIL builds id-based path', () => {
+    expect(ROUTES.ADMIN_USER_DETAIL('user-123')).toBe('/admin/users/user-123')
+  })
+
+  it('ADMIN_TOURNAMENT_EDIT builds edit path from slug', () => {
+    expect(ROUTES.ADMIN_TOURNAMENT_EDIT('my-tourney')).toBe(
+      '/admin/tournaments/my-tourney/edit',
+    )
+  })
+
   it('ADMIN_SPONSOR_NEW is /admin/sponsors/new', () => {
     expect(ROUTES.ADMIN_SPONSOR_NEW).toBe('/admin/sponsors/new')
+  })
+
+  it('ADMIN_SPONSOR_DETAIL builds id-based path', () => {
+    expect(ROUTES.ADMIN_SPONSOR_DETAIL('sponsor-123')).toBe(
+      '/admin/sponsors/sponsor-123',
+    )
   })
 
   it('ADMIN_SPONSOR_EDIT builds id-based path', () => {

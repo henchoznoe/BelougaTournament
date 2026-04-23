@@ -8,12 +8,30 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  CENTIMES_PER_UNIT,
+  STRIPE_FEE_FIXED_CENTIMES,
+  STRIPE_FEE_PERCENT,
+  STRIPE_FEE_PERCENT_DIVISOR,
+} from '@/lib/config/constants'
+import {
+  calculateStripeNetAmount,
+  formatCentimes,
   formatDate,
   formatDateTime,
   formatShortDate,
   fromNullable,
+  parseCentimes,
+  pluralize,
+  stripHtml,
   toNullable,
 } from '@/lib/utils/formatting'
+
+const HTML_INPUT =
+  '<p>Belouga&nbsp;<strong>Tournament</strong><br>Tom &amp; Jerry &#39;test&#39;</p>'
+const STRIPPED_HTML_OUTPUT = "Belouga Tournament Tom & Jerry 'test'"
+const AMOUNT_IN_CENTIMES = 1050
+const AMOUNT_IN_UNITS = 10.55
+const GROSS_STRIPE_AMOUNT_CENTIMES = 10000
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -121,5 +139,57 @@ describe('fromNullable', () => {
 
   it('returns empty string for empty string', () => {
     expect(fromNullable('')).toBe('')
+  })
+})
+
+describe('stripHtml', () => {
+  it('removes HTML tags, decodes entities, and collapses whitespace', () => {
+    expect(stripHtml(HTML_INPUT)).toBe(STRIPPED_HTML_OUTPUT)
+  })
+})
+
+describe('formatCentimes', () => {
+  it('formats centimes with the default CHF currency', () => {
+    expect(formatCentimes(AMOUNT_IN_CENTIMES)).toBe('10.50 CHF')
+  })
+
+  it('formats centimes with a custom uppercase currency code', () => {
+    expect(formatCentimes(AMOUNT_IN_CENTIMES, 'eur')).toBe('10.50 EUR')
+  })
+})
+
+describe('parseCentimes', () => {
+  it('converts decimal units into rounded centimes', () => {
+    expect(parseCentimes(AMOUNT_IN_UNITS)).toBe(1055)
+  })
+})
+
+describe('pluralize', () => {
+  it('returns an empty suffix for 0 and 1, then pluralizes above 1', () => {
+    expect(pluralize(0)).toBe('')
+    expect(pluralize(1)).toBe('')
+    expect(pluralize(2)).toBe('s')
+  })
+})
+
+describe('calculateStripeNetAmount', () => {
+  it('deducts both percentage and fixed Stripe fees', () => {
+    const expectedNetAmount = Math.round(
+      GROSS_STRIPE_AMOUNT_CENTIMES -
+        (STRIPE_FEE_PERCENT * GROSS_STRIPE_AMOUNT_CENTIMES) /
+          STRIPE_FEE_PERCENT_DIVISOR -
+        STRIPE_FEE_FIXED_CENTIMES,
+    )
+
+    expect(calculateStripeNetAmount(GROSS_STRIPE_AMOUNT_CENTIMES)).toBe(
+      expectedNetAmount,
+    )
+  })
+
+  it('keeps parse and format centimes helpers consistent', () => {
+    const units = AMOUNT_IN_CENTIMES / CENTIMES_PER_UNIT
+
+    expect(parseCentimes(units)).toBe(AMOUNT_IN_CENTIMES)
+    expect(formatCentimes(parseCentimes(units))).toBe('10.50 CHF')
   })
 })

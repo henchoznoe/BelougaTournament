@@ -145,13 +145,41 @@ describe('authenticatedAction — role checking', () => {
     const handler = vi.fn().mockResolvedValue({ success: true, message: 'ok' })
     const action = authenticatedAction({
       schema,
-      role: Role.ADMIN,
+      role: [Role.ADMIN, Role.USER],
       handler,
     })
 
     await action({ name: 'test' })
 
     expect(handler).toHaveBeenCalledOnce()
+  })
+
+  it('returns Unauthorized when the session role is malformed even if a role is required', async () => {
+    mockGetSession.mockResolvedValue({
+      user: {
+        id: 'user-1',
+        role: null,
+        email: 'test@example.com',
+        name: 'Test',
+      },
+      session: {
+        id: 'session-1',
+        userId: 'user-1',
+        token: 'tok',
+        expiresAt: '2027-01-01',
+      },
+    })
+
+    const action = authenticatedAction({
+      schema,
+      role: Role.ADMIN,
+      handler: async () => ({ success: true, message: 'ok' }),
+    })
+
+    expect(await action({ name: 'test' })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
   })
 })
 
