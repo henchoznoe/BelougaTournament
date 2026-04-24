@@ -10,6 +10,7 @@
 'use client'
 
 import { AlertTriangle, RotateCcw } from 'lucide-react'
+import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 interface GlobalErrorProps {
@@ -21,6 +22,11 @@ interface GlobalErrorProps {
 const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     console.error(error)
+    try {
+      posthog.captureException(error)
+    } catch {
+      // PostHog may not be available if the root layout failed to load
+    }
   }, [error])
 
   return (
@@ -34,6 +40,9 @@ const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
           <p className="mt-2 text-sm text-zinc-400">
             L&apos;application a rencontré une erreur critique. Réessayez dans
             un instant.
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">
+            Notre équipe a été automatiquement informée de ce problème.
           </p>
         </div>
         <button

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -233,10 +234,21 @@ export const TournamentRegistrationForm = ({
 
       if (result.success) {
         if (result.data?.checkoutUrl) {
+          posthog.capture('checkout_initiated', {
+            tournament_id: tournamentId,
+            format,
+            registration_type: tournament.registrationType,
+          })
           window.location.href = result.data.checkoutUrl
           return
         }
 
+        posthog.capture('tournament_registration_submitted', {
+          tournament_id: tournamentId,
+          format,
+          registration_type: tournament.registrationType,
+          team_mode: format === TournamentFormat.TEAM ? teamMode : undefined,
+        })
         toast.success(result.message)
         router.refresh()
       } else {

@@ -14,6 +14,13 @@ const clientSchema = z.object({
     .string()
     .min(1, 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
     .optional(),
+  NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: z
+    .string()
+    .min(1, 'NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN is required')
+    .optional(),
+  NEXT_PUBLIC_POSTHOG_HOST: z
+    .url('NEXT_PUBLIC_POSTHOG_HOST must be a valid URL')
+    .optional(),
 })
 
 const serverSchema = z.object({
@@ -59,6 +66,9 @@ const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:
+    process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN,
+  NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
 })
 
 // Parse server-side

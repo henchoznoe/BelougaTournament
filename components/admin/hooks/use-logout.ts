@@ -8,6 +8,7 @@
 
 'use client'
 
+import posthog from 'posthog-js'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/core/auth-client'
 
@@ -26,6 +27,7 @@ export const useLogout = ({ onSuccess }: UseLogoutOptions = {}) => {
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
+            posthog.reset()
             toast.success('Déconnexion réussie')
             onSuccess?.()
           },

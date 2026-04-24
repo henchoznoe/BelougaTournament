@@ -9,6 +9,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
+import posthog from 'posthog-js'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,7 @@ export const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleLogin = async (provider: SocialProvider) => {
+    posthog.capture('login_clicked', { provider })
     try {
       setIsLoading(true)
       const { error } = await authClient.signIn.social({
