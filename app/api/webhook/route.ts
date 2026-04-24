@@ -12,6 +12,7 @@ import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
+import { getPostHogClient } from '@/lib/core/posthog-server'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
 import { removeUserFromTeam } from '@/lib/utils/team'
@@ -71,6 +72,8 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
           id: true,
           status: true,
           paymentStatus: true,
+          userId: true,
+          tournamentId: true,
         },
       },
     },
@@ -174,6 +177,19 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const posthog = getPostHogClient()
+  posthog.capture({
+    distinctId: payment.registration.userId,
+    event: 'payment_completed',
+    properties: {
+      tournament_id: payment.registration.tournamentId,
+      payment_id: payment.id,
+      amount: payment.amount,
+      currency: payment.currency,
+    },
+  })
+  await posthog.shutdown()
 }
 
 const handleCheckoutExpired = async (event: Stripe.Event) => {
@@ -230,6 +246,17 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const posthog = getPostHogClient()
+  posthog.capture({
+    distinctId: payment.registration.userId,
+    event: 'checkout_session_expired',
+    properties: {
+      tournament_id: payment.registration.tournamentId,
+      payment_id: payment.id,
+    },
+  })
+  await posthog.shutdown()
 }
 
 const handlePaymentFailed = async (event: Stripe.Event) => {
@@ -283,6 +310,17 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const posthog = getPostHogClient()
+  posthog.capture({
+    distinctId: payment.registration.userId,
+    event: 'payment_failed',
+    properties: {
+      tournament_id: payment.registration.tournamentId,
+      payment_id: payment.id,
+    },
+  })
+  await posthog.shutdown()
 }
 
 /**
@@ -391,6 +429,19 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
       })
     }
   })
+
+  const posthog = getPostHogClient()
+  posthog.capture({
+    distinctId: payment.registration.userId,
+    event: 'payment_refunded',
+    properties: {
+      tournament_id: payment.registration.tournamentId,
+      payment_id: payment.id,
+      refund_amount: charge.amount_refunded,
+      is_full_refund: isFullRefund,
+    },
+  })
+  await posthog.shutdown()
 }
 
 export const POST = async (request: Request) => {

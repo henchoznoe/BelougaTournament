@@ -13,6 +13,7 @@ import { BarChart3, Home, Mail, Trophy, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useEffect, useState } from 'react'
 import { NavbarMobileMenu } from '@/components/public/layout/navbar-mobile-menu'
 import { NavbarProfile } from '@/components/public/layout/navbar-profile'
@@ -47,6 +48,15 @@ export const PublicNavbarClient = ({
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    if (sessionUser) {
+      posthog.identify(sessionUser.id, {
+        email: sessionUser.email,
+        name: sessionUser.displayName ?? sessionUser.name,
+      })
+    }
+  }, [sessionUser])
 
   const isLinkActive = (href: string): boolean =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)

@@ -89,6 +89,15 @@ vi.mock('@/lib/core/prisma', () => ({
   },
 }))
 
+const mockPostHogCapture = vi.fn()
+const mockPostHogShutdown = vi.fn().mockResolvedValue(undefined)
+vi.mock('@/lib/core/posthog-server', () => ({
+  getPostHogClient: () => ({
+    capture: (...args: unknown[]) => mockPostHogCapture(...args),
+    shutdown: () => mockPostHogShutdown(),
+  }),
+}))
+
 const { POST } = await import('@/app/api/webhook/route')
 
 const PAYMENT_ID = 'pay-1'

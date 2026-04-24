@@ -10,6 +10,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Suspense } from 'react'
+import { PostHogPageView } from '@/components/providers/posthog-pageview'
+import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
@@ -69,11 +71,16 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
           'bg-zinc-950 font-sans antialiased text-zinc-50',
         )}
       >
-        <Suspense>
-          <ScrollToTop />
-        </Suspense>
-        {props.children}
-        <Toaster richColors position="bottom-right" />
+        <PostHogProvider>
+          <Suspense>
+            <PostHogPageView />
+          </Suspense>
+          <Suspense>
+            <ScrollToTop />
+          </Suspense>
+          {props.children}
+          <Toaster richColors position="bottom-right" />
+        </PostHogProvider>
         <Analytics />
         <SpeedInsights />
       </body>

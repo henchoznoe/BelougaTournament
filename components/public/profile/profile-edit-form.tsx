@@ -11,6 +11,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IdCard, Loader2, Pencil, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -51,6 +52,7 @@ export const ProfileEditForm = ({
       const result = await updateProfile(data)
 
       if (result.success) {
+        posthog.capture('profile_display_name_updated')
         toast.success(result.message)
         setIsEditing(false)
         reset({ displayName: data.displayName })

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { RegistrationEditDialog } from '@/components/public/profile/registration-edit-dialog'
@@ -74,6 +75,12 @@ export const ProfileRegistrations = ({
       })
 
       if (result.success) {
+        posthog.capture('tournament_unregistration_confirmed', {
+          tournament_id: unregisterTarget.tournament.id,
+          format: unregisterTarget.tournament.format,
+          waive_refund: waiveRefund,
+          refund_eligible: refundInfo.eligible,
+        })
         toast.success(result.message)
         router.refresh()
         setUnregisterTarget(null)
