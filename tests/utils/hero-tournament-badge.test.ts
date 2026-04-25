@@ -11,6 +11,7 @@ import { DAY_IN_MS, MINUTE_IN_MS } from '@/lib/config/constants'
 import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
   getNextHeroTournamentBadgeUpdateDelay,
+  resolveActiveTournamentSlug,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
 
@@ -163,6 +164,44 @@ describe('resolveHeroTournamentBadge', () => {
     )
 
     expect(result).toEqual(DEFAULT_HERO_TOURNAMENT_BADGE)
+  })
+})
+
+describe('resolveActiveTournamentSlug', () => {
+  it('returns the slug of a live tournament', () => {
+    const result = resolveActiveTournamentSlug(
+      [LIVE_TOURNAMENT, LATER_TOURNAMENT],
+      new Date('2026-06-15T12:00:00.000Z'),
+    )
+
+    expect(result).toBe('tournoi-live')
+  })
+
+  it('returns the slug of the earliest upcoming tournament when none is live', () => {
+    const result = resolveActiveTournamentSlug(
+      [LATER_TOURNAMENT, UPCOMING_TOURNAMENT],
+      new Date('2026-06-15T08:00:00.000Z'),
+    )
+
+    expect(result).toBe('tournoi-beta')
+  })
+
+  it('returns null when no tournament is live or upcoming', () => {
+    const result = resolveActiveTournamentSlug(
+      [LIVE_TOURNAMENT],
+      new Date('2026-06-16T12:00:00.000Z'),
+    )
+
+    expect(result).toBeNull()
+  })
+
+  it('prefers the live tournament over an upcoming one', () => {
+    const result = resolveActiveTournamentSlug(
+      [LIVE_TOURNAMENT, LATER_TOURNAMENT],
+      new Date('2026-06-15T15:00:00.000Z'),
+    )
+
+    expect(result).toBe('tournoi-live')
   })
 })
 

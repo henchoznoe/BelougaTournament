@@ -24,6 +24,7 @@ import type {
 import { cn } from '@/lib/utils/cn'
 import {
   getNextHeroTournamentBadgeUpdateDelay,
+  resolveActiveTournamentSlug,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
 
@@ -50,6 +51,7 @@ const itemVariants: Variants = {
 interface HeroSectionProps {
   badge: HeroTournamentBadge
   badgeTournaments: HeroTournamentBadgeTournament[]
+  initialActiveTournamentSlug: string | null
   isAuthenticated: boolean
   twitchUrl?: string
 }
@@ -66,34 +68,17 @@ const HERO_BADGE_DOT_STYLES: Record<HeroTournamentBadge['variant'], string> = {
   live: 'bg-blue-500',
 }
 
-/** Returns the slug of the currently live or next upcoming tournament, or null if none. */
-const resolveActiveTournamentSlug = (
-  tournaments: HeroTournamentBadgeTournament[],
-  now: Date,
-): string | null => {
-  const nowMs = now.getTime()
-  const getTs = (v: Date | string) => new Date(v).getTime()
-  const sorted = [...tournaments].sort(
-    (a, b) => getTs(a.startDate) - getTs(b.startDate),
-  )
-  const live = sorted.find(
-    t => getTs(t.startDate) <= nowMs && getTs(t.endDate) > nowMs,
-  )
-  if (live) return live.slug
-  const upcoming = sorted.find(t => getTs(t.startDate) > nowMs)
-  return upcoming?.slug ?? null
-}
-
 export const HeroSection = ({
   badge,
   badgeTournaments,
+  initialActiveTournamentSlug,
   isAuthenticated,
   twitchUrl,
 }: HeroSectionProps) => {
   const [currentBadge, setCurrentBadge] = useState(badge)
   const [activeTournamentSlug, setActiveTournamentSlug] = useState<
     string | null
-  >(null)
+  >(initialActiveTournamentSlug)
 
   useEffect(() => {
     let timeoutId: number | undefined

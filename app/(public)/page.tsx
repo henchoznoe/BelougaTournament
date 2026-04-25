@@ -20,6 +20,7 @@ import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
 import { getHeroTournamentBadgeData } from '@/lib/services/tournaments-public'
+import { resolveActiveTournamentSlug } from '@/lib/utils/hero-tournament-badge'
 
 export const metadata: Metadata = {
   title: 'Accueil',
@@ -39,6 +40,9 @@ const HeroSectionWrapper = async () => {
       twitchUrl={globalSettings.twitchUrl ?? undefined}
       badge={heroBadgeData.badge}
       badgeTournaments={heroBadgeData.tournaments}
+      initialActiveTournamentSlug={resolveActiveTournamentSlug(
+        heroBadgeData.tournaments,
+      )}
       isAuthenticated={!!session?.user}
     />
   )
