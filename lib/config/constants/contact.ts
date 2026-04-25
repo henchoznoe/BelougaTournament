@@ -7,12 +7,11 @@
  */
 
 /** Admin team inbox — receives all contact form submissions. */
-export const CONTACT_EMAIL = 'belougatournament@gmail.com'
+export const CONTACT_EMAIL = 'contact@belougatournament.ch'
 
 /** Available subject categories for the contact form dropdown. */
 export const CONTACT_SUBJECTS = [
   { value: 'sponsoring', label: 'Sponsoring' },
-  { value: 'inscription', label: 'Inscription tournoi' },
   { value: 'bug', label: 'Bug technique' },
   { value: 'feedback', label: 'Feedback / Amélioration' },
   { value: 'question', label: 'Question générale' },

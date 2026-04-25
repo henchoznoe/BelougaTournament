@@ -68,7 +68,7 @@ describe('sendContactMessage', () => {
     expect(mockSend).toHaveBeenCalledOnce()
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: 'belougatournament@gmail.com',
+        to: 'contact@belougatournament.ch',
         replyTo: 'jean@exemple.ch',
         subject: expect.stringContaining('Jean Dupont'),
       }),

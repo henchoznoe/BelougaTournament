@@ -115,7 +115,6 @@ describe('contactSchema', () => {
   it('accepts all valid subject values', () => {
     for (const subject of [
       'sponsoring',
-      'inscription',
       'bug',
       'feedback',
       'question',
