@@ -31,7 +31,7 @@ export type UserRow = {
 }
 
 /** A payment entry nested inside a registration row. */
-export type UserPaymentRow = {
+type UserPaymentRow = {
   id: string
   amount: number
   currency: string
@@ -41,7 +41,7 @@ export type UserPaymentRow = {
 }
 
 /** A registration entry nested inside a UserDetail. */
-export type UserRegistrationRow = {
+type UserRegistrationRow = {
   id: string
   createdAt: Date
   status: RegistrationStatus

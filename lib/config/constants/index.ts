@@ -11,6 +11,7 @@
 export * from './admin'
 export * from './auth'
 export * from './cache'
+export * from './contact'
 export * from './site'
 export * from './timing'
 export * from './transaction'

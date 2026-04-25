@@ -64,7 +64,7 @@ export type PublicTournamentDetail = PublicTournamentListItem & {
 }
 
 /** Dynamic badge state displayed in the landing page hero. */
-export type HeroTournamentBadgeVariant = 'idle' | 'upcoming' | 'live'
+type HeroTournamentBadgeVariant = 'idle' | 'upcoming' | 'live'
 
 /** A minimal public tournament shape used to compute the hero badge. */
 export type HeroTournamentBadgeTournament = {

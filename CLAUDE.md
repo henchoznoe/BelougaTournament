@@ -90,6 +90,7 @@ PostHog tracks errors, session replays, and user events. Client-side init via `i
 - Numeric form inputs: `z.number()` + React Hook Form `{ valueAsNumber: true }`. No `z.coerce.number()` in repo.
 - Validation bounds shared in `lib/config/constants/validation.ts`.
 - Behavior changes must ship with tests.
+- Use `/* v8 ignore next */` to exclude branches that are unreachable in practice (e.g. defensive fallbacks after Zod validation) from coverage reports.
 
 ## Gotchas
 

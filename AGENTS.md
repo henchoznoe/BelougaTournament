@@ -49,6 +49,7 @@
 - Tests are top-level in `tests/`, not colocated with source files.
 - Vitest runs in `node` with globals enabled.
 - Behavior changes are expected to ship with tests in the same change.
+- Use `/* v8 ignore next */` to exclude branches that are unreachable in practice (e.g. defensive fallbacks after Zod validation) from coverage reports.
 
 ## Gotchas
 
