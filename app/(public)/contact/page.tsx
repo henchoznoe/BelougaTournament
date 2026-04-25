@@ -8,6 +8,7 @@
 
 import type { Metadata } from 'next'
 import { ContactBento } from '@/components/public/contact/contact-bento'
+import { ContactForm } from '@/components/public/contact/contact-form'
 import { PageHeader } from '@/components/ui/page-header'
 import { getGlobalSettings } from '@/lib/services/settings'
 
@@ -16,8 +17,20 @@ export const metadata: Metadata = {
   description: 'Contactez-nous et rejoignez la communauté Belouga Tournament.',
 }
 
+const hasSocialLinks = (
+  settings: Awaited<ReturnType<typeof getGlobalSettings>>,
+) =>
+  [
+    settings.discordUrl,
+    settings.twitchUrl,
+    settings.youtubeUrl,
+    settings.tiktokUrl,
+    settings.instagramUrl,
+  ].some(url => typeof url === 'string' && url.trim() !== '')
+
 const ContactPage = async () => {
   const settings = await getGlobalSettings()
+  const showBento = hasSocialLinks(settings)
 
   return (
     <div className="min-h-dvh pb-20 pt-32">
@@ -27,17 +40,23 @@ const ContactPage = async () => {
           title="CONTACT"
           description={
             <>
-              Une question ? Envie de rejoindre l'aventure ? Retrouvez-nous sur
-              nos différents réseaux.{' '}
-              <strong className="text-zinc-300">
-                Discord reste notre canal principal pour toute assistance.
-              </strong>
+              Une question ? Envie de rejoindre l'aventure ? Envie de nous
+              soutenir en devenant un sponsor ? Retrouvez-nous sur nos
+              différents réseaux ou écrivez-nous via le formulaire ci-dessous.
             </>
           }
         />
 
-        {/* Bento Box */}
-        <ContactBento settings={settings} />
+        {/* Bento Box — only when social links are configured */}
+        {showBento && (
+          <>
+            <ContactBento settings={settings} />
+            <div className="mx-auto my-16 h-px w-full max-w-5xl bg-white/5" />
+          </>
+        )}
+
+        {/* Contact Form */}
+        <ContactForm />
       </div>
     </div>
   )

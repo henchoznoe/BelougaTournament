@@ -1,6 +1,6 @@
 /**
  * File: lib/actions/safe-action.ts
- * Description: Generic wrapper for safe, authenticated server actions.
+ * Description: Generic wrappers for safe server actions (authenticated and public).
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -25,6 +25,11 @@ type ActionOptions<T extends z.ZodType, TOutput = unknown> = {
   schema: T
   role?: Role | Role[]
   handler: ActionHandler<z.infer<T>, TOutput>
+}
+
+type PublicActionOptions<T extends z.ZodType, TOutput = unknown> = {
+  schema: T
+  handler: (data: z.infer<T>) => Promise<ActionState<TOutput>>
 }
 
 /** Returns true if `userRole` satisfies `requiredRole` considering the role hierarchy. */
@@ -97,6 +102,40 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       }
 
       logger.error({ error }, 'Unexpected error in server action')
+
+      return { success: false, message: 'Internal server error' }
+    }
+  }
+}
+
+/**
+ * Wraps a server action with input validation, structured logging, and error
+ * capturing — without requiring authentication. Use for public-facing forms.
+ */
+export function publicAction<T extends z.ZodType, TOutput = unknown>({
+  schema,
+  handler,
+}: PublicActionOptions<T, TOutput>) {
+  return async (data: z.infer<T>): Promise<ActionState<TOutput>> => {
+    try {
+      // 1. Input Validation
+      const validatedFields = schema.safeParse(data)
+
+      if (!validatedFields.success) {
+        return {
+          success: false,
+          errors: validatedFields.error.flatten().fieldErrors as Record<
+            string,
+            string[]
+          >,
+          message: 'Validation error',
+        }
+      }
+
+      // 2. Execute Handler
+      return await handler(validatedFields.data)
+    } catch (error) {
+      logger.error({ error }, 'Unexpected error in public server action')
 
       return { success: false, message: 'Internal server error' }
     }

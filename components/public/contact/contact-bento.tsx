@@ -18,7 +18,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { motion, type Variants } from 'framer-motion'
-import { ArrowUpRight, MessageSquare } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
@@ -152,14 +152,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
   }
 
   if (socialLinks.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <MessageSquare className="mb-4 size-12 text-zinc-600" />
-        <p className="text-zinc-400">
-          Aucun moyen de contact n'est configuré pour le moment.
-        </p>
-      </div>
-    )
+    return null
   }
 
   return (

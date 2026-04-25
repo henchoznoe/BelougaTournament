@@ -54,6 +54,9 @@ const serverSchema = z.object({
     .min(1, 'STRIPE_WEBHOOK_SECRET is required')
     .optional(),
 
+  // Resend
+  RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required').optional(),
+
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),

@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 19 avril 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 25 avril 2026."
         />
 
         <div className="space-y-6">
@@ -68,7 +68,7 @@ const LegalPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="2. Hébergement">
+          <LegalSection title="2. Hébergement et prestataires techniques">
             <p>La Plateforme est hébergée par :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
@@ -98,7 +98,36 @@ const LegalPage = () => {
               sont en place pour assurer la protection des données conformément
               aux standards suisses et européens (clauses contractuelles types).
             </p>
-            <p>Les paiements sont traités par :</p>
+
+            <p className="mt-2">La base de données est hébergée par :</p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> Supabase Inc.
+              </li>
+              <li>
+                <span className="text-zinc-300">Région :</span> Europe centrale
+                — Zurich (eu-central-2)
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://supabase.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  supabase.com
+                </a>
+              </li>
+            </ul>
+            <p>
+              Supabase héberge la base de données PostgreSQL contenant les
+              données utilisateurs, les données de tournoi, les sessions et les
+              références de paiement. Les données sont stockées sur des serveurs
+              situés en Suisse (région Zurich).
+            </p>
+
+            <p className="mt-2">Les paiements sont traités par :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Nom :</span> Stripe, Inc.
@@ -134,6 +163,81 @@ const LegalPage = () => {
               </a>
               .
             </p>
+
+            <p className="mt-2">
+              L'analyse d'audience, la surveillance des erreurs et
+              l'enregistrement de session sont assurés par :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> PostHog Inc.
+              </li>
+              <li>
+                <span className="text-zinc-300">Instance :</span> Europe
+                (eu.i.posthog.com)
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://posthog.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  posthog.com
+                </a>
+              </li>
+            </ul>
+            <p>
+              PostHog est utilisé pour l'analyse d'audience, le suivi des
+              événements d'utilisation, la capture automatique des erreurs
+              JavaScript et l'enregistrement de session (session replay) à des
+              fins de débogage et d'amélioration de l'expérience utilisateur.
+              Les données transitent via un proxy first-party sur notre domaine.
+            </p>
+
+            <p className="mt-2">
+              Les e-mails transactionnels (formulaire de contact) sont envoyés
+              via :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> Resend, Inc.
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://resend.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  resend.com
+                </a>
+              </li>
+            </ul>
+
+            <p className="mt-2">
+              Les brackets et résultats de tournois peuvent être affichés via
+              des widgets iframe fournis par :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> Toornament
+                (Webedia)
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://www.toornament.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  toornament.com
+                </a>
+              </li>
+            </ul>
           </LegalSection>
 
           <LegalSection title="3. Propriété intellectuelle">
@@ -175,29 +279,34 @@ const LegalPage = () => {
           </LegalSection>
 
           <LegalSection title="5. Cookies">
+            <p>La Plateforme utilise les cookies suivants :</p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Cookies de session :</span>{' '}
+                Strictement nécessaires au fonctionnement de l'authentification.
+                Ces cookies ne peuvent pas être désactivés sans empêcher
+                l'utilisation de la Plateforme
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Cookies d'analyse (PostHog) :
+                </span>{' '}
+                Utilisés pour l'analyse d'audience, le suivi des événements et
+                l'enregistrement de session à des fins d'amélioration de la
+                Plateforme. Déposés sous intérêt légitime, sans finalité
+                publicitaire
+              </li>
+            </ul>
             <p>
-              La Plateforme utilise uniquement des cookies techniques
-              strictement nécessaires au fonctionnement de l'authentification
-              (cookies de session). Aucun cookie publicitaire ou de profilage
-              n'est déposé par la Plateforme.
+              La page de streaming intègre un lecteur Twitch et certaines pages
+              de tournois intègrent un widget Toornament (services tiers chargés
+              dans des iframes). Ces services sont susceptibles de déposer leurs
+              propres cookies sur votre terminal. La Plateforme n'a aucun
+              contrôle sur ces cookies tiers.
             </p>
             <p>
-              La page de streaming intègre un lecteur Twitch (service tiers
-              opéré par Amazon / Twitch Interactive, Inc.) qui est susceptible
-              de déposer ses propres cookies sur votre terminal (session Twitch,
-              analytics, publicité). Ces cookies tiers sont régis par la{' '}
-              <a
-                href="https://www.twitch.tv/p/legal/privacy-notice/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
-              >
-                politique de confidentialité de Twitch
-              </a>
-              . La Plateforme n'a aucun contrôle sur ces cookies.
-            </p>
-            <p>
-              Pour plus de détails, consultez notre{' '}
+              Aucun cookie publicitaire ou de profilage commercial n'est déposé
+              par la Plateforme. Pour plus de détails, consultez notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
                 className="text-blue-400 transition-colors hover:text-blue-300"
@@ -227,11 +336,11 @@ const LegalPage = () => {
           <LegalSection title="7. Liens externes">
             <p>
               La Plateforme peut contenir des liens vers des sites tiers
-              (Discord, Twitch, sponsors, etc.). L'éditeur n'exerce aucun
-              contrôle sur ces sites et décline toute responsabilité quant à
-              leur contenu, leur disponibilité ou leurs pratiques en matière de
-              protection des données. La mise en place d'un lien hypertexte vers
-              la Plateforme nécessite l'autorisation préalable écrite de
+              (Discord, Twitch, Toornament, sponsors, etc.). L'éditeur n'exerce
+              aucun contrôle sur ces sites et décline toute responsabilité quant
+              à leur contenu, leur disponibilité ou leurs pratiques en matière
+              de protection des données. La mise en place d'un lien hypertexte
+              vers la Plateforme nécessite l'autorisation préalable écrite de
               l'éditeur.
             </p>
           </LegalSection>
@@ -269,8 +378,9 @@ const LegalPage = () => {
                 (ISC), Font Awesome (CC BY 4.0)
               </li>
               <li>
-                <span className="text-zinc-300">Polices :</span> Google Fonts
-                (SIL Open Font License)
+                <span className="text-zinc-300">Polices :</span> Inter (SIL Open
+                Font License) — auto-hébergée via Next.js, aucune requête
+                externe vers Google ; Paladins (police locale)
               </li>
             </ul>
           </LegalSection>

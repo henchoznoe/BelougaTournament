@@ -1,6 +1,6 @@
 /**
  * File: tests/actions/safe-action.test.ts
- * Description: Unit tests for the authenticatedAction wrapper (auth, role, validation, errors).
+ * Description: Unit tests for the authenticatedAction and publicAction wrappers.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -36,7 +36,9 @@ vi.mock('@/lib/core/logger', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { authenticatedAction } = await import('@/lib/actions/safe-action')
+const { authenticatedAction, publicAction } = await import(
+  '@/lib/actions/safe-action'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -281,5 +283,66 @@ describe('authenticatedAction — error handling', () => {
     const result = await action({ name: 'test' })
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// publicAction — input validation
+// ---------------------------------------------------------------------------
+
+describe('publicAction — input validation', () => {
+  it('returns a validation error when input fails schema', async () => {
+    const action = publicAction({
+      schema,
+      handler: async () => ({ success: true, message: 'ok' }),
+    })
+
+    const result = await action({ name: '' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+    expect(result.errors).toBeDefined()
+  })
+
+  it('passes validated data to the handler', async () => {
+    const handler = vi.fn().mockResolvedValue({ success: true, message: 'ok' })
+    const action = publicAction({ schema, handler })
+
+    await action({ name: 'Alice' })
+
+    expect(handler).toHaveBeenCalledWith({ name: 'Alice' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// publicAction — error handling
+// ---------------------------------------------------------------------------
+
+describe('publicAction — error handling', () => {
+  it('returns Internal server error for unexpected errors', async () => {
+    const action = publicAction({
+      schema,
+      handler: async () => {
+        throw new Error('Unexpected failure')
+      },
+    })
+
+    const result = await action({ name: 'test' })
+
+    expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+
+  it('does not require authentication', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    const handler = vi
+      .fn()
+      .mockResolvedValue({ success: true, message: 'public ok' })
+    const action = publicAction({ schema, handler })
+
+    const result = await action({ name: 'test' })
+
+    expect(result).toEqual({ success: true, message: 'public ok' })
+    expect(handler).toHaveBeenCalledOnce()
   })
 })

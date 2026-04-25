@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { METADATA, OWNER } from '@/lib/config/constants'
+import { CONTACT_EMAIL, METADATA, OWNER } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 19 avril 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 25 avril 2026."
         />
 
         <div className="space-y-6">
@@ -44,10 +44,10 @@ const PrivacyPage = () => {
               <li>
                 <span className="text-zinc-300">Contact :</span>{' '}
                 <Link
-                  href={`mailto:${OWNER.EMAIL}`}
+                  href={`mailto:${CONTACT_EMAIL}`}
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  {OWNER.EMAIL}
+                  {CONTACT_EMAIL}
                 </Link>
               </li>
             </ul>
@@ -74,6 +74,10 @@ const PrivacyPage = () => {
                 l'authentification OAuth 2.0
               </li>
               <li>
+                <span className="text-zinc-300">Données de profil :</span> Nom
+                d'affichage personnalisé (modifiable par l'utilisateur)
+              </li>
+              <li>
                 <span className="text-zinc-300">Données de session :</span>{' '}
                 Adresse IP, user-agent (navigateur / système d'exploitation),
                 jetons de session chiffrés, dates et heures de connexion
@@ -89,17 +93,45 @@ const PrivacyPage = () => {
                   Données de paiement (tournois payants uniquement) :
                 </span>{' '}
                 Identifiant de session Stripe, identifiant de paiement (Payment
-                Intent), identifiant de charge, identifiant client Stripe, et
+                Intent), identifiant de charge, identifiant client Stripe,
+                montant, devise, frais de traitement Stripe, don éventuel, et
                 statut du paiement. Ces identifiants sont des références
                 techniques transmises par Stripe — aucune donnée bancaire
                 (numéro de carte, IBAN, etc.) n'est stockée sur les serveurs de
                 la Plateforme
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données du formulaire de contact :
+                </span>{' '}
+                Nom complet, adresse e-mail, numéro de téléphone (optionnel),
+                sujet et message. Ces données sont transmises par e-mail via le
+                service Resend et ne sont <strong>pas stockées</strong> dans la
+                base de données de la Plateforme
+              </li>
+              <li>
+                <span className="text-zinc-300">Fichiers uploadés :</span> Logos
+                d'équipe, images de tournois et logos de sponsors. Ces fichiers
+                sont stockés sur Vercel Blob et accessibles via des URL
+                publiques
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données d'analyse et de suivi (PostHog) :
+                </span>{' '}
+                Pages visitées, événements d'interaction (inscription à un
+                tournoi, désinscription, connexion, lancement de paiement,
+                modification du profil), exceptions JavaScript, et
+                enregistrements de session (voir section 9). Lorsque vous êtes
+                connecté(e), ces données sont associées à votre identifiant
+                utilisateur
+              </li>
             </ul>
             <p>
-              Nous ne collectons aucun document d'identité officiel et
-              n'effectuons aucun profilage ni prise de décision automatisée
-              produisant des effets juridiques sur les utilisateurs.
+              Nous ne collectons aucun document d'identité officiel, aucune
+              donnée de géolocalisation précise, et n'effectuons aucun profilage
+              ni prise de décision automatisée produisant des effets juridiques
+              sur les utilisateurs.
             </p>
           </LegalSection>
 
@@ -111,24 +143,37 @@ const PrivacyPage = () => {
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 Gestion de votre compte utilisateur et authentification
-                sécurisée
+                sécurisée via Discord OAuth 2.0
               </li>
               <li>Organisation, administration et archivage des tournois</li>
-              <li>
-                Communication relative aux tournois (confirmations
-                d'inscription, résultats, annonces)
-              </li>
               <li>
                 Traitement des paiements et gestion des remboursements pour les
                 tournois payants
               </li>
+              <li>Traitement de vos demandes via le formulaire de contact</li>
               <li>
                 Modération de la communauté et application des sanctions prévues
-                aux CGU
+                aux{' '}
+                <Link
+                  href={ROUTES.TERMS}
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  CGU
+                </Link>
               </li>
               <li>
-                Amélioration de la Plateforme et mesure d'audience (via Vercel
-                Analytics — données anonymes et agrégées uniquement)
+                Analyse d'audience et amélioration de la Plateforme via PostHog
+                (événements d'utilisation, mesure de performance) et Vercel
+                Analytics (données anonymes et agrégées)
+              </li>
+              <li>
+                Surveillance des erreurs et amélioration de la stabilité via
+                PostHog (capture automatique des exceptions JavaScript)
+              </li>
+              <li>
+                Enregistrement de session (session replay) à des fins de
+                débogage et d'amélioration de l'expérience utilisateur (voir
+                section 9)
               </li>
               <li>Prévention de la fraude et sécurité de la Plateforme</li>
             </ul>
@@ -142,7 +187,7 @@ const PrivacyPage = () => {
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">
-                  Consentement (art. 6.1.a RGPD / LPD) :
+                  Consentement (art. 6.1.a RGPD / art. 31 al. 1 LPD) :
                 </span>{' '}
                 Lors de votre inscription via Discord OAuth — vous consentez
                 explicitement à transmettre vos données Discord à la Plateforme
@@ -157,17 +202,19 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  Intérêt légitime (art. 6.1.f RGPD / LPD) :
+                  Intérêt légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) :
                 </span>{' '}
-                Pour la sécurité, la modération et la prévention de la fraude
-                sur la Plateforme
+                Pour la sécurité et la modération de la Plateforme, l'analyse
+                d'audience (PostHog, Vercel Analytics), l'enregistrement de
+                session à des fins de débogage et d'amélioration de
+                l'expérience, ainsi que la surveillance des erreurs
               </li>
               <li>
                 <span className="text-zinc-300">
                   Obligation légale (art. 6.1.c RGPD / LPD) :
                 </span>{' '}
                 Conservation des données de paiement conformément aux
-                obligations comptables et fiscales applicables
+                obligations comptables et fiscales applicables (art. 958f CO)
               </li>
             </ul>
           </LegalSection>
@@ -184,7 +231,8 @@ const PrivacyPage = () => {
                   Vercel Inc. (États-Unis) :
                 </span>{' '}
                 Hébergement de la Plateforme, stockage des fichiers (Vercel
-                Blob), et services d'infrastructure. Vercel est certifié
+                Blob), mesure d'audience anonyme (Vercel Analytics) et mesure de
+                performance (Vercel Speed Insights). Vercel est certifié
                 conforme au EU-U.S. Data Privacy Framework. Politique de
                 confidentialité :{' '}
                 <a
@@ -194,6 +242,24 @@ const PrivacyPage = () => {
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
                   vercel.com/legal/privacy-policy
+                </a>
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Supabase Inc. (Singapour — données hébergées en Suisse) :
+                </span>{' '}
+                Hébergement de la base de données PostgreSQL contenant les
+                données utilisateurs, les données de tournoi, les sessions et
+                les références de paiement. Les données sont stockées dans la
+                région Zurich (eu-central-2), en Suisse. Politique de
+                confidentialité :{' '}
+                <a
+                  href="https://supabase.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  supabase.com/privacy
                 </a>
               </li>
               <li>
@@ -229,13 +295,65 @@ const PrivacyPage = () => {
                   stripe.com/privacy
                 </a>
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  PostHog Inc. (États-Unis — données hébergées dans l'UE) :
+                </span>{' '}
+                Analyse d'audience, suivi des événements, surveillance des
+                erreurs et enregistrement de session. Les données sont traitées
+                sur l'instance européenne de PostHog (eu.i.posthog.com) et
+                transitent via un proxy first-party (/ingest) sur notre domaine.
+                Politique de confidentialité :{' '}
+                <a
+                  href="https://posthog.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  posthog.com/privacy
+                </a>
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Resend, Inc. (États-Unis) :
+                </span>{' '}
+                Service d'envoi d'e-mails transactionnels pour le formulaire de
+                contact. Les données du formulaire transitent par Resend mais ne
+                sont pas stockées dans la base de données de la Plateforme.
+                Politique de confidentialité :{' '}
+                <a
+                  href="https://resend.com/legal/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  resend.com/legal/privacy-policy
+                </a>
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Toornament / Webedia (France) :
+                </span>{' '}
+                Widgets iframe intégrés pour l'affichage des brackets et
+                résultats de tournois. Le widget peut déposer ses propres
+                cookies. Politique de confidentialité :{' '}
+                <a
+                  href="https://www.toornament.com/en/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  toornament.com/privacy-policy
+                </a>
+              </li>
             </ul>
             <p>
-              Ces transferts vers des pays tiers (États-Unis) sont encadrés par
-              des garanties appropriées (clauses contractuelles types de la
-              Commission européenne, EU-U.S. Data Privacy Framework) assurant un
-              niveau de protection équivalent aux standards suisses et
-              européens.
+              La base de données principale est hébergée en Suisse (Zurich) par
+              Supabase. Les autres transferts vers des pays tiers (États-Unis)
+              sont encadrés par des garanties appropriées (clauses
+              contractuelles types de la Commission européenne, EU-U.S. Data
+              Privacy Framework) assurant un niveau de protection équivalent aux
+              standards suisses et européens.
             </p>
           </LegalSection>
 
@@ -269,6 +387,22 @@ const PrivacyPage = () => {
                   Données de modération (sanctions) :
                 </span>{' '}
                 Durée du bannissement, puis 1 an supplémentaire
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données du formulaire de contact :
+                </span>{' '}
+                Non stockées dans la base de données de la Plateforme. Les
+                e-mails sont conservés dans la boîte de réception de
+                l'administrateur
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données d'analyse (PostHog) :
+                </span>{' '}
+                Selon la configuration du projet PostHog. Les enregistrements de
+                session et les événements sont automatiquement supprimés après
+                leur période de rétention configurée
               </li>
             </ul>
             <p>
@@ -330,10 +464,10 @@ const PrivacyPage = () => {
             <p>
               Pour exercer vos droits, adressez votre demande par e-mail à{' '}
               <Link
-                href={`mailto:${OWNER.EMAIL}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {OWNER.EMAIL}
+                {CONTACT_EMAIL}
               </Link>{' '}
               ou via le{' '}
               <Link
@@ -375,56 +509,150 @@ const PrivacyPage = () => {
             </ul>
           </LegalSection>
 
-          <LegalSection title="8. Cookies et analytics">
-            <p>La Plateforme utilise uniquement :</p>
+          <LegalSection title="8. Cookies et technologies de suivi">
+            <p>La Plateforme utilise les cookies et technologies suivantes :</p>
+
+            <p className="mt-2 font-medium text-zinc-300">
+              Cookies first-party (déposés par belougatournament.ch) :
+            </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Cookies de session :</span>{' '}
+                <span className="text-zinc-300">
+                  Cookies de session (belouga.*) :
+                </span>{' '}
                 Strictement nécessaires au fonctionnement de l'authentification.
-                Ces cookies ne peuvent pas être désactivés sans empêcher
-                l'utilisation de la Plateforme. Ils sont supprimés
-                automatiquement à la déconnexion ou à expiration de la session
-                (7 jours).
+                HttpOnly, Secure, SameSite=Lax. Durée : 7 jours. Ces cookies ne
+                peuvent pas être désactivés sans empêcher l'utilisation de la
+                Plateforme
               </li>
+              <li>
+                <span className="text-zinc-300">Cookies PostHog (ph_*) :</span>{' '}
+                Identifiant anonyme permettant le suivi d'audience, le
+                fonctionnement de l'enregistrement de session et la corrélation
+                des événements. Ces cookies sont déposés sous intérêt légitime à
+                des fins d'amélioration de la Plateforme et de surveillance des
+                erreurs. Ils ne sont pas utilisés à des fins publicitaires ni de
+                profilage commercial
+              </li>
+            </ul>
+
+            <p className="mt-2 font-medium text-zinc-300">
+              Services sans cookies :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 <span className="text-zinc-300">Vercel Analytics :</span> Mesure
                 d'audience entièrement anonyme, <strong>sans cookies</strong>,
                 sans suivi inter-sites, sans collecte d'identifiants personnels.
-                Conforme au RGPD et à la LPD sans consentement requis.
+                Conforme au RGPD et à la LPD sans consentement requis
               </li>
               <li>
                 <span className="text-zinc-300">Vercel Speed Insights :</span>{' '}
                 Mesure de performance web anonyme, <strong>sans cookies</strong>
-                , sans identification des utilisateurs.
+                , sans identification des utilisateurs
+              </li>
+            </ul>
+
+            <p className="mt-2 font-medium text-zinc-300">
+              Cookies tiers (iframes) :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Lecteur Twitch :</span> La page
+                de streaming intègre un lecteur fourni par Twitch (Amazon /
+                Twitch Interactive, Inc.), chargé dans une iframe. Ce lecteur
+                est susceptible de déposer ses propres cookies (session,
+                analytics, publicité). Ces cookies sont régis par la{' '}
+                <a
+                  href="https://www.twitch.tv/p/legal/privacy-notice/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  politique de confidentialité de Twitch
+                </a>
+              </li>
+              <li>
+                <span className="text-zinc-300">Widget Toornament :</span> Les
+                pages de tournois peuvent intégrer un widget iframe fourni par
+                Toornament (Webedia), susceptible de déposer ses propres
+                cookies. Ces cookies sont régis par la{' '}
+                <a
+                  href="https://www.toornament.com/en/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  politique de confidentialité de Toornament
+                </a>
               </li>
             </ul>
             <p>
-              Aucun cookie publicitaire ou de profilage n'est déposé par la
-              Plateforme.
+              Vous pouvez bloquer les cookies tiers via les paramètres de votre
+              navigateur sans affecter le fonctionnement principal de la
+              Plateforme. Aucun cookie publicitaire ni de profilage commercial
+              n'est déposé par la Plateforme elle-même.
             </p>
-            <p>
-              <span className="text-zinc-300">
-                Cookies tiers (lecteur Twitch) :
-              </span>{' '}
-              La page de streaming intègre un lecteur fourni par Twitch (Amazon
-              / Twitch Interactive, Inc.). Ce lecteur, chargé dans une iframe,
-              est susceptible de déposer ses propres cookies sur votre terminal
-              (session, analytics, publicité). Ces cookies sont régis par la{' '}
-              <a
-                href="https://www.twitch.tv/p/legal/privacy-notice/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
-              >
-                politique de confidentialité de Twitch
-              </a>
-              . La Plateforme n'a aucun contrôle sur ces cookies tiers et ne les
-              utilise pas. Vous pouvez les bloquer via les paramètres de votre
-              navigateur sans affecter le reste de la Plateforme.
+            <p className="text-sm text-zinc-400">
+              Un mécanisme de consentement granulaire pourra être mis en place à
+              l'avenir pour offrir un contrôle accru sur les cookies non
+              strictement nécessaires.
             </p>
           </LegalSection>
 
-          <LegalSection title="9. Sécurité">
+          <LegalSection title="9. Enregistrement de session (Session Replay)">
+            <p>
+              La Plateforme utilise la fonctionnalité d'enregistrement de
+              session (session replay) fournie par PostHog afin d'améliorer
+              l'expérience utilisateur et de diagnostiquer les problèmes
+              techniques. Cette fonctionnalité est activée uniquement en
+              environnement de production.
+            </p>
+            <p className="font-medium text-zinc-300">Ce qui est enregistré :</p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                Mouvements de souris, clics, défilements et interactions avec
+                les éléments de la page
+              </li>
+              <li>Snapshots du contenu DOM (structure visuelle de la page)</li>
+              <li>Navigation entre les pages</li>
+            </ul>
+            <p className="font-medium text-zinc-300">
+              Ce qui n'est PAS enregistré :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                Mots de passe et données saisies dans les champs sensibles
+                (masquage automatique par PostHog)
+              </li>
+              <li>
+                Données bancaires ou de carte de crédit (gérées exclusivement
+                par Stripe dans sa propre iframe sécurisée)
+              </li>
+            </ul>
+            <p>
+              Lorsque vous êtes connecté(e), les enregistrements de session
+              peuvent être associés à votre identifiant utilisateur afin de
+              faciliter le diagnostic de problèmes signalés.
+            </p>
+            <p>
+              <span className="text-zinc-300">Base légale :</span> Intérêt
+              légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) — amélioration de
+              la Plateforme et résolution de bugs.
+            </p>
+            <p>
+              <span className="text-zinc-300">Hébergement :</span> Les données
+              sont traitées sur l'instance européenne de PostHog
+              (eu.i.posthog.com).
+            </p>
+            <p>
+              Vous pouvez bloquer l'enregistrement de session en désactivant
+              JavaScript dans votre navigateur ou en utilisant une extension
+              bloquant les scripts PostHog.
+            </p>
+          </LegalSection>
+
+          <LegalSection title="10. Sécurité">
             <p>
               Nous mettons en œuvre des mesures techniques et organisationnelles
               appropriées pour protéger vos données contre tout accès non
@@ -438,8 +666,12 @@ const PrivacyPage = () => {
                 Authentification sécurisée via OAuth 2.0 — aucun mot de passe
                 stocké sur la Plateforme
               </li>
-              <li>Accès aux données restreint par rôle (USER, ADMIN)</li>
-              <li>Surveillance des erreurs et alertes de sécurité</li>
+              <li>
+                Accès aux données restreint par rôle (USER, ADMIN, SUPER_ADMIN)
+              </li>
+              <li>
+                Surveillance des erreurs et alertes de sécurité via PostHog
+              </li>
               <li>
                 Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et
                 ISO 27001
@@ -447,6 +679,14 @@ const PrivacyPage = () => {
               <li>
                 Paiements traités par Stripe, certifié PCI DSS niveau 1 — aucune
                 donnée bancaire ne transite par nos serveurs
+              </li>
+              <li>
+                Limitation de débit (rate limiting) en production pour prévenir
+                les attaques par force brute
+              </li>
+              <li>
+                En-têtes de sécurité HTTP (HSTS, CSP, X-Frame-Options,
+                Permissions-Policy)
               </li>
             </ul>
             <p>
@@ -458,7 +698,7 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="10. Mineurs">
+          <LegalSection title="11. Mineurs">
             <p>
               La Plateforme est accessible aux personnes âgées d'au moins 16
               ans. Nous ne collectons pas sciemment de données personnelles
@@ -466,16 +706,16 @@ const PrivacyPage = () => {
               tuteur légal et que vous pensez que votre enfant nous a fourni des
               données personnelles sans votre consentement, contactez-nous à{' '}
               <Link
-                href={`mailto:${OWNER.EMAIL}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {OWNER.EMAIL}
+                {CONTACT_EMAIL}
               </Link>{' '}
               afin que nous puissions prendre les mesures nécessaires.
             </p>
           </LegalSection>
 
-          <LegalSection title="11. Modifications">
+          <LegalSection title="12. Modifications">
             <p>
               Cette politique de confidentialité peut être modifiée à tout
               moment pour refléter des évolutions légales, réglementaires ou
