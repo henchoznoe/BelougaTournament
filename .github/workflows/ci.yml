@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   push:
     branches:
       - main
@@ -27,17 +28,30 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: '.node-version'
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+        env:
+          DIRECT_URL: 'postgresql://ci:ci@localhost:5432/ci'
 
       - name: Type-check
         run: pnpm exec tsc --noEmit
 
       - name: Format & Lint check
         run: pnpm exec biome check .
+
+      - name: Dead code analysis
+        run: pnpm exec knip
+        env:
+          DIRECT_URL: 'postgresql://ci:ci@localhost:5432/ci'
+
+      - name: Security audit
+        run: pnpm audit --audit-level=high
 
       - name: Run unit tests with coverage
         run: pnpm test:coverage
