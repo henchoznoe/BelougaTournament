@@ -42,6 +42,8 @@ const USER_REGISTRATION_SELECT = {
       format: true,
       teamSize: true,
       startDate: true,
+      endDate: true,
+      description: true,
       status: true,
       registrationType: true,
       entryFeeAmount: true,

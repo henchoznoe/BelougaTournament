@@ -1,21 +1,15 @@
 /**
  * File: instrumentation-client.ts
- * Description: Client-side PostHog initialization for Next.js 15.3+.
+ * Description: Client-side instrumentation for Next.js 15.3+.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import posthog from 'posthog-js'
-
-// Only initialize PostHog in production to avoid polluting analytics with
-// dev/preview events and to prevent Discord webhook spam from non-prod errors.
-if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'production') {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN ?? '', {
-    api_host: '/ingest',
-    ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    defaults: '2026-01-30',
-    capture_pageview: false,
-    capture_exceptions: true,
-  })
-}
+// Suppress benign ResizeObserver loop errors that trigger false-positive alerts.
+// These occur naturally when field-sizing-content textareas resize across frames.
+window.addEventListener('error', event => {
+  if (event.message?.includes('ResizeObserver loop')) {
+    event.stopImmediatePropagation()
+  }
+})

@@ -69,7 +69,7 @@ The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreS
 | Storage | Vercel Blob |
 | Validation | Zod v4 + react-hook-form |
 | Analytics | PostHog (error tracking, session replay, event capture) |
-| Quality | Biome, Vitest, Codecov, Husky, lint-staged |
+| Quality | Biome, Vitest, knip, Codecov, Husky, lint-staged |
 | Hosting | Vercel |
 
 ## Project Structure
@@ -90,7 +90,7 @@ The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreS
 ├── public/               # Static assets and fonts
 ├── tests/                # Top-level Vitest suites
 ├── proxy.ts              # Edge protection for /admin/*
-└── .github/workflows/ci.yml
+└── .github/workflows/   # CI, release, dependency review, PR title validation
 ```
 
 For a deeper technical breakdown, see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
@@ -167,13 +167,21 @@ pnpm vitest run -t "test name"
 
 ## Quality Workflow
 
-CI runs the following checks in this order:
+CI runs the following checks in order ([`ci.yml`](.github/workflows/ci.yml), reused by [`release.yml`](.github/workflows/release.yml) via `workflow_call`):
 
 ```bash
-pnpm exec tsc --noEmit
-pnpm exec biome check .
-pnpm test:coverage
+pnpm exec prisma generate          # Generate Prisma client
+pnpm exec tsc --noEmit              # Type-check
+pnpm exec biome check .             # Lint & format
+pnpm exec knip                      # Dead code analysis
+pnpm audit --audit-level=high       # Security audit
+pnpm test:coverage                  # Unit tests + Codecov upload
 ```
+
+Additional CI workflows:
+
+- [`dependency-review.yml`](.github/workflows/dependency-review.yml) — blocks PRs introducing high-severity vulnerable dependencies.
+- [`pr-title.yml`](.github/workflows/pr-title.yml) — enforces Conventional Commits format on PR titles (required for semantic-release).
 
 Pre-commit only runs Biome on staged `*.{ts,tsx,css}` files through `lint-staged`, so local type-checking and tests are still your responsibility before shipping changes.
 

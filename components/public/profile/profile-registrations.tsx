@@ -25,6 +25,7 @@ import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { RegistrationEditDialog } from '@/components/public/profile/registration-edit-dialog'
+import { AddToCalendarButton } from '@/components/public/tournaments/add-to-calendar-button'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -183,6 +184,12 @@ export const ProfileRegistrations = ({
                   </div>
                 </Link>
                 <div className="flex shrink-0 items-center gap-2">
+                  {registration.status === RegistrationStatus.CONFIRMED && (
+                    <AddToCalendarButton
+                      variant="icon"
+                      tournament={registration.tournament}
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() => setEditingRegistration(registration)}

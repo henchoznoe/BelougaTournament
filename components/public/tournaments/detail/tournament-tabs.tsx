@@ -153,6 +153,14 @@ export const TournamentTabs = ({
                   tournament={tournament}
                   registrationState={registrationState}
                   isAuthenticated={isAuthenticated}
+                  calendarData={{
+                    title: tournament.title,
+                    slug: tournament.slug,
+                    startDate: tournament.startDate,
+                    endDate: tournament.endDate,
+                    description: tournament.description,
+                    games: tournament.games,
+                  }}
                 />
               </>
             ) : (

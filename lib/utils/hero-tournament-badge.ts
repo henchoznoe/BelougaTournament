@@ -89,6 +89,21 @@ export const resolveHeroTournamentBadge = (
   return DEFAULT_HERO_TOURNAMENT_BADGE
 }
 
+/** Returns the slug of the currently live or next upcoming tournament, or null if none. */
+export const resolveActiveTournamentSlug = (
+  tournaments: HeroTournamentBadgeTournament[],
+  now = new Date(),
+): string | null => {
+  const sorted = getSortedTournaments(tournaments)
+  const nowMs = now.getTime()
+  const live = sorted.find(
+    t => getTimestamp(t.startDate) <= nowMs && getTimestamp(t.endDate) > nowMs,
+  )
+  if (live) return live.slug
+  const upcoming = sorted.find(t => getTimestamp(t.startDate) > nowMs)
+  return upcoming?.slug ?? null
+}
+
 /** Returns the exact delay before the hero badge should be recomputed. */
 export const getNextHeroTournamentBadgeUpdateDelay = (
   tournaments: HeroTournamentBadgeTournament[],

@@ -105,5 +105,10 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.5"
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "overrides": {
+      "vite": "7.3.2"
+    }
+  }
 }

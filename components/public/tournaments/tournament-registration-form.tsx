@@ -24,6 +24,7 @@ import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { AddToCalendarButton } from '@/components/public/tournaments/add-to-calendar-button'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -52,6 +53,7 @@ import type {
   TournamentFieldItem,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
+import type { CalendarEventData } from '@/lib/utils/calendar'
 import { cn } from '@/lib/utils/cn'
 import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
 import {
@@ -83,6 +85,7 @@ interface TournamentRegistrationFormProps {
   availableTeams: AvailableTeam[]
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
+  calendarData?: CalendarEventData
 }
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
@@ -111,6 +114,7 @@ export const TournamentRegistrationForm = ({
   availableTeams,
   registrationState,
   isAuthenticated,
+  calendarData,
 }: TournamentRegistrationFormProps) => {
   const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
@@ -295,6 +299,9 @@ export const TournamentRegistrationForm = ({
             Voir / modifier mon inscription
           </Link>
         </Button>
+        {calendarData && (
+          <AddToCalendarButton variant="full" tournament={calendarData} />
+        )}
       </div>
     )
   }

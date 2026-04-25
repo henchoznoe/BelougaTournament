@@ -35,7 +35,7 @@ The architecture follows a clear split:
 | Validation | Zod v4 |
 | Forms | react-hook-form |
 | Styling | TailwindCSS v4 + shadcn/ui |
-| Tooling | Biome, Vitest, Husky, lint-staged |
+| Tooling | Biome, Vitest, knip, Husky, lint-staged |
 
 ## 3. Top-Level Structure
 
@@ -407,11 +407,20 @@ Coverage spans:
 - SEO helpers
 - proxy/access rules
 
-CI currently runs:
+CI runs the following checks in order (`ci.yml`, reused by `release.yml` via `workflow_call`):
 
-1. `pnpm exec tsc --noEmit`
-2. `pnpm exec biome check .`
-3. `pnpm test:coverage`
+1. `pnpm exec prisma generate` (with dummy `DIRECT_URL`)
+2. `pnpm exec tsc --noEmit`
+3. `pnpm exec biome check .`
+4. `pnpm exec knip` (dead code analysis)
+5. `pnpm audit --audit-level=high` (security audit)
+6. `pnpm test:coverage`
+7. Codecov upload
+
+Additional CI workflows:
+
+- `dependency-review.yml` blocks PRs introducing high-severity vulnerable dependencies.
+- `pr-title.yml` enforces Conventional Commits format on PR titles (required for semantic-release).
 
 Pre-commit only runs Biome on staged TypeScript and CSS files.
 
