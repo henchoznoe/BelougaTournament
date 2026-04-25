@@ -40,6 +40,8 @@ export type UserRegistrationItem = {
     format: TournamentFormat
     teamSize: number
     startDate: Date
+    endDate: Date
+    description: string
     status: TournamentStatus
     registrationType: RegistrationType
     entryFeeAmount: number | null
