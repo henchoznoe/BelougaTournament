@@ -8,7 +8,6 @@
 
 import 'server-only'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { withAccelerate } from '@prisma/extension-accelerate'
 import { env } from '@/lib/core/env'
 import { PrismaClient } from '@/prisma/generated/prisma/client'
 
@@ -17,15 +16,15 @@ const createPrismaClient = () => {
   return new PrismaClient({
     adapter,
     log: env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  }).$extends(withAccelerate())
+  })
 }
 
-type PrismaWithAccelerate = ReturnType<typeof createPrismaClient>
+type PrismaInstance = ReturnType<typeof createPrismaClient>
 
 // Cast `global` to a typed object to safely store the Prisma singleton across
 // hot-reloads in development without creating multiple client instances.
 const globalForPrisma = global as unknown as {
-  prisma: PrismaWithAccelerate | undefined
+  prisma: PrismaInstance | undefined
 }
 
 const prisma = globalForPrisma.prisma ?? createPrismaClient()

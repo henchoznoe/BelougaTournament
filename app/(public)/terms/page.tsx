@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
-import { METADATA, OWNER } from '@/lib/config/constants'
+import { CONTACT_EMAIL, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const TermsPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONDITIONS GÉNÉRALES"
-          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 19 avril 2026."
+          description="Conditions générales d'utilisation de la plateforme Belouga Tournament. Dernière mise à jour : 25 avril 2026."
         />
 
         <div className="space-y-6">
@@ -97,10 +97,10 @@ const TermsPage = () => {
               Pour demander la suppression de votre compte, contactez l'éditeur
               à l'adresse{' '}
               <Link
-                href={`mailto:${OWNER.EMAIL}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {OWNER.EMAIL}
+                {CONTACT_EMAIL}
               </Link>
               . Les données seront traitées conformément à la{' '}
               <Link
@@ -211,10 +211,10 @@ const TermsPage = () => {
               Pour toute contestation relative à un remboursement, contactez
               l'éditeur à l'adresse{' '}
               <Link
-                href={`mailto:${OWNER.EMAIL}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {OWNER.EMAIL}
+                {CONTACT_EMAIL}
               </Link>
               .
             </p>
@@ -308,10 +308,10 @@ const TermsPage = () => {
               L'utilisateur peut contester une sanction en contactant l'éditeur
               à l'adresse{' '}
               <Link
-                href={`mailto:${OWNER.EMAIL}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="text-blue-400 transition-colors hover:text-blue-300"
               >
-                {OWNER.EMAIL}
+                {CONTACT_EMAIL}
               </Link>
               .
             </p>
@@ -432,10 +432,10 @@ const TermsPage = () => {
               <li>
                 Par e-mail :{' '}
                 <Link
-                  href={`mailto:${OWNER.EMAIL}`}
+                  href={`mailto:${CONTACT_EMAIL}`}
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  {OWNER.EMAIL}
+                  {CONTACT_EMAIL}
                 </Link>
               </li>
               <li>Via le formulaire de contact disponible sur la Plateforme</li>
