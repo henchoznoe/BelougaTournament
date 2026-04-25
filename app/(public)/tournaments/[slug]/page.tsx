@@ -67,17 +67,7 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
   return (
     <>
       <Suspense fallback={null}>
-        <StripeReturnToast
-          tournamentId={tournament.id}
-          calendarData={{
-            title: tournament.title,
-            slug: tournament.slug,
-            startDate: tournament.startDate,
-            endDate: tournament.endDate,
-            description: tournament.description,
-            games: tournament.games,
-          }}
-        />
+        <StripeReturnToast tournamentId={tournament.id} />
       </Suspense>
       <TournamentDetail
         tournament={tournament}

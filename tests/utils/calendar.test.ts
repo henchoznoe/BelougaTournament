@@ -8,7 +8,12 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CalendarEventData } from '@/lib/utils/calendar'
-import { downloadIcsFile, generateIcsContent } from '@/lib/utils/calendar'
+import {
+  downloadIcsFile,
+  generateGoogleCalendarUrl,
+  generateIcsContent,
+  generateOutlookCalendarUrl,
+} from '@/lib/utils/calendar'
 
 vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://example.com')
 
@@ -141,6 +146,69 @@ describe('generateIcsContent', () => {
       expect(ics).toContain('DTSTART:20260615T140000Z')
       expect(ics).toContain('DTEND:20260616T200000Z')
     })
+  })
+})
+
+describe('generateGoogleCalendarUrl', () => {
+  it('returns a Google Calendar URL with correct params', () => {
+    const url = generateGoogleCalendarUrl(BASE_DATA)
+    expect(url).toContain('https://calendar.google.com/calendar/render')
+    expect(url).toContain('action=TEMPLATE')
+    expect(url).toContain('text=Summer+Cup+2026')
+    expect(url).toContain('dates=20260615T140000Z%2F20260616T200000Z')
+  })
+
+  it('includes games and description in details param', () => {
+    const url = generateGoogleCalendarUrl(BASE_DATA)
+    const parsed = new URL(url)
+    const details = parsed.searchParams.get('details') ?? ''
+    expect(details).toContain('Jeux : Valorant, Rocket League')
+    expect(details).toContain('Un tournoi incroyable !')
+    expect(details).toContain('https://example.com/tournaments/')
+  })
+
+  it('handles empty games array', () => {
+    const data = { ...BASE_DATA, games: [] }
+    const url = generateGoogleCalendarUrl(data)
+    const parsed = new URL(url)
+    const details = parsed.searchParams.get('details') ?? ''
+    expect(details).not.toContain('Jeux :')
+  })
+})
+
+describe('generateOutlookCalendarUrl', () => {
+  it('returns an Outlook URL with correct params', () => {
+    const url = generateOutlookCalendarUrl(BASE_DATA)
+    expect(url).toContain('https://outlook.live.com/calendar/0/action/compose')
+    expect(url).toContain('rru=addevent')
+    expect(url).toContain('subject=Summer+Cup+2026')
+  })
+
+  it('includes ISO date strings for start and end', () => {
+    const url = generateOutlookCalendarUrl(BASE_DATA)
+    const parsed = new URL(url)
+    expect(parsed.searchParams.get('startdt')).toBe('2026-06-15T14:00:00.000Z')
+    expect(parsed.searchParams.get('enddt')).toBe('2026-06-16T20:00:00.000Z')
+  })
+
+  it('accepts string dates', () => {
+    const data = {
+      ...BASE_DATA,
+      startDate: '2026-06-15T14:00:00.000Z',
+      endDate: '2026-06-16T20:00:00.000Z',
+    }
+    const url = generateOutlookCalendarUrl(data)
+    const parsed = new URL(url)
+    expect(parsed.searchParams.get('startdt')).toBe('2026-06-15T14:00:00.000Z')
+    expect(parsed.searchParams.get('enddt')).toBe('2026-06-16T20:00:00.000Z')
+  })
+
+  it('includes description in body param', () => {
+    const url = generateOutlookCalendarUrl(BASE_DATA)
+    const parsed = new URL(url)
+    const body = parsed.searchParams.get('body') ?? ''
+    expect(body).toContain('Jeux : Valorant, Rocket League')
+    expect(body).toContain('Un tournoi incroyable !')
   })
 })
 

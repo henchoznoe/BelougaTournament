@@ -93,6 +93,48 @@ export const generateIcsContent = (data: CalendarEventData): string => {
   return `${lines.map(foldIcsLine).join('\r\n')}\r\n`
 }
 
+/** Builds a plain-text description for calendar services (non-ICS). */
+const buildPlainDescription = (data: CalendarEventData): string => {
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}${ROUTES.TOURNAMENTS}/${data.slug}`
+  const gamesLine =
+    data.games.length > 0 ? `Jeux : ${data.games.join(', ')}` : ''
+  const stripped = stripHtml(data.description)
+  return [gamesLine, stripped, `Plus d'infos : ${url}`]
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+/** Generates a Google Calendar event creation URL. */
+export const generateGoogleCalendarUrl = (data: CalendarEventData): string => {
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: data.title,
+    dates: `${formatIcsDate(data.startDate)}/${formatIcsDate(data.endDate)}`,
+    details: buildPlainDescription(data),
+    sprop: `website:${process.env.NEXT_PUBLIC_APP_URL}${ROUTES.TOURNAMENTS}/${data.slug}`,
+  })
+  return `https://calendar.google.com/calendar/render?${params.toString()}`
+}
+
+/** Generates an Outlook.com calendar event creation URL. */
+export const generateOutlookCalendarUrl = (data: CalendarEventData): string => {
+  const start =
+    typeof data.startDate === 'string'
+      ? data.startDate
+      : data.startDate.toISOString()
+  const end =
+    typeof data.endDate === 'string' ? data.endDate : data.endDate.toISOString()
+  const params = new URLSearchParams({
+    rru: 'addevent',
+    subject: data.title,
+    startdt: start,
+    enddt: end,
+    body: buildPlainDescription(data),
+    path: '/calendar/action/compose',
+  })
+  return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`
+}
+
 /** Triggers a browser download of a .ics file for the given tournament. */
 export const downloadIcsFile = (data: CalendarEventData): void => {
   const content = generateIcsContent(data)

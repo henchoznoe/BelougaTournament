@@ -13,18 +13,12 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { cancelMyPendingRegistrationForTournament } from '@/lib/actions/tournament-registration'
-import type { CalendarEventData } from '@/lib/utils/calendar'
-import { downloadIcsFile } from '@/lib/utils/calendar'
 
 interface StripeReturnToastProps {
   tournamentId: string
-  calendarData?: CalendarEventData
 }
 
-export const StripeReturnToast = ({
-  tournamentId,
-  calendarData,
-}: StripeReturnToastProps) => {
+export const StripeReturnToast = ({ tournamentId }: StripeReturnToastProps) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -40,14 +34,7 @@ export const StripeReturnToast = ({
     router.replace(pathname)
 
     if (stripe === 'success') {
-      toast.success('Ton inscription est confirmée !', {
-        ...(calendarData && {
-          action: {
-            label: 'Ajouter au calendrier',
-            onClick: () => downloadIcsFile(calendarData),
-          },
-        }),
-      })
+      toast.success('Ton inscription est confirmée !')
       router.refresh()
     } else if (stripe === 'cancelled') {
       // Cancel the PENDING registration server-side, then notify the user
@@ -61,7 +48,7 @@ export const StripeReturnToast = ({
           router.refresh()
         })
     }
-  }, [searchParams, router, pathname, tournamentId, calendarData])
+  }, [searchParams, router, pathname, tournamentId])
 
   return null
 }
