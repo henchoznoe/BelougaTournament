@@ -24,3 +24,7 @@ export const profileSchema = z.object({
 })
 
 export type ProfileInput = z.infer<typeof profileSchema>
+
+export const profileVisibilitySchema = z.object({
+  isPublic: z.boolean(),
+})

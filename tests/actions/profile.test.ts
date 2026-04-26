@@ -41,7 +41,16 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
-const { updateProfile } = await import('@/lib/actions/profile')
+vi.mock('next/cache', () => ({
+  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
+}))
+
+const { updateProfile, updateProfileVisibility } = await import(
+  '@/lib/actions/profile'
+)
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -128,6 +137,69 @@ describe('updateProfile', () => {
     mockUserUpdate.mockRejectedValue(new Error('DB failure'))
 
     const result = await updateProfile({ displayName: 'Alice' })
+
+    expect(result).toEqual({ success: false, message: 'Internal server error' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateProfileVisibility
+// ---------------------------------------------------------------------------
+
+describe('updateProfileVisibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSession.mockResolvedValue(USER_SESSION)
+    mockUserUpdate.mockResolvedValue({})
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    mockGetSession.mockResolvedValue(null)
+
+    expect(await updateProfileVisibility({ isPublic: true })).toEqual({
+      success: false,
+      message: 'Unauthorized',
+    })
+  })
+
+  it('sets profile to public and returns success message', async () => {
+    const result = await updateProfileVisibility({ isPublic: true })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre profil est maintenant public.',
+    })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { isPublic: true },
+    })
+  })
+
+  it('sets profile to private and returns success message', async () => {
+    const result = await updateProfileVisibility({ isPublic: false })
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Votre profil est maintenant privé.',
+    })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { isPublic: false },
+    })
+  })
+
+  it('returns validation error for invalid input', async () => {
+    // @ts-expect-error testing invalid input
+    const result = await updateProfileVisibility({ isPublic: 'not-a-boolean' })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Validation error')
+  })
+
+  it('returns Internal server error when prisma update throws', async () => {
+    mockUserUpdate.mockRejectedValue(new Error('DB failure'))
+
+    const result = await updateProfileVisibility({ isPublic: true })
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
   })

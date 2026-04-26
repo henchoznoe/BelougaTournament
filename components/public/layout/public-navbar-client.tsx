@@ -9,7 +9,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { BarChart3, Home, Mail, Trophy, Video } from 'lucide-react'
+import { Home, Mail, Trophy, Users, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils/cn'
 const NAV_LINKS = [
   { href: ROUTES.HOME, label: 'Accueil', icon: Home },
   { href: ROUTES.TOURNAMENTS, label: 'Tournois', icon: Trophy },
-  { href: ROUTES.LEADERBOARD, label: 'Classement', icon: BarChart3 },
+  { href: ROUTES.PLAYERS, label: 'Joueurs', icon: Users },
   { href: ROUTES.STREAM, label: 'Stream', icon: Video },
   { href: ROUTES.CONTACT, label: 'Contact', icon: Mail },
 ] as const

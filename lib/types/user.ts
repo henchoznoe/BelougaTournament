@@ -28,6 +28,7 @@ export type UserRow = {
   bannedAt: Date | null
   bannedUntil: Date | null
   banReason: string | null
+  isPublic: boolean
 }
 
 /** A payment entry nested inside a registration row. */
@@ -72,6 +73,7 @@ export type UserDetail = {
   bannedAt: Date | null
   bannedUntil: Date | null
   banReason: string | null
+  isPublic: boolean
   registrations: UserRegistrationRow[]
 }
 
@@ -87,4 +89,5 @@ export type UserProfile = {
   bannedAt: Date | null
   bannedUntil: Date | null
   banReason: string | null
+  isPublic: boolean
 }

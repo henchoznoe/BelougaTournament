@@ -101,7 +101,7 @@ describe('sitemap', () => {
     expect(urls).toContain('https://belouga.test/tournaments')
     expect(urls).toContain('https://belouga.test/tournaments/archive')
     expect(urls).toContain('https://belouga.test/stream')
-    expect(urls).toContain('https://belouga.test/leaderboard')
+    expect(urls).toContain('https://belouga.test/players')
     expect(urls).toContain('https://belouga.test/contact')
     expect(urls).toContain('https://belouga.test/legal')
     expect(urls).toContain('https://belouga.test/privacy')

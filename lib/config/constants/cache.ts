@@ -16,4 +16,5 @@ export const CACHE_TAGS = {
   SPONSORS: 'sponsors',
   TOURNAMENTS: 'tournaments',
   USERS: 'users',
+  PLAYERS: 'players',
 } as const

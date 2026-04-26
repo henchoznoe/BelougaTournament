@@ -16,6 +16,22 @@ import type {
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
+/** A confirmed registrant shown on public tournament pages when showRegistrants is enabled. */
+export type PublicTournamentRegistrant = {
+  userId: string
+  displayName: string
+  image: string | null
+  isPublic: boolean
+}
+
+/** A team with members shown on public tournament pages when showRegistrants is enabled. */
+export type PublicTournamentTeamRegistrant = {
+  teamId: string
+  teamName: string
+  logoUrl: string | null
+  members: PublicTournamentRegistrant[]
+}
+
 /** Tournament card for the public list pages (published & archived). */
 export type PublicTournamentListItem = {
   id: string
@@ -43,6 +59,7 @@ export type PublicTournamentListItem = {
 
 /** Full tournament detail for the public detail page. */
 export type PublicTournamentDetail = PublicTournamentListItem & {
+  showRegistrants: boolean
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
   teamLogoEnabled: boolean

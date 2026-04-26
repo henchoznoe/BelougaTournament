@@ -97,7 +97,8 @@ export const UserScalarFieldEnum = {
   role: 'role',
   bannedAt: 'bannedAt',
   bannedUntil: 'bannedUntil',
-  banReason: 'banReason'
+  banReason: 'banReason',
+  isPublic: 'isPublic'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -176,6 +177,7 @@ export const TournamentScalarFieldEnum = {
   donationFixedAmount: 'donationFixedAmount',
   donationMinAmount: 'donationMinAmount',
   status: 'status',
+  showRegistrants: 'showRegistrants',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

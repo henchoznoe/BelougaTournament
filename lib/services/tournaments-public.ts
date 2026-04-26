@@ -20,6 +20,8 @@ import type {
   HeroTournamentBadgeTournament,
   PublicTournamentDetail,
   PublicTournamentListItem,
+  PublicTournamentRegistrant,
+  PublicTournamentTeamRegistrant,
 } from '@/lib/types/tournament'
 import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
@@ -29,7 +31,10 @@ import type {
   PublicTournamentFilters,
   TournamentSortOption,
 } from '@/lib/validations/tournaments'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  TournamentStatus,
+} from '@/prisma/generated/prisma/enums'
 
 /** Shared select for the landing hero badge. */
 const HERO_BADGE_SELECT = {
@@ -156,18 +161,25 @@ export const getPublicTournamentBySlug = async (
         slug,
         status: { in: [TournamentStatus.PUBLISHED, TournamentStatus.ARCHIVED] },
       },
-      include: {
+      select: {
+        ...PUBLIC_LIST_SELECT,
+        showRegistrants: true,
+        refundPolicyType: true,
+        refundDeadlineDays: true,
+        teamLogoEnabled: true,
+        donationEnabled: true,
+        donationType: true,
+        donationFixedAmount: true,
+        donationMinAmount: true,
+        rules: true,
+        prize: true,
+        toornamentId: true,
+        streamUrl: true,
         fields: {
           orderBy: { order: 'asc' },
         },
         toornamentStages: {
           orderBy: { number: 'asc' },
-        },
-        _count: {
-          select: {
-            registrations: true,
-            teams: true,
-          },
         },
       },
     })
@@ -324,4 +336,90 @@ export const getArchivedTournamentsFiltered = async (
   filters: PublicTournamentFilters,
 ): Promise<PublicTournamentPage> => {
   return getTournamentsFilteredByStatus(TournamentStatus.ARCHIVED, filters)
+}
+
+// ---------------------------------------------------------------------------
+// Public registrant lists (for tournaments with showRegistrants enabled)
+// ---------------------------------------------------------------------------
+
+/** Fetches confirmed solo registrants for a tournament. */
+export const getTournamentRegistrants = async (
+  tournamentId: string,
+): Promise<PublicTournamentRegistrant[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  try {
+    const rows = await prisma.tournamentRegistration.findMany({
+      where: { tournamentId, status: RegistrationStatus.CONFIRMED },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            image: true,
+            isPublic: true,
+          },
+        },
+      },
+    })
+    return rows.map(r => ({
+      userId: r.user.id,
+      displayName: r.user.displayName,
+      image: r.user.image,
+      isPublic: r.user.isPublic,
+    }))
+  } catch (error) {
+    logger.error({ error }, 'Error fetching tournament registrants')
+    return []
+  }
+}
+
+/** Fetches confirmed team registrants (with members) for a tournament. */
+export const getTournamentTeamRegistrants = async (
+  tournamentId: string,
+): Promise<PublicTournamentTeamRegistrant[]> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.TOURNAMENTS)
+
+  try {
+    const teams = await prisma.team.findMany({
+      where: { tournamentId },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        logoUrl: true,
+        members: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                image: true,
+                isPublic: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    return teams.map(t => ({
+      teamId: t.id,
+      teamName: t.name,
+      logoUrl: t.logoUrl,
+      members: t.members.map(m => ({
+        userId: m.user.id,
+        displayName: m.user.displayName,
+        image: m.user.image,
+        isPublic: m.user.isPublic,
+      })),
+    }))
+  } catch (error) {
+    logger.error({ error }, 'Error fetching tournament team registrants')
+    return []
+  }
 }

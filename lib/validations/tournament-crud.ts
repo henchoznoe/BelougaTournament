@@ -207,6 +207,7 @@ const baseTournamentFields = {
   imageUrls: z.array(z.url('URL invalide.')).default([]),
   streamUrl: optionalUrl,
   teamLogoEnabled: z.boolean(),
+  showRegistrants: z.boolean(),
   donationEnabled: z.boolean().default(false),
   donationType: z
     .enum([DonationType.FIXED, DonationType.FREE], {
