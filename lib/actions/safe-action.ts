@@ -135,6 +135,12 @@ export function publicAction<T extends z.ZodType, TOutput = unknown>({
       // 2. Execute Handler
       return await handler(validatedFields.data)
     } catch (error) {
+      const prismaResult = handlePrismaError(error)
+      if (prismaResult) {
+        logger.warn({ error }, 'Prisma error in public server action')
+        return prismaResult as ActionState<TOutput>
+      }
+
       logger.error({ error }, 'Unexpected error in public server action')
 
       return { success: false, message: 'Internal server error' }

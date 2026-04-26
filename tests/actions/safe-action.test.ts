@@ -319,6 +319,30 @@ describe('publicAction — input validation', () => {
 // ---------------------------------------------------------------------------
 
 describe('publicAction — error handling', () => {
+  it('returns a Prisma error response for PrismaClientKnownRequestError', async () => {
+    const prismaError = new Prisma.PrismaClientKnownRequestError(
+      'unique constraint',
+      {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+      },
+    )
+
+    const action = publicAction({
+      schema,
+      handler: async () => {
+        throw prismaError
+      },
+    })
+
+    const result = await action({ name: 'test' })
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Cette valeur existe déjà.',
+    })
+  })
+
   it('returns Internal server error for unexpected errors', async () => {
     const action = publicAction({
       schema,
