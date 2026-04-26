@@ -70,6 +70,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
           paladins.variable,
           'bg-zinc-950 font-sans antialiased text-zinc-50',
         )}
+        suppressHydrationWarning
       >
         <PostHogProvider>
           <Suspense>

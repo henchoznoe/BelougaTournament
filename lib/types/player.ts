@@ -36,3 +36,6 @@ export type PublicPlayerProfile = {
   createdAt: Date
   tournamentHistory: PublicPlayerTournamentEntry[]
 }
+
+/** Possible states when resolving a player profile page. */
+export type PlayerProfileStatus = 'public' | 'private' | 'not_found'
