@@ -41,9 +41,10 @@ vi.mock('@/lib/core/prisma', () => ({
 // Module under test
 // ---------------------------------------------------------------------------
 
+const mockUpdateTag = vi.fn()
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
-  updateTag: vi.fn(),
+  updateTag: (...args: unknown[]) => mockUpdateTag(...args),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))
@@ -86,7 +87,7 @@ describe('updateProfile', () => {
     })
   })
 
-  it('updates the displayName and returns success', async () => {
+  it('updates the displayName, invalidates cache, and returns success', async () => {
     const result = await updateProfile({ displayName: 'Alice' })
 
     expect(result).toEqual({
@@ -97,6 +98,8 @@ describe('updateProfile', () => {
       where: { id: 'user-1' },
       data: { displayName: 'Alice' },
     })
+    expect(mockUpdateTag).toHaveBeenCalledWith('users')
+    expect(mockUpdateTag).toHaveBeenCalledWith('players')
   })
 
   it('works for any authenticated role (no role restriction)', async () => {
