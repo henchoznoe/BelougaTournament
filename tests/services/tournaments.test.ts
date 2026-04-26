@@ -1037,7 +1037,7 @@ describe('getPublishedTournaments', () => {
         registrationClose: true,
         _count: {
           select: {
-            registrations: true,
+            registrations: { where: { status: 'CONFIRMED' } },
             teams: true,
           },
         },
@@ -1101,7 +1101,7 @@ describe('getArchivedTournaments', () => {
         registrationClose: true,
         _count: {
           select: {
-            registrations: true,
+            registrations: { where: { status: 'CONFIRMED' } },
             teams: true,
           },
         },

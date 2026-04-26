@@ -65,7 +65,7 @@ const PUBLIC_LIST_SELECT = {
   registrationClose: true,
   _count: {
     select: {
-      registrations: true,
+      registrations: { where: { status: RegistrationStatus.CONFIRMED } },
       teams: true,
     },
   },
