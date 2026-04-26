@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.3.0...v1.4.0) (2026-04-26)
+
+
+### Features
+
+* add players page and profile visibility toggles, and allow tournament organizers to configure registrant list display. ([3f0f934](https://github.com/henchoznoe/BelougaTournament/commit/3f0f934cf0f8b99f525fecf71320ad0b65fc3546))
+* filter registration counts by confirmed status and display refund policy details on registration forms ([d2abde1](https://github.com/henchoznoe/BelougaTournament/commit/d2abde1db484e3937f19b32e6fc4c3eebb6ccf8f))
+
 # [1.3.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.2.0...v1.3.0) (2026-04-25)
 
 
