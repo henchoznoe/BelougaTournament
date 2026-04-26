@@ -1,3 +1,12 @@
+## [1.4.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.0...v1.4.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* clear search debounce timer on component unmount to prevent memory leaks ([6efbf21](https://github.com/henchoznoe/BelougaTournament/commit/6efbf21f124b01e9ed30213dcc911b760b7a4f16))
+* handle Prisma unique constraint errors in server actions ([c0c5cfc](https://github.com/henchoznoe/BelougaTournament/commit/c0c5cfc1b3bd25871e4072205e4fab4d52e62d37))
+* invalidate profile cache ([fea6b47](https://github.com/henchoznoe/BelougaTournament/commit/fea6b476b74e4ad7432b53cc53a688c8ae6087be))
+
 # [1.4.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.3.0...v1.4.0) (2026-04-26)
 
 
