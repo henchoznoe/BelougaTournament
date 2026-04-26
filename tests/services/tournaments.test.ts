@@ -62,6 +62,8 @@ const {
   getPublicTournamentBySlug,
   getPublishedTournamentsFiltered,
   getArchivedTournamentsFiltered,
+  getTournamentRegistrants,
+  getTournamentTeamRegistrants,
 } = await import('@/lib/services/tournaments-public')
 
 const { getUserRegistrations, getUserPastRegistrations } = await import(
@@ -1035,7 +1037,7 @@ describe('getPublishedTournaments', () => {
         registrationClose: true,
         _count: {
           select: {
-            registrations: true,
+            registrations: { where: { status: 'CONFIRMED' } },
             teams: true,
           },
         },
@@ -1099,7 +1101,7 @@ describe('getArchivedTournaments', () => {
         registrationClose: true,
         _count: {
           select: {
-            registrations: true,
+            registrations: { where: { status: 'CONFIRMED' } },
             teams: true,
           },
         },
@@ -1144,20 +1146,11 @@ describe('getPublicTournamentBySlug', () => {
         slug: 'valorant-cup',
         status: { in: ['PUBLISHED', 'ARCHIVED'] },
       },
-      include: {
-        fields: {
-          orderBy: { order: 'asc' },
-        },
-        toornamentStages: {
-          orderBy: { number: 'asc' },
-        },
-        _count: {
-          select: {
-            registrations: true,
-            teams: true,
-          },
-        },
-      },
+      select: expect.objectContaining({
+        showRegistrants: true,
+        fields: { orderBy: { order: 'asc' } },
+        toornamentStages: { orderBy: { number: 'asc' } },
+      }),
     })
   })
 
@@ -1373,6 +1366,154 @@ describe('getUserPastRegistrations', () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
     const result = await getUserPastRegistrations('user-1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ===========================================================================
+// getTournamentRegistrants
+// ===========================================================================
+
+describe('getTournamentRegistrants', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns mapped registrants for confirmed solo registrations', async () => {
+    mockRegistrationFindMany.mockResolvedValue([
+      {
+        user: {
+          id: 'u1',
+          displayName: 'Alice',
+          image: 'https://img/alice.png',
+          isPublic: true,
+        },
+      },
+      {
+        user: {
+          id: 'u2',
+          displayName: 'Bob',
+          image: null,
+          isPublic: false,
+        },
+      },
+    ])
+
+    const result = await getTournamentRegistrants('t1')
+
+    expect(result).toEqual([
+      {
+        userId: 'u1',
+        displayName: 'Alice',
+        image: 'https://img/alice.png',
+        isPublic: true,
+      },
+      {
+        userId: 'u2',
+        displayName: 'Bob',
+        image: null,
+        isPublic: false,
+      },
+    ])
+    expect(mockRegistrationFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tournamentId: 't1', status: 'CONFIRMED' },
+      }),
+    )
+  })
+
+  it('returns an empty array when no registrants exist', async () => {
+    mockRegistrationFindMany.mockResolvedValue([])
+
+    const result = await getTournamentRegistrants('t1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getTournamentRegistrants('t1')
+
+    expect(result).toEqual([])
+  })
+})
+
+// ===========================================================================
+// getTournamentTeamRegistrants
+// ===========================================================================
+
+describe('getTournamentTeamRegistrants', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns mapped team registrants with members', async () => {
+    mockTeamFindMany.mockResolvedValue([
+      {
+        id: 'team1',
+        name: 'Team Alpha',
+        logoUrl: 'https://img/alpha.png',
+        members: [
+          {
+            user: {
+              id: 'u1',
+              displayName: 'Alice',
+              image: 'https://img/alice.png',
+              isPublic: true,
+            },
+          },
+          {
+            user: {
+              id: 'u2',
+              displayName: 'Bob',
+              image: null,
+              isPublic: false,
+            },
+          },
+        ],
+      },
+    ])
+
+    const result = await getTournamentTeamRegistrants('t1')
+
+    expect(result).toEqual([
+      {
+        teamId: 'team1',
+        teamName: 'Team Alpha',
+        logoUrl: 'https://img/alpha.png',
+        members: [
+          {
+            userId: 'u1',
+            displayName: 'Alice',
+            image: 'https://img/alice.png',
+            isPublic: true,
+          },
+          {
+            userId: 'u2',
+            displayName: 'Bob',
+            image: null,
+            isPublic: false,
+          },
+        ],
+      },
+    ])
+    expect(mockTeamFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tournamentId: 't1' },
+      }),
+    )
+  })
+
+  it('returns an empty array when no teams exist', async () => {
+    mockTeamFindMany.mockResolvedValue([])
+
+    const result = await getTournamentTeamRegistrants('t1')
+
+    expect(result).toEqual([])
+  })
+
+  it('returns an empty array on database error', async () => {
+    mockTeamFindMany.mockRejectedValue(new Error('DB error'))
+
+    const result = await getTournamentTeamRegistrants('t1')
 
     expect(result).toEqual([])
   })

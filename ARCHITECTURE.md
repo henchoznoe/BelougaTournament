@@ -76,7 +76,7 @@ The architecture follows a clear split:
 - `/tournaments/[slug]` tournament detail and registration flow
 - `/profile` authenticated player profile
 - `/stream` live Twitch page
-- `/leaderboard` placeholder page for a future feature
+- `/players` public player list and profiles
 - `/contact`, `/legal`, `/privacy`, `/terms`, `/login`, `/unauthorized`
 
 The public layout is wrapped by `app/(public)/layout.tsx` and uses public-facing components under `components/public/`.

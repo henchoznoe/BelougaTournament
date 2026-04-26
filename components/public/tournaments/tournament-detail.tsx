@@ -16,6 +16,8 @@ import { ROUTES } from '@/lib/config/routes'
 import type {
   AvailableTeam,
   PublicTournamentDetail,
+  PublicTournamentRegistrant,
+  PublicTournamentTeamRegistrant,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import {
@@ -29,6 +31,8 @@ interface TournamentDetailProps {
   availableTeams: AvailableTeam[]
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
+  registrants: PublicTournamentRegistrant[]
+  teamRegistrants: PublicTournamentTeamRegistrant[]
 }
 
 export const TournamentDetail = ({
@@ -37,6 +41,8 @@ export const TournamentDetail = ({
   availableTeams,
   registrationState,
   isAuthenticated,
+  registrants,
+  teamRegistrants,
 }: TournamentDetailProps) => {
   const registrationBadge = getTournamentRegistrationBadge(tournament)
 
@@ -71,6 +77,8 @@ export const TournamentDetail = ({
         registrationState={registrationState}
         isAuthenticated={isAuthenticated}
         registrationPhase={registrationBadge.phase}
+        registrants={registrants}
+        teamRegistrants={teamRegistrants}
       />
     </div>
   )

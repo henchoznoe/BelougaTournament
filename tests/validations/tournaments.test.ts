@@ -49,6 +49,7 @@ const VALID_TOURNAMENT = {
   refundPolicyType: 'NONE' as const,
   refundDeadlineDays: null,
   teamLogoEnabled: false,
+  showRegistrants: false,
   toornamentId: '',
   streamUrl: '',
   imageUrl: '',

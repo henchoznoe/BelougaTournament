@@ -174,6 +174,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
       refundPolicyType: tournament?.refundPolicyType ?? RefundPolicyType.NONE,
       refundDeadlineDays: tournament?.refundDeadlineDays ?? null,
       teamLogoEnabled: tournament?.teamLogoEnabled ?? false,
+      showRegistrants: tournament?.showRegistrants ?? false,
       donationEnabled: tournament?.donationEnabled ?? false,
       donationType: tournament?.donationType ?? null,
       donationFixedAmount: tournament?.donationFixedAmount ?? null,
@@ -209,6 +210,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const watchEntryFeeAmount = watch('entryFeeAmount')
   const watchRefundDeadlineDays = watch('refundDeadlineDays')
   const watchTeamLogoEnabled = watch('teamLogoEnabled')
+  const watchShowRegistrants = watch('showRegistrants')
   const watchDonationEnabled = watch('donationEnabled')
   const watchDonationType = watch('donationType')
   const watchDonationFixedAmount = watch('donationFixedAmount')
@@ -324,6 +326,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
         watchFormat={watchFormat}
         watchMaxTeams={watchMaxTeams}
         watchTeamLogoEnabled={watchTeamLogoEnabled}
+        watchShowRegistrants={watchShowRegistrants}
         isEditing={isEditing}
       />
 

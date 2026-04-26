@@ -95,6 +95,7 @@ export const createTournament = authenticatedAction({
         format: data.format,
         teamSize: data.teamSize,
         teamLogoEnabled: data.teamLogoEnabled,
+        showRegistrants: data.showRegistrants,
         donationEnabled:
           data.registrationType === RegistrationType.PAID
             ? data.donationEnabled
@@ -288,6 +289,7 @@ export const updateTournament = authenticatedAction({
           format: data.format,
           teamSize: data.teamSize,
           teamLogoEnabled: data.teamLogoEnabled,
+          showRegistrants: data.showRegistrants,
           donationEnabled:
             data.registrationType === RegistrationType.PAID
               ? data.donationEnabled

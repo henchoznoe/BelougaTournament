@@ -18,6 +18,7 @@ import {
   Swords,
   Trophy,
   Tv,
+  Users,
   Video,
 } from 'lucide-react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
@@ -25,17 +26,26 @@ import {
   ContentCard,
   DateRow,
 } from '@/components/public/tournaments/detail/tournament-detail-shared'
+import {
+  TournamentRegistrantsSolo,
+  TournamentRegistrantsTeam,
+} from '@/components/public/tournaments/detail/tournament-registrants'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
 import { RichText } from '@/components/ui/rich-text'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type {
   AvailableTeam,
   PublicTournamentDetail,
+  PublicTournamentRegistrant,
+  PublicTournamentTeamRegistrant,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
 import { formatDateTime } from '@/lib/utils/formatting'
 import type { TournamentRegistrationPhase } from '@/lib/utils/tournament-status'
-import { RegistrationStatus } from '@/prisma/generated/prisma/enums'
+import {
+  RegistrationStatus,
+  TournamentFormat,
+} from '@/prisma/generated/prisma/enums'
 
 interface TournamentTabsProps {
   tournament: PublicTournamentDetail
@@ -44,6 +54,8 @@ interface TournamentTabsProps {
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
   registrationPhase: TournamentRegistrationPhase
+  registrants: PublicTournamentRegistrant[]
+  teamRegistrants: PublicTournamentTeamRegistrant[]
 }
 
 export const TournamentTabs = ({
@@ -53,6 +65,8 @@ export const TournamentTabs = ({
   registrationState,
   isAuthenticated,
   registrationPhase,
+  registrants,
+  teamRegistrants,
 }: TournamentTabsProps) => (
   <Tabs defaultValue="details" className="w-full">
     <TabsList className="w-full rounded-2xl border border-white/5 bg-white/5 p-1">
@@ -63,6 +77,15 @@ export const TournamentTabs = ({
         <ScrollText className="size-4" />
         Détails
       </TabsTrigger>
+      {tournament.showRegistrants && (
+        <TabsTrigger
+          value="registrants"
+          className="flex-1 gap-1.5 rounded-xl text-zinc-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
+        >
+          <Users className="size-4" />
+          Inscrits
+        </TabsTrigger>
+      )}
       <TabsTrigger
         value="stream"
         className="flex-1 gap-1.5 rounded-xl text-zinc-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
@@ -192,6 +215,19 @@ export const TournamentTabs = ({
         </div>
       </div>
     </TabsContent>
+
+    {/* Tab: Inscrits */}
+    {tournament.showRegistrants && (
+      <TabsContent value="registrants">
+        <ContentCard icon={Users} title="Inscrits">
+          {tournament.format === TournamentFormat.TEAM ? (
+            <TournamentRegistrantsTeam teams={teamRegistrants} />
+          ) : (
+            <TournamentRegistrantsSolo registrants={registrants} />
+          )}
+        </ContentCard>
+      </TabsContent>
+    )}
 
     {/* Tab: Stream */}
     <TabsContent value="stream">

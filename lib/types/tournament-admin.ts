@@ -63,6 +63,7 @@ type ToornamentStageItem = {
 export type TournamentDetail = TournamentListItem & {
   description: string
   imageUrls: string[]
+  showRegistrants: boolean
   refundPolicyType: RefundPolicyType
   refundDeadlineDays: number | null
   teamLogoEnabled: boolean

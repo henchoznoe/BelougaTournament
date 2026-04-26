@@ -22,6 +22,7 @@ import { redirect } from 'next/navigation'
 import { ProfileActiveTournaments } from '@/components/public/profile/profile-active-tournaments'
 import { ProfileEditForm } from '@/components/public/profile/profile-edit-form'
 import { ProfileRegistrations } from '@/components/public/profile/profile-registrations'
+import { ProfileVisibilityToggle } from '@/components/public/profile/profile-visibility-toggle'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/lib/config/routes'
 import { getSession } from '@/lib/services/auth'
@@ -167,6 +168,9 @@ export const ProfilePage = async () => {
                   </span>
                 </div>
               </div>
+
+              {/* Profile visibility */}
+              <ProfileVisibilityToggle isPublic={dbUser.isPublic} />
             </div>
           </div>
         </div>

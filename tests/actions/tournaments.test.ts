@@ -162,6 +162,7 @@ const VALID_TOURNAMENT_INPUT = {
   refundPolicyType: RefundPolicyType.NONE,
   refundDeadlineDays: null,
   teamLogoEnabled: false,
+  showRegistrants: false,
   toornamentId: '',
   streamUrl: '',
   imageUrls: [],

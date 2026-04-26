@@ -16,6 +16,8 @@ import { getGlobalSettings } from '@/lib/services/settings'
 import {
   getAvailableTeams,
   getPublicTournamentBySlug,
+  getTournamentRegistrants,
+  getTournamentTeamRegistrants,
 } from '@/lib/services/tournaments-public'
 import { getUserTournamentRegistrationState } from '@/lib/services/tournaments-user'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
@@ -64,6 +66,17 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
     ? await getUserTournamentRegistrationState(session.user.id, tournament.id)
     : null
 
+  // Fetch registrants if the tournament has showRegistrants enabled
+  const registrants = tournament.showRegistrants
+    ? tournament.format === TournamentFormat.TEAM
+      ? []
+      : await getTournamentRegistrants(tournament.id)
+    : []
+  const teamRegistrants =
+    tournament.showRegistrants && tournament.format === TournamentFormat.TEAM
+      ? await getTournamentTeamRegistrants(tournament.id)
+      : []
+
   return (
     <>
       <Suspense fallback={null}>
@@ -75,6 +88,8 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
         availableTeams={availableTeams}
         registrationState={isRegistered}
         isAuthenticated={!!session?.user}
+        registrants={registrants}
+        teamRegistrants={teamRegistrants}
       />
     </>
   )

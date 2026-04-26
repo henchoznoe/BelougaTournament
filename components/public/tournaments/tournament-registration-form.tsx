@@ -56,6 +56,7 @@ import type {
 import type { CalendarEventData } from '@/lib/utils/calendar'
 import { cn } from '@/lib/utils/cn'
 import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
+import { getRefundPolicyLabel } from '@/lib/utils/refund-policy-label'
 import {
   DonationType,
   FieldType,
@@ -72,6 +73,8 @@ interface TournamentRegistrationFormProps {
     | 'registrationType'
     | 'entryFeeAmount'
     | 'entryFeeCurrency'
+    | 'refundPolicyType'
+    | 'refundDeadlineDays'
     | 'teamLogoEnabled'
     | 'donationEnabled'
     | 'donationType'
@@ -331,6 +334,16 @@ export const TournamentRegistrationForm = ({
             Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
             au moment de la redirection vers Stripe. Si vous quittez la page
             Stripe sans payer, votre place sera libérée.
+          </p>
+        </div>
+      )}
+      {isPaidTournament && (
+        <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-sm text-zinc-300">
+          <p className="text-xs text-zinc-400">
+            {getRefundPolicyLabel(
+              tournament.refundPolicyType,
+              tournament.refundDeadlineDays,
+            )}
           </p>
         </div>
       )}

@@ -43,6 +43,7 @@ interface TournamentFormFormatProps {
   watchFormat: TournamentFormat
   watchMaxTeams: number | null
   watchTeamLogoEnabled: boolean
+  watchShowRegistrants: boolean
   isEditing: boolean
 }
 
@@ -53,6 +54,7 @@ export const TournamentFormFormat = ({
   watchFormat,
   watchMaxTeams,
   watchTeamLogoEnabled,
+  watchShowRegistrants,
   isEditing,
 }: TournamentFormFormatProps) => {
   const isTeam = watchFormat === TournamentFormat.TEAM
@@ -160,6 +162,23 @@ export const TournamentFormFormat = ({
             </Label>
           </div>
         )}
+
+        {/* Show registrants toggle */}
+        <div className="flex items-center gap-3">
+          <Switch
+            id="tournament-showRegistrants"
+            checked={watchShowRegistrants}
+            onCheckedChange={val =>
+              setValue('showRegistrants', val, { shouldValidate: true })
+            }
+          />
+          <Label
+            htmlFor="tournament-showRegistrants"
+            className="cursor-pointer text-sm text-zinc-300"
+          >
+            Afficher la liste des inscrits sur la page publique du tournoi
+          </Label>
+        </div>
       </div>
     </div>
   )
