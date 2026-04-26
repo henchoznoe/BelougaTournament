@@ -70,6 +70,13 @@ export const TournamentFilters = ({
     setSearchValue(filters.search)
   }, [filters.search])
 
+  // Clear pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
   const navigate = useCallback(
     (overrides: Partial<PublicTournamentFilters>) => {
       router.push(`${basePath}${buildQuery(filters, overrides)}`, {

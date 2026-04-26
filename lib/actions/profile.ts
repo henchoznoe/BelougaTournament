@@ -26,6 +26,9 @@ export const updateProfile = authenticatedAction({
       data: { displayName: data.displayName },
     })
 
+    updateTag(CACHE_TAGS.USERS)
+    updateTag(CACHE_TAGS.PLAYERS)
+
     return { success: true, message: 'Votre nom a été mis à jour.' }
   },
 })
