@@ -1,3 +1,11 @@
+## [1.4.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.1...v1.4.2) (2026-04-26)
+
+
+### Bug Fixes
+
+* add comprehensive player page when their profile is private instead of 404 ([21ef7f2](https://github.com/henchoznoe/BelougaTournament/commit/21ef7f26acf44dcb970b373df5362605eb444b5f))
+* add suppressHydrationWarning to body element to prevent checksum mismatch errors ([484622e](https://github.com/henchoznoe/BelougaTournament/commit/484622e5d8a8737087173a79fe82eb07b4cfc8f9))
+
 ## [1.4.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.0...v1.4.1) (2026-04-26)
 
 
