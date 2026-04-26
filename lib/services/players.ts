@@ -12,6 +12,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
+  PlayerProfileStatus,
   PublicPlayerListItem,
   PublicPlayerProfile,
 } from '@/lib/types/player'
@@ -66,6 +67,28 @@ export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
   } catch (error) {
     logger.error({ error }, 'Error fetching public players')
     return []
+  }
+}
+
+/** Checks whether a player exists and whether their profile is public, private, or not found. */
+export const getPlayerProfileStatus = async (
+  userId: string,
+): Promise<PlayerProfileStatus> => {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(CACHE_TAGS.PLAYERS)
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isPublic: true, bannedAt: true },
+    })
+
+    if (!user || user.bannedAt !== null) return 'not_found'
+    return user.isPublic ? 'public' : 'private'
+  } catch (error) {
+    logger.error({ error }, 'Error fetching player profile status')
+    return 'not_found'
   }
 }
 
