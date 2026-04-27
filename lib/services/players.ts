@@ -74,10 +74,6 @@ export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
 export const getPlayerProfileStatus = async (
   userId: string,
 ): Promise<PlayerProfileStatus> => {
-  'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.PLAYERS)
-
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
