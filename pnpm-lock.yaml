@@ -75,8 +75,8 @@ importers:
         specifier: ^1.372.5
         version: 1.372.5
       posthog-node:
-        specifier: ^5.31.0
-        version: 5.31.0
+        specifier: ^5.32.0
+        version: 5.32.0
       prisma:
         specifier: ^7.8.0
         version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(magicast@0.5.2)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3)
@@ -3599,6 +3599,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.12:
+    resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   nanostores@1.2.0:
     resolution: {integrity: sha512-F0wCzbsH80G7XXo0Jd9/AVQC7ouWY6idUCTnMwW5t/Rv9W8qmO6endavDwg7TNp5GbugwSukFMVZqzPSrSMndg==}
     engines: {node: ^20.0.0 || >=22.0.0}
@@ -3930,6 +3935,10 @@ packages:
     resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.5.13:
+    resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
+    engines: {node: ^10 || ^12 || >=14}
+
   postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
@@ -3957,8 +3966,8 @@ packages:
   posthog-js@1.372.5:
     resolution: {integrity: sha512-0Wq4yRTX8rg2/SOTo3T/0tt2EIE0usBDJKxWPY6eRTGxWAajNmPWZwK4vREn2ANZGdPhUHQ+hg4kLEUdQnzs/Q==}
 
-  posthog-node@5.31.0:
-    resolution: {integrity: sha512-vRhLERIOG6gIrfz5zfSUTiIrf4G8yWZPuEUP8TyvIusedMwxUXitCU9HN3uZfzkkOgvgC5MUAr/eN3reO9WQMA==}
+  posthog-node@5.32.0:
+    resolution: {integrity: sha512-kEsQFrpQrrrXQlVzXF5yTyHfnKAP/37W6ta9cFHh8ISlKtyYEKuLGTc5ssfpn4RrRS6r0xsJSK94ScFTQTSEOg==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -7892,6 +7901,8 @@ snapshots:
 
   nanoid@3.3.12: {}
 
+  nanoid@3.3.12: {}
+
   nanostores@1.2.0: {}
 
   neo-async@2.6.2: {}
@@ -8181,6 +8192,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  postcss@8.5.13:
+    dependencies:
+      nanoid: 3.3.12
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
   postgres-array@2.0.0: {}
 
   postgres-array@3.0.4: {}
@@ -8211,7 +8228,7 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
 
-  posthog-node@5.31.0:
+  posthog-node@5.32.0:
     dependencies:
       '@posthog/core': 1.27.9
 
