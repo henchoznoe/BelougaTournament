@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.3...v1.4.4) (2026-05-01)
+
+
+### Bug Fixes
+
+* update dependabot config to rebase to avoid pnpm lock not up to date ([76b63c5](https://github.com/henchoznoe/BelougaTournament/commit/76b63c51488adee12d03360aa82ee96c49d1d8ab))
+
 ## [1.4.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.2...v1.4.3) (2026-04-27)
 
 
