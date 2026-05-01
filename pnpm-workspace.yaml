@@ -1,7 +1,10 @@
-onlyBuiltDependencies:
-  - '@prisma/engines'
-  - core-js
-  - esbuild
-  - prisma
-  - protobufjs
-  - sharp
+overrides:
+  vite: "7.3.2"
+
+allowBuilds:
+  '@prisma/engines': true
+  core-js: true
+  esbuild: true
+  prisma: true
+  protobufjs: true
+  sharp: true
