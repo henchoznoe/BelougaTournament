@@ -1,6 +1,6 @@
 {
   "name": "belouga-tournament",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Production-ready e-sports tournament management platform with Discord auth, Stripe payments, and an admin back office",
   "homepage": "https://github.com/henchoznoe/BelougaTournament",
   "bugs": {

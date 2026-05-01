@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.2...v1.4.3) (2026-04-27)
+
+
+### Bug Fixes
+
+* remove caching logic from getPlayerProfileStatus service to avoid 404 ([e737056](https://github.com/henchoznoe/BelougaTournament/commit/e73705691ce8fed7c8f4b275e60c15d9e0e3fc0f))
+
 ## [1.4.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.1...v1.4.2) (2026-04-26)
 
 
