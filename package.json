@@ -18,7 +18,7 @@
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build",
     "start": "next start",
-    "prepare": "husky",
+    "prepare": "lefthook install",
     "lint": "biome lint .",
     "format": "biome format . --write",
     "check": "biome check --write .",
@@ -36,11 +36,6 @@
     "docker:down": "docker-compose down",
     "stripe:listen": "tsx scripts/stripe-listen.ts",
     "stripe:listen:live": "tsx scripts/stripe-listen.ts --live"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,css}": [
-      "biome check --write"
-    ]
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
@@ -82,6 +77,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.14",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
@@ -95,9 +92,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.1.5",
     "dotenv": "^17.4.2",
-    "husky": "^9.1.7",
     "knip": "^6.11.0",
-    "lint-staged": "^16.4.0",
+    "lefthook": "^2.1.6",
     "postcss": "^8.5.13",
     "semantic-release": "^25.0.3",
     "tailwindcss": "^4.2.4",
