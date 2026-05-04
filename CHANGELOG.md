@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.4...v1.5.0) (2026-05-04)
+
+
+### Features
+
+* redesign tournament detail page with sidebar layout and Framer Motion hero gallery carousel ([057abef](https://github.com/henchoznoe/BelougaTournament/commit/057abefdfaff00eec77fbd3b9357ce382604dd7f))
+
 ## [1.4.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.3...v1.4.4) (2026-05-01)
 
 
