@@ -4,3 +4,8 @@ pre-commit:
     - name: biome check
       glob: "*.{ts,tsx,css}"
       run: pnpm exec biome check --write {staged_files} && git add {staged_files}
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}
