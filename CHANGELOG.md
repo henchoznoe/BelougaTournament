@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.5.0...v1.6.0) (2026-05-04)
+
+
+### Features
+
+* integrate commitlint with lefthook for commit message validation ([893a0c5](https://github.com/henchoznoe/BelougaTournament/commit/893a0c5b1168fdab5e63deb005c20db2422e87f4))
+
 # [1.5.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.4.4...v1.5.0) (2026-05-04)
 
 
