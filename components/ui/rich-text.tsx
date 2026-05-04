@@ -68,7 +68,7 @@ export const RichText = ({ content, className }: RichTextProps) => {
   return (
     <div
       className={cn(
-        'prose prose-invert max-w-none',
+        'prose prose-invert max-w-none break-words [overflow-wrap:anywhere]',
         // Headings
         'prose-headings:font-bold prose-headings:tracking-wide prose-headings:text-white',
         'prose-h2:text-lg prose-h3:text-base',
