@@ -1,6 +1,6 @@
 /**
  * File: components/public/tournaments/detail/tournament-tabs.tsx
- * Description: Tabbed content (details, stream, bracket) with registration card for the public tournament detail view.
+ * Description: Stream and bracket tabs for the public tournament detail view.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,84 +8,23 @@
 
 'use client'
 
-import {
-  Calendar,
-  CalendarDays,
-  Clock,
-  Layers,
-  ScrollText,
-  Shield,
-  Swords,
-  Trophy,
-  Tv,
-  Users,
-  Video,
-} from 'lucide-react'
+import { CalendarDays, Layers, Swords, Trophy, Tv, Video } from 'lucide-react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
-import {
-  ContentCard,
-  DateRow,
-} from '@/components/public/tournaments/detail/tournament-detail-shared'
-import {
-  TournamentRegistrantsSolo,
-  TournamentRegistrantsTeam,
-} from '@/components/public/tournaments/detail/tournament-registrants'
-import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
-import { RichText } from '@/components/ui/rich-text'
+import { ContentCard } from '@/components/public/tournaments/detail/tournament-detail-shared'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type {
-  AvailableTeam,
-  PublicTournamentDetail,
-  PublicTournamentRegistrant,
-  PublicTournamentTeamRegistrant,
-  UserTournamentRegistrationState,
-} from '@/lib/types/tournament'
-import { formatDateTime } from '@/lib/utils/formatting'
-import type { TournamentRegistrationPhase } from '@/lib/utils/tournament-status'
-import {
-  RegistrationStatus,
-  TournamentFormat,
-} from '@/prisma/generated/prisma/enums'
+import type { PublicTournamentDetail } from '@/lib/types/tournament'
 
 interface TournamentTabsProps {
-  tournament: PublicTournamentDetail
+  tournament: Pick<PublicTournamentDetail, 'toornamentId' | 'toornamentStages'>
   twitchChannel: string | undefined
-  availableTeams: AvailableTeam[]
-  registrationState: UserTournamentRegistrationState | null
-  isAuthenticated: boolean
-  registrationPhase: TournamentRegistrationPhase
-  registrants: PublicTournamentRegistrant[]
-  teamRegistrants: PublicTournamentTeamRegistrant[]
 }
 
 export const TournamentTabs = ({
   tournament,
   twitchChannel,
-  availableTeams,
-  registrationState,
-  isAuthenticated,
-  registrationPhase,
-  registrants,
-  teamRegistrants,
 }: TournamentTabsProps) => (
-  <Tabs defaultValue="details" className="w-full">
+  <Tabs defaultValue="stream" className="w-full">
     <TabsList className="w-full rounded-2xl border border-white/5 bg-white/5 p-1">
-      <TabsTrigger
-        value="details"
-        className="flex-1 gap-1.5 rounded-xl text-zinc-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
-      >
-        <ScrollText className="size-4" />
-        Détails
-      </TabsTrigger>
-      {tournament.showRegistrants && (
-        <TabsTrigger
-          value="registrants"
-          className="flex-1 gap-1.5 rounded-xl text-zinc-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
-        >
-          <Users className="size-4" />
-          Inscrits
-        </TabsTrigger>
-      )}
       <TabsTrigger
         value="stream"
         className="flex-1 gap-1.5 rounded-xl text-zinc-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
@@ -101,133 +40,6 @@ export const TournamentTabs = ({
         Bracket
       </TabsTrigger>
     </TabsList>
-
-    {/* Tab: Détails */}
-    <TabsContent value="details">
-      <div className="space-y-6">
-        {tournament.description && (
-          <ContentCard icon={ScrollText} title="Description">
-            <RichText content={tournament.description} />
-          </ContentCard>
-        )}
-
-        {tournament.rules && (
-          <ContentCard icon={Shield} title="Règlement">
-            <RichText content={tournament.rules} />
-          </ContentCard>
-        )}
-
-        <ContentCard icon={Calendar} title="Dates">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <DateRow
-              label="Début du tournoi"
-              value={formatDateTime(tournament.startDate)}
-            />
-            <DateRow
-              label="Fin du tournoi"
-              value={formatDateTime(tournament.endDate)}
-            />
-            <DateRow
-              label="Ouverture des inscriptions"
-              value={formatDateTime(tournament.registrationOpen)}
-            />
-            <DateRow
-              label="Fermeture des inscriptions"
-              value={formatDateTime(tournament.registrationClose)}
-            />
-          </div>
-        </ContentCard>
-
-        {!tournament.description && !tournament.rules && (
-          <div className="rounded-3xl border border-white/5 bg-white/2 p-8 text-center">
-            <p className="text-sm text-zinc-500">
-              Aucun détail supplémentaire pour ce tournoi.
-            </p>
-          </div>
-        )}
-
-        {/* Registration card */}
-        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-linear-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-6 shadow-[0_0_40px_rgba(59,130,246,0.08)] md:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
-          <div className="relative z-10 space-y-4">
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-              <Clock className="size-4 text-blue-400" />
-              Inscription
-            </h3>
-
-            {registrationPhase === 'open' ? (
-              <>
-                {registrationState?.status !== RegistrationStatus.CONFIRMED && (
-                  <p className="text-center text-sm text-zinc-400">
-                    Les inscriptions sont ouvertes jusqu&apos;au{' '}
-                    <span className="font-medium text-zinc-300">
-                      {formatDateTime(tournament.registrationClose)}
-                    </span>
-                    .
-                  </p>
-                )}
-                <TournamentRegistrationForm
-                  tournamentId={tournament.id}
-                  fields={tournament.fields}
-                  format={tournament.format}
-                  teamSize={tournament.teamSize}
-                  availableTeams={availableTeams}
-                  tournament={tournament}
-                  registrationState={registrationState}
-                  isAuthenticated={isAuthenticated}
-                  calendarData={{
-                    title: tournament.title,
-                    slug: tournament.slug,
-                    startDate: tournament.startDate,
-                    endDate: tournament.endDate,
-                    description: tournament.description,
-                    games: tournament.games,
-                  }}
-                />
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-3 py-4 text-center">
-                {registrationPhase === 'archived' ? (
-                  <p className="text-sm text-zinc-500">
-                    Ce tournoi est terminé.
-                  </p>
-                ) : registrationPhase === 'upcoming' ? (
-                  <p className="text-sm text-zinc-500">
-                    Les inscriptions ouvriront le{' '}
-                    <span className="font-medium text-zinc-400">
-                      {formatDateTime(tournament.registrationOpen)}
-                    </span>
-                    .
-                  </p>
-                ) : (
-                  <p className="text-sm text-zinc-500">
-                    Les inscriptions sont fermées depuis le{' '}
-                    <span className="font-medium text-zinc-400">
-                      {formatDateTime(tournament.registrationClose)}
-                    </span>
-                    .
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </TabsContent>
-
-    {/* Tab: Inscrits */}
-    {tournament.showRegistrants && (
-      <TabsContent value="registrants">
-        <ContentCard icon={Users} title="Inscrits">
-          {tournament.format === TournamentFormat.TEAM ? (
-            <TournamentRegistrantsTeam teams={teamRegistrants} />
-          ) : (
-            <TournamentRegistrantsSolo registrants={registrants} />
-          )}
-        </ContentCard>
-      </TabsContent>
-    )}
 
     {/* Tab: Stream */}
     <TabsContent value="stream">
