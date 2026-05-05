@@ -58,7 +58,7 @@
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
     "pg": "^8.20.0",
-    "posthog-js": "^1.372.5",
+    "posthog-js": "^1.372.8",
     "posthog-node": "^5.33.2",
     "prisma": "^7.8.0",
     "radix-ui": "^1.4.3",
