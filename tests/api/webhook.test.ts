@@ -15,6 +15,11 @@ import {
 
 vi.mock('server-only', () => ({}))
 
+vi.mock('@sentry/nextjs', () => ({
+  captureException: vi.fn(),
+  captureRequestError: vi.fn(),
+}))
+
 const mockRevalidateTag = vi.fn()
 vi.mock('next/cache', () => ({
   revalidateTag: (...args: unknown[]) => mockRevalidateTag(...args),
@@ -87,15 +92,6 @@ vi.mock('@/lib/core/prisma', () => ({
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
   },
-}))
-
-const mockPostHogCapture = vi.fn()
-const mockPostHogShutdown = vi.fn().mockResolvedValue(undefined)
-vi.mock('@/lib/core/posthog-server', () => ({
-  getPostHogClient: () => ({
-    capture: (...args: unknown[]) => mockPostHogCapture(...args),
-    shutdown: () => mockPostHogShutdown(),
-  }),
 }))
 
 const { POST } = await import('@/app/api/webhook/route')
