@@ -100,7 +100,7 @@ For a deeper technical breakdown, see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 ### Prerequisites
 
 - Node.js 22+
-- pnpm 10+
+- pnpm 11+
 - Docker
 - Stripe CLI if you want to test webhooks locally
 
