@@ -8,6 +8,7 @@
 
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
@@ -23,6 +24,7 @@ interface ErrorPageProps {
 const AdminErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
     console.error(error)
+    Sentry.captureException(error)
   }, [error])
 
   return (

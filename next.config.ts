@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 // Content Security Policy — allows Twitch player, Discord CDN, and Vercel Blob storage
@@ -41,6 +42,10 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Expose VERCEL_ENV to the client so Sentry can tag events by environment
+  env: {
+    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV,
+  },
   images: {
     remotePatterns: [
       {
@@ -64,4 +69,11 @@ const nextConfig: NextConfig = {
   ],
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: '/monitoring',
+  silent: !process.env.CI,
+})
