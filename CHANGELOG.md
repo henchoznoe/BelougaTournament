@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.6.0...v1.7.0) (2026-05-06)
+
+
+### Features
+
+* integrate Sentry for server-side and client-side error monitoring and performance tracing ([fc3f4a1](https://github.com/henchoznoe/BelougaTournament/commit/fc3f4a1cf6251133705552ca1a1194069be40716))
+
 # [1.6.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.5.0...v1.6.0) (2026-05-04)
 
 
