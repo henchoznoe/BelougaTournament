@@ -10,7 +10,6 @@
 'use client'
 
 import { AlertTriangle, RotateCcw } from 'lucide-react'
-import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 interface GlobalErrorProps {
@@ -22,11 +21,6 @@ interface GlobalErrorProps {
 const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     console.error(error)
-    try {
-      posthog.captureException(error)
-    } catch {
-      // PostHog may not be available if the root layout failed to load
-    }
   }, [error])
 
   return (

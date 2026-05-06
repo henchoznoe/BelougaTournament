@@ -8,7 +8,7 @@
 
 import type { NextConfig } from 'next'
 
-// Content Security Policy — allows Twitch player, Discord CDN, Vercel Blob storage, and PostHog
+// Content Security Policy — allows Twitch player, Discord CDN, and Vercel Blob storage
 const CSP_DIRECTIVES = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://player.twitch.tv",
@@ -41,28 +41,6 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  // Expose VERCEL_ENV to the client so PostHog can be gated to production only
-  env: {
-    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV,
-  },
-  // Required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true,
-  async rewrites() {
-    return [
-      {
-        source: '/ingest/static/:path*',
-        destination: 'https://eu-assets.i.posthog.com/static/:path*',
-      },
-      {
-        source: '/ingest/array/:path*',
-        destination: 'https://eu-assets.i.posthog.com/array/:path*',
-      },
-      {
-        source: '/ingest/:path*',
-        destination: 'https://eu.i.posthog.com/:path*',
-      },
-    ]
-  },
   images: {
     remotePatterns: [
       {

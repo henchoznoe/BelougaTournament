@@ -10,7 +10,6 @@
 'use client'
 
 import { AlertTriangle, RotateCcw } from 'lucide-react'
-import posthog from 'posthog-js'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
@@ -23,7 +22,6 @@ interface ErrorPageProps {
 const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
     console.error(error)
-    posthog.captureException(error)
   }, [error])
 
   return (
