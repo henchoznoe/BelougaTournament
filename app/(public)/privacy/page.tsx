@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 25 avril 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 6 mai 2026."
         />
 
         <div className="space-y-6">
@@ -296,8 +296,9 @@ const PrivacyPage = () => {
                 <span className="text-zinc-300">
                   Sentry (Functional Software, Inc. — États-Unis) :
                 </span>{' '}
-                Surveillance des erreurs, capture des exceptions JavaScript et
-                traçage des performances. Politique de confidentialité :{' '}
+                Surveillance des erreurs, capture des exceptions JavaScript,
+                traçage des performances et enregistrement de session (session
+                replay) en production. Politique de confidentialité :{' '}
                 <a
                   href="https://sentry.io/privacy/"
                   target="_blank"
@@ -521,11 +522,12 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">Cookies Sentry :</span>{' '}
-                Identifiant de session permettant la corrélation des erreurs et
-                le diagnostic des problèmes techniques. Ces cookies sont déposés
-                sous intérêt légitime à des fins de surveillance des erreurs et
-                d'amélioration de la stabilité. Ils ne sont pas utilisés à des
-                fins publicitaires ni de profilage commercial
+                Identifiant de session permettant la corrélation des erreurs, le
+                fonctionnement de l'enregistrement de session (session replay)
+                et le diagnostic des problèmes techniques. Ces cookies sont
+                déposés sous intérêt légitime à des fins de surveillance des
+                erreurs et d'amélioration de la stabilité. Ils ne sont pas
+                utilisés à des fins publicitaires ni de profilage commercial
               </li>
             </ul>
 
@@ -593,10 +595,11 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="9. Surveillance des erreurs (Sentry)">
+          <LegalSection title="9. Surveillance des erreurs et enregistrement de session (Sentry)">
             <p>
               La Plateforme utilise Sentry afin de détecter et diagnostiquer les
-              erreurs techniques. Cette fonctionnalité est activée uniquement en
+              erreurs techniques et d'enregistrer des sessions utilisateur à des
+              fins de débogage. Ces fonctionnalités sont activées uniquement en
               environnement de production.
             </p>
             <p className="font-medium text-zinc-300">Ce qui est collecté :</p>
@@ -609,13 +612,19 @@ const PrivacyPage = () => {
                 Informations sur le navigateur et le système d'exploitation
               </li>
               <li>Identifiant de session Sentry (anonyme)</li>
+              <li>
+                Enregistrements de session (session replay) : mouvements de
+                souris, clics, défilements et snapshots DOM — pour 10% des
+                sessions et 100% des sessions ayant rencontré une erreur
+              </li>
             </ul>
             <p className="font-medium text-zinc-300">
-              Ce qui n'est PAS collecté :
+              Ce qui n'est PAS enregistré :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 Mots de passe et données saisies dans les champs sensibles
+                (masqués automatiquement par Sentry)
               </li>
               <li>
                 Données bancaires ou de carte de crédit (gérées exclusivement
@@ -623,9 +632,14 @@ const PrivacyPage = () => {
               </li>
             </ul>
             <p>
+              Lorsque vous êtes connecté(e), les enregistrements de session
+              peuvent être associés à votre identifiant utilisateur afin de
+              faciliter le diagnostic de problèmes signalés.
+            </p>
+            <p>
               <span className="text-zinc-300">Base légale :</span> Intérêt
               légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) — surveillance de
-              la stabilité et résolution de bugs.
+              la stabilité, résolution de bugs et amélioration de l'expérience.
             </p>
             <p>
               <span className="text-zinc-300">Hébergement :</span> Les données

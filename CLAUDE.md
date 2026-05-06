@@ -45,10 +45,10 @@ Additional CI workflows:
 ### Boundaries
 
 - `app/` — Routes and page orchestration. Route groups: `(public)/`, `admin/`, `api/`
-- `components/` — UI split by domain: `public/`, `admin/`, `ui/` (shadcn primitives), `providers/` (PostHog)
+- `components/` — UI split by domain: `public/`, `admin/`, `ui/` (shadcn primitives), `providers/`
 - `lib/actions/` — Server Actions for mutations via `authenticatedAction()` wrapper
 - `lib/services/` — Read-side cached data access (server-only, `'use cache'`, `cacheTag()`, `cacheLife()`)
-- `lib/core/` — Auth, env, logger, Prisma client, Stripe client, PostHog server client
+- `lib/core/` — Auth, env, logger, Prisma client, Stripe client
 - `lib/validations/` — Zod v4 schemas
 - `lib/config/constants/` — Named constants (new constants go here, not the barrel at `lib/config/constants`)
 - `lib/utils/` — Helpers (formatting, cn, stripe-refund, etc.)
@@ -79,9 +79,9 @@ Additional CI workflows:
 
 Paid registrations: create pending -> redirect to Stripe Checkout -> webhook confirms/expires/fails -> cache invalidation. Money stored in centimes — use `lib/utils/formatting.ts` helpers and `CENTIMES_PER_UNIT`, never raw `/ 100` or `* 100`. Refunds are DB-first, then reconciled with Stripe via `lib/utils/stripe-refund.ts`.
 
-### Analytics (PostHog)
+### Error Monitoring (Sentry)
 
-PostHog tracks errors, session replays, and user events. Client-side init via `instrumentation-client.ts` (Next.js 15.3+ convention), server-side via `lib/core/posthog-server.ts` factory. Reverse proxy at `/ingest` hides PostHog endpoints (configured in `next.config.ts`). `PostHogProvider` wraps the React tree in `app/layout.tsx`; `PostHogPageView` captures SPA route changes. Error boundaries send exceptions via `posthog.captureException()`. User identification happens in `public-navbar-client.tsx`, reset on logout in `use-logout.ts`. Server-side event capture (webhook) uses `getPostHogClient()` + `await posthog.shutdown()`.
+Sentry captures errors, traces requests, and records session replays. Enabled in production only (`VERCEL_ENV === 'production'`). Client-side init + session replay via `instrumentation-client.ts` (Next.js 15.3+ convention). Server and Edge init via `sentry.server.config.ts` / `sentry.edge.config.ts`, loaded from `instrumentation.ts` by runtime. `onRequestError` in `instrumentation.ts` automatically captures unhandled server request errors. All 4 error boundaries call `Sentry.captureException(error)`. Tunnel route at `/monitoring` bypasses ad-blockers (configured in `next.config.ts` via `withSentryConfig`).
 
 ## Repo Conventions
 

@@ -2,7 +2,7 @@
 
 ## Fast Start
 
-- Single Next.js 16 app. Main boundaries: `app/` routes, `components/` UI (includes `providers/` for PostHog), `lib/actions/` server mutations, `lib/services/` cached reads, `prisma/` schema+migrations+seed, top-level `tests/`.
+- Single Next.js 16 app. Main boundaries: `app/` routes, `components/` UI, `lib/actions/` server mutations, `lib/services/` cached reads, `prisma/` schema+migrations+seed, top-level `tests/`.
 - UI text is French. Code, comments, and identifiers are English.
 - Prisma client is generated into `prisma/generated/prisma`. Import enum values from `@/prisma/generated/prisma/enums`; do not use hardcoded enum strings.
 
@@ -34,7 +34,7 @@
 - Admin protection is dual-layer: `proxy.ts` at the edge plus `components/public/auth/admin-guard.tsx` in the app layer.
 - Server-side session access goes through `getSession()` in `lib/services/auth.ts`. Prefer passing session-derived data down as props instead of re-reading session state in client components.
 - `next.config.ts` enables `cacheComponents`. Follow the existing pattern of using route `loading.tsx` files or `Suspense` around dynamic APIs like `headers()`/`cookies()`.
-- PostHog analytics: client init in `instrumentation-client.ts`, server factory in `lib/core/posthog-server.ts`, provider + pageview tracking in `components/providers/`. Error boundaries capture exceptions to PostHog. Reverse proxy at `/ingest` configured in `next.config.ts`.
+- Sentry error monitoring: client init + session replay in `instrumentation-client.ts`, server/edge init in `sentry.server.config.ts` / `sentry.edge.config.ts`, dispatched from `instrumentation.ts` by runtime. All 4 error boundaries call `Sentry.captureException`. Enabled in production only. Tunnel route `/monitoring` configured via `withSentryConfig` in `next.config.ts`.
 
 ## Repo Rules
 

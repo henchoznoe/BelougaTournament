@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 25 avril 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 6 mai 2026."
         />
 
         <div className="space-y-6">
@@ -186,8 +186,9 @@ const LegalPage = () => {
             </ul>
             <p>
               Sentry est utilisé pour la capture automatique des erreurs
-              JavaScript et le suivi des performances applicatives à des fins de
-              débogage et d'amélioration de la stabilité.
+              JavaScript, le suivi des performances et l'enregistrement de
+              session (session replay) à des fins de débogage et d'amélioration
+              de la stabilité. Activé en production uniquement.
             </p>
 
             <p className="mt-2">
