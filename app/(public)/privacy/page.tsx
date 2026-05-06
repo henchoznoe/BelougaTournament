@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 25 avril 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 6 mai 2026."
         />
 
         <div className="space-y-6">
@@ -117,14 +117,13 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  Données d'analyse et de suivi (PostHog) :
+                  Données d'analyse et de surveillance des erreurs (Sentry) :
                 </span>{' '}
                 Pages visitées, événements d'interaction (inscription à un
                 tournoi, désinscription, connexion, lancement de paiement,
-                modification du profil), exceptions JavaScript, et
-                enregistrements de session (voir section 9). Lorsque vous êtes
-                connecté(e), ces données sont associées à votre identifiant
-                utilisateur
+                modification du profil), exceptions JavaScript et erreurs
+                applicatives. Lorsque vous êtes connecté(e), ces données peuvent
+                être associées à votre identifiant utilisateur
               </li>
             </ul>
             <p>
@@ -162,13 +161,12 @@ const PrivacyPage = () => {
                 </Link>
               </li>
               <li>
-                Analyse d'audience et amélioration de la Plateforme via PostHog
-                (événements d'utilisation, mesure de performance) et Vercel
+                Analyse d'audience et amélioration de la Plateforme via Vercel
                 Analytics (données anonymes et agrégées)
               </li>
               <li>
                 Surveillance des erreurs et amélioration de la stabilité via
-                PostHog (capture automatique des exceptions JavaScript)
+                Sentry (capture automatique des exceptions JavaScript)
               </li>
               <li>
                 Enregistrement de session (session replay) à des fins de
@@ -205,9 +203,8 @@ const PrivacyPage = () => {
                   Intérêt légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) :
                 </span>{' '}
                 Pour la sécurité et la modération de la Plateforme, l'analyse
-                d'audience (PostHog, Vercel Analytics), l'enregistrement de
-                session à des fins de débogage et d'amélioration de
-                l'expérience, ainsi que la surveillance des erreurs
+                d'audience (Vercel Analytics), la surveillance des erreurs
+                (Sentry) et la surveillance de la stabilité de la Plateforme
               </li>
               <li>
                 <span className="text-zinc-300">
@@ -297,20 +294,18 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  PostHog Inc. (États-Unis — données hébergées dans l'UE) :
+                  Sentry (Functional Software, Inc. — États-Unis) :
                 </span>{' '}
-                Analyse d'audience, suivi des événements, surveillance des
-                erreurs et enregistrement de session. Les données sont traitées
-                sur l'instance européenne de PostHog (eu.i.posthog.com) et
-                transitent via un proxy first-party (/ingest) sur notre domaine.
-                Politique de confidentialité :{' '}
+                Surveillance des erreurs, capture des exceptions JavaScript,
+                traçage des performances et enregistrement de session (session
+                replay) en production. Politique de confidentialité :{' '}
                 <a
-                  href="https://posthog.com/privacy"
+                  href="https://sentry.io/privacy/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  posthog.com/privacy
+                  sentry.io/privacy
                 </a>
               </li>
               <li>
@@ -398,11 +393,11 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  Données d'analyse (PostHog) :
+                  Données d'erreurs (Sentry) :
                 </span>{' '}
-                Selon la configuration du projet PostHog. Les enregistrements de
-                session et les événements sont automatiquement supprimés après
-                leur période de rétention configurée
+                Selon la configuration du projet Sentry. Les événements d'erreur
+                sont automatiquement supprimés après leur période de rétention
+                configurée
               </li>
             </ul>
             <p>
@@ -526,13 +521,13 @@ const PrivacyPage = () => {
                 Plateforme
               </li>
               <li>
-                <span className="text-zinc-300">Cookies PostHog (ph_*) :</span>{' '}
-                Identifiant anonyme permettant le suivi d'audience, le
-                fonctionnement de l'enregistrement de session et la corrélation
-                des événements. Ces cookies sont déposés sous intérêt légitime à
-                des fins d'amélioration de la Plateforme et de surveillance des
-                erreurs. Ils ne sont pas utilisés à des fins publicitaires ni de
-                profilage commercial
+                <span className="text-zinc-300">Cookies Sentry :</span>{' '}
+                Identifiant de session permettant la corrélation des erreurs, le
+                fonctionnement de l'enregistrement de session (session replay)
+                et le diagnostic des problèmes techniques. Ces cookies sont
+                déposés sous intérêt légitime à des fins de surveillance des
+                erreurs et d'amélioration de la stabilité. Ils ne sont pas
+                utilisés à des fins publicitaires ni de profilage commercial
               </li>
             </ul>
 
@@ -600,22 +595,28 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="9. Enregistrement de session (Session Replay)">
+          <LegalSection title="9. Surveillance des erreurs et enregistrement de session (Sentry)">
             <p>
-              La Plateforme utilise la fonctionnalité d'enregistrement de
-              session (session replay) fournie par PostHog afin d'améliorer
-              l'expérience utilisateur et de diagnostiquer les problèmes
-              techniques. Cette fonctionnalité est activée uniquement en
+              La Plateforme utilise Sentry afin de détecter et diagnostiquer les
+              erreurs techniques et d'enregistrer des sessions utilisateur à des
+              fins de débogage. Ces fonctionnalités sont activées uniquement en
               environnement de production.
             </p>
-            <p className="font-medium text-zinc-300">Ce qui est enregistré :</p>
+            <p className="font-medium text-zinc-300">Ce qui est collecté :</p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                Mouvements de souris, clics, défilements et interactions avec
-                les éléments de la page
+                Exceptions JavaScript et erreurs applicatives (message, stack
+                trace, URL de la page)
               </li>
-              <li>Snapshots du contenu DOM (structure visuelle de la page)</li>
-              <li>Navigation entre les pages</li>
+              <li>
+                Informations sur le navigateur et le système d'exploitation
+              </li>
+              <li>Identifiant de session Sentry (anonyme)</li>
+              <li>
+                Enregistrements de session (session replay) : mouvements de
+                souris, clics, défilements et snapshots DOM — pour 10% des
+                sessions et 100% des sessions ayant rencontré une erreur
+              </li>
             </ul>
             <p className="font-medium text-zinc-300">
               Ce qui n'est PAS enregistré :
@@ -623,7 +624,7 @@ const PrivacyPage = () => {
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
                 Mots de passe et données saisies dans les champs sensibles
-                (masquage automatique par PostHog)
+                (masqués automatiquement par Sentry)
               </li>
               <li>
                 Données bancaires ou de carte de crédit (gérées exclusivement
@@ -637,18 +638,16 @@ const PrivacyPage = () => {
             </p>
             <p>
               <span className="text-zinc-300">Base légale :</span> Intérêt
-              légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) — amélioration de
-              la Plateforme et résolution de bugs.
+              légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) — surveillance de
+              la stabilité, résolution de bugs et amélioration de l'expérience.
             </p>
             <p>
               <span className="text-zinc-300">Hébergement :</span> Les données
-              sont traitées sur l'instance européenne de PostHog
-              (eu.i.posthog.com).
+              sont traitées par Sentry (Functional Software, Inc., États-Unis).
             </p>
             <p>
-              Vous pouvez bloquer l'enregistrement de session en désactivant
-              JavaScript dans votre navigateur ou en utilisant une extension
-              bloquant les scripts PostHog.
+              Vous pouvez bloquer Sentry en désactivant JavaScript dans votre
+              navigateur.
             </p>
           </LegalSection>
 
@@ -670,7 +669,7 @@ const PrivacyPage = () => {
                 Accès aux données restreint par rôle (USER, ADMIN, SUPER_ADMIN)
               </li>
               <li>
-                Surveillance des erreurs et alertes de sécurité via PostHog
+                Surveillance des erreurs et alertes de sécurité via Sentry
               </li>
               <li>
                 Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et

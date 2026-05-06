@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 25 avril 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 6 mai 2026."
         />
 
         <div className="space-y-6">
@@ -165,35 +165,30 @@ const LegalPage = () => {
             </p>
 
             <p className="mt-2">
-              L'analyse d'audience, la surveillance des erreurs et
-              l'enregistrement de session sont assurés par :
+              La surveillance des erreurs est assurée par :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
               <li>
-                <span className="text-zinc-300">Nom :</span> PostHog Inc.
-              </li>
-              <li>
-                <span className="text-zinc-300">Instance :</span> Europe
-                (eu.i.posthog.com)
+                <span className="text-zinc-300">Nom :</span> Functional
+                Software, Inc. (Sentry)
               </li>
               <li>
                 <span className="text-zinc-300">Site web :</span>{' '}
                 <a
-                  href="https://posthog.com"
+                  href="https://sentry.io"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 transition-colors hover:text-blue-300"
                 >
-                  posthog.com
+                  sentry.io
                 </a>
               </li>
             </ul>
             <p>
-              PostHog est utilisé pour l'analyse d'audience, le suivi des
-              événements d'utilisation, la capture automatique des erreurs
-              JavaScript et l'enregistrement de session (session replay) à des
-              fins de débogage et d'amélioration de l'expérience utilisateur.
-              Les données transitent via un proxy first-party sur notre domaine.
+              Sentry est utilisé pour la capture automatique des erreurs
+              JavaScript, le suivi des performances et l'enregistrement de
+              session (session replay) à des fins de débogage et d'amélioration
+              de la stabilité. Activé en production uniquement.
             </p>
 
             <p className="mt-2">
@@ -289,11 +284,10 @@ const LegalPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  Cookies d'analyse (PostHog) :
+                  Cookies de surveillance des erreurs (Sentry) :
                 </span>{' '}
-                Utilisés pour l'analyse d'audience, le suivi des événements et
-                l'enregistrement de session à des fins d'amélioration de la
-                Plateforme. Déposés sous intérêt légitime, sans finalité
+                Utilisés pour la corrélation des erreurs et le diagnostic
+                technique. Déposés sous intérêt légitime, sans finalité
                 publicitaire
               </li>
             </ul>

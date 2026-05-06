@@ -8,9 +8,9 @@
 
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
-import posthog from 'posthog-js'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/config/routes'
@@ -24,7 +24,7 @@ interface ErrorPageProps {
 const PublicErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
     console.error(error)
-    posthog.captureException(error)
+    Sentry.captureException(error)
   }, [error])
 
   return (
