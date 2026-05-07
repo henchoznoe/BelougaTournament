@@ -18,7 +18,9 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
   enableLogs: true,
   sendDefaultPii: true,
-  integrations: [Sentry.replayIntegration()],
+  integrations: [
+    Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+  ],
 })
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
