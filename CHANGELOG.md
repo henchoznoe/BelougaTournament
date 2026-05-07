@@ -1,3 +1,11 @@
+## [1.7.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.0...v1.7.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* disable text masking and media blocking in Sentry replay integration ([91b2b06](https://github.com/henchoznoe/BelougaTournament/commit/91b2b06defd44ea9b4589c32ad3ac1fbbcdc9d95))
+* update Sentry enabled condition to use NODE_ENV across all configurations ([9a4cafd](https://github.com/henchoznoe/BelougaTournament/commit/9a4cafd1d60c228cfa4964b5fcf4f193adf9154a))
+
 # [1.7.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.6.0...v1.7.0) (2026-05-06)
 
 
