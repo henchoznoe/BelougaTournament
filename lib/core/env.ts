@@ -14,8 +14,6 @@ const clientSchema = z.object({
     .string()
     .min(1, 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
     .optional(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().min(1).optional(),
-  NEXT_PUBLIC_VERCEL_ENV: z.string().optional(),
 })
 
 const serverSchema = z.object({
@@ -55,9 +53,6 @@ const serverSchema = z.object({
   // Vercel runtime metadata
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
-
-  // Sentry
-  SENTRY_DSN: z.string().min(1).optional(),
 })
 
 const isServer = typeof window === 'undefined'
@@ -67,8 +62,6 @@ const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
 })
 
 // Parse server-side

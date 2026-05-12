@@ -79,10 +79,6 @@ Additional CI workflows:
 
 Paid registrations: create pending -> redirect to Stripe Checkout -> webhook confirms/expires/fails -> cache invalidation. Money stored in centimes — use `lib/utils/formatting.ts` helpers and `CENTIMES_PER_UNIT`, never raw `/ 100` or `* 100`. Refunds are DB-first, then reconciled with Stripe via `lib/utils/stripe-refund.ts`.
 
-### Error Monitoring (Sentry)
-
-Sentry captures errors, traces requests, and records session replays. Enabled in production only (`VERCEL_ENV === 'production'`). Client-side init + session replay via `instrumentation-client.ts` (Next.js 15.3+ convention). Server and Edge init via `sentry.server.config.ts` / `sentry.edge.config.ts`, loaded from `instrumentation.ts` by runtime. `onRequestError` in `instrumentation.ts` automatically captures unhandled server request errors. All 4 error boundaries call `Sentry.captureException(error)`. Tunnel route at `/monitoring` bypasses ad-blockers (configured in `next.config.ts` via `withSentryConfig`).
-
 ## Repo Conventions
 
 - Every `.ts`/`.tsx` file starts with the repository header block (File, Description, Author, License, Copyright).

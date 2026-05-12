@@ -115,16 +115,6 @@ const PrivacyPage = () => {
                 sont stockés sur Vercel Blob et accessibles via des URL
                 publiques
               </li>
-              <li>
-                <span className="text-zinc-300">
-                  Données d'analyse et de surveillance des erreurs (Sentry) :
-                </span>{' '}
-                Pages visitées, événements d'interaction (inscription à un
-                tournoi, désinscription, connexion, lancement de paiement,
-                modification du profil), exceptions JavaScript et erreurs
-                applicatives. Lorsque vous êtes connecté(e), ces données peuvent
-                être associées à votre identifiant utilisateur
-              </li>
             </ul>
             <p>
               Nous ne collectons aucun document d'identité officiel, aucune
@@ -164,15 +154,6 @@ const PrivacyPage = () => {
                 Analyse d'audience et amélioration de la Plateforme via Vercel
                 Analytics (données anonymes et agrégées)
               </li>
-              <li>
-                Surveillance des erreurs et amélioration de la stabilité via
-                Sentry (capture automatique des exceptions JavaScript)
-              </li>
-              <li>
-                Enregistrement de session (session replay) à des fins de
-                débogage et d'amélioration de l'expérience utilisateur (voir
-                section 9)
-              </li>
               <li>Prévention de la fraude et sécurité de la Plateforme</li>
             </ul>
           </LegalSection>
@@ -203,8 +184,8 @@ const PrivacyPage = () => {
                   Intérêt légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) :
                 </span>{' '}
                 Pour la sécurité et la modération de la Plateforme, l'analyse
-                d'audience (Vercel Analytics), la surveillance des erreurs
-                (Sentry) et la surveillance de la stabilité de la Plateforme
+                d'audience (Vercel Analytics) et la surveillance de la stabilité
+                de la Plateforme
               </li>
               <li>
                 <span className="text-zinc-300">
@@ -294,22 +275,6 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <span className="text-zinc-300">
-                  Sentry (Functional Software, Inc. — États-Unis) :
-                </span>{' '}
-                Surveillance des erreurs, capture des exceptions JavaScript,
-                traçage des performances et enregistrement de session (session
-                replay) en production. Politique de confidentialité :{' '}
-                <a
-                  href="https://sentry.io/privacy/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
-                >
-                  sentry.io/privacy
-                </a>
-              </li>
-              <li>
-                <span className="text-zinc-300">
                   Resend, Inc. (États-Unis) :
                 </span>{' '}
                 Service d'envoi d'e-mails transactionnels pour le formulaire de
@@ -390,14 +355,6 @@ const PrivacyPage = () => {
                 Non stockées dans la base de données de la Plateforme. Les
                 e-mails sont conservés dans la boîte de réception de
                 l'administrateur
-              </li>
-              <li>
-                <span className="text-zinc-300">
-                  Données d'erreurs (Sentry) :
-                </span>{' '}
-                Selon la configuration du projet Sentry. Les événements d'erreur
-                sont automatiquement supprimés après leur période de rétention
-                configurée
               </li>
             </ul>
             <p>
@@ -520,15 +477,6 @@ const PrivacyPage = () => {
                 peuvent pas être désactivés sans empêcher l'utilisation de la
                 Plateforme
               </li>
-              <li>
-                <span className="text-zinc-300">Cookies Sentry :</span>{' '}
-                Identifiant de session permettant la corrélation des erreurs, le
-                fonctionnement de l'enregistrement de session (session replay)
-                et le diagnostic des problèmes techniques. Ces cookies sont
-                déposés sous intérêt légitime à des fins de surveillance des
-                erreurs et d'amélioration de la stabilité. Ils ne sont pas
-                utilisés à des fins publicitaires ni de profilage commercial
-              </li>
             </ul>
 
             <p className="mt-2 font-medium text-zinc-300">
@@ -595,63 +543,7 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="9. Surveillance des erreurs et enregistrement de session (Sentry)">
-            <p>
-              La Plateforme utilise Sentry afin de détecter et diagnostiquer les
-              erreurs techniques et d'enregistrer des sessions utilisateur à des
-              fins de débogage. Ces fonctionnalités sont activées uniquement en
-              environnement de production.
-            </p>
-            <p className="font-medium text-zinc-300">Ce qui est collecté :</p>
-            <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>
-                Exceptions JavaScript et erreurs applicatives (message, stack
-                trace, URL de la page)
-              </li>
-              <li>
-                Informations sur le navigateur et le système d'exploitation
-              </li>
-              <li>Identifiant de session Sentry (anonyme)</li>
-              <li>
-                Enregistrements de session (session replay) : mouvements de
-                souris, clics, défilements et snapshots DOM — pour 10% des
-                sessions et 100% des sessions ayant rencontré une erreur
-              </li>
-            </ul>
-            <p className="font-medium text-zinc-300">
-              Ce qui n'est PAS enregistré :
-            </p>
-            <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>
-                Mots de passe et données saisies dans les champs sensibles
-                (masqués automatiquement par Sentry)
-              </li>
-              <li>
-                Données bancaires ou de carte de crédit (gérées exclusivement
-                par Stripe dans sa propre iframe sécurisée)
-              </li>
-            </ul>
-            <p>
-              Lorsque vous êtes connecté(e), les enregistrements de session
-              peuvent être associés à votre identifiant utilisateur afin de
-              faciliter le diagnostic de problèmes signalés.
-            </p>
-            <p>
-              <span className="text-zinc-300">Base légale :</span> Intérêt
-              légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) — surveillance de
-              la stabilité, résolution de bugs et amélioration de l'expérience.
-            </p>
-            <p>
-              <span className="text-zinc-300">Hébergement :</span> Les données
-              sont traitées par Sentry (Functional Software, Inc., États-Unis).
-            </p>
-            <p>
-              Vous pouvez bloquer Sentry en désactivant JavaScript dans votre
-              navigateur.
-            </p>
-          </LegalSection>
-
-          <LegalSection title="10. Sécurité">
+          <LegalSection title="9. Sécurité">
             <p>
               Nous mettons en œuvre des mesures techniques et organisationnelles
               appropriées pour protéger vos données contre tout accès non
@@ -667,9 +559,6 @@ const PrivacyPage = () => {
               </li>
               <li>
                 Accès aux données restreint par rôle (USER, ADMIN, SUPER_ADMIN)
-              </li>
-              <li>
-                Surveillance des erreurs et alertes de sécurité via Sentry
               </li>
               <li>
                 Infrastructure hébergée chez Vercel, certifiée SOC 2 Type II et
@@ -697,7 +586,7 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="11. Mineurs">
+          <LegalSection title="10. Mineurs">
             <p>
               La Plateforme est accessible aux personnes âgées d'au moins 16
               ans. Nous ne collectons pas sciemment de données personnelles
@@ -714,7 +603,7 @@ const PrivacyPage = () => {
             </p>
           </LegalSection>
 
-          <LegalSection title="12. Modifications">
+          <LegalSection title="11. Modifications">
             <p>
               Cette politique de confidentialité peut être modifiée à tout
               moment pour refléter des évolutions légales, réglementaires ou

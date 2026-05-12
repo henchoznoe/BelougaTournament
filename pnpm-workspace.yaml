@@ -1,6 +1,6 @@
 allowBuilds:
   '@prisma/engines': true
-  '@sentry/cli': true
+  '@sentry/cli': set this to true or false
   core-js: true
   esbuild: true
   lefthook: true
@@ -8,4 +8,4 @@ allowBuilds:
   protobufjs: true
   sharp: true
 overrides:
-  vite: "7.3.2"
+  kysely: "^0.28.17"
