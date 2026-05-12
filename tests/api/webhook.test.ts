@@ -15,11 +15,6 @@ import {
 
 vi.mock('server-only', () => ({}))
 
-vi.mock('@sentry/nextjs', () => ({
-  captureException: vi.fn(),
-  captureRequestError: vi.fn(),
-}))
-
 const mockRevalidateTag = vi.fn()
 vi.mock('next/cache', () => ({
   revalidateTag: (...args: unknown[]) => mockRevalidateTag(...args),

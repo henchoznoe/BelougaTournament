@@ -1,6 +1,6 @@
 allowBuilds:
   '@prisma/engines': true
-  '@sentry/cli': true
+  '@sentry/cli': set this to true or false
   core-js: true
   esbuild: true
   lefthook: true

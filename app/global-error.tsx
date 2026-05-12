@@ -9,7 +9,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useEffect } from 'react'
 
@@ -22,7 +21,6 @@ interface GlobalErrorProps {
 const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     console.error(error)
-    Sentry.captureException(error)
   }, [error])
 
   return (
@@ -36,9 +34,6 @@ const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
           <p className="mt-2 text-sm text-zinc-400">
             L&apos;application a rencontré une erreur critique. Réessayez dans
             un instant.
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            Notre équipe a été automatiquement informée de ce problème.
           </p>
         </div>
         <button

@@ -165,33 +165,6 @@ const LegalPage = () => {
             </p>
 
             <p className="mt-2">
-              La surveillance des erreurs est assurée par :
-            </p>
-            <ul className="list-inside list-disc space-y-1 pl-2">
-              <li>
-                <span className="text-zinc-300">Nom :</span> Functional
-                Software, Inc. (Sentry)
-              </li>
-              <li>
-                <span className="text-zinc-300">Site web :</span>{' '}
-                <a
-                  href="https://sentry.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
-                >
-                  sentry.io
-                </a>
-              </li>
-            </ul>
-            <p>
-              Sentry est utilisé pour la capture automatique des erreurs
-              JavaScript, le suivi des performances et l'enregistrement de
-              session (session replay) à des fins de débogage et d'amélioration
-              de la stabilité. Activé en production uniquement.
-            </p>
-
-            <p className="mt-2">
               Les e-mails transactionnels (formulaire de contact) sont envoyés
               via :
             </p>
@@ -281,14 +254,6 @@ const LegalPage = () => {
                 Strictement nécessaires au fonctionnement de l'authentification.
                 Ces cookies ne peuvent pas être désactivés sans empêcher
                 l'utilisation de la Plateforme
-              </li>
-              <li>
-                <span className="text-zinc-300">
-                  Cookies de surveillance des erreurs (Sentry) :
-                </span>{' '}
-                Utilisés pour la corrélation des erreurs et le diagnostic
-                technique. Déposés sous intérêt légitime, sans finalité
-                publicitaire
               </li>
             </ul>
             <p>

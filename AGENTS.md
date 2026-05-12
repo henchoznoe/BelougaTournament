@@ -34,7 +34,6 @@
 - Admin protection is dual-layer: `proxy.ts` at the edge plus `components/public/auth/admin-guard.tsx` in the app layer.
 - Server-side session access goes through `getSession()` in `lib/services/auth.ts`. Prefer passing session-derived data down as props instead of re-reading session state in client components.
 - `next.config.ts` enables `cacheComponents`. Follow the existing pattern of using route `loading.tsx` files or `Suspense` around dynamic APIs like `headers()`/`cookies()`.
-- Sentry error monitoring: client init + session replay in `instrumentation-client.ts`, server/edge init in `sentry.server.config.ts` / `sentry.edge.config.ts`, dispatched from `instrumentation.ts` by runtime. All 4 error boundaries call `Sentry.captureException`. Enabled in production only. Tunnel route `/monitoring` configured via `withSentryConfig` in `next.config.ts`.
 
 ## Repo Rules
 

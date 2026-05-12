@@ -9,7 +9,6 @@
 
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -23,7 +22,6 @@ interface ErrorPageProps {
 const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
   useEffect(() => {
     console.error(error)
-    Sentry.captureException(error)
   }, [error])
 
   return (
@@ -38,9 +36,6 @@ const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
         <p className="mt-2 text-sm text-zinc-400">
           Quelque chose s&apos;est mal passé. Vous pouvez réessayer ou revenir
           plus tard.
-        </p>
-        <p className="mt-1 text-xs text-zinc-500">
-          Notre équipe a été automatiquement informée de ce problème.
         </p>
         {error.digest && (
           <p className="mt-1 font-mono text-xs text-zinc-600">
