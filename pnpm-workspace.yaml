@@ -8,4 +8,4 @@ allowBuilds:
   protobufjs: true
   sharp: true
 overrides:
-  vite: "7.3.2"
+  kysely: "^0.28.17"
