@@ -103,7 +103,7 @@ const DateTimePicker = ({
           mode="single"
           selected={currentDate}
           onSelect={handleDateSelect}
-          initialFocus
+          autoFocus
         />
         <div className="border-t p-3">
           <Input
