@@ -1,3 +1,10 @@
+## [1.7.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.2...v1.7.3) (2026-05-13)
+
+
+### Bug Fixes
+
+* update calendar and date-time-picker components for v10 ([2a0d32c](https://github.com/henchoznoe/BelougaTournament/commit/2a0d32ca5ec33ba61eb2eda136b4c7302f3d242b))
+
 ## [1.7.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.1...v1.7.2) (2026-05-12)
 
 
