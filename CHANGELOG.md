@@ -1,3 +1,25 @@
+## [1.7.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.3...v1.7.4) (2026-05-15)
+
+
+### Bug Fixes
+
+* configure dependabot grouping and update dependencies ([a793080](https://github.com/henchoznoe/BelougaTournament/commit/a793080fb1e620ebff377bd3b01efc0af984aa59))
+
+## [1.7.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.2...v1.7.3) (2026-05-13)
+
+
+### Bug Fixes
+
+* update calendar and date-time-picker components for v10 ([2a0d32c](https://github.com/henchoznoe/BelougaTournament/commit/2a0d32ca5ec33ba61eb2eda136b4c7302f3d242b))
+
+## [1.7.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.1...v1.7.2) (2026-05-12)
+
+
+### Bug Fixes
+
+* relocate kysely dependency override from package.json to pnpm-workspace.yaml ([dcee4e2](https://github.com/henchoznoe/BelougaTournament/commit/dcee4e28fb13f525e274e3cec5416c86660f2c72))
+* remove Sentry error monitoring and associated configuration files ([1163c26](https://github.com/henchoznoe/BelougaTournament/commit/1163c264e437ac98441832bcd6389c5b3cf8cd3b))
+
 ## [1.7.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.0...v1.7.1) (2026-05-07)
 
 
