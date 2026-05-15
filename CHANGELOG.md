@@ -1,3 +1,10 @@
+## [1.7.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.3...v1.7.4) (2026-05-15)
+
+
+### Bug Fixes
+
+* configure dependabot grouping and update dependencies ([a793080](https://github.com/henchoznoe/BelougaTournament/commit/a793080fb1e620ebff377bd3b01efc0af984aa59))
+
 ## [1.7.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.2...v1.7.3) (2026-05-13)
 
 
