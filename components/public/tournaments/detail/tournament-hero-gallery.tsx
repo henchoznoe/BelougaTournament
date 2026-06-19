@@ -10,9 +10,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { TournamentHero } from '@/components/public/tournaments/detail/tournament-hero'
+import { TournamentImage } from '@/components/public/tournaments/tournament-image'
 import type { PublicTournamentDetail } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
 import type { TournamentRegistrationBadge } from '@/lib/utils/tournament-status'
@@ -94,7 +94,9 @@ export const TournamentHeroGallery = ({
     >
       {/* Carousel slides */}
       {tournament.imageUrls.length > 0 ? (
-        <div className="relative h-56 sm:h-72 md:h-80">
+        // overflow-hidden confines the scaled ambient backdrop to the image box so it
+        // cannot bleed down into the title/badges overlay area below.
+        <div className="relative h-56 overflow-hidden sm:h-72 md:h-80">
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={activeIndex}
@@ -106,11 +108,10 @@ export const TournamentHeroGallery = ({
               transition={{ duration: 0.4, ease: 'easeInOut' }}
               className="absolute inset-0"
             >
-              <Image
+              <TournamentImage
                 src={tournament.imageUrls[activeIndex]}
                 alt={`${tournament.title} ${activeIndex + 1}`}
-                fill
-                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 66vw"
                 priority={activeIndex === 0}
               />
             </motion.div>

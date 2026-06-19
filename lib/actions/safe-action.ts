@@ -13,8 +13,8 @@ import { logger } from '@/lib/core/logger'
 import type { ActionState } from '@/lib/types/actions'
 import type { AuthSession } from '@/lib/types/auth'
 import { handlePrismaError } from '@/lib/utils/prisma-error'
-import { isRoleValue } from '@/lib/utils/role'
-import { Role } from '@/prisma/generated/prisma/enums'
+import { isRoleValue, satisfiesRole } from '@/lib/utils/role'
+import type { Role } from '@/prisma/generated/prisma/enums'
 
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
@@ -30,13 +30,6 @@ type ActionOptions<T extends z.ZodType, TOutput = unknown> = {
 type PublicActionOptions<T extends z.ZodType, TOutput = unknown> = {
   schema: T
   handler: (data: z.infer<T>) => Promise<ActionState<TOutput>>
-}
-
-/** Returns true if `userRole` satisfies `requiredRole` considering the role hierarchy. */
-const satisfiesRole = (userRole: Role, requiredRole: Role): boolean => {
-  if (userRole === requiredRole) return true
-  if (userRole === Role.SUPER_ADMIN && requiredRole === Role.ADMIN) return true
-  return false
 }
 
 /**
