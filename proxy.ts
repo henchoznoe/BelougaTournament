@@ -11,7 +11,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { ADMIN_ROUTE_ROLES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
-import { isRoleValue } from '@/lib/utils/role'
+import { isRoleValue, satisfiesRole } from '@/lib/utils/role'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 /**
@@ -63,17 +63,6 @@ const getRequiredRole = (pathname: string): Role => {
   return match ? match[1] : Role.ADMIN
 }
 
-/**
- * Roles that satisfy a given minimum role requirement.
- * Any role listed here (or higher) is considered authorized.
- * Currently only ADMIN exists; extend this map when new privileged roles are added.
- */
-const ROLE_ALLOWLIST: Record<Role, Set<Role>> = {
-  [Role.ADMIN]: new Set([Role.ADMIN, Role.SUPER_ADMIN]),
-  [Role.SUPER_ADMIN]: new Set([Role.SUPER_ADMIN]),
-  [Role.USER]: new Set([Role.USER]),
-} as const
-
 export const proxy = async (request: NextRequest) => {
   const session = await fetchSession(request)
 
@@ -82,9 +71,11 @@ export const proxy = async (request: NextRequest) => {
   }
 
   const requiredRole = getRequiredRole(request.nextUrl.pathname)
-  const allowedRoles = ROLE_ALLOWLIST[requiredRole] ?? new Set([requiredRole])
   // Guard against a malformed/tampered session JSON returning an unknown role string.
-  if (!isRoleValue(session.user.role) || !allowedRoles.has(session.user.role)) {
+  if (
+    !isRoleValue(session.user.role) ||
+    !satisfiesRole(session.user.role, requiredRole)
+  ) {
     return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
