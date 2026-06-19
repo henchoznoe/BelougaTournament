@@ -45,14 +45,14 @@ const AdminDashboardPage = async () => {
       {/* Stats cards */}
       <DashboardStatsCards stats={stats} />
 
+      {/* Payment revenue */}
+      <DashboardPayments payments={paymentStats} />
+
       {/* Two-column panels */}
       <div className="grid gap-6 lg:grid-cols-2">
         <DashboardRecentLogins logins={recentLogins} />
         <DashboardRecentRegistrations registrations={recentRegistrations} />
       </div>
-
-      {/* Payment revenue */}
-      <DashboardPayments payments={paymentStats} />
     </AdminContentLayout>
   )
 }

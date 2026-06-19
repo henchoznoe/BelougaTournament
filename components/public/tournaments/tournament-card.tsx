@@ -9,8 +9,8 @@
 'use client'
 
 import { Calendar, Gamepad2, Swords, Users } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
+import { TournamentImage } from '@/components/public/tournaments/tournament-image'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
@@ -52,18 +52,17 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
     >
       {/* Image banner */}
       {tournament.imageUrls.length > 0 ? (
-        <div className="relative h-40 w-full overflow-hidden">
-          <Image
+        <div className="relative aspect-video w-full overflow-hidden">
+          <TournamentImage
             src={tournament.imageUrls[0]}
             alt={tournament.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
         </div>
       ) : (
-        <div className="relative flex h-40 w-full items-center justify-center overflow-hidden bg-linear-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
+        <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-linear-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
           <Gamepad2 className="size-12 text-zinc-700" />
           <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
         </div>
