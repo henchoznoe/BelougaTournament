@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.4...v1.8.0) (2026-06-19)
+
+
+### Features
+
+* introduce TournamentImage component with ambient backdrop and update tournament displays ([81c6c4a](https://github.com/henchoznoe/BelougaTournament/commit/81c6c4a8106f51f0783de3dfaf9e5290cbc5301d))
+
 ## [1.7.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.3...v1.7.4) (2026-05-15)
 
 
