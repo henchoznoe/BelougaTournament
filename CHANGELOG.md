@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.8.0...v1.9.0) (2026-06-21)
+
+
+### Features
+
+* update financial dashboard to track and display forfeited entry fees separate from donations ([7ca844f](https://github.com/henchoznoe/BelougaTournament/commit/7ca844f006977414341e740f3e86e12a2f7d1430))
+
 # [1.8.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.7.4...v1.8.0) (2026-06-19)
 
 
