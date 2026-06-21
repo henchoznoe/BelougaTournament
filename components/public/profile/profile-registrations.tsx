@@ -328,8 +328,8 @@ export const ProfileRegistrations = ({
                       Me désinscrire sans remboursement
                     </p>
                     <p className="text-xs text-zinc-500">
-                      Vos frais d&apos;inscription sont offerts au Belouga
-                      Tournament. Cette action est irréversible.
+                      Vous renoncez à vos frais d&apos;inscription au profit de
+                      Belouga Tournament. Cette action est irréversible.
                     </p>
                   </div>
                 </button>

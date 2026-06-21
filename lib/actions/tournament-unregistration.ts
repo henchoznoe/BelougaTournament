@@ -12,15 +12,12 @@ import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
-import {
-  buildTeamRevertCallback,
-  buildTeamRevertInfo,
-  handleCaptainSuccession,
-} from '@/lib/utils/team'
+import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
+import { handleCaptainSuccession } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import { unregisterFromTournamentSchema } from '@/lib/validations/tournaments'
 import {
@@ -154,6 +151,46 @@ export const unregisterFromTournament = authenticatedAction({
         ? 'forfeit'
         : 'cancel'
 
+    const successMessage = !isPaidRegistration
+      ? 'Votre inscription a été annulée.'
+      : refundEligible
+        ? 'Votre inscription a été annulée et remboursée.'
+        : waiveRefund
+          ? "Votre inscription a été annulée. Vous avez renoncé à vos frais d'inscription au profit de Belouga Tournament."
+          : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique."
+
+    const invalidateCaches = () => {
+      updateTag(CACHE_TAGS.TOURNAMENTS)
+      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+      updateTag(CACHE_TAGS.DASHBOARD_STATS)
+      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    }
+
+    // Stripe-first: issue the refund BEFORE any DB mutation. If it fails, abort with
+    // the registration left untouched (no money moved, no state change). On success the
+    // returned amount/id become the authoritative refund record persisted below.
+    let refundResult: { stripeRefundId: string; refundAmount: number } | null =
+      null
+    if (refundEligible && latestPayment) {
+      try {
+        refundResult = await refundPaymentViaStripe({
+          payment: latestPayment,
+          registrationId: registration.id,
+          idempotencyPrefix: 'refund',
+        })
+      } catch (error) {
+        logger.error(
+          { error, registrationId: registration.id },
+          'Stripe refund failed during unregistration',
+        )
+        return {
+          success: false,
+          message:
+            'Le remboursement a échoué. Votre inscription est conservée, réessayez plus tard.',
+        }
+      }
+    }
+
     // 3. SOLO format — cancel paid registrations, delete free registrations
     if (registration.tournament.format === TournamentFormat.SOLO) {
       if (isPaidRegistration) {
@@ -167,6 +204,8 @@ export const unregisterFromTournament = authenticatedAction({
             resolution,
             clearTeamId: false,
             clearExpiresAt: true,
+            refundAmount: refundResult?.refundAmount,
+            stripeRefundId: refundResult?.stripeRefundId,
           })
         })
       } else {
@@ -175,31 +214,8 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
-      // Issue Stripe refund after DB update (DB-first pattern)
-      if (refundEligible && latestPayment) {
-        await issueStripeRefundAfterDbUpdate({
-          registrationId: registration.id,
-          latestPayment,
-          previousPaymentStatus: registration.paymentStatus,
-          idempotencyPrefix: 'refund',
-        })
-      }
-
-      updateTag(CACHE_TAGS.TOURNAMENTS)
-      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-      updateTag(CACHE_TAGS.DASHBOARD_STATS)
-      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
-
-      return {
-        success: true,
-        message: !isPaidRegistration
-          ? 'Votre inscription a été annulée.'
-          : refundEligible
-            ? 'Votre inscription a été annulée et remboursée.'
-            : waiveRefund
-              ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
-              : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
-      }
+      invalidateCaches()
+      return { success: true, message: successMessage }
     }
 
     // 4. TEAM format — find the user's team membership
@@ -227,45 +243,16 @@ export const unregisterFromTournament = authenticatedAction({
           resolution,
           clearTeamId: true,
           clearExpiresAt: isPaidRegistration,
+          refundAmount: refundResult?.refundAmount,
+          stripeRefundId: refundResult?.stripeRefundId,
         })
       })
 
-      // Issue Stripe refund after DB update (DB-first pattern)
-      if (refundEligible && latestPayment) {
-        await issueStripeRefundAfterDbUpdate({
-          registrationId: registration.id,
-          latestPayment,
-          previousPaymentStatus: registration.paymentStatus,
-          idempotencyPrefix: 'refund',
-        })
-      }
-
-      updateTag(CACHE_TAGS.TOURNAMENTS)
-      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-      updateTag(CACHE_TAGS.DASHBOARD_STATS)
-      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
-
-      return {
-        success: true,
-        message: !isPaidRegistration
-          ? 'Votre inscription a été annulée.'
-          : refundEligible
-            ? 'Votre inscription a été annulée et remboursée.'
-            : waiveRefund
-              ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
-              : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
-      }
+      invalidateCaches()
+      return { success: true, message: successMessage }
     }
 
     const team = teamMember.team
-
-    // Save pre-mutation state for potential Stripe revert
-    const teamRevertInfo = buildTeamRevertInfo({
-      team,
-      joinedAt: teamMember.joinedAt,
-      userId,
-      tournamentId: data.tournamentId,
-    })
 
     await prisma.$transaction(async tx => {
       // a. Remove team member record
@@ -283,37 +270,15 @@ export const unregisterFromTournament = authenticatedAction({
         resolution,
         clearTeamId: true,
         clearExpiresAt: isPaidRegistration,
+        refundAmount: refundResult?.refundAmount,
+        stripeRefundId: refundResult?.stripeRefundId,
       })
 
       // c. Handle captain succession / team cleanup
       await handleCaptainSuccession(tx, team, userId)
     })
 
-    // Issue Stripe refund after DB update (DB-first pattern)
-    if (refundEligible && latestPayment) {
-      await issueStripeRefundAfterDbUpdate({
-        registrationId: registration.id,
-        latestPayment,
-        previousPaymentStatus: registration.paymentStatus,
-        idempotencyPrefix: 'refund',
-        onRevert: buildTeamRevertCallback(registration.id, teamRevertInfo),
-      })
-    }
-
-    updateTag(CACHE_TAGS.TOURNAMENTS)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
-
-    return {
-      success: true,
-      message: !isPaidRegistration
-        ? 'Votre inscription a été annulée.'
-        : refundEligible
-          ? 'Votre inscription a été annulée et remboursée.'
-          : waiveRefund
-            ? "Votre inscription a été annulée. Vos frais d'inscription ont été offerts au Belouga Tournament."
-            : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique.",
-    }
+    invalidateCaches()
+    return { success: true, message: successMessage }
   },
 })

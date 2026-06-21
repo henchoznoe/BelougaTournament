@@ -14,6 +14,7 @@ import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
+import { REFUND_KIND_FULL_CANCELLATION } from '@/lib/utils/stripe-refund'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { Prisma } from '@/prisma/generated/prisma/client'
 import {
@@ -361,20 +362,28 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
     return
   }
 
-  // C2: Only cancel the registration on a full refund; partial refunds only update the payment
-  const isFullRefund = charge.amount_refunded >= charge.amount
+  // App-issued cancellation refunds are intentionally reduced by the Stripe fee and the
+  // (non-refundable) donation, so `amount_refunded < amount` even though they fully cancel
+  // the registration. They carry metadata so we don't misclassify them as partial. A
+  // dashboard-initiated full refund (no metadata) is still detected by the amount.
+  const latestRefund = charge.refunds?.data?.[0] ?? null
+  const stripeRefundId = latestRefund?.id ?? null
+  const isFullCancellation =
+    latestRefund?.metadata?.kind === REFUND_KIND_FULL_CANCELLATION ||
+    charge.amount_refunded >= charge.amount
 
   await prisma.$transaction(async tx => {
     await tx.payment.update({
       where: { id: payment.id },
       data: {
-        status: isFullRefund ? PaymentStatus.REFUNDED : payment.status,
+        status: isFullCancellation ? PaymentStatus.REFUNDED : payment.status,
         refundAmount: charge.amount_refunded,
         refundedAt: new Date(),
+        ...(stripeRefundId ? { stripeRefundId } : {}),
       },
     })
 
-    if (isFullRefund) {
+    if (isFullCancellation) {
       await removeUserFromTeam(
         tx,
         payment.registration.userId,
@@ -392,6 +401,82 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
         },
       })
     }
+  })
+}
+
+/** Logs a chargeback so disputes are visible for manual review (no DB schema for disputes). */
+const handleChargeDisputeCreated = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'charge.dispute.created'
+  const dispute = event.data.object as Stripe.Dispute
+  const chargeId =
+    typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id
+
+  const payment = await prisma.payment.findFirst({
+    where: { stripeChargeId: chargeId },
+    select: { id: true, registrationId: true },
+  })
+
+  logger.error(
+    {
+      eventId: event.id,
+      disputeId: dispute.id,
+      chargeId,
+      amount: dispute.amount,
+      reason: dispute.reason,
+      paymentId: payment?.id ?? null,
+      registrationId: payment?.registrationId ?? null,
+    },
+    'Stripe dispute (chargeback) opened — manual review required',
+  )
+}
+
+/** Aligns DB state when a payment intent is explicitly canceled while still pending. */
+const handlePaymentIntentCanceled = async (event: Stripe.Event) => {
+  // Safe: this handler is only called from the switch branch for 'payment_intent.canceled'
+  const paymentIntent = event.data.object as Stripe.PaymentIntent
+  const paymentId = paymentIntent.metadata.paymentId
+
+  if (!paymentId) {
+    return
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    include: {
+      registration: {
+        select: { id: true, userId: true, tournamentId: true },
+      },
+    },
+  })
+
+  if (!payment || TERMINAL_PAYMENT_STATUSES.has(payment.status)) {
+    return
+  }
+
+  await prisma.$transaction(async tx => {
+    await removeUserFromTeam(
+      tx,
+      payment.registration.userId,
+      payment.registration.tournamentId,
+    )
+
+    await tx.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: PaymentStatus.CANCELLED,
+        stripePaymentIntentId: paymentIntent.id,
+      },
+    })
+
+    await tx.tournamentRegistration.update({
+      where: { id: payment.registration.id },
+      data: {
+        status: RegistrationStatus.EXPIRED,
+        paymentStatus: PaymentStatus.CANCELLED,
+        expiresAt: new Date(),
+        teamId: null,
+      },
+    })
   })
 }
 
@@ -495,6 +580,12 @@ export const POST = async (request: Request) => {
         break
       case 'charge.updated':
         await handleChargeUpdated(event)
+        break
+      case 'charge.dispute.created':
+        await handleChargeDisputeCreated(event)
+        break
+      case 'payment_intent.canceled':
+        await handlePaymentIntentCanceled(event)
         break
       default:
         break

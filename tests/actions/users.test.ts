@@ -39,22 +39,16 @@ vi.mock('next/cache', () => ({
   cacheTag: vi.fn(),
 }))
 
-const mockIssueStripeRefundAfterDbUpdate = vi.fn()
+const mockRefundPaymentViaStripe = vi.fn(async (_arg?: unknown) => ({
+  stripeRefundId: 're_ban',
+  refundAmount: 1000,
+}))
 vi.mock('@/lib/utils/stripe-refund', () => ({
-  computeRefundAmount: vi.fn((amount: number) => amount),
-  issueStripeRefundAfterDbUpdate: (arg: unknown) =>
-    mockIssueStripeRefundAfterDbUpdate(arg),
+  refundPaymentViaStripe: (arg: unknown) => mockRefundPaymentViaStripe(arg),
 }))
 
-const mockBuildTeamRevertCallback = vi.fn(
-  (_registrationId: unknown, _teamRevertInfo: unknown) => vi.fn(),
-)
-const mockBuildTeamRevertInfo = vi.fn((_arg: unknown) => ({ teamId: 'team-1' }))
 vi.mock('@/lib/utils/team', () => ({
   handleCaptainSuccession: vi.fn().mockResolvedValue(undefined),
-  buildTeamRevertCallback: (registrationId: unknown, teamRevertInfo: unknown) =>
-    mockBuildTeamRevertCallback(registrationId, teamRevertInfo),
-  buildTeamRevertInfo: (arg: unknown) => mockBuildTeamRevertInfo(arg),
   removeUserFromTeam: vi.fn().mockResolvedValue(undefined),
   syncTeamFullState: vi.fn().mockResolvedValue(undefined),
 }))
@@ -572,8 +566,7 @@ describe('banUser', () => {
     const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })
 
     expect(result.success).toBe(true)
-    expect(mockBuildTeamRevertInfo).toHaveBeenCalledOnce()
-    expect(mockIssueStripeRefundAfterDbUpdate).toHaveBeenCalledWith(
+    expect(mockRefundPaymentViaStripe).toHaveBeenCalledWith(
       expect.objectContaining({
         registrationId: 'reg-paid-team',
         idempotencyPrefix: 'ban-refund',
@@ -660,7 +653,7 @@ describe('banUser', () => {
         data: expect.objectContaining({ status: RegistrationStatus.CANCELLED }),
       }),
     )
-    expect(mockIssueStripeRefundAfterDbUpdate).not.toHaveBeenCalled()
+    expect(mockRefundPaymentViaStripe).not.toHaveBeenCalled()
   })
 
   it('skips team cleanup when a paid team registration has no matching team membership', async () => {
@@ -704,8 +697,7 @@ describe('banUser', () => {
     const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })
 
     expect(result.success).toBe(true)
-    expect(mockBuildTeamRevertInfo).not.toHaveBeenCalled()
-    expect(mockIssueStripeRefundAfterDbUpdate).not.toHaveBeenCalled()
+    expect(mockRefundPaymentViaStripe).not.toHaveBeenCalled()
   })
 
   it('refunds future paid solo registrations while banning a player', async () => {
@@ -765,10 +757,71 @@ describe('banUser', () => {
         }),
       }),
     )
-    expect(mockIssueStripeRefundAfterDbUpdate).toHaveBeenCalledWith(
+    expect(mockRefundPaymentViaStripe).toHaveBeenCalledWith(
       expect.objectContaining({
         registrationId: 'reg-paid-solo',
         idempotencyPrefix: 'ban-refund',
+      }),
+    )
+  })
+
+  it('still cancels the registration when the Stripe refund fails during a ban', async () => {
+    mockUserFindUnique.mockResolvedValue({
+      role: Role.USER,
+      name: 'Bob',
+      bannedAt: null,
+    })
+    mockIsRefundEligible.mockReturnValue(true)
+    mockRefundPaymentViaStripe.mockRejectedValueOnce(new Error('Stripe down'))
+    mockRegistrationFindMany.mockResolvedValue([
+      {
+        id: 'reg-paid-solo',
+        paymentStatus: PaymentStatus.PAID,
+        paymentRequiredSnapshot: true,
+        refundDeadlineDaysSnapshot: 30,
+        teamId: null,
+        payments: [
+          {
+            id: 'pay-solo',
+            status: PaymentStatus.PAID,
+            amount: 1000,
+            stripeFee: null,
+            donationAmount: null,
+            stripePaymentIntentId: 'pi_solo',
+            stripeChargeId: 'ch_solo',
+          },
+        ],
+        tournament: {
+          id: 'tournament-solo',
+          status: TournamentStatus.PUBLISHED,
+          format: TournamentFormat.SOLO,
+          startDate: new Date('2026-12-01T10:00:00.000Z'),
+          refundPolicyType: 'BEFORE_DEADLINE',
+          refundDeadlineDays: 30,
+        },
+      },
+    ])
+    mockTransaction.mockImplementation(async arg => {
+      if (typeof arg === 'function') {
+        return arg({
+          tournamentRegistration: { update: mockRegistrationUpdate },
+          payment: { update: vi.fn() },
+        })
+      }
+      return []
+    })
+
+    const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })
+
+    expect(result.success).toBe(true)
+    expect(mockRefundPaymentViaStripe).toHaveBeenCalledOnce()
+    // The registration is still cancelled even though the refund failed.
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'reg-paid-solo' },
+        data: expect.objectContaining({
+          status: RegistrationStatus.CANCELLED,
+        }),
       }),
     )
   })
@@ -827,7 +880,7 @@ describe('banUser', () => {
         data: expect.objectContaining({ status: RegistrationStatus.CANCELLED }),
       }),
     )
-    expect(mockIssueStripeRefundAfterDbUpdate).not.toHaveBeenCalled()
+    expect(mockRefundPaymentViaStripe).not.toHaveBeenCalled()
   })
 
   it('cancels paid team registrations without refund when no latest payment exists', async () => {
@@ -894,8 +947,7 @@ describe('banUser', () => {
     const result = await banUser({ userId: OTHER_UUID, bannedUntil: null })
 
     expect(result.success).toBe(true)
-    expect(mockBuildTeamRevertInfo).not.toHaveBeenCalled()
-    expect(mockIssueStripeRefundAfterDbUpdate).not.toHaveBeenCalled()
+    expect(mockRefundPaymentViaStripe).not.toHaveBeenCalled()
   })
 })
 

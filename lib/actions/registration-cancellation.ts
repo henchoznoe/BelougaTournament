@@ -52,6 +52,8 @@ export const cancelOrDeleteRegistration = async ({
   clearTeamId = true,
   clearExpiresAt = false,
   refundIncludesDonation = true,
+  refundAmount,
+  stripeRefundId,
 }: {
   tx: PrismaTransaction
   registrationId: string
@@ -62,6 +64,9 @@ export const cancelOrDeleteRegistration = async ({
   clearTeamId?: boolean
   clearExpiresAt?: boolean
   refundIncludesDonation?: boolean
+  // Stripe-first refund result, persisted as the authoritative refund record.
+  refundAmount?: number
+  stripeRefundId?: string
 }): Promise<void> => {
   if (!paymentRequiredSnapshot) {
     await tx.tournamentRegistration.delete({ where: { id: registrationId } })
@@ -93,12 +98,17 @@ export const cancelOrDeleteRegistration = async ({
       where: { id: latestPayment.id },
       data: {
         status: PaymentStatus.REFUNDED,
-        refundAmount: computeRefundAmount(
-          latestPayment.amount,
-          latestPayment.stripeFee,
-          refundIncludesDonation ? (latestPayment.donationAmount ?? 0) : 0,
-        ),
+        // Prefer the amount actually refunded via Stripe; fall back to a local
+        // computation only for legacy callers that don't pass it.
+        refundAmount:
+          refundAmount ??
+          computeRefundAmount(
+            latestPayment.amount,
+            latestPayment.stripeFee,
+            refundIncludesDonation ? (latestPayment.donationAmount ?? 0) : 0,
+          ),
         refundedAt: new Date(),
+        ...(stripeRefundId ? { stripeRefundId } : {}),
       },
     })
   }

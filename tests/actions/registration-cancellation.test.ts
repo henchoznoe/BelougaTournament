@@ -139,6 +139,54 @@ describe('cancelOrDeleteRegistration', () => {
     })
   })
 
+  it('computes the fallback refund without a donation when none was made', async () => {
+    const tx = createMockTransaction()
+
+    await cancelOrDeleteRegistration({
+      tx: toTransaction(tx),
+      registrationId: REGISTRATION_ID,
+      paymentRequiredSnapshot: true,
+      previousPaymentStatus: PaymentStatus.PAID,
+      latestPayment: { ...LATEST_PAYMENT, donationAmount: null },
+      resolution: 'refund',
+    })
+
+    expect(tx.payment.update).toHaveBeenCalledWith({
+      where: { id: PAYMENT_ID },
+      data: {
+        status: PaymentStatus.REFUNDED,
+        // No donation → full amount minus the real Stripe fee
+        refundAmount: TOTAL_AMOUNT - STRIPE_FEE,
+        refundedAt: NOW,
+      },
+    })
+  })
+
+  it('persists the Stripe-first refund amount and refund id when provided', async () => {
+    const tx = createMockTransaction()
+
+    await cancelOrDeleteRegistration({
+      tx: toTransaction(tx),
+      registrationId: REGISTRATION_ID,
+      paymentRequiredSnapshot: true,
+      previousPaymentStatus: PaymentStatus.PAID,
+      latestPayment: LATEST_PAYMENT,
+      resolution: 'refund',
+      refundAmount: 1234,
+      stripeRefundId: 're_stripe_first',
+    })
+
+    expect(tx.payment.update).toHaveBeenCalledWith({
+      where: { id: PAYMENT_ID },
+      data: {
+        status: PaymentStatus.REFUNDED,
+        refundAmount: 1234,
+        refundedAt: NOW,
+        stripeRefundId: 're_stripe_first',
+      },
+    })
+  })
+
   it('should exclude the donation from the refund when refundIncludesDonation is false', async () => {
     const tx = createMockTransaction()
 
