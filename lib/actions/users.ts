@@ -12,16 +12,13 @@ import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import { hasAdminAccess, isSuperAdmin } from '@/lib/utils/role'
-import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
-import {
-  buildTeamRevertCallback,
-  buildTeamRevertInfo,
-  handleCaptainSuccession,
-} from '@/lib/utils/team'
+import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
+import { handleCaptainSuccession } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
 import {
   banUserSchema,
@@ -324,14 +321,10 @@ export const banUser = authenticatedAction({
       prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    // Process cancellations for each active future registration
-    const stripeRefundJobs: {
-      registrationId: string
-      latestPayment: RegistrationForBan['payments'][number]
-      previousPaymentStatus: PaymentStatus
-      teamRevertInfo?: Parameters<typeof buildTeamRevertCallback>[1]
-    }[] = []
-
+    // Process cancellations for each active future registration. Refund-eligible
+    // registrations are refunded via Stripe FIRST, then the DB is cancelled with the
+    // authoritative refund record. If a Stripe refund fails, the registration is still
+    // cancelled (the user is banned) but without a refund — logged for manual handling.
     for (const reg of registrations) {
       const latestPayment = reg.payments[0] ?? null
       const refundDeadlineDays =
@@ -346,6 +339,28 @@ export const banUser = authenticatedAction({
           refundDeadlineDays,
           new Date(),
         )
+
+      // Issues the Stripe refund before the DB cancellation. Returns null when not
+      // eligible or when the Stripe call fails (cancellation then proceeds unrefunded).
+      const issueBanRefund = async (): Promise<{
+        stripeRefundId: string
+        refundAmount: number
+      } | null> => {
+        if (!refundEligible || !latestPayment) return null
+        try {
+          return await refundPaymentViaStripe({
+            payment: latestPayment,
+            registrationId: reg.id,
+            idempotencyPrefix: 'ban-refund',
+          })
+        } catch (error) {
+          logger.error(
+            { error, registrationId: reg.id },
+            'Stripe refund failed during ban; cancelling without refund for manual reconciliation',
+          )
+          return null
+        }
+      }
 
       if (reg.tournament.format === TournamentFormat.TEAM && reg.teamId) {
         const teamMember = (await prisma.teamMember.findFirst({
@@ -365,6 +380,7 @@ export const banUser = authenticatedAction({
 
         if (teamMember) {
           const team = teamMember.team
+          const refundResult = await issueBanRefund()
 
           await prisma.$transaction(async tx => {
             await tx.teamMember.deleteMany({
@@ -377,32 +393,22 @@ export const banUser = authenticatedAction({
               paymentRequiredSnapshot: reg.paymentRequiredSnapshot,
               previousPaymentStatus: reg.paymentStatus,
               latestPayment,
-              resolution: refundEligible ? 'refund' : 'cancel',
+              resolution: refundResult ? 'refund' : 'cancel',
               clearTeamId: true,
               clearExpiresAt: reg.paymentRequiredSnapshot,
               refundIncludesDonation: true,
+              refundAmount: refundResult?.refundAmount,
+              stripeRefundId: refundResult?.stripeRefundId,
             })
 
             await handleCaptainSuccession(tx, team, data.userId)
           })
-
-          if (refundEligible && latestPayment) {
-            stripeRefundJobs.push({
-              registrationId: reg.id,
-              latestPayment,
-              previousPaymentStatus: reg.paymentStatus,
-              teamRevertInfo: buildTeamRevertInfo({
-                team,
-                joinedAt: teamMember.joinedAt,
-                userId: data.userId,
-                tournamentId: reg.tournament.id,
-              }),
-            })
-          }
         }
       } else {
         // SOLO format (or team with no team membership)
         if (reg.paymentRequiredSnapshot) {
+          const refundResult = await issueBanRefund()
+
           await prisma.$transaction(async tx => {
             await cancelOrDeleteRegistration({
               tx,
@@ -410,37 +416,18 @@ export const banUser = authenticatedAction({
               paymentRequiredSnapshot: true,
               previousPaymentStatus: reg.paymentStatus,
               latestPayment,
-              resolution: refundEligible ? 'refund' : 'cancel',
+              resolution: refundResult ? 'refund' : 'cancel',
               clearTeamId: false,
               clearExpiresAt: true,
               refundIncludesDonation: true,
+              refundAmount: refundResult?.refundAmount,
+              stripeRefundId: refundResult?.stripeRefundId,
             })
           })
         } else {
           await prisma.tournamentRegistration.delete({ where: { id: reg.id } })
         }
-
-        if (refundEligible && latestPayment) {
-          stripeRefundJobs.push({
-            registrationId: reg.id,
-            latestPayment,
-            previousPaymentStatus: reg.paymentStatus,
-          })
-        }
       }
-    }
-
-    // Issue Stripe refunds after DB mutations (DB-first pattern)
-    for (const job of stripeRefundJobs) {
-      await issueStripeRefundAfterDbUpdate({
-        registrationId: job.registrationId,
-        latestPayment: job.latestPayment,
-        previousPaymentStatus: job.previousPaymentStatus,
-        idempotencyPrefix: 'ban-refund',
-        onRevert: job.teamRevertInfo
-          ? buildTeamRevertCallback(job.registrationId, job.teamRevertInfo)
-          : undefined,
-      })
     }
 
     updateTag(CACHE_TAGS.USERS)

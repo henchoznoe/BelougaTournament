@@ -247,6 +247,7 @@ export const RegistrationEditDialog = ({
                       src={logoUrl}
                       alt="Logo d'équipe"
                       fill
+                      sizes="48px"
                       className="object-cover"
                     />
                   </div>

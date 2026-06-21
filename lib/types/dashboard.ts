@@ -61,6 +61,7 @@ export type PaymentStats = {
   transactionCount: number
   refundCount: number
   forfeitedCount: number
+  totalForfeited: number
   totalDonations: number
   donationCount: number
   currency: string

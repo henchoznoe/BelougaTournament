@@ -32,10 +32,16 @@ vi.mock('@/lib/core/logger', () => ({
 }))
 
 const mockRefundCreate = vi.fn()
+const mockPaymentIntentRetrieve = vi.fn(async (..._args: unknown[]) => ({
+  latest_charge: null,
+}))
 vi.mock('@/lib/core/stripe', () => ({
   getStripe: () => ({
     refunds: {
       create: (...args: unknown[]) => mockRefundCreate(...args),
+    },
+    paymentIntents: {
+      retrieve: (...args: unknown[]) => mockPaymentIntentRetrieve(...args),
     },
   }),
 }))
@@ -252,6 +258,8 @@ describe('registration admin actions', () => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockTxTeamMemberCount.mockResolvedValue(1)
+    mockRefundCreate.mockResolvedValue({ id: 're_test' })
+    mockPaymentIntentRetrieve.mockResolvedValue({ latest_charge: null })
   })
 
   it('rejects non-admin users for adminDeleteRegistration', async () => {
@@ -275,6 +283,26 @@ describe('registration admin actions', () => {
         message: "L'inscription de Alice a été supprimée.",
       },
     )
+  })
+
+  it('forfeits the payment when force-deleting a paid solo registration', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(
+      createRegistration({
+        paymentRequiredSnapshot: true,
+        paymentStatus: PaymentStatus.PAID,
+        payments: [createLatestPayment()],
+      }),
+    )
+
+    const result = await adminDeleteRegistration({ registrationId: REG_UUID })
+
+    expect(result.success).toBe(true)
+    expect(mockTxPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: 'payment-1' },
+      data: { status: PaymentStatus.FORFEITED },
+    })
+    // A force-delete never refunds via Stripe.
+    expect(mockRefundCreate).not.toHaveBeenCalled()
   })
 
   it('returns an error when adminDeleteRegistration cannot find the registration', async () => {
@@ -676,6 +704,26 @@ describe('registration admin actions', () => {
     expect(mockRefundCreate).toHaveBeenCalledOnce()
   })
 
+  it('keeps the registration intact when the Stripe refund fails', async () => {
+    mockRegistrationFindUnique.mockResolvedValue(
+      createRegistration({
+        paymentRequiredSnapshot: true,
+        paymentStatus: PaymentStatus.PAID,
+        payments: [createLatestPayment()],
+      }),
+    )
+    mockRefundCreate.mockRejectedValue(new Error('Stripe down'))
+
+    expect(await adminRefundRegistration({ registrationId: REG_UUID })).toEqual(
+      {
+        success: false,
+        message:
+          "Le remboursement Stripe a échoué. L'inscription est conservée.",
+      },
+    )
+    expect(mockTxRegistrationUpdate).not.toHaveBeenCalled()
+  })
+
   it('returns an error when adminRefundRegistration cannot find the registration', async () => {
     mockRegistrationFindUnique.mockResolvedValue(null)
 
@@ -815,7 +863,7 @@ describe('registration admin actions', () => {
     expect(mockRefundCreate).toHaveBeenCalledOnce()
   })
 
-  it('refunds a team registration and tracks team revert info when the player still has a team', async () => {
+  it('refunds a team registration and reassigns the captain when the player still has a team', async () => {
     mockRegistrationFindUnique.mockResolvedValue(
       createRegistration({
         paymentRequiredSnapshot: true,

@@ -266,6 +266,7 @@ model Payment {
   stripeCheckoutSessionId String?            @unique
   stripePaymentIntentId   String?            @unique
   stripeChargeId          String?            @unique
+  stripeRefundId          String?            @unique
   stripeCustomerId        String?
   stripeFee               Int?
   donationAmount          Int?

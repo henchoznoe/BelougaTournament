@@ -8,10 +8,10 @@
 
 import {
   ArrowDownRight,
-  ArrowUpRight,
+  Coins,
   CreditCard,
-  Gift,
   HandHeart,
+  PiggyBank,
   TrendingDown,
   Wallet,
 } from 'lucide-react'
@@ -29,21 +29,21 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
     <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
         <Wallet className="size-4 text-amber-400" />
-        <h2 className="text-sm font-semibold text-white">Revenus</h2>
+        <h2 className="text-sm font-semibold text-white">Finances</h2>
       </div>
 
-      {/* KPI cards — row 1: revenue */}
+      {/* KPI cards — row 1: gross, refunds, net capital */}
       <div className="mb-3 grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <CreditCard className="size-3" />
-            Revenu brut
+            Total encaissé
           </div>
           <p className="mt-1 text-lg font-semibold text-emerald-400">
             {formatCentimes(payments.totalRevenue)}
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
-            {payments.transactionCount} transaction
+            {payments.transactionCount} paiement
             {pluralize(payments.transactionCount)}
           </p>
         </div>
@@ -64,29 +64,20 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
 
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <ArrowUpRight className="size-3" />
-            Revenu net
+            <PiggyBank className="size-3" />
+            Capital net Belouga
           </div>
           <p className="mt-1 text-lg font-semibold text-white">
             {formatCentimes(payments.netRevenue)}
           </p>
-          <p className="mt-0.5 text-[10px] text-zinc-600">après frais Stripe</p>
+          <p className="mt-0.5 text-[10px] text-zinc-600">
+            après remboursements et frais
+          </p>
         </div>
       </div>
 
-      {/* KPI cards — row 2: forfaits, dons, frais */}
+      {/* KPI cards — row 2: donations, forfeits, Stripe fees */}
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <Gift className="size-3" />
-            Annulations avec don
-          </div>
-          <p className="mt-1 text-lg font-semibold text-orange-400">
-            {payments.forfeitedCount}
-          </p>
-          <p className="mt-0.5 text-[10px] text-zinc-600">frais conservés</p>
-        </div>
-
         <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <HandHeart className="size-3" />
@@ -96,7 +87,22 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
             {formatCentimes(payments.totalDonations)}
           </p>
           <p className="mt-0.5 text-[10px] text-zinc-600">
-            {payments.donationCount} don{pluralize(payments.donationCount)}
+            {payments.donationCount} don{pluralize(payments.donationCount)}{' '}
+            volontaire{pluralize(payments.donationCount)}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-white/5 bg-white/2 px-4 py-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <Coins className="size-3" />
+            Frais conservés
+          </div>
+          <p className="mt-1 text-lg font-semibold text-orange-400">
+            {formatCentimes(payments.totalForfeited)}
+          </p>
+          <p className="mt-0.5 text-[10px] text-zinc-600">
+            {payments.forfeitedCount} forfait
+            {pluralize(payments.forfeitedCount)}
           </p>
         </div>
 
@@ -107,6 +113,9 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
           </div>
           <p className="mt-1 text-lg font-semibold text-amber-400">
             {formatCentimes(payments.totalStripeFees)}
+          </p>
+          <p className="mt-0.5 text-[10px] text-zinc-600">
+            coûts de transaction
           </p>
         </div>
       </div>
@@ -140,15 +149,14 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
                   {t.forfeitedCount > 0 && (
                     <span className="text-orange-400/70">
                       {' '}
-                      · {t.forfeitedCount} don
+                      · {t.forfeitedCount} forfait
                       {pluralize(t.forfeitedCount)}
                     </span>
                   )}
                   {t.donationCount > 0 && (
                     <span className="text-violet-400/70">
                       {' '}
-                      · {t.donationCount} donation
-                      {pluralize(t.donationCount)}
+                      · {t.donationCount} don{pluralize(t.donationCount)}
                     </span>
                   )}
                 </p>
@@ -162,9 +170,9 @@ export const DashboardPayments = ({ payments }: DashboardPaymentsProps) => {
                     -{formatCentimes(t.refunded)}
                   </p>
                 )}
-                {t.forfeitedCount > 0 && (
+                {t.forfeited > 0 && (
                   <p className="text-[10px] text-orange-400/70">
-                    {t.forfeitedCount} don{pluralize(t.forfeitedCount)}
+                    {formatCentimes(t.forfeited)} conservés
                   </p>
                 )}
                 {t.donations > 0 && (

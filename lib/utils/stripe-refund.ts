@@ -1,120 +1,107 @@
 /**
  * File: lib/utils/stripe-refund.ts
- * Description: Shared Stripe refund helper with DB-first pattern and revert on failure.
+ * Description: Stripe-first refund helper. Issues the Stripe refund BEFORE any DB
+ *   mutation so the database is never marked refunded without money actually moving.
+ *   The charge.refunded webhook reconciles the DB state as the source of truth.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
  */
 
 import 'server-only'
-import { logger } from '@/lib/core/logger'
-import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import { computeRefundAmount } from '@/lib/utils/refund'
-import {
-  type PaymentStatus,
-  RegistrationStatus,
-} from '@/prisma/generated/prisma/enums'
-
-type PrismaTransaction = Parameters<
-  Parameters<typeof prisma.$transaction>[0]
->[0]
 
 export { computeRefundAmount } from '@/lib/utils/refund'
 
+/** Metadata tag attached to app-issued refunds so the webhook can recognise a full cancellation. */
+export const REFUND_KIND_FULL_CANCELLATION = 'full_cancellation'
+
+type RefundablePayment = {
+  id: string
+  amount: number
+  stripeFee: number | null
+  donationAmount: number | null
+  stripePaymentIntentId: string | null
+  stripeChargeId: string | null
+}
+
 /**
- * Issues a Stripe refund AFTER the DB has already been updated to REFUNDED state.
- * If the Stripe API call fails, reverts the DB records back to their pre-refund state.
- * Uses an idempotency key to ensure the refund is safe to retry.
+ * Retrieves the real Stripe processing fee from the balance transaction when it
+ * was not yet recorded on the payment. Prevents the organisation from absorbing
+ * the fee when a refund is issued before charge.updated has backfilled it.
  */
-export const issueStripeRefundAfterDbUpdate = async ({
-  registrationId,
-  latestPayment,
-  previousPaymentStatus,
-  idempotencyPrefix,
-  onRevert,
-}: {
-  registrationId: string
-  latestPayment: {
-    id: string
-    amount: number
-    stripeFee: number | null
-    donationAmount: number | null
-    stripePaymentIntentId: string | null
-    stripeChargeId: string | null
+const resolveStripeFee = async (
+  payment: RefundablePayment,
+): Promise<number | null> => {
+  if (payment.stripeFee !== null) {
+    return payment.stripeFee
   }
-  previousPaymentStatus: PaymentStatus
-  idempotencyPrefix: string
-  onRevert?: (tx: PrismaTransaction) => Promise<void>
-}): Promise<void> => {
+  if (!payment.stripePaymentIntentId) {
+    return null
+  }
+
   try {
     const stripe = getStripe()
-    const refundAmount = computeRefundAmount(
-      latestPayment.amount,
-      latestPayment.stripeFee,
-      latestPayment.donationAmount ?? 0,
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      payment.stripePaymentIntentId,
+      { expand: ['latest_charge.balance_transaction'] },
     )
-    await stripe.refunds.create(
-      latestPayment.stripePaymentIntentId
-        ? {
-            payment_intent: latestPayment.stripePaymentIntentId,
-            amount: refundAmount,
-            reason: 'requested_by_customer',
-          }
-        : {
-            charge: latestPayment.stripeChargeId ?? undefined,
-            amount: refundAmount,
-            reason: 'requested_by_customer',
-          },
-      {
-        idempotencyKey: `${idempotencyPrefix}-${registrationId}-${latestPayment.id}`,
-      },
-    )
-  } catch (error) {
-    // Stripe refund failed — revert DB records back to pre-refund state
-    logger.error(
-      { error, registrationId },
-      'Stripe refund failed, reverting DB state',
-    )
-    try {
-      await prisma.$transaction(async tx => {
-        await tx.tournamentRegistration.update({
-          where: { id: registrationId },
-          data: {
-            status: RegistrationStatus.CONFIRMED,
-            paymentStatus: previousPaymentStatus,
-            cancelledAt: null,
-          },
-        })
-        await tx.payment.update({
-          where: { id: latestPayment.id },
-          data: {
-            status: previousPaymentStatus,
-            refundAmount: null,
-            refundedAt: null,
-          },
-        })
-        if (onRevert) await onRevert(tx)
-      })
-    } catch (revertError) {
-      logger.error(
-        {
-          registrationId,
-          stripeErrorMessage:
-            error instanceof Error ? error.message : 'unknown Stripe error',
-          revertErrorMessage:
-            revertError instanceof Error
-              ? revertError.message
-              : 'unknown revert error',
-        },
-        'Stripe refund failed and DB revert also failed',
-      )
-
-      throw new Error(
-        `Stripe refund failed and DB revert also failed for registration ${registrationId}. Manual reconciliation required.`,
-      )
+    const charge = paymentIntent.latest_charge
+    if (charge && typeof charge !== 'string') {
+      const bt = charge.balance_transaction
+      if (bt && typeof bt !== 'string') {
+        return bt.fee
+      }
     }
-
-    throw error
+  } catch {
+    // Fee stays unknown; computeRefundAmount falls back to the full refundable amount.
   }
+  return null
+}
+
+/**
+ * Issues a Stripe refund FIRST, then returns the refund id and amount so the caller
+ * can persist the DB state in its own transaction. Throws if the Stripe call fails —
+ * the caller must leave the registration untouched (no money moved, no DB mutation).
+ * The idempotency key makes the call safe to retry; metadata lets the webhook
+ * reconcile the cancellation even if the caller crashes before its DB write.
+ */
+export const refundPaymentViaStripe = async ({
+  payment,
+  registrationId,
+  idempotencyPrefix,
+}: {
+  payment: RefundablePayment
+  registrationId: string
+  idempotencyPrefix: string
+}): Promise<{ stripeRefundId: string; refundAmount: number }> => {
+  const stripe = getStripe()
+  const stripeFee = await resolveStripeFee(payment)
+  const refundAmount = computeRefundAmount(
+    payment.amount,
+    stripeFee,
+    payment.donationAmount ?? 0,
+  )
+
+  const refund = await stripe.refunds.create(
+    payment.stripePaymentIntentId
+      ? {
+          payment_intent: payment.stripePaymentIntentId,
+          amount: refundAmount,
+          reason: 'requested_by_customer',
+          metadata: { registrationId, kind: REFUND_KIND_FULL_CANCELLATION },
+        }
+      : {
+          charge: payment.stripeChargeId ?? undefined,
+          amount: refundAmount,
+          reason: 'requested_by_customer',
+          metadata: { registrationId, kind: REFUND_KIND_FULL_CANCELLATION },
+        },
+    {
+      idempotencyKey: `${idempotencyPrefix}-${registrationId}-${payment.id}`,
+    },
+  )
+
+  return { stripeRefundId: refund.id, refundAmount }
 }

@@ -12,15 +12,12 @@ import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { issueStripeRefundAfterDbUpdate } from '@/lib/utils/stripe-refund'
-import {
-  buildTeamRevertCallback,
-  buildTeamRevertInfo,
-  handleCaptainSuccession,
-} from '@/lib/utils/team'
+import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
+import { handleCaptainSuccession } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
   adminUpdateRegistrationFieldsSchema,
@@ -74,6 +71,13 @@ export const adminDeleteRegistration = authenticatedAction({
       return { success: false, message: 'Inscription introuvable.' }
     }
 
+    const latestPayment = registration.payments[0] ?? null
+    // A force-delete never refunds. When the fee was actually paid, keep the money
+    // but record it as FORFEITED so the payment never lingers in a misleading PAID
+    // state on a CANCELLED registration. Otherwise leave the payment untouched.
+    const deleteResolution =
+      registration.paymentStatus === PaymentStatus.PAID ? 'forfeit' : 'cancel'
+
     // 2. SOLO format — just delete the registration
     if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.$transaction(async tx => {
@@ -82,6 +86,8 @@ export const adminDeleteRegistration = authenticatedAction({
           registrationId: registration.id,
           paymentRequiredSnapshot: registration.paymentRequiredSnapshot,
           previousPaymentStatus: registration.paymentStatus,
+          latestPayment,
+          resolution: deleteResolution,
         })
       })
 
@@ -120,6 +126,8 @@ export const adminDeleteRegistration = authenticatedAction({
           registrationId: registration.id,
           paymentRequiredSnapshot: registration.paymentRequiredSnapshot,
           previousPaymentStatus: registration.paymentStatus,
+          latestPayment,
+          resolution: deleteResolution,
         })
       })
 
@@ -148,6 +156,8 @@ export const adminDeleteRegistration = authenticatedAction({
         registrationId: registration.id,
         paymentRequiredSnapshot: registration.paymentRequiredSnapshot,
         previousPaymentStatus: registration.paymentStatus,
+        latestPayment,
+        resolution: deleteResolution,
       })
 
       // c. Handle captain succession / team cleanup
@@ -275,9 +285,26 @@ export const adminRefundRegistration = authenticatedAction({
       }
     }
 
-    // DB-first pattern: update DB to REFUNDED state before calling Stripe
-    // Track team state for potential Stripe revert (TEAM format only)
-    let teamRevertInfo: ReturnType<typeof buildTeamRevertInfo> | null = null
+    // Stripe-first: issue the refund before mutating the DB. If Stripe fails, the
+    // registration is left untouched (no money moved, no false "refunded" state).
+    let refundResult: { stripeRefundId: string; refundAmount: number }
+    try {
+      refundResult = await refundPaymentViaStripe({
+        payment: latestPayment,
+        registrationId: registration.id,
+        idempotencyPrefix: 'admin-refund',
+      })
+    } catch (error) {
+      logger.error(
+        { error, registrationId: registration.id },
+        'Stripe refund failed during admin refund',
+      )
+      return {
+        success: false,
+        message:
+          "Le remboursement Stripe a échoué. L'inscription est conservée.",
+      }
+    }
 
     if (registration.tournament.format === TournamentFormat.SOLO) {
       await prisma.$transaction(async tx => {
@@ -290,6 +317,8 @@ export const adminRefundRegistration = authenticatedAction({
           resolution: 'refund',
           clearTeamId: true,
           refundIncludesDonation: true,
+          refundAmount: refundResult.refundAmount,
+          stripeRefundId: refundResult.stripeRefundId,
         })
       })
     } else {
@@ -319,18 +348,12 @@ export const adminRefundRegistration = authenticatedAction({
             resolution: 'refund',
             clearTeamId: true,
             refundIncludesDonation: true,
+            refundAmount: refundResult.refundAmount,
+            stripeRefundId: refundResult.stripeRefundId,
           })
         })
       } else {
         const team = teamMember.team
-
-        // Save pre-mutation state for potential Stripe revert
-        teamRevertInfo = buildTeamRevertInfo({
-          team,
-          joinedAt: teamMember.joinedAt,
-          userId: registration.userId,
-          tournamentId: registration.tournament.id,
-        })
 
         await prisma.$transaction(async tx => {
           await tx.teamMember.deleteMany({
@@ -346,23 +369,14 @@ export const adminRefundRegistration = authenticatedAction({
             resolution: 'refund',
             clearTeamId: true,
             refundIncludesDonation: true,
+            refundAmount: refundResult.refundAmount,
+            stripeRefundId: refundResult.stripeRefundId,
           })
 
           await handleCaptainSuccession(tx, team, registration.userId)
         })
       }
     }
-
-    // Issue Stripe refund after DB update; revert DB on failure
-    await issueStripeRefundAfterDbUpdate({
-      registrationId: registration.id,
-      latestPayment,
-      previousPaymentStatus: PaymentStatus.PAID,
-      idempotencyPrefix: 'admin-refund',
-      onRevert: teamRevertInfo
-        ? buildTeamRevertCallback(registration.id, teamRevertInfo)
-        : undefined,
-    })
 
     updateTag(CACHE_TAGS.TOURNAMENTS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)

@@ -1117,6 +1117,171 @@ describe('POST /api/webhook', () => {
     expect(mockPaymentUpdate).not.toHaveBeenCalled()
   })
 
+  it('treats a fee/donation-reduced app refund as a full cancellation via metadata', async () => {
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_refund_meta',
+      type: 'charge.refunded',
+      livemode: false,
+      data: {
+        object: {
+          id: 'ch_meta',
+          amount: PAYMENT_AMOUNT,
+          // Reduced by fee + donation, so amount_refunded < amount on a FULL cancellation.
+          amount_refunded: 900,
+          refunds: {
+            data: [{ id: 're_meta', metadata: { kind: 'full_cancellation' } }],
+          },
+        },
+      },
+    })
+    mockPaymentFindFirst.mockResolvedValue({
+      id: PAYMENT_ID,
+      status: PaymentStatus.REFUNDED,
+      registration: {
+        id: REGISTRATION_ID,
+        userId: USER_ID,
+        tournamentId: TOURNAMENT_ID,
+      },
+    })
+
+    const response = await POST(makeWebhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: PAYMENT_ID },
+      data: expect.objectContaining({
+        status: PaymentStatus.REFUNDED,
+        refundAmount: 900,
+        stripeRefundId: 're_meta',
+      }),
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: REGISTRATION_ID },
+      data: expect.objectContaining({ status: RegistrationStatus.CANCELLED }),
+    })
+  })
+
+  it('logs a chargeback when a dispute is created (payment found and not found)', async () => {
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_dispute',
+      type: 'charge.dispute.created',
+      livemode: false,
+      data: {
+        object: {
+          id: 'dp_1',
+          charge: CHARGE_ID,
+          amount: PAYMENT_AMOUNT,
+          reason: 'fraudulent',
+        },
+      },
+    })
+    mockPaymentFindFirst.mockResolvedValueOnce({
+      id: PAYMENT_ID,
+      registrationId: REGISTRATION_ID,
+    })
+
+    let response = await POST(makeWebhookRequest())
+    expect(response.status).toBe(200)
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      expect.objectContaining({ disputeId: 'dp_1', paymentId: PAYMENT_ID }),
+      expect.stringContaining('dispute'),
+    )
+
+    // Dispute referencing an expanded charge object and no matching payment
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_dispute_2',
+      type: 'charge.dispute.created',
+      livemode: false,
+      data: {
+        object: {
+          id: 'dp_2',
+          charge: { id: 'ch_obj' },
+          amount: PAYMENT_AMOUNT,
+          reason: 'general',
+        },
+      },
+    })
+    mockPaymentFindFirst.mockResolvedValueOnce(null)
+
+    response = await POST(makeWebhookRequest())
+    expect(response.status).toBe(200)
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      expect.objectContaining({ disputeId: 'dp_2', paymentId: null }),
+      expect.stringContaining('dispute'),
+    )
+  })
+
+  it('cancels a still-pending payment on payment_intent.canceled', async () => {
+    mockConstructEvent.mockReturnValue({
+      id: 'evt_pi_canceled',
+      type: 'payment_intent.canceled',
+      livemode: false,
+      data: {
+        object: { id: PAYMENT_INTENT_ID, metadata: { paymentId: PAYMENT_ID } },
+      },
+    })
+    mockPaymentFindUnique.mockResolvedValue({
+      id: PAYMENT_ID,
+      status: PaymentStatus.PENDING,
+      registration: {
+        id: REGISTRATION_ID,
+        userId: USER_ID,
+        tournamentId: TOURNAMENT_ID,
+      },
+    })
+
+    const response = await POST(makeWebhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mockRemoveUserFromTeam).toHaveBeenCalled()
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: PAYMENT_ID },
+      data: expect.objectContaining({ status: PaymentStatus.CANCELLED }),
+    })
+    expect(mockRegistrationUpdate).toHaveBeenCalledWith({
+      where: { id: REGISTRATION_ID },
+      data: expect.objectContaining({
+        status: RegistrationStatus.EXPIRED,
+        paymentStatus: PaymentStatus.CANCELLED,
+      }),
+    })
+  })
+
+  it('skips payment_intent.canceled when missing paymentId or already terminal', async () => {
+    mockConstructEvent.mockReturnValueOnce({
+      id: 'evt_pi_canceled_nometa',
+      type: 'payment_intent.canceled',
+      livemode: false,
+      data: { object: { id: PAYMENT_INTENT_ID, metadata: {} } },
+    })
+
+    let response = await POST(makeWebhookRequest())
+    expect(response.status).toBe(200)
+    expect(mockPaymentUpdate).not.toHaveBeenCalled()
+
+    mockConstructEvent.mockReturnValueOnce({
+      id: 'evt_pi_canceled_terminal',
+      type: 'payment_intent.canceled',
+      livemode: false,
+      data: {
+        object: { id: PAYMENT_INTENT_ID, metadata: { paymentId: PAYMENT_ID } },
+      },
+    })
+    mockPaymentFindUnique.mockResolvedValueOnce({
+      id: PAYMENT_ID,
+      status: PaymentStatus.PAID,
+      registration: {
+        id: REGISTRATION_ID,
+        userId: USER_ID,
+        tournamentId: TOURNAMENT_ID,
+      },
+    })
+
+    response = await POST(makeWebhookRequest())
+    expect(response.status).toBe(200)
+    expect(mockPaymentUpdate).not.toHaveBeenCalled()
+  })
+
   it('backfills the stripe fee from a charge.updated event with a balance transaction id', async () => {
     mockConstructEvent.mockReturnValue({
       id: 'evt_charge_updated',

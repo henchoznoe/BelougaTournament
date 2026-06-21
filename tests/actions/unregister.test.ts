@@ -282,6 +282,18 @@ describe('unregisterFromTournament — SOLO paid, refund eligible', () => {
     )
     expect(mockRefundsCreate).toHaveBeenCalledOnce()
   })
+
+  it('keeps the registration intact when the Stripe refund fails', async () => {
+    mockRefundsCreate.mockRejectedValue(new Error('Stripe down'))
+
+    const result = await unregisterFromTournament({
+      tournamentId: TOURNAMENT_UUID,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('Le remboursement a échoué')
+    expect(mockRegistrationUpdate).not.toHaveBeenCalled()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -586,7 +598,7 @@ describe('unregisterFromTournament — TEAM paid without team membership', () =>
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toContain('offerts')
+    expect(result.message).toContain('renoncé')
     expect(mockRefundsCreate).not.toHaveBeenCalled()
   })
 
@@ -761,7 +773,7 @@ describe('unregisterFromTournament — TEAM paid with refund', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toContain('offerts')
+    expect(result.message).toContain('renoncé')
     expect(mockRefundsCreate).not.toHaveBeenCalled()
   })
 })
@@ -799,7 +811,7 @@ describe('unregisterFromTournament — SOLO paid, waiveRefund within window', ()
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toContain('offerts')
+    expect(result.message).toContain('renoncé')
     expect(mockRegistrationUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -853,7 +865,7 @@ describe('unregisterFromTournament — SOLO paid, waiveRefund outside window', (
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).not.toContain('offerts')
+    expect(result.message).not.toContain('renoncé')
     expect(mockRefundsCreate).not.toHaveBeenCalled()
     // Payment should NOT be set to FORFEITED since we're outside the window
     expect(mockPaymentUpdate).not.toHaveBeenCalledWith(

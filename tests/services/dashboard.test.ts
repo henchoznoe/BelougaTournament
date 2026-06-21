@@ -251,6 +251,7 @@ describe('getDashboardPaymentStats', () => {
     transactionCount: 0,
     refundCount: 0,
     forfeitedCount: 0,
+    totalForfeited: 0,
     totalDonations: 0,
     donationCount: 0,
     currency: 'CHF',
@@ -487,10 +488,10 @@ describe('getDashboardPaymentStats', () => {
     expect(result.byTournament[0].donationCount).toBe(2)
   })
 
-  it('counts forfeited entry fees as donations', async () => {
+  it('tracks forfeited entry fees separately from voluntary donations', async () => {
     mockPaymentFindMany.mockResolvedValue([
       {
-        // Player forfeited with no optional donation: full entryFee (1000) becomes a donation
+        // Player forfeited with no optional donation: full entryFee (1000) is a forfeit
         amount: 1000,
         currency: 'CHF',
         status: 'FORFEITED',
@@ -502,8 +503,8 @@ describe('getDashboardPaymentStats', () => {
         },
       },
       {
-        // Player forfeited with an optional donation of 200 on top of 800 entry fee
-        // → forfeited entry fee (800) + optional donation (0, handled via PAID path) = 800 donation
+        // Player forfeited with an optional 200 donation on top of an 800 entry fee
+        // → 800 forfeited entry fee + 200 voluntary donation
         amount: 1000,
         currency: 'CHF',
         status: 'FORFEITED',
@@ -518,16 +519,18 @@ describe('getDashboardPaymentStats', () => {
 
     const result = await getDashboardPaymentStats()
 
-    // First payment: 1000 entry fee forfeited → 1000 as donation
-    // Second payment: 1000 - 200 = 800 entry fee forfeited → 800 as donation
-    expect(result.totalDonations).toBe(1800)
-    expect(result.donationCount).toBe(2)
+    // Forfeited entry fees: 1000 + 800 = 1800
+    expect(result.totalForfeited).toBe(1800)
     expect(result.forfeitedCount).toBe(2)
-    expect(result.byTournament[0].donations).toBe(1800)
-    expect(result.byTournament[0].donationCount).toBe(2)
+    // Only the voluntary donation portion (200) counts as a donation
+    expect(result.totalDonations).toBe(200)
+    expect(result.donationCount).toBe(1)
+    expect(result.byTournament[0].forfeited).toBe(1800)
+    expect(result.byTournament[0].donations).toBe(200)
+    expect(result.byTournament[0].donationCount).toBe(1)
   })
 
-  it('does not count forfeited donations when the whole amount is already a donation', async () => {
+  it('counts only the donation portion when a forfeited payment was entirely a donation', async () => {
     mockPaymentFindMany.mockResolvedValue([
       {
         amount: 500,
@@ -544,9 +547,11 @@ describe('getDashboardPaymentStats', () => {
 
     const result = await getDashboardPaymentStats()
 
-    expect(result.totalDonations).toBe(0)
-    expect(result.donationCount).toBe(0)
-    expect(result.byTournament[0].donations).toBe(0)
+    expect(result.totalForfeited).toBe(0)
+    expect(result.totalDonations).toBe(500)
+    expect(result.donationCount).toBe(1)
+    expect(result.byTournament[0].forfeited).toBe(0)
+    expect(result.byTournament[0].donations).toBe(500)
   })
 
   it('skips payment aggregation safely when a grouped tournament entry is unexpectedly missing', async () => {

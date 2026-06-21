@@ -34,6 +34,7 @@ export const ProfileActiveTournaments = ({
                 src={tournament.imageUrls[0]}
                 alt={tournament.title}
                 fill
+                sizes="40px"
                 className="object-cover"
               />
             ) : (
