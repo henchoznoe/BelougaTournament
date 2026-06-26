@@ -11,7 +11,6 @@ import type {
   RegistrationStatus,
   Role,
   TournamentFormat,
-  TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
 /** A user as displayed in the admin users table (lightweight). */
@@ -53,7 +52,6 @@ type UserRegistrationRow = {
     title: string
     slug: string
     format: TournamentFormat
-    status: TournamentStatus
   }
   team: { name: string } | null
   payments: UserPaymentRow[]
@@ -69,7 +67,7 @@ export type UserDetail = {
   discordId: string | null
   role: Role
   createdAt: Date
-  lastLoginAt: Date | null
+  lastSeenAt: Date | null
   bannedAt: Date | null
   bannedUntil: Date | null
   banReason: string | null

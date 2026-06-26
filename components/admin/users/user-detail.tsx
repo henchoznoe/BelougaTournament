@@ -14,7 +14,6 @@ import {
   CreditCard,
   Info,
   Mail,
-  MessageSquare,
   OctagonX,
   Swords,
   Trophy,
@@ -31,10 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  TOURNAMENT_STATUS_LABELS,
-  TOURNAMENT_STATUS_STYLES,
-} from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserDetail as UserDetailType } from '@/lib/types/user'
 import { cn } from '@/lib/utils/cn'
@@ -43,6 +38,7 @@ import {
   formatDate,
   formatDateTime,
 } from '@/lib/utils/formatting'
+import { summarizeKeptPayments } from '@/lib/utils/payment-summary'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -104,28 +100,14 @@ interface StatsSummaryProps {
 const StatsSummary = ({ user }: StatsSummaryProps) => {
   const stats = useMemo(() => {
     const regs = user.registrations
-    const confirmed = regs.filter(
-      r => r.status === RegistrationStatus.CONFIRMED,
-    ).length
-    const totalPaid = regs.reduce((sum, r) => {
-      const paidPayments = r.payments.filter(
-        p => p.status === PaymentStatus.PAID,
-      )
-      return sum + paidPayments.reduce((s, p) => s + p.amount, 0)
-    }, 0)
-    // Collect unique currencies from paid payments
-    const currencies = new Set<string>()
-    for (const r of regs) {
-      for (const p of r.payments) {
-        if (p.status === PaymentStatus.PAID)
-          currencies.add(p.currency.toUpperCase())
-      }
-    }
+    // Counts money the org actually kept: PAID + FORFEITED (waived refund).
+    const { total: totalPaid, currencies } = summarizeKeptPayments(
+      regs.flatMap(r => r.payments),
+    )
     return {
       total: regs.length,
-      confirmed,
       totalPaid,
-      currencies: [...currencies],
+      currencies,
     }
   }, [user.registrations])
 
@@ -138,15 +120,8 @@ const StatsSummary = ({ user }: StatsSummaryProps) => {
       bg: 'bg-blue-500/10',
     },
     {
-      icon: Swords,
-      label: 'Confirmées',
-      value: stats.confirmed.toString(),
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-    },
-    {
       icon: CreditCard,
-      label: 'Total payé',
+      label: 'Déboursé',
       value:
         stats.totalPaid > 0
           ? stats.currencies
@@ -159,7 +134,7 @@ const StatsSummary = ({ user }: StatsSummaryProps) => {
   ]
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2">
       {STAT_ITEMS.map(item => (
         <div
           key={item.label}
@@ -209,19 +184,14 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
             <TableRow className="border-white/5 hover:bg-transparent">
               <TableHead className="text-zinc-400">Tournoi</TableHead>
               <TableHead className="hidden text-zinc-400 sm:table-cell">
-                Format
-              </TableHead>
-              <TableHead className="hidden text-zinc-400 md:table-cell">
                 Équipe
               </TableHead>
               <TableHead className="text-zinc-400">Inscription</TableHead>
-              <TableHead className="hidden text-zinc-400 sm:table-cell">
-                Paiement
-              </TableHead>
-              <TableHead className="hidden text-zinc-400 lg:table-cell">
+              <TableHead className="text-zinc-400">Paiement</TableHead>
+              <TableHead className="hidden text-zinc-400 md:table-cell">
                 Montant
               </TableHead>
-              <TableHead className="hidden text-zinc-400 md:table-cell">
+              <TableHead className="hidden text-zinc-400 lg:table-cell">
                 Date
               </TableHead>
             </TableRow>
@@ -236,20 +206,9 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
                   >
                     {reg.tournament.title}
                   </Link>
-                  <span
-                    className={cn(
-                      'ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                      TOURNAMENT_STATUS_STYLES[reg.tournament.status],
-                    )}
-                  >
-                    {TOURNAMENT_STATUS_LABELS[reg.tournament.status]}
-                  </span>
                 </TableCell>
                 <TableCell className="hidden text-sm text-zinc-400 sm:table-cell">
-                  {FORMAT_LABELS[reg.tournament.format]}
-                </TableCell>
-                <TableCell className="hidden text-sm text-zinc-400 md:table-cell">
-                  {reg.team?.name ?? '—'}
+                  {reg.team?.name ?? FORMAT_LABELS[reg.tournament.format]}
                 </TableCell>
                 <TableCell>
                   <span
@@ -261,7 +220,7 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
                     {REGISTRATION_STATUS_LABELS[reg.status]}
                   </span>
                 </TableCell>
-                <TableCell className="hidden sm:table-cell">
+                <TableCell>
                   <span
                     className={cn(
                       'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
@@ -271,7 +230,7 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
                     {PAYMENT_STATUS_LABELS[reg.paymentStatus]}
                   </span>
                 </TableCell>
-                <TableCell className="hidden text-sm text-zinc-400 lg:table-cell">
+                <TableCell className="hidden text-sm text-zinc-400 md:table-cell">
                   {reg.entryFeeAmountSnapshot && reg.entryFeeCurrencySnapshot
                     ? formatCentimes(
                         reg.entryFeeAmountSnapshot,
@@ -279,7 +238,7 @@ const RegistrationsTable = ({ user }: RegistrationsTableProps) => {
                       )
                     : '—'}
                 </TableCell>
-                <TableCell className="hidden text-sm text-zinc-400 md:table-cell">
+                <TableCell className="hidden text-sm text-zinc-400 lg:table-cell">
                   {formatDate(reg.createdAt)}
                 </TableCell>
               </TableRow>
@@ -344,17 +303,6 @@ export const UserDetail = ({ user }: UserDetailProps) => {
               </dt>
               <dd className="text-right text-zinc-300">{user.email}</dd>
             </div>
-            {user.discordId && (
-              <div className="flex items-start justify-between gap-2">
-                <dt className="flex items-center gap-2 text-zinc-500">
-                  <MessageSquare className="size-3.5" />
-                  Discord ID
-                </dt>
-                <dd className="text-right font-mono text-xs text-zinc-400">
-                  {user.discordId}
-                </dd>
-              </div>
-            )}
             {isUserBanned(user) && (
               <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
                 <div className="flex items-center gap-2 text-red-400">
@@ -397,10 +345,10 @@ export const UserDetail = ({ user }: UserDetailProps) => {
             <div className="flex items-start justify-between gap-2">
               <dt className="flex items-center gap-2 text-zinc-500">
                 <Clock className="size-3.5" />
-                Dernière connexion
+                Dernier accès
               </dt>
               <dd className="text-right text-zinc-300">
-                {user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Jamais'}
+                {user.lastSeenAt ? formatDateTime(user.lastSeenAt) : 'Jamais'}
               </dd>
             </div>
           </dl>
