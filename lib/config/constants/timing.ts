@@ -14,7 +14,7 @@ export const DAY_IN_MS = HOUR_IN_MS * 24
 
 /** Common time durations in seconds (used for cookie/session TTL configuration). */
 export const SECONDS_PER_MINUTE = 60
-const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60
+export const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60
 export const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24
 
 /** Minutes in one hour, used for sub-day time formatting. */

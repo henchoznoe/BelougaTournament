@@ -65,8 +65,8 @@ describe('AUTH_CONFIG', () => {
     expect(AUTH_CONFIG.SESSION_EXPIRES_IN).toBe(60 * 60 * 24 * 7)
   })
 
-  it('SESSION_UPDATE_AGE is 24 hours in seconds', () => {
-    expect(AUTH_CONFIG.SESSION_UPDATE_AGE).toBe(60 * 60 * 24)
+  it('SESSION_UPDATE_AGE is 4 hours in seconds', () => {
+    expect(AUTH_CONFIG.SESSION_UPDATE_AGE).toBe(60 * 60 * 4)
   })
 
   it('COOKIE_CACHE_MAX_AGE is 5 minutes in seconds', () => {
