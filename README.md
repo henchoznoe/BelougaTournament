@@ -9,7 +9,6 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![Biome](https://img.shields.io/badge/formatter|linter-biome-39B420?style=flat&logo=biome)](https://biomejs.dev/)
-[![Lines of Code](https://img.shields.io/badge/dynamic/json?label=lines%20of%20code&query=%24%5B-1%3A%5D.linesOfCode&url=https%3A%2F%2Fapi.codetabs.com%2Fv1%2Floc%3Fgithub%3Dhenchoznoe%2FBelougaTournament&color=blue)](https://github.com/henchoznoe/BelougaTournament)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Belouga Tournament
@@ -68,7 +67,7 @@ The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreS
 | Payments | Stripe Checkout, Webhooks, Refunds |
 | Storage | Vercel Blob |
 | Validation | Zod v4 + react-hook-form |
-| Quality | Biome, Vitest, knip, Codecov, Husky, lint-staged |
+| Quality | Biome, Vitest, knip, Codecov, Lefthook, commitlint |
 | Hosting | Vercel |
 
 ## Project Structure
@@ -87,6 +86,7 @@ The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreS
 │   └── types/            # Shared TypeScript types
 ├── prisma/               # Schema, migrations, seed, generated client
 ├── public/               # Static assets and fonts
+├── scripts/              # Local tooling (Stripe webhook listener)
 ├── tests/                # Top-level Vitest suites
 ├── proxy.ts              # Edge protection for /admin/*
 └── .github/workflows/   # CI, release, dependency review, PR title validation
@@ -145,7 +145,8 @@ Notes:
 | `pnpm exec tsc --noEmit` | Run TypeScript type-checking |
 | `pnpm exec biome check .` | Run formatter/linter check without writing |
 | `pnpm check` | Run Biome and write fixes |
-| `pnpm check:com` | Run all checks before commit |
+| `pnpm check:all` | Run Biome (write) and knip |
+| `pnpm check:com` | Full local verification: Biome, knip, Vitest, type-check, build |
 | `pnpm test` | Run Vitest once |
 | `pnpm test:coverage` | Run Vitest with coverage |
 | `pnpm generate` | Generate Prisma client |
@@ -165,23 +166,33 @@ pnpm vitest run -t "test name"
 
 ## Quality Workflow
 
-CI runs the following checks in order ([`ci.yml`](.github/workflows/ci.yml), reused by [`release.yml`](.github/workflows/release.yml) via `workflow_call`):
+CI ([`ci.yml`](.github/workflows/ci.yml), reused by [`release.yml`](.github/workflows/release.yml) via `workflow_call`) runs three jobs:
 
-```bash
-pnpm exec prisma generate          # Generate Prisma client
-pnpm exec tsc --noEmit              # Type-check
-pnpm exec biome check .             # Lint & format
-pnpm exec knip                      # Dead code analysis
-pnpm audit --audit-level=high       # Security audit
-pnpm test:coverage                  # Unit tests + Codecov upload
-```
+1. **Secret scanning** — [gitleaks](https://github.com/gitleaks/gitleaks-action) scans the repository for committed secrets.
+2. **Lint, Type-check & Build**:
+
+   ```bash
+   pnpm exec prisma generate          # Generate Prisma client
+   pnpm exec tsc --noEmit              # Type-check
+   pnpm exec biome check .             # Lint & format
+   pnpm exec knip                      # Dead code analysis
+   pnpm exec next build                # Production build
+   pnpm audit --audit-level=high       # Security audit
+   ```
+
+3. **Tests** — `pnpm test:coverage` runs the Vitest suite with coverage and uploads the report to Codecov.
 
 Additional CI workflows:
 
 - [`dependency-review.yml`](.github/workflows/dependency-review.yml) — blocks PRs introducing high-severity vulnerable dependencies.
 - [`pr-title.yml`](.github/workflows/pr-title.yml) — enforces Conventional Commits format on PR titles (required for semantic-release).
 
-Pre-commit only runs Biome on staged `*.{ts,tsx,css}` files through `lint-staged`, so local type-checking and tests are still your responsibility before shipping changes.
+Git hooks are managed by [Lefthook](https://github.com/evilmartians/lefthook) ([`lefthook.yml`](lefthook.yml)):
+
+- **pre-commit** runs Biome (`check --write`) on staged `*.{ts,tsx,css}` files.
+- **commit-msg** runs commitlint to enforce Conventional Commits locally.
+
+Pre-commit does not type-check or run tests, so that remains your responsibility before shipping — use `pnpm check:com` for the full local verification.
 
 ## Architectural Principles
 

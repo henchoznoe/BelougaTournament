@@ -27,13 +27,13 @@ export type DashboardStats = {
   }
 }
 
-export type RecentLogin = {
+export type RecentVisit = {
   id: string
   name: string
   displayName: string
   image: string | null
   role: Role
-  lastLoginAt: Date
+  lastSeenAt: Date
 }
 
 export type RecentRegistration = {

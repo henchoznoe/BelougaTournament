@@ -37,29 +37,31 @@ const GROSS_STRIPE_AMOUNT_CENTIMES = 10000
 // Tests
 // ---------------------------------------------------------------------------
 
+// All helpers render in Europe/Zurich regardless of the runtime timezone, so
+// these fixtures use explicit UTC instants and assert the Swiss wall-clock value.
 describe('formatDate', () => {
-  it('formats March 15 2026 as "15 mars 2026"', () => {
-    expect(formatDate(new Date(2026, 2, 15))).toBe('15 mars 2026')
+  it('formats a noon-UTC March instant as "15 mars 2026"', () => {
+    expect(formatDate(new Date('2026-03-15T12:00:00Z'))).toBe('15 mars 2026')
   })
 
-  it('formats January 1 as "1 janvier"', () => {
-    const result = formatDate(new Date(2026, 0, 1))
+  it('formats January correctly', () => {
+    const result = formatDate(new Date('2026-01-01T12:00:00Z'))
     expect(result).toContain('janvier')
     expect(result).toContain('2026')
   })
 
-  it('formats June 21 as "juin"', () => {
-    const result = formatDate(new Date(2026, 5, 21))
+  it('formats June correctly', () => {
+    const result = formatDate(new Date('2026-06-21T12:00:00Z'))
     expect(result).toContain('juin')
   })
 
   it('accepts a numeric timestamp', () => {
-    const result = formatDate(new Date(2026, 2, 15).getTime())
+    const result = formatDate(new Date('2026-03-15T12:00:00Z').getTime())
     expect(result).toBe('15 mars 2026')
   })
 
-  it('accepts a Date string with explicit time to avoid timezone drift', () => {
-    const result = formatDate(new Date(2026, 11, 25))
+  it('accepts an ISO string', () => {
+    const result = formatDate('2026-12-25T12:00:00Z')
     expect(result).toContain('décembre')
     expect(result).toContain('2026')
   })
@@ -67,21 +69,28 @@ describe('formatDate', () => {
 
 describe('formatDateTime', () => {
   it('includes "à" as separator between date and time', () => {
-    expect(formatDateTime(new Date(2026, 2, 15, 10, 0))).toContain(' à ')
+    expect(formatDateTime(new Date('2026-03-15T10:00:00Z'))).toContain(' à ')
   })
 
   it('contains the correct date portion', () => {
-    const result = formatDateTime(new Date(2026, 2, 15, 14, 30))
+    const result = formatDateTime(new Date('2026-03-15T13:30:00Z'))
     expect(result).toContain('15 mars 2026')
   })
 
-  it('contains the correct time portion', () => {
-    const result = formatDateTime(new Date(2026, 2, 15, 14, 30))
+  it('renders the time in Zurich winter time (CET, +1)', () => {
+    // 13:30 UTC on a March (pre-DST) date -> 14:30 in Zurich.
+    const result = formatDateTime(new Date('2026-03-15T13:30:00Z'))
     expect(result).toContain('14:30')
   })
 
+  it('renders the time in Zurich summer time (CEST, +2)', () => {
+    // 11:49 UTC in June -> 13:49 in Zurich (the production bug scenario).
+    const result = formatDateTime(new Date('2026-06-26T11:49:24Z'))
+    expect(result).toContain('13:49')
+  })
+
   it('formats December correctly', () => {
-    const result = formatDateTime(new Date(2026, 11, 25, 18, 0))
+    const result = formatDateTime(new Date('2026-12-25T18:00:00Z'))
     expect(result).toContain('décembre')
     expect(result).toContain('2026')
   })
@@ -89,15 +98,17 @@ describe('formatDateTime', () => {
 
 describe('formatShortDate', () => {
   it('formats as dd.MM.yyyy', () => {
-    expect(formatShortDate(new Date(2026, 2, 15))).toBe('15.03.2026')
+    expect(formatShortDate(new Date('2026-03-15T12:00:00Z'))).toBe('15.03.2026')
   })
 
   it('zero-pads single-digit day and month', () => {
-    expect(formatShortDate(new Date(2026, 0, 5))).toBe('05.01.2026')
+    expect(formatShortDate(new Date('2026-01-05T12:00:00Z'))).toBe('05.01.2026')
   })
 
   it('accepts a numeric timestamp', () => {
-    expect(formatShortDate(new Date(2026, 11, 25).getTime())).toBe('25.12.2026')
+    expect(formatShortDate(new Date('2026-12-25T12:00:00Z').getTime())).toBe(
+      '25.12.2026',
+    )
   })
 
   it('accepts a string date', () => {
@@ -106,7 +117,7 @@ describe('formatShortDate', () => {
   })
 
   it('formats last day of year correctly', () => {
-    expect(formatShortDate(new Date(2026, 11, 31))).toBe('31.12.2026')
+    expect(formatShortDate(new Date('2026-12-31T12:00:00Z'))).toBe('31.12.2026')
   })
 })
 

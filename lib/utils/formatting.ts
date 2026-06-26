@@ -6,25 +6,49 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import {
+  APP_TIME_ZONE,
   CENTIMES_PER_UNIT,
   STRIPE_FEE_FIXED_CENTIMES,
   STRIPE_FEE_PERCENT,
   STRIPE_FEE_PERCENT_DIVISOR,
 } from '@/lib/config/constants'
 
+// Dates are rendered in APP_TIME_ZONE (not the runtime zone) so output is stable
+// across environments — the Vercel runtime is UTC and would otherwise shift the
+// displayed wall-clock time by the Swiss offset (CET/CEST).
+const dateFormatter = new Intl.DateTimeFormat('fr-CH', {
+  dateStyle: 'long',
+  timeZone: APP_TIME_ZONE,
+})
+
+const dateTimeFormatter = new Intl.DateTimeFormat('fr-CH', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: APP_TIME_ZONE,
+})
+
+const shortDateFormatter = new Intl.DateTimeFormat('fr-CH', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  timeZone: APP_TIME_ZONE,
+})
+
 export const formatDate = (date: Date | string | number): string => {
-  return format(new Date(date), 'PPP', { locale: fr })
+  return dateFormatter.format(new Date(date))
 }
 
 export const formatDateTime = (date: Date | string | number): string => {
-  return format(new Date(date), "PPP 'à' p", { locale: fr })
+  return dateTimeFormatter.format(new Date(date))
 }
 
 export const formatShortDate = (date: Date | string | number): string => {
-  return format(new Date(date), 'dd.MM.yyyy')
+  const parts: Record<string, string> = {}
+  for (const part of shortDateFormatter.formatToParts(new Date(date))) {
+    parts[part.type] = part.value
+  }
+  return `${parts.day}.${parts.month}.${parts.year}`
 }
 
 /** Converts empty strings or undefined to null for nullable Prisma fields. */

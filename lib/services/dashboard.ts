@@ -16,8 +16,8 @@ import prisma from '@/lib/core/prisma'
 import type {
   DashboardStats,
   PaymentStats,
-  RecentLogin,
   RecentRegistration,
+  RecentVisit,
 } from '@/lib/types/dashboard'
 import {
   PaymentStatus,
@@ -110,16 +110,16 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   }
 }
 
-/** Fetches users with the most recent login activity. */
-export const getRecentLogins = async (limit = 8): Promise<RecentLogin[]> => {
+/** Fetches users with the most recent site access (visit) activity. */
+export const getRecentVisits = async (limit = 8): Promise<RecentVisit[]> => {
   'use cache'
   cacheLife('minutes')
   cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
   try {
     const rows = await prisma.user.findMany({
-      where: { lastLoginAt: { not: null } },
-      orderBy: { lastLoginAt: 'desc' },
+      where: { lastSeenAt: { not: null } },
+      orderBy: { lastSeenAt: 'desc' },
       take: limit,
       select: {
         id: true,
@@ -127,12 +127,12 @@ export const getRecentLogins = async (limit = 8): Promise<RecentLogin[]> => {
         displayName: true,
         image: true,
         role: true,
-        lastLoginAt: true,
+        lastSeenAt: true,
       },
     })
-    return rows as unknown as RecentLogin[]
+    return rows as unknown as RecentVisit[]
   } catch (error) {
-    logger.error({ error }, 'Error fetching recent logins')
+    logger.error({ error }, 'Error fetching recent visits')
     return []
   }
 }

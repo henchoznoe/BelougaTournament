@@ -34,6 +34,7 @@ export type UserMinAggregateOutputType = {
   discordId: string | null
   createdAt: Date | null
   lastLoginAt: Date | null
+  lastSeenAt: Date | null
   updatedAt: Date | null
   role: $Enums.Role | null
   bannedAt: Date | null
@@ -52,6 +53,7 @@ export type UserMaxAggregateOutputType = {
   discordId: string | null
   createdAt: Date | null
   lastLoginAt: Date | null
+  lastSeenAt: Date | null
   updatedAt: Date | null
   role: $Enums.Role | null
   bannedAt: Date | null
@@ -70,6 +72,7 @@ export type UserCountAggregateOutputType = {
   discordId: number
   createdAt: number
   lastLoginAt: number
+  lastSeenAt: number
   updatedAt: number
   role: number
   bannedAt: number
@@ -90,6 +93,7 @@ export type UserMinAggregateInputType = {
   discordId?: true
   createdAt?: true
   lastLoginAt?: true
+  lastSeenAt?: true
   updatedAt?: true
   role?: true
   bannedAt?: true
@@ -108,6 +112,7 @@ export type UserMaxAggregateInputType = {
   discordId?: true
   createdAt?: true
   lastLoginAt?: true
+  lastSeenAt?: true
   updatedAt?: true
   role?: true
   bannedAt?: true
@@ -126,6 +131,7 @@ export type UserCountAggregateInputType = {
   discordId?: true
   createdAt?: true
   lastLoginAt?: true
+  lastSeenAt?: true
   updatedAt?: true
   role?: true
   bannedAt?: true
@@ -217,6 +223,7 @@ export type UserGroupByOutputType = {
   discordId: string | null
   createdAt: Date
   lastLoginAt: Date | null
+  lastSeenAt: Date | null
   updatedAt: Date
   role: $Enums.Role
   bannedAt: Date | null
@@ -256,6 +263,7 @@ export type UserWhereInput = {
   discordId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  lastSeenAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   bannedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -279,6 +287,7 @@ export type UserOrderByWithRelationInput = {
   discordId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   bannedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -305,6 +314,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  lastSeenAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   bannedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -328,6 +338,7 @@ export type UserOrderByWithAggregationInput = {
   discordId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   bannedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -352,6 +363,7 @@ export type UserScalarWhereWithAggregatesInput = {
   discordId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  lastSeenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   bannedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -370,6 +382,7 @@ export type UserCreateInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -393,6 +406,7 @@ export type UserUncheckedCreateInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -416,6 +430,7 @@ export type UserUpdateInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -439,6 +454,7 @@ export type UserUncheckedUpdateInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -462,6 +478,7 @@ export type UserCreateManyInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -480,6 +497,7 @@ export type UserUpdateManyMutationInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -498,6 +516,7 @@ export type UserUncheckedUpdateManyInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -516,6 +535,7 @@ export type UserCountOrderByAggregateInput = {
   discordId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   bannedAt?: Prisma.SortOrder
@@ -534,6 +554,7 @@ export type UserMaxOrderByAggregateInput = {
   discordId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   bannedAt?: Prisma.SortOrder
@@ -552,6 +573,7 @@ export type UserMinOrderByAggregateInput = {
   discordId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   bannedAt?: Prisma.SortOrder
@@ -669,6 +691,7 @@ export type UserCreateWithoutSessionsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -691,6 +714,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -729,6 +753,7 @@ export type UserUpdateWithoutSessionsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -751,6 +776,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -773,6 +799,7 @@ export type UserCreateWithoutAccountsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -795,6 +822,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -833,6 +861,7 @@ export type UserUpdateWithoutAccountsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -855,6 +884,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -877,6 +907,7 @@ export type UserCreateWithoutCaptainOfInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -899,6 +930,7 @@ export type UserUncheckedCreateWithoutCaptainOfInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -937,6 +969,7 @@ export type UserUpdateWithoutCaptainOfInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -959,6 +992,7 @@ export type UserUncheckedUpdateWithoutCaptainOfInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -981,6 +1015,7 @@ export type UserCreateWithoutTeamMembersInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -1003,6 +1038,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -1041,6 +1077,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1063,6 +1100,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1085,6 +1123,7 @@ export type UserCreateWithoutRegistrationsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -1107,6 +1146,7 @@ export type UserUncheckedCreateWithoutRegistrationsInput = {
   discordId?: string | null
   createdAt?: Date | string
   lastLoginAt?: Date | string | null
+  lastSeenAt?: Date | string | null
   updatedAt?: Date | string
   role?: $Enums.Role
   bannedAt?: Date | string | null
@@ -1145,6 +1185,7 @@ export type UserUpdateWithoutRegistrationsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1167,6 +1208,7 @@ export type UserUncheckedUpdateWithoutRegistrationsInput = {
   discordId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1256,6 +1298,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   discordId?: boolean
   createdAt?: boolean
   lastLoginAt?: boolean
+  lastSeenAt?: boolean
   updatedAt?: boolean
   role?: boolean
   bannedAt?: boolean
@@ -1280,6 +1323,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   discordId?: boolean
   createdAt?: boolean
   lastLoginAt?: boolean
+  lastSeenAt?: boolean
   updatedAt?: boolean
   role?: boolean
   bannedAt?: boolean
@@ -1298,6 +1342,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   discordId?: boolean
   createdAt?: boolean
   lastLoginAt?: boolean
+  lastSeenAt?: boolean
   updatedAt?: boolean
   role?: boolean
   bannedAt?: boolean
@@ -1316,6 +1361,7 @@ export type UserSelectScalar = {
   discordId?: boolean
   createdAt?: boolean
   lastLoginAt?: boolean
+  lastSeenAt?: boolean
   updatedAt?: boolean
   role?: boolean
   bannedAt?: boolean
@@ -1324,7 +1370,7 @@ export type UserSelectScalar = {
   isPublic?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "email" | "emailVerified" | "image" | "discordId" | "createdAt" | "lastLoginAt" | "updatedAt" | "role" | "bannedAt" | "bannedUntil" | "banReason" | "isPublic", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "email" | "emailVerified" | "image" | "discordId" | "createdAt" | "lastLoginAt" | "lastSeenAt" | "updatedAt" | "role" | "bannedAt" | "bannedUntil" | "banReason" | "isPublic", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1355,6 +1401,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     discordId: string | null
     createdAt: Date
     lastLoginAt: Date | null
+    lastSeenAt: Date | null
     updatedAt: Date
     role: $Enums.Role
     bannedAt: Date | null
@@ -1798,6 +1845,7 @@ export interface UserFieldRefs {
   readonly discordId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly lastSeenAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly bannedAt: Prisma.FieldRef<"User", 'DateTime'>

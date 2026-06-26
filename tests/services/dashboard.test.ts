@@ -54,7 +54,7 @@ vi.mock('@/lib/core/prisma', () => ({
 
 const {
   getDashboardStats,
-  getRecentLogins,
+  getRecentVisits,
   getRecentRegistrations,
   getDashboardPaymentStats,
 } = await import('@/lib/services/dashboard')
@@ -131,20 +131,20 @@ describe('getDashboardStats', () => {
 })
 
 // ---------------------------------------------------------------------------
-// getRecentLogins
+// getRecentVisits
 // ---------------------------------------------------------------------------
 
-describe('getRecentLogins', () => {
+describe('getRecentVisits', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  const MOCK_LOGINS = [
+  const MOCK_VISITS = [
     {
       id: 'user-1',
       name: 'PlayerOne',
       displayName: 'Player One',
       image: null,
       role: Role.USER,
-      lastLoginAt: new Date('2026-04-15T10:00:00Z'),
+      lastSeenAt: new Date('2026-04-15T10:00:00Z'),
     },
     {
       id: 'user-2',
@@ -152,20 +152,20 @@ describe('getRecentLogins', () => {
       displayName: 'Admin User',
       image: 'https://cdn.discordapp.com/avatars/456/def.png',
       role: Role.ADMIN,
-      lastLoginAt: new Date('2026-04-14T08:00:00Z'),
+      lastSeenAt: new Date('2026-04-14T08:00:00Z'),
     },
   ]
 
-  it('returns recent logins ordered by lastLoginAt desc', async () => {
-    mockUserFindMany.mockResolvedValue(MOCK_LOGINS)
+  it('returns recent visits ordered by lastSeenAt desc', async () => {
+    mockUserFindMany.mockResolvedValue(MOCK_VISITS)
 
-    const result = await getRecentLogins()
+    const result = await getRecentVisits()
 
-    expect(result).toEqual(MOCK_LOGINS)
+    expect(result).toEqual(MOCK_VISITS)
     expect(mockUserFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { lastLoginAt: { not: null } },
-        orderBy: { lastLoginAt: 'desc' },
+        where: { lastSeenAt: { not: null } },
+        orderBy: { lastSeenAt: 'desc' },
       }),
     )
   })
@@ -173,7 +173,7 @@ describe('getRecentLogins', () => {
   it('respects the limit parameter', async () => {
     mockUserFindMany.mockResolvedValue([])
 
-    await getRecentLogins(3)
+    await getRecentVisits(3)
 
     expect(mockUserFindMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 3 }),
@@ -183,7 +183,7 @@ describe('getRecentLogins', () => {
   it('returns an empty array on database error', async () => {
     mockUserFindMany.mockRejectedValue(new Error('DB error'))
 
-    expect(await getRecentLogins()).toEqual([])
+    expect(await getRecentVisits()).toEqual([])
   })
 })
 

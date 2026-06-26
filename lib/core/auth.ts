@@ -101,10 +101,14 @@ const auth = betterAuth({
 
             if (!user) return
 
+            const loginAt = session.createdAt
+              ? new Date(session.createdAt)
+              : new Date()
+
+            // A fresh login also counts as a site access.
             const updateData: Record<string, unknown> = {
-              lastLoginAt: session.createdAt
-                ? new Date(session.createdAt)
-                : new Date(),
+              lastLoginAt: loginAt,
+              lastSeenAt: loginAt,
             }
 
             const discordAccount = user.accounts.find(
@@ -161,6 +165,25 @@ const auth = betterAuth({
                 userId: session.userId,
               },
               'Failed to sync Discord profile',
+            )
+          }
+        },
+      },
+      update: {
+        after: async session => {
+          try {
+            await prisma.user.update({
+              where: { id: session.userId },
+              data: { lastSeenAt: new Date() },
+            })
+          } catch (error) {
+            logger.error(
+              {
+                errorMessage:
+                  error instanceof Error ? error.message : 'unknown',
+                userId: session.userId,
+              },
+              'Failed to update lastSeenAt',
             )
           }
         },

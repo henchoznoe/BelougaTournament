@@ -6,39 +6,37 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { LogIn, Trophy } from 'lucide-react'
+import { Clock, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { ROUTES } from '@/lib/config/routes'
-import type { RecentLogin, RecentRegistration } from '@/lib/types/dashboard'
+import type { RecentRegistration, RecentVisit } from '@/lib/types/dashboard'
 import { formatDateTime } from '@/lib/utils/formatting'
 
-interface RecentLoginsProps {
-  logins: RecentLogin[]
+interface RecentVisitsProps {
+  visits: RecentVisit[]
 }
 
 interface RecentRegistrationsProps {
   registrations: RecentRegistration[]
 }
 
-export const DashboardRecentLogins = ({ logins }: RecentLoginsProps) => {
+export const DashboardRecentVisits = ({ visits }: RecentVisitsProps) => {
   return (
     <div className="flex flex-col rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
       <div className="mb-4 flex items-center gap-2">
-        <LogIn className="size-4 text-emerald-400" />
-        <h2 className="text-sm font-semibold text-white">
-          Connexions récentes
-        </h2>
+        <Clock className="size-4 text-emerald-400" />
+        <h2 className="text-sm font-semibold text-white">Accès récents</h2>
       </div>
 
-      {logins.length === 0 ? (
+      {visits.length === 0 ? (
         <p className="py-4 text-center text-sm text-zinc-500">
-          Aucune connexion récente.
+          Aucun accès récent.
         </p>
       ) : (
         <div className="max-h-105 space-y-2 overflow-y-auto pr-1">
-          {logins.map(user => (
+          {visits.map(user => (
             <Link
               key={user.id}
               href={ROUTES.ADMIN_USER_DETAIL(user.id)}
@@ -74,7 +72,7 @@ export const DashboardRecentLogins = ({ logins }: RecentLoginsProps) => {
                 </div>
               </div>
               <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
-                {formatDateTime(user.lastLoginAt)}
+                {formatDateTime(user.lastSeenAt)}
               </span>
             </Link>
           ))}
