@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.9.0...v1.10.0) (2026-06-26)
+
+
+### Bug Fixes
+
+* standardize all date formatting to Europe/Zurich timezone using Intl.DateTimeFormat ([4925b7f](https://github.com/henchoznoe/BelougaTournament/commit/4925b7f8f4176628df0749fca2da69528eabe053))
+
+
+### Features
+
+* add lastSeenAt field to User model and update on session activity ([e75412a](https://github.com/henchoznoe/BelougaTournament/commit/e75412ac2339cb32b184d0457ac62c50f4a8d451))
+
 # [1.9.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.8.0...v1.9.0) (2026-06-21)
 
 
