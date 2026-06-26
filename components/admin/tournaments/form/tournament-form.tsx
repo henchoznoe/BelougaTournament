@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { createTournament, updateTournament } from '@/lib/actions/tournaments'
+import { APP_TIME_ZONE } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
 import type { TournamentFormValues } from '@/lib/types/tournament-form'
@@ -65,7 +66,7 @@ const slugify = (text: string): string =>
 const toDatetimeLocalValue = (iso: string | Date): string => {
   const date = new Date(iso)
   const formatter = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Europe/Zurich',
+    timeZone: APP_TIME_ZONE,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -90,7 +91,7 @@ const toISOFromLocal = (localStr: string): string => {
 
   const zurichOffsetAt = (utcMs: number): number => {
     const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Europe/Zurich',
+      timeZone: APP_TIME_ZONE,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',

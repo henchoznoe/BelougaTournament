@@ -42,3 +42,10 @@ export const DEFAULT_CURRENCY = 'CHF' as const
 
 /** Suffix used to set date to noon UTC, avoiding timezone-induced day shifts. */
 export const NOON_UTC_SUFFIX = 'T12:00:00.000Z'
+
+/**
+ * IANA timezone the platform operates in. All user-facing dates are rendered in
+ * this zone so the output is stable regardless of the server runtime — Vercel
+ * runs in UTC, which would otherwise shift displayed times by the Swiss offset.
+ */
+export const APP_TIME_ZONE = 'Europe/Zurich'
