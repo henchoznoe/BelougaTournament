@@ -126,7 +126,7 @@ export const getUserById = async (
         discordId: true,
         role: true,
         createdAt: true,
-        lastLoginAt: true,
+        lastSeenAt: true,
         bannedAt: true,
         bannedUntil: true,
         banReason: true,
@@ -145,7 +145,6 @@ export const getUserById = async (
                 title: true,
                 slug: true,
                 format: true,
-                status: true,
               },
             },
             team: {

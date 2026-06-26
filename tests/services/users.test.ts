@@ -12,7 +12,6 @@ import {
   RegistrationStatus,
   Role,
   TournamentFormat,
-  TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
 
 vi.mock('server-only', () => ({}))
@@ -79,7 +78,7 @@ const MOCK_USER_DETAIL = {
   discordId: 'discord-1',
   role: Role.USER,
   createdAt: new Date('2026-01-01'),
-  lastLoginAt: new Date('2026-04-15T19:30:00Z'),
+  lastSeenAt: new Date('2026-04-15T19:30:00Z'),
   registrations: [
     {
       id: 'reg-1',
@@ -92,7 +91,6 @@ const MOCK_USER_DETAIL = {
         title: 'Tournoi Alpha',
         slug: 'tournoi-alpha',
         format: TournamentFormat.SOLO,
-        status: TournamentStatus.PUBLISHED,
       },
       team: null,
       payments: [
@@ -231,7 +229,7 @@ describe('getUserById', () => {
       expect.objectContaining({
         where: { id: 'user-1' },
         select: expect.objectContaining({
-          lastLoginAt: true,
+          lastSeenAt: true,
         }),
       }),
     )
