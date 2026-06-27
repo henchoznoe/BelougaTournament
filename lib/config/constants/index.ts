@@ -9,6 +9,7 @@
  */
 
 export * from './admin'
+export * from './analytics'
 export * from './auth'
 export * from './cache'
 export * from './contact'

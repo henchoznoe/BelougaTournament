@@ -12,6 +12,7 @@ import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
+import { captureServerException } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
 import { REFUND_KIND_FULL_CANCELLATION } from '@/lib/utils/stripe-refund'
@@ -604,6 +605,11 @@ export const POST = async (request: Request) => {
       { error, eventId: event.id, type: event.type },
       'Failed to process Stripe webhook',
     )
+    await captureServerException(error, undefined, {
+      source: 'stripe-webhook',
+      eventId: event.id,
+      type: event.type,
+    })
     return NextResponse.json(
       { error: 'Webhook processing failed.' },
       { status: 500 },
