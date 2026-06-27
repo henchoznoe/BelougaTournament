@@ -59,7 +59,7 @@ const FooterLogo = (props: { url: string | null }) => {
         height={120}
         className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
       />
-      <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 -z-10 rounded-full bg-brand/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
     </div>
   )
 }
@@ -139,8 +139,8 @@ export const PublicFooter = async () => {
   return (
     <footer className="relative border-t border-white/10 bg-zinc-950 pb-8 pt-16 overflow-hidden mt-8">
       {/* Subtle top glow effect */}
-      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
-      <div className="absolute left-1/2 -top-24 h-48 w-full max-w-3xl -translate-x-1/2 bg-blue-500/10 blur-[100px] pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/50 to-transparent" />
+      <div className="absolute left-1/2 -top-24 h-48 w-full max-w-3xl -translate-x-1/2 bg-brand/10 blur-[100px] pointer-events-none" />
 
       <div className="container relative z-10 mx-auto px-4">
         <div className="mb-16 flex flex-col items-center justify-center text-center">
@@ -168,9 +168,9 @@ export const PublicFooter = async () => {
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="group flex items-center gap-2 text-zinc-400 transition-colors hover:text-blue-400"
+                        className="group flex items-center gap-2 text-zinc-400 transition-colors hover:text-brand"
                       >
-                        <span className="h-px w-0 bg-blue-400 transition-all group-hover:w-3" />
+                        <span className="h-px w-0 bg-brand transition-all group-hover:w-3" />
                         {link.label}
                       </Link>
                     </li>

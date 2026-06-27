@@ -120,7 +120,7 @@ export const TournamentHeroGallery = ({
           <div className="absolute inset-0 bg-linear-to-r from-zinc-950/50 to-transparent" />
         </div>
       ) : (
-        <div className="relative h-44 bg-linear-to-br from-blue-600/20 via-zinc-950 to-purple-600/10 sm:h-56">
+        <div className="relative h-44 bg-linear-to-br from-brand/20 via-zinc-950 to-purple-600/10 sm:h-56">
           <div className="absolute inset-0 bg-linear-to-t from-zinc-950 to-transparent" />
         </div>
       )}
@@ -164,7 +164,7 @@ export const TournamentHeroGallery = ({
               className={cn(
                 'rounded-full transition-all duration-300',
                 i === activeIndex
-                  ? 'size-2.5 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                  ? 'size-2.5 bg-brand shadow-[0_0_8px_rgba(59,130,246,0.5)]'
                   : 'size-2 bg-white/30 hover:bg-white/50',
               )}
               aria-label={`Image ${i + 1}`}

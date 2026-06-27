@@ -89,7 +89,7 @@ export const ProfileEditForm = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-2 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4"
+      className="space-y-2 rounded-2xl border border-brand/10 bg-brand/5 p-4"
     >
       <Label htmlFor="displayName" className="text-xs text-zinc-400">
         Nom
@@ -99,7 +99,7 @@ export const ProfileEditForm = ({
           id="displayName"
           autoComplete="given-name"
           disabled={isPending}
-          className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+          className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
           {...register('displayName')}
         />
         <Button

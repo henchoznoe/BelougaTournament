@@ -9,8 +9,11 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { FeaturesSection } from '@/components/public/landing/features-section'
+import { FinalCtaSection } from '@/components/public/landing/final-cta-section'
 import { HeroSection } from '@/components/public/landing/hero-section'
+import { HowItWorksSection } from '@/components/public/landing/how-it-works-section'
 import { SponsorsSection } from '@/components/public/landing/sponsors-section'
+import { StatsSection } from '@/components/public/landing/stats-section'
 import { StreamSection } from '@/components/public/landing/stream-section'
 import { TournamentsSection } from '@/components/public/landing/tournaments-section'
 import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
@@ -48,6 +51,12 @@ const HeroSectionWrapper = async () => {
   )
 }
 
+/** Fetches the session (dynamic) and renders the closing CTA with auth state. */
+const FinalCtaWrapper = async () => {
+  const session = await getSession()
+  return <FinalCtaSection isAuthenticated={!!session?.user} />
+}
+
 const LandingPage = async () => {
   const [globalSettings, sponsors] = await Promise.all([
     getGlobalSettings(),
@@ -63,12 +72,17 @@ const LandingPage = async () => {
       >
         <HeroSectionWrapper />
       </Suspense>
+      <StatsSection />
       <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>
+      <HowItWorksSection />
       <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
       <SponsorsSection sponsors={sponsors} />
+      <Suspense fallback={null}>
+        <FinalCtaWrapper />
+      </Suspense>
     </div>
   )
 }

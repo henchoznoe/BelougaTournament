@@ -42,7 +42,7 @@ const TournamentListFallback = () => {
           <Skeleton
             // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
             key={i}
-            className="h-64 rounded-3xl border border-white/5 bg-white/2"
+            className="h-64 rounded-2xl border border-surface-border bg-surface"
           />
         ))}
       </div>
@@ -80,9 +80,9 @@ const TournamentsContent = async ({ searchParams }: TournamentsPageProps) => {
       <div className="flex justify-center pt-2">
         <Link
           href={ROUTES.TOURNAMENTS_ARCHIVE}
-          className="group inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/2 px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:text-white"
+          className="glass group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm text-zinc-400 transition-all duration-300 hover:border-brand/20 hover:bg-surface-hover hover:text-white"
         >
-          <Archive className="size-4 transition-colors duration-300 group-hover:text-blue-400" />
+          <Archive className="size-4 transition-colors duration-300 group-hover:text-brand" />
           Voir les tournois passés
         </Link>
       </div>

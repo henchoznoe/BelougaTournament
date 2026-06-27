@@ -7,6 +7,8 @@
  */
 
 import { type LucideIcon, Swords, Target, Zap } from 'lucide-react'
+import { Reveal } from '@/components/public/shared/reveal'
+import { SectionHeader } from '@/components/public/shared/section-header'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { cn } from '@/lib/utils/cn'
 
@@ -30,10 +32,10 @@ const FEATURE_DEFAULTS = [
       'Affrontez des joueurs de votre niveau grâce à notre système de rangs strict. Pas de smurfs, juste du pur talent.',
     icon: Swords,
     styles: {
-      iconColor: 'text-orange-400',
-      bg: 'bg-orange-500/10',
-      border: 'group-hover:border-orange-500/50',
-      glow: 'group-hover:bg-orange-500/10',
+      iconColor: 'text-brand',
+      bg: 'bg-brand/10',
+      border: 'group-hover:border-brand/50',
+      glow: 'group-hover:bg-brand/10',
     },
   },
   {
@@ -42,10 +44,10 @@ const FEATURE_DEFAULTS = [
       'Arbre de tournoi professionnel, phases de poules et playoffs. Vivez la pression des grandes ligues e-sport.',
     icon: Target,
     styles: {
-      iconColor: 'text-blue-400',
-      bg: 'bg-blue-500/10',
-      border: 'group-hover:border-blue-500/50',
-      glow: 'group-hover:bg-blue-500/10',
+      iconColor: 'text-brand-2',
+      bg: 'bg-brand-2/10',
+      border: 'group-hover:border-brand-2/50',
+      glow: 'group-hover:bg-brand-2/10',
     },
   },
   {
@@ -54,10 +56,10 @@ const FEATURE_DEFAULTS = [
       'Les phases finales sont commentées et diffusées sur notre chaîne Twitch. Montrez votre talent à toute la communauté.',
     icon: Zap,
     styles: {
-      iconColor: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      border: 'group-hover:border-purple-500/50',
-      glow: 'group-hover:bg-purple-500/10',
+      iconColor: 'text-brand-3',
+      bg: 'bg-brand-3/10',
+      border: 'group-hover:border-brand-3/50',
+      glow: 'group-hover:bg-brand-3/10',
     },
   },
 ] as const
@@ -66,7 +68,7 @@ const FeatureCard = ({ feature }: { feature: FeatureItem }) => {
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-8 transition-all duration-300 backdrop-blur-md',
+        'glass group relative h-full overflow-hidden rounded-2xl p-8 transition-all duration-300',
         'hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]',
         feature.styles.border,
       )}
@@ -141,30 +143,21 @@ export const FeaturesSection = async () => {
   return (
     <section className="relative container mx-auto px-4 py-24">
       {/* Decorative Top Line */}
-      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-brand/50 to-transparent opacity-50" />
 
-      {/* Section Header */}
-      <div className="mb-20 text-center">
-        <div className="mx-auto mb-6 inline-flex items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5">
-          <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">
-            Pourquoi nous rejoindre ?
-          </span>
-        </div>
-
-        <h2 className="font-paladins text-4xl tracking-wider text-white sm:text-5xl lg:text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase">
-          L'arène ultime
-        </h2>
-
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-          Expérimentez la compétition à son paroxysme. Des tournois conçus par
-          des joueurs, pour des joueurs.
-        </p>
-      </div>
+      <SectionHeader
+        eyebrow="Pourquoi nous rejoindre ?"
+        title="L'arène ultime"
+        description="Expérimentez la compétition à son paroxysme. Des tournois conçus par des joueurs, pour des joueurs."
+        className="mb-20"
+      />
 
       {/* Grid Layout */}
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3 md:gap-8">
-        {features.map(feature => (
-          <FeatureCard key={feature.title} feature={feature} />
+        {features.map((feature, index) => (
+          <Reveal key={feature.title} delay={index * 0.1}>
+            <FeatureCard feature={feature} />
+          </Reveal>
         ))}
       </div>
     </section>

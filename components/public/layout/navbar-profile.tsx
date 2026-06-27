@@ -52,7 +52,7 @@ export const NavbarProfile = ({
       <Link
         href={`${ROUTES.LOGIN}?from=${encodeURIComponent(pathname)}`}
         onClick={onClick}
-        className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-colors duration-300 hover:bg-white/4"
+        className="glass group relative flex h-12 w-12 items-center justify-center rounded-full transition-colors duration-300 hover:bg-surface-hover"
         aria-label="Se connecter"
       >
         <User className="size-5 text-zinc-400 transition-colors duration-300 group-hover:text-white" />
@@ -66,7 +66,7 @@ export const NavbarProfile = ({
   if (mode === 'desktop') {
     return (
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger className="group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden">
+        <DropdownMenuTrigger className="glass group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-surface-hover hover:ring-2 hover:ring-brand/20 focus:outline-hidden">
           {sessionUser.image ? (
             <Image
               src={sessionUser.image}
@@ -133,7 +133,7 @@ export const NavbarProfile = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-3xl border border-white/5 bg-white/2 p-4">
+    <div className="glass flex w-full flex-col gap-4 rounded-3xl p-4">
       <div className="flex items-center gap-4">
         {sessionUser.image ? (
           <Image
@@ -141,10 +141,10 @@ export const NavbarProfile = ({
             alt={resolvedDisplayName}
             width={48}
             height={48}
-            className="rounded-full ring-2 ring-blue-500/20"
+            className="rounded-full ring-2 ring-brand/20"
           />
         ) : (
-          <div className="flex size-12 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-blue-500/20">
+          <div className="flex size-12 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-brand/20">
             <span className="text-lg font-medium text-zinc-300">
               {resolvedDisplayName.charAt(0).toUpperCase()}
             </span>

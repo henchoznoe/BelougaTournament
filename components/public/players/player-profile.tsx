@@ -32,7 +32,7 @@ const ROLE_CONFIG = {
   [Role.ADMIN]: {
     label: 'Admin',
     icon: Shield,
-    className: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+    className: 'border-brand/30 bg-brand/10 text-brand',
   },
   [Role.SUPER_ADMIN]: {
     label: 'Super Admin',
@@ -62,7 +62,7 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
 
       {/* Profile card */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
 
         <div className="relative z-10 flex flex-col items-center gap-6">
           {/* Avatar */}
@@ -72,10 +72,10 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
               alt={player.displayName}
               width={96}
               height={96}
-              className="rounded-full ring-2 ring-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+              className="rounded-full ring-2 ring-brand/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
             />
           ) : (
-            <div className="flex size-24 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-blue-500/20">
+            <div className="flex size-24 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-brand/20">
               <User className="size-10 text-zinc-500" />
             </div>
           )}
@@ -130,7 +130,7 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
         <div className="relative z-10">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
-              <Swords className="size-5 text-blue-400" />
+              <Swords className="size-5 text-brand" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">
@@ -150,10 +150,10 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
                 <Link
                   key={entry.tournamentSlug}
                   href={`${ROUTES.TOURNAMENTS}/${entry.tournamentSlug}`}
-                  className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-all duration-300 hover:border-blue-500/20 hover:bg-white/4"
+                  className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-all duration-300 hover:border-brand/20 hover:bg-white/4"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-white transition-colors group-hover:text-blue-400">
+                    <p className="truncate font-medium text-white transition-colors group-hover:text-brand">
                       {entry.tournamentTitle}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">

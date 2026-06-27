@@ -74,7 +74,7 @@ export const PublicNavbarClient = ({
         <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 md:flex">
           <Link
             href={ROUTES.HOME}
-            className="group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/5 bg-white/2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 hover:bg-white/4 hover:ring-2 hover:ring-blue-500/20 focus:outline-hidden"
+            className="glass group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-surface-hover hover:ring-2 hover:ring-brand/20 focus:outline-hidden"
           >
             <Image
               src={logoUrl}
@@ -88,7 +88,7 @@ export const PublicNavbarClient = ({
 
           <nav
             aria-label="Navigation principale"
-            className="flex items-center gap-1 rounded-full border border-white/5 bg-white/2 p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-md"
+            className="glass flex items-center gap-1 rounded-full p-1.5"
           >
             {NAV_LINKS.map(link => {
               const isActive = isLinkActive(link.href)
@@ -100,13 +100,13 @@ export const PublicNavbarClient = ({
                     'group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300',
                     isActive
                       ? 'text-white'
-                      : 'text-zinc-400 hover:bg-white/4 hover:text-white',
+                      : 'text-zinc-400 hover:bg-surface-hover hover:text-white',
                   )}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="desktop-active-nav-bg"
-                      className="absolute inset-0 z-0 rounded-full border border-blue-500/20 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                      className="absolute inset-0 z-0 rounded-full border border-brand/20 bg-brand/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
                       transition={{
                         type: 'spring',
                         stiffness: 300,
@@ -120,12 +120,12 @@ export const PublicNavbarClient = ({
                         className={cn(
                           'relative z-10 size-4 transition-all duration-300',
                           isActive
-                            ? 'scale-110 text-blue-400'
-                            : 'text-zinc-500 group-hover:-translate-y-0.5 group-hover:text-blue-300',
+                            ? 'scale-110 text-brand'
+                            : 'text-zinc-500 group-hover:-translate-y-0.5 group-hover:text-brand',
                         )}
                       />
                       {isActive && (
-                        <span className="absolute inset-0 z-0 animate-pulse rounded-full bg-blue-500/40 blur-md" />
+                        <span className="absolute inset-0 z-0 animate-pulse rounded-full bg-brand/40 blur-md" />
                       )}
                     </span>
                     {link.label}

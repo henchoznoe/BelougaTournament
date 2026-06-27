@@ -38,7 +38,7 @@ export const ProfileActiveTournaments = ({
                 className="object-cover"
               />
             ) : (
-              <div className="flex size-full items-center justify-center bg-gradient-to-br from-blue-600/20 via-zinc-900 to-purple-600/10">
+              <div className="flex size-full items-center justify-center bg-gradient-to-br from-brand/20 via-zinc-900 to-purple-600/10">
                 <Gamepad2 className="size-5 text-zinc-600" />
               </div>
             )}

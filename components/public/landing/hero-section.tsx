@@ -10,7 +10,7 @@
 
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
-import { ChevronRight, Video } from 'lucide-react'
+import { ChevronDown, ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -59,13 +59,13 @@ interface HeroSectionProps {
 const HERO_BADGE_STYLES: Record<HeroTournamentBadge['variant'], string> = {
   idle: 'border-zinc-400/20 bg-zinc-400/10 text-zinc-300',
   upcoming: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
-  live: 'border-blue-500/30 bg-blue-500/10 text-blue-300',
+  live: 'border-brand/30 bg-brand/10 text-brand',
 }
 
 const HERO_BADGE_DOT_STYLES: Record<HeroTournamentBadge['variant'], string> = {
   idle: 'bg-zinc-400',
   upcoming: 'bg-amber-400',
-  live: 'bg-blue-500',
+  live: 'bg-brand',
 }
 
 export const HeroSection = ({
@@ -121,6 +121,10 @@ export const HeroSection = ({
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
+        {/* Faint cyber grid that fades out towards the edges. */}
+        <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_25%,transparent_72%)]" />
+        {/* Brand halo behind the title. */}
+        <div className="absolute left-1/2 top-1/3 size-[40rem] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-[120px]" />
       </div>
 
       <motion.div
@@ -181,7 +185,7 @@ export const HeroSection = ({
           className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl"
         >
           Belouga{' '}
-          <span className="animate-gradient-x bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <span className="text-gradient-brand animate-gradient-x">
             Tournament
           </span>
         </motion.h1>
@@ -196,12 +200,12 @@ export const HeroSection = ({
               href={twitchUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-blue-400 underline decoration-blue-400/30 underline-offset-2 transition-colors hover:text-blue-300 hover:decoration-blue-300/50"
+              className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 transition-colors hover:text-brand hover:decoration-brand/50"
             >
               Quentadou
             </a>
           ) : (
-            <span className="font-semibold text-blue-400">Quentadou</span>
+            <span className="font-semibold text-brand">Quentadou</span>
           )}
           .
           <br />
@@ -215,8 +219,9 @@ export const HeroSection = ({
         >
           <Button
             asChild
+            variant="brand"
             size="lg"
-            className="group h-14 bg-blue-600 px-8 text-lg text-white font-bold shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)]"
+            className="group h-14 px-8 text-lg"
           >
             <Link href={ROUTES.TOURNAMENTS}>
               Découvrir les tournois
@@ -229,7 +234,7 @@ export const HeroSection = ({
               asChild
               variant="outline"
               size="lg"
-              className="h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-blue-500/50 hover:bg-white/10 hover:text-blue-400"
+              className="h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-brand/50 hover:bg-white/10 hover:text-brand"
             >
               <Link href={ROUTES.LOGIN}>Rejoindre l'aventure</Link>
             </Button>
@@ -238,15 +243,26 @@ export const HeroSection = ({
               asChild
               variant="outline"
               size="lg"
-              className="group h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-purple-500/50 hover:bg-white/10 hover:text-purple-400"
+              className="group h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-brand-3/50 hover:bg-white/10 hover:text-brand-3"
             >
               <Link href={ROUTES.STREAM}>
-                <Video className="mr-2 size-5 transition-colors group-hover:text-purple-400" />
+                <Video className="mr-2 size-5 transition-colors group-hover:text-brand-3" />
                 Suivre le stream
               </Link>
             </Button>
           )}
         </motion.div>
+      </motion.div>
+
+      {/* Scroll cue */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
+        aria-hidden="true"
+      >
+        <ChevronDown className="size-6 animate-bounce-slow text-zinc-500" />
       </motion.div>
     </section>
   )

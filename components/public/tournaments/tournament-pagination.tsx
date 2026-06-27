@@ -65,7 +65,7 @@ export const TournamentPagination = ({
         disabled={page <= 1}
         onClick={() => goTo(page - 1)}
         aria-label="Page précédente"
-        className="h-10 gap-1.5 rounded-xl border border-white/5 bg-white/3 px-4 text-sm text-zinc-400 hover:bg-white/5 hover:text-white disabled:opacity-40"
+        className="h-10 gap-1.5 rounded-xl border border-surface-border bg-surface px-4 text-sm text-zinc-400 hover:bg-surface-hover hover:text-white disabled:opacity-40"
       >
         <ChevronLeft className="size-4" />
         Précédent
@@ -88,7 +88,7 @@ export const TournamentPagination = ({
         disabled={page >= totalPages}
         onClick={() => goTo(page + 1)}
         aria-label="Page suivante"
-        className="h-10 gap-1.5 rounded-xl border border-white/5 bg-white/3 px-4 text-sm text-zinc-400 hover:bg-white/5 hover:text-white disabled:opacity-40"
+        className="h-10 gap-1.5 rounded-xl border border-surface-border bg-surface px-4 text-sm text-zinc-400 hover:bg-surface-hover hover:text-white disabled:opacity-40"
       >
         Suivant
         <ChevronRight className="size-4" />

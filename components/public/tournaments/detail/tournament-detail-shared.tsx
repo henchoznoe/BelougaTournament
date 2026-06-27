@@ -48,10 +48,10 @@ export const ContentCard = ({
       className,
     )}
   >
-    <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+    <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
     <div className="relative z-10 space-y-4">
       <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-        <Icon className="size-4 text-blue-400" />
+        <Icon className="size-4 text-brand" />
         {title}
         {titleExtra}
       </h3>
@@ -70,7 +70,7 @@ interface InfoRowProps {
 
 export const InfoRow = ({ icon: Icon, label, value }: InfoRowProps) => (
   <div className="flex items-start gap-3 py-2.5">
-    <Icon className="mt-0.5 size-4 shrink-0 text-blue-400" />
+    <Icon className="mt-0.5 size-4 shrink-0 text-brand" />
     <div className="min-w-0 flex-1">
       <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
         {label}

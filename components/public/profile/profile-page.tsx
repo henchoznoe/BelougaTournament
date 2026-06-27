@@ -46,7 +46,7 @@ const ROLE_CONFIG = {
   [Role.ADMIN]: {
     label: 'Admin',
     icon: Shield,
-    className: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+    className: 'border-brand/30 bg-brand/10 text-brand',
   },
   [Role.SUPER_ADMIN]: {
     label: 'Super Admin',
@@ -84,7 +84,7 @@ export const ProfilePage = async () => {
       {/* Card 1: Profile Info */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
         {/* Subtle background glow */}
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
 
         <div className="relative z-10 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
           {/* Avatar */}
@@ -95,15 +95,15 @@ export const ProfilePage = async () => {
                 alt={dbUser.displayName || dbUser.name}
                 width={96}
                 height={96}
-                className="rounded-full ring-2 ring-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                className="rounded-full ring-2 ring-brand/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
               />
             ) : (
-              <div className="flex size-24 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-blue-500/20">
+              <div className="flex size-24 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-brand/20">
                 <User className="size-10 text-zinc-500" />
               </div>
             )}
             {/* Online-style accent dot */}
-            <div className="absolute bottom-1 right-1 size-4 rounded-full border-2 border-zinc-950 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+            <div className="absolute bottom-1 right-1 size-4 rounded-full border-2 border-zinc-950 bg-brand shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
           </div>
 
           {/* Info */}
@@ -182,7 +182,7 @@ export const ProfilePage = async () => {
           <div className="relative z-10">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
-                <Swords className="size-5 text-blue-400" />
+                <Swords className="size-5 text-brand" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">
@@ -207,7 +207,7 @@ export const ProfilePage = async () => {
         <div className="relative z-10">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/5">
-              <Trophy className="size-5 text-blue-400" />
+              <Trophy className="size-5 text-brand" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Mes inscriptions</h3>
@@ -258,7 +258,7 @@ export const ProfilePage = async () => {
                   </p>
                   <Link
                     href={ROUTES.TOURNAMENTS}
-                    className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/10"
+                    className="inline-flex items-center rounded-full border border-brand/20 bg-brand/5 px-4 py-1.5 text-xs font-medium text-brand transition-colors hover:bg-brand/10"
                   >
                     Voir les tournois
                   </Link>

@@ -44,7 +44,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
         <Link
           key={player.id}
           href={ROUTES.PLAYER_DETAIL(player.id)}
-          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-blue-500/20 hover:bg-white/4 hover:shadow-[0_0_20px_rgba(59,130,246,0.08)]"
+          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-brand/20 hover:bg-white/4 hover:shadow-[0_0_20px_rgba(59,130,246,0.08)]"
         >
           <div className="flex flex-col items-center gap-3 text-center">
             {player.image ? (
@@ -53,16 +53,16 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                 alt={player.displayName}
                 width={64}
                 height={64}
-                className="rounded-full ring-2 ring-white/10 transition-all duration-300 group-hover:ring-blue-500/30"
+                className="rounded-full ring-2 ring-white/10 transition-all duration-300 group-hover:ring-brand/30"
               />
             ) : (
-              <div className="flex size-16 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10 transition-all duration-300 group-hover:ring-blue-500/30">
+              <div className="flex size-16 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10 transition-all duration-300 group-hover:ring-brand/30">
                 <User className="size-7 text-zinc-500" />
               </div>
             )}
 
             <div className="min-w-0">
-              <p className="truncate font-semibold text-white transition-colors duration-300 group-hover:text-blue-400">
+              <p className="truncate font-semibold text-white transition-colors duration-300 group-hover:text-brand">
                 {player.displayName}
               </p>
               <p className="mt-0.5 text-xs text-zinc-500">

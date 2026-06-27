@@ -29,10 +29,10 @@ export const TournamentGrid = ({
 }: TournamentGridProps) => {
   if (tournaments.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="glass relative overflow-hidden rounded-2xl p-6 md:p-8">
+        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
         <div className="relative z-10 flex flex-col items-center gap-4 py-8 text-center">
-          <div className="flex size-16 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
+          <div className="flex size-16 items-center justify-center rounded-2xl border border-surface-border bg-white/5">
             {emptyIcon ?? <Trophy className="size-8 text-zinc-600" />}
           </div>
           <div className="space-y-2">

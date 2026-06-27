@@ -8,6 +8,8 @@
 
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { Reveal } from '@/components/public/shared/reveal'
+import { SectionHeader } from '@/components/public/shared/section-header'
 import { TournamentCard } from '@/components/public/tournaments/tournament-card'
 import { ROUTES } from '@/lib/config/routes'
 import { getPublishedTournaments } from '@/lib/services/tournaments-public'
@@ -26,35 +28,25 @@ export const TournamentsSection = async () => {
   return (
     <section className="relative container mx-auto px-4 py-24">
       {/* Decorative Top Line */}
-      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-brand/50 to-transparent opacity-50" />
 
-      {/* Section Header */}
-      <div className="mb-20 text-center">
-        <div className="mx-auto mb-6 inline-flex items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5">
-          <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">
-            Tournois
-          </span>
-        </div>
-
-        <h2 className="font-paladins text-4xl tracking-wider text-white uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] sm:text-5xl lg:text-6xl">
-          Prochains tournois
-        </h2>
-
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-          Inscrivez-vous dès maintenant et affrontez les meilleurs joueurs de la
-          communauté.
-        </p>
-      </div>
+      <SectionHeader
+        eyebrow="Tournois"
+        title="Prochains tournois"
+        description="Inscrivez-vous dès maintenant et affrontez les meilleurs joueurs de la communauté."
+        className="mb-20"
+      />
 
       {/* Tournament Cards Row */}
       <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6">
-        {displayed.map(tournament => (
-          <div
+        {displayed.map((tournament, index) => (
+          <Reveal
             key={tournament.id}
+            delay={index * 0.1}
             className="w-full max-w-md shrink-0 md:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]"
           >
             <TournamentCard tournament={tournament} />
-          </div>
+          </Reveal>
         ))}
       </div>
 
@@ -63,7 +55,7 @@ export const TournamentsSection = async () => {
         <div className="mt-12 text-center">
           <Link
             href={ROUTES.TOURNAMENTS}
-            className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-6 py-2.5 text-sm font-medium text-blue-400 transition-colors duration-200 hover:bg-blue-500/20"
+            className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-6 py-2.5 text-sm font-medium text-brand transition-colors duration-200 hover:bg-brand/20"
           >
             Voir tous les tournois
             <ArrowRight className="size-4" />

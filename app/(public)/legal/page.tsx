@@ -55,7 +55,7 @@ const LegalPage = () => {
                 <span className="text-zinc-300">Contact :</span>{' '}
                 <Link
                   href={`mailto:${OWNER.EMAIL}`}
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   {OWNER.EMAIL}
                 </Link>
@@ -84,7 +84,7 @@ const LegalPage = () => {
                   href="https://vercel.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   vercel.com
                 </a>
@@ -114,7 +114,7 @@ const LegalPage = () => {
                   href="https://supabase.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   supabase.com
                 </a>
@@ -142,7 +142,7 @@ const LegalPage = () => {
                   href="https://stripe.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   stripe.com
                 </a>
@@ -157,7 +157,7 @@ const LegalPage = () => {
                 href="https://stripe.com/legal/ssa"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 Conditions d'utilisation de Stripe
               </a>
@@ -178,7 +178,7 @@ const LegalPage = () => {
                   href="https://resend.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   resend.com
                 </a>
@@ -200,7 +200,7 @@ const LegalPage = () => {
                   href="https://www.toornament.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   toornament.com
                 </a>
@@ -238,7 +238,7 @@ const LegalPage = () => {
               données personnelles, veuillez consulter notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 politique de confidentialité
               </Link>
@@ -268,7 +268,7 @@ const LegalPage = () => {
               par la Plateforme. Pour plus de détails, consultez notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 politique de confidentialité
               </Link>
@@ -327,7 +327,7 @@ const LegalPage = () => {
                   href={AUTHOR.URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   {AUTHOR.NAME}
                 </a>

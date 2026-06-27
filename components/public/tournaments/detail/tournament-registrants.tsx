@@ -50,7 +50,7 @@ const PlayerName = ({ player }: { player: PublicTournamentRegistrant }) => {
     return (
       <Link
         href={ROUTES.PLAYER_DETAIL(player.userId)}
-        className="truncate text-sm font-medium text-white transition-colors hover:text-blue-400"
+        className="truncate text-sm font-medium text-white transition-colors hover:text-brand"
       >
         {player.displayName}
       </Link>
