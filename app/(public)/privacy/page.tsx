@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="CONFIDENTIALITÉ"
-          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 6 mai 2026."
+          description="Politique de confidentialité et de protection des données personnelles. Dernière mise à jour : 27 juin 2026."
         />
 
         <div className="space-y-6">
@@ -115,6 +115,17 @@ const PrivacyPage = () => {
                 sont stockés sur Vercel Blob et accessibles via des URL
                 publiques
               </li>
+              <li>
+                <span className="text-zinc-300">
+                  Données d'usage et de navigation (PostHog) :
+                </span>{' '}
+                Pages visitées, clics et interactions, enregistrements de
+                session (parcours de navigation, les champs de saisie étant{' '}
+                <strong>masqués</strong>), rapports d'exceptions et d'erreurs
+                techniques, ainsi qu'un identifiant de suivi pseudonyme. Ces
+                données nous aident à comprendre l'utilisation de la Plateforme
+                et à corriger les dysfonctionnements
+              </li>
             </ul>
             <p>
               Nous ne collectons aucun document d'identité officiel, aucune
@@ -154,6 +165,11 @@ const PrivacyPage = () => {
                 Analyse d'audience et amélioration de la Plateforme via Vercel
                 Analytics (données anonymes et agrégées)
               </li>
+              <li>
+                Analyse du comportement et du parcours des utilisateurs,
+                amélioration de l'expérience (UX) et débogage via PostHog
+                (session replay et suivi des erreurs)
+              </li>
               <li>Prévention de la fraude et sécurité de la Plateforme</li>
             </ul>
           </LegalSection>
@@ -184,8 +200,9 @@ const PrivacyPage = () => {
                   Intérêt légitime (art. 6.1.f RGPD / art. 31 al. 1 LPD) :
                 </span>{' '}
                 Pour la sécurité et la modération de la Plateforme, l'analyse
-                d'audience (Vercel Analytics) et la surveillance de la stabilité
-                de la Plateforme
+                d'audience (Vercel Analytics), l'analyse du comportement, le
+                session replay et le suivi des erreurs (PostHog), ainsi que la
+                surveillance de la stabilité de la Plateforme
               </li>
               <li>
                 <span className="text-zinc-300">
@@ -220,6 +237,25 @@ const PrivacyPage = () => {
                   className="text-brand transition-colors hover:text-brand"
                 >
                   vercel.com/legal/privacy-policy
+                </a>
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  PostHog (instance Cloud UE — données hébergées dans l'Union
+                  européenne, à Francfort) :
+                </span>{' '}
+                Analyse produit, enregistrement de session (session replay) et
+                suivi des exceptions. Les données sont collectées via un proxy
+                inverse sur le domaine de la Plateforme et hébergées dans l'UE —
+                aucun transfert hors UE pour l'instance européenne. Politique de
+                confidentialité :{' '}
+                <a
+                  href="https://posthog.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand transition-colors hover:text-brand"
+                >
+                  posthog.com/privacy
                 </a>
               </li>
               <li>
@@ -497,6 +533,26 @@ const PrivacyPage = () => {
             </ul>
 
             <p className="mt-2 font-medium text-zinc-300">
+              Cookies de mesure et d'analyse (PostHog) :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Cookies / stockage local </span>
+                (<code className="text-zinc-300">ph_*</code>) : Déposés par
+                PostHog (instance UE) pour l'analyse d'audience,
+                l'enregistrement de session (session replay, champs de saisie
+                masqués) et le suivi des erreurs. Ces cookies reposent sur
+                l'intérêt légitime et ne sont pas strictement nécessaires au
+                fonctionnement de la Plateforme. PostHog{' '}
+                <strong>respecte le signal « Do Not Track »</strong> de votre
+                navigateur : s'il est activé, aucune donnée n'est collectée.
+                Vous pouvez également bloquer ces cookies via les paramètres de
+                votre navigateur, sans affecter le fonctionnement principal de
+                la Plateforme
+              </li>
+            </ul>
+
+            <p className="mt-2 font-medium text-zinc-300">
               Cookies tiers (iframes) :
             </p>
             <ul className="list-inside list-disc space-y-1 pl-2">
@@ -537,9 +593,18 @@ const PrivacyPage = () => {
               n'est déposé par la Plateforme elle-même.
             </p>
             <p className="text-sm text-zinc-400">
-              Un mécanisme de consentement granulaire pourra être mis en place à
-              l'avenir pour offrir un contrôle accru sur les cookies non
-              strictement nécessaires.
+              En attendant la mise en place d'un mécanisme de consentement
+              granulaire, vous pouvez vous opposer aux cookies de mesure non
+              strictement nécessaires (PostHog) en activant le signal « Do Not
+              Track » de votre navigateur, en bloquant ces cookies, ou en nous
+              contactant à{' '}
+              <Link
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-brand transition-colors hover:text-brand"
+              >
+                {CONTACT_EMAIL}
+              </Link>
+              .
             </p>
           </LegalSection>
 

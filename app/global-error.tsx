@@ -10,6 +10,7 @@
 'use client'
 
 import { AlertTriangle, RotateCcw } from 'lucide-react'
+import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 interface GlobalErrorProps {
@@ -21,6 +22,7 @@ interface GlobalErrorProps {
 const GlobalErrorPage = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     console.error(error)
+    if (posthog.__loaded) posthog.captureException(error)
   }, [error])
 
   return (

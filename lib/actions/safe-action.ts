@@ -12,9 +12,29 @@ import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import type { ActionState } from '@/lib/types/actions'
 import type { AuthSession } from '@/lib/types/auth'
+import { extractDistinctId } from '@/lib/utils/posthog'
 import { handlePrismaError } from '@/lib/utils/prisma-error'
 import { isRoleValue, satisfiesRole } from '@/lib/utils/role'
 import type { Role } from '@/prisma/generated/prisma/enums'
+
+/**
+ * Forwards an unexpected server-action error to PostHog. Imported lazily so the
+ * server-only PostHog client (and its env validation) isn't pulled into every
+ * module that imports a server action, and wrapped so an analytics failure can
+ * never mask the original error.
+ */
+const reportException = async (
+  error: unknown,
+  distinctId: string | undefined,
+  source: string,
+): Promise<void> => {
+  try {
+    const { captureServerException } = await import('@/lib/core/posthog')
+    await captureServerException(error, distinctId, { source })
+  } catch {
+    // Analytics is best-effort; never let it break the action response.
+  }
+}
 
 type ActionHandler<TInput, TOutput> = (
   data: TInput,
@@ -42,6 +62,9 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
   handler,
 }: ActionOptions<T, TOutput>) {
   return async (data: z.infer<T>): Promise<ActionState<TOutput>> => {
+    // Hoisted so the catch block can attribute exceptions to the user.
+    let distinctId: string | undefined
+
     try {
       // 1. Authentication Check
       const session = await auth.api.getSession({
@@ -51,6 +74,8 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       if (!session?.user) {
         return { success: false, message: 'Unauthorized' }
       }
+
+      distinctId = session.user.id
 
       // 2. Role Check
       if (role) {
@@ -95,6 +120,7 @@ export function authenticatedAction<T extends z.ZodType, TOutput = unknown>({
       }
 
       logger.error({ error }, 'Unexpected error in server action')
+      await reportException(error, distinctId, 'authenticatedAction')
 
       return { success: false, message: 'Internal server error' }
     }
@@ -135,6 +161,12 @@ export function publicAction<T extends z.ZodType, TOutput = unknown>({
       }
 
       logger.error({ error }, 'Unexpected error in public server action')
+      const cookieHeader = (await headers()).get('cookie') ?? undefined
+      await reportException(
+        error,
+        extractDistinctId(cookieHeader),
+        'publicAction',
+      )
 
       return { success: false, message: 'Internal server error' }
     }

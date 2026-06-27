@@ -67,6 +67,7 @@ The project is built with **Next.js 16**, **React 19**, **Prisma 7**, **PostgreS
 | Payments | Stripe Checkout, Webhooks, Refunds |
 | Storage | Vercel Blob |
 | Validation | Zod v4 + react-hook-form |
+| Analytics | PostHog (EU) — product analytics, session replay & error tracking; Vercel Analytics & Speed Insights |
 | Quality | Biome, Vitest, knip, Codecov, Lefthook, commitlint |
 | Hosting | Vercel |
 
@@ -126,6 +127,7 @@ Important variables:
 - `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` for Discord OAuth.
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` for payments.
 - `BLOB_READ_WRITE_TOKEN` for Vercel Blob.
+- `NEXT_PUBLIC_POSTHOG_KEY` (optional) for PostHog analytics, session replay, and error tracking (EU region). PostHog is disabled in local development regardless of this value (`NODE_ENV` gate); set it in Vercel for Production (and Preview, to test) to enable it there.
 - `ADMIN_EMAILS` for seeding admin accounts.
 - `SUPER_ADMIN_EMAILS` for seeding super admin accounts.
 

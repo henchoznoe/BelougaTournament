@@ -39,8 +39,25 @@ const SECURITY_HEADERS = [
   },
 ]
 
+// PostHog (EU) reverse proxy — keeps analytics same-origin so the strict CSP
+// above stays unchanged and ad-blockers are mitigated. Hosts mirror
+// `lib/config/constants/analytics.ts` (inlined here because next.config.ts is
+// loaded before the TS path aliases are available).
+const POSTHOG_API_HOST = 'https://eu.i.posthog.com'
+const POSTHOG_ASSETS_HOST = 'https://eu-assets.i.posthog.com'
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Required by the PostHog reverse proxy so /ingest paths aren't trailing-slash redirected.
+  skipTrailingSlashRedirect: true,
+  rewrites: async () => [
+    {
+      source: '/ingest/static/:path*',
+      destination: `${POSTHOG_ASSETS_HOST}/static/:path*`,
+    },
+    { source: '/ingest/flags', destination: `${POSTHOG_API_HOST}/flags` },
+    { source: '/ingest/:path*', destination: `${POSTHOG_API_HOST}/:path*` },
+  ],
   images: {
     remotePatterns: [
       {

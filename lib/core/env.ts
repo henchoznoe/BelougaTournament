@@ -14,6 +14,12 @@ const clientSchema = z.object({
     .string()
     .min(1, 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
     .optional(),
+  // PostHog project API key (public, `phc_` prefix). Optional so the app runs
+  // without analytics in local/dev. Reused by the server-side posthog-node client.
+  NEXT_PUBLIC_POSTHOG_KEY: z
+    .string()
+    .min(1, 'NEXT_PUBLIC_POSTHOG_KEY is required')
+    .optional(),
 })
 
 const serverSchema = z.object({
@@ -62,6 +68,7 @@ const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
 })
 
 // Parse server-side

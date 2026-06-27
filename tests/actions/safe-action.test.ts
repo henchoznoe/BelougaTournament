@@ -32,6 +32,12 @@ vi.mock('@/lib/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
 
+const mockCaptureServerException = vi.fn()
+vi.mock('@/lib/core/posthog', () => ({
+  captureServerException: (...args: unknown[]) =>
+    mockCaptureServerException(...args),
+}))
+
 // ---------------------------------------------------------------------------
 // Module under test
 // ---------------------------------------------------------------------------
@@ -255,6 +261,8 @@ describe('authenticatedAction — error handling', () => {
       success: false,
       message: 'Cette valeur existe déjà.',
     })
+    // Expected Prisma errors are handled, not reported to PostHog.
+    expect(mockCaptureServerException).not.toHaveBeenCalled()
   })
 
   it('returns Internal server error for unexpected errors', async () => {
@@ -270,6 +278,12 @@ describe('authenticatedAction — error handling', () => {
     const result = await action({ name: 'test' })
 
     expect(result).toEqual({ success: false, message: 'Internal server error' })
+    // Unexpected errors are reported to PostHog, attributed to the user.
+    expect(mockCaptureServerException).toHaveBeenCalledWith(
+      expect.any(Error),
+      'user-1',
+      expect.objectContaining({ source: 'authenticatedAction' }),
+    )
   })
 
   it('returns Unauthorized when getSession itself throws', async () => {

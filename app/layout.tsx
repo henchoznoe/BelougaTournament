@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Suspense } from 'react'
+import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
@@ -70,13 +71,15 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
         )}
         suppressHydrationWarning
       >
-        <Suspense>
-          <ScrollToTop />
-        </Suspense>
-        {props.children}
-        <Toaster richColors position="bottom-right" />
-        <Analytics />
-        <SpeedInsights />
+        <PostHogProvider>
+          <Suspense>
+            <ScrollToTop />
+          </Suspense>
+          {props.children}
+          <Toaster richColors position="bottom-right" />
+          <Analytics />
+          <SpeedInsights />
+        </PostHogProvider>
       </body>
     </html>
   )

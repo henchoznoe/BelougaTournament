@@ -24,7 +24,7 @@ const LegalPage = () => {
       <div className="container mx-auto max-w-4xl px-4">
         <PageHeader
           title="MENTIONS LÉGALES"
-          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 6 mai 2026."
+          description="Informations légales relatives à la plateforme Belouga Tournament. Dernière mise à jour : 27 juin 2026."
         />
 
         <div className="space-y-6">
@@ -206,6 +206,32 @@ const LegalPage = () => {
                 </a>
               </li>
             </ul>
+
+            <p className="mt-2">
+              L'analyse d'audience, l'enregistrement de session et le suivi des
+              erreurs sont assurés par :
+            </p>
+            <ul className="list-inside list-disc space-y-1 pl-2">
+              <li>
+                <span className="text-zinc-300">Nom :</span> PostHog (instance
+                Cloud UE)
+              </li>
+              <li>
+                <span className="text-zinc-300">Région :</span> Union européenne
+                (Francfort)
+              </li>
+              <li>
+                <span className="text-zinc-300">Site web :</span>{' '}
+                <a
+                  href="https://posthog.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand transition-colors hover:text-brand"
+                >
+                  posthog.com
+                </a>
+              </li>
+            </ul>
           </LegalSection>
 
           <LegalSection title="3. Propriété intellectuelle">
@@ -254,6 +280,15 @@ const LegalPage = () => {
                 Strictement nécessaires au fonctionnement de l'authentification.
                 Ces cookies ne peuvent pas être désactivés sans empêcher
                 l'utilisation de la Plateforme
+              </li>
+              <li>
+                <span className="text-zinc-300">
+                  Cookies de mesure (PostHog) :
+                </span>{' '}
+                Utilisés pour l'analyse d'audience, l'enregistrement de session
+                et le suivi des erreurs. Non strictement nécessaires : PostHog
+                respecte le signal « Do Not Track » et ces cookies peuvent être
+                bloqués via votre navigateur
               </li>
             </ul>
             <p>
