@@ -313,9 +313,9 @@ export const TournamentRegistrationForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {isPaidTournament && entryFeeLabel && (
-        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm text-zinc-300">
+        <div className="rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-zinc-300">
           <p className="flex items-center gap-2 font-medium text-white">
-            <CreditCard className="size-4 text-blue-400" />
+            <CreditCard className="size-4 text-brand" />
             Inscription payante: {entryFeeLabel}
           </p>
           <p className="mt-1 text-xs text-zinc-400">
@@ -496,7 +496,7 @@ export const TournamentRegistrationForm = ({
                 disabled={isPending}
                 placeholder="Entrez le nom de votre équipe"
                 maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
               />
             </div>
           )}
@@ -516,7 +516,7 @@ export const TournamentRegistrationForm = ({
                 >
                   <SelectTrigger
                     id="team-select"
-                    className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus:border-blue-500/30 focus:ring-blue-500/20"
+                    className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus:border-brand/30 focus:ring-brand/20"
                   >
                     <SelectValue placeholder="Sélectionnez une équipe" />
                   </SelectTrigger>
@@ -567,7 +567,7 @@ export const TournamentRegistrationForm = ({
                 id={`field-${field.id}`}
                 type={field.type === FieldType.NUMBER ? 'number' : 'text'}
                 disabled={isPending}
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
                 {...register(field.label, {
                   required: field.required
                     ? `Le champ « ${field.label} » est requis.`
@@ -630,7 +630,7 @@ export const TournamentRegistrationForm = ({
       <p className="text-center text-xs text-zinc-500">
         En procédant {isPaidTournament ? 'au paiement' : "à l'inscription"},
         vous confirmez accepter nos{' '}
-        <Link href={ROUTES.TERMS} className="text-blue-500 hover:underline">
+        <Link href={ROUTES.TERMS} className="text-brand hover:underline">
           conditions générales
         </Link>
         .

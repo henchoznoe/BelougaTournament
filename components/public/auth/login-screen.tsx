@@ -71,8 +71,8 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
             </Button>
 
             <div className="mb-8">
-              <div className="mb-6 inline-flex size-14 items-center justify-center rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
-                <Gamepad2 className="size-7 text-blue-400" />
+              <div className="mb-6 inline-flex size-14 items-center justify-center rounded-xl bg-brand/10 ring-1 ring-brand/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+                <Gamepad2 className="size-7 text-brand" />
               </div>
               <h1 className="text-3xl font-bold text-white tracking-tight">
                 Bienvenue
@@ -89,11 +89,11 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
 
             <p className="mt-8 text-center text-xs text-zinc-600">
               En vous connectant, vous acceptez nos{' '}
-              <Link href={ROUTES.TERMS} className="text-blue-400">
+              <Link href={ROUTES.TERMS} className="text-brand">
                 conditions d'utilisation
               </Link>{' '}
               et notre{' '}
-              <Link href={ROUTES.PRIVACY} className="text-blue-400">
+              <Link href={ROUTES.PRIVACY} className="text-brand">
                 politique de confidentialité
               </Link>
               .

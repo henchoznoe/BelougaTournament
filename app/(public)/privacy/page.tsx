@@ -45,7 +45,7 @@ const PrivacyPage = () => {
                 <span className="text-zinc-300">Contact :</span>{' '}
                 <Link
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   {CONTACT_EMAIL}
                 </Link>
@@ -145,7 +145,7 @@ const PrivacyPage = () => {
                 aux{' '}
                 <Link
                   href={ROUTES.TERMS}
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   CGU
                 </Link>
@@ -217,7 +217,7 @@ const PrivacyPage = () => {
                   href="https://vercel.com/legal/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   vercel.com/legal/privacy-policy
                 </a>
@@ -235,7 +235,7 @@ const PrivacyPage = () => {
                   href="https://supabase.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   supabase.com/privacy
                 </a>
@@ -251,7 +251,7 @@ const PrivacyPage = () => {
                   href="https://discord.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   discord.com/privacy
                 </a>
@@ -268,7 +268,7 @@ const PrivacyPage = () => {
                   href="https://stripe.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   stripe.com/privacy
                 </a>
@@ -285,7 +285,7 @@ const PrivacyPage = () => {
                   href="https://resend.com/legal/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   resend.com/legal/privacy-policy
                 </a>
@@ -301,7 +301,7 @@ const PrivacyPage = () => {
                   href="https://www.toornament.com/en/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   toornament.com/privacy-policy
                 </a>
@@ -417,14 +417,14 @@ const PrivacyPage = () => {
               Pour exercer vos droits, adressez votre demande par e-mail à{' '}
               <Link
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 {CONTACT_EMAIL}
               </Link>{' '}
               ou via le{' '}
               <Link
                 href={ROUTES.CONTACT}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 formulaire de contact
               </Link>
@@ -441,7 +441,7 @@ const PrivacyPage = () => {
                   href="https://www.edoeb.admin.ch"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   Préposé fédéral à la protection des données et à la
                   transparence (PFPDT)
@@ -453,7 +453,7 @@ const PrivacyPage = () => {
                   href="https://www.cnil.fr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   Commission nationale de l'informatique et des libertés (CNIL)
                 </a>
@@ -510,7 +510,7 @@ const PrivacyPage = () => {
                   href="https://www.twitch.tv/p/legal/privacy-notice/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   politique de confidentialité de Twitch
                 </a>
@@ -524,7 +524,7 @@ const PrivacyPage = () => {
                   href="https://www.toornament.com/en/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   politique de confidentialité de Toornament
                 </a>
@@ -595,7 +595,7 @@ const PrivacyPage = () => {
               données personnelles sans votre consentement, contactez-nous à{' '}
               <Link
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 {CONTACT_EMAIL}
               </Link>{' '}

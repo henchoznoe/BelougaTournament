@@ -231,7 +231,7 @@ export const ProfileRegistrations = ({
           </p>
           <Link
             href={ROUTES.TOURNAMENTS}
-            className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/10"
+            className="inline-flex items-center rounded-full border border-brand/20 bg-brand/5 px-4 py-1.5 text-xs font-medium text-brand transition-colors hover:bg-brand/10"
           >
             Voir les tournois
           </Link>

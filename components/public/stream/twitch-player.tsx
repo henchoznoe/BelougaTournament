@@ -97,7 +97,7 @@ export const TwitchPlayer = ({
 
       {/* Glow behind the player when live */}
       {isLive && (
-        <div className="absolute inset-0 z-0 animate-pulse bg-blue-500/5 blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 z-0 animate-pulse bg-brand/5 blur-3xl pointer-events-none" />
       )}
 
       {/* Embedded Player */}

@@ -31,7 +31,7 @@ import { ROUTES } from '@/lib/config/routes'
 import { type ContactInput, contactSchema } from '@/lib/validations/contact'
 
 const INPUT_CLASS =
-  'h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20'
+  'h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20'
 
 export const ContactForm = () => {
   const [isPending, startTransition] = useTransition()
@@ -75,7 +75,7 @@ export const ContactForm = () => {
         {/* Section Header */}
         <div className="mb-8 flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10">
-            <Send className="size-5 text-blue-400" />
+            <Send className="size-5 text-brand" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Nous écrire</h2>
@@ -189,7 +189,7 @@ export const ContactForm = () => {
               placeholder="Décrivez votre demande..."
               maxLength={VALIDATION_LIMITS.CONTACT_MESSAGE_MAX}
               disabled={isPending}
-              className="min-h-32 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+              className="min-h-32 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
               {...register('message')}
             />
             {errors.message && (
@@ -214,7 +214,7 @@ export const ContactForm = () => {
               utilisées pour traiter votre demande conformément à notre{' '}
               <Link
                 href={ROUTES.PRIVACY}
-                className="text-blue-400 hover:underline"
+                className="text-brand hover:underline"
               >
                 politique de confidentialité
               </Link>

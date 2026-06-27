@@ -38,7 +38,7 @@ const TermsPage = () => {
                 href="https://belougatournament.ch"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 belougatournament.ch
               </a>
@@ -98,14 +98,14 @@ const TermsPage = () => {
               à l'adresse{' '}
               <Link
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 {CONTACT_EMAIL}
               </Link>
               . Les données seront traitées conformément à la{' '}
               <Link
                 href={ROUTES.PRIVACY}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 politique de confidentialité
               </Link>
@@ -150,7 +150,7 @@ const TermsPage = () => {
                 href="https://stripe.com/legal/ssa"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 Conditions d'utilisation de Stripe
               </a>{' '}
@@ -159,7 +159,7 @@ const TermsPage = () => {
                 href="https://stripe.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 Politique de confidentialité de Stripe
               </a>
@@ -212,7 +212,7 @@ const TermsPage = () => {
               l'éditeur à l'adresse{' '}
               <Link
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 {CONTACT_EMAIL}
               </Link>
@@ -309,7 +309,7 @@ const TermsPage = () => {
               à l'adresse{' '}
               <Link
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-blue-400 transition-colors hover:text-blue-300"
+                className="text-brand transition-colors hover:text-brand"
               >
                 {CONTACT_EMAIL}
               </Link>
@@ -433,7 +433,7 @@ const TermsPage = () => {
                 Par e-mail :{' '}
                 <Link
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="text-blue-400 transition-colors hover:text-blue-300"
+                  className="text-brand transition-colors hover:text-brand"
                 >
                   {CONTACT_EMAIL}
                 </Link>

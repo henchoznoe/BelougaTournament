@@ -71,12 +71,12 @@ export const TournamentSidebar = ({
   return (
     <aside className="w-full space-y-6 lg:sticky lg:top-32 lg:w-85 lg:shrink-0 lg:self-start">
       {/* Registration card */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-linear-to-br from-blue-500/5 via-white/2 to-purple-500/5 p-5 shadow-[0_0_60px_rgba(59,130,246,0.12)]">
-        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl border border-brand/20 bg-linear-to-br from-brand/5 via-white/2 to-purple-500/5 p-5 shadow-[0_0_60px_rgba(59,130,246,0.12)]">
+        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-brand/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative z-10 space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-            <Clock className="size-4 text-blue-400" />
+            <Clock className="size-4 text-brand" />
             Inscription
           </h3>
 
@@ -135,10 +135,10 @@ export const TournamentSidebar = ({
 
       {/* Tournament info card */}
       <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
         <div className="relative z-10">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
-            <Swords className="size-4 text-blue-400" />
+            <Swords className="size-4 text-brand" />
             Informations
           </h3>
           <div className="divide-y divide-white/5">
@@ -166,7 +166,7 @@ export const TournamentSidebar = ({
                     </span>
                     <a
                       href="#inscrits"
-                      className="text-xs text-blue-400 transition-colors hover:text-blue-300"
+                      className="text-xs text-brand transition-colors hover:text-brand"
                     >
                       voir la liste
                     </a>

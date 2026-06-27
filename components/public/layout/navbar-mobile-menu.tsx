@@ -79,7 +79,7 @@ export const NavbarMobileMenu = ({
                 className={cn(
                   'group relative flex items-center gap-4 rounded-full px-5 py-3 text-lg font-medium transition-colors duration-300',
                   isActive
-                    ? 'bg-blue-500/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.1)] ring-1 ring-blue-500/20'
+                    ? 'bg-brand/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.1)] ring-1 ring-brand/20'
                     : 'text-zinc-400 hover:bg-white/5 hover:text-white',
                 )}
               >
@@ -88,12 +88,12 @@ export const NavbarMobileMenu = ({
                     className={cn(
                       'relative z-10 size-5 transition-all duration-300',
                       isActive
-                        ? 'scale-110 text-blue-400'
-                        : 'text-zinc-500 group-hover:-translate-y-0.5 group-hover:text-blue-300',
+                        ? 'scale-110 text-brand'
+                        : 'text-zinc-500 group-hover:-translate-y-0.5 group-hover:text-brand',
                     )}
                   />
                   {isActive && (
-                    <span className="absolute inset-0 z-0 animate-pulse rounded-full bg-blue-500/40 blur-md" />
+                    <span className="absolute inset-0 z-0 animate-pulse rounded-full bg-brand/40 blur-md" />
                   )}
                 </span>
                 <span className="relative z-10">{link.label}</span>

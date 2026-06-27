@@ -357,7 +357,7 @@ export const RegistrationEditDialog = ({
             <Button
               type="submit"
               disabled={isPending || (!isDirty && !teamNameDirty)}
-              className="gap-2 bg-blue-600 text-white hover:bg-blue-500"
+              className="gap-2 bg-brand text-white hover:bg-brand"
             >
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />

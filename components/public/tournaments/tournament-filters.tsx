@@ -112,7 +112,7 @@ export const TournamentFilters = ({
           onChange={e => handleSearch(e.target.value)}
           placeholder="Rechercher un tournoi ou un jeu…"
           aria-label="Rechercher un tournoi"
-          className="h-10 rounded-xl border-white/10 bg-white/5 pl-9 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+          className="h-10 rounded-xl border-white/10 bg-white/5 pl-9 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/40 focus-visible:ring-brand/20"
         />
       </div>
 

@@ -37,7 +37,7 @@ export const ProfileVisibilityToggle = ({
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
       {initialIsPublic ? (
-        <Eye className="size-4 shrink-0 text-blue-400" />
+        <Eye className="size-4 shrink-0 text-brand" />
       ) : (
         <EyeOff className="size-4 shrink-0 text-zinc-500" />
       )}

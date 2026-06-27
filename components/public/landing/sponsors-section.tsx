@@ -38,8 +38,8 @@ const SponsorLogo = ({ sponsor }: { sponsor: Sponsor }) => {
   const image = (
     <div
       className={cn(
-        'group/logo relative flex h-24 w-48 shrink-0 items-center justify-center rounded-2xl border border-white/5 bg-white/2 px-6 backdrop-blur-sm transition-all duration-500',
-        'hover:border-blue-500/20 hover:bg-white/5 hover:shadow-[0_0_30px_rgba(59,130,246,0.08)]',
+        'glass group/logo relative flex h-24 w-48 shrink-0 items-center justify-center rounded-2xl px-6 transition-all duration-500',
+        'hover:border-brand/20 hover:bg-white/5 hover:shadow-[0_0_30px_rgba(59,130,246,0.08)]',
       )}
     >
       {sponsor.imageUrls.map((url, i) => (
@@ -94,22 +94,22 @@ export const SponsorsSection = ({ sponsors }: SponsorsSectionProps) => {
   return (
     <section className="relative container mx-auto px-4 py-24">
       {/* Decorative top line */}
-      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+      <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-brand/50 to-transparent opacity-50" />
 
       {/* Section header */}
       <div className="mb-16 text-center">
-        <div className="mx-auto mb-6 inline-flex items-center justify-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5">
-          <Handshake className="size-4 text-blue-400" />
-          <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">
+        <div className="mx-auto mb-5 inline-flex items-center justify-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-1.5">
+          <Handshake className="size-4 text-brand" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-brand">
             Partenaires
           </span>
         </div>
 
-        <h2 className="font-paladins text-4xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] uppercase sm:text-5xl lg:text-6xl">
+        <h2 className="font-paladins text-4xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.25)] uppercase sm:text-5xl lg:text-6xl">
           Ils nous font confiance
         </h2>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
+        <p className="mx-auto mt-5 max-w-2xl text-lg text-zinc-400">
           Merci à nos partenaires qui rendent cette aventure possible et
           soutiennent la scène compétitive.
         </p>
