@@ -20,6 +20,7 @@ import {
   upsertRegistrationAttempt,
 } from '@/lib/actions/tournament-registration-helpers'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
@@ -201,6 +202,20 @@ export const registerForTournament = authenticatedAction({
     updateTag(CACHE_TAGS.TOURNAMENTS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
+
+    const ph = getPostHogServer()
+    if (ph) {
+      ph.capture({
+        distinctId: session.user.id,
+        event: 'free_registration_confirmed',
+        properties: {
+          tournament_id: data.tournamentId,
+          format: tournament.format,
+          registration_id: registration.id,
+        },
+      })
+      await ph.flush()
+    }
 
     return { success: true, message: 'Votre inscription a été enregistrée.' }
   },
