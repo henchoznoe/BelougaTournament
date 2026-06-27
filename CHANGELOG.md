@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.0...v1.12.1) (2026-06-27)
+
+
+### Bug Fixes
+
+* add comprehensive user action and payment event tracking using PostHog ([1db31c1](https://github.com/henchoznoe/BelougaTournament/commit/1db31c12d511df902648ca6074e58ecc3b3665aa))
+
 # [1.12.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.11.0...v1.12.0) (2026-06-27)
 
 
