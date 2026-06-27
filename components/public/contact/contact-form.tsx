@@ -11,6 +11,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send } from 'lucide-react'
 import Link from 'next/link'
+import posthog from 'posthog-js'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -61,6 +62,7 @@ export const ContactForm = () => {
       const result = await sendContactMessage(data)
 
       if (result.success) {
+        posthog.capture('contact_message_sent', { subject: data.subject })
         toast.success(result.message)
         reset()
       } else {

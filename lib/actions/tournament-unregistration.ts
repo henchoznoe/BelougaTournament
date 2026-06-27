@@ -13,6 +13,7 @@ import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellat
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
+import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
@@ -166,6 +167,23 @@ export const unregisterFromTournament = authenticatedAction({
       updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
     }
 
+    const captureUnregistration = async () => {
+      const ph = getPostHogServer()
+      if (!ph) return
+      ph.capture({
+        distinctId: userId,
+        event: 'registration_cancelled',
+        properties: {
+          tournament_id: data.tournamentId,
+          format: registration.tournament.format,
+          resolution,
+          refund_eligible: refundEligible,
+          paid_registration: isPaidRegistration,
+        },
+      })
+      await ph.flush()
+    }
+
     // Stripe-first: issue the refund BEFORE any DB mutation. If it fails, abort with
     // the registration left untouched (no money moved, no state change). On success the
     // returned amount/id become the authoritative refund record persisted below.
@@ -215,6 +233,7 @@ export const unregisterFromTournament = authenticatedAction({
       }
 
       invalidateCaches()
+      await captureUnregistration()
       return { success: true, message: successMessage }
     }
 
@@ -249,6 +268,7 @@ export const unregisterFromTournament = authenticatedAction({
       })
 
       invalidateCaches()
+      await captureUnregistration()
       return { success: true, message: successMessage }
     }
 
@@ -279,6 +299,7 @@ export const unregisterFromTournament = authenticatedAction({
     })
 
     invalidateCaches()
+    await captureUnregistration()
     return { success: true, message: successMessage }
   },
 })

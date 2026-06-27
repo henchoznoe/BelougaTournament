@@ -12,7 +12,7 @@ import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
-import { captureServerException } from '@/lib/core/posthog'
+import { captureServerException, getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
 import { REFUND_KIND_FULL_CANCELLATION } from '@/lib/utils/stripe-refund'
@@ -178,6 +178,21 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const ph = getPostHogServer()
+  if (ph) {
+    ph.capture({
+      distinctId: payment.registration.userId,
+      event: 'payment_confirmed',
+      properties: {
+        payment_id: payment.id,
+        tournament_id: payment.registration.tournamentId,
+        amount: payment.amount,
+        currency: payment.currency,
+      },
+    })
+    await ph.flush()
+  }
 }
 
 const handleCheckoutExpired = async (event: Stripe.Event) => {
@@ -234,6 +249,19 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const ph = getPostHogServer()
+  if (ph) {
+    ph.capture({
+      distinctId: payment.registration.userId,
+      event: 'payment_expired',
+      properties: {
+        payment_id: payment.id,
+        tournament_id: payment.registration.tournamentId,
+      },
+    })
+    await ph.flush()
+  }
 }
 
 const handlePaymentFailed = async (event: Stripe.Event) => {
@@ -287,6 +315,19 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
       },
     })
   })
+
+  const ph = getPostHogServer()
+  if (ph) {
+    ph.capture({
+      distinctId: payment.registration.userId,
+      event: 'payment_failed',
+      properties: {
+        payment_id: payment.id,
+        tournament_id: payment.registration.tournamentId,
+      },
+    })
+    await ph.flush()
+  }
 }
 
 /**

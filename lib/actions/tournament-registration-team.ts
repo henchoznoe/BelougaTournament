@@ -19,6 +19,7 @@ import {
   upsertRegistrationAttempt,
 } from '@/lib/actions/tournament-registration-helpers'
 import { CACHE_TAGS } from '@/lib/config/constants'
+import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import { resolveDonationAmount } from '@/lib/utils/donation'
@@ -144,6 +145,20 @@ export const createTeamAndRegister = authenticatedAction({
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
+    const phCreate = getPostHogServer()
+    if (phCreate) {
+      phCreate.capture({
+        distinctId: session.user.id,
+        event: 'free_team_registration_confirmed',
+        properties: {
+          tournament_id: data.tournamentId,
+          action: 'create',
+          registration_id: registration.id,
+        },
+      })
+      await phCreate.flush()
+    }
+
     return {
       success: true,
       message: 'Votre équipe a été créée et votre inscription enregistrée.',
@@ -250,6 +265,20 @@ export const joinTeamAndRegister = authenticatedAction({
     updateTag(CACHE_TAGS.TOURNAMENTS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
+
+    const phJoin = getPostHogServer()
+    if (phJoin) {
+      phJoin.capture({
+        distinctId: session.user.id,
+        event: 'free_team_registration_confirmed',
+        properties: {
+          tournament_id: data.tournamentId,
+          action: 'join',
+          registration_id: registration.id,
+        },
+      })
+      await phJoin.flush()
+    }
 
     return {
       success: true,
