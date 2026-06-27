@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.11.0...v1.12.0) (2026-06-27)
+
+
+### Features
+
+* integrate PostHog for user analytics, session recording, and client/server-side error tracking ([584753a](https://github.com/henchoznoe/BelougaTournament/commit/584753aa281484eff9edef75bf763325b36bfe65))
+
 # [1.11.0](https://github.com/henchoznoe/BelougaTournament/compare/v1.10.0...v1.11.0) (2026-06-27)
 
 
