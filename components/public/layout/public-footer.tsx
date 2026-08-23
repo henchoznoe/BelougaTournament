@@ -6,17 +6,9 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import {
-  faDiscord,
-  faInstagram,
-  faTiktok,
-  faTwitch,
-  faYoutube,
-  type IconDefinition,
-} from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
+import { SocialIcon, type SocialNetwork } from '@/components/ui/social-icon'
 import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import { getGlobalSettings } from '@/lib/services/settings'
@@ -27,7 +19,7 @@ import { getCommitHash } from '@/lib/utils/commit-hash'
 interface SocialLink {
   name: string
   href: string | null
-  icon: IconDefinition
+  icon: SocialNetwork
   colorClass: string
 }
 
@@ -57,6 +49,7 @@ const FooterLogo = (props: { url: string | null }) => {
         alt={METADATA.NAME}
         width={120}
         height={120}
+        sizes="(min-width: 768px) 128px, 96px"
         className="h-24 w-auto transition-transform duration-500 group-hover:scale-110 md:h-32"
       />
       <div className="absolute inset-0 -z-10 rounded-full bg-brand/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
@@ -70,38 +63,40 @@ export const PublicFooter = async () => {
   const repoUrl = getRepoUrl()
   const commitHash = getCommitHash()
 
-  const socialLinks: SocialLink[] = [
-    {
-      name: 'Discord',
-      href: globalSettings.discordUrl,
-      icon: faDiscord,
-      colorClass: BRAND_COLORS.DISCORD,
-    },
-    {
-      name: 'Twitch',
-      href: globalSettings.twitchUrl,
-      icon: faTwitch,
-      colorClass: BRAND_COLORS.TWITCH,
-    },
-    {
-      name: 'YouTube',
-      href: globalSettings.youtubeUrl,
-      icon: faYoutube,
-      colorClass: BRAND_COLORS.YOUTUBE,
-    },
-    {
-      name: 'TikTok',
-      href: globalSettings.tiktokUrl,
-      icon: faTiktok,
-      colorClass: BRAND_COLORS.TIKTOK,
-    },
-    {
-      name: 'Instagram',
-      href: globalSettings.instagramUrl,
-      icon: faInstagram,
-      colorClass: BRAND_COLORS.INSTAGRAM,
-    },
-  ].filter(link => Boolean(link.href && link.href.trim() !== ''))
+  const socialLinks = (
+    [
+      {
+        name: 'Discord',
+        href: globalSettings.discordUrl,
+        icon: 'discord',
+        colorClass: BRAND_COLORS.DISCORD,
+      },
+      {
+        name: 'Twitch',
+        href: globalSettings.twitchUrl,
+        icon: 'twitch',
+        colorClass: BRAND_COLORS.TWITCH,
+      },
+      {
+        name: 'YouTube',
+        href: globalSettings.youtubeUrl,
+        icon: 'youtube',
+        colorClass: BRAND_COLORS.YOUTUBE,
+      },
+      {
+        name: 'TikTok',
+        href: globalSettings.tiktokUrl,
+        icon: 'tiktok',
+        colorClass: BRAND_COLORS.TIKTOK,
+      },
+      {
+        name: 'Instagram',
+        href: globalSettings.instagramUrl,
+        icon: 'instagram',
+        colorClass: BRAND_COLORS.INSTAGRAM,
+      },
+    ] satisfies SocialLink[]
+  ).filter(link => Boolean(link.href && link.href.trim() !== ''))
 
   const footerSections: FooterSection[] = [
     {
@@ -201,7 +196,7 @@ export const PublicFooter = async () => {
                   )}
                   aria-label={social.name}
                 >
-                  <FontAwesomeIcon icon={social.icon} className="size-5" />
+                  <SocialIcon network={social.icon} className="size-5" />
                 </a>
               ))}
             </div>

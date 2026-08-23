@@ -8,7 +8,6 @@
 
 'use client'
 
-import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
 
@@ -26,12 +25,7 @@ export const StreamSection = (props: StreamSectionProps) => {
     <section className="relative container mx-auto px-4 py-24">
       {/* Header and Badge */}
       <div className="mb-12 flex flex-col items-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-6"
-        >
+        <div className="mb-6">
           {isLive ? (
             <div className="inline-flex items-center gap-3 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
               <span className="relative flex size-2.5">
@@ -50,39 +44,21 @@ export const StreamSection = (props: StreamSectionProps) => {
               </span>
             </div>
           )}
-        </motion.div>
+        </div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          className="font-paladins text-3xl tracking-wider text-white sm:text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] uppercase"
-        >
+        <h2 className="font-paladins text-3xl tracking-wider text-white sm:text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] uppercase">
           Live Stream
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="mt-4 max-w-2xl text-zinc-400"
-        >
+        </h2>
+        <p className="mt-4 max-w-2xl text-zinc-400">
           Suivez nos tournois en direct, interagissez avec la communauté et ne
           manquez aucune action épique.
-        </motion.p>
+        </p>
       </div>
 
       {/* Stream Container */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.3 }}
-        className="mx-auto w-full max-w-4xl"
-      >
+      <div className="mx-auto w-full max-w-4xl">
         <TwitchPlayer channel={props.channel} onLiveChange={setIsLive} />
-      </motion.div>
+      </div>
     </section>
   )
 }

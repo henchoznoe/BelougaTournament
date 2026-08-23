@@ -49,6 +49,7 @@ const SponsorLogo = ({ sponsor }: { sponsor: Sponsor }) => {
           alt={i === 0 ? sponsor.name : `${sponsor.name} — image ${i + 1}`}
           width={160}
           height={64}
+          sizes="160px"
           className={cn(
             'absolute max-h-12 w-auto object-contain transition-all duration-700',
             i === activeIndex ? 'scale-100 opacity-90' : 'scale-95 opacity-0',

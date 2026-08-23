@@ -8,17 +8,8 @@
 
 'use client'
 
-import {
-  faDiscord,
-  faInstagram,
-  faTiktok,
-  faTwitch,
-  faYoutube,
-  type IconDefinition,
-} from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { motion, type Variants } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
+import { SocialIcon, type SocialNetwork } from '@/components/ui/social-icon'
 import { cn } from '@/lib/utils/cn'
 import type { GlobalSettings } from '@/prisma/generated/prisma/client'
 
@@ -30,7 +21,7 @@ interface SocialLink {
   id: string
   name: string
   href: string | null
-  icon: IconDefinition
+  icon: SocialNetwork
   colorClass: string
   bgHoverClass: string
   description: string
@@ -80,7 +71,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
         id: 'discord',
         name: 'Discord',
         href: settings.discordUrl,
-        icon: faDiscord,
+        icon: 'discord',
         colorClass: BRAND_STYLES.DISCORD.color,
         bgHoverClass: `${BRAND_STYLES.DISCORD.bgHover} ${BRAND_STYLES.DISCORD.borderHover} ${BRAND_STYLES.DISCORD.shadowHover}`,
         description:
@@ -91,7 +82,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
         id: 'twitch',
         name: 'Twitch',
         href: settings.twitchUrl,
-        icon: faTwitch,
+        icon: 'twitch',
         colorClass: BRAND_STYLES.TWITCH.color,
         bgHoverClass: `${BRAND_STYLES.TWITCH.bgHover} ${BRAND_STYLES.TWITCH.borderHover} ${BRAND_STYLES.TWITCH.shadowHover}`,
         description: 'Suivez nos tournois en direct.',
@@ -100,7 +91,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
         id: 'youtube',
         name: 'YouTube',
         href: settings.youtubeUrl,
-        icon: faYoutube,
+        icon: 'youtube',
         colorClass: BRAND_STYLES.YOUTUBE.color,
         bgHoverClass: `${BRAND_STYLES.YOUTUBE.bgHover} ${BRAND_STYLES.YOUTUBE.borderHover} ${BRAND_STYLES.YOUTUBE.shadowHover}`,
         description: 'Revivez les meilleurs moments.',
@@ -109,7 +100,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
         id: 'tiktok',
         name: 'TikTok',
         href: settings.tiktokUrl,
-        icon: faTiktok,
+        icon: 'tiktok',
         colorClass: BRAND_STYLES.TIKTOK.color,
         bgHoverClass: `${BRAND_STYLES.TIKTOK.bgHover} ${BRAND_STYLES.TIKTOK.borderHover} ${BRAND_STYLES.TIKTOK.shadowHover}`,
         description: 'Clips et highlights exclusifs.',
@@ -118,7 +109,7 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
         id: 'instagram',
         name: 'Instagram',
         href: settings.instagramUrl,
-        icon: faInstagram,
+        icon: 'instagram',
         colorClass: BRAND_STYLES.INSTAGRAM.color,
         bgHoverClass: `${BRAND_STYLES.INSTAGRAM.bgHover} ${BRAND_STYLES.INSTAGRAM.borderHover} ${BRAND_STYLES.INSTAGRAM.shadowHover}`,
         description: 'Photos et actus au quotidien.',
@@ -132,41 +123,16 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
   const primaryLink = socialLinks.find(link => link.isPrimary)
   const secondaryLinks = socialLinks.filter(link => !link.isPrimary)
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 24 },
-    },
-  }
-
   if (socialLinks.length === 0) {
     return null
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="mx-auto w-full max-w-5xl"
-    >
+    <div className="mx-auto w-full max-w-5xl">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Primary Link (Discord) takes up more space */}
         {primaryLink && (
-          <motion.a
-            variants={itemVariants}
+          <a
             href={primaryLink.href}
             target="_blank"
             rel="noopener noreferrer"
@@ -177,8 +143,8 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
             )}
           >
             {/* Background Icon */}
-            <FontAwesomeIcon
-              icon={primaryLink.icon}
+            <SocialIcon
+              network={primaryLink.icon}
               className={cn(
                 'absolute -bottom-8 -right-8 size-64 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-10',
                 primaryLink.colorClass,
@@ -193,8 +159,8 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
                     primaryLink.bgHoverClass,
                   )}
                 >
-                  <FontAwesomeIcon
-                    icon={primaryLink.icon}
+                  <SocialIcon
+                    network={primaryLink.icon}
                     className={cn('size-7', primaryLink.colorClass)}
                   />
                 </div>
@@ -211,14 +177,13 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
                 <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
               </div>
             </div>
-          </motion.a>
+          </a>
         )}
 
         {/* Secondary Links */}
         {secondaryLinks.map(link => (
-          <motion.a
+          <a
             key={link.id}
-            variants={itemVariants}
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
@@ -228,8 +193,8 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
             )}
           >
             {/* Background Icon */}
-            <FontAwesomeIcon
-              icon={link.icon}
+            <SocialIcon
+              network={link.icon}
               className={cn(
                 'absolute -bottom-4 -right-4 size-32 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-10',
                 link.colorClass,
@@ -244,8 +209,8 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
                     link.bgHoverClass,
                   )}
                 >
-                  <FontAwesomeIcon
-                    icon={link.icon}
+                  <SocialIcon
+                    network={link.icon}
                     className={cn('size-5', link.colorClass)}
                   />
                 </div>
@@ -256,9 +221,9 @@ export const ContactBento = ({ settings }: ContactBentoProps) => {
                 {link.description}
               </p>
             </div>
-          </motion.a>
+          </a>
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }

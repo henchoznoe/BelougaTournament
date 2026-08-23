@@ -38,8 +38,8 @@ describe('METADATA', () => {
 
 describe('DEFAULT_ASSETS', () => {
   it('defines LOGO and BG_IMAGE paths', () => {
-    expect(DEFAULT_ASSETS.LOGO).toBe('/assets/logo-blue.png')
-    expect(DEFAULT_ASSETS.BG_IMAGE).toBe('/assets/wall.png')
+    expect(DEFAULT_ASSETS.LOGO).toBe('/assets/logo-blue.webp')
+    expect(DEFAULT_ASSETS.BG_IMAGE).toBe('/assets/wall.webp')
   })
 })
 

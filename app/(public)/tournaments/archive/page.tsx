@@ -6,31 +6,20 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { TournamentFilters } from '@/components/public/tournaments/tournament-filters'
-import { TournamentGrid } from '@/components/public/tournaments/tournament-grid'
-import { TournamentPagination } from '@/components/public/tournaments/tournament-pagination'
+import { TournamentBrowser } from '@/components/public/tournaments/tournament-browser'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PUBLIC_TOURNAMENTS_PAGE_SIZE } from '@/lib/config/constants/tournaments'
 import { ROUTES } from '@/lib/config/routes'
-import {
-  getArchivedTournamentsFiltered,
-  PUBLIC_TOURNAMENTS_PAGE_SIZE,
-} from '@/lib/services/tournaments-public'
-import { parsePublicTournamentFilters } from '@/lib/validations/tournaments'
+import { getArchivedTournaments } from '@/lib/services/tournaments-public'
 
 export const metadata: Metadata = {
   title: 'Tournois passés',
   description: 'Consultez les tournois passés de la communauté Belouga.',
-}
-
-type PublicSearchParams = Record<string, string | string[] | undefined>
-
-interface ArchivePageProps {
-  searchParams: Promise<PublicSearchParams>
 }
 
 const TournamentArchiveFallback = () => {
@@ -50,15 +39,8 @@ const TournamentArchiveFallback = () => {
   )
 }
 
-const ArchiveContent = async ({ searchParams }: ArchivePageProps) => {
-  const params = await searchParams
-  const filters = parsePublicTournamentFilters(params, 'date_desc')
-  const { tournaments, total, page, pageSize, totalPages } =
-    await getArchivedTournamentsFiltered(filters)
-
-  const hasActiveFilters =
-    filters.search !== '' || filters.format !== '' || filters.type !== ''
-
+const ArchiveContent = async () => {
+  const tournaments = await getArchivedTournaments()
   return (
     <>
       <div className="flex justify-center">
@@ -70,30 +52,17 @@ const ArchiveContent = async ({ searchParams }: ArchivePageProps) => {
           Retour aux tournois
         </Link>
       </div>
-      <TournamentFilters
-        filters={filters}
-        basePath={ROUTES.TOURNAMENTS_ARCHIVE}
-      />
-      <TournamentGrid
+      <TournamentBrowser
         tournaments={tournaments}
-        hasActiveFilters={hasActiveFilters}
-        emptyIcon={<Clock className="size-8 text-zinc-600" />}
-        emptyTitle="Aucun tournoi archivé"
-        emptyDescription="Il n'y a pas encore de tournoi archivé. Les tournois terminés apparaîtront ici."
-      />
-      <TournamentPagination
-        total={total}
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
         basePath={ROUTES.TOURNAMENTS_ARCHIVE}
-        filters={filters}
+        defaultSort="date_desc"
+        variant="archive"
       />
     </>
   )
 }
 
-const ArchivePage = ({ searchParams }: ArchivePageProps) => {
+const ArchivePage = () => {
   return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <PageHeader
@@ -103,7 +72,7 @@ const ArchivePage = ({ searchParams }: ArchivePageProps) => {
 
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <Suspense fallback={<TournamentArchiveFallback />}>
-          <ArchiveContent searchParams={searchParams} />
+          <ArchiveContent />
         </Suspense>
       </div>
     </section>

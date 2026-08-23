@@ -34,6 +34,7 @@ const PlayerAvatar = ({
       alt={name}
       width={size}
       height={size}
+      sizes={`${size}px`}
       className="rounded-full ring-1 ring-white/10"
     />
   ) : (
@@ -126,6 +127,7 @@ export const TournamentRegistrantsTeam = ({
                 alt={team.teamName}
                 width={28}
                 height={28}
+                sizes="28px"
                 className="rounded-lg ring-1 ring-white/10"
               />
             ) : (

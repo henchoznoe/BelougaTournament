@@ -8,15 +8,12 @@
 
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { FinalCtaAuthButton } from '@/components/public/landing/final-cta-auth-button'
 import { Reveal } from '@/components/public/shared/reveal'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/config/routes'
 
-interface FinalCtaSectionProps {
-  isAuthenticated: boolean
-}
-
-export const FinalCtaSection = ({ isAuthenticated }: FinalCtaSectionProps) => {
+export const FinalCtaSection = () => {
   return (
     <section className="container mx-auto px-4 py-24">
       <Reveal>
@@ -46,16 +43,7 @@ export const FinalCtaSection = ({ isAuthenticated }: FinalCtaSectionProps) => {
                 </Link>
               </Button>
 
-              {!isAuthenticated && (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="h-14 border-white/10 bg-white/5 px-8 text-lg font-medium text-white backdrop-blur-md transition-all hover:border-brand/50 hover:bg-white/10 hover:text-brand"
-                >
-                  <Link href={ROUTES.LOGIN}>Créer mon compte</Link>
-                </Button>
-              )}
+              <FinalCtaAuthButton />
             </div>
           </div>
         </div>

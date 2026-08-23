@@ -13,6 +13,7 @@ import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { invalidateTournamentCatalog } from '@/lib/utils/cache-invalidation'
 import { toNullable } from '@/lib/utils/formatting'
 import {
   deleteTournamentSchema,
@@ -141,7 +142,7 @@ export const createTournament = authenticatedAction({
       },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentCatalog({ slug })
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {
@@ -336,7 +337,7 @@ export const updateTournament = authenticatedAction({
       }),
     ])
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentCatalog({ tournamentId: data.id, slug })
 
     return {
       success: true,
@@ -369,7 +370,7 @@ export const deleteTournament = authenticatedAction({
       where: { id: data.id },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentCatalog({ tournamentId: data.id })
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
@@ -406,12 +407,16 @@ export const updateTournamentStatus = authenticatedAction({
       }
     }
 
-    await prisma.tournament.update({
+    const updatedTournament = await prisma.tournament.update({
       where: { id: data.id },
       data: { status: data.status },
+      select: { slug: true },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentCatalog({
+      tournamentId: data.id,
+      slug: updatedTournament.slug,
+    })
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
     return {

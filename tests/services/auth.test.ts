@@ -10,6 +10,25 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
+let cacheGeneration = 0
+vi.mock('react', async importOriginal => {
+  const actual = await importOriginal<typeof import('react')>()
+  return {
+    ...actual,
+    cache: <Args extends unknown[], Result>(fn: (...args: Args) => Result) => {
+      let generation = -1
+      let cached: Result
+      return (...args: Args): Result => {
+        if (generation !== cacheGeneration) {
+          generation = cacheGeneration
+          cached = fn(...args)
+        }
+        return cached
+      }
+    },
+  }
+})
+
 // ---------------------------------------------------------------------------
 // Mocks — must be defined before importing the module under test
 // ---------------------------------------------------------------------------
@@ -62,6 +81,7 @@ const MOCK_SESSION = {
 
 describe('getSession', () => {
   beforeEach(() => {
+    cacheGeneration++
     vi.clearAllMocks()
   })
 
@@ -89,5 +109,16 @@ describe('getSession', () => {
     const result = await getSession()
 
     expect(result).toBeNull()
+  })
+
+  it('deduplicates repeated reads during the same render request', async () => {
+    mockGetSession.mockResolvedValue(MOCK_SESSION)
+
+    const [first, second] = await Promise.all([getSession(), getSession()])
+
+    expect(first).toEqual(MOCK_SESSION)
+    expect(second).toBe(first)
+    expect(mockGetSession).toHaveBeenCalledTimes(1)
+    expect(mockHeaders).toHaveBeenCalledTimes(1)
   })
 })

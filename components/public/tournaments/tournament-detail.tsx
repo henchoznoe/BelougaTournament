@@ -10,6 +10,8 @@
 
 import { ChevronLeft, ScrollText, Shield, Users } from 'lucide-react'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
+import { usePublicSession } from '@/components/providers/public-session-provider'
 import { ContentCard } from '@/components/public/tournaments/detail/tournament-detail-shared'
 import { TournamentHeroGallery } from '@/components/public/tournaments/detail/tournament-hero-gallery'
 import { TournamentPrizeBanner } from '@/components/public/tournaments/detail/tournament-prize-banner'
@@ -39,8 +41,6 @@ interface TournamentDetailProps {
   tournament: PublicTournamentDetail
   twitchUsername?: string
   availableTeams: AvailableTeam[]
-  registrationState: UserTournamentRegistrationState | null
-  isAuthenticated: boolean
   registrants: PublicTournamentRegistrant[]
   teamRegistrants: PublicTournamentTeamRegistrant[]
 }
@@ -49,11 +49,51 @@ export const TournamentDetail = ({
   tournament,
   twitchUsername,
   availableTeams,
-  registrationState,
-  isAuthenticated,
   registrants,
   teamRegistrants,
 }: TournamentDetailProps) => {
+  const { isPending: sessionPending, sessionUser } = usePublicSession()
+  const [registrationState, setRegistrationState] =
+    useState<UserTournamentRegistrationState | null>(null)
+  const [registrationStateLoading, setRegistrationStateLoading] =
+    useState(false)
+
+  const loadRegistrationState = useCallback(async () => {
+    if (!sessionUser) {
+      setRegistrationState(null)
+      setRegistrationStateLoading(false)
+      return
+    }
+
+    setRegistrationStateLoading(true)
+    try {
+      const response = await fetch(
+        `/api/tournaments/${encodeURIComponent(tournament.id)}/registration-state`,
+        { cache: 'no-store' },
+      )
+      if (!response.ok) {
+        setRegistrationState(null)
+        return
+      }
+      const state =
+        (await response.json()) as UserTournamentRegistrationState | null
+      setRegistrationState(
+        state
+          ? {
+              ...state,
+              expiresAt: state.expiresAt ? new Date(state.expiresAt) : null,
+            }
+          : null,
+      )
+    } finally {
+      setRegistrationStateLoading(false)
+    }
+  }, [sessionUser, tournament.id])
+
+  useEffect(() => {
+    void loadRegistrationState()
+  }, [loadRegistrationState])
+
   const registrationBadge = getTournamentRegistrationBadge(tournament)
 
   const twitchChannel = tournament.streamUrl
@@ -96,7 +136,9 @@ export const TournamentDetail = ({
           tournament={tournament}
           registrationPhase={registrationBadge.phase}
           registrationState={registrationState}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={Boolean(sessionUser)}
+          registrationStateLoading={sessionPending || registrationStateLoading}
+          onRegistrationChanged={loadRegistrationState}
           availableTeams={availableTeams}
         />
 

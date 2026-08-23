@@ -41,6 +41,8 @@ interface TournamentSidebarProps {
   registrationPhase: TournamentRegistrationPhase
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
+  registrationStateLoading: boolean
+  onRegistrationChanged: () => Promise<void>
   availableTeams: AvailableTeam[]
 }
 
@@ -49,6 +51,8 @@ export const TournamentSidebar = ({
   registrationPhase,
   registrationState,
   isAuthenticated,
+  registrationStateLoading,
+  onRegistrationChanged,
   availableTeams,
 }: TournamentSidebarProps) => {
   const entryFee =
@@ -99,6 +103,8 @@ export const TournamentSidebar = ({
                 tournament={tournament}
                 registrationState={registrationState}
                 isAuthenticated={isAuthenticated}
+                registrationStateLoading={registrationStateLoading}
+                onRegistrationChanged={onRegistrationChanged}
                 calendarData={{
                   title: tournament.title,
                   slug: tournament.slug,

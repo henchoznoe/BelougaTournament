@@ -8,19 +8,12 @@
 
 import { PublicNavbarClient } from '@/components/public/layout/public-navbar-client'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
-import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 
 export const PublicNavbar = async () => {
-  const [settings, session] = await Promise.all([
-    getGlobalSettings(),
-    getSession(),
-  ])
+  const settings = await getGlobalSettings()
 
   return (
-    <PublicNavbarClient
-      logoUrl={settings.logoUrl ?? DEFAULT_ASSETS.LOGO}
-      sessionUser={session?.user ?? null}
-    />
+    <PublicNavbarClient logoUrl={settings.logoUrl ?? DEFAULT_ASSETS.LOGO} />
   )
 }

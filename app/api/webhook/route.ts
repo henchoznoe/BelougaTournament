@@ -15,6 +15,7 @@ import { logger } from '@/lib/core/logger'
 import { captureServerException, getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
+import { getTournamentParticipationCacheTags } from '@/lib/utils/cache-invalidation'
 import { REFUND_KIND_FULL_CANCELLATION } from '@/lib/utils/stripe-refund'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { Prisma } from '@/prisma/generated/prisma/client'
@@ -31,6 +32,15 @@ const TERMINAL_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.REFUNDED,
   PaymentStatus.FORFEITED,
 ])
+
+const revalidateTournamentParticipation = (
+  tournamentId: string,
+  userId: string,
+): void => {
+  for (const tag of getTournamentParticipationCacheTags(tournamentId, userId)) {
+    revalidateTag(tag, 'max')
+  }
+}
 
 const handleCheckoutCompleted = async (event: Stripe.Event) => {
   const stripe = getStripe()
@@ -178,6 +188,10 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       },
     })
   })
+  revalidateTournamentParticipation(
+    payment.registration.tournamentId,
+    payment.registration.userId,
+  )
 
   const ph = getPostHogServer()
   if (ph) {
@@ -249,6 +263,10 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
       },
     })
   })
+  revalidateTournamentParticipation(
+    payment.registration.tournamentId,
+    payment.registration.userId,
+  )
 
   const ph = getPostHogServer()
   if (ph) {
@@ -315,6 +333,10 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
       },
     })
   })
+  revalidateTournamentParticipation(
+    payment.registration.tournamentId,
+    payment.registration.userId,
+  )
 
   const ph = getPostHogServer()
   if (ph) {
@@ -444,6 +466,10 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
       })
     }
   })
+  revalidateTournamentParticipation(
+    payment.registration.tournamentId,
+    payment.registration.userId,
+  )
 }
 
 /** Logs a chargeback so disputes are visible for manual review (no DB schema for disputes). */
@@ -520,6 +546,10 @@ const handlePaymentIntentCanceled = async (event: Stripe.Event) => {
       },
     })
   })
+  revalidateTournamentParticipation(
+    payment.registration.tournamentId,
+    payment.registration.userId,
+  )
 }
 
 export const POST = async (request: Request) => {
@@ -658,7 +688,6 @@ export const POST = async (request: Request) => {
   }
 
   try {
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
     revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
     revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')

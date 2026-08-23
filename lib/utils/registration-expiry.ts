@@ -10,6 +10,7 @@ import 'server-only'
 import { updateTag } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import {
   PaymentStatus,
@@ -83,7 +84,9 @@ export const cleanupExpiredPendingRegistrations = async (
   }
 
   if (staleRegistrations.length > 0) {
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    for (const registration of staleRegistrations) {
+      invalidateTournamentParticipation(registration.tournamentId, userId)
+    }
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)

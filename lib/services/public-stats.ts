@@ -37,8 +37,8 @@ const EMPTY_STATS: PublicStats = {
 /** Aggregates community-wide counts used as social proof on the landing page. */
 export const getPublicStats = async (): Promise<PublicStats> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS, CACHE_TAGS.USERS, CACHE_TAGS.PLAYERS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS.PUBLIC_STATS)
 
   try {
     const [tournaments, players, registrations, gameRows] = await Promise.all([

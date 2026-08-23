@@ -8,16 +8,15 @@
 
 'use client'
 
-import { motion } from 'framer-motion'
 import { Home, Mail, Trophy, Users, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { usePublicSession } from '@/components/providers/public-session-provider'
 import { NavbarMobileMenu } from '@/components/public/layout/navbar-mobile-menu'
 import { NavbarProfile } from '@/components/public/layout/navbar-profile'
 import { ROUTES } from '@/lib/config/routes'
-import type { AuthSession } from '@/lib/types/auth'
 import { cn } from '@/lib/utils/cn'
 
 const NAV_LINKS = [
@@ -30,13 +29,10 @@ const NAV_LINKS = [
 
 interface PublicNavbarClientProps {
   logoUrl: string
-  sessionUser: AuthSession['user'] | null
 }
 
-export const PublicNavbarClient = ({
-  logoUrl,
-  sessionUser,
-}: PublicNavbarClientProps) => {
+export const PublicNavbarClient = ({ logoUrl }: PublicNavbarClientProps) => {
+  const { sessionUser } = usePublicSession()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isScrolled, setIsScrolled] = useState<boolean>(false)
@@ -52,10 +48,7 @@ export const PublicNavbarClient = ({
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   return (
-    <motion.header
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+    <header
       className={cn(
         'fixed top-0 z-50 w-full py-4 transition-[background-color,backdrop-filter] duration-300',
         isScrolled &&
@@ -81,6 +74,7 @@ export const PublicNavbarClient = ({
               alt="Belouga"
               width={32}
               height={32}
+              sizes="32px"
               loading="eager"
               className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
             />
@@ -104,15 +98,7 @@ export const PublicNavbarClient = ({
                   )}
                 >
                   {isActive && (
-                    <motion.div
-                      layoutId="desktop-active-nav-bg"
-                      className="absolute inset-0 z-0 rounded-full border border-brand/20 bg-brand/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 30,
-                      }}
-                    />
+                    <div className="absolute inset-0 z-0 rounded-full border border-brand/20 bg-brand/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]" />
                   )}
                   <span className="relative z-10 flex items-center gap-2.5">
                     <span className="relative flex size-5 items-center justify-center">
@@ -149,6 +135,6 @@ export const PublicNavbarClient = ({
           />
         </div>
       </div>
-    </motion.header>
+    </header>
   )
 }

@@ -24,6 +24,7 @@ import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -105,7 +106,7 @@ export const updateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, session.user.id)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return { success: true, message: 'Votre inscription a été mise à jour.' }
@@ -199,7 +200,7 @@ export const registerForTournament = authenticatedAction({
       })
     }
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, session.user.id)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
@@ -282,7 +283,7 @@ export const cancelMyPendingRegistrationForTournament = authenticatedAction({
       })
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, session.user.id)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 

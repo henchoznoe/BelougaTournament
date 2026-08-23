@@ -10,10 +10,11 @@ import { del, put } from '@vercel/blob'
 import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { CACHE_TAGS, MAX_TEAM_LOGO_SIZE } from '@/lib/config/constants'
+import { MAX_TEAM_LOGO_SIZE } from '@/lib/config/constants'
 import auth from '@/lib/core/auth'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
+import { getTournamentParticipationCacheTags } from '@/lib/utils/cache-invalidation'
 import {
   isAllowedImageMimeType,
   verifyImageMagicBytes,
@@ -78,6 +79,7 @@ export const POST = async (request: Request) => {
         logoUrl: true,
         tournament: {
           select: {
+            id: true,
             slug: true,
             status: true,
             teamLogoEnabled: true,
@@ -140,7 +142,9 @@ export const POST = async (request: Request) => {
       data: { logoUrl: blob.url },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    for (const tag of getTournamentParticipationCacheTags(team.tournament.id)) {
+      revalidateTag(tag, 'max')
+    }
 
     return NextResponse.json({ url: blob.url })
   } catch (error) {
@@ -184,7 +188,7 @@ export const DELETE = async (request: Request) => {
         captainId: true,
         logoUrl: true,
         tournament: {
-          select: { status: true, teamLogoEnabled: true },
+          select: { id: true, status: true, teamLogoEnabled: true },
         },
       },
     })
@@ -233,7 +237,9 @@ export const DELETE = async (request: Request) => {
       data: { logoUrl: null },
     })
 
-    revalidateTag(CACHE_TAGS.TOURNAMENTS, 'hours')
+    for (const tag of getTournamentParticipationCacheTags(team.tournament.id)) {
+      revalidateTag(tag, 'max')
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

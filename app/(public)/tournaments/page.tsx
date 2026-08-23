@@ -6,31 +6,20 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { Archive, Trophy } from 'lucide-react'
+import { Archive } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { TournamentFilters } from '@/components/public/tournaments/tournament-filters'
-import { TournamentGrid } from '@/components/public/tournaments/tournament-grid'
-import { TournamentPagination } from '@/components/public/tournaments/tournament-pagination'
+import { TournamentBrowser } from '@/components/public/tournaments/tournament-browser'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PUBLIC_TOURNAMENTS_PAGE_SIZE } from '@/lib/config/constants/tournaments'
 import { ROUTES } from '@/lib/config/routes'
-import {
-  getPublishedTournamentsFiltered,
-  PUBLIC_TOURNAMENTS_PAGE_SIZE,
-} from '@/lib/services/tournaments-public'
-import { parsePublicTournamentFilters } from '@/lib/validations/tournaments'
+import { getPublishedTournaments } from '@/lib/services/tournaments-public'
 
 export const metadata: Metadata = {
   title: 'Tournois',
   description: 'Découvrez les tournois à venir et inscrivez-vous.',
-}
-
-type PublicSearchParams = Record<string, string | string[] | undefined>
-
-interface TournamentsPageProps {
-  searchParams: Promise<PublicSearchParams>
 }
 
 const TournamentListFallback = () => {
@@ -50,32 +39,15 @@ const TournamentListFallback = () => {
   )
 }
 
-const TournamentsContent = async ({ searchParams }: TournamentsPageProps) => {
-  const params = await searchParams
-  const filters = parsePublicTournamentFilters(params, 'date_asc')
-  const { tournaments, total, page, pageSize, totalPages } =
-    await getPublishedTournamentsFiltered(filters)
-
-  const hasActiveFilters =
-    filters.search !== '' || filters.format !== '' || filters.type !== ''
-
+const TournamentsContent = async () => {
+  const tournaments = await getPublishedTournaments()
   return (
     <>
-      <TournamentFilters filters={filters} basePath={ROUTES.TOURNAMENTS} />
-      <TournamentGrid
+      <TournamentBrowser
         tournaments={tournaments}
-        hasActiveFilters={hasActiveFilters}
-        emptyIcon={<Trophy className="size-8 text-zinc-600" />}
-        emptyTitle="Aucun tournoi pour le moment"
-        emptyDescription="Aucun tournoi n'est actuellement disponible. Revenez bientôt pour découvrir nos prochaines compétitions."
-      />
-      <TournamentPagination
-        total={total}
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
         basePath={ROUTES.TOURNAMENTS}
-        filters={filters}
+        defaultSort="date_asc"
+        variant="published"
       />
       <div className="flex justify-center pt-2">
         <Link
@@ -90,7 +62,7 @@ const TournamentsContent = async ({ searchParams }: TournamentsPageProps) => {
   )
 }
 
-const TournamentsPage = ({ searchParams }: TournamentsPageProps) => {
+const TournamentsPage = () => {
   return (
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <PageHeader
@@ -100,7 +72,7 @@ const TournamentsPage = ({ searchParams }: TournamentsPageProps) => {
 
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <Suspense fallback={<TournamentListFallback />}>
-          <TournamentsContent searchParams={searchParams} />
+          <TournamentsContent />
         </Suspense>
       </div>
     </section>

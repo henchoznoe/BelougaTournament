@@ -11,7 +11,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IdCard, Loader2, Pencil, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -19,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateProfile } from '@/lib/actions/profile'
+import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 import { type ProfileInput, profileSchema } from '@/lib/validations/profile'
 
 interface ProfileEditFormProps {

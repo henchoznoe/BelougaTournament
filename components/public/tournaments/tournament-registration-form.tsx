@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import posthog from 'posthog-js'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -56,6 +55,7 @@ import type {
 import type { CalendarEventData } from '@/lib/utils/calendar'
 import { cn } from '@/lib/utils/cn'
 import { formatCentimes, parseCentimes } from '@/lib/utils/formatting'
+import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 import { getRefundPolicyLabel } from '@/lib/utils/refund-policy-label'
 import {
   DonationType,
@@ -88,6 +88,8 @@ interface TournamentRegistrationFormProps {
   availableTeams: AvailableTeam[]
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
+  registrationStateLoading: boolean
+  onRegistrationChanged: () => Promise<void>
   calendarData?: CalendarEventData
 }
 
@@ -117,6 +119,8 @@ export const TournamentRegistrationForm = ({
   availableTeams,
   registrationState,
   isAuthenticated,
+  registrationStateLoading,
+  onRegistrationChanged,
   calendarData,
 }: TournamentRegistrationFormProps) => {
   const [isPending, startTransition] = useTransition()
@@ -258,11 +262,21 @@ export const TournamentRegistrationForm = ({
           registration_type: tournament.registrationType,
         })
         toast.success(result.message)
+        await onRegistrationChanged()
         router.refresh()
       } else {
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
     })
+  }
+
+  if (registrationStateLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-400">
+        <Loader2 className="size-4 animate-spin" />
+        Vérification de votre inscription…
+      </div>
+    )
   }
 
   // Not authenticated: show login CTA

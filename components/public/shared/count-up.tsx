@@ -8,7 +8,6 @@
 
 'use client'
 
-import { useInView, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 interface CountUpProps {
@@ -22,12 +21,30 @@ const COUNT_UP_DURATION_MS = 1200
 
 export const CountUp = ({ value, suffix, className }: CountUpProps) => {
   const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
-  const reduceMotion = useReducedMotion()
-  const [display, setDisplay] = useState(reduceMotion ? value : 0)
+  const [inView, setInView] = useState(false)
+  const [display, setDisplay] = useState(0)
 
   useEffect(() => {
-    if (!inView || reduceMotion) {
+    const element = ref.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting) {
+          setInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px -60px' },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!inView) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setDisplay(value)
       return
     }
@@ -44,7 +61,7 @@ export const CountUp = ({ value, suffix, className }: CountUpProps) => {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [inView, reduceMotion, value])
+  }, [inView, value])
 
   return (
     <span ref={ref} className={className}>

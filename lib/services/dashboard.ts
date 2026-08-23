@@ -29,7 +29,7 @@ import {
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.DASHBOARD_STATS)
 
   try {
@@ -113,7 +113,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 /** Fetches users with the most recent site access (visit) activity. */
 export const getRecentVisits = async (limit = 8): Promise<RecentVisit[]> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
   try {
@@ -142,7 +142,7 @@ export const getRecentRegistrations = async (
   limit = 8,
 ): Promise<RecentRegistration[]> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
   try {
@@ -187,7 +187,7 @@ export const getRecentRegistrations = async (
 /** Fetches aggregate payment/revenue stats for the dashboard. */
 export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
   const emptyStats: PaymentStats = {

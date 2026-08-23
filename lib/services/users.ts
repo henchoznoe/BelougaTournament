@@ -77,7 +77,7 @@ export const getActiveUserBan = async (
 /** Fetches all users for the admin users table (lightweight). */
 export const getUsers = async (): Promise<UserRow[]> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.USERS)
 
   try {
@@ -111,7 +111,7 @@ export const getUserById = async (
   userId: string,
 ): Promise<UserDetail | null> => {
   'use cache'
-  cacheLife('minutes')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.USERS)
 
   try {

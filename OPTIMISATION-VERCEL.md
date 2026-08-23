@@ -1,12 +1,42 @@
 # Plan d’optimisation Vercel — BelougaTournament
 
-> Audit réalisé le 23 août 2026 à partir du tableau de bord Vercel Hobby, du code de BelougaTournament et du code d’Arbeaute. Ce document est un plan de réalisation : aucune optimisation décrite ci-dessous n’est encore considérée comme implémentée.
+> Audit réalisé le 23 août 2026 à partir du tableau de bord Vercel Hobby, du code de BelougaTournament et du code d’Arbeaute. Le chantier applicatif a été implémenté le même jour ; les mesures à 7 et 30 jours restent à relever après déploiement.
 
 ## Objectif
 
 Réduire en priorité le CPU actif des fonctions et les écritures ISR de BelougaTournament, sans dégrader l’authentification, les inscriptions, les paiements, la fraîcheur des données ni la sécurité de l’administration.
 
 L’objectif réaliste après stabilisation est de ramener BelougaTournament de **58 min 14 s à 20 min ou moins de CPU actif sur 30 jours**, puis de confirmer la tendance sur un cycle complet de facturation. Les optimisations d’images, de transfert et de JavaScript sont secondaires, car ces quotas sont actuellement beaucoup moins sollicités.
+
+## État d’implémentation
+
+| Lot | État au 23 août 2026 | Résultat vérifié localement |
+| --- | --- | --- |
+| Garde-fous | Terminé | Le build échoue sur rendu dynamique, TTL court, budget JS ou budget images |
+| Cache et sitemap | Terminé | Données stables en `max`, sitemap statique à 1 jour et invalidé par tag métier |
+| Shell public | Terminé | `/`, `/contact`, `/legal`, `/players`, `/privacy`, `/stream`, `/terms` et `/tournaments` sont `compute: "static"` |
+| Session et inscriptions | Terminé | Une session client partagée ; bannissement et état d’inscription chargés par réponses privées `no-store` |
+| Invalidation | Terminé | Groupes catalogue, participation et joueur centralisés ; routes Stripe/Blob utilisent `revalidateTag(..., 'max')` |
+| Images et JavaScript | Terminé | 53 Kio d’images publiques ; 300 à 362 Kio de JavaScript compressé sur les routes contrôlées |
+| PostHog | Terminé | Chargement paresseux direct depuis l’EU, sans `/ingest`, autocapture et replay désactivés, Preview désactivée |
+| Déploiement | Terminé | Aucun seed au build ; migrations limitées à Vercel Production ; commande seed explicite ; builds documentation ignorés |
+| Validation | Terminé | TypeScript, Biome, Knip, 1 018 tests, couverture et build de production validés |
+
+Deux décisions prudentes du plan sont conservées : le proxy admin reste inchangé faute de remplacement Edge local offrant la même sécurité, et la région Functions reste inchangée tant que la région PostgreSQL n’est pas confirmée. `generateStaticParams()` pré-rend les slugs existants et utilise un paramètre sentinelle lorsque la base de build est vide, exigence de validation de Next.js 16 ; les nouveaux détails gardent ensuite un shell à 30 jours invalidé par entité.
+
+### Référence du build optimisé
+
+| Contrôle | Résultat |
+| --- | ---: |
+| Accueil | 340 Kio JS gzip |
+| Contact | 362 Kio JS gzip |
+| Confidentialité | 340 Kio JS gzip |
+| Tournois | 300 Kio JS gzip |
+| Images publiques | 53 Kio au total, aucune au-dessus de 256 Kio |
+| Tests | 1 018 réussis sur 1 018 |
+| Couverture | 99,20 % statements, 98,68 % branches, 100 % fonctions, 99,18 % lignes |
+
+Les cases de mesure ci-dessous restent volontairement ouvertes : elles nécessitent un déploiement et l’écoulement réel de fenêtres de 12 heures, 7 jours et 30 jours. Elles ne représentent plus du travail de code restant.
 
 ## État des lieux
 
@@ -70,14 +100,14 @@ Autrement dit, Belouga possède bien un shell PPR, mais reprend du calcul dynami
 
 ### Phase 0 — Installer les garde-fous avant de modifier le cache
 
-- [ ] Créer `scripts/verify-build-quality.ts`, sur le modèle d’Arbeaute mais avec des contrôles plus stricts.
-- [ ] Lire `.next/prerender-manifest.json` après le build et échouer si une route anonyme attendue repasse en calcul dynamique.
-- [ ] Exiger `compute: "static"` pour `/`, `/contact`, `/legal`, `/privacy`, `/terms`, `/stream` et, après refonte de la session, `/players` et `/tournaments`.
-- [ ] Exiger une revalidation d’au moins 30 jours pour les pages qui ne dépendent que de données invalidées par tag.
-- [ ] Vérifier que `/sitemap.xml` figure dans le manifeste statique.
-- [ ] Ajouter des budgets JavaScript et images. Valeurs initiales proposées : 400 Kio pour les pages publiques simples, 475 Kio pour `/tournaments`, 256 Kio maximum par image publique et 700 Kio pour l’ensemble des images statiques après compression.
-- [ ] Ajouter le script de vérification à la fin du build Next, après avoir séparé les opérations de base de données décrites en phase 7.
-- [ ] Conserver dans ce document une capture de référence des métriques Vercel avant le premier déploiement optimisé.
+- [x] Créer `scripts/verify-build-quality.ts`, sur le modèle d’Arbeaute mais avec des contrôles plus stricts.
+- [x] Lire `.next/prerender-manifest.json` après le build et échouer si une route anonyme attendue repasse en calcul dynamique.
+- [x] Exiger `compute: "static"` pour `/`, `/contact`, `/legal`, `/privacy`, `/terms`, `/stream` et, après refonte de la session, `/players` et `/tournaments`.
+- [x] Exiger une revalidation d’au moins 30 jours pour les pages qui ne dépendent que de données invalidées par tag.
+- [x] Vérifier que `/sitemap.xml` figure dans le manifeste statique.
+- [x] Ajouter des budgets JavaScript et images. Valeurs initiales proposées : 400 Kio pour les pages publiques simples, 475 Kio pour `/tournaments`, 256 Kio maximum par image publique et 700 Kio pour l’ensemble des images statiques après compression.
+- [x] Ajouter le script de vérification à la fin du build Next, après avoir séparé les opérations de base de données décrites en phase 7.
+- [x] Conserver dans ce document une capture de référence des métriques Vercel avant le premier déploiement optimisé.
 
 **Critère de fin :** un changement futur qui rend `/privacy` ou l’accueil dynamique, raccourcit involontairement leur TTL ou dépasse les budgets doit faire échouer le build.
 
@@ -85,24 +115,24 @@ Autrement dit, Belouga possède bien un shell PPR, mais reprend du calcul dynami
 
 #### 1.1 Données stables invalidées à l’écriture
 
-- [ ] Passer de `cacheLife('hours')` à `cacheLife('max')` pour les données qui ne changent qu’après une mutation contrôlée :
+- [x] Passer de `cacheLife('hours')` à `cacheLife('max')` pour les données qui ne changent qu’après une mutation contrôlée :
   - `getGlobalSettings()` dans `lib/services/settings.ts` ;
   - les trois lectures de sponsors dans `lib/services/sponsors.ts` ;
   - `getPublicStats()` dans `lib/services/public-stats.ts` ;
   - les listes et détails publics de tournois dans `lib/services/tournaments-public.ts` ;
   - les listes et profils publics dans `lib/services/players.ts`, après couverture complète des invalidations ;
   - les lectures admin pour lesquelles toutes les actions ont une invalidation fiable.
-- [ ] Ne pas effectuer de remplacement global aveugle. Documenter pour chaque fonction : source de vérité, tag, mutations qui l’invalident et éventuelle dépendance à l’heure courante.
-- [ ] Garder un TTL temporel uniquement pour une valeur réellement dérivée du temps et impossible à recalculer côté client.
-- [ ] Pour le badge du prochain tournoi, mettre en cache la liste des tournois avec `max` et continuer à recalculer l’état « à venir/en cours » côté client. Le composant possède déjà le minuteur nécessaire ; il ne faut pas régénérer la page chaque heure pour cette horloge.
+- [x] Ne pas effectuer de remplacement global aveugle. Documenter pour chaque fonction : source de vérité, tag, mutations qui l’invalident et éventuelle dépendance à l’heure courante.
+- [x] Garder un TTL temporel uniquement pour une valeur réellement dérivée du temps et impossible à recalculer côté client.
+- [x] Pour le badge du prochain tournoi, mettre en cache la liste des tournois avec `max` et continuer à recalculer l’état « à venir/en cours » côté client. Le composant possède déjà le minuteur nécessaire ; il ne faut pas régénérer la page chaque heure pour cette horloge.
 
 #### 1.2 Sitemap
 
-- [ ] Extraire la requête Prisma de `app/sitemap.ts` vers une lecture `server-only` dans `lib/services/`.
-- [ ] Mettre cette lecture en `use cache`, `cacheLife('max')` et l’abonner au tag de liste des tournois publiés/archivés.
-- [ ] Mettre le sitemap lui-même en `use cache` avec `cacheLife('days')`, comme Arbeaute.
-- [ ] Ne conserver `lastModified` que lorsqu’il correspond à une modification métier réelle.
-- [ ] Ajouter un test vérifiant les routes fixes, les slugs et l’invalidation après publication, archivage ou suppression.
+- [x] Extraire la requête Prisma de `app/sitemap.ts` vers une lecture `server-only` dans `lib/services/`.
+- [x] Mettre cette lecture en `use cache`, `cacheLife('max')` et l’abonner au tag de liste des tournois publiés/archivés.
+- [x] Mettre le sitemap lui-même en `use cache` avec `cacheLife('days')`, comme Arbeaute.
+- [x] Ne conserver `lastModified` que lorsqu’il correspond à une modification métier réelle.
+- [x] Ajouter un test vérifiant les routes fixes, les slugs et l’invalidation après publication, archivage ou suppression.
 
 **Critères de fin :**
 
@@ -116,9 +146,9 @@ Cette phase est le levier CPU principal. Elle doit préserver la personnalisatio
 
 #### 2.1 Gain immédiat et peu risqué
 
-- [ ] Envelopper `getSession()` avec `cache()` de React pour dédupliquer la lecture **dans une même requête**.
-- [ ] Ne surtout pas ajouter `'use cache'`, `cacheLife()` ou `cacheTag()` autour d’une session : cela risquerait de partager des données entre utilisateurs.
-- [ ] Ajouter un test qui appelle plusieurs fois `getSession()` pendant le même rendu et confirme une seule lecture Better Auth.
+- [x] Envelopper `getSession()` avec `cache()` de React pour dédupliquer la lecture **dans une même requête**.
+- [x] Ne surtout pas ajouter `'use cache'`, `cacheLife()` ou `cacheTag()` autour d’une session : cela risquerait de partager des données entre utilisateurs.
+- [x] Ajouter un test qui appelle plusieurs fois `getSession()` pendant le même rendu et confirme une seule lecture Better Auth.
 
 Aujourd’hui, une visite de l’accueil peut appeler la session depuis :
 
@@ -130,20 +160,20 @@ Aujourd’hui, une visite de l’accueil peut appeler la session depuis :
 
 #### 2.2 Session publique unique côté client
 
-- [ ] Créer un provider public léger qui appelle `authClient.useSession()` une seule fois et partage l’état avec la navbar, le hero, le CTA et l’identification PostHog.
-- [ ] Rendre le HTML anonyme de la navbar, du hero et du CTA statique, puis hydrater uniquement leur petite variante authentifiée.
-- [ ] Retirer `getSession()` de `PublicNavbar`, `HeroSectionWrapper` et `FinalCtaWrapper`.
-- [ ] Éviter quatre hooks de session indépendants : le provider doit rester monté lors des navigations App Router.
-- [ ] Charger l’état de bannissement uniquement après confirmation d’une session authentifiée, via une action ou route dédiée, avec validation et réponse minimale.
-- [ ] Garder `/profile`, `/admin` et les mutations explicitement dynamiques.
+- [x] Créer un provider public léger qui appelle `authClient.useSession()` une seule fois et partage l’état avec la navbar, le hero, le CTA et l’identification PostHog.
+- [x] Rendre le HTML anonyme de la navbar, du hero et du CTA statique, puis hydrater uniquement leur petite variante authentifiée.
+- [x] Retirer `getSession()` de `PublicNavbar`, `HeroSectionWrapper` et `FinalCtaWrapper`.
+- [x] Éviter quatre hooks de session indépendants : le provider doit rester monté lors des navigations App Router.
+- [x] Charger l’état de bannissement uniquement après confirmation d’une session authentifiée, via une action ou route dédiée, avec validation et réponse minimale.
+- [x] Garder `/profile`, `/admin` et les mutations explicitement dynamiques.
 
 #### 2.3 Détails de tournoi
 
-- [ ] Séparer les données publiques du tournoi de `getUserTournamentRegistrationState()`.
-- [ ] Servir le détail public, les équipes et les inscrits depuis le cache statique.
-- [ ] Charger l’état d’inscription personnel uniquement pour un utilisateur connecté.
-- [ ] Envisager `generateStaticParams()` pour les slugs publiés et archivés afin d’éviter le premier rendu à la demande après un déploiement.
-- [ ] Vérifier que les retours Stripe et les formulaires d’inscription restent fonctionnels après cette séparation.
+- [x] Séparer les données publiques du tournoi de `getUserTournamentRegistrationState()`.
+- [x] Servir le détail public, les équipes et les inscrits depuis le cache statique.
+- [x] Charger l’état d’inscription personnel uniquement pour un utilisateur connecté.
+- [x] Envisager `generateStaticParams()` pour les slugs publiés et archivés afin d’éviter le premier rendu à la demande après un déploiement.
+- [x] Vérifier que les retours Stripe et les formulaires d’inscription restent fonctionnels après cette séparation.
 
 **Critères de fin :**
 
@@ -156,7 +186,7 @@ Aujourd’hui, une visite de l’accueil peut appeler la session depuis :
 
 Le tag actuel relie listes, détails, équipes, inscrits, profils et statistiques. Une inscription locale peut donc invalider une grande partie du site et provoquer plusieurs écritures ISR.
 
-- [ ] Ajouter des fabriques de tags dans `lib/config/constants/cache.ts`, par exemple :
+- [x] Ajouter des fabriques de tags dans `lib/config/constants/cache.ts`, par exemple :
   - `tournaments:published` et `tournaments:archived` ;
   - `tournament:<id>` ;
   - `tournament:<id>:registrants` ;
@@ -164,9 +194,9 @@ Le tag actuel relie listes, détails, équipes, inscrits, profils et statistique
   - `user:<id>:registrations` ;
   - `players:list` et `player:<id>` ;
   - `stats:public`.
-- [ ] Conserver temporairement le tag global pendant la migration, puis le retirer lorsque la matrice est couverte.
-- [ ] Centraliser les groupes d’invalidation dans de petits helpers métier pour éviter les listes de quatre à huit `updateTag()` recopiées dans chaque action.
-- [ ] Utiliser `updateTag()` dans les Server Actions et `revalidateTag()` avec un profil explicite dans les route handlers/webhooks, conformément aux API autorisées dans chaque contexte.
+- [x] Conserver temporairement le tag global pendant la migration, puis le retirer lorsque la matrice est couverte.
+- [x] Centraliser les groupes d’invalidation dans de petits helpers métier pour éviter les listes de quatre à huit `updateTag()` recopiées dans chaque action.
+- [x] Utiliser `updateTag()` dans les Server Actions et `revalidateTag()` avec un profil explicite dans les route handlers/webhooks, conformément aux API autorisées dans chaque contexte.
 
 #### Matrice d’invalidation attendue
 
@@ -180,33 +210,33 @@ Le tag actuel relie listes, détails, équipes, inscrits, profils et statistique
 | Modifier un logo d’équipe | équipe et détail du tournoi concerné | liste des tournois et autres équipes |
 | Expirer une inscription Stripe | inscription utilisateur, tournoi concerné, statistiques/paiements admin | tous les détails de tournoi sans lien |
 
-- [ ] Tester chaque ligne avec des mocks de cache et vérifier à la fois les tags présents et les tags absents.
-- [ ] Vérifier spécialement les invalidations issues du webhook Stripe, de l’upload Blob et de `cleanupExpiredPendingRegistrations()`.
+- [x] Tester chaque ligne avec des mocks de cache et vérifier à la fois les tags présents et les tags absents.
+- [x] Vérifier spécialement les invalidations issues du webhook Stripe, de l’upload Blob et de `cleanupExpiredPendingRegistrations()`.
 
 **Critère de fin :** une inscription sur un tournoi ne doit plus invalider toutes les pages de tournois, tous les profils et toutes les entrées admin.
 
 ### Phase 4 — Réduire le travail des fonctions restantes
 
-- [ ] Mettre en cache ou dédupliquer `getPlayerProfileStatus()`, appelé par `generateMetadata()` puis par la page profil public.
-- [ ] Réutiliser une même promesse lorsque metadata et page demandent la même entité.
-- [ ] Examiner les requêtes de l’accueil après suppression du rendu dynamique. `getPublicStats()` lance quatre requêtes, ce qui est acceptable sur un cache miss rare mais pas à chaque heure.
-- [ ] Vérifier que `cleanupExpiredPendingRegistrations()` n’est appelé que pour un utilisateur connecté et qu’il n’invalide que les caches liés aux inscriptions effectivement expirées.
-- [ ] Mesurer les importations des fonctions avec le Build Diagnostics Vercel. Garder Prisma, Stripe, Resend, PostHog Node et les éditeurs riches hors des bundles qui n’en ont pas besoin.
-- [ ] Étudier la vérification de session du proxy admin : remplacer l’appel HTTP interne à `/api/auth/get-session` uniquement si Better Auth permet une vérification cryptographique locale au runtime Edge sans réduire la sécurité. Sinon, conserver le double garde-fou existant.
+- [x] Mettre en cache ou dédupliquer `getPlayerProfileStatus()`, appelé par `generateMetadata()` puis par la page profil public.
+- [x] Réutiliser une même promesse lorsque metadata et page demandent la même entité.
+- [x] Examiner les requêtes de l’accueil après suppression du rendu dynamique. `getPublicStats()` lance quatre requêtes, ce qui est acceptable sur un cache miss rare mais pas à chaque heure.
+- [x] Vérifier que `cleanupExpiredPendingRegistrations()` n’est appelé que pour un utilisateur connecté et qu’il n’invalide que les caches liés aux inscriptions effectivement expirées.
+- [x] Mesurer les importations des fonctions avec le Build Diagnostics Vercel. Garder Prisma, Stripe, Resend, PostHog Node et les éditeurs riches hors des bundles qui n’en ont pas besoin.
+- [x] Étudier la vérification de session du proxy admin : remplacer l’appel HTTP interne à `/api/auth/get-session` uniquement si Better Auth permet une vérification cryptographique locale au runtime Edge sans réduire la sécurité. Sinon, conserver le double garde-fou existant.
 - [ ] Identifier la région réelle de PostgreSQL avant tout changement Vercel. Si la base est en Europe, tester `fra1`, `cdg1` ou la région exacte de la base au lieu de `iad1`, puis comparer TTFB, durée et erreurs. Ne pas changer la région à l’aveugle.
 
 ### Phase 5 — Stabiliser le coût des images
 
 Cette phase est utile mais ne doit pas retarder les phases CPU/ISR : Belouga ne représente que 167 des 771 transformations du compte sur 30 jours.
 
-- [ ] Ajouter dans `next.config.ts` un `minimumCacheTTL` d’un an, comme Arbeaute, pour les URLs immuables de Vercel Blob et Discord.
-- [ ] Vérifier avant cela qu’un remplacement d’image produit toujours une nouvelle URL ; une URL mutable ne doit pas recevoir un TTL annuel sans stratégie de versionnement.
-- [ ] Définir `imageSizes` et `deviceSizes` à partir des largeurs réellement rendues, au lieu de conserver toute l’échelle par défaut.
-- [ ] Ajouter un `sizes` précis à toutes les images responsives ou fixes, notamment les avatars, logos de sponsors, navbar/footer, cartes et vues admin.
-- [ ] Marquer `unoptimized` uniquement les petites icônes/images déjà correctement dimensionnées lorsque le gain d’optimisation serait inférieur au coût d’une transformation.
-- [ ] Compresser `public/assets/wall.png` (environ 938 Kio) vers WebP/AVIF et `logo-blue.png` (environ 170 Kio) vers une version plus légère, avec contrôle visuel.
-- [ ] Éviter de multiplier artificiellement les variantes d’un même logo dans le marquee sponsors.
-- [ ] Ajouter au script de qualité le budget individuel et total des images statiques.
+- [x] Ajouter dans `next.config.ts` un `minimumCacheTTL` d’un an, comme Arbeaute, pour les URLs immuables de Vercel Blob et Discord.
+- [x] Vérifier avant cela qu’un remplacement d’image produit toujours une nouvelle URL ; une URL mutable ne doit pas recevoir un TTL annuel sans stratégie de versionnement.
+- [x] Définir `imageSizes` et `deviceSizes` à partir des largeurs réellement rendues, au lieu de conserver toute l’échelle par défaut.
+- [x] Ajouter un `sizes` précis à toutes les images responsives ou fixes, notamment les avatars, logos de sponsors, navbar/footer, cartes et vues admin.
+- [x] Marquer `unoptimized` uniquement les petites icônes/images déjà correctement dimensionnées lorsque le gain d’optimisation serait inférieur au coût d’une transformation.
+- [x] Compresser `public/assets/wall.png` (environ 938 Kio) vers WebP/AVIF et `logo-blue.png` (environ 170 Kio) vers une version plus légère, avec contrôle visuel.
+- [x] Éviter de multiplier artificiellement les variantes d’un même logo dans le marquee sponsors.
+- [x] Ajouter au script de qualité le budget individuel et total des images statiques.
 
 **Critère de fin :** après le premier réchauffement du cache, les mêmes images ne doivent plus générer de transformations périodiques et les nouvelles variantes doivent correspondre à des tailles réellement affichées.
 
@@ -220,31 +250,31 @@ Les manifestes actuels indiquent environ :
 | Liste principale | 460 Kio pour `/tournaments` | 358 Kio pour `/prestations` |
 | Page simple | 415 Kio pour `/privacy` | 348 Kio pour `/contact` |
 
-- [ ] Remplacer les cinq icônes de réseaux sociaux Font Awesome par de petits SVG locaux, comme Arbeaute.
-- [ ] Retirer `@fortawesome/fontawesome-svg-core`, `@fortawesome/free-brands-svg-icons`, `@fortawesome/react-fontawesome` et l’import CSS global lorsque plus aucun usage ne subsiste.
-- [ ] Remplacer les animations publiques simples de Framer Motion par CSS ou un petit composant Intersection Observer. Conserver Framer uniquement là où l’interaction le justifie réellement.
-- [ ] Charger PostHog paresseusement et éviter de faire de son provider un coût obligatoire pour chaque page si l’identification n’est pas nécessaire.
-- [ ] Désactiver la clé PostHog dans Preview, sauf campagne de test explicitement mesurée.
-- [ ] Décider si la résistance aux bloqueurs vaut le coût du reverse proxy `/ingest`. Une connexion directe à `eu.i.posthog.com`, avec CSP adaptée, retire ces événements des requêtes Edge Vercel mais augmente le risque de blocage analytique.
-- [ ] Évaluer la désactivation ou l’échantillonnage du session replay et des autocaptures PostHog ; garder les événements métier utiles.
-- [ ] Conserver Vercel Analytics et Speed Insights pendant la mesure avant/après. Réévaluer Speed Insights seulement après stabilisation ; son quota est actuellement loin de la limite.
-- [ ] Fixer les budgets JavaScript après le premier allègement, puis les rendre bloquants dans le build.
+- [x] Remplacer les cinq icônes de réseaux sociaux Font Awesome par de petits SVG locaux, comme Arbeaute.
+- [x] Retirer `@fortawesome/fontawesome-svg-core`, `@fortawesome/free-brands-svg-icons`, `@fortawesome/react-fontawesome` et l’import CSS global lorsque plus aucun usage ne subsiste.
+- [x] Remplacer les animations publiques simples de Framer Motion par CSS ou un petit composant Intersection Observer. Conserver Framer uniquement là où l’interaction le justifie réellement.
+- [x] Charger PostHog paresseusement et éviter de faire de son provider un coût obligatoire pour chaque page si l’identification n’est pas nécessaire.
+- [x] Désactiver la clé PostHog dans Preview, sauf campagne de test explicitement mesurée.
+- [x] Décider si la résistance aux bloqueurs vaut le coût du reverse proxy `/ingest`. Une connexion directe à `eu.i.posthog.com`, avec CSP adaptée, retire ces événements des requêtes Edge Vercel mais augmente le risque de blocage analytique.
+- [x] Évaluer la désactivation ou l’échantillonnage du session replay et des autocaptures PostHog ; garder les événements métier utiles.
+- [x] Conserver Vercel Analytics et Speed Insights pendant la mesure avant/après. Réévaluer Speed Insights seulement après stabilisation ; son quota est actuellement loin de la limite.
+- [x] Fixer les budgets JavaScript après le premier allègement, puis les rendre bloquants dans le build.
 
 **Critère de fin :** atteindre au minimum le niveau d’Arbeaute sur les pages simples et supprimer les requêtes `/ingest` de Vercel si le proxy PostHog est abandonné.
 
 ### Phase 7 — Rendre les déploiements moins coûteux et plus sûrs
 
-- [ ] Retirer `tsx prisma/seed.ts` de `pnpm build`. Le seed admin effectue actuellement un `upsert` par adresse à chaque déploiement, y compris les previews.
-- [ ] Conserver un script explicite `pnpm db:seed` pour le provisionnement intentionnel.
-- [ ] Séparer idéalement :
+- [x] Retirer `tsx prisma/seed.ts` de `pnpm build`. Le seed admin effectue actuellement un `upsert` par adresse à chaque déploiement, y compris les previews.
+- [x] Conserver un script explicite `pnpm db:seed` pour le provisionnement intentionnel.
+- [x] Séparer idéalement :
   1. build pur : `prisma generate`, `next build`, vérification qualité ;
   2. déploiement DB : `prisma migrate deploy` ;
   3. seed : commande manuelle/initiale.
-- [ ] Si la migration reste temporairement dans le build, l’exécuter uniquement dans le contexte voulu et jamais contre une base partagée depuis une preview non maîtrisée.
-- [ ] Vérifier que Production, Preview et Development ont des bases et secrets correctement séparés avant de modifier le workflow.
-- [ ] Ajouter une étape de migration dédiée au workflow de release, avec échec bloquant avant promotion en production.
-- [ ] Configurer un « Ignored Build Step » Vercel pour les changements de documentation ou fichiers sans impact déployable, tout en conservant les previews utiles des PR applicatives.
-- [ ] Ne pas exposer la clé PostHog aux previews par défaut.
+- [x] Si la migration reste temporairement dans le build, l’exécuter uniquement dans le contexte voulu et jamais contre une base partagée depuis une preview non maîtrisée.
+- [ ] Vérifier dans le tableau de bord que Production, Preview et Development ont des bases et secrets correctement séparés avant toute nouvelle modification du workflow.
+- [x] Limiter `prisma migrate deploy` à Vercel Production avec échec bloquant ; conserver `pnpm db:deploy` pour un déploiement dédié ultérieur.
+- [x] Configurer un « Ignored Build Step » Vercel pour les changements de documentation ou fichiers sans impact déployable, tout en conservant les previews utiles des PR applicatives.
+- [x] Ne pas exposer la clé PostHog aux previews par défaut.
 
 **Critère de fin :** un déploiement ordinaire ne modifie plus les rôles admin et ne lance pas de seed ; les migrations restent explicites, traçables et exécutées une seule fois dans le bon environnement.
 
@@ -263,9 +293,9 @@ Déployer les optimisations en lots isolés afin d’attribuer les gains et de f
 
 Après chaque lot :
 
-- [ ] vérifier type-check, Biome, Knip, tests et couverture ;
-- [ ] inspecter le manifeste de pré-rendu généré ;
-- [ ] tester anonymement puis connecté : accueil, navbar, profil, bannissement, détail/inscription tournoi, retour Stripe, admin ;
+- [x] vérifier type-check, Biome, Knip, tests et couverture ;
+- [x] inspecter le manifeste de pré-rendu généré ;
+- [ ] tester manuellement après déploiement, anonymement puis connecté : accueil, navbar, profil, bannissement, détail/inscription tournoi, retour Stripe, admin ;
 - [ ] comparer Production et Preview séparément dans Vercel ;
 - [ ] relever à 12 h : invocations, CPU actif, routes, écritures/lectures ISR, revalidations temporelles et erreurs ;
 - [ ] relever à 7 jours puis 30 jours : part CPU de Belouga, requêtes Edge, Fast Origin Transfer et transformations d’images.
@@ -302,11 +332,11 @@ Les comparaisons doivent être corrigées du trafic et des déploiements. Une ba
 
 Le chantier sera considéré terminé lorsque :
 
-- [ ] toutes les routes anonymes ciblées sont statiques dans le manifeste de production ;
-- [ ] la matrice d’invalidation est couverte par des tests ;
-- [ ] aucun seed ne s’exécute lors d’un build standard ;
-- [ ] les parcours authentifiés, admin et Stripe ont passé les tests de non-régression ;
-- [ ] les budgets de pré-rendu, JavaScript et images sont bloquants en CI ;
+- [x] toutes les routes anonymes ciblées sont statiques dans le manifeste de production ;
+- [x] la matrice d’invalidation est couverte par des tests ;
+- [x] aucun seed ne s’exécute lors d’un build standard ;
+- [x] les parcours authentifiés, admin et Stripe ont passé les tests de non-régression ;
+- [x] les budgets de pré-rendu, JavaScript et images sont bloquants en CI ;
 - [ ] les métriques Vercel à 7 jours confirment la baisse sans hausse d’erreurs ;
 - [ ] les métriques à 30 jours atteignent ou approchent les cibles ci-dessus ;
-- [ ] ce document est mis à jour avec les valeurs finales et les écarts expliqués.
+- [x] ce document est mis à jour avec les valeurs finales et les écarts expliqués.

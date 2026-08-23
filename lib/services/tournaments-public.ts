@@ -10,7 +10,8 @@ import 'server-only'
 // $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
 // because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
+import { PUBLIC_TOURNAMENTS_PAGE_SIZE } from '@/lib/config/constants/tournaments'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -76,8 +77,8 @@ export const getPublishedTournaments = async (): Promise<
   PublicTournamentListItem[]
 > => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS.TOURNAMENTS_PUBLISHED)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -96,8 +97,8 @@ export const getPublishedTournaments = async (): Promise<
 export const getHeroTournamentBadgeData =
   async (): Promise<HeroTournamentBadgeData> => {
     'use cache'
-    cacheLife('hours')
-    cacheTag(CACHE_TAGS.TOURNAMENTS)
+    cacheLife('max')
+    cacheTag(CACHE_TAGS.TOURNAMENT_HERO)
 
     try {
       const tournaments = (await prisma.tournament.findMany({
@@ -131,8 +132,8 @@ export const getArchivedTournaments = async (): Promise<
   PublicTournamentListItem[]
 > => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS.TOURNAMENTS_ARCHIVED)
 
   try {
     const rows = await prisma.tournament.findMany({
@@ -152,8 +153,8 @@ export const getPublicTournamentBySlug = async (
   slug: string,
 ): Promise<PublicTournamentDetail | null> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_SLUG(slug))
 
   try {
     const row = await prisma.tournament.findFirst({
@@ -183,6 +184,7 @@ export const getPublicTournamentBySlug = async (
         },
       },
     })
+    if (row) cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT(row.id))
     return row as PublicTournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching public tournament by slug')
@@ -195,8 +197,8 @@ export const getAvailableTeams = async (
   tournamentId: string,
 ): Promise<AvailableTeam[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(tournamentId))
 
   try {
     const rows = await prisma.team.findMany({
@@ -227,8 +229,6 @@ export const getAvailableTeams = async (
 // ---------------------------------------------------------------------------
 // Public filtered + paginated tournament lists
 // ---------------------------------------------------------------------------
-
-export const PUBLIC_TOURNAMENTS_PAGE_SIZE = 6
 
 /** Result type for filtered + paginated public tournament queries. */
 type PublicTournamentPage = {
@@ -262,8 +262,12 @@ const getTournamentsFilteredByStatus = async (
   filters: PublicTournamentFilters,
 ): Promise<PublicTournamentPage> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(
+    status === TournamentStatus.PUBLISHED
+      ? CACHE_TAGS.TOURNAMENTS_PUBLISHED
+      : CACHE_TAGS.TOURNAMENTS_ARCHIVED,
+  )
 
   const { search, format, type, sort, page } = filters
   const skip = (page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE
@@ -347,8 +351,8 @@ export const getTournamentRegistrants = async (
   tournamentId: string,
 ): Promise<PublicTournamentRegistrant[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(tournamentId))
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -382,8 +386,11 @@ export const getTournamentTeamRegistrants = async (
   tournamentId: string,
 ): Promise<PublicTournamentTeamRegistrant[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(
+    CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(tournamentId),
+    CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(tournamentId),
+  )
 
   try {
     const teams = await prisma.team.findMany({

@@ -43,7 +43,7 @@ type RawTournamentRegistrationRow = Omit<
 /** Fetches all tournaments for the admin list table. */
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
@@ -95,7 +95,7 @@ export const getTournamentBySlug = async (
   slug: string,
 ): Promise<TournamentDetail | null> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
@@ -137,7 +137,7 @@ export const getTournamentById = async (
   id: string,
 ): Promise<TournamentDetail | null> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
@@ -179,7 +179,7 @@ export const getRegistrations = async (
   tournamentId: string,
 ): Promise<TournamentRegistrationItem[]> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
@@ -254,7 +254,7 @@ export const getRegistrations = async (
 /** Fetches all teams for a tournament (admin teams tab). */
 export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {

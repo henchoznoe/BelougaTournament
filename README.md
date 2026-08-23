@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/assets/logo-blue.png" alt="Logo" width="auto" height="200">
+<img src="public/assets/logo-blue.webp" alt="Logo" width="auto" height="200">
 
 [![CI](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml/badge.svg)](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/main?label=coverage&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)

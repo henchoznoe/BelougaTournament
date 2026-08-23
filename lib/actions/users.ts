@@ -16,6 +16,10 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
+import {
+  invalidatePlayer,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { hasAdminAccess, isSuperAdmin } from '@/lib/utils/role'
 import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession } from '@/lib/utils/team'
@@ -433,7 +437,10 @@ export const banUser = authenticatedAction({
     updateTag(CACHE_TAGS.USERS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidatePlayer(data.userId)
+    for (const registration of registrations) {
+      invalidateTournamentParticipation(registration.tournament.id, data.userId)
+    }
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     const isBanPermanent = !data.bannedUntil

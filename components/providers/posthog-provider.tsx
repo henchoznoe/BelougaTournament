@@ -9,10 +9,13 @@
 
 'use client'
 
-import posthog from 'posthog-js'
-import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { useEffect } from 'react'
-import { authClient } from '@/lib/core/auth-client'
+import { usePublicSession } from '@/components/providers/public-session-provider'
+import { env } from '@/lib/core/env'
+import {
+  initializePostHogBrowser,
+  posthogBrowser,
+} from '@/lib/utils/posthog-browser'
 
 /**
  * Identifies the signed-in user in PostHog so events, exceptions and session
@@ -20,19 +23,29 @@ import { authClient } from '@/lib/core/auth-client'
  * on sign-out is handled in `useLogout`.
  */
 const PostHogIdentifier = () => {
-  const { data } = authClient.useSession()
-  const user = data?.user
+  const { sessionUser: user } = usePublicSession()
 
   useEffect(() => {
-    if (!posthog.__loaded || !user) return
+    if (
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' ||
+      !env.NEXT_PUBLIC_POSTHOG_KEY
+    ) {
+      return
+    }
 
-    posthog.identify(user.id, {
-      email: user.email,
-      name: user.name,
-      displayName: user.displayName,
-      role: user.role,
-      discordId: user.discordId,
-    })
+    initializePostHogBrowser(env.NEXT_PUBLIC_POSTHOG_KEY)
+    if (!user) return
+
+    const identify = () => {
+      posthogBrowser.identify(user.id, {
+        email: user.email,
+        name: user.name,
+        displayName: user.displayName,
+        role: user.role,
+        discordId: user.discordId,
+      })
+    }
+    identify()
   }, [user])
 
   return null
@@ -43,8 +56,8 @@ interface PostHogProviderProps {
 }
 
 export const PostHogProvider = ({ children }: PostHogProviderProps) => (
-  <PHProvider client={posthog}>
+  <>
     {children}
     <PostHogIdentifier />
-  </PHProvider>
+  </>
 )
