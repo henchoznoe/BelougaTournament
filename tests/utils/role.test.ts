@@ -72,9 +72,10 @@ describe('satisfiesRole', () => {
     [Role.SUPER_ADMIN, Role.SUPER_ADMIN, true],
   ]
 
-  it.each(
-    cases,
-  )('%s satisfying %s returns %s', (userRole, requiredRole, expected) => {
-    expect(satisfiesRole(userRole, requiredRole)).toBe(expected)
-  })
+  it.each(cases)(
+    '%s satisfying %s returns %s',
+    (userRole, requiredRole, expected) => {
+      expect(satisfiesRole(userRole, requiredRole)).toBe(expected)
+    },
+  )
 })
