@@ -41,6 +41,10 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // isomorphic-dompurify loads jsdom on the server. Keeping the package external
+  // preserves jsdom's runtime assets instead of relocating them into a webpack
+  // chunk where its relative browser/default-stylesheet.css path no longer exists.
+  serverExternalPackages: ['isomorphic-dompurify'],
   env: {
     NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV ?? 'development',
   },

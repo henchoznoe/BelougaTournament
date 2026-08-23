@@ -53,6 +53,21 @@ const imageExtensions = new Set([
 ])
 const maximumImageBytes = 256 * 1024
 const maximumPublicImagesBytes = 700 * 1024
+const forbiddenServerBundleFragments = [
+  {
+    fragment: 'browser/default-stylesheet.css',
+    explanation:
+      'jsdom a été intégré à un chunk serveur et perdra ses ressources relatives sur Vercel',
+  },
+] as const
+const tournamentDetailTrace = path.join(
+  nextDirectory,
+  'server/app/(public)/tournaments/[slug]/page.js.nft.json',
+)
+const requiredTournamentTraceFragments = [
+  'isomorphic-dompurify/dist/index',
+  'jsdom/lib/jsdom/browser/default-stylesheet.css',
+] as const
 
 interface PrerenderRoute {
   compute?: string
@@ -165,8 +180,42 @@ const verifyImageBudgets = async (): Promise<void> => {
   )
 }
 
+const verifyPortableServerBundles = async (): Promise<void> => {
+  const serverDirectory = path.join(nextDirectory, 'server')
+  const serverBundles = (await listFiles(serverDirectory)).filter(file =>
+    ['.cjs', '.js', '.mjs'].includes(path.extname(file)),
+  )
+
+  for (const file of serverBundles) {
+    const source = await readFile(file, 'utf8')
+    for (const forbidden of forbiddenServerBundleFragments) {
+      if (source.includes(forbidden.fragment)) {
+        throw new Error(
+          `${path.relative(nextDirectory, file)} contient ${forbidden.fragment}: ${forbidden.explanation}.`,
+        )
+      }
+    }
+  }
+
+  const tournamentTrace = await readJson<{ files: string[] }>(
+    tournamentDetailTrace,
+  )
+  for (const fragment of requiredTournamentTraceFragments) {
+    if (!tournamentTrace.files.some(file => file.includes(fragment))) {
+      throw new Error(
+        `La trace de /tournaments/[slug] n'inclut pas ${fragment}; le déploiement Vercel serait incomplet.`,
+      )
+    }
+  }
+
+  console.info(
+    '✓ jsdom reste externe et toutes ses ressources sont tracées pour Vercel',
+  )
+}
+
 const main = async (): Promise<void> => {
   await verifyPrerenderedRoutes()
+  await verifyPortableServerBundles()
   await verifyJavascriptBudgets()
   await verifyImageBudgets()
 }
