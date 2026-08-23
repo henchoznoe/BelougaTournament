@@ -22,7 +22,7 @@
 
 ## Verification
 
-- CI order is `prisma generate` -> `tsc --noEmit` -> `biome check .` -> `knip` -> `pnpm audit --audit-level=high` -> `test:coverage` -> Codecov upload.
+- CI order is `prisma generate` -> `tsc --noEmit` -> `biome check .` -> `knip` -> `test:coverage` -> Codecov upload.
 - `release.yml` reuses `ci.yml` via `workflow_call`. Node version pinned in `.node-version`.
 - Additional workflows: `dependency-review.yml` (blocks vulnerable deps in PRs), `pr-title.yml` (enforces Conventional Commits).
 - Pre-commit only runs `biome check --write` on staged `*.{ts,tsx,css}`. It does not type-check or run tests.

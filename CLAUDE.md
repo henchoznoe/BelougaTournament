@@ -34,7 +34,7 @@ pnpm stripe:listen          # Stripe webhook forwarding to localhost:3000/api/we
 
 ### CI Pipeline
 
-CI order: `prisma generate` -> `tsc --noEmit` -> `biome check .` -> `knip` -> `pnpm audit --audit-level=high` -> `test:coverage` -> Codecov upload. The `release.yml` workflow reuses `ci.yml` via `workflow_call` to avoid duplication. Node version is pinned in `.node-version`. Pre-commit hook only runs `biome check --write` on staged `*.{ts,tsx,css}` — does not type-check or test.
+CI order: `prisma generate` -> `tsc --noEmit` -> `biome check .` -> `knip` -> `test:coverage` -> Codecov upload. The `release.yml` workflow reuses `ci.yml` via `workflow_call` to avoid duplication. Node version is pinned in `.node-version`. Pre-commit hook only runs `biome check --write` on staged `*.{ts,tsx,css}` — does not type-check or test.
 
 Additional CI workflows:
 - `dependency-review.yml` — blocks PRs introducing high-severity vulnerable dependencies.

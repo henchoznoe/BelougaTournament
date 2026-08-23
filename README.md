@@ -179,7 +179,6 @@ CI ([`ci.yml`](.github/workflows/ci.yml), reused by [`release.yml`](.github/work
    pnpm exec biome check .             # Lint & format
    pnpm exec knip                      # Dead code analysis
    pnpm exec next build                # Production build
-   pnpm audit --audit-level=high       # Security audit
    ```
 
 3. **Tests** — `pnpm test:coverage` runs the Vitest suite with coverage and uploads the report to Codecov.
