@@ -17,6 +17,7 @@ import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
@@ -161,7 +162,7 @@ export const unregisterFromTournament = authenticatedAction({
           : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique."
 
     const invalidateCaches = () => {
-      updateTag(CACHE_TAGS.TOURNAMENTS)
+      invalidateTournamentParticipation(data.tournamentId, userId)
       updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
       updateTag(CACHE_TAGS.DASHBOARD_STATS)
       updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)

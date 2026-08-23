@@ -32,7 +32,7 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('max')
   cacheTag(CACHE_TAGS.SETTINGS)
 
   try {

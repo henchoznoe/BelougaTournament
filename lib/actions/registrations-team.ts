@@ -17,6 +17,7 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
 import {
   adminDeleteTeamLogoSchema,
@@ -186,7 +187,10 @@ export const adminChangeTeam = authenticatedAction({
       throw error
     }
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(
+      registration.tournament.id,
+      registration.userId,
+    )
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
@@ -243,7 +247,7 @@ export const adminPromoteCaptain = authenticatedAction({
       data: { captainId: data.userId },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(team.tournamentId)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
@@ -294,7 +298,7 @@ export const adminUpdateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(team.tournamentId)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
@@ -312,7 +316,7 @@ export const adminDeleteTeamLogo = authenticatedAction({
   handler: async (data): Promise<ActionState> => {
     const team = await prisma.team.findUnique({
       where: { id: data.teamId },
-      select: { id: true, logoUrl: true },
+      select: { id: true, logoUrl: true, tournamentId: true },
     })
 
     if (!team) {
@@ -334,7 +338,7 @@ export const adminDeleteTeamLogo = authenticatedAction({
       data: { logoUrl: null },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(team.tournamentId)
 
     return { success: true, message: "Le logo de l'équipe a été supprimé." }
   },

@@ -13,6 +13,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // ---------------------------------------------------------------------------
 
 vi.mock('server-only', () => ({}))
+vi.mock('next/cache', () => ({
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
+}))
 
 const mockEnv: {
   NEXT_PUBLIC_APP_URL: string
@@ -159,6 +163,7 @@ describe('sitemap', () => {
     expect(mockFindMany).toHaveBeenCalledWith({
       where: { status: { in: ['PUBLISHED', 'ARCHIVED'] } },
       select: { slug: true, updatedAt: true },
+      orderBy: { slug: 'asc' },
     })
   })
 

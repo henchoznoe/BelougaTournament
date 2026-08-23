@@ -9,11 +9,11 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import posthog from 'posthog-js'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/core/auth-client'
+import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 
 /** Extension point: add more OAuth providers here as needed (e.g. 'google', 'twitch'). */
 type SocialProvider = 'discord'

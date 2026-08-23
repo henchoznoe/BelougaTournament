@@ -19,23 +19,20 @@ import { TournamentsSection } from '@/components/public/landing/tournaments-sect
 import { TournamentsSkeleton } from '@/components/public/landing/tournaments-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 import { METADATA } from '@/lib/config/constants'
-import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getSponsors } from '@/lib/services/sponsors'
 import { getHeroTournamentBadgeData } from '@/lib/services/tournaments-public'
-import { resolveActiveTournamentSlug } from '@/lib/utils/hero-tournament-badge'
 
 export const metadata: Metadata = {
   title: 'Accueil',
   description: METADATA.DESCRIPTION,
 }
 
-/** Fetches the session (dynamic) and renders HeroSection with auth state. */
+/** Renders the cached hero data; auth state is resolved by the client provider. */
 const HeroSectionWrapper = async () => {
-  const [globalSettings, heroBadgeData, session] = await Promise.all([
+  const [globalSettings, heroBadgeData] = await Promise.all([
     getGlobalSettings(),
     getHeroTournamentBadgeData(),
-    getSession(),
   ])
 
   return (
@@ -43,18 +40,9 @@ const HeroSectionWrapper = async () => {
       twitchUrl={globalSettings.twitchUrl ?? undefined}
       badge={heroBadgeData.badge}
       badgeTournaments={heroBadgeData.tournaments}
-      initialActiveTournamentSlug={resolveActiveTournamentSlug(
-        heroBadgeData.tournaments,
-      )}
-      isAuthenticated={!!session?.user}
+      initialActiveTournamentSlug={null}
     />
   )
-}
-
-/** Fetches the session (dynamic) and renders the closing CTA with auth state. */
-const FinalCtaWrapper = async () => {
-  const session = await getSession()
-  return <FinalCtaSection isAuthenticated={!!session?.user} />
 }
 
 const LandingPage = async () => {
@@ -80,9 +68,7 @@ const LandingPage = async () => {
       <HowItWorksSection />
       <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
       <SponsorsSection sponsors={sponsors} />
-      <Suspense fallback={null}>
-        <FinalCtaWrapper />
-      </Suspense>
+      <FinalCtaSection />
     </div>
   )
 }

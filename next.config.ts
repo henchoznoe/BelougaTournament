@@ -8,15 +8,15 @@
 
 import type { NextConfig } from 'next'
 
-// Content Security Policy — allows Twitch player, Discord CDN, and Vercel Blob storage
+// Content Security Policy — allows Twitch, immutable media hosts, and direct PostHog EU ingestion.
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://player.twitch.tv",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://player.twitch.tv https://eu-assets.i.posthog.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://*.public.blob.vercel-storage.com https://cdn.discordapp.com",
   "font-src 'self'",
   'frame-src https://player.twitch.tv https://widget.toornament.com',
-  "connect-src 'self' https://discord.com https://player.twitch.tv",
+  "connect-src 'self' https://discord.com https://player.twitch.tv https://eu.i.posthog.com https://eu-assets.i.posthog.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
@@ -39,26 +39,19 @@ const SECURITY_HEADERS = [
   },
 ]
 
-// PostHog (EU) reverse proxy — keeps analytics same-origin so the strict CSP
-// above stays unchanged and ad-blockers are mitigated. Hosts mirror
-// `lib/config/constants/analytics.ts` (inlined here because next.config.ts is
-// loaded before the TS path aliases are available).
-const POSTHOG_API_HOST = 'https://eu.i.posthog.com'
-const POSTHOG_ASSETS_HOST = 'https://eu-assets.i.posthog.com'
-
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  // Required by the PostHog reverse proxy so /ingest paths aren't trailing-slash redirected.
-  skipTrailingSlashRedirect: true,
-  rewrites: async () => [
-    {
-      source: '/ingest/static/:path*',
-      destination: `${POSTHOG_ASSETS_HOST}/static/:path*`,
-    },
-    { source: '/ingest/flags', destination: `${POSTHOG_API_HOST}/flags` },
-    { source: '/ingest/:path*', destination: `${POSTHOG_API_HOST}/:path*` },
-  ],
+  // isomorphic-dompurify loads jsdom on the server. Keeping the package external
+  // preserves jsdom's runtime assets instead of relocating them into a webpack
+  // chunk where its relative browser/default-stylesheet.css path no longer exists.
+  serverExternalPackages: ['isomorphic-dompurify'],
+  env: {
+    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV ?? 'development',
+  },
   images: {
+    minimumCacheTTL: 31_536_000,
+    deviceSizes: [360, 640, 768, 1024, 1280, 1536],
+    imageSizes: [32, 48, 64, 96, 128, 256],
     remotePatterns: [
       {
         protocol: 'https',

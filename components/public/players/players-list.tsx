@@ -53,6 +53,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
                 alt={player.displayName}
                 width={64}
                 height={64}
+                sizes="64px"
                 className="rounded-full ring-2 ring-white/10 transition-all duration-300 group-hover:ring-brand/30"
               />
             ) : (

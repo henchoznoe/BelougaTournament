@@ -7,7 +7,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -132,17 +132,18 @@ describe('cleanupExpiredPendingRegistrations', () => {
         expiresAt: NOW,
       },
     })
-    expect(mockUpdateTag).toHaveBeenCalledTimes(4)
-    expect(mockUpdateTag).toHaveBeenNthCalledWith(1, CACHE_TAGS.TOURNAMENTS)
-    expect(mockUpdateTag).toHaveBeenNthCalledWith(
-      2,
+    expect(mockUpdateTag.mock.calls.map(([tag]) => tag)).toEqual([
+      CACHE_TAGS.TOURNAMENTS,
+      CACHE_TAGS.TOURNAMENTS_PUBLISHED,
+      CACHE_TAGS.PUBLIC_STATS,
+      CACHE_TAGS_DYNAMIC.TOURNAMENT(TOURNAMENT_ID),
+      CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(TOURNAMENT_ID),
+      CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(TOURNAMENT_ID),
+      CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(USER_ID),
       CACHE_TAGS.DASHBOARD_REGISTRATIONS,
-    )
-    expect(mockUpdateTag).toHaveBeenNthCalledWith(3, CACHE_TAGS.DASHBOARD_STATS)
-    expect(mockUpdateTag).toHaveBeenNthCalledWith(
-      4,
+      CACHE_TAGS.DASHBOARD_STATS,
       CACHE_TAGS.DASHBOARD_PAYMENTS,
-    )
+    ])
   })
 
   it('should skip database mutations when the registration is no longer stale after recheck', async () => {

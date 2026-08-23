@@ -7,12 +7,16 @@
  */
 
 import type { MetadataRoute } from 'next'
+import { cacheLife, cacheTag } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
-import { logger } from '@/lib/core/logger'
-import prisma from '@/lib/core/prisma'
-import { TournamentStatus } from '@/prisma/generated/prisma/enums'
+import { getTournamentSitemapEntries } from '@/lib/services/sitemap'
 
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
+  'use cache'
+  cacheLife('days')
+  cacheTag(CACHE_TAGS.TOURNAMENTS_SITEMAP)
+
   const baseUrl = env.NEXT_PUBLIC_APP_URL
 
   // Static public routes
@@ -33,24 +37,13 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   ]
 
   // Dynamic tournament routes (PUBLISHED + ARCHIVED)
-  let tournamentRoutes: MetadataRoute.Sitemap = []
-  try {
-    const tournaments = await prisma.tournament.findMany({
-      where: {
-        status: { in: [TournamentStatus.PUBLISHED, TournamentStatus.ARCHIVED] },
-      },
-      select: { slug: true, updatedAt: true },
-    })
-
-    tournamentRoutes = tournaments.map(t => ({
-      url: `${baseUrl}/tournaments/${t.slug}`,
-      lastModified: t.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    }))
-  } catch (error) {
-    logger.error({ error }, 'Failed to fetch tournaments for sitemap')
-  }
+  const tournaments = await getTournamentSitemapEntries()
+  const tournamentRoutes: MetadataRoute.Sitemap = tournaments.map(t => ({
+    url: `${baseUrl}/tournaments/${t.slug}`,
+    lastModified: t.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
 
   return [...staticRoutes, ...tournamentRoutes]
 }

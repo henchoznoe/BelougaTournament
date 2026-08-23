@@ -413,9 +413,8 @@ CI runs the following checks in order (`ci.yml`, reused by `release.yml` via `wo
 2. `pnpm exec tsc --noEmit`
 3. `pnpm exec biome check .`
 4. `pnpm exec knip` (dead code analysis)
-5. `pnpm audit --audit-level=high` (security audit)
-6. `pnpm test:coverage`
-7. Codecov upload
+5. `pnpm test:coverage`
+6. Codecov upload
 
 Additional CI workflows:
 

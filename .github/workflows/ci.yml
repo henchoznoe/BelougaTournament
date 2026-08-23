@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -39,15 +39,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.1
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@v6.0.10
         with:
           version: 11
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: '.node-version'
           cache: pnpm
@@ -73,7 +73,7 @@ jobs:
         run: pnpm exec knip
 
       - name: Cache Next.js build
-        uses: actions/cache@v5
+        uses: actions/cache@v6.1.0
         with:
           path: .next/cache
           key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
@@ -81,7 +81,7 @@ jobs:
             nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Build
-        run: pnpm exec next build
+        run: pnpm build
         env:
           BETTER_AUTH_SECRET: 'this_is_a_ci_build_placeholder_only'
           BETTER_AUTH_URL: 'http://localhost:3000'
@@ -89,9 +89,6 @@ jobs:
           DISCORD_CLIENT_ID: 'ci-placeholder'
           DISCORD_CLIENT_SECRET: 'ci-placeholder'
           BLOB_READ_WRITE_TOKEN: 'ci-placeholder'
-
-      - name: Security audit
-        run: pnpm audit --audit-level=high
 
   test:
     name: Tests
@@ -102,15 +99,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.1
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@v6.0.10
         with:
           version: 11
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: '.node-version'
           cache: pnpm

@@ -8,11 +8,12 @@
 
 import 'server-only'
 import { headers } from 'next/headers'
+import { cache } from 'react'
 import auth from '@/lib/core/auth'
 import type { AuthSession } from '@/lib/types/auth'
 
 /** Retrieves the typed session for the current request, or null. */
-export const getSession = async (): Promise<AuthSession | null> => {
+export const getSession = cache(async (): Promise<AuthSession | null> => {
   const session = await auth.api.getSession({ headers: await headers() })
   return (session as AuthSession | null) ?? null // BetterAuth returns a generic type; cast to our typed AuthSession
-}
+})

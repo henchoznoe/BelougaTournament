@@ -11,19 +11,25 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { StripeReturnToast } from '@/components/public/tournaments/stripe-return-toast'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
-import { getSession } from '@/lib/services/auth'
 import { getGlobalSettings } from '@/lib/services/settings'
+import { getTournamentSitemapEntries } from '@/lib/services/sitemap'
 import {
   getAvailableTeams,
   getPublicTournamentBySlug,
   getTournamentRegistrants,
   getTournamentTeamRegistrants,
 } from '@/lib/services/tournaments-public'
-import { getUserTournamentRegistrationState } from '@/lib/services/tournaments-user'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface TournamentPageProps {
   params: Promise<{ slug: string }>
+}
+
+export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
+  const tournaments = await getTournamentSitemapEntries()
+  return tournaments.length > 0
+    ? tournaments.map(({ slug }) => ({ slug }))
+    : [{ slug: '__no-tournaments__' }]
 }
 
 export const generateMetadata = async ({
@@ -45,10 +51,9 @@ export const generateMetadata = async ({
 
 const TournamentPage = async ({ params }: TournamentPageProps) => {
   const { slug } = await params
-  const [tournament, settings, session] = await Promise.all([
+  const [tournament, settings] = await Promise.all([
     getPublicTournamentBySlug(slug),
     getGlobalSettings(),
-    getSession(),
   ])
 
   if (!tournament) {
@@ -60,11 +65,6 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
     tournament.format === TournamentFormat.TEAM
       ? await getAvailableTeams(tournament.id)
       : []
-
-  // Check if the logged-in user is already registered for this tournament
-  const isRegistered = session?.user
-    ? await getUserTournamentRegistrationState(session.user.id, tournament.id)
-    : null
 
   // Fetch registrants if the tournament has showRegistrants enabled
   const registrants = tournament.showRegistrants
@@ -86,8 +86,6 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
         tournament={tournament}
         twitchUsername={settings.twitchUsername ?? undefined}
         availableTeams={availableTeams}
-        registrationState={isRegistered}
-        isAuthenticated={!!session?.user}
         registrants={registrants}
         teamRegistrants={teamRegistrants}
       />

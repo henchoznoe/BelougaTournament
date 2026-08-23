@@ -240,6 +240,27 @@
   }
 }
 
+[data-reveal-visible] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 24px));
+  transition:
+    opacity 500ms ease-out var(--reveal-delay, 0s),
+    transform 500ms ease-out var(--reveal-delay, 0s);
+}
+
+[data-reveal-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-visible] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ── Quill Rich Text Editor — Dark Theme ──────────────────────────────────── */
 
 .rich-text-editor .ql-toolbar.ql-snow {

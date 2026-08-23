@@ -14,8 +14,8 @@ export const METADATA = {
 } as const
 
 export const DEFAULT_ASSETS = {
-  LOGO: '/assets/logo-blue.png',
-  BG_IMAGE: '/assets/wall.png',
+  LOGO: '/assets/logo-blue.webp',
+  BG_IMAGE: '/assets/wall.webp',
 } as const
 
 export const AUTHOR = {

@@ -22,6 +22,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -141,7 +142,7 @@ export const createTeamAndRegister = authenticatedAction({
       })
     }
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, session.user.id)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 
@@ -262,7 +263,7 @@ export const joinTeamAndRegister = authenticatedAction({
       })
     }
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, session.user.id)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
 

@@ -15,6 +15,7 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamWithMembers } from '@/lib/types/team'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import {
   dissolveTeamSchema,
@@ -92,7 +93,7 @@ export const kickPlayer = authenticatedAction({
       await handleCaptainSuccession(tx, team, data.userId)
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, data.userId)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
@@ -155,7 +156,7 @@ export const dissolveTeam = authenticatedAction({
       await tx.team.delete({ where: { id: data.teamId } })
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(data.tournamentId, memberUserIds)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
@@ -225,7 +226,7 @@ export const updateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(team.tournamentId)
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },

@@ -6,20 +6,19 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
+import { PublicSessionProvider } from '@/components/providers/public-session-provider'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
 import { DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { env } from '@/lib/core/env'
 import { cn } from '@/lib/utils/cn'
-import '@fortawesome/fontawesome-svg-core/styles.css'
-import { config } from '@fortawesome/fontawesome-svg-core'
-import { Analytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 interface LayoutProps {
@@ -53,8 +52,6 @@ export const metadata: Metadata = {
       : undefined,
 }
 
-config.autoAddCss = false
-
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
     <html
@@ -71,15 +68,17 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
         )}
         suppressHydrationWarning
       >
-        <PostHogProvider>
-          <Suspense>
-            <ScrollToTop />
-          </Suspense>
-          {props.children}
-          <Toaster richColors position="bottom-right" />
-          <Analytics />
-          <SpeedInsights />
-        </PostHogProvider>
+        <PublicSessionProvider>
+          <PostHogProvider>
+            <Suspense>
+              <ScrollToTop />
+            </Suspense>
+            {props.children}
+            <Toaster richColors position="bottom-right" />
+            <Analytics />
+            <SpeedInsights />
+          </PostHogProvider>
+        </PublicSessionProvider>
       </body>
     </html>
   )

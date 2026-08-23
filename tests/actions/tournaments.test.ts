@@ -214,7 +214,7 @@ describe('tournament admin actions', () => {
     vi.clearAllMocks()
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockTournamentCreate.mockResolvedValue({})
-    mockTournamentUpdate.mockResolvedValue({})
+    mockTournamentUpdate.mockResolvedValue({ slug: 'valorant-cup' })
     mockTournamentDelete.mockResolvedValue({})
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])

@@ -72,6 +72,7 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
               alt={player.displayName}
               width={96}
               height={96}
+              sizes="96px"
               className="rounded-full ring-2 ring-brand/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]"
             />
           ) : (

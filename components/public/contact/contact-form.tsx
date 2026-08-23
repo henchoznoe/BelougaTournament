@@ -11,7 +11,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send } from 'lucide-react'
 import Link from 'next/link'
-import posthog from 'posthog-js'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -29,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { sendContactMessage } from '@/lib/actions/contact'
 import { CONTACT_SUBJECTS, VALIDATION_LIMITS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
+import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 import { type ContactInput, contactSchema } from '@/lib/validations/contact'
 
 const INPUT_CLASS =

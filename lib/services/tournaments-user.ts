@@ -10,7 +10,7 @@ import 'server-only'
 // $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
 // because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -111,8 +111,8 @@ export const getUserRegistrations = async (
   userId: string,
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -138,8 +138,8 @@ export const getUserPastRegistrations = async (
   userId: string,
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
     const rows = await prisma.tournamentRegistration.findMany({
@@ -172,8 +172,8 @@ export const getUserActiveTournaments = async (
   userId: string,
 ): Promise<UserActiveTournament[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
     const rows = await prisma.tournament.findMany({

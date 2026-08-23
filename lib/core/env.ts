@@ -20,6 +20,9 @@ const clientSchema = z.object({
     .string()
     .min(1, 'NEXT_PUBLIC_POSTHOG_KEY is required')
     .optional(),
+  NEXT_PUBLIC_VERCEL_ENV: z
+    .enum(['development', 'preview', 'production'])
+    .optional(),
 })
 
 const serverSchema = z.object({
@@ -69,6 +72,7 @@ const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+  NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
 })
 
 // Parse server-side

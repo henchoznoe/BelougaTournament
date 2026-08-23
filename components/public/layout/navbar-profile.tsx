@@ -73,6 +73,7 @@ export const NavbarProfile = ({
               alt={resolvedDisplayName}
               width={32}
               height={32}
+              sizes="32px"
               className="rounded-full ring-2 ring-transparent transition-all duration-300 group-hover:scale-105"
             />
           ) : (
@@ -141,6 +142,7 @@ export const NavbarProfile = ({
             alt={resolvedDisplayName}
             width={48}
             height={48}
+            sizes="48px"
             className="rounded-full ring-2 ring-brand/20"
           />
         ) : (

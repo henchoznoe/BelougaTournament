@@ -8,12 +8,11 @@
 
 'use client'
 
-import type { Variants } from 'framer-motion'
-import { motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { usePublicSession } from '@/components/providers/public-session-provider'
 import { Button } from '@/components/ui/button'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
@@ -28,31 +27,10 @@ import {
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-}
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-}
-
 interface HeroSectionProps {
   badge: HeroTournamentBadge
   badgeTournaments: HeroTournamentBadgeTournament[]
   initialActiveTournamentSlug: string | null
-  isAuthenticated: boolean
   twitchUrl?: string
 }
 
@@ -72,9 +50,10 @@ export const HeroSection = ({
   badge,
   badgeTournaments,
   initialActiveTournamentSlug,
-  isAuthenticated,
   twitchUrl,
 }: HeroSectionProps) => {
+  const { sessionUser } = usePublicSession()
+  const isAuthenticated = Boolean(sessionUser)
   const [currentBadge, setCurrentBadge] = useState(badge)
   const [activeTournamentSlug, setActiveTournamentSlug] = useState<
     string | null
@@ -127,13 +106,8 @@ export const HeroSection = ({
         <div className="absolute left-1/2 top-1/3 size-[40rem] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-[120px]" />
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 max-w-5xl space-y-8"
-      >
-        <motion.div variants={itemVariants} className="flex justify-center">
+      <div className="relative z-10 max-w-5xl space-y-8">
+        <div className="flex justify-center">
           {activeTournamentSlug ? (
             <Link
               href={`${ROUTES.TOURNAMENTS}/${activeTournamentSlug}`}
@@ -178,22 +152,16 @@ export const HeroSection = ({
               <span className="truncate">{currentBadge.label}</span>
             </span>
           )}
-        </motion.div>
+        </div>
 
-        <motion.h1
-          variants={itemVariants}
-          className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl"
-        >
+        <h1 className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl">
           Belouga{' '}
           <span className="text-gradient-brand animate-gradient-x">
             Tournament
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          variants={itemVariants}
-          className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl"
-        >
+        <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl">
           L'expérience compétitive ultime fondée par{' '}
           {twitchUrl ? (
             <a
@@ -211,12 +179,9 @@ export const HeroSection = ({
           <br />
           Affrontez les meilleurs, suivez l'action en direct sur Twitch et
           forgez votre légende.
-        </motion.p>
+        </p>
 
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-wrap justify-center gap-6 pt-8"
-        >
+        <div className="flex flex-wrap justify-center gap-6 pt-8">
           <Button
             asChild
             variant="brand"
@@ -251,19 +216,16 @@ export const HeroSection = ({
               </Link>
             </Button>
           )}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Scroll cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
+      <div
         className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
         aria-hidden="true"
       >
         <ChevronDown className="size-6 animate-bounce-slow text-zinc-500" />
-      </motion.div>
+      </div>
     </section>
   )
 }

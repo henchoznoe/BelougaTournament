@@ -16,6 +16,7 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -91,7 +92,10 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       })
 
-      updateTag(CACHE_TAGS.TOURNAMENTS)
+      invalidateTournamentParticipation(
+        registration.tournament.id,
+        registration.userId,
+      )
       updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
       updateTag(CACHE_TAGS.DASHBOARD_STATS)
       updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
@@ -131,7 +135,10 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       })
 
-      updateTag(CACHE_TAGS.TOURNAMENTS)
+      invalidateTournamentParticipation(
+        registration.tournament.id,
+        registration.userId,
+      )
       updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
       updateTag(CACHE_TAGS.DASHBOARD_STATS)
       updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
@@ -164,7 +171,10 @@ export const adminDeleteRegistration = authenticatedAction({
       await handleCaptainSuccession(tx, team, registration.userId)
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(
+      registration.tournament.id,
+      registration.userId,
+    )
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
@@ -183,6 +193,7 @@ export const adminDeleteRegistration = authenticatedAction({
 /** Registration with tournament fields. Used by adminUpdateRegistrationFields. */
 type RegistrationWithFields = {
   id: string
+  userId: string
   tournament: {
     id: string
     fields: { label: string; type: string; required: boolean }[]
@@ -228,7 +239,10 @@ export const adminUpdateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(
+      registration.tournament.id,
+      registration.userId,
+    )
 
     return {
       success: true,
@@ -378,7 +392,10 @@ export const adminRefundRegistration = authenticatedAction({
       }
     }
 
-    updateTag(CACHE_TAGS.TOURNAMENTS)
+    invalidateTournamentParticipation(
+      registration.tournament.id,
+      registration.userId,
+    )
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)

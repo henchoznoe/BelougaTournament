@@ -8,9 +8,9 @@
 
 'use client'
 
-import posthog from 'posthog-js'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/core/auth-client'
+import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 
 interface UseLogoutOptions {
   /** Called after a successful sign-out (e.g. redirect or refresh). */

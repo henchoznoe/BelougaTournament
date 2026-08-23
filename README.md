@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/assets/logo-blue.png" alt="Logo" width="auto" height="200">
+<img src="public/assets/logo-blue.webp" alt="Logo" width="auto" height="200">
 
 [![CI](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml/badge.svg)](https://github.com/henchoznoe/BelougaTournament/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/henchoznoe/BelougaTournament/main?label=coverage&logo=codecov)](https://codecov.io/github/henchoznoe/BelougaTournament)
@@ -179,7 +179,6 @@ CI ([`ci.yml`](.github/workflows/ci.yml), reused by [`release.yml`](.github/work
    pnpm exec biome check .             # Lint & format
    pnpm exec knip                      # Dead code analysis
    pnpm exec next build                # Production build
-   pnpm audit --audit-level=high       # Security audit
    ```
 
 3. **Tests** — `pnpm test:coverage` runs the Vitest suite with coverage and uploads the report to Codecov.

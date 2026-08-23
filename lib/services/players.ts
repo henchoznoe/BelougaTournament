@@ -8,7 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -24,8 +24,8 @@ import {
 /** Fetches all public, non-banned players for the players list page. */
 export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.PLAYERS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS.PLAYERS_LIST)
 
   try {
     const rows = await prisma.user.findMany({
@@ -74,6 +74,10 @@ export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
 export const getPlayerProfileStatus = async (
   userId: string,
 ): Promise<PlayerProfileStatus> => {
+  'use cache'
+  cacheLife('max')
+  cacheTag(CACHE_TAGS.PLAYERS_LIST, CACHE_TAGS_DYNAMIC.PLAYER(userId))
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -93,8 +97,8 @@ export const getPublicPlayerProfile = async (
   userId: string,
 ): Promise<PublicPlayerProfile | null> => {
   'use cache'
-  cacheLife('hours')
-  cacheTag(CACHE_TAGS.PLAYERS)
+  cacheLife('max')
+  cacheTag(CACHE_TAGS_DYNAMIC.PLAYER(userId))
 
   try {
     const user = await prisma.user.findUnique({
