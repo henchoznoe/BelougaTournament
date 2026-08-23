@@ -1,3 +1,10 @@
+## [1.12.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.2...v1.12.3) (2026-08-23)
+
+
+### Bug Fixes
+
+* **auth:** restore Discord OAuth compatibility ([15d2a30](https://github.com/henchoznoe/BelougaTournament/commit/15d2a3048fa83c6ac12c9e0887be4905a57b3b69))
+
 ## [1.12.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.1...v1.12.2) (2026-08-23)
 
 
