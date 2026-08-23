@@ -1,3 +1,16 @@
+## [1.12.2](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.1...v1.12.2) (2026-08-23)
+
+
+### Bug Fixes
+
+* **deps:** override vulnerable nanoid version ([f6f6ee4](https://github.com/henchoznoe/BelougaTournament/commit/f6f6ee44a99ebad9d3a6831f9c6c2dd29967ffa0))
+* preserve jsdom assets in Vercel builds ([885b81b](https://github.com/henchoznoe/BelougaTournament/commit/885b81b9ced7b7ef10996249ad0b811bda39c152))
+
+
+### Performance Improvements
+
+* optimize Vercel resource usage ([220faa7](https://github.com/henchoznoe/BelougaTournament/commit/220faa731dd17b0fb8d5f3afb10024db95ef3106))
+
 ## [1.12.1](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.0...v1.12.1) (2026-06-27)
 
 
