@@ -1,3 +1,10 @@
+## [1.12.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.3...v1.12.4) (2026-09-16)
+
+
+### Bug Fixes
+
+* update discord login ([e0f7355](https://github.com/henchoznoe/BelougaTournament/commit/e0f7355ef6914b634bda2ce5eaa90ce484c33679))
+
 ## [1.12.3](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.2...v1.12.3) (2026-08-23)
 
 
