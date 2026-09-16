@@ -29,13 +29,21 @@ const getQueue = (): PostHogQueue | undefined =>
   typeof window === 'undefined' ? undefined : window.posthog
 
 const enqueue = (method: string, args: PostHogArguments): void => {
-  const queue = getQueue()
-  if (!queue) return
-  const callable = queue[method as keyof PostHogQueue] as unknown
-  if (typeof callable === 'function') {
-    const capture = callable as (...values: PostHogArguments) => void
-    capture(...args)
-  } else queue.push([method, ...args])
+  try {
+    const queue = getQueue()
+    if (!queue) return
+    const callable = queue[method as keyof PostHogQueue] as unknown
+    if (typeof callable === 'function') {
+      const capture = callable as (...values: PostHogArguments) => void
+
+      // The CDN replaces the initial queue stubs with methods that depend on
+      // `this`. Calling an extracted method loses the PostHog instance and can
+      // throw before critical user actions (such as OAuth sign-in) run.
+      Reflect.apply(capture, queue, args)
+    } else queue.push([method, ...args])
+  } catch {
+    // Analytics must never interrupt the user-facing action being measured.
+  }
 }
 
 export const posthogBrowser = {
