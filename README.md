@@ -99,8 +99,8 @@ For a deeper technical breakdown, see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ### Prerequisites
 
-- Node.js 22+
-- pnpm 11+
+- Node.js 24 (see `.node-version`)
+- pnpm 12 (see `packageManager` in `package.json`)
 - Docker
 - Stripe CLI if you want to test webhooks locally
 

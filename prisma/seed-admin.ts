@@ -6,10 +6,12 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { config } from 'dotenv'
 import pg from 'pg'
 import { PrismaClient } from './generated/prisma/client'
+
+config({ path: '.env.local' })
 
 /**
  * Parse a comma-separated email env var and derive a placeholder name
