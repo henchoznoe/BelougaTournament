@@ -41,6 +41,8 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Preserve the existing prefetch behavior while upgrading to Next.js 16.4.
+  partialPrefetching: false,
   // isomorphic-dompurify loads jsdom on the server. Keeping the package external
   // preserves jsdom's runtime assets instead of relocating them into a webpack
   // chunk where its relative browser/default-stylesheet.css path no longer exists.

@@ -10,8 +10,9 @@ import { readFileSync, statSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
+import { resolvePrerenderedHtml } from './build-artifacts.ts'
 
-const nextDirectory = path.resolve('.next')
+const nextDirectory = path.resolve(process.argv[2] ?? '.next')
 const publicDirectory = path.resolve('public')
 const minimumRevalidateSeconds = 30 * 24 * 60 * 60
 
@@ -97,7 +98,7 @@ const getRouteJavascriptBytes = async (
   route: keyof typeof routeHtmlPaths,
 ): Promise<number> => {
   const html = await readFile(
-    path.join(nextDirectory, 'server/app', routeHtmlPaths[route]),
+    await resolvePrerenderedHtml(nextDirectory, routeHtmlPaths[route]),
     'utf8',
   )
   const scripts = new Set(
