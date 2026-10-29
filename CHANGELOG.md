@@ -1,3 +1,11 @@
+## [1.12.5](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.4...v1.12.5) (2026-10-29)
+
+
+### Bug Fixes
+
+* **auth:** migrate preview database and surface OAuth failures ([9cbb9c9](https://github.com/henchoznoe/BelougaTournament/commit/9cbb9c94a65fa79eb3f6500f6fcb0f1b10ec639c))
+* support Vercel build artifacts and Better Auth schema ([15fc326](https://github.com/henchoznoe/BelougaTournament/commit/15fc326bddb9d5c8787a56e99b4bd0c4509d5ba2))
+
 ## [1.12.4](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.3...v1.12.4) (2026-09-16)
 
 
