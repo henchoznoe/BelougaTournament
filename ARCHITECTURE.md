@@ -431,7 +431,8 @@ Key operational details:
 
 - Prisma CLI reads `.env.local` through `prisma.config.ts`
 - local schema changes should go through `pnpm migrate`
-- `pnpm build` and `pnpm db:deploy` both run migrations and seeds
+- `pnpm build` applies migrations only in Vercel Preview and Production; local and CI builds skip them
+- `pnpm db:deploy` explicitly applies migrations; seeding is separate (`pnpm db:seed`)
 - `ADMIN_EMAILS` is used for admin seeding
 - `SUPER_ADMIN_EMAILS` is used for super admin seeding
 
@@ -444,14 +445,14 @@ The app is intended for Vercel deployment.
 The build command is intentionally operational:
 
 ```bash
-prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build
+prisma generate && node scripts/deploy-migrations.ts && next build --webpack && pnpm verify:build
 ```
 
 Implication:
 
-- a production build is also a database deployment step.
+- Vercel Preview and Production builds also deploy migrations to their respective configured databases.
 
-That behavior is convenient for deploy targets but must be treated carefully in local and preview environments.
+Preview uses a separate Supabase database. Local and CI builds do not run migrations automatically.
 
 ## 20. Key Conventions
 

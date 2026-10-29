@@ -135,14 +135,15 @@ Notes:
 
 - Prisma CLI loads `.env.local` through `prisma.config.ts`.
 - `ADMIN_EMAILS` and `SUPER_ADMIN_EMAILS` are both used by `prisma/seed-admin.ts` at seed time.
-- `pnpm build` and `pnpm db:deploy` both run migrations and seed logic against the configured database.
+- `pnpm build` applies migrations only in Vercel Preview and Production, against the database configured for that environment. Preview uses its own Supabase database. Local and CI builds skip migrations.
+- `pnpm db:deploy` explicitly applies migrations to the configured database. Seeding is separate (`pnpm db:seed`).
 
 ## Development Commands
 
 | Command | Description |
 | --- | --- |
 | `pnpm dev` | Start the Next.js dev server |
-| `pnpm build` | Generate Prisma client, deploy migrations, seed, then build Next.js |
+| `pnpm build` | Generate Prisma client, migrate on Vercel Preview/Production, build Next.js, verify assets |
 | `pnpm start` | Start the production server |
 | `pnpm exec tsc --noEmit` | Run TypeScript type-checking |
 | `pnpm exec biome check .` | Run formatter/linter check without writing |
@@ -153,7 +154,7 @@ Notes:
 | `pnpm test:coverage` | Run Vitest with coverage |
 | `pnpm generate` | Generate Prisma client |
 | `pnpm migrate` | Create and apply a local Prisma migration |
-| `pnpm db:deploy` | Generate Prisma client, deploy migrations, seed database |
+| `pnpm db:deploy` | Generate Prisma client and deploy migrations |
 | `pnpm db:studio` | Open Prisma Studio |
 | `pnpm docker:up` | Start local PostgreSQL |
 | `pnpm docker:down` | Stop local PostgreSQL |

@@ -28,7 +28,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && node scripts/deploy-production-migrations.ts && next build --webpack && pnpm verify:build",
+    "build": "prisma generate && node scripts/deploy-migrations.ts && next build --webpack && pnpm verify:build",
     "verify:build": "node scripts/verify-build-quality.ts",
     "vercel:ignore-build": "node scripts/should-ignore-vercel-build.ts",
     "start": "next start",

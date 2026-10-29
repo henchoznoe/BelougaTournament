@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/core/auth-client'
+import { getLoginErrorUrl } from '@/lib/utils/auth-redirect'
 import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 
 /** Extension point: add more OAuth providers here as needed (e.g. 'google', 'twitch'). */
@@ -32,6 +33,7 @@ export const SocialLogin = ({ redirectTo }: SocialLoginProps) => {
       const { error } = await authClient.signIn.social({
         provider: provider,
         callbackURL: redirectTo,
+        errorCallbackURL: getLoginErrorUrl(redirectTo),
       })
 
       if (error) {

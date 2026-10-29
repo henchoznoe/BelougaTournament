@@ -17,6 +17,13 @@ export const AUTH_CONFIG = {
   RATE_LIMIT_MAX: 30, // 30 requests per window
 } as const
 
+/** Safe user-facing OAuth failure messages; never display provider error details. */
+export const AUTH_ERROR_MESSAGES = {
+  CANCELLED: 'La connexion Discord a été annulée. Vous pouvez réessayer.',
+  FAILED:
+    'La connexion avec Discord a échoué. Veuillez réessayer dans quelques instants.',
+} as const
+
 /** Singleton ID for the GlobalSettings row (single-row table pattern). */
 export const SETTINGS_SINGLETON_ID = 1
 
