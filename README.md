@@ -137,6 +137,7 @@ Notes:
 - `ADMIN_EMAILS` and `SUPER_ADMIN_EMAILS` are both used by `prisma/seed-admin.ts` at seed time.
 - `pnpm build` applies migrations only in Vercel Preview and Production, against the database configured for that environment. Preview uses its own Supabase database. Local and CI builds skip migrations.
 - `pnpm db:deploy` explicitly applies migrations to the configured database. Seeding is separate (`pnpm db:seed`).
+- `vercel.json` enables Node's `require(ESM)` interop for Vercel Functions. Lambda disables it by default, but the current DOMPurify/jsdom dependencies require it for server rendering. See the [upstream runtime configuration guidance](https://github.com/kkomelin/isomorphic-dompurify/wiki/Workaround:-%60ERR_REQUIRE_ESM%60-on-Vercel---Netlify---AWS-Lambda).
 
 ## Development Commands
 
