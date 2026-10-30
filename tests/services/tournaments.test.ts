@@ -6,6 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { cacheLife } from 'next/cache'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
@@ -1141,6 +1142,7 @@ describe('getPublicTournamentBySlug', () => {
     const result = await getPublicTournamentBySlug('valorant-cup')
 
     expect(result).toEqual(MOCK_PUBLIC_DETAIL)
+    expect(cacheLife).toHaveBeenCalledWith({ stale: 0 })
     expect(mockFindFirst).toHaveBeenCalledWith({
       where: {
         slug: 'valorant-cup',

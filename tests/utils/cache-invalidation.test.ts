@@ -10,8 +10,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 
 const mockUpdateTag = vi.fn()
+const mockRevalidatePath = vi.fn()
 vi.mock('next/cache', () => ({
   updateTag: (...args: unknown[]) => mockUpdateTag(...args),
+  revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }))
 
 const {
@@ -40,6 +42,22 @@ describe('cache invalidation groups', () => {
       CACHE_TAGS_DYNAMIC.TOURNAMENT('t-1'),
       CACHE_TAGS_DYNAMIC.TOURNAMENT_SLUG('summer-cup'),
     ])
+    expect(mockRevalidatePath.mock.calls).toEqual([
+      ['/'],
+      ['/tournaments'],
+      ['/tournaments/archive'],
+      ['/tournaments/summer-cup'],
+    ])
+  })
+
+  it('refreshes catalog pages without invalidating unrelated tournament details', () => {
+    invalidateTournamentCatalog()
+
+    expect(mockRevalidatePath.mock.calls).toEqual([
+      ['/'],
+      ['/tournaments'],
+      ['/tournaments/archive'],
+    ])
   })
 
   it('keeps a registration mutation scoped to its tournament and user', () => {
@@ -57,6 +75,7 @@ describe('cache invalidation groups', () => {
     expect(calledTags()).not.toContain(CACHE_TAGS.TOURNAMENTS_ARCHIVED)
     expect(calledTags()).not.toContain(CACHE_TAGS.TOURNAMENTS_SITEMAP)
     expect(calledTags()).not.toContain(CACHE_TAGS.PLAYERS_LIST)
+    expect(mockRevalidatePath).not.toHaveBeenCalled()
   })
 
   it('invalidates only the player list, profile and public stats', () => {

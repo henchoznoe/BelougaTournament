@@ -153,7 +153,8 @@ export const getPublicTournamentBySlug = async (
   slug: string,
 ): Promise<PublicTournamentDetail | null> => {
   'use cache'
-  cacheLife('max')
+  // Always check the server on navigation; registration fields must stay current.
+  cacheLife({ stale: 0 })
   cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_SLUG(slug))
 
   try {

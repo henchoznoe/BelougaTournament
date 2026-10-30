@@ -8,10 +8,13 @@
 
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
-import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import { cn } from '@/lib/utils/cn'
+
+// Quill accesses document during import and cannot be rendered on the server.
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
 
 interface RichTextEditorProps {
   id?: string

@@ -1,4 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "node scripts/should-ignore-vercel-build.ts"
+  "ignoreCommand": "node scripts/should-ignore-vercel-build.ts",
+  "env": {
+    "NODE_OPTIONS": "--experimental-require-module"
+  }
 }
