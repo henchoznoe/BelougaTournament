@@ -6,9 +6,11 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { revalidatePath } from 'next/cache'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   DonationType,
+  FieldType,
   RefundPolicyType,
   RegistrationType,
   Role,
@@ -47,6 +49,7 @@ vi.mock('@/lib/core/stripe', () => ({
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   updateTag: vi.fn(),
+  revalidatePath: vi.fn(),
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }))
@@ -215,7 +218,7 @@ describe('tournament admin actions', () => {
     mockGetSession.mockResolvedValue(ADMIN_SESSION)
     mockTournamentCreate.mockResolvedValue({})
     mockTournamentUpdate.mockResolvedValue({ slug: 'valorant-cup' })
-    mockTournamentDelete.mockResolvedValue({})
+    mockTournamentDelete.mockResolvedValue({ slug: 'valorant-cup' })
     mockTournamentFindUnique.mockResolvedValue(EXISTING_TOURNAMENT)
     mockTransaction.mockResolvedValue([])
     mockTeamMemberCount.mockResolvedValue(1)
@@ -371,6 +374,40 @@ describe('tournament admin actions', () => {
       }),
     ).toEqual({ success: true, message: 'Le tournoi a été mis à jour.' })
     expect(mockTransaction).toHaveBeenCalledOnce()
+  })
+
+  it('refreshes the existing public URL after committing a required field on a published tournament', async () => {
+    mockTournamentFindUnique.mockResolvedValue({
+      ...EXISTING_TOURNAMENT,
+      status: TournamentStatus.PUBLISHED,
+      slug: 'existing-overwatch-cup',
+    })
+    const fields = [
+      {
+        label: 'Rang Overwatch',
+        type: FieldType.TEXT,
+        required: true,
+        order: 0,
+      },
+    ]
+
+    const result = await updateTournament({
+      ...VALID_TOURNAMENT_INPUT,
+      id: TOURNAMENT_UUID,
+      fields,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockTournamentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ fields: { create: fields } }),
+      }),
+    )
+    expect(mockTransaction).toHaveBeenCalledBefore(vi.mocked(revalidatePath))
+    expect(revalidatePath).toHaveBeenCalledWith(
+      '/tournaments/existing-overwatch-cup',
+    )
+    expect(revalidatePath).not.toHaveBeenCalledWith('/tournaments/valorant-cup')
   })
 
   it('updates a paid tournament with free donations configured', async () => {
@@ -634,6 +671,7 @@ describe('tournament admin actions', () => {
       success: true,
       message: 'Le tournoi a été supprimé.',
     })
+    expect(revalidatePath).toHaveBeenCalledWith('/tournaments/valorant-cup')
   })
 
   it('rejects moving a tournament back to draft when paid registrations exist', async () => {

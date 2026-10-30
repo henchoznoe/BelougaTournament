@@ -366,11 +366,15 @@ export const deleteTournament = authenticatedAction({
       }
     }
 
-    await prisma.tournament.delete({
+    const deletedTournament = await prisma.tournament.delete({
       where: { id: data.id },
+      select: { slug: true },
     })
 
-    invalidateTournamentCatalog({ tournamentId: data.id })
+    invalidateTournamentCatalog({
+      tournamentId: data.id,
+      slug: deletedTournament.slug,
+    })
     updateTag(CACHE_TAGS.DASHBOARD_STATS)
     updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 

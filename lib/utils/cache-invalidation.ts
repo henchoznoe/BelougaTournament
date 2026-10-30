@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { updateTag } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants/cache'
 
 const unique = (tags: string[]): string[] => [...new Set(tags)]
@@ -60,7 +60,15 @@ const invalidate = (tags: string[]): void => {
 export const invalidateTournamentCatalog = (options?: {
   tournamentId?: string
   slug?: string
-}): void => invalidate(getTournamentCatalogCacheTags(options))
+}): void => {
+  invalidate(getTournamentCatalogCacheTags(options))
+
+  // Expire prerendered pages as well as their data, so the next visit is fresh.
+  revalidatePath('/')
+  revalidatePath('/tournaments')
+  revalidatePath('/tournaments/archive')
+  if (options?.slug) revalidatePath(`/tournaments/${options.slug}`)
+}
 
 export const invalidateTournamentParticipation = (
   tournamentId: string,
