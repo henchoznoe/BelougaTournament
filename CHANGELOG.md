@@ -1,3 +1,10 @@
+## [1.12.7](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.6...v1.12.7) (2026-11-07)
+
+
+### Bug Fixes
+
+* **tournaments:** refresh upcoming events and clear stale payment feedback ([f33de6e](https://github.com/henchoznoe/BelougaTournament/commit/f33de6e9df64b923a8a7df88f3c07dd9ba8cc83a))
+
 ## [1.12.6](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.5...v1.12.6) (2026-10-30)
 
 
