@@ -1,3 +1,12 @@
+## [1.12.6](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.5...v1.12.6) (2026-10-30)
+
+
+### Bug Fixes
+
+* **tournaments:** refresh public pages after tournament updates ([a74ec3b](https://github.com/henchoznoe/BelougaTournament/commit/a74ec3b21dbc5925f16a24252c67c9d6bdec857b))
+* **tournaments:** restore fresh public pages on Vercel ([757b7b5](https://github.com/henchoznoe/BelougaTournament/commit/757b7b5764399eeecc5ecd87f0069bfc72639e84))
+* **vercel:** enable ESM interop for server rendering ([2116074](https://github.com/henchoznoe/BelougaTournament/commit/2116074d2e09e24fa6757857e8c17d38b5927811))
+
 ## [1.12.5](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.4...v1.12.5) (2026-10-29)
 
 
