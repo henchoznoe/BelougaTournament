@@ -20,7 +20,7 @@ const ProfilePageContent = () => {
     <section className="relative px-4 pb-20 pt-32 md:pt-40">
       <PageHeader
         title="Mon Profil"
-        description="Consultez vos informations personnelles."
+        description="Retrouvez vos tournois, vos inscriptions et votre compte."
       />
       <ProfilePage />
     </section>

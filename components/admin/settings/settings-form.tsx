@@ -11,10 +11,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { useUnsavedChanges } from '@/components/admin/hooks/use-unsaved-changes'
 import { LogoPicker } from '@/components/admin/settings/logo-picker'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,6 +39,7 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors, isDirty },
   } = useForm<SettingsInput>({
     resolver: zodResolver(settingsSchema),
@@ -57,40 +60,47 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
     },
   })
 
+  const allowLeave = useUnsavedChanges(isDirty)
+  const [feedback, setFeedback] = useState<{
+    success: boolean
+    message: string
+  } | null>(null)
+
   const onSubmit = (data: SettingsInput) => {
     startTransition(async () => {
       const result = await updateSettings(data)
 
       if (result.success) {
         toast.success(result.message)
+        allowLeave()
+        reset(data)
+        setFeedback({
+          success: true,
+          message: result.message ?? 'Paramètres enregistrés.',
+        })
         router.refresh()
       } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
+        setFeedback({
+          success: false,
+          message:
+            result.message ??
+            'Une erreur est survenue. Vos modifications sont conservées.',
+        })
       }
     })
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Save button */}
-      <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isPending || !isDirty}
-          className="w-full gap-2 bg-blue-600 text-white hover:bg-blue-500 sm:w-auto"
-        >
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Save className="size-4" />
-          )}
-          Sauvegarder
-        </Button>
-      </div>
-
+      {feedback && (
+        <ActionFeedback
+          tone={feedback.success ? 'success' : 'error'}
+          title={feedback.message}
+        />
+      )}
       {/* Social links + Twitch card */}
       <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
           Réseaux sociaux
         </h3>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -155,10 +165,10 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
       {/* Features card */}
       <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
             Pourquoi participer ?
           </h3>
-          <p className="mt-1 text-xs text-zinc-600">
+          <p className="mt-1 text-xs text-zinc-400">
             Titre et description des 3 cartes affichées sur la page d'accueil.
             Laissez vide pour utiliser les valeurs par défaut.
           </p>
@@ -230,10 +240,10 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
       {/* Logo card */}
       <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
             Logo
           </h3>
-          <p className="mt-1 text-xs text-zinc-600">
+          <p className="mt-1 text-xs text-zinc-400">
             Logo du site affiché dans le pied de page. Laisser vide pour
             utiliser le logo par défaut (logo bleu).
           </p>
@@ -249,6 +259,21 @@ export const SettingsForm = ({ settings }: SettingsFormProps) => {
             </p>
           )}
         </div>
+      </div>
+      {/* Save button */}
+      <div className="form-actions">
+        <Button
+          type="submit"
+          disabled={isPending || !isDirty}
+          className="w-full gap-2 bg-blue-600 text-white hover:bg-blue-500 sm:w-auto"
+        >
+          {isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Save className="size-4" />
+          )}
+          Sauvegarder
+        </Button>
       </div>
     </form>
   )
@@ -274,10 +299,16 @@ const SettingsField = ({
       </Label>
       <Input
         id={id}
-        className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
         {...inputProps}
       />
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="text-sm text-red-300">
+          {error}
+        </p>
+      )}
     </div>
   )
 }
@@ -302,10 +333,16 @@ const SettingsTextareaField = ({
       </Label>
       <Textarea
         id={id}
-        className="min-h-20 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className="min-h-20 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
         {...textareaProps}
       />
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="text-sm text-red-300">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

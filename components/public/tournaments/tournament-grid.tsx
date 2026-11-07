@@ -9,6 +9,7 @@
 import { Trophy } from 'lucide-react'
 import { TournamentCard } from '@/components/public/tournaments/tournament-card'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
+import { cn } from '@/lib/utils/cn'
 
 interface TournamentGridProps {
   tournaments: PublicTournamentListItem[]
@@ -39,7 +40,7 @@ export const TournamentGrid = ({
             <h2 className="text-xl font-bold text-white">
               {hasActiveFilters ? 'Aucun résultat' : emptyTitle}
             </h2>
-            <p className="mx-auto max-w-md text-sm text-zinc-500">
+            <p className="mx-auto max-w-md text-sm text-zinc-400">
               {hasActiveFilters ? emptyFilteredDescription : emptyDescription}
             </p>
           </div>
@@ -49,7 +50,16 @@ export const TournamentGrid = ({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      className={cn(
+        'grid gap-6',
+        tournaments.length === 1
+          ? 'mx-auto max-w-lg'
+          : tournaments.length === 2
+            ? 'sm:grid-cols-2'
+            : 'sm:grid-cols-2 lg:grid-cols-3',
+      )}
+    >
       {tournaments.map(tournament => (
         <TournamentCard key={tournament.id} tournament={tournament} />
       ))}

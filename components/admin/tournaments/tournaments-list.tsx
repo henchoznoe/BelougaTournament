@@ -9,10 +9,9 @@
 'use client'
 
 import { Plus, Search } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
+import { useListQuery } from '@/components/admin/hooks/use-list-query'
 import {
   applySortToList,
   useListSort,
@@ -20,8 +19,10 @@ import {
 import { TournamentActionsDropdown } from '@/components/admin/tournaments/tournament-actions-dropdown'
 import { TournamentStatusBadge } from '@/components/admin/tournaments/tournament-status-badge'
 import { AdminPagination } from '@/components/admin/ui/admin-pagination'
+import { PendingTableRow } from '@/components/admin/ui/pending-table-row'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Select,
   SelectContent,
@@ -50,6 +51,15 @@ import {
   TournamentFormat,
   TournamentStatus,
 } from '@/prisma/generated/prisma/enums'
+
+const SORT_KEYS = [
+  'title',
+  'format',
+  'registrationType',
+  'startDate',
+  'registrations',
+  'status',
+] as const
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.TOURNAMENTS
 
@@ -124,13 +134,19 @@ const formatRegistrationType = (t: TournamentListItem): string => {
 }
 
 export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
-  const router = useRouter()
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [search, setSearch] = useListQuery<string>('search', '')
+  const [statusFilter, setStatusFilter] = useListQuery<StatusFilter>(
+    'status',
+    'all',
+    isStatusFilter,
+  )
 
   const { paginate, resetPage } =
     useClientPagination<TournamentListItem>(PAGE_SIZE)
-  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(
+    resetPage,
+    SORT_KEYS,
+  )
 
   const filtered = useMemo(() => {
     let items = tournaments
@@ -188,13 +204,13 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       {/* Search + status filter + create button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-xs flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
           <Input
             placeholder="Rechercher un tournoi..."
             aria-label="Rechercher un tournoi"
             value={search}
             onChange={e => handleSearch(e.target.value)}
-            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
+            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-400"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -225,7 +241,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       </div>
 
       {/* Stats line */}
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
         <span className="mr-2">
           {tournaments.length} tournoi{pluralize(tournaments.length)}
         </span>
@@ -246,7 +262,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
       {/* Table or empty state */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-400">
             {search || statusFilter !== 'all'
               ? 'Aucun tournoi trouvé pour ces critères.'
               : 'Aucun tournoi pour le moment.'}
@@ -258,73 +274,85 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
                 <TableHead
-                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
-                  onClick={() => handleSort('title')}
+                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300"
+                  onSort={() => handleSort('title')}
+                  sortDirection={
+                    sort.key === 'title' ? sort.direction : undefined
+                  }
                 >
                   Tournoi {sortIndicator('title')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 sm:table-cell"
-                  onClick={() => handleSort('format')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 sm:table-cell"
+                  onSort={() => handleSort('format')}
+                  sortDirection={
+                    sort.key === 'format' ? sort.direction : undefined
+                  }
                 >
                   Format {sortIndicator('format')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
-                  onClick={() => handleSort('registrationType')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 md:table-cell"
+                  onSort={() => handleSort('registrationType')}
+                  sortDirection={
+                    sort.key === 'registrationType' ? sort.direction : undefined
+                  }
                 >
                   Type {sortIndicator('registrationType')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
-                  onClick={() => handleSort('startDate')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 md:table-cell"
+                  onSort={() => handleSort('startDate')}
+                  sortDirection={
+                    sort.key === 'startDate' ? sort.direction : undefined
+                  }
                 >
                   Date de début {sortIndicator('startDate')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-center text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 lg:table-cell"
-                  onClick={() => handleSort('registrations')}
+                  className="hidden cursor-pointer select-none text-center text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 lg:table-cell"
+                  onSort={() => handleSort('registrations')}
+                  sortDirection={
+                    sort.key === 'registrations' ? sort.direction : undefined
+                  }
                 >
                   Inscriptions {sortIndicator('registrations')}
                 </TableHead>
                 <TableHead
-                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
-                  onClick={() => handleSort('status')}
+                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300"
+                  onSort={() => handleSort('status')}
+                  sortDirection={
+                    sort.key === 'status' ? sort.direction : undefined
+                  }
                 >
                   Statut {sortIndicator('status')}
                 </TableHead>
-                <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-400">
                   <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginated.map(tournament => (
-                <TableRow
+                <PendingTableRow
                   key={tournament.id}
-                  tabIndex={0}
-                  role="link"
-                  className="cursor-pointer border-white/5 hover:bg-white/4"
-                  onClick={() =>
-                    router.push(ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug))
-                  }
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      router.push(
-                        ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug),
-                      )
-                    }
-                  }}
+                  href={ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug)}
                 >
                   {/* Title & game */}
                   <TableCell>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-200">
+                      <Link
+                        href={ROUTES.ADMIN_TOURNAMENT_DETAIL(tournament.slug)}
+                        className="inline-flex items-center text-sm font-semibold text-white hover:text-blue-300 group-data-[pending=true]/row:after:content-['…']"
+                      >
                         {tournament.title}
+                      </Link>
+                      <p className="mt-1 text-xs text-zinc-400 md:hidden">
+                        {formatShortDate(tournament.startDate)} ·{' '}
+                        {formatRegistrationType(tournament)}
                       </p>
                       {tournament.games.length > 0 && (
-                        <p className="truncate text-xs text-zinc-500">
+                        <p className="truncate text-xs text-zinc-400">
                           {tournament.games.join(', ')}
                         </p>
                       )}
@@ -332,7 +360,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   </TableCell>
 
                   {/* Format */}
-                  <TableCell className="hidden sm:table-cell">
+                  <TableCell className="hidden whitespace-nowrap sm:table-cell">
                     <span className="text-xs text-zinc-400">
                       {FORMAT_LABELS[tournament.format]}
                       {tournament.format === TournamentFormat.TEAM &&
@@ -341,14 +369,14 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   </TableCell>
 
                   {/* Registration type */}
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="hidden whitespace-nowrap md:table-cell">
                     <span className="text-xs text-zinc-400">
                       {formatRegistrationType(tournament)}
                     </span>
                   </TableCell>
 
                   {/* Start date */}
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="hidden whitespace-nowrap md:table-cell">
                     <span className="text-xs text-zinc-400">
                       {formatShortDate(tournament.startDate)}
                     </span>
@@ -372,7 +400,7 @@ export const TournamentsList = ({ tournaments }: TournamentsListProps) => {
                   <TableCell onClick={e => e.stopPropagation()}>
                     <TournamentActionsDropdown tournament={tournament} />
                   </TableCell>
-                </TableRow>
+                </PendingTableRow>
               ))}
             </TableBody>
           </Table>

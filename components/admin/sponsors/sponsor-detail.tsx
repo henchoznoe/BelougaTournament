@@ -21,7 +21,6 @@ import {
   Trash2,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -37,6 +36,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { deleteSponsor, toggleSponsorStatus } from '@/lib/actions/sponsors'
 import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'

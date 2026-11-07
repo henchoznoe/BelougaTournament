@@ -10,10 +10,10 @@
 
 import { ArrowLeft, LogOut, Menu } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Tooltip,
   TooltipContent,
@@ -42,7 +42,10 @@ export const AdminTopbar = ({
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/80 px-4 backdrop-blur-xl md:px-6">
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="hidden text-sm font-semibold text-zinc-300 sm:inline">
+          Administration
+        </span>
         <Button
           variant="ghost"
           size="icon"
@@ -97,6 +100,7 @@ export const AdminTopbar = ({
               <TooltipTrigger asChild>
                 <Link
                   href={ROUTES.PROFILE}
+                  aria-label={`Profil de ${resolvedDisplayName}`}
                   className="flex items-center gap-3 rounded-xl px-3 py-1.5 transition-colors duration-200 hover:bg-white/5"
                 >
                   <span

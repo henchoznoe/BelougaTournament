@@ -55,16 +55,16 @@ const LandingPage = async () => {
     <div className="flex flex-col overflow-x-hidden gap-12">
       <Suspense
         fallback={
-          <Skeleton className="h-dvh w-full rounded-none bg-zinc-900/50" />
+          <Skeleton className="h-[75svh] w-full rounded-none bg-zinc-900/50" />
         }
       >
         <HeroSectionWrapper />
       </Suspense>
-      <StatsSection />
-      <FeaturesSection />
       <Suspense fallback={<TournamentsSkeleton />}>
         <TournamentsSection />
       </Suspense>
+      <StatsSection />
+      <FeaturesSection />
       <HowItWorksSection />
       <StreamSection channel={globalSettings.twitchUsername ?? undefined} />
       <SponsorsSection sponsors={sponsors} />

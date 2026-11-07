@@ -11,6 +11,7 @@
 import DOMPurify from 'isomorphic-dompurify'
 import { useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils/cn'
+import { normalizeRichTextSpacing } from '@/lib/utils/editor-content'
 
 interface RichTextProps {
   content: string
@@ -42,7 +43,7 @@ export const RichText = ({ content, className }: RichTextProps) => {
 
   const sanitized = useMemo(() => {
     ensureHook()
-    return DOMPurify.sanitize(content, {
+    return DOMPurify.sanitize(normalizeRichTextSpacing(content), {
       ALLOWED_TAGS: [
         'h2',
         'h3',
@@ -68,16 +69,16 @@ export const RichText = ({ content, className }: RichTextProps) => {
   return (
     <div
       className={cn(
-        'prose prose-invert max-w-none break-words [overflow-wrap:anywhere]',
+        'prose prose-invert min-w-0 w-full max-w-full break-words [overflow-wrap:anywhere] [&_*]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap',
         // Headings
         'prose-headings:font-bold prose-headings:tracking-wide prose-headings:text-white',
         'prose-h2:text-lg prose-h3:text-base',
         'prose-h2:mt-5 prose-h2:mb-2 prose-h3:mt-4 prose-h3:mb-2',
         // Paragraphs
-        'prose-p:text-sm prose-p:leading-relaxed prose-p:text-zinc-400',
+        'prose-p:text-sm prose-p:leading-relaxed prose-p:text-zinc-300',
         // Lists
-        'prose-ul:text-sm prose-ul:text-zinc-400 prose-ol:text-sm prose-ol:text-zinc-400',
-        'prose-li:text-zinc-400 prose-li:marker:text-zinc-600',
+        'prose-ul:text-sm prose-ul:text-zinc-300 prose-ol:text-sm prose-ol:text-zinc-300',
+        'prose-li:text-zinc-300 prose-li:marker:text-zinc-400',
         // Links
         'prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 hover:prose-a:underline',
         // Strong / emphasis
@@ -86,7 +87,7 @@ export const RichText = ({ content, className }: RichTextProps) => {
         'prose-code:rounded prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-xs prose-code:text-zinc-300',
         'prose-pre:rounded-xl prose-pre:border prose-pre:border-white/5 prose-pre:bg-white/2',
         // Blockquotes
-        'prose-blockquote:border-l-blue-500/30 prose-blockquote:text-zinc-400',
+        'prose-blockquote:border-l-blue-500/30 prose-blockquote:text-zinc-300',
         className,
       )}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: content is sanitized with DOMPurify

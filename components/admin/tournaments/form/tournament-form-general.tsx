@@ -51,6 +51,10 @@ export const TournamentFormGeneral = ({
             Titre *
           </Label>
           <Input
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={
+              errors.title ? 'tournament-form-general-title-error' : undefined
+            }
             id="tournament-title"
             placeholder="Nom du tournoi"
             maxLength={VALIDATION_LIMITS.TITLE_MAX}
@@ -58,7 +62,13 @@ export const TournamentFormGeneral = ({
             {...register('title')}
           />
           {errors.title?.message && (
-            <p className="text-xs text-red-400">{errors.title.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-general-title-error"
+              role="alert"
+            >
+              {errors.title?.message}
+            </p>
           )}
         </div>
 
@@ -73,14 +83,23 @@ export const TournamentFormGeneral = ({
                 id="tournament-description"
                 value={field.value}
                 onChange={val =>
-                  setValue('description', val, { shouldValidate: true })
+                  setValue('description', val, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
                 }
                 placeholder="Description du tournoi..."
               />
             )}
           />
           {errors.description?.message && (
-            <p className="text-xs text-red-400">{errors.description.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-general-description-error"
+              role="alert"
+            >
+              {errors.description?.message}
+            </p>
           )}
         </div>
       </div>

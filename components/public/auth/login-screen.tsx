@@ -11,9 +11,9 @@
 import { motion } from 'framer-motion'
 import { ArrowLeft, Gamepad2 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { SocialLogin } from '@/components/public/auth/social-login'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 
@@ -23,7 +23,7 @@ interface LoginScreenProps {
 
 export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
   return (
-    <div className="flex h-dvh overflow-hidden w-full bg-zinc-950">
+    <div className="flex min-h-dvh w-full bg-zinc-950">
       {/* Left side - Visual (Hidden on mobile) */}
       <div className="relative hidden w-1/2 lg:block">
         <Image
@@ -56,7 +56,7 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="flex w-full flex-col items-center justify-center p-8 lg:w-1/2 relative">
+      <div className="flex w-full flex-col items-center justify-center px-6 py-10 lg:w-1/2 relative">
         <div className="w-full max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -87,7 +87,7 @@ export const LoginScreen = ({ redirectTo }: LoginScreenProps) => {
               <SocialLogin redirectTo={redirectTo} />
             </div>
 
-            <p className="mt-8 text-center text-xs text-zinc-600">
+            <p className="mt-8 text-center text-xs text-zinc-400">
               En vous connectant, vous acceptez nos{' '}
               <Link href={ROUTES.TERMS} className="text-brand">
                 conditions d'utilisation

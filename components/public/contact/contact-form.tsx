@@ -10,13 +10,14 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send } from 'lucide-react'
-import Link from 'next/link'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Select,
   SelectContent,
@@ -36,6 +37,10 @@ const INPUT_CLASS =
 
 export const ContactForm = () => {
   const [isPending, startTransition] = useTransition()
+  const [feedback, setFeedback] = useState<{
+    success: boolean
+    message: string
+  } | null>(null)
 
   const {
     register,
@@ -61,6 +66,11 @@ export const ContactForm = () => {
     startTransition(async () => {
       const result = await sendContactMessage(data)
 
+      setFeedback({
+        success: result.success,
+        message:
+          result.message ?? 'Le message n’a pas pu être envoyé. Réessayez.',
+      })
       if (result.success) {
         posthog.capture('contact_message_sent', { subject: data.subject })
         toast.success(result.message)
@@ -87,7 +97,17 @@ export const ContactForm = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          aria-busy={isPending}
+          className="space-y-5"
+        >
+          {feedback && (
+            <ActionFeedback
+              tone={feedback.success ? 'success' : 'error'}
+              title={feedback.message}
+            />
+          )}
           {/* Row 1: Name + Email (2-col on desktop) */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
@@ -96,6 +116,10 @@ export const ContactForm = () => {
               </Label>
               <Input
                 id="fullName"
+                aria-invalid={Boolean(errors.fullName)}
+                aria-describedby={
+                  errors.fullName ? 'fullName-error' : undefined
+                }
                 placeholder="Jean Dupont"
                 autoComplete="name"
                 disabled={isPending}
@@ -103,7 +127,11 @@ export const ContactForm = () => {
                 {...register('fullName')}
               />
               {errors.fullName && (
-                <p className="text-xs text-red-400">
+                <p
+                  id="fullName-error"
+                  role="alert"
+                  className="text-sm text-red-300"
+                >
                   {errors.fullName.message}
                 </p>
               )}
@@ -115,6 +143,8 @@ export const ContactForm = () => {
               </Label>
               <Input
                 id="email"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? 'email-error' : undefined}
                 type="email"
                 placeholder="jean@exemple.ch"
                 autoComplete="email"
@@ -123,7 +153,13 @@ export const ContactForm = () => {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-xs text-red-400">{errors.email.message}</p>
+                <p
+                  id="email-error"
+                  role="alert"
+                  className="text-sm text-red-300"
+                >
+                  {errors.email.message}
+                </p>
               )}
             </div>
           </div>
@@ -136,6 +172,8 @@ export const ContactForm = () => {
               </Label>
               <Input
                 id="phone"
+                aria-invalid={Boolean(errors.phone)}
+                aria-describedby={errors.phone ? 'phone-error' : undefined}
                 type="tel"
                 placeholder="+41 79 123 45 67"
                 autoComplete="tel"
@@ -144,7 +182,13 @@ export const ContactForm = () => {
                 {...register('phone')}
               />
               {errors.phone && (
-                <p className="text-xs text-red-400">{errors.phone.message}</p>
+                <p
+                  id="phone-error"
+                  role="alert"
+                  className="text-sm text-red-300"
+                >
+                  {errors.phone.message}
+                </p>
               )}
             </div>
 
@@ -195,7 +239,13 @@ export const ContactForm = () => {
               {...register('message')}
             />
             {errors.message && (
-              <p className="text-xs text-red-400">{errors.message.message}</p>
+              <p
+                id="message-error"
+                role="alert"
+                className="text-sm text-red-300"
+              >
+                {errors.message.message}
+              </p>
             )}
           </div>
 
@@ -207,7 +257,7 @@ export const ContactForm = () => {
               ) : (
                 <Send className="mr-2 size-4" />
               )}
-              Envoyer le message
+              {isPending ? 'Envoi en cours…' : 'Envoyer le message'}
             </Button>
 
             {/* GDPR / LPD Disclaimer */}

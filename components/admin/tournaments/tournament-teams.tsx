@@ -20,7 +20,6 @@ import {
   Users,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -43,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { adminPromoteCaptain } from '@/lib/actions/registrations-team'
 import { dissolveTeam, kickPlayer } from '@/lib/actions/tournament-team'
 import { ROUTES } from '@/lib/config/routes'

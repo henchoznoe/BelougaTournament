@@ -8,7 +8,7 @@
 
 import { Clock, Trophy } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { ROUTES } from '@/lib/config/routes'
 import type { RecentRegistration, RecentVisit } from '@/lib/types/dashboard'
@@ -31,7 +31,7 @@ export const DashboardRecentVisits = ({ visits }: RecentVisitsProps) => {
       </div>
 
       {visits.length === 0 ? (
-        <p className="py-4 text-center text-sm text-zinc-500">
+        <p className="py-4 text-center text-sm text-zinc-400">
           Aucun accès récent.
         </p>
       ) : (
@@ -40,7 +40,7 @@ export const DashboardRecentVisits = ({ visits }: RecentVisitsProps) => {
             <Link
               key={user.id}
               href={ROUTES.ADMIN_USER_DETAIL(user.id)}
-              className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
             >
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 {user.image ? (
@@ -64,14 +64,14 @@ export const DashboardRecentVisits = ({ visits }: RecentVisitsProps) => {
                     {user.displayName}
                   </p>
                   <div className="mt-0.5 flex items-center gap-2">
-                    <span className="truncate text-xs text-zinc-500">
+                    <span className="truncate text-xs text-zinc-400">
                       {user.name}
                     </span>
                     <RoleBadge role={user.role} />
                   </div>
                 </div>
               </div>
-              <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
+              <span className="ml-4 shrink-0 text-xs text-zinc-400">
                 {formatDateTime(user.lastSeenAt)}
               </span>
             </Link>
@@ -95,7 +95,7 @@ export const DashboardRecentRegistrations = ({
       </div>
 
       {registrations.length === 0 ? (
-        <p className="py-4 text-center text-sm text-zinc-500">
+        <p className="py-4 text-center text-sm text-zinc-400">
           Aucune inscription récente.
         </p>
       ) : (
@@ -104,17 +104,17 @@ export const DashboardRecentRegistrations = ({
             <Link
               key={reg.id}
               href={ROUTES.ADMIN_TOURNAMENT_DETAIL(reg.tournament.slug)}
-              className="flex items-center justify-between rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/2 px-4 py-3 transition-colors hover:border-white/10 hover:bg-white/5"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-white">
                   {reg.user.name}
                 </p>
-                <p className="mt-0.5 truncate text-xs text-zinc-500">
+                <p className="mt-0.5 truncate text-xs text-zinc-400">
                   {reg.tournament.title}
                 </p>
               </div>
-              <span className="ml-4 shrink-0 text-[10px] text-zinc-600">
+              <span className="ml-4 shrink-0 text-xs text-zinc-400">
                 {formatDateTime(reg.createdAt)}
               </span>
             </Link>

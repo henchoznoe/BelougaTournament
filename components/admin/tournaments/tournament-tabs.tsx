@@ -9,8 +9,8 @@
 'use client'
 
 import { ClipboardList, LayoutDashboard, Users } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { PendingLink } from '@/components/ui/pending-link'
 import { cn } from '@/lib/utils/cn'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
@@ -36,49 +36,45 @@ const isValidTab = (tab: string | null): tab is TournamentTab =>
   tab !== null && VALID_TABS.has(tab)
 
 export const TournamentTabNav = ({ format }: TournamentTabNavProps) => {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const rawTab = searchParams.get('tab')
   const currentTab: TournamentTab = isValidTab(rawTab) ? rawTab : 'overview'
 
-  const handleTabChange = useCallback(
-    (tab: TournamentTab) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (tab === 'overview') {
-        params.delete('tab')
-      } else {
-        params.set('tab', tab)
-      }
-      const qs = params.toString()
-      router.push(qs ? `${pathname}?${qs}` : pathname)
-    },
-    [router, pathname, searchParams],
-  )
+  const tabHref = (tab: TournamentTab) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (tab === 'overview') params.delete('tab')
+    else params.set('tab', tab)
+    return `${pathname}${params.size ? `?${params}` : ''}`
+  }
 
   const visibleTabs = TABS.filter(
     tab => !tab.teamOnly || format === TournamentFormat.TEAM,
   )
 
   return (
-    <div className="flex gap-1 rounded-xl border border-white/5 bg-white/2 p-1 backdrop-blur-sm">
+    <nav
+      aria-label="Sections du tournoi"
+      className="flex flex-wrap gap-1 rounded-xl border border-white/5 bg-white/2 p-1 backdrop-blur-sm"
+    >
       {visibleTabs.map(tab => (
-        <button
+        <PendingLink
           key={tab.id}
-          type="button"
-          onClick={() => handleTabChange(tab.id)}
+          href={tabHref(tab.id)}
+          scroll={false}
+          aria-current={currentTab === tab.id ? 'page' : undefined}
           className={cn(
-            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+            'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
             currentTab === tab.id
               ? 'bg-white/10 text-white'
               : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200',
           )}
         >
           <tab.icon className="size-4" />
-          <span className="hidden sm:inline">{tab.label}</span>
-        </button>
+          <span>{tab.label}</span>
+        </PendingLink>
       ))}
-    </div>
+    </nav>
   )
 }

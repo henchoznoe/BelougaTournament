@@ -7,10 +7,10 @@
  */
 
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { Reveal } from '@/components/public/shared/reveal'
 import { SectionHeader } from '@/components/public/shared/section-header'
 import { TournamentCard } from '@/components/public/tournaments/tournament-card'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import { getPublishedTournaments } from '@/lib/services/tournaments-public'
 
@@ -26,7 +26,11 @@ export const TournamentsSection = async () => {
   }
 
   return (
-    <section className="relative container mx-auto px-4 py-24">
+    <section
+      id="prochains-tournois"
+      aria-label="Prochains tournois"
+      className="section-anchor relative container mx-auto px-4 py-10 sm:py-16"
+    >
       {/* Decorative Top Line */}
       <div className="absolute left-1/2 top-0 -z-10 h-px w-1/2 -translate-x-1/2 bg-linear-to-r from-transparent via-brand/50 to-transparent opacity-50" />
 
@@ -34,7 +38,7 @@ export const TournamentsSection = async () => {
         eyebrow="Tournois"
         title="Prochains tournois"
         description="Inscrivez-vous dès maintenant et affrontez les meilleurs joueurs de la communauté."
-        className="mb-20"
+        className="mb-8"
       />
 
       {/* Tournament Cards Row */}

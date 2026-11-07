@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +32,10 @@ export const ProfileEditForm = ({
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const [feedback, setFeedback] = useState<{
+    success: boolean
+    message: string
+  } | null>(null)
 
   const {
     register,
@@ -51,6 +56,10 @@ export const ProfileEditForm = ({
     startTransition(async () => {
       const result = await updateProfile(data)
 
+      setFeedback({
+        success: result.success,
+        message: result.message ?? 'Le nom n’a pas pu être modifié.',
+      })
       if (result.success) {
         posthog.capture('profile_updated')
         toast.success(result.message)
@@ -67,23 +76,31 @@ export const ProfileEditForm = ({
 
   if (!isEditing) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
-        <IdCard className="size-4 shrink-0 text-zinc-500" />
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[10px] uppercase tracking-wider text-zinc-600">
-            Nom
-          </span>
-          <span className="text-sm text-zinc-300">{currentDisplayName}</span>
+      <div className="space-y-2">
+        {feedback && (
+          <ActionFeedback
+            tone={feedback.success ? 'success' : 'error'}
+            title={feedback.message}
+          />
+        )}
+        <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
+          <IdCard className="size-4 shrink-0 text-zinc-400" />
+          <div className="flex min-w-0 flex-col">
+            <span className="text-[10px] uppercase tracking-wider text-zinc-400">
+              Nom
+            </span>
+            <span className="text-sm text-zinc-300">{currentDisplayName}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="ml-auto"
+            onClick={() => setIsEditing(true)}
+            aria-label="Modifier le nom d'affichage"
+          >
+            <Pencil className="size-3.5 text-zinc-400" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="ml-auto"
-          onClick={() => setIsEditing(true)}
-          aria-label="Modifier le nom d'affichage"
-        >
-          <Pencil className="size-3.5 text-zinc-400" />
-        </Button>
       </div>
     )
   }
@@ -93,15 +110,22 @@ export const ProfileEditForm = ({
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-2 rounded-2xl border border-brand/10 bg-brand/5 p-4"
     >
+      {feedback && !feedback.success && (
+        <ActionFeedback tone="error" title={feedback.message} />
+      )}
       <Label htmlFor="displayName" className="text-xs text-zinc-400">
         Nom
       </Label>
       <div className="flex gap-2">
         <Input
           id="displayName"
+          aria-invalid={Boolean(errors.displayName)}
+          aria-describedby={
+            errors.displayName ? 'displayName-error' : undefined
+          }
           autoComplete="given-name"
           disabled={isPending}
-          className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
+          className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-brand/30 focus-visible:ring-brand/20"
           {...register('displayName')}
         />
         <Button
@@ -130,7 +154,9 @@ export const ProfileEditForm = ({
         </Button>
       </div>
       {errors.displayName && (
-        <p className="text-xs text-red-400">{errors.displayName.message}</p>
+        <p id="displayName-error" role="alert" className="text-sm text-red-300">
+          {errors.displayName.message}
+        </p>
       )}
     </form>
   )

@@ -9,36 +9,58 @@
 'use client'
 
 import { Tv, VideoOff, Wifi } from 'lucide-react'
-import Link from 'next/link'
 import Script from 'next/script'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { TWITCH_FALLBACK_TIMEOUT_MS } from '@/lib/config/constants'
+import type { STREAM_STATE_LABELS } from '@/lib/config/constants/stream'
 import { cn } from '@/lib/utils/cn'
 
 interface TwitchPlayerProps {
   channel: string | undefined
-  onLiveChange?: (isLive: boolean | null) => void
+  onStateChange?: (state: keyof typeof STREAM_STATE_LABELS) => void
   className?: string
 }
 
 export const TwitchPlayer = ({
   channel,
-  onLiveChange,
+  onStateChange,
   className,
 }: TwitchPlayerProps) => {
   const embedRef = useRef<HTMLDivElement>(null)
   const [isLive, setIsLive] = useState<boolean | null>(channel ? null : false)
   const [isScriptLoaded, setIsScriptLoaded] = useState(false)
+  const [unavailable, setUnavailable] = useState(false)
+  const receivedState = useRef(false)
 
   // Create a unique ID for the container to avoid conflicts during SPA navigation
   const uniqueId = useId().replace(/:/g, '')
   const containerId = `twitch-embed-${channel || 'empty'}-${uniqueId}`
 
-  // Sync internal state with parent if needed
+  const playbackState: keyof typeof STREAM_STATE_LABELS = !channel
+    ? 'unconfigured'
+    : unavailable
+      ? 'unavailable'
+      : isLive === null
+        ? 'loading'
+        : isLive
+          ? 'live'
+          : 'offline'
   useEffect(() => {
-    if (onLiveChange) onLiveChange(isLive)
-  }, [isLive, onLiveChange])
+    onStateChange?.(playbackState)
+  }, [onStateChange, playbackState])
+
+  useEffect(() => {
+    receivedState.current = false
+    setUnavailable(false)
+    setIsLive(channel ? null : false)
+    if (!channel) return
+    const timeout = setTimeout(() => {
+      if (!receivedState.current) setUnavailable(true)
+    }, TWITCH_FALLBACK_TIMEOUT_MS)
+    return () => clearTimeout(timeout)
+  }, [channel])
 
   useEffect(() => {
     if (!channel || !isScriptLoaded || !embedRef.current) {
@@ -52,12 +74,6 @@ export const TwitchPlayer = ({
     const Twitch = window.Twitch
     if (!Twitch?.Player) return
 
-    // Fallback: If after 8 seconds we haven't received any state, assume offline
-    // (covers invalid channels and deferred offline events)
-    const fallbackTimeout = setTimeout(() => {
-      setIsLive(prev => (prev === null ? false : prev))
-    }, TWITCH_FALLBACK_TIMEOUT_MS)
-
     const player = new Twitch.Player(containerId, {
       width: '100%',
       height: '100%',
@@ -69,12 +85,19 @@ export const TwitchPlayer = ({
 
     player.addEventListener(Twitch.Player.READY, () => {
       // Listen to player state events
-      player.addEventListener(Twitch.Player.ONLINE, () => setIsLive(true))
-      player.addEventListener(Twitch.Player.OFFLINE, () => setIsLive(false))
+      player.addEventListener(Twitch.Player.ONLINE, () => {
+        receivedState.current = true
+        setUnavailable(false)
+        setIsLive(true)
+      })
+      player.addEventListener(Twitch.Player.OFFLINE, () => {
+        receivedState.current = true
+        setUnavailable(false)
+        setIsLive(false)
+      })
     })
 
     return () => {
-      clearTimeout(fallbackTimeout)
       if (embedRef.current) {
         embedRef.current.innerHTML = ''
       }
@@ -93,6 +116,7 @@ export const TwitchPlayer = ({
         src="https://player.twitch.tv/js/embed/v1.js"
         onLoad={() => setIsScriptLoaded(true)}
         onReady={() => setIsScriptLoaded(true)}
+        onError={() => setUnavailable(true)}
       />
 
       {/* Glow behind the player when live */}
@@ -111,28 +135,37 @@ export const TwitchPlayer = ({
       />
 
       {/* Loading State */}
-      {isLive === null && channel && (
+      {isLive === null && channel && !unavailable && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-sm">
           <Wifi className="size-10 animate-pulse text-zinc-600 mb-4" />
-          <p className="font-mono text-sm uppercase tracking-widest text-zinc-500">
+          <p
+            role="status"
+            className="font-mono text-sm uppercase tracking-widest text-zinc-500"
+          >
             Connexion au stream...
           </p>
         </div>
       )}
 
       {/* Offline / No Channel Fallback */}
-      {isLive === false && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/80 p-4 text-center backdrop-blur-sm sm:p-6">
+      {(isLive === false || unavailable) && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-zinc-950/80 p-4 text-center backdrop-blur-sm sm:p-6">
           <div className="mb-4 inline-flex rounded-full bg-white/5 p-4 ring-1 ring-white/10 sm:mb-6 sm:p-6">
             <VideoOff className="size-8 text-zinc-500 sm:size-12" />
           </div>
           <h3 className="font-paladins text-base tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] mb-2 sm:text-xl">
-            {channel ? 'Le stream est interrompu' : 'Aucune chaîne configurée'}
+            {unavailable
+              ? 'Lecteur indisponible'
+              : channel
+                ? 'La chaîne est hors ligne'
+                : 'Aucun stream prévu'}
           </h3>
           <p className="max-w-md text-xs text-zinc-400 mb-4 sm:text-sm sm:mb-8">
-            {channel
-              ? `Aucune diffusion n'est actuellement en cours sur la chaîne @${channel}. Revenez plus tard pour le prochain tournoi !`
-              : "La chaîne Twitch officielle n'a pas encore été configurée pour la diffusion en direct."}
+            {unavailable
+              ? 'Le lecteur n’a pas pu se connecter. Vous pouvez ouvrir la chaîne directement sur Twitch.'
+              : channel
+                ? `Aucune diffusion n'est actuellement en cours sur la chaîne @${channel}. Revenez plus tard pour le prochain tournoi !`
+                : "La chaîne Twitch officielle n'a pas encore été configurée pour la diffusion en direct."}
           </p>
           {channel && (
             <Button

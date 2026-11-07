@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import Link from 'next/link'
 import { Fragment } from 'react'
 import {
   Breadcrumb,
@@ -16,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 
 interface BreadcrumbSegment {
   label: string

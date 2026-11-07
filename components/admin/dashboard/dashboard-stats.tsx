@@ -7,7 +7,7 @@
  */
 
 import { Handshake, Swords, Users } from 'lucide-react'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import type { DashboardStats } from '@/lib/types/dashboard'
 import { pluralize } from '@/lib/utils/formatting'
@@ -69,7 +69,7 @@ export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
             className="cursor-pointer rounded-2xl border border-white/5 bg-white/2 p-5 backdrop-blur-sm transition-colors hover:border-white/10"
           >
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
                 {card.label}
               </p>
               <div className={`rounded-lg p-2 ${card.bg}`}>
@@ -77,7 +77,7 @@ export const DashboardStatsCards = ({ stats }: DashboardStatsProps) => {
               </div>
             </div>
             <p className="mt-3 text-3xl font-bold text-white">{value}</p>
-            <p className="mt-1 text-xs text-zinc-500">{detail}</p>
+            <p className="mt-1 text-xs text-zinc-400">{detail}</p>
           </Link>
         )
       })}

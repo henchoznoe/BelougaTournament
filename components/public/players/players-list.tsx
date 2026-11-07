@@ -8,7 +8,7 @@
 
 import { Trophy, User, Users } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicPlayerListItem } from '@/lib/types/player'
 import { formatDate } from '@/lib/utils/formatting'
@@ -24,11 +24,11 @@ export const PlayersList = ({ players }: PlayersListProps) => {
         <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl md:p-8">
           <div className="relative z-10 flex flex-col items-center gap-6 py-8 text-center">
             <div className="flex size-16 items-center justify-center rounded-2xl border border-white/5 bg-white/5">
-              <Users className="size-8 text-zinc-600" />
+              <Users className="size-8 text-zinc-400" />
             </div>
             <div className="space-y-3">
               <h2 className="text-xl font-bold text-white">Aucun joueur</h2>
-              <p className="mx-auto max-w-md text-sm text-zinc-500">
+              <p className="mx-auto max-w-md text-sm text-zinc-400">
                 Aucun joueur n&apos;a encore rendu son profil public.
               </p>
             </div>
@@ -58,15 +58,15 @@ export const PlayersList = ({ players }: PlayersListProps) => {
               />
             ) : (
               <div className="flex size-16 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/10 transition-all duration-300 group-hover:ring-brand/30">
-                <User className="size-7 text-zinc-500" />
+                <User className="size-7 text-zinc-400" />
               </div>
             )}
 
-            <div className="min-w-0">
+            <div className="w-full min-w-0">
               <p className="truncate font-semibold text-white transition-colors duration-300 group-hover:text-brand">
                 {player.displayName}
               </p>
-              <p className="mt-0.5 text-xs text-zinc-500">
+              <p className="mt-0.5 text-xs text-zinc-400">
                 Membre depuis le {formatDate(player.createdAt)}
               </p>
             </div>

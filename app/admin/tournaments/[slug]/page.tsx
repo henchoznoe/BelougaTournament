@@ -21,12 +21,14 @@ import type { TournamentTab } from '@/components/admin/tournaments/tournament-ta
 import { TournamentTabNav } from '@/components/admin/tournaments/tournament-tabs'
 import { TournamentTeams } from '@/components/admin/tournaments/tournament-teams'
 import { AdminContentLayout } from '@/components/admin/ui/admin-content-layout'
+import { AdminPageSkeleton } from '@/components/admin/ui/admin-page-skeleton'
 import { ROUTES } from '@/lib/config/routes'
 import {
   getRegistrations,
   getTeams,
   getTournamentBySlug,
 } from '@/lib/services/tournaments-admin'
+import type { TournamentDetail } from '@/lib/types/tournament'
 import { TournamentFormat } from '@/prisma/generated/prisma/enums'
 
 interface AdminTournamentDetailPageProps {
@@ -59,17 +61,6 @@ const AdminTournamentDetailPage = async ({
 
   const activeTab: TournamentTab =
     tab === 'registrations' || tab === 'teams' ? tab : 'overview'
-  const isTeam = tournament.format === TournamentFormat.TEAM
-
-  // Fetch data based on active tab to avoid unnecessary queries
-  const registrations =
-    activeTab === 'registrations' || activeTab === 'teams'
-      ? await getRegistrations(tournament.id)
-      : []
-  const teams =
-    isTeam && (activeTab === 'registrations' || activeTab === 'teams')
-      ? await getTeams(tournament.id)
-      : []
 
   return (
     <AdminContentLayout
@@ -89,6 +80,32 @@ const AdminTournamentDetailPage = async ({
         <TournamentTabNav format={tournament.format} />
       </Suspense>
 
+      <Suspense
+        key={activeTab}
+        fallback={<AdminPageSkeleton variant="detail" />}
+      >
+        <TournamentTabContent tournament={tournament} activeTab={activeTab} />
+      </Suspense>
+    </AdminContentLayout>
+  )
+}
+
+const TournamentTabContent = async ({
+  tournament,
+  activeTab,
+}: {
+  tournament: TournamentDetail
+  activeTab: TournamentTab
+}) => {
+  const isTeam = tournament.format === TournamentFormat.TEAM
+  const needsParticipants =
+    activeTab === 'registrations' || activeTab === 'teams'
+  const [registrations, teams] = await Promise.all([
+    needsParticipants ? getRegistrations(tournament.id) : Promise.resolve([]),
+    isTeam && needsParticipants ? getTeams(tournament.id) : Promise.resolve([]),
+  ])
+  return (
+    <>
       {activeTab === 'overview' && (
         <TournamentOverview tournament={tournament} />
       )}
@@ -104,7 +121,7 @@ const AdminTournamentDetailPage = async ({
       {activeTab === 'teams' && isTeam && (
         <TournamentTeams tournament={tournament} teams={teams} />
       )}
-    </AdminContentLayout>
+    </>
   )
 }
 

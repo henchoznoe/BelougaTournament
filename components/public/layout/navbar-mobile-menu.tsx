@@ -10,9 +10,9 @@
 
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Menu } from 'lucide-react'
-import Link from 'next/link'
 import { NavbarProfile } from '@/components/public/layout/navbar-profile'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Sheet,
   SheetContent,
@@ -47,13 +47,13 @@ export const NavbarMobileMenu = ({
     <SheetTrigger asChild>
       <Button variant="ghost" size="icon" className="text-zinc-400">
         <Menu className="size-6" />
-        <span className="sr-only">Toggle menu</span>
+        <span className="sr-only">Ouvrir le menu</span>
       </Button>
     </SheetTrigger>
 
     <SheetContent
       side="right"
-      className="w-75 border-l border-white/10 bg-zinc-950/95 p-0 backdrop-blur-xl"
+      className="w-[min(22rem,100vw)] border-l border-white/10 bg-zinc-950/95 p-0 backdrop-blur-xl"
     >
       <VisuallyHidden>
         <SheetTitle>Menu de navigation mobile</SheetTitle>
@@ -75,6 +75,7 @@ export const NavbarMobileMenu = ({
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => onOpenChange(false)}
                 className={cn(
                   'group relative flex items-center gap-4 rounded-full px-5 py-3 text-lg font-medium transition-colors duration-300',

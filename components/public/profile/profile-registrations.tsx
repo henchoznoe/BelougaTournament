@@ -19,7 +19,6 @@ import {
   Swords,
   X,
 } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -34,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { unregisterFromTournament } from '@/lib/actions/tournament-unregistration'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserRegistrationItem } from '@/lib/types/tournament'
@@ -119,15 +119,15 @@ export const ProfileRegistrations = ({
         <div className="space-y-2">
           {registrations.map(registration => (
             <div key={registration.id} className="space-y-2">
-              <div className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-colors duration-200 hover:border-white/10 hover:bg-white/4">
+              <div className="flex flex-wrap items-start gap-4 rounded-2xl border border-white/5 bg-white/2 px-4 py-3 transition-colors duration-200 hover:border-white/10 hover:bg-white/4">
                 <Link
                   href={`${ROUTES.TOURNAMENTS}/${registration.tournament.slug}`}
                   className="flex min-w-0 flex-1 flex-col gap-1"
                 >
-                  <span className="truncate text-sm font-medium text-white">
+                  <span className="break-words text-base font-semibold text-white">
                     {registration.tournament.title}
                   </span>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
                     {registration.tournament.games.length > 0 && (
                       <span className="inline-flex items-center gap-1">
                         <Gamepad2 className="size-3" />
@@ -189,7 +189,7 @@ export const ProfileRegistrations = ({
                     disabled={
                       registration.status !== RegistrationStatus.CONFIRMED
                     }
-                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"
+                    className="rounded-lg p-3 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-300"
                     aria-label="Modifier l'inscription"
                   >
                     <Pencil className="size-3.5" />
@@ -197,7 +197,7 @@ export const ProfileRegistrations = ({
                   <button
                     type="button"
                     onClick={() => setUnregisterTarget(registration)}
-                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                    className="rounded-lg p-3 text-zinc-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
                     aria-label="Se désinscrire"
                   >
                     <X className="size-3.5" />
@@ -205,10 +205,18 @@ export const ProfileRegistrations = ({
                 </div>
               </div>
               {registration.status === RegistrationStatus.PENDING && (
-                <p className="px-1 text-xs text-amber-300">
-                  Paiement Stripe en attente. Si vous venez de payer, le webhook
-                  n'a peut-être pas encore confirmé votre inscription.
-                </p>
+                <div className="space-y-2 rounded-xl border border-amber-400/25 bg-amber-400/5 p-3 text-sm text-amber-200">
+                  <p>
+                    La confirmation du paiement peut prendre un instant.
+                    Consultez votre inscription avant de réessayer.
+                  </p>
+                  <Link
+                    href={`${ROUTES.TOURNAMENTS}/${registration.tournament.slug}#inscription`}
+                    className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+                  >
+                    Vérifier ou reprendre mon inscription
+                  </Link>
+                </div>
               )}
               {registration.paymentStatus === PaymentStatus.REFUNDED && (
                 <p className="px-1 text-xs text-emerald-300">
@@ -226,7 +234,7 @@ export const ProfileRegistrations = ({
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <p className="max-w-sm text-sm text-zinc-500">
+          <p className="max-w-sm text-sm text-zinc-400">
             Vous n'êtes inscrit à aucun tournoi pour le moment.
           </p>
           <Link
@@ -301,7 +309,7 @@ export const ProfileRegistrations = ({
                     <p className="text-sm font-medium text-emerald-400">
                       Me désinscrire et être remboursé
                     </p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-400">
                       Vous recevrez{' '}
                       <span className="font-medium text-zinc-300">
                         {refundInfo.amount}
@@ -327,7 +335,7 @@ export const ProfileRegistrations = ({
                     <p className="text-sm font-medium text-orange-400">
                       Me désinscrire sans remboursement
                     </p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-400">
                       Vous renoncez à vos frais d&apos;inscription au profit de
                       Belouga Tournament. Cette action est irréversible.
                     </p>

@@ -59,16 +59,46 @@ const TableRow = ({ className, ...props }: ComponentProps<'tr'>) => {
   )
 }
 
-const TableHead = ({ className, ...props }: ComponentProps<'th'>) => {
+const TableHead = ({
+  className,
+  children,
+  onSort,
+  sortDirection,
+  ...props
+}: ComponentProps<'th'> & {
+  onSort?: () => void
+  sortDirection?: 'asc' | 'desc'
+}) => {
   return (
     <th
       data-slot="table-head"
+      aria-sort={
+        onSort
+          ? sortDirection === 'asc'
+            ? 'ascending'
+            : sortDirection === 'desc'
+              ? 'descending'
+              : 'none'
+          : undefined
+      }
       className={cn(
         'text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
       {...props}
-    />
+    >
+      {onSort ? (
+        <button
+          type="button"
+          onClick={onSort}
+          className="inline-flex min-h-11 items-center gap-1 text-left"
+        >
+          {children}
+        </button>
+      ) : (
+        children
+      )}
+    </th>
   )
 }
 
@@ -77,7 +107,7 @@ const TableCell = ({ className, ...props }: ComponentProps<'td'>) => {
     <td
       data-slot="table-cell"
       className={cn(
-        'p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+        'p-3 align-middle whitespace-normal break-words [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
       {...props}

@@ -34,21 +34,27 @@ export const AdminContentLayout = ({
   children,
 }: AdminContentLayoutProps) => {
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto w-full min-w-0 max-w-(--content-width) space-y-6">
       {/* Breadcrumb */}
       <AdminBreadcrumb segments={segments} />
 
       {/* Page heading */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
-            <Icon className="size-6 text-blue-400" />
-            {title}
-            {titleExtra}
+        <div className="min-w-0 flex-1 space-y-2">
+          <h1 className="flex items-start gap-3 break-words text-2xl font-bold tracking-tight text-white">
+            <Icon className="mt-1 size-6 shrink-0 text-blue-400" />
+            <span className="min-w-0">{title}</span>
           </h1>
+          {titleExtra && (
+            <div className="flex flex-wrap items-center gap-2">
+              {titleExtra}
+            </div>
+          )}
           {subtitle && <p className="text-sm text-zinc-400">{subtitle}</p>}
         </div>
-        {headerRight && <div className="shrink-0">{headerRight}</div>}
+        {headerRight && (
+          <div className="flex max-w-full flex-wrap gap-2">{headerRight}</div>
+        )}
       </div>
 
       {children}

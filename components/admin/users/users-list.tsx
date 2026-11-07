@@ -10,16 +10,18 @@
 
 import { OctagonX, Search } from 'lucide-react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
+import { useListQuery } from '@/components/admin/hooks/use-list-query'
 import {
   applySortToList,
   useListSort,
 } from '@/components/admin/hooks/use-list-sort'
 import { AdminPagination } from '@/components/admin/ui/admin-pagination'
+import { PendingTableRow } from '@/components/admin/ui/pending-table-row'
 import { UserActionsDropdown } from '@/components/admin/users/user-actions-dropdown'
 import { Input } from '@/components/ui/input'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { RoleBadge } from '@/components/ui/role-badge'
 import {
   Select,
@@ -52,6 +54,8 @@ const isRowBanned = (user: UserRow): boolean => {
   if (!user.bannedUntil) return true
   return user.bannedUntil > new Date()
 }
+
+const SORT_KEYS = ['user', 'role', 'createdAt', 'lastLoginAt'] as const
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.USERS
 
@@ -97,12 +101,19 @@ const compareValues = (a: UserRow, b: UserRow, key: SortKey): number => {
 }
 
 export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
-  const router = useRouter()
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
+  const [search, setSearch] = useListQuery<string>('search', '')
+  const [roleFilter, setRoleFilter] = useListQuery<RoleFilter>(
+    'role',
+    'all',
+    (value): value is RoleFilter =>
+      value === 'all' || Object.values(Role).some(role => role === value),
+  )
 
   const { paginate, resetPage } = useClientPagination<UserRow>(PAGE_SIZE)
-  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(
+    resetPage,
+    SORT_KEYS,
+  )
 
   const filtered = useMemo(() => {
     let items = users
@@ -162,13 +173,13 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
     <>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-xs flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
           <Input
             placeholder="Rechercher un utilisateur..."
             aria-label="Rechercher un utilisateur"
             value={search}
             onChange={e => handleSearch(e.target.value)}
-            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
+            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-400"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -190,7 +201,7 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
       </div>
 
       {/* Stats line */}
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
         <span className="mr-2">
           {filtered.length} utilisateur{pluralize(filtered.length)}
         </span>
@@ -216,7 +227,7 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-400">
             {search || roleFilter !== 'all'
               ? 'Aucun utilisateur trouvé pour ces critères.'
               : 'Aucun utilisateur inscrit.'}
@@ -228,48 +239,51 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
                 <TableHead
-                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
-                  onClick={() => handleSort('user')}
+                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300"
+                  onSort={() => handleSort('user')}
+                  sortDirection={
+                    sort.key === 'user' ? sort.direction : undefined
+                  }
                 >
                   Utilisateur {sortIndicator('user')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 sm:table-cell"
-                  onClick={() => handleSort('role')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 sm:table-cell"
+                  onSort={() => handleSort('role')}
+                  sortDirection={
+                    sort.key === 'role' ? sort.direction : undefined
+                  }
                 >
                   Rôle {sortIndicator('role')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 md:table-cell"
-                  onClick={() => handleSort('createdAt')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 md:table-cell"
+                  onSort={() => handleSort('createdAt')}
+                  sortDirection={
+                    sort.key === 'createdAt' ? sort.direction : undefined
+                  }
                 >
                   Inscrit le {sortIndicator('createdAt')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 lg:table-cell"
-                  onClick={() => handleSort('lastLoginAt')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 lg:table-cell"
+                  onSort={() => handleSort('lastLoginAt')}
+                  sortDirection={
+                    sort.key === 'lastLoginAt' ? sort.direction : undefined
+                  }
                 >
                   Dernière connexion {sortIndicator('lastLoginAt')}
                 </TableHead>
-                <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <TableHead className="w-10 text-xs font-semibold uppercase tracking-wider text-zinc-400">
                   <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginated.map(user => (
-                <TableRow
+                <PendingTableRow
                   key={user.id}
-                  tabIndex={0}
-                  role="link"
-                  className="cursor-pointer border-white/5 hover:bg-white/4"
-                  onClick={() => router.push(ROUTES.ADMIN_USER_DETAIL(user.id))}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      router.push(ROUTES.ADMIN_USER_DETAIL(user.id))
-                    }
-                  }}
+                  href={ROUTES.ADMIN_USER_DETAIL(user.id)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -289,8 +303,13 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-200">
+                        <Link
+                          href={ROUTES.ADMIN_USER_DETAIL(user.id)}
+                          className="inline-flex items-center text-sm font-semibold text-white hover:text-blue-300"
+                        >
                           {user.name}
+                        </Link>
+                        <p className="text-xs text-zinc-400">
                           {isRowBanned(user) && (
                             <OctagonX
                               className="ml-1.5 inline size-3 text-red-400"
@@ -298,7 +317,7 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
                             />
                           )}
                         </p>
-                        <p className="truncate text-xs text-zinc-500">
+                        <p className="truncate text-xs text-zinc-400">
                           {user.email}
                         </p>
                       </div>
@@ -310,13 +329,13 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
                   </TableCell>
 
                   <TableCell className="hidden md:table-cell">
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-400">
                       {formatShortDate(user.createdAt)}
                     </span>
                   </TableCell>
 
                   <TableCell className="hidden lg:table-cell">
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-400">
                       {user.lastLoginAt
                         ? formatDateTime(user.lastLoginAt)
                         : 'Jamais'}
@@ -329,7 +348,7 @@ export const UsersList = ({ users, viewerIsSuperAdmin }: UsersListProps) => {
                       viewerIsSuperAdmin={viewerIsSuperAdmin}
                     />
                   </TableCell>
-                </TableRow>
+                </PendingTableRow>
               ))}
             </TableBody>
           </Table>

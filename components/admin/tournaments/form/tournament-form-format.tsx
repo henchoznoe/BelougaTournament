@@ -97,7 +97,13 @@ export const TournamentFormFormat = ({
               </SelectContent>
             </Select>
             {errors.format?.message && (
-              <p className="text-xs text-red-400">{errors.format.message}</p>
+              <p
+                className="text-xs text-red-400"
+                id="tournament-form-format-format-error"
+                role="alert"
+              >
+                {errors.format?.message}
+              </p>
             )}
           </div>
 
@@ -107,6 +113,12 @@ export const TournamentFormFormat = ({
               Taille d&apos;équipe *
             </Label>
             <Input
+              aria-invalid={Boolean(errors.teamSize)}
+              aria-describedby={
+                errors.teamSize
+                  ? 'tournament-form-format-teamSize-error'
+                  : undefined
+              }
               id="tournament-teamSize"
               type="number"
               min={VALIDATION_LIMITS.TEAM_SIZE_MIN}
@@ -116,7 +128,13 @@ export const TournamentFormFormat = ({
               {...register('teamSize', { valueAsNumber: true })}
             />
             {errors.teamSize?.message && (
-              <p className="text-xs text-red-400">{errors.teamSize.message}</p>
+              <p
+                className="text-xs text-red-400"
+                id="tournament-form-format-teamSize-error"
+                role="alert"
+              >
+                {errors.teamSize?.message}
+              </p>
             )}
           </div>
 
@@ -139,7 +157,13 @@ export const TournamentFormFormat = ({
               }}
             />
             {errors.maxTeams?.message && (
-              <p className="text-xs text-red-400">{errors.maxTeams.message}</p>
+              <p
+                className="text-xs text-red-400"
+                id="tournament-form-format-maxTeams-error"
+                role="alert"
+              >
+                {errors.maxTeams?.message}
+              </p>
             )}
           </div>
         </div>

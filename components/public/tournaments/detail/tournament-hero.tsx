@@ -45,7 +45,7 @@ export const TournamentHero = ({
   return (
     <div className="relative z-10 -mt-28 px-6 pb-6 sm:-mt-32 md:px-8 md:pb-8">
       {/* Status badge */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <span
           className={cn(
             'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold',
@@ -69,7 +69,7 @@ export const TournamentHero = ({
       </div>
 
       {/* Title */}
-      <h1 className="mb-2 font-paladins text-3xl tracking-wider text-white drop-shadow-[0_0_20px_rgba(59,130,246,0.4)] sm:text-4xl md:text-5xl">
+      <h1 className="mb-2 font-paladins break-words text-2xl leading-snug tracking-wide sm:text-3xl text-white drop-shadow-[0_0_20px_rgba(59,130,246,0.4)] sm:text-4xl md:text-4xl">
         {tournament.title}
       </h1>
 
@@ -94,22 +94,16 @@ export const TournamentHero = ({
             }
           />
         ) : (
-          <>
-            <QuickBadge
-              icon={Users}
-              text={
-                tournament.maxTeams
-                  ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
-                  : `${tournament._count.teams} équipe${pluralize(tournament._count.teams)}`
-              }
-            />
-            <QuickBadge
-              icon={Users}
-              text={`${tournament._count.registrations} joueur${pluralize(tournament._count.registrations)}`}
-            />
-          </>
+          <QuickBadge
+            icon={Users}
+            text={
+              tournament.maxTeams
+                ? `${tournament._count.teams}/${tournament.maxTeams} équipes`
+                : `${tournament._count.teams} équipe${pluralize(tournament._count.teams)}`
+            }
+          />
         )}
-        {entryFee && <QuickBadge icon={Coins} text={entryFee} />}
+        {entryFee && <QuickBadge icon={Coins} text={`${entryFee} / joueur`} />}
       </div>
     </div>
   )

@@ -7,7 +7,7 @@
  */
 
 import { ChevronLeft, Lock } from 'lucide-react'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 
 export const PlayerProfilePrivate = () => {

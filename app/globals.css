@@ -62,6 +62,9 @@
 }
 
 :root {
+  --content-width: 72rem;
+  --reading-width: 48rem;
+  --section-offset: 7rem;
   --radius: 0.625rem;
   /* Belouga brand ramp — aligned with Tailwind blue-500 / indigo-500 / violet-500. */
   --brand: oklch(0.623 0.214 259.815);
@@ -221,13 +224,89 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .section-anchor {
+    scroll-margin-top: var(--section-offset);
+  }
+  #admin-main .section-anchor {
+    scroll-margin-top: 1.5rem;
+  }
+  .surface-card {
+    min-width: 0;
+    border-radius: 1rem;
+    border: 1px solid oklch(1 0 0 / 12%);
+    background: oklch(0.19 0.012 270 / 90%);
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+  .pending-link:has(> [role="status"]) {
+    cursor: progress;
+    opacity: 0.8;
+  }
+  .form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border: 1px solid oklch(1 0 0 / 15%);
+    border-radius: 1rem;
+    background: oklch(0.16 0.01 270 / 97%);
+    padding: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 24px #0004;
+  }
+}
+
+@layer base {
+  :where(h1, h2, h3, p, label) {
+    overflow-wrap: anywhere;
+  }
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 4px;
+  }
+  @media (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    [role="combobox"],
+    button[data-slot="button"] {
+      min-height: 2.75rem;
+    }
+    input,
+    textarea,
+    select {
+      font-size: 1rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: accessibility preference overrides animated utilities. */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: accessibility preference overrides animated utilities. */
+      animation-iteration-count: 1 !important;
+      /* biome-ignore lint/complexity/noImportantStyles: accessibility preference overrides animated utilities. */
+      transition-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: accessibility preference overrides animated utilities. */
+      scroll-behavior: auto !important;
+    }
   }
 }
 

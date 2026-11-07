@@ -8,10 +8,10 @@
 
 import { Archive } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Suspense } from 'react'
 import { TournamentBrowser } from '@/components/public/tournaments/tournament-browser'
 import { PageHeader } from '@/components/ui/page-header'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PUBLIC_TOURNAMENTS_PAGE_SIZE } from '@/lib/config/constants/tournaments'
 import { ROUTES } from '@/lib/config/routes'

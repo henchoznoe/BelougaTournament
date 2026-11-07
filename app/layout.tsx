@@ -55,12 +55,7 @@ export const metadata: Metadata = {
 
 const RootLayout = (props: Readonly<LayoutProps>) => {
   return (
-    <html
-      lang="fr-CH"
-      className="dark scroll-smooth"
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-    >
+    <html lang="fr-CH" className="dark" suppressHydrationWarning>
       <body
         className={cn(
           inter.variable,

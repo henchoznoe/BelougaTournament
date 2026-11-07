@@ -9,7 +9,7 @@
 'use client'
 
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,10 @@ import type {
   PublicTournamentFilters,
   TournamentSortOption,
 } from '@/lib/validations/tournaments'
-import { VALID_SORT_OPTIONS } from '@/lib/validations/tournaments'
+import {
+  parsePublicTournamentFilters,
+  VALID_SORT_OPTIONS,
+} from '@/lib/validations/tournaments'
 import {
   RegistrationType,
   TournamentFormat,
@@ -59,7 +62,6 @@ export const TournamentFilters = ({
   filters,
   basePath,
 }: TournamentFiltersProps) => {
-  const router = useRouter()
   useSearchParams() // ensure component re-renders on param changes
 
   const [searchValue, setSearchValue] = useState(filters.search)
@@ -79,11 +81,13 @@ export const TournamentFilters = ({
 
   const navigate = useCallback(
     (overrides: Partial<PublicTournamentFilters>) => {
-      router.push(`${basePath}${buildQuery(filters, overrides)}`, {
-        scroll: false,
-      })
+      window.history.replaceState(
+        null,
+        '',
+        `${basePath}${buildQuery(parsePublicTournamentFilters(Object.fromEntries(new URLSearchParams(window.location.search)), filters.sort), overrides)}`,
+      )
     },
-    [router, basePath, filters],
+    [basePath, filters.sort],
   )
 
   const handleSearch = (value: string) => {
@@ -98,8 +102,10 @@ export const TournamentFilters = ({
     filters.search !== '' || filters.format !== '' || filters.type !== ''
 
   const handleReset = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = null
     setSearchValue('')
-    router.push(basePath, { scroll: false })
+    window.history.replaceState(null, '', basePath)
   }
 
   return (
@@ -116,7 +122,7 @@ export const TournamentFilters = ({
         />
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
         {/* Format filter */}
         <Select
           value={filters.format || 'all'}
@@ -133,7 +139,7 @@ export const TournamentFilters = ({
         >
           <SelectTrigger
             aria-label="Filtrer par format"
-            className="h-10 w-36 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
+            className="h-11 w-full min-w-40 sm:w-44 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
           >
             <SlidersHorizontal className="mr-1.5 size-3.5 text-zinc-500" />
             <SelectValue placeholder="Format" />
@@ -161,7 +167,7 @@ export const TournamentFilters = ({
         >
           <SelectTrigger
             aria-label="Filtrer par type d'inscription"
-            className="h-10 w-36 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
+            className="h-11 w-full min-w-40 sm:w-44 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
           >
             <SelectValue placeholder="Type" />
           </SelectTrigger>
@@ -181,7 +187,7 @@ export const TournamentFilters = ({
         >
           <SelectTrigger
             aria-label="Trier les tournois"
-            className="h-10 w-44 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
+            className="h-11 w-full min-w-44 sm:w-48 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-300"
           >
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>

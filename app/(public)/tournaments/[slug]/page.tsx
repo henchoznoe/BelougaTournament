@@ -8,8 +8,6 @@
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
-import { StripeReturnToast } from '@/components/public/tournaments/stripe-return-toast'
 import { TournamentDetail } from '@/components/public/tournaments/tournament-detail'
 import { getGlobalSettings } from '@/lib/services/settings'
 import { getTournamentSitemapEntries } from '@/lib/services/sitemap'
@@ -60,36 +58,26 @@ const TournamentPage = async ({ params }: TournamentPageProps) => {
     notFound()
   }
 
-  // Fetch available teams for TEAM format tournaments
-  const availableTeams =
+  const [availableTeams, registrants, teamRegistrants] = await Promise.all([
     tournament.format === TournamentFormat.TEAM
-      ? await getAvailableTeams(tournament.id)
-      : []
-
-  // Fetch registrants if the tournament has showRegistrants enabled
-  const registrants = tournament.showRegistrants
-    ? tournament.format === TournamentFormat.TEAM
-      ? []
-      : await getTournamentRegistrants(tournament.id)
-    : []
-  const teamRegistrants =
+      ? getAvailableTeams(tournament.id)
+      : Promise.resolve([]),
+    tournament.showRegistrants && tournament.format === TournamentFormat.SOLO
+      ? getTournamentRegistrants(tournament.id)
+      : Promise.resolve([]),
     tournament.showRegistrants && tournament.format === TournamentFormat.TEAM
-      ? await getTournamentTeamRegistrants(tournament.id)
-      : []
+      ? getTournamentTeamRegistrants(tournament.id)
+      : Promise.resolve([]),
+  ])
 
   return (
-    <>
-      <Suspense fallback={null}>
-        <StripeReturnToast tournamentId={tournament.id} />
-      </Suspense>
-      <TournamentDetail
-        tournament={tournament}
-        twitchUsername={settings.twitchUsername ?? undefined}
-        availableTeams={availableTeams}
-        registrants={registrants}
-        teamRegistrants={teamRegistrants}
-      />
-    </>
+    <TournamentDetail
+      tournament={tournament}
+      twitchUsername={settings.twitchUsername ?? undefined}
+      availableTeams={availableTeams}
+      registrants={registrants}
+      teamRegistrants={teamRegistrants}
+    />
   )
 }
 

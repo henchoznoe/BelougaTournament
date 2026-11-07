@@ -9,9 +9,9 @@
 'use client'
 
 import { CircleAlert } from 'lucide-react'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   getAuthErrorMessage,
   getLoginErrorUrl,

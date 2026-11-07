@@ -12,12 +12,11 @@ import { cn } from '@/lib/utils/cn'
 // ─── Styling constants ──────────────────────────────────────────────────────
 
 export const INPUT_CLASSES =
-  'h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20'
+  'h-11 rounded-xl border-white/15 bg-white/5 text-base sm:text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20'
 
 export const LABEL_CLASSES = 'text-xs font-medium text-zinc-400'
 
-export const SECTION_CLASSES =
-  'rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm'
+export const SECTION_CLASSES = 'surface-card'
 
 // ─── Section Header ─────────────────────────────────────────────────────────
 
@@ -41,7 +40,7 @@ export const SectionHeader = ({
 // ─── Locked Field Indicator ─────────────────────────────────────────────────
 
 export const LockedIndicator = () => (
-  <span className="inline-flex items-center gap-1 text-[10px] text-zinc-600">
+  <span className="inline-flex items-center gap-1 text-[10px] text-zinc-400">
     <Lock className="size-2.5" />
     Verrouillé
   </span>

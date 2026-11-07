@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import 'react-quill-new/dist/quill.snow.css'
 import { cn } from '@/lib/utils/cn'
+import { getEditedContent } from '@/lib/utils/editor-content'
 
 // Quill accesses document during import and cannot be rendered on the server.
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
@@ -59,10 +60,9 @@ export const RichTextEditor = ({
     [],
   )
 
-  const handleChange = (content: string) => {
-    // react-quill returns "<p><br></p>" for empty content — normalize to ""
-    const isEmpty = content === '<p><br></p>' || content === '<p><br/></p>'
-    onChange(isEmpty ? '' : content)
+  const handleChange = (content: string, _delta: unknown, source: string) => {
+    const edited = getEditedContent(content, source)
+    if (edited !== undefined) onChange(edited)
   }
 
   return (
