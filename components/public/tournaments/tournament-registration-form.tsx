@@ -18,16 +18,17 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
-import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { AddToCalendarButton } from '@/components/public/tournaments/add-to-calendar-button'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Select,
   SelectContent,
@@ -80,6 +81,8 @@ interface TournamentRegistrationFormProps {
     | 'donationType'
     | 'donationFixedAmount'
     | 'donationMinAmount'
+    | 'maxTeams'
+    | '_count'
   >
   tournamentId: string
   fields: TournamentFieldItem[]
@@ -95,14 +98,14 @@ interface TournamentRegistrationFormProps {
 
 /** Maps dynamic field values from form (all strings) to proper types for the action. */
 const buildFieldValues = (
-  formData: Record<string, string>,
+  formData: Record<string, string | number>,
   fields: TournamentFieldItem[],
 ): Record<string, string | number> => {
   const result: Record<string, string | number> = {}
   for (const field of fields) {
     const raw = formData[field.label] ?? ''
     if (field.type === FieldType.NUMBER && raw !== '') {
-      result[field.label] = Number(raw)
+      result[field.label] = Number.isFinite(Number(raw)) ? Number(raw) : ''
     } else {
       result[field.label] = raw
     }
@@ -131,7 +134,15 @@ export const TournamentRegistrationForm = ({
     searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname
 
   // Team-specific state
-  const [teamMode, setTeamMode] = useState<'create' | 'join'>('create')
+  const teamsFull =
+    tournament.maxTeams !== null &&
+    tournament.maxTeams > 0 &&
+    tournament._count.teams >= tournament.maxTeams
+  const [teamMode, setTeamMode] = useState<'create' | 'join'>(
+    teamsFull && availableTeams.length > 0 ? 'join' : 'create',
+  )
+  const [submissionError, setSubmissionError] = useState<string | null>(null)
+  const [teamError, setTeamError] = useState<string | null>(null)
   const [teamName, setTeamName] = useState('')
   const [selectedTeamId, setSelectedTeamId] = useState('')
 
@@ -147,7 +158,7 @@ export const TournamentRegistrationForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Record<string, string>>({
+  } = useForm<Record<string, string | number>>({
     defaultValues: Object.fromEntries(fields.map(f => [f.label, ''])),
   })
 
@@ -179,7 +190,9 @@ export const TournamentRegistrationForm = ({
     return false
   }
 
-  const onSubmit = (data: Record<string, string>) => {
+  const onSubmit = (data: Record<string, string | number>) => {
+    setSubmissionError(null)
+    setTeamError(null)
     // Client-side team field validation
     if (format === TournamentFormat.TEAM) {
       if (teamMode === 'create') {
@@ -188,14 +201,16 @@ export const TournamentRegistrationForm = ({
           trimmed.length < VALIDATION_LIMITS.TEAM_NAME_MIN ||
           trimmed.length > VALIDATION_LIMITS.TEAM_NAME_MAX
         ) {
-          toast.error(
+          setTeamError(
             `Le nom de l'équipe doit contenir entre ${VALIDATION_LIMITS.TEAM_NAME_MIN} et ${VALIDATION_LIMITS.TEAM_NAME_MAX} caractères.`,
           )
+          document.getElementById('team-name')?.focus()
           return
         }
       } else {
         if (!selectedTeamId) {
-          toast.error('Veuillez sélectionner une équipe.')
+          setTeamError('Veuillez sélectionner une équipe.')
+          document.getElementById('team-select')?.focus()
           return
         }
       }
@@ -216,63 +231,76 @@ export const TournamentRegistrationForm = ({
 
       let result: ActionState<{ checkoutUrl: string }>
 
-      if (format === TournamentFormat.TEAM) {
-        if (teamMode === 'create') {
-          result = await createTeamAndRegister({
-            tournamentId,
-            returnPath: currentPath,
-            teamName: teamName.trim(),
-            fieldValues,
-            donationAmount: resolvedDonation,
-          })
+      try {
+        if (format === TournamentFormat.TEAM) {
+          if (teamMode === 'create') {
+            result = await createTeamAndRegister({
+              tournamentId,
+              returnPath: currentPath,
+              teamName: teamName.trim(),
+              fieldValues,
+              donationAmount: resolvedDonation,
+            })
+          } else {
+            result = await joinTeamAndRegister({
+              tournamentId,
+              returnPath: currentPath,
+              teamId: selectedTeamId,
+              fieldValues,
+              donationAmount: resolvedDonation,
+            })
+          }
         } else {
-          result = await joinTeamAndRegister({
+          result = await registerForTournament({
             tournamentId,
             returnPath: currentPath,
-            teamId: selectedTeamId,
             fieldValues,
             donationAmount: resolvedDonation,
           })
         }
-      } else {
-        result = await registerForTournament({
-          tournamentId,
-          returnPath: currentPath,
-          fieldValues,
-          donationAmount: resolvedDonation,
-        })
-      }
 
-      if (result.success) {
-        if (result.data?.checkoutUrl) {
-          posthog.capture('tournament_checkout_initiated', {
+        if (result.success) {
+          if (result.data?.checkoutUrl) {
+            posthog.capture('tournament_checkout_initiated', {
+              tournament_id: tournamentId,
+              format: format,
+              team_mode:
+                format === TournamentFormat.TEAM ? teamMode : undefined,
+              registration_type: tournament.registrationType,
+            })
+            window.location.href = result.data.checkoutUrl
+            return
+          }
+
+          posthog.capture('tournament_registration_confirmed', {
             tournament_id: tournamentId,
             format: format,
             team_mode: format === TournamentFormat.TEAM ? teamMode : undefined,
             registration_type: tournament.registrationType,
           })
-          window.location.href = result.data.checkoutUrl
-          return
+          toast.success(result.message)
+          await onRegistrationChanged()
+          router.refresh()
+        } else {
+          setSubmissionError(
+            result.message ??
+              'Une erreur est survenue. Vos réponses sont conservées.',
+          )
         }
-
-        posthog.capture('tournament_registration_confirmed', {
-          tournament_id: tournamentId,
-          format: format,
-          team_mode: format === TournamentFormat.TEAM ? teamMode : undefined,
-          registration_type: tournament.registrationType,
-        })
-        toast.success(result.message)
-        await onRegistrationChanged()
-        router.refresh()
-      } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
+      } catch {
+        setSubmissionError(
+          'La demande n’a pas pu aboutir. Vos réponses sont conservées ; réessayez.',
+        )
       }
     })
   }
 
   if (registrationStateLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-400">
+      <div
+        role="status"
+        className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-300"
+      >
         <Loader2 className="size-4 animate-spin" />
         Vérification de votre inscription…
       </div>
@@ -336,31 +364,34 @@ export const TournamentRegistrationForm = ({
       : null
   const donationBlocksSubmit = hasDonationError()
 
+  const capacityReached =
+    tournament.maxTeams !== null &&
+    tournament.maxTeams > 0 &&
+    (format === TournamentFormat.SOLO
+      ? tournament._count.registrations >= tournament.maxTeams
+      : teamsFull && teamMode === 'create') &&
+    !isPendingRegistration
+
   // Registration form
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {isPaidTournament && entryFeeLabel && (
-        <div className="rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-zinc-300">
-          <p className="flex items-center gap-2 font-medium text-white">
-            <CreditCard className="size-4 text-brand" />
-            Inscription payante: {entryFeeLabel}
-          </p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
-            au moment de la redirection vers Stripe. Si vous quittez la page
-            Stripe sans payer, votre place sera libérée.
-          </p>
-        </div>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      aria-busy={isPending}
+      className="space-y-5"
+    >
+      {submissionError && (
+        <ActionFeedback tone="error" title="Inscription non finalisée">
+          <p>{submissionError}</p>
+        </ActionFeedback>
       )}
-      {isPaidTournament && (
-        <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-sm text-zinc-300">
-          <p className="text-xs text-zinc-400">
-            {getRefundPolicyLabel(
-              tournament.refundPolicyType,
-              tournament.refundDeadlineDays,
-            )}
+      {capacityReached && (
+        <ActionFeedback title="Capacité atteinte">
+          <p>
+            {format === TournamentFormat.TEAM && availableTeams.length > 0
+              ? 'Toutes les places d’équipe sont prises. Vous pouvez rejoindre une équipe existante ci-dessous.'
+              : 'Les places disponibles sont actuellement prises. Revenez vérifier si une place se libère.'}
           </p>
-        </div>
+        </ActionFeedback>
       )}
       {isPendingRegistration && (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
@@ -378,6 +409,183 @@ export const TournamentRegistrationForm = ({
         </div>
       )}
 
+      {/* Team mode selector (TEAM format only) */}
+      {format === TournamentFormat.TEAM && (
+        <div className="space-y-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button
+              type="button"
+              variant={teamMode === 'create' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                'min-w-0 gap-2 whitespace-normal',
+                teamMode !== 'create' &&
+                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
+              )}
+              aria-pressed={teamMode === 'create'}
+              onClick={() => {
+                setTeamMode('create')
+                setTeamError(null)
+              }}
+              disabled={isPending}
+            >
+              <Users className="size-4" />
+              Créer une équipe
+            </Button>
+            <Button
+              type="button"
+              variant={teamMode === 'join' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                'min-w-0 gap-2 whitespace-normal',
+                teamMode !== 'join' &&
+                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
+              )}
+              aria-pressed={teamMode === 'join'}
+              onClick={() => {
+                setTeamMode('join')
+                setTeamError(null)
+              }}
+              disabled={isPending}
+            >
+              <Users className="size-4" />
+              Rejoindre une équipe
+            </Button>
+          </div>
+
+          {teamError && (
+            <p id="team-error" role="alert" className="text-sm text-red-300">
+              {teamError}
+            </p>
+          )}
+          {/* Create mode: team name input */}
+          {teamMode === 'create' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="team-name" className="text-xs text-zinc-400">
+                Nom de l'équipe
+                <span className="ml-0.5 text-red-400">*</span>
+              </Label>
+              <Input
+                id="team-name"
+                type="text"
+                aria-invalid={Boolean(teamError)}
+                aria-describedby={teamError ? 'team-error' : undefined}
+                value={teamName}
+                onChange={e => setTeamName(e.target.value)}
+                disabled={isPending}
+                placeholder="Entrez le nom de votre équipe"
+                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
+                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
+              />
+            </div>
+          )}
+
+          {/* Join mode: team select dropdown */}
+          {teamMode === 'join' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="team-select" className="text-xs text-zinc-400">
+                Équipe
+                <span className="ml-0.5 text-red-400">*</span>
+              </Label>
+              {availableTeams.length > 0 ? (
+                <Select
+                  value={selectedTeamId}
+                  onValueChange={setSelectedTeamId}
+                  disabled={isPending}
+                >
+                  <SelectTrigger
+                    id="team-select"
+                    aria-invalid={Boolean(teamError)}
+                    aria-describedby={teamError ? 'team-error' : undefined}
+                    className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus:border-brand/30 focus:ring-brand/20"
+                  >
+                    <SelectValue placeholder="Sélectionnez une équipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTeams.map(team => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name} — Capitaine: {team.captain.displayName} (
+                        {team._count.members}/{teamSize} membres)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-zinc-400">
+                  Aucune équipe disponible. Créez la vôtre !
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {/* Team logo hint — shown only when creating a team and logo upload is enabled */}
+      {format === TournamentFormat.TEAM &&
+        teamMode === 'create' &&
+        tournament.teamLogoEnabled && (
+          <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-xs text-zinc-400">
+            <p>
+              En tant que capitaine, vous pourrez ajouter un logo d&apos;équipe
+              depuis votre profil après inscription.
+            </p>
+          </div>
+        )}
+      {/* Dynamic fields */}
+      {fields.length > 0 ? (
+        <div className="grid min-w-0 grid-cols-1 gap-4">
+          {fields.map(field => (
+            <div key={field.id} className="space-y-1.5">
+              <Label
+                htmlFor={`field-${field.id}`}
+                className="text-xs text-zinc-400"
+              >
+                {field.label}
+                {field.required && (
+                  <span className="ml-0.5 text-red-400">*</span>
+                )}
+              </Label>
+              <Input
+                id={`field-${field.id}`}
+                type={field.type === FieldType.NUMBER ? 'number' : 'text'}
+                disabled={isPending}
+                aria-invalid={Boolean(errors[field.label])}
+                aria-describedby={
+                  errors[field.label] ? `error-${field.id}` : undefined
+                }
+                className="h-11 rounded-xl border-white/15 bg-white/5 text-base text-zinc-200 placeholder:text-zinc-400 focus-visible:border-brand/30 focus-visible:ring-brand/20"
+                {...register(field.label, {
+                  required: field.required
+                    ? `Le champ « ${field.label} » est requis.`
+                    : false,
+                  ...(field.type === FieldType.NUMBER
+                    ? { valueAsNumber: true }
+                    : {}),
+                })}
+              />
+              {errors[field.label] && (
+                <p
+                  id={`error-${field.id}`}
+                  role="alert"
+                  className="text-sm text-red-300"
+                >
+                  {errors[field.label]?.message}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-sm text-zinc-400">
+          Aucun champ supplémentaire n'est requis.
+        </p>
+      )}
+      {/* Fields editable hint — shown only when there are custom fields */}
+      {fields.length > 0 && (
+        <p className="text-center text-xs text-zinc-400">
+          Si un champ venait à changer, vous pouvez modifier vos réponses depuis
+          la page de votre profil.
+        </p>
+      )}
       {/* Optional donation (paid tournaments only) */}
       {isPaidTournament && tournament.donationEnabled && (
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm">
@@ -417,7 +625,7 @@ export const TournamentRegistrationForm = ({
               <Label htmlFor="donation-free" className="text-xs text-zinc-400">
                 Montant du don ({tournament.entryFeeCurrency ?? 'CHF'})
                 {tournament.donationMinAmount !== null && (
-                  <span className="ml-1 text-zinc-500">
+                  <span className="ml-1 text-zinc-400">
                     (minimum{' '}
                     {formatCentimes(
                       tournament.donationMinAmount,
@@ -472,159 +680,60 @@ export const TournamentRegistrationForm = ({
         </div>
       )}
 
-      {/* Team mode selector (TEAM format only) */}
-      {format === TournamentFormat.TEAM && (
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={teamMode === 'create' ? 'default' : 'outline'}
-              size="sm"
-              className={cn(
-                'flex-1 gap-2',
-                teamMode !== 'create' &&
-                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
-              )}
-              onClick={() => setTeamMode('create')}
-              disabled={isPending}
-            >
-              <Users className="size-4" />
-              Créer une équipe
-            </Button>
-            <Button
-              type="button"
-              variant={teamMode === 'join' ? 'default' : 'outline'}
-              size="sm"
-              className={cn(
-                'flex-1 gap-2',
-                teamMode !== 'join' &&
-                  'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
-              )}
-              onClick={() => setTeamMode('join')}
-              disabled={isPending}
-            >
-              <Users className="size-4" />
-              Rejoindre une équipe
-            </Button>
-          </div>
-
-          {/* Create mode: team name input */}
-          {teamMode === 'create' && (
-            <div className="space-y-1.5">
-              <Label htmlFor="team-name" className="text-xs text-zinc-400">
-                Nom de l'équipe
-                <span className="ml-0.5 text-red-400">*</span>
-              </Label>
-              <Input
-                id="team-name"
-                type="text"
-                value={teamName}
-                onChange={e => setTeamName(e.target.value)}
-                disabled={isPending}
-                placeholder="Entrez le nom de votre équipe"
-                maxLength={VALIDATION_LIMITS.TEAM_NAME_MAX}
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
-              />
-            </div>
-          )}
-
-          {/* Join mode: team select dropdown */}
-          {teamMode === 'join' && (
-            <div className="space-y-1.5">
-              <Label htmlFor="team-select" className="text-xs text-zinc-400">
-                Équipe
-                <span className="ml-0.5 text-red-400">*</span>
-              </Label>
-              {availableTeams.length > 0 ? (
-                <Select
-                  value={selectedTeamId}
-                  onValueChange={setSelectedTeamId}
-                  disabled={isPending}
-                >
-                  <SelectTrigger
-                    id="team-select"
-                    className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus:border-brand/30 focus:ring-brand/20"
-                  >
-                    <SelectValue placeholder="Sélectionnez une équipe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTeams.map(team => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name} — Capitaine: {team.captain.displayName} (
-                        {team._count.members}/{teamSize} membres)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-zinc-500">
-                  Aucune équipe disponible. Créez la vôtre !
-                </p>
-              )}
-            </div>
-          )}
+      {isPaidTournament && entryFeeLabel && (
+        <div className="rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-zinc-300">
+          <p className="flex items-center gap-2 font-medium text-white">
+            <CreditCard className="size-4 text-brand" />
+            Inscription payante : {entryFeeLabel} par joueur
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Votre place est réservée pendant {REGISTRATION_HOLD_MINUTES} minutes
+            au moment de la redirection vers Stripe. Si vous quittez la page
+            Stripe sans payer, votre place sera libérée.
+          </p>
         </div>
       )}
-      {/* Team logo hint — shown only when creating a team and logo upload is enabled */}
-      {format === TournamentFormat.TEAM &&
-        teamMode === 'create' &&
-        tournament.teamLogoEnabled && (
-          <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-xs text-zinc-400">
-            <p>
-              En tant que capitaine, vous pourrez ajouter un logo d&apos;équipe
-              depuis votre profil après inscription.
-            </p>
+      {isPaidTournament && (
+        <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 px-4 py-3 text-sm text-zinc-300">
+          <p className="text-xs text-zinc-400">
+            {getRefundPolicyLabel(
+              tournament.refundPolicyType,
+              tournament.refundDeadlineDays,
+            )}
+          </p>
+        </div>
+      )}
+      <div className="rounded-2xl border border-white/15 bg-white/3 p-4">
+        <h4 className="mb-3 font-semibold text-white">Récapitulatif</h4>
+        <dl className="space-y-2 text-sm text-zinc-300">
+          <div className="flex flex-wrap justify-between gap-2">
+            <dt>Inscription par joueur</dt>
+            <dd>{isPaidTournament ? entryFeeLabel : 'Gratuit'}</dd>
           </div>
-        )}
-      {/* Dynamic fields */}
-      {fields.length > 0 ? (
-        <div className="space-y-4">
-          {fields.map(field => (
-            <div key={field.id} className="space-y-1.5">
-              <Label
-                htmlFor={`field-${field.id}`}
-                className="text-xs text-zinc-400"
-              >
-                {field.label}
-                {field.required && (
-                  <span className="ml-0.5 text-red-400">*</span>
+          {getResolvedDonation() ? (
+            <div className="flex flex-wrap justify-between gap-2">
+              <dt>Don facultatif</dt>
+              <dd>
+                {formatCentimes(
+                  getResolvedDonation() ?? 0,
+                  tournament.entryFeeCurrency ?? 'CHF',
                 )}
-              </Label>
-              <Input
-                id={`field-${field.id}`}
-                type={field.type === FieldType.NUMBER ? 'number' : 'text'}
-                disabled={isPending}
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-brand/30 focus-visible:ring-brand/20"
-                {...register(field.label, {
-                  required: field.required
-                    ? `Le champ « ${field.label} » est requis.`
-                    : false,
-                  ...(field.type === FieldType.NUMBER
-                    ? { valueAsNumber: false }
-                    : {}),
-                })}
-              />
-              {errors[field.label] && (
-                <p className="text-xs text-red-400">
-                  {errors[field.label]?.message}
-                </p>
-              )}
+              </dd>
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-sm text-zinc-500">
-          Aucun champ supplémentaire n'est requis.
-        </p>
-      )}
-      {/* Fields editable hint — shown only when there are custom fields */}
-      {fields.length > 0 && (
-        <p className="text-center text-xs text-zinc-500">
-          Si un champ venait à changer, vous pouvez modifier vos réponses depuis
-          la page de votre profil.
-        </p>
-      )}
-      <p className="text-center text-xs text-zinc-500">
+          ) : null}
+          <div className="flex flex-wrap justify-between gap-2 border-t border-white/10 pt-2 font-semibold text-white">
+            <dt>Total à payer pour vous</dt>
+            <dd>
+              {formatCentimes(
+                (isPaidTournament ? (tournament.entryFeeAmount ?? 0) : 0) +
+                  (getResolvedDonation() ?? 0),
+                tournament.entryFeeCurrency ?? 'CHF',
+              )}
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <p className="text-center text-xs text-zinc-400">
         <CheckCircle className="mr-1 inline size-3 text-emerald-500" />
         {isPaidTournament
           ? 'Votre inscription sera confirmée après paiement Stripe.'
@@ -632,8 +741,16 @@ export const TournamentRegistrationForm = ({
       </p>
       <Button
         type="submit"
-        disabled={isPending || donationBlocksSubmit}
+        disabled={
+          isPending ||
+          donationBlocksSubmit ||
+          capacityReached ||
+          (format === TournamentFormat.TEAM &&
+            teamMode === 'join' &&
+            availableTeams.length === 0)
+        }
         className="w-full gap-2"
+        aria-busy={isPending}
       >
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
@@ -642,19 +759,23 @@ export const TournamentRegistrationForm = ({
         ) : (
           <Send className="size-4" />
         )}
-        {format === TournamentFormat.TEAM
-          ? teamMode === 'create'
-            ? isPaidTournament
-              ? 'Créer et payer'
-              : "Créer et s'inscrire"
+        {isPending
+          ? isPaidTournament
+            ? 'Préparation du paiement…'
+            : 'Inscription en cours…'
+          : format === TournamentFormat.TEAM
+            ? teamMode === 'create'
+              ? isPaidTournament
+                ? 'Créer et payer'
+                : "Créer et s'inscrire"
+              : isPaidTournament
+                ? 'Rejoindre et payer'
+                : "Rejoindre et s'inscrire"
             : isPaidTournament
-              ? 'Rejoindre et payer'
-              : "Rejoindre et s'inscrire"
-          : isPaidTournament
-            ? "Payer et s'inscrire"
-            : "S'inscrire"}
+              ? "Payer et s'inscrire"
+              : "S'inscrire"}
       </Button>
-      <p className="text-center text-xs text-zinc-500">
+      <p className="text-center text-xs text-zinc-400">
         En procédant {isPaidTournament ? 'au paiement' : "à l'inscription"},
         vous confirmez accepter nos{' '}
         <Link href={ROUTES.TERMS} className="text-brand hover:underline">

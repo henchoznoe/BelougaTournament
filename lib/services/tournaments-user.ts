@@ -79,6 +79,7 @@ const USER_REGISTRATION_SELECT = {
 export const getUserTournamentRegistrationState = async (
   userId: string,
   tournamentId: string,
+  options?: { throwOnError?: boolean },
 ): Promise<UserTournamentRegistrationState | null> => {
   try {
     await cleanupExpiredPendingRegistrations(userId)
@@ -102,6 +103,7 @@ export const getUserTournamentRegistrationState = async (
     return row as UserTournamentRegistrationState | null
   } catch (error) {
     logger.error({ error }, 'Error fetching user tournament registration state')
+    if (options?.throwOnError) throw error
     return null
   }
 }

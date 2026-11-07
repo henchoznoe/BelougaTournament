@@ -10,7 +10,6 @@
 
 import { LayoutDashboard, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useLogout } from '@/components/admin/hooks/use-logout'
 import { Button } from '@/components/ui/button'
@@ -22,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import type { AuthSession } from '@/lib/types/auth'
 import { hasAdminAccess } from '@/lib/utils/role'

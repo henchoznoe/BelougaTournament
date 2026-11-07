@@ -34,21 +34,21 @@ export const OrderableItem = ({
   children,
 }: OrderableItemProps) => {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/2 px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/2 px-4 py-3">
       {/* Index badge */}
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-xs font-semibold text-zinc-500">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-xs font-semibold text-zinc-400">
         #{index + 1}
       </span>
 
       {/* Reorder arrows */}
-      <div className="flex shrink-0 flex-col gap-0.5">
+      <div className="flex shrink-0 gap-0.5 sm:flex-col">
         <Button
           type="button"
           variant="ghost"
           size="icon-xs"
           disabled={index === 0 || disabled}
           onClick={onMoveUp}
-          className="text-zinc-500 hover:text-zinc-300"
+          className="text-zinc-400 hover:text-zinc-300"
           aria-label={`Monter l'élément ${index + 1}`}
         >
           <ChevronUp className="size-3" />
@@ -59,7 +59,7 @@ export const OrderableItem = ({
           size="icon-xs"
           disabled={index === total - 1 || disabled}
           onClick={onMoveDown}
-          className="text-zinc-500 hover:text-zinc-300"
+          className="text-zinc-400 hover:text-zinc-300"
           aria-label={`Descendre l'élément ${index + 1}`}
         >
           <ChevronDown className="size-3" />
@@ -67,7 +67,9 @@ export const OrderableItem = ({
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
+        {children}
+      </div>
 
       {/* Delete */}
       <Button
@@ -76,7 +78,7 @@ export const OrderableItem = ({
         size="icon-xs"
         disabled={disabled}
         onClick={onRemove}
-        className="shrink-0 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+        className="ml-auto shrink-0 text-zinc-400 sm:ml-0 hover:bg-red-500/10 hover:text-red-400"
         aria-label={removeLabel}
       >
         <Trash2 className="size-3.5" />

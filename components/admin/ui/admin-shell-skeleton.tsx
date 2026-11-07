@@ -10,9 +10,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export const AdminShellSkeleton = () => {
   return (
-    <div className="flex h-dvh bg-zinc-950">
-      {/* Sidebar skeleton (desktop only — always collapsed w-16) */}
-      <aside className="hidden w-16 flex-col border-r border-white/5 bg-zinc-950/80 md:flex">
+    <div
+      role="status"
+      aria-label="Chargement de l’administration"
+      className="flex h-dvh bg-zinc-950"
+    >
+      {/* Sidebar skeleton (desktop only — responsive menu) */}
+      <aside className="hidden w-16 lg:w-60 flex-col border-r border-white/5 bg-zinc-950/80 md:flex">
         {/* Logo area */}
         <div className="flex h-16 items-center justify-center border-b border-white/5 px-4">
           <Skeleton className="size-7 shrink-0 rounded bg-zinc-800" />

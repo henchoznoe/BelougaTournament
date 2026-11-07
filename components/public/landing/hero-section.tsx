@@ -10,10 +10,10 @@
 
 import { ChevronDown, ChevronRight, Video } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePublicSession } from '@/components/providers/public-session-provider'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { DEFAULT_ASSETS } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 import type {
@@ -89,7 +89,7 @@ export const HeroSection = ({
   }, [badgeTournaments])
 
   return (
-    <section className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-4 text-center">
+    <section className="relative flex min-h-[min(46rem,85svh)] flex-col items-center justify-center overflow-hidden px-4 pb-20 pt-32 text-center">
       <div className="absolute inset-0 z-0 select-none">
         <Image
           alt="Belouga Tournament Background"
@@ -106,7 +106,7 @@ export const HeroSection = ({
         <div className="absolute left-1/2 top-1/3 size-[40rem] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-[120px]" />
       </div>
 
-      <div className="relative z-10 max-w-5xl space-y-8">
+      <div className="relative z-10 w-full max-w-5xl space-y-6">
         <div className="flex justify-center">
           {activeTournamentSlug ? (
             <Link
@@ -154,7 +154,7 @@ export const HeroSection = ({
           )}
         </div>
 
-        <h1 className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-8xl lg:text-9xl">
+        <h1 className="text-5xl font-black tracking-tighter text-white drop-shadow-2xl sm:text-7xl lg:text-8xl">
           Belouga{' '}
           <span className="text-gradient-brand animate-gradient-x">
             Tournament
@@ -181,7 +181,7 @@ export const HeroSection = ({
           forgez votre légende.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-6 pt-8">
+        <div className="flex flex-wrap justify-center gap-3 pt-3">
           <Button
             asChild
             variant="brand"

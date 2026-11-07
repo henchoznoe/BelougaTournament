@@ -119,7 +119,13 @@ export const TournamentFormGames = ({
           Entrée ou virgule pour ajouter un jeu
         </p>
         {errors.games?.message && (
-          <p className="text-xs text-red-400">{errors.games.message}</p>
+          <p
+            className="text-xs text-red-400"
+            id="tournament-form-games-games-error"
+            role="alert"
+          >
+            {errors.games?.message}
+          </p>
         )}
       </div>
     </div>

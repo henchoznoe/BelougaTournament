@@ -50,14 +50,23 @@ export const TournamentFormContent = ({
                 id="tournament-rules"
                 value={field.value}
                 onChange={val =>
-                  setValue('rules', val, { shouldValidate: true })
+                  setValue('rules', val, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
                 }
                 placeholder="Règles du tournoi..."
               />
             )}
           />
           {errors.rules?.message && (
-            <p className="text-xs text-red-400">{errors.rules.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-content-rules-error"
+              role="alert"
+            >
+              {errors.rules?.message}
+            </p>
           )}
         </div>
 
@@ -72,14 +81,23 @@ export const TournamentFormContent = ({
                 id="tournament-prize"
                 value={field.value}
                 onChange={val =>
-                  setValue('prize', val, { shouldValidate: true })
+                  setValue('prize', val, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
                 }
                 placeholder="Description des prix..."
               />
             )}
           />
           {errors.prize?.message && (
-            <p className="text-xs text-red-400">{errors.prize.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-content-prize-error"
+              role="alert"
+            >
+              {errors.prize?.message}
+            </p>
           )}
         </div>
       </div>

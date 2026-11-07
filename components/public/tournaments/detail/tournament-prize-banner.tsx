@@ -32,7 +32,7 @@ export const TournamentPrizeBanner = ({
       <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -left-16 -bottom-16 size-48 rounded-full bg-yellow-500/10 blur-3xl" />
 
-      <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+      <div className="relative z-10 flex min-w-0 flex-col items-center gap-3 text-left sm:text-center">
         <div
           className={cn(
             'inline-flex rounded-full bg-amber-500/10 ring-1 ring-amber-500/20',

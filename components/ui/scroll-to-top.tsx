@@ -20,7 +20,8 @@ export const ScrollToTop = () => {
 
   useEffect(() => {
     if (path !== prevPath.current) {
-      window.scrollTo(0, 0)
+      if (!window.location.hash)
+        window.scrollTo({ top: 0, behavior: 'instant' })
       prevPath.current = path
     }
   }, [path])

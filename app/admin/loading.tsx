@@ -6,10 +6,10 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { AdminShellSkeleton } from '@/components/admin/ui/admin-shell-skeleton'
+import { AdminPageSkeleton } from '@/components/admin/ui/admin-page-skeleton'
 
 const AdminLoadingPage = () => {
-  return <AdminShellSkeleton />
+  return <AdminPageSkeleton />
 }
 
 export default AdminLoadingPage

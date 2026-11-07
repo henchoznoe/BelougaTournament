@@ -8,9 +8,9 @@
 
 'use client'
 
-import Link from 'next/link'
 import { usePublicSession } from '@/components/providers/public-session-provider'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 
 export const FinalCtaAuthButton = () => {

@@ -54,6 +54,18 @@ const { getUserTournamentRegistrationState, getUserActiveTournaments } =
   await import('@/lib/services/tournaments-user')
 
 describe('getUserTournamentRegistrationState', () => {
+  it('propagates database errors for callers that must distinguish unknown from absent', async () => {
+    mockCleanupExpiredPendingRegistrations.mockResolvedValue(0)
+    mockRegistrationFindFirst.mockRejectedValueOnce(
+      new Error('database unavailable'),
+    )
+    await expect(
+      getUserTournamentRegistrationState(USER_ID, TOURNAMENT_ID, {
+        throwOnError: true,
+      }),
+    ).rejects.toThrow('database unavailable')
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

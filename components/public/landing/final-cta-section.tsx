@@ -7,10 +7,10 @@
  */
 
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { FinalCtaAuthButton } from '@/components/public/landing/final-cta-auth-button'
 import { Reveal } from '@/components/public/shared/reveal'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 
 export const FinalCtaSection = () => {

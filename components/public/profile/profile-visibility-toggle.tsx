@@ -9,7 +9,7 @@
 'use client'
 
 import { Eye, EyeOff } from 'lucide-react'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
 import { updateProfileVisibility } from '@/lib/actions/profile'
@@ -22,13 +22,22 @@ export const ProfileVisibilityToggle = ({
   isPublic: initialIsPublic,
 }: ProfileVisibilityToggleProps) => {
   const [isPending, startTransition] = useTransition()
+  const [isPublic, setIsPublic] = useState(initialIsPublic)
+  const [message, setMessage] = useState('')
 
   const handleToggle = (checked: boolean) => {
     startTransition(async () => {
       const result = await updateProfileVisibility({ isPublic: checked })
       if (result.success) {
+        setIsPublic(checked)
+        setMessage(
+          checked
+            ? 'Votre profil est maintenant public.'
+            : 'Votre profil est maintenant privé.',
+        )
         toast.success(result.message)
       } else {
+        setMessage(result.message ?? 'La visibilité n’a pas pu être modifiée.')
         toast.error(result.message ?? 'Une erreur est survenue.')
       }
     })
@@ -36,21 +45,27 @@ export const ProfileVisibilityToggle = ({
 
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/2 px-4 py-3">
-      {initialIsPublic ? (
+      {isPublic ? (
         <Eye className="size-4 shrink-0 text-brand" />
       ) : (
-        <EyeOff className="size-4 shrink-0 text-zinc-500" />
+        <EyeOff className="size-4 shrink-0 text-zinc-400" />
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+        <span className="text-[10px] uppercase tracking-wider text-zinc-400">
           Visibilité du profil
         </span>
+        {message && (
+          <span role="status" className="text-xs text-zinc-300">
+            {message}
+          </span>
+        )}
         <span className="text-sm text-zinc-300">
-          {initialIsPublic ? 'Public' : 'Privé'}
+          {isPublic ? 'Public' : 'Privé'}
         </span>
       </div>
       <Switch
-        checked={initialIsPublic}
+        aria-label="Rendre mon profil public"
+        checked={isPublic}
         onCheckedChange={handleToggle}
         disabled={isPending}
       />

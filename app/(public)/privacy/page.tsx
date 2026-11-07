@@ -7,9 +7,9 @@
  */
 
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { LegalSection } from '@/components/public/legal/legal-section'
 import { PageHeader } from '@/components/ui/page-header'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { CONTACT_EMAIL, METADATA, OWNER } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'
 

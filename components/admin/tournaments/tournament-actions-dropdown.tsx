@@ -18,7 +18,6 @@ import {
   RotateCcw,
   Trash2,
 } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -40,6 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   deleteTournament,
   updateTournamentStatus,

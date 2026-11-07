@@ -8,7 +8,7 @@
 
 import { Calendar, Gamepad2 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import type { UserActiveTournament } from '@/lib/types/tournament'
 import { formatDate } from '@/lib/utils/formatting'

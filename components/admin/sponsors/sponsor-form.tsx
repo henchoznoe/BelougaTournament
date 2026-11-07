@@ -26,6 +26,10 @@ import { useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useBlobList } from '@/components/admin/hooks/use-blob-list'
+import { useMediaUpload } from '@/components/admin/hooks/use-media-upload'
+import { useUnsavedChanges } from '@/components/admin/hooks/use-unsaved-changes'
+import { MediaUploadFeedback } from '@/components/admin/ui/media-upload-feedback'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -43,7 +47,8 @@ interface SponsorFormProps {
 export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
   const isEditing = !!sponsor
   const [isPending, startTransition] = useTransition()
-  const [isUploading, setIsUploading] = useState(false)
+  const { progress: uploadProgress, upload } = useMediaUpload()
+  const isUploading = uploadProgress.pending
   const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList('sponsors')
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -54,7 +59,8 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
+    reset,
   } = useForm<SponsorInput>({
     resolver: zodResolver(sponsorSchema),
     defaultValues: {
@@ -67,54 +73,25 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
     },
   })
 
+  const allowLeave = useUnsavedChanges(isDirty)
+  const [actionError, setActionError] = useState<string | null>(null)
   const imageUrls = watch('imageUrls')
 
   /** Upload one or more images to Vercel Blob and add them to the list. */
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    setIsUploading(true)
-    const newUrls: string[] = []
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (!files.length || isUploading) return
 
     try {
-      for (const file of Array.from(files)) {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('folder', 'sponsors')
-
-        const res = await fetch('/api/admin/blobs', {
-          method: 'POST',
-          body: formData,
-        })
-
-        const data = (await res.json()) as { url?: string; error?: string }
-
-        if (!res.ok || !data.url) {
-          toast.error(data.error ?? `Erreur lors de l'upload de ${file.name}.`)
-          continue
-        }
-
-        newUrls.push(data.url)
-      }
-
-      if (newUrls.length > 0) {
-        const label =
-          newUrls.length === 1
-            ? 'Image importée avec succès.'
-            : `${newUrls.length.toString()} images importées avec succès.`
-        toast.success(label)
+      const newUrls = await upload(files, 'sponsors')
+      if (newUrls.length) {
         setValue('imageUrls', [...imageUrls, ...newUrls], {
           shouldDirty: true,
           shouldValidate: true,
         })
         await refetchBlobs()
       }
-    } catch (error) {
-      console.error('Error uploading sponsor images:', error)
-      toast.error('Une erreur inattendue est survenue.')
     } finally {
-      setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -172,6 +149,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
   }
 
   const onSubmit = (data: SponsorInput) => {
+    setActionError(null)
     startTransition(async () => {
       const result = isEditing
         ? await updateSponsor({ ...data, id: sponsor.id })
@@ -179,32 +157,47 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
 
       if (result.success) {
         toast.success(result.message)
+        allowLeave()
+        reset(data)
         router.push(
           isEditing
             ? ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id)
             : ROUTES.ADMIN_SPONSORS,
         )
       } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
+        setActionError(
+          result.message ??
+            'Une erreur est survenue. Vos modifications sont conservées.',
+        )
       }
     })
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      aria-busy={isPending || isUploading}
+      className="space-y-6"
+    >
+      {actionError && (
+        <ActionFeedback tone="error" title="Enregistrement impossible">
+          <p>{actionError}</p>
+        </ActionFeedback>
+      )}
+      <MediaUploadFeedback {...uploadProgress} />
       {/* Images */}
       <div className="rounded-2xl border border-white/5 bg-white/2 p-6 backdrop-blur-sm">
         <Label className="mb-1 text-xs font-medium text-zinc-400">
           Images *
         </Label>
-        <p className="mb-4 text-[11px] text-zinc-600">
+        <p className="mb-4 text-[11px] text-zinc-400">
           La première image est utilisée comme image principale sur le site.
           Réorganisez avec les flèches.
         </p>
 
         {/* Image grid */}
         {imageUrls.length > 0 && (
-          <div className="mb-4 grid grid-cols-4 gap-3 sm:grid-cols-6">
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
             {imageUrls.map((url, index) => (
               <div key={url} className="group relative">
                 <div
@@ -233,14 +226,14 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
                 )}
 
                 {/* Overlay controls — visible on hover */}
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-0.5 rounded-b-lg bg-zinc-950/80 py-1 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-0.5 rounded-b-lg bg-zinc-950/80 py-1 opacity-100 backdrop-blur-sm transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                   {/* Set as principal */}
                   {index !== 0 && (
                     <button
                       type="button"
                       onClick={() => handleSetPrincipal(index)}
                       aria-label="Définir comme principal"
-                      className="flex size-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-blue-500/20 hover:text-blue-400"
+                      className="flex size-9 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-blue-500/20 hover:text-blue-400"
                     >
                       <Crown className="size-3" />
                     </button>
@@ -252,7 +245,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
                       type="button"
                       onClick={() => handleMoveImage(index, 'left')}
                       aria-label="Déplacer à gauche"
-                      className="flex size-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex size-9 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
                     >
                       <ArrowLeft className="size-3" />
                     </button>
@@ -264,7 +257,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
                       type="button"
                       onClick={() => handleMoveImage(index, 'right')}
                       aria-label="Déplacer à droite"
-                      className="flex size-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex size-9 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
                     >
                       <ArrowRight className="size-3" />
                     </button>
@@ -275,7 +268,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
                     type="button"
                     onClick={() => handleRemoveImage(index)}
                     aria-label="Supprimer"
-                    className="flex size-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
+                    className="flex size-9 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
                   >
                     <Trash2 className="size-3" />
                   </button>
@@ -316,7 +309,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
           <button
             type="button"
             onClick={() => setGalleryOpen(prev => !prev)}
-            className="flex w-full items-center justify-between text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
+            className="flex w-full items-center justify-between text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-300"
           >
             <span>Images existantes</span>
             <ChevronDown
@@ -338,7 +331,7 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
                 ))}
               </div>
             ) : blobs.length === 0 ? (
-              <p className="py-2 text-center text-xs text-zinc-600">
+              <p className="py-2 text-center text-xs text-zinc-400">
                 Aucune image dans le dossier sponsors.
               </p>
             ) : (
@@ -378,8 +371,12 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
         </div>
 
         {errors.imageUrls?.message && (
-          <p className="mt-2 text-xs text-red-400">
-            {errors.imageUrls.message}
+          <p
+            className="mt-2 text-xs text-red-400"
+            id="sponsor-form-imageUrls-error"
+            role="alert"
+          >
+            {errors.imageUrls?.message}
           </p>
         )}
       </div>
@@ -396,13 +393,23 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
               Nom *
             </Label>
             <Input
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={
+                errors.name ? 'sponsor-form-name-error' : undefined
+              }
               id="sponsor-name"
               placeholder="Nom du sponsor"
-              className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+              className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
               {...register('name')}
             />
             {errors.name?.message && (
-              <p className="text-xs text-red-400">{errors.name.message}</p>
+              <p
+                className="text-xs text-red-400"
+                id="sponsor-form-name-error"
+                role="alert"
+              >
+                {errors.name?.message}
+              </p>
             )}
           </div>
 
@@ -415,13 +422,23 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
               Lien (optionnel)
             </Label>
             <Input
+              aria-invalid={Boolean(errors.url)}
+              aria-describedby={
+                errors.url ? 'sponsor-form-url-error' : undefined
+              }
               id="sponsor-url"
               placeholder="https://sponsor.com"
-              className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
+              className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 placeholder:text-zinc-400 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
               {...register('url')}
             />
             {errors.url?.message && (
-              <p className="text-xs text-red-400">{errors.url.message}</p>
+              <p
+                className="text-xs text-red-400"
+                id="sponsor-form-url-error"
+                role="alert"
+              >
+                {errors.url?.message}
+              </p>
             )}
           </div>
 
@@ -434,14 +451,24 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
               Partenaire depuis
             </Label>
             <Input
+              aria-invalid={Boolean(errors.supportedSince)}
+              aria-describedby={
+                errors.supportedSince
+                  ? 'sponsor-form-supportedSince-error'
+                  : undefined
+              }
               id="sponsor-supported-since"
               type="date"
               className="h-10 w-44 rounded-xl border-white/10 bg-white/5 text-sm text-zinc-200 focus-visible:border-blue-500/30 focus-visible:ring-blue-500/20"
               {...register('supportedSince')}
             />
             {errors.supportedSince?.message && (
-              <p className="text-xs text-red-400">
-                {errors.supportedSince.message}
+              <p
+                className="text-xs text-red-400"
+                id="sponsor-form-supportedSince-error"
+                role="alert"
+              >
+                {errors.supportedSince?.message}
               </p>
             )}
           </div>
@@ -449,11 +476,19 @@ export const SponsorForm = ({ sponsor }: SponsorFormProps) => {
       </div>
 
       {/* Submit */}
-      <div className="flex items-center justify-end gap-3">
+      <div className="form-actions">
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push(ROUTES.ADMIN_SPONSORS)}
+          onClick={() => {
+            if (
+              !isDirty ||
+              window.confirm('Quitter sans enregistrer les modifications ?')
+            ) {
+              allowLeave()
+              router.push(ROUTES.ADMIN_SPONSORS)
+            }
+          }}
           className="text-zinc-400"
         >
           Annuler

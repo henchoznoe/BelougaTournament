@@ -7,7 +7,7 @@
  */
 
 import Image from 'next/image'
-import Link from 'next/link'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { SocialIcon, type SocialNetwork } from '@/components/ui/social-icon'
 import { AUTHOR, DEFAULT_ASSETS, METADATA } from '@/lib/config/constants'
 import { ROUTES } from '@/lib/config/routes'

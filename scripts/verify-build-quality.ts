@@ -15,6 +15,8 @@ import { resolvePrerenderedHtml } from './build-artifacts.ts'
 const nextDirectory = path.resolve(process.argv[2] ?? '.next')
 const publicDirectory = path.resolve('public')
 const minimumRevalidateSeconds = 30 * 24 * 60 * 60
+// Date-sensitive tournament selections need periodic refresh even without an admin mutation.
+const tournamentCatalogMinimumRevalidateSeconds = 60
 
 const staticRoutes = [
   '/',
@@ -124,13 +126,17 @@ const verifyPrerenderedRoutes = async (): Promise<void> => {
     if (entry.compute && entry.compute !== 'static') {
       throw new Error(`${route} utilise encore compute=${entry.compute}.`)
     }
+    const minimumForRoute =
+      route === '/' || route === '/tournaments'
+        ? tournamentCatalogMinimumRevalidateSeconds
+        : minimumRevalidateSeconds
     if (
       route !== '/sitemap.xml' &&
       typeof entry.initialRevalidateSeconds === 'number' &&
-      entry.initialRevalidateSeconds < minimumRevalidateSeconds
+      entry.initialRevalidateSeconds < minimumForRoute
     ) {
       throw new Error(
-        `${route} se revalide après ${entry.initialRevalidateSeconds}s, sous le minimum de ${minimumRevalidateSeconds}s.`,
+        `${route} se revalide après ${entry.initialRevalidateSeconds}s, sous le minimum de ${minimumForRoute}s.`,
       )
     }
   }

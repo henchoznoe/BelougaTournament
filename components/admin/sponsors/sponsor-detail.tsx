@@ -21,7 +21,6 @@ import {
   Trash2,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -37,6 +36,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { deleteSponsor, toggleSponsorStatus } from '@/lib/actions/sponsors'
 import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'
@@ -73,7 +73,7 @@ export const SponsorStatusBadge = ({ sponsor }: SponsorStatusBadgeProps) => {
       aria-label={`${sponsor.enabled ? 'Désactiver' : 'Activer'} le sponsor`}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
-        'cursor-pointer disabled:cursor-wait disabled:opacity-60',
+        'cursor-pointer disabled:opacity-60',
         sponsor.enabled
           ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
           : 'bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20',

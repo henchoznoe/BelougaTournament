@@ -143,8 +143,8 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
             />
           ) : (
             <div className="flex flex-col items-center gap-1">
-              <ImagePlus className="size-6 text-zinc-600" />
-              <span className="text-[10px] text-zinc-600">Aucun</span>
+              <ImagePlus className="size-6 text-zinc-400" />
+              <span className="text-[10px] text-zinc-400">Aucun</span>
             </div>
           )}
         </div>
@@ -182,7 +182,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
             </Button>
           )}
 
-          <p className="text-[10px] leading-relaxed text-zinc-600">
+          <p className="text-[10px] leading-relaxed text-zinc-400">
             PNG, JPEG ou WebP. Préférez un logo carré.
           </p>
         </div>
@@ -201,7 +201,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
       <div className="space-y-2.5">
         <div className="flex items-center gap-2">
           <div className="h-px flex-1 bg-white/5" />
-          <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
+          <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-400">
             Galerie{!isLoading && ` · ${blobs.length.toString()}`}
           </span>
           <div className="h-px flex-1 bg-white/5" />
@@ -217,7 +217,7 @@ export const LogoPicker = ({ value, onChange }: LogoPickerProps) => {
             ))}
           </div>
         ) : blobs.length === 0 ? (
-          <p className="py-2 text-center text-xs text-zinc-600">
+          <p className="py-2 text-center text-xs text-zinc-400">
             Aucun logo importé pour le moment.
           </p>
         ) : (

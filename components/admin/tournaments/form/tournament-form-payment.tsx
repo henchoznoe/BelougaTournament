@@ -204,8 +204,12 @@ export const TournamentFormPayment = ({
               création du tournoi.
             </p>
             {errors.registrationType?.message && (
-              <p className="text-xs text-red-400">
-                {errors.registrationType.message}
+              <p
+                className="text-xs text-red-400"
+                id="tournament-form-payment-registrationType-error"
+                role="alert"
+              >
+                {errors.registrationType?.message}
               </p>
             )}
           </div>
@@ -246,8 +250,12 @@ export const TournamentFormPayment = ({
                 }}
               />
               {errors.entryFeeAmount?.message && (
-                <p className="text-xs text-red-400">
-                  {errors.entryFeeAmount.message}
+                <p
+                  className="text-xs text-red-400"
+                  id="tournament-form-payment-entryFeeAmount-error"
+                  role="alert"
+                >
+                  {errors.entryFeeAmount?.message}
                 </p>
               )}
               <p className="text-xs text-zinc-500">
@@ -308,8 +316,12 @@ export const TournamentFormPayment = ({
                 création du tournoi.
               </p>
               {errors.refundPolicyType?.message && (
-                <p className="text-xs text-red-400">
-                  {errors.refundPolicyType.message}
+                <p
+                  className="text-xs text-red-400"
+                  id="tournament-form-payment-refundPolicyType-error"
+                  role="alert"
+                >
+                  {errors.refundPolicyType?.message}
                 </p>
               )}
             </div>
@@ -342,8 +354,12 @@ export const TournamentFormPayment = ({
                   }}
                 />
                 {errors.refundDeadlineDays?.message && (
-                  <p className="text-xs text-red-400">
-                    {errors.refundDeadlineDays.message}
+                  <p
+                    className="text-xs text-red-400"
+                    id="tournament-form-payment-refundDeadlineDays-error"
+                    role="alert"
+                  >
+                    {errors.refundDeadlineDays?.message}
                   </p>
                 )}
               </div>
@@ -411,8 +427,12 @@ export const TournamentFormPayment = ({
               />
             </div>
             {errors.donationEnabled?.message && (
-              <p className="text-xs text-red-400">
-                {errors.donationEnabled.message}
+              <p
+                className="text-xs text-red-400"
+                id="tournament-form-payment-donationEnabled-error"
+                role="alert"
+              >
+                {errors.donationEnabled?.message}
               </p>
             )}
 
@@ -456,8 +476,12 @@ export const TournamentFormPayment = ({
                     </SelectContent>
                   </Select>
                   {errors.donationType?.message && (
-                    <p className="text-xs text-red-400">
-                      {errors.donationType.message}
+                    <p
+                      className="text-xs text-red-400"
+                      id="tournament-form-payment-donationType-error"
+                      role="alert"
+                    >
+                      {errors.donationType?.message}
                     </p>
                   )}
                 </div>
@@ -494,8 +518,12 @@ export const TournamentFormPayment = ({
                       }}
                     />
                     {errors.donationFixedAmount?.message && (
-                      <p className="text-xs text-red-400">
-                        {errors.donationFixedAmount.message}
+                      <p
+                        className="text-xs text-red-400"
+                        id="tournament-form-payment-donationFixedAmount-error"
+                        role="alert"
+                      >
+                        {errors.donationFixedAmount?.message}
                       </p>
                     )}
                   </div>
@@ -533,8 +561,12 @@ export const TournamentFormPayment = ({
                       }}
                     />
                     {errors.donationMinAmount?.message && (
-                      <p className="text-xs text-red-400">
-                        {errors.donationMinAmount.message}
+                      <p
+                        className="text-xs text-red-400"
+                        id="tournament-form-payment-donationMinAmount-error"
+                        role="alert"
+                      >
+                        {errors.donationMinAmount?.message}
                       </p>
                     )}
                   </div>

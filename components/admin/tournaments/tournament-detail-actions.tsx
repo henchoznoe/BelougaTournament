@@ -9,7 +9,6 @@
 'use client'
 
 import { Loader2, Pencil, Trash2 } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -25,6 +24,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   deleteTournament,
   updateTournamentStatus,
@@ -146,7 +146,7 @@ export const TournamentStatusControl = ({
             aria-label={`Changer le statut du tournoi`}
             className={cn(
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
-              'cursor-pointer disabled:cursor-wait disabled:opacity-60',
+              'cursor-pointer disabled:opacity-60',
               TOURNAMENT_STATUS_STYLES[tournament.status],
               'hover:opacity-80',
             )}
@@ -196,7 +196,7 @@ export const TournamentStatusControl = ({
             aria-label={transition.label}
             className={cn(
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
-              'cursor-pointer disabled:cursor-wait disabled:opacity-60',
+              'cursor-pointer disabled:opacity-60',
               transition === transitions[0]
                 ? TOURNAMENT_STATUS_STYLES[tournament.status]
                 : 'bg-white/5 text-zinc-400 hover:bg-white/10',

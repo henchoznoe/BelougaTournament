@@ -9,7 +9,6 @@
 'use client'
 
 import { Eye, EyeOff, Loader2, MoreHorizontal, Power } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
@@ -21,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { toggleSponsorStatus } from '@/lib/actions/sponsors'
 import { ROUTES } from '@/lib/config/routes'
 import type { Sponsor } from '@/prisma/generated/prisma/client'

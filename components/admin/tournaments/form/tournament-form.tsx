@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { type FieldErrors, type Resolver, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { useUnsavedChanges } from '@/components/admin/hooks/use-unsaved-changes'
 import { TournamentFormContent } from '@/components/admin/tournaments/form/tournament-form-content'
 import { TournamentFormDates } from '@/components/admin/tournaments/form/tournament-form-dates'
 import { TournamentFormFields } from '@/components/admin/tournaments/form/tournament-form-fields'
@@ -23,6 +24,7 @@ import { TournamentFormGeneral } from '@/components/admin/tournaments/form/tourn
 import { TournamentFormImages } from '@/components/admin/tournaments/form/tournament-form-images'
 import { TournamentFormPayment } from '@/components/admin/tournaments/form/tournament-form-payment'
 import { TournamentFormStages } from '@/components/admin/tournaments/form/tournament-form-stages'
+import { ActionFeedback } from '@/components/ui/action-feedback'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,9 +38,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { createTournament, updateTournament } from '@/lib/actions/tournaments'
 import { APP_TIME_ZONE } from '@/lib/config/constants'
+import { TOURNAMENT_FORM_SECTIONS } from '@/lib/config/constants/form-sections'
 import { ROUTES } from '@/lib/config/routes'
 import type { TournamentDetail } from '@/lib/types/tournament'
 import type { TournamentFormValues } from '@/lib/types/tournament-form'
+import { getFirstErrorPath } from '@/lib/utils/form-errors'
 import { fromNullable } from '@/lib/utils/formatting'
 import {
   tournamentSchema,
@@ -128,7 +132,9 @@ interface TournamentFormProps {
 export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   const isEditing = !!tournament
   const [isPending, startTransition] = useTransition()
+  const [mediaUploading, setMediaUploading] = useState(false)
   const [showLeaveDialog, setShowLeaveDialog] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
   const router = useRouter()
 
   const fieldsLocked =
@@ -251,28 +257,38 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
     }
   }, [watchFormat, setValue])
 
-  // Warn before closing/refreshing when form has unsaved changes
-  useEffect(() => {
-    if (!isDirty) return
-    const handler = (e: BeforeUnloadEvent) => {
-      e.preventDefault()
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [isDirty])
-
+  const allowLeave = useUnsavedChanges(isDirty || mediaUploading)
+  const sectionHasError = (fields: readonly string[]) =>
+    fields.some(field => field in errors)
   // ─── Form submission ────────────────────────────────────────────────────────
 
-  const isSubmitDisabled = isPending || isSubmitting
+  const isSubmitDisabled = isPending || isSubmitting || mediaUploading
 
   const onFormError = (fieldErrors: FieldErrors<TournamentFormValues>) => {
     const firstError = Object.values(fieldErrors).find(e => e?.message)
     const message =
       firstError?.message ?? 'Veuillez corriger les erreurs du formulaire.'
     toast.error(String(message))
+    requestAnimationFrame(() => {
+      const path = getFirstErrorPath(fieldErrors)
+      const section = TOURNAMENT_FORM_SECTIONS.find(item =>
+        item.fields.some(field => field === path?.split('.')[0]),
+      )
+      if (!section || !path) return
+      const container = document.getElementById(`form-${section.id}`)
+      container?.scrollIntoView({ block: 'start' })
+      const invalidField =
+        container?.querySelector<HTMLElement>(`[name="${CSS.escape(path)}"]`) ??
+        document
+          .getElementById(`tournament-${path}`)
+          ?.querySelector<HTMLElement>('.ql-editor') ??
+        container?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      invalidField?.focus({ preventScroll: true })
+    })
   }
 
   const onSubmit = (data: TournamentFormValues) => {
+    setActionError(null)
     const payload = {
       ...data,
       startDate: toISOFromLocal(data.startDate),
@@ -293,6 +309,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
 
       if (result.success) {
         toast.success(result.message)
+        allowLeave()
         reset()
         router.push(
           isEditing
@@ -302,7 +319,10 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
               ),
         )
       } else {
-        toast.error(result.message ?? 'Une erreur est survenue.')
+        setActionError(
+          result.message ??
+            'Une erreur est survenue. Vos modifications sont conservées.',
+        )
       }
     })
   }
@@ -310,74 +330,150 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-6">
-      <TournamentFormGeneral
-        register={register}
-        control={control}
-        errors={errors}
-        setValue={setValue}
-      />
+    <form
+      onSubmit={handleSubmit(onSubmit, onFormError)}
+      aria-busy={isPending}
+      className="space-y-6"
+    >
+      <nav
+        aria-label="Sections du formulaire"
+        className="flex flex-wrap gap-2 rounded-2xl border border-white/15 bg-zinc-950/95 p-3"
+      >
+        {TOURNAMENT_FORM_SECTIONS.map(section => (
+          <a
+            key={section.id}
+            href={`#form-${section.id}`}
+            className={`rounded-lg border px-3 py-2 text-sm ${sectionHasError(section.fields) ? 'border-red-400/40 text-red-300' : 'border-white/10 text-zinc-300 hover:text-white'}`}
+          >
+            {section.label}
+            {sectionHasError(section.fields) && (
+              <span className="ml-1">• erreur</span>
+            )}
+          </a>
+        ))}
+      </nav>
+      {Object.keys(errors).length > 0 && (
+        <ActionFeedback tone="error" title="Le formulaire contient des erreurs">
+          <p>
+            Les sections concernées sont signalées dans le sommaire. Vos
+            réponses sont conservées.
+          </p>
+        </ActionFeedback>
+      )}
+      {actionError && (
+        <ActionFeedback tone="error" title="Enregistrement impossible">
+          <p>{actionError}</p>
+        </ActionFeedback>
+      )}
+      <section
+        id="form-general"
+        aria-label="Informations générales"
+        className="section-anchor"
+      >
+        <TournamentFormGeneral
+          register={register}
+          control={control}
+          errors={errors}
+          setValue={setValue}
+        />
+      </section>
 
-      <TournamentFormGames errors={errors} setValue={setValue} watch={watch} />
+      <section id="form-games" aria-label="Jeux" className="section-anchor">
+        <TournamentFormGames
+          errors={errors}
+          setValue={setValue}
+          watch={watch}
+        />
+      </section>
 
-      <TournamentFormFormat
-        register={register}
-        errors={errors}
-        setValue={setValue}
-        watchFormat={watchFormat}
-        watchMaxTeams={watchMaxTeams}
-        watchTeamLogoEnabled={watchTeamLogoEnabled}
-        watchShowRegistrants={watchShowRegistrants}
-        isEditing={isEditing}
-      />
+      <section id="form-format" aria-label="Format" className="section-anchor">
+        <TournamentFormFormat
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          watchFormat={watchFormat}
+          watchMaxTeams={watchMaxTeams}
+          watchTeamLogoEnabled={watchTeamLogoEnabled}
+          watchShowRegistrants={watchShowRegistrants}
+          isEditing={isEditing}
+        />
+      </section>
 
-      <TournamentFormPayment
-        errors={errors}
-        setValue={setValue}
-        watchRegistrationType={watchRegistrationType}
-        watchRefundPolicyType={watchRefundPolicyType}
-        watchEntryFeeAmount={watchEntryFeeAmount}
-        watchRefundDeadlineDays={watchRefundDeadlineDays}
-        watchDonationEnabled={watchDonationEnabled ?? false}
-        watchDonationType={watchDonationType}
-        watchDonationFixedAmount={watchDonationFixedAmount}
-        watchDonationMinAmount={watchDonationMinAmount}
-        isEditing={isEditing}
-      />
+      <section
+        id="form-payment"
+        aria-label="Paiement"
+        className="section-anchor"
+      >
+        <TournamentFormPayment
+          errors={errors}
+          setValue={setValue}
+          watchRegistrationType={watchRegistrationType}
+          watchRefundPolicyType={watchRefundPolicyType}
+          watchEntryFeeAmount={watchEntryFeeAmount}
+          watchRefundDeadlineDays={watchRefundDeadlineDays}
+          watchDonationEnabled={watchDonationEnabled ?? false}
+          watchDonationType={watchDonationType}
+          watchDonationFixedAmount={watchDonationFixedAmount}
+          watchDonationMinAmount={watchDonationMinAmount}
+          isEditing={isEditing}
+        />
+      </section>
 
-      <TournamentFormDates control={control} errors={errors} />
+      <section id="form-dates" aria-label="Dates" className="section-anchor">
+        <TournamentFormDates control={control} errors={errors} />
+      </section>
 
-      <TournamentFormImages
-        register={register}
-        errors={errors}
-        setValue={setValue}
-        watchImageUrls={watchImageUrls}
-        watchSlug={watchSlug}
-      />
+      <section id="form-images" aria-label="Médias" className="section-anchor">
+        <TournamentFormImages
+          onUploadingChange={setMediaUploading}
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          watchImageUrls={watchImageUrls}
+          watchSlug={watchSlug}
+        />
+      </section>
 
-      <TournamentFormContent
-        control={control}
-        errors={errors}
-        setValue={setValue}
-      />
+      <section
+        id="form-content"
+        aria-label="Contenu"
+        className="section-anchor"
+      >
+        <TournamentFormContent
+          control={control}
+          errors={errors}
+          setValue={setValue}
+        />
+      </section>
 
-      <TournamentFormFields
-        control={control}
-        register={register}
-        errors={errors}
-        setValue={setValue}
-        watch={watch}
-        fieldsLocked={!!fieldsLocked}
-      />
+      <section id="form-fields" aria-label="Champs" className="section-anchor">
+        <TournamentFormFields
+          control={control}
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          watch={watch}
+          fieldsLocked={!!fieldsLocked}
+        />
+      </section>
 
-      <TournamentFormStages
-        control={control}
-        register={register}
-        errors={errors}
-      />
+      <section id="form-stages" aria-label="Phases" className="section-anchor">
+        <TournamentFormStages
+          control={control}
+          register={register}
+          errors={errors}
+        />
+      </section>
 
       {/* ── Submit ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-end gap-3">
+      <div className="form-actions">
+        <span className="mr-auto text-sm text-zinc-300" role="status">
+          {isPending
+            ? 'Enregistrement…'
+            : isDirty
+              ? 'Modifications non enregistrées'
+              : 'Aucune modification en attente'}
+        </span>
         <Button
           type="button"
           variant="ghost"
@@ -420,6 +516,7 @@ export const TournamentForm = ({ tournament }: TournamentFormProps) => {
             <AlertDialogCancel>Rester</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
+                allowLeave()
                 reset()
                 router.push(ROUTES.ADMIN_TOURNAMENTS)
               }}

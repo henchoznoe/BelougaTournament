@@ -10,12 +10,12 @@
 
 import { Home, Mail, Trophy, Users, Video } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { usePublicSession } from '@/components/providers/public-session-provider'
 import { NavbarMobileMenu } from '@/components/public/layout/navbar-mobile-menu'
 import { NavbarProfile } from '@/components/public/layout/navbar-profile'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'
 
@@ -90,8 +90,9 @@ export const PublicNavbarClient = ({ logoUrl }: PublicNavbarClientProps) => {
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300',
+                    'group relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors duration-300',
                     isActive
                       ? 'text-white'
                       : 'text-zinc-400 hover:bg-surface-hover hover:text-white',

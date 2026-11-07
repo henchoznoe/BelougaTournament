@@ -16,14 +16,15 @@ import type {
   UseFormRegister,
   UseFormSetValue,
 } from 'react-hook-form'
-import { toast } from 'sonner'
 import { useBlobList } from '@/components/admin/hooks/use-blob-list'
+import { useMediaUpload } from '@/components/admin/hooks/use-media-upload'
 import {
   INPUT_CLASSES,
   LABEL_CLASSES,
   SECTION_CLASSES,
   SectionHeader,
 } from '@/components/admin/tournaments/form/tournament-form-ui'
+import { MediaUploadFeedback } from '@/components/admin/ui/media-upload-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,6 +37,7 @@ interface TournamentFormImagesProps {
   errors: FieldErrors<TournamentFormValues>
   setValue: UseFormSetValue<TournamentFormValues>
   watchImageUrls: string[]
+  onUploadingChange: (uploading: boolean) => void
   watchSlug: string
 }
 
@@ -45,55 +47,34 @@ export const TournamentFormImages = ({
   setValue,
   watchImageUrls,
   watchSlug,
+  onUploadingChange,
 }: TournamentFormImagesProps) => {
-  const [isUploading, setIsUploading] = useState(false)
+  const { progress: uploadProgress, upload } = useMediaUpload()
+  const isUploading = uploadProgress.pending
   const { blobs, isLoadingBlobs, refetchBlobs } = useBlobList(
     watchSlug ? `tournaments/${watchSlug}/images` : 'tournaments',
   )
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    setIsUploading(true)
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (!files.length || isUploading) return
+    onUploadingChange(true)
     try {
-      const newUrls: string[] = []
-      for (const file of files) {
-        const formData = new FormData()
-        formData.append('file', file)
-        const folder = watchSlug
-          ? `tournaments/${watchSlug}/images`
-          : 'tournaments'
-        formData.append('folder', folder)
-
-        const res = await fetch('/api/admin/blobs', {
-          method: 'POST',
-          body: formData,
-        })
-        const data = (await res.json()) as { url?: string; error?: string }
-
-        if (!res.ok || !data.url) {
-          toast.error(data.error ?? "Erreur lors de l'upload.")
-          continue
-        }
-        newUrls.push(data.url)
-      }
-
-      if (newUrls.length > 0) {
-        toast.success(`${newUrls.length} image(s) importée(s) avec succès.`)
+      const newUrls = await upload(
+        files,
+        watchSlug ? `tournaments/${watchSlug}/images` : 'tournaments',
+      )
+      if (newUrls.length) {
         setValue('imageUrls', [...watchImageUrls, ...newUrls], {
           shouldDirty: true,
           shouldValidate: true,
         })
+        await refetchBlobs()
       }
-      await refetchBlobs()
-    } catch (error) {
-      console.error('Error uploading tournament image:', error)
-      toast.error('Une erreur inattendue est survenue.')
     } finally {
-      setIsUploading(false)
+      onUploadingChange(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -102,6 +83,7 @@ export const TournamentFormImages = ({
     <div className={SECTION_CLASSES}>
       <SectionHeader icon={ImagePlus} title="Images et médias" />
       <div className="space-y-4">
+        <MediaUploadFeedback {...uploadProgress} />
         {/* Selected images grid */}
         {watchImageUrls.length > 0 && (
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -126,12 +108,12 @@ export const TournamentFormImages = ({
                     Principale
                   </span>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                   {index > 0 && (
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-xs"
+                      size="icon-sm"
                       aria-label="Définir comme principale"
                       className="text-white hover:bg-white/20"
                       onClick={() => {
@@ -147,7 +129,7 @@ export const TournamentFormImages = ({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-xs"
+                    size="icon-sm"
                     aria-label="Retirer l'image"
                     className="text-red-400 hover:bg-red-500/20"
                     onClick={() => {
@@ -221,7 +203,7 @@ export const TournamentFormImages = ({
                 ))}
               </div>
             ) : blobs.length === 0 ? (
-              <p className="py-2 text-center text-xs text-zinc-600">
+              <p className="py-2 text-center text-xs text-zinc-400">
                 Aucune image pour ce tournoi.
               </p>
             ) : (
@@ -275,7 +257,13 @@ export const TournamentFormImages = ({
         </div>
 
         {errors.imageUrls?.message && (
-          <p className="text-xs text-red-400">{errors.imageUrls.message}</p>
+          <p
+            className="text-xs text-red-400"
+            id="tournament-form-images-imageUrls-error"
+            role="alert"
+          >
+            {errors.imageUrls?.message}
+          </p>
         )}
 
         {/* Stream URL */}
@@ -284,13 +272,25 @@ export const TournamentFormImages = ({
             URL du stream
           </Label>
           <Input
+            aria-invalid={Boolean(errors.streamUrl)}
+            aria-describedby={
+              errors.streamUrl
+                ? 'tournament-form-images-streamUrl-error'
+                : undefined
+            }
             id="tournament-streamUrl"
             placeholder="https://twitch.tv/..."
             className={INPUT_CLASSES}
             {...register('streamUrl')}
           />
           {errors.streamUrl?.message && (
-            <p className="text-xs text-red-400">{errors.streamUrl.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-images-streamUrl-error"
+              role="alert"
+            >
+              {errors.streamUrl?.message}
+            </p>
           )}
         </div>
       </div>

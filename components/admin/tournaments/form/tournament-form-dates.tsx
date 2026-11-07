@@ -50,7 +50,13 @@ export const TournamentFormDates = ({
             )}
           />
           {errors.startDate?.message && (
-            <p className="text-xs text-red-400">{errors.startDate.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-dates-startDate-error"
+              role="alert"
+            >
+              {errors.startDate?.message}
+            </p>
           )}
         </div>
 
@@ -71,7 +77,13 @@ export const TournamentFormDates = ({
             )}
           />
           {errors.endDate?.message && (
-            <p className="text-xs text-red-400">{errors.endDate.message}</p>
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-dates-endDate-error"
+              role="alert"
+            >
+              {errors.endDate?.message}
+            </p>
           )}
         </div>
 
@@ -95,8 +107,12 @@ export const TournamentFormDates = ({
             )}
           />
           {errors.registrationOpen?.message && (
-            <p className="text-xs text-red-400">
-              {errors.registrationOpen.message}
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-dates-registrationOpen-error"
+              role="alert"
+            >
+              {errors.registrationOpen?.message}
             </p>
           )}
         </div>
@@ -121,8 +137,12 @@ export const TournamentFormDates = ({
             )}
           />
           {errors.registrationClose?.message && (
-            <p className="text-xs text-red-400">
-              {errors.registrationClose.message}
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-dates-registrationClose-error"
+              role="alert"
+            >
+              {errors.registrationClose?.message}
             </p>
           )}
         </div>

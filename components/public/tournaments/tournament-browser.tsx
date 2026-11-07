@@ -56,6 +56,9 @@ export const TournamentBrowser = ({
       )
     })
 
+    // The published service already orders upcoming events first by date.
+    if (variant === 'published' && filters.sort === 'date_asc') return rows
+
     return rows.toSorted((a, b) => {
       switch (filters.sort) {
         case 'date_asc':
@@ -76,16 +79,24 @@ export const TournamentBrowser = ({
       /* v8 ignore next */
       return 0
     })
-  }, [filters.format, filters.search, filters.sort, filters.type, tournaments])
+  }, [
+    filters.format,
+    filters.search,
+    filters.sort,
+    filters.type,
+    tournaments,
+    variant,
+  ])
 
   const total = filtered.length
   const totalPages = Math.max(
     1,
     Math.ceil(total / PUBLIC_TOURNAMENTS_PAGE_SIZE),
   )
+  const safePage = Math.min(filters.page, totalPages)
   const pageRows = filtered.slice(
-    (filters.page - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE,
-    filters.page * PUBLIC_TOURNAMENTS_PAGE_SIZE,
+    (safePage - 1) * PUBLIC_TOURNAMENTS_PAGE_SIZE,
+    safePage * PUBLIC_TOURNAMENTS_PAGE_SIZE,
   )
   const hasActiveFilters = Boolean(
     filters.search || filters.format || filters.type,
@@ -94,6 +105,12 @@ export const TournamentBrowser = ({
   return (
     <>
       <TournamentFilters filters={filters} basePath={basePath} />
+      <p role="status" className="text-sm text-zinc-400">
+        {total} tournoi{total > 1 ? 's' : ''}{' '}
+        {hasActiveFilters
+          ? 'correspondant à votre recherche'
+          : `disponible${total > 1 ? 's' : ''}`}
+      </p>
       <TournamentGrid
         tournaments={pageRows}
         hasActiveFilters={hasActiveFilters}
@@ -117,7 +134,7 @@ export const TournamentBrowser = ({
       />
       <TournamentPagination
         total={total}
-        page={filters.page}
+        page={safePage}
         pageSize={PUBLIC_TOURNAMENTS_PAGE_SIZE}
         totalPages={totalPages}
         basePath={basePath}

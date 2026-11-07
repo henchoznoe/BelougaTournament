@@ -10,15 +10,15 @@
 
 import { useState } from 'react'
 import { TwitchPlayer } from '@/components/public/stream/twitch-player'
+import { STREAM_STATE_LABELS } from '@/lib/config/constants/stream'
 
 interface StreamSectionProps {
   channel: string | undefined
 }
 
 export const StreamSection = (props: StreamSectionProps) => {
-  // null = loading, true = live, false = offline or no channel
-  const [isLive, setIsLive] = useState<boolean | null>(
-    props.channel ? null : false,
+  const [state, setState] = useState<keyof typeof STREAM_STATE_LABELS>(
+    props.channel ? 'loading' : 'unconfigured',
   )
 
   return (
@@ -26,21 +26,21 @@ export const StreamSection = (props: StreamSectionProps) => {
       {/* Header and Badge */}
       <div className="mb-12 flex flex-col items-center text-center">
         <div className="mb-6">
-          {isLive ? (
+          {state === 'live' ? (
             <div className="inline-flex items-center gap-3 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
               <span className="relative flex size-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex size-2.5 rounded-full bg-red-500"></span>
               </span>
               <span className="text-sm font-bold uppercase tracking-widest text-red-500">
-                En Live
+                En direct
               </span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-3 rounded-full border border-zinc-500/30 bg-zinc-500/10 px-4 py-1.5">
               <div className="size-2.5 rounded-full bg-zinc-500" />
               <span className="text-sm font-bold uppercase tracking-widest text-zinc-400">
-                Hors Ligne
+                {STREAM_STATE_LABELS[state]}
               </span>
             </div>
           )}
@@ -57,7 +57,7 @@ export const StreamSection = (props: StreamSectionProps) => {
 
       {/* Stream Container */}
       <div className="mx-auto w-full max-w-4xl">
-        <TwitchPlayer channel={props.channel} onLiveChange={setIsLive} />
+        <TwitchPlayer channel={props.channel} onStateChange={setState} />
       </div>
     </section>
   )

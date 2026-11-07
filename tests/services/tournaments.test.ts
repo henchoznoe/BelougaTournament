@@ -1015,6 +1015,11 @@ describe('getPublishedTournaments', () => {
     const result = await getPublishedTournaments()
 
     expect(result).toEqual([MOCK_PUBLIC_LIST_ITEM])
+    expect(cacheLife).toHaveBeenCalledWith({
+      stale: 30,
+      revalidate: 60,
+      expire: 300,
+    })
     expect(mockFindMany).toHaveBeenCalledWith({
       where: { status: 'PUBLISHED' },
       orderBy: { startDate: 'asc' },

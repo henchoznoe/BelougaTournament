@@ -9,9 +9,9 @@
 'use client'
 
 import { Calendar, Coins, Gamepad2, Gift, Swords, Users } from 'lucide-react'
-import Link from 'next/link'
 import { Countdown } from '@/components/public/shared/countdown'
 import { TournamentImage } from '@/components/public/tournaments/tournament-image'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import type { PublicTournamentListItem } from '@/lib/types/tournament'
 import { cn } from '@/lib/utils/cn'
@@ -72,6 +72,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
   return (
     <Link
       href={`${ROUTES.TOURNAMENTS}/${tournament.slug}`}
+      aria-label={`Voir le tournoi ${tournament.title}`}
       className="glass glow-brand-hover group relative block h-full overflow-hidden rounded-2xl transition-all duration-300 hover:border-brand/20"
     >
       {/* Image banner */}
@@ -93,16 +94,13 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
       )}
 
       {/* Content */}
-      <div className="relative p-6">
+      <div className="relative p-5">
         {/* Background glow */}
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
 
         <div className="relative z-10 space-y-4">
           {/* Header: title + registration badge */}
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-bold text-white transition-colors duration-300 group-hover:text-brand">
-              {tournament.title}
-            </h3>
+          <div className="flex flex-col items-start gap-3">
             <span
               className={cn(
                 'shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
@@ -115,6 +113,9 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
                   ? 'Bientôt'
                   : registrationInfo.label}
             </span>
+            <h3 className="break-words text-xl font-bold leading-snug text-white transition-colors duration-300 group-hover:text-brand">
+              {tournament.title}
+            </h3>
           </div>
 
           {/* Description */}
@@ -202,7 +203,7 @@ export const TournamentCard = ({ tournament }: TournamentCardProps) => {
 
           {/* Footer: countdown + raw counts when uncapped */}
           {(!spots.hasCap || !isArchived) && (
-            <div className="flex items-center justify-between gap-4 border-t border-surface-border pt-4 text-xs text-zinc-500">
+            <div className="flex items-center justify-between gap-4 border-t border-surface-border pt-4 text-xs text-zinc-400">
               {!spots.hasCap ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Users className="size-3.5" />

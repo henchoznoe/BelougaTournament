@@ -6,7 +6,9 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useListQuery } from '@/components/admin/hooks/use-list-query'
+import { parseListPage } from '@/lib/utils/list-query'
 
 interface PaginationResult<T> {
   /** Current page (1-based, clamped to valid range). */
@@ -52,11 +54,9 @@ export const useClientPagination = <T>(
   resetPage: () => void
   paginate: (items: T[]) => PaginationResult<T>
 } => {
-  const [page, setPage] = useState(1)
-
-  const resetPage = useCallback(() => setPage(1), [])
-  const prevPage = useCallback(() => setPage(p => Math.max(1, p - 1)), [])
-  const nextPage = useCallback(() => setPage(p => p + 1), [])
+  const [rawPage, setPage] = useListQuery<string>('page', '1')
+  const page = parseListPage(rawPage)
+  const resetPage = useCallback(() => setPage('1', false), [setPage])
 
   const paginate = useMemo(
     () =>
@@ -75,12 +75,13 @@ export const useClientPagination = <T>(
           total: items.length,
           hasPrev: safePage > 1,
           hasNext: safePage < totalPages,
-          prevPage,
-          nextPage,
+          prevPage: () => setPage(String(Math.max(1, safePage - 1)), false),
+          nextPage: () =>
+            setPage(String(Math.min(totalPages, safePage + 1)), false),
           resetPage,
         }
       },
-    [page, pageSize, prevPage, nextPage, resetPage],
+    [page, pageSize, setPage, resetPage],
   )
 
   return { resetPage, paginate }

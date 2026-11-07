@@ -1,6 +1,6 @@
 /**
  * File: app/(public)/tournaments/[slug]/loading.tsx
- * Description: Route-level loading skeleton for the public tournament detail page.
+ * Description: Loading state matching the public tournament detail sections.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,30 +8,24 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 
-const TournamentLoadingPage = () => {
+export default function Loading() {
   return (
-    <section className="relative px-4 pb-20 pt-32 md:pt-40">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
-        <Skeleton className="h-6 w-40 rounded-md bg-white/2" />
-        <Skeleton className="h-72 rounded-3xl border border-white/5 bg-white/2" />
-
-        <div className="flex flex-col gap-8 lg:flex-row">
-          {/* Sidebar skeleton (first in DOM for mobile) */}
-          <div className="w-full space-y-6 lg:order-last lg:w-85 lg:shrink-0">
-            <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
-            <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
-          </div>
-
-          {/* Main content skeleton */}
-          <div className="min-w-0 flex-1 space-y-6">
-            <Skeleton className="h-48 rounded-3xl border border-white/5 bg-white/2" />
-            <Skeleton className="h-36 rounded-3xl border border-white/5 bg-white/2" />
-            <Skeleton className="h-64 rounded-3xl border border-white/5 bg-white/2" />
-          </div>
+    <div
+      role="status"
+      aria-busy="true"
+      className="mx-auto max-w-6xl space-y-6 px-4 pb-20 pt-28"
+    >
+      <span className="sr-only">Chargement du tournoi…</span>
+      <div aria-hidden="true" className="space-y-6">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-96 w-full rounded-3xl" />
+        <Skeleton className="h-16 w-full rounded-2xl" />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <Skeleton className="h-96 rounded-2xl" />
+          <Skeleton className="h-72 rounded-2xl" />
         </div>
+        <Skeleton className="mx-auto h-64 max-w-4xl rounded-2xl" />
       </div>
-    </section>
+    </div>
   )
 }
-
-export default TournamentLoadingPage

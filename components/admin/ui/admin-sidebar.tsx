@@ -1,6 +1,6 @@
 /**
  * File: components/admin/ui/admin-sidebar.tsx
- * Description: Sidebar navigation for the admin panel (always collapsed on desktop, full on mobile).
+ * Description: Responsive admin navigation with a bottom-aligned desktop collapse control.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -8,9 +8,11 @@
 
 'use client'
 
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Tooltip,
   TooltipContent,
@@ -25,12 +27,16 @@ interface AdminSidebarProps {
   variant: 'desktop' | 'mobile'
   onNavigate?: () => void
   logoUrl: string | null
+  collapsed?: boolean
+  onToggle?: () => void
 }
 
 export const AdminSidebar = ({
   variant,
   onNavigate,
   logoUrl,
+  collapsed = false,
+  onToggle,
 }: AdminSidebarProps) => {
   const pathname = usePathname()
   const isMobile = variant === 'mobile'
@@ -44,7 +50,7 @@ export const AdminSidebar = ({
     <aside
       className={cn(
         'flex h-full flex-col border-r border-white/5 bg-zinc-950/80 backdrop-blur-xl',
-        isMobile ? 'w-full' : 'w-16',
+        isMobile ? 'w-full' : collapsed ? 'w-16' : 'w-16 lg:w-60',
       )}
     >
       {/* Logo area */}
@@ -61,8 +67,13 @@ export const AdminSidebar = ({
             height={28}
             className="shrink-0"
           />
-          {isMobile && (
-            <span className="whitespace-nowrap font-paladins text-sm tracking-wider text-white">
+          {(isMobile || !collapsed) && (
+            <span
+              className={cn(
+                'whitespace-nowrap font-paladins text-sm tracking-wider text-white',
+                !isMobile && 'hidden lg:inline',
+              )}
+            >
               Admin
             </span>
           )}
@@ -72,7 +83,7 @@ export const AdminSidebar = ({
       {/* Navigation */}
       <nav
         aria-label="Navigation admin"
-        className="flex-1 space-y-1 overflow-y-auto px-2 py-4"
+        className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-4"
       >
         {ADMIN_NAV.map(menu => {
           const isActive = isLinkActive(menu.href)
@@ -86,7 +97,10 @@ export const AdminSidebar = ({
                 isActive
                   ? 'border border-blue-500/20 bg-blue-500/10 text-white shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                   : 'border border-transparent text-zinc-400 hover:bg-white/5 hover:text-white',
-                !isMobile && 'justify-center px-0',
+                !isMobile &&
+                  (collapsed
+                    ? 'justify-center px-0'
+                    : 'justify-center px-0 lg:justify-start lg:px-3'),
               )}
             >
               <menu.icon
@@ -97,7 +111,14 @@ export const AdminSidebar = ({
                     : 'text-zinc-500 group-hover:text-blue-300',
                 )}
               />
-              {isMobile && <span>{menu.label}</span>}
+              <span
+                className={cn(
+                  !isMobile &&
+                    (collapsed ? 'sr-only' : 'sr-only lg:not-sr-only'),
+                )}
+              >
+                {menu.label}
+              </span>
             </Link>
           )
 
@@ -116,6 +137,24 @@ export const AdminSidebar = ({
           return <div key={menu.href}>{linkContent}</div>
         })}
       </nav>
+      {!isMobile && (
+        <div className="hidden shrink-0 border-t border-white/5 p-2 lg:block">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            aria-label={collapsed ? 'Développer le menu' : 'Réduire le menu'}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? (
+              <PanelLeftOpen className="size-5" />
+            ) : (
+              <PanelLeftClose className="size-5" />
+            )}
+          </Button>
+        </div>
+      )}
     </aside>
   )
 }

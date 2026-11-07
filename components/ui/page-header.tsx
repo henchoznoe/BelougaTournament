@@ -24,12 +24,12 @@ export const PageHeader = ({
     <>
       {/* Background Glows */}
       <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-96 w-full max-w-3xl -translate-x-1/2 bg-brand/10 blur-[120px]" />
-      <div className={cn('mb-16 text-center', className)}>
-        <h1 className="mb-4 font-paladins text-4xl tracking-wider text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] md:text-5xl lg:text-6xl">
+      <div className={cn('mb-10 text-center sm:mb-12', className)}>
+        <h1 className="mb-4 font-paladins text-3xl tracking-wide break-words sm:text-4xl text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] md:text-5xl lg:text-6xl">
           {title}
         </h1>
         {description && (
-          <p className="mx-auto max-w-2xl text-lg text-zinc-400">
+          <p className="mx-auto max-w-2xl text-base leading-relaxed text-zinc-300">
             {description}
           </p>
         )}

@@ -28,8 +28,22 @@ export const GET = async (request: NextRequest, context: RouteContext) => {
   }
 
   const { id } = await context.params
-  const state = await getUserTournamentRegistrationState(session.user.id, id)
-  return NextResponse.json(state, {
-    headers: { 'Cache-Control': 'private, no-store' },
-  })
+  try {
+    const state = await getUserTournamentRegistrationState(
+      session.user.id,
+      id,
+      { throwOnError: true },
+    )
+    return NextResponse.json(state, {
+      headers: { 'Cache-Control': 'private, no-store' },
+    })
+  } catch {
+    return NextResponse.json(
+      { error: 'Impossible de vérifier votre inscription.' },
+      {
+        status: 503,
+        headers: { 'Cache-Control': 'private, no-store' },
+      },
+    )
+  }
 }

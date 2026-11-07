@@ -7,8 +7,8 @@
  */
 
 import { ArrowLeft, ShieldOff } from 'lucide-react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 
 /** Rendered when an authenticated user tries to access a route they are not authorized for. */

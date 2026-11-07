@@ -9,9 +9,9 @@
 'use client'
 
 import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import { ROUTES } from '@/lib/config/routes'
 import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 

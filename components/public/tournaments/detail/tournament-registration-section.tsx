@@ -1,6 +1,6 @@
 /**
- * File: components/public/tournaments/detail/tournament-sidebar.tsx
- * Description: Sticky sidebar with registration card, tournament info, and prize for the public tournament detail view.
+ * File: components/public/tournaments/detail/tournament-registration-section.tsx
+ * Description: Registration form and supporting tournament information in the page flow.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -18,8 +18,9 @@ import {
   Users,
 } from 'lucide-react'
 import { InfoRow } from '@/components/public/tournaments/detail/tournament-detail-shared'
-import { TournamentPrizeBanner } from '@/components/public/tournaments/detail/tournament-prize-banner'
 import { TournamentRegistrationForm } from '@/components/public/tournaments/tournament-registration-form'
+import { ActionFeedback } from '@/components/ui/action-feedback'
+import { Button } from '@/components/ui/button'
 import type {
   AvailableTeam,
   PublicTournamentDetail,
@@ -30,31 +31,36 @@ import {
   formatDateTime,
   pluralize,
 } from '@/lib/utils/formatting'
+import { getRegistrationCapacity } from '@/lib/utils/registration-feedback'
 import type { TournamentRegistrationPhase } from '@/lib/utils/tournament-status'
 import {
   RegistrationStatus,
   TournamentFormat,
 } from '@/prisma/generated/prisma/enums'
 
-interface TournamentSidebarProps {
+interface TournamentRegistrationSectionProps {
   tournament: PublicTournamentDetail
   registrationPhase: TournamentRegistrationPhase
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
+  registrationStateError: string | null
   registrationStateLoading: boolean
   onRegistrationChanged: () => Promise<void>
   availableTeams: AvailableTeam[]
 }
 
-export const TournamentSidebar = ({
+export const TournamentRegistrationSection = ({
   tournament,
   registrationPhase,
   registrationState,
   isAuthenticated,
+  registrationStateError,
   registrationStateLoading,
   onRegistrationChanged,
   availableTeams,
-}: TournamentSidebarProps) => {
+}: TournamentRegistrationSectionProps) => {
+  const fullyBooked =
+    getRegistrationCapacity(tournament, availableTeams.length) === 'full'
   const entryFee =
     tournament.entryFeeAmount && tournament.entryFeeCurrency
       ? formatCentimes(tournament.entryFeeAmount, tournament.entryFeeCurrency)
@@ -73,9 +79,9 @@ export const TournamentSidebar = ({
     : `${playerCount} ${playerLabel}${pluralize(playerCount)}`
 
   return (
-    <aside className="w-full space-y-6 lg:sticky lg:top-32 lg:w-85 lg:shrink-0 lg:self-start">
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       {/* Registration card */}
-      <div className="relative overflow-hidden rounded-3xl border border-brand/20 bg-linear-to-br from-brand/5 via-white/2 to-purple-500/5 p-5 shadow-[0_0_60px_rgba(59,130,246,0.12)]">
+      <div className="relative overflow-hidden rounded-2xl border border-brand/20 bg-linear-to-br from-brand/5 via-white/2 to-purple-500/5 p-5 shadow-[0_0_60px_rgba(59,130,246,0.12)]">
         <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-brand/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 -bottom-20 size-56 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative z-10 space-y-4">
@@ -84,7 +90,29 @@ export const TournamentSidebar = ({
             Inscription
           </h3>
 
-          {registrationPhase === 'open' ? (
+          {registrationStateError ? (
+            <ActionFeedback tone="error" title="Vérification indisponible">
+              <p>{registrationStateError}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void onRegistrationChanged()}
+              >
+                Réessayer
+              </Button>
+            </ActionFeedback>
+          ) : registrationPhase === 'open' &&
+            fullyBooked &&
+            !registrationState &&
+            !registrationStateLoading ? (
+            <ActionFeedback title="Tournoi complet">
+              <p>
+                Toutes les places sont actuellement prises. Revenez vérifier si
+                une place se libère.
+              </p>
+            </ActionFeedback>
+          ) : registrationPhase === 'open' ||
+            registrationState?.status === RegistrationStatus.CONFIRMED ? (
             <>
               {registrationState?.status !== RegistrationStatus.CONFIRMED && (
                 <p className="text-center text-sm text-zinc-400">
@@ -140,7 +168,7 @@ export const TournamentSidebar = ({
       </div>
 
       {/* Tournament info card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-white/2 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
+      <div className="relative min-w-0 self-start overflow-hidden rounded-2xl border border-white/10 bg-white/2 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-brand/5 blur-3xl" />
         <div className="relative z-10">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
@@ -214,11 +242,6 @@ export const TournamentSidebar = ({
           </div>
         </div>
       </div>
-
-      {/* Prize banner */}
-      {tournament.prize && (
-        <TournamentPrizeBanner prize={tournament.prize} compact />
-      )}
-    </aside>
+    </div>
   )
 }

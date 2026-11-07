@@ -55,6 +55,12 @@ export const TournamentFormStages = ({
             ID Toornament
           </Label>
           <Input
+            aria-invalid={Boolean(errors.toornamentId)}
+            aria-describedby={
+              errors.toornamentId
+                ? 'tournament-form-stages-toornamentId-error'
+                : undefined
+            }
             id="tournament-toornamentId"
             placeholder="ID du tournoi sur Toornament.com"
             className={INPUT_CLASSES}
@@ -66,8 +72,12 @@ export const TournamentFormStages = ({
             <strong>ID</strong>/information).
           </p>
           {errors.toornamentId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.toornamentId.message}
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-stages-toornamentId-error"
+              role="alert"
+            >
+              {errors.toornamentId?.message}
             </p>
           )}
         </div>
@@ -102,8 +112,12 @@ export const TournamentFormStages = ({
             </OrderableItem>
           ))}
           {errors.toornamentStages?.message && (
-            <p className="text-xs text-red-400">
-              {errors.toornamentStages.message}
+            <p
+              className="text-xs text-red-400"
+              id="tournament-form-stages-toornamentStages-error"
+              role="alert"
+            >
+              {errors.toornamentStages?.message}
             </p>
           )}
 

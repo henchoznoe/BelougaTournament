@@ -7,7 +7,9 @@
  */
 
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { createElement, type ReactNode, useCallback, useState } from 'react'
+import { createElement, type ReactNode, useCallback, useMemo } from 'react'
+
+import { useListQuery } from '@/components/admin/hooks/use-list-query'
 
 type SortDirection = 'asc' | 'desc'
 
@@ -20,22 +22,30 @@ interface SortState<K extends string> {
  * Generic 3-state sort toggle: unsorted → asc → desc → unsorted.
  * Resets page via the provided callback.
  */
-export const useListSort = <K extends string>(resetPage?: () => void) => {
-  const [sort, setSort] = useState<SortState<K>>({
-    key: null,
-    direction: 'asc',
-  })
-
+export const useListSort = <K extends string>(
+  resetPage?: () => void,
+  keys: readonly K[] = [],
+) => {
+  const [rawSort, setSort] = useListQuery<string>('sort', '')
+  const sort = useMemo<SortState<K>>(() => {
+    const [key, direction] = rawSort.split(':')
+    return keys.includes(key as K) &&
+      (direction === 'asc' || direction === 'desc')
+      ? { key: key as K, direction }
+      : { key: null, direction: 'asc' }
+  }, [rawSort, keys])
   const handleSort = useCallback(
     (key: K) => {
-      setSort(prev => {
-        if (prev.key !== key) return { key, direction: 'asc' }
-        if (prev.direction === 'asc') return { key, direction: 'desc' }
-        return { key: null, direction: 'asc' }
-      })
+      setSort(
+        sort.key !== key
+          ? `${key}:asc`
+          : sort.direction === 'asc'
+            ? `${key}:desc`
+            : '',
+      )
       resetPage?.()
     },
-    [resetPage],
+    [sort, setSort, resetPage],
   )
 
   /** Renders a chevron icon when the given column is actively sorted. */

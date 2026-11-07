@@ -9,18 +9,19 @@
 'use client'
 
 import { ExternalLink, Plus, Search } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useClientPagination } from '@/components/admin/hooks/use-client-pagination'
+import { useListQuery } from '@/components/admin/hooks/use-list-query'
 import {
   applySortToList,
   useListSort,
 } from '@/components/admin/hooks/use-list-sort'
 import { SponsorActionsDropdown } from '@/components/admin/sponsors/sponsor-actions-dropdown'
 import { AdminPagination } from '@/components/admin/ui/admin-pagination'
+import { PendingTableRow } from '@/components/admin/ui/pending-table-row'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PendingLink as Link } from '@/components/ui/pending-link'
 import {
   Select,
   SelectContent,
@@ -41,6 +42,8 @@ import { ROUTES } from '@/lib/config/routes'
 import { cn } from '@/lib/utils/cn'
 import { formatShortDate, pluralize } from '@/lib/utils/formatting'
 import type { Sponsor } from '@/prisma/generated/prisma/client'
+
+const SORT_KEYS = ['name', 'supportedSince', 'enabled'] as const
 
 const PAGE_SIZE = ADMIN_PAGE_SIZES.SPONSORS
 
@@ -78,12 +81,18 @@ const compareValues = (a: Sponsor, b: Sponsor, key: SortKey): number => {
 }
 
 export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
-  const router = useRouter()
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [search, setSearch] = useListQuery<string>('search', '')
+  const [statusFilter, setStatusFilter] = useListQuery<StatusFilter>(
+    'status',
+    'all',
+    isStatusFilter,
+  )
 
   const { paginate, resetPage } = useClientPagination<Sponsor>(PAGE_SIZE)
-  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(resetPage)
+  const { sort, handleSort, sortIndicator } = useListSort<SortKey>(
+    resetPage,
+    SORT_KEYS,
+  )
 
   const filtered = useMemo(() => {
     let items = sponsors
@@ -122,13 +131,13 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       {/* Search + status filter + create button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-xs flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
           <Input
             placeholder="Rechercher un sponsor..."
             aria-label="Rechercher un sponsor"
             value={search}
             onChange={e => handleSearch(e.target.value)}
-            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-600"
+            className="border-white/10 bg-white/5 pl-9 text-zinc-200 placeholder:text-zinc-400"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -158,7 +167,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       </div>
 
       {/* Stats line */}
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
         <span className="mr-2">
           {sponsors.length} sponsor{pluralize(sponsors.length)}
         </span>
@@ -175,7 +184,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
       {/* Table or empty state */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-400">
             {search || statusFilter !== 'all'
               ? 'Aucun sponsor trouvé pour ces critères.'
               : 'Aucun sponsor pour le moment.'}
@@ -187,23 +196,32 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
                 <TableHead
-                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300"
-                  onClick={() => handleSort('name')}
+                  className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-zinc-300"
+                  onSort={() => handleSort('name')}
+                  sortDirection={
+                    sort.key === 'name' ? sort.direction : undefined
+                  }
                 >
                   Nom {sortIndicator('name')}
                 </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-zinc-400 sm:table-cell">
                   Lien
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300 sm:table-cell"
-                  onClick={() => handleSort('supportedSince')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-zinc-300 sm:table-cell"
+                  onSort={() => handleSort('supportedSince')}
+                  sortDirection={
+                    sort.key === 'supportedSince' ? sort.direction : undefined
+                  }
                 >
                   Depuis {sortIndicator('supportedSince')}
                 </TableHead>
                 <TableHead
-                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300 md:table-cell"
-                  onClick={() => handleSort('enabled')}
+                  className="hidden cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-zinc-300 md:table-cell"
+                  onSort={() => handleSort('enabled')}
+                  sortDirection={
+                    sort.key === 'enabled' ? sort.direction : undefined
+                  }
                 >
                   Statut {sortIndicator('enabled')}
                 </TableHead>
@@ -214,23 +232,21 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
             </TableHeader>
             <TableBody>
               {paginated.map(sponsor => (
-                <TableRow
+                <PendingTableRow
                   key={sponsor.id}
-                  tabIndex={0}
-                  role="link"
-                  className="cursor-pointer border-white/5 hover:bg-white/4"
-                  onClick={() =>
-                    router.push(ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id))
-                  }
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      router.push(ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id))
-                    }
-                  }}
+                  href={ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id)}
                 >
                   <TableCell className="font-medium text-zinc-200">
-                    {sponsor.name}
+                    <Link
+                      href={ROUTES.ADMIN_SPONSOR_DETAIL(sponsor.id)}
+                      className="inline-flex items-center font-semibold hover:text-blue-300"
+                    >
+                      {sponsor.name}
+                    </Link>
+                    <p className="mt-1 text-xs text-zinc-400 md:hidden">
+                      {sponsor.enabled ? 'Activé' : 'Désactivé'} ·{' '}
+                      {formatShortDate(sponsor.supportedSince)}
+                    </p>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {sponsor.url ? (
@@ -244,7 +260,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                         <span className="max-w-48 truncate">{sponsor.url}</span>
                       </a>
                     ) : (
-                      <span className="text-xs text-zinc-600">&mdash;</span>
+                      <span className="text-xs text-zinc-400">&mdash;</span>
                     )}
                   </TableCell>
                   <TableCell className="hidden text-sm text-zinc-400 sm:table-cell">
@@ -265,7 +281,7 @@ export const SponsorsList = ({ sponsors }: SponsorsListProps) => {
                   <TableCell>
                     <SponsorActionsDropdown sponsor={sponsor} />
                   </TableCell>
-                </TableRow>
+                </PendingTableRow>
               ))}
             </TableBody>
           </Table>

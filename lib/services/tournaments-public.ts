@@ -28,6 +28,7 @@ import {
   DEFAULT_HERO_TOURNAMENT_BADGE,
   resolveHeroTournamentBadge,
 } from '@/lib/utils/hero-tournament-badge'
+import { orderPublishedTournaments } from '@/lib/utils/public-tournament-order'
 import type {
   PublicTournamentFilters,
   TournamentSortOption,
@@ -77,7 +78,7 @@ export const getPublishedTournaments = async (): Promise<
   PublicTournamentListItem[]
 > => {
   'use cache'
-  cacheLife('max')
+  cacheLife({ stale: 30, revalidate: 60, expire: 300 })
   cacheTag(CACHE_TAGS.TOURNAMENTS_PUBLISHED)
 
   try {
@@ -86,7 +87,10 @@ export const getPublishedTournaments = async (): Promise<
       orderBy: { startDate: 'asc' },
       select: PUBLIC_LIST_SELECT,
     })
-    return rows as unknown as PublicTournamentListItem[]
+    return orderPublishedTournaments(
+      rows as unknown as PublicTournamentListItem[],
+      new Date(),
+    )
   } catch (error) {
     logger.error({ error }, 'Error fetching published tournaments')
     return []
@@ -97,7 +101,7 @@ export const getPublishedTournaments = async (): Promise<
 export const getHeroTournamentBadgeData =
   async (): Promise<HeroTournamentBadgeData> => {
     'use cache'
-    cacheLife('max')
+    cacheLife({ stale: 30, revalidate: 60, expire: 300 })
     cacheTag(CACHE_TAGS.TOURNAMENT_HERO)
 
     try {
