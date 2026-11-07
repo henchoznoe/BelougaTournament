@@ -51,8 +51,18 @@ export const useRegistrationState = (
   }, [tournamentId, userId])
   useEffect(() => {
     void reload()
+    const refreshOnFocus = () => {
+      if (document.visibilityState === 'visible') void reload()
+    }
+    const refreshOnRestore = (event: PageTransitionEvent) => {
+      if (event.persisted) void reload()
+    }
+    window.addEventListener('focus', refreshOnFocus)
+    window.addEventListener('pageshow', refreshOnRestore)
     return () => {
       request.current++
+      window.removeEventListener('focus', refreshOnFocus)
+      window.removeEventListener('pageshow', refreshOnRestore)
     }
   }, [reload])
   const isCurrent =

@@ -532,7 +532,7 @@ export const TournamentRegistrationForm = ({
         )}
       {/* Dynamic fields */}
       {fields.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-4">
           {fields.map(field => (
             <div key={field.id} className="space-y-1.5">
               <Label

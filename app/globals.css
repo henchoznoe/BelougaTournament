@@ -249,7 +249,6 @@
     padding: clamp(1rem, 3vw, 2rem);
   }
   .pending-link:has(> [role="status"]) {
-    cursor: progress;
     opacity: 0.8;
   }
   .form-actions {

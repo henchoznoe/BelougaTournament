@@ -56,6 +56,9 @@ export const TournamentBrowser = ({
       )
     })
 
+    // The published service already orders upcoming events first by date.
+    if (variant === 'published' && filters.sort === 'date_asc') return rows
+
     return rows.toSorted((a, b) => {
       switch (filters.sort) {
         case 'date_asc':
@@ -76,7 +79,14 @@ export const TournamentBrowser = ({
       /* v8 ignore next */
       return 0
     })
-  }, [filters.format, filters.search, filters.sort, filters.type, tournaments])
+  }, [
+    filters.format,
+    filters.search,
+    filters.sort,
+    filters.type,
+    tournaments,
+    variant,
+  ])
 
   const total = filtered.length
   const totalPages = Math.max(

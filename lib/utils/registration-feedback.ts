@@ -76,6 +76,18 @@ export const getPaymentReturnFeedback = (
       message:
         'Votre inscription en attente a été annulée et votre place a été libérée. Vous pouvez recommencer ci-dessous.',
     }
+  if (
+    !cancelled &&
+    (!state ||
+      state.status === RegistrationStatus.CANCELLED ||
+      state.status === RegistrationStatus.EXPIRED)
+  )
+    return {
+      tone: 'info' as const,
+      title: 'Aucune inscription active',
+      message:
+        'Le serveur ne trouve aucune inscription active à votre nom pour ce tournoi. Vous pouvez vous inscrire ci-dessous.',
+    }
   return {
     tone: 'info' as const,
     title: cancelled
@@ -86,3 +98,13 @@ export const getPaymentReturnFeedback = (
       : 'Nous attendons la confirmation du serveur. Aucun nouveau paiement n’est nécessaire pendant cette vérification.',
   }
 }
+
+/** A previous Stripe return must never block a new registration after withdrawal. */
+export const isPaymentConfirmationPending = (
+  state: UserTournamentRegistrationState | null,
+  paymentReturned: boolean,
+): boolean =>
+  paymentReturned &&
+  state?.status === RegistrationStatus.PENDING &&
+  (state.paymentStatus === PaymentStatus.PENDING ||
+    state.paymentStatus === PaymentStatus.PAID)

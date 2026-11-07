@@ -43,3 +43,13 @@ L’identité sombre, les couleurs bleu–indigo–violet, les accents dorés et
 - Compléter la recette clavier, lecteur d’écran, zoom et réseau ralenti sur les navigateurs ciblés. Le refus de quitter via l’historique dépend de la possibilité d’annuler la navigation dans le navigateur ; liens et fermeture disposent de leur propre protection.
 - Mesurer les transitions sur un déploiement de prévisualisation : les mesures du serveur de développement ne représentent pas la latence en production.
 - Faire relire les parcours par l’organisateur et des joueurs, puis déployer et contrôler la production.
+
+## Corrections après recette en préproduction
+
+- L’accueil sélectionne les tournois non terminés avant de limiter les cartes à trois. Le catalogue présente les événements en cours et à venir par date croissante, puis les événements terminés, sans les masquer.
+- Les sélections de tournois se rafraîchissent périodiquement (revalidation serveur après une minute, cache de navigation de 30 secondes), en complément de l’invalidation immédiate à la publication. Le contrôle du build autorise ce délai sur l’accueil et le catalogue tout en conservant leur rendu statique et les budgets d’assets.
+- Un ancien retour Stripe ne bloque plus le formulaire après désinscription : seule une inscription réellement en attente bloque une nouvelle soumission. Le message suit la lecture serveur, sans annoncer une confirmation depuis l’URL. Les dossiers de paiement annulés restent conservés en base.
+- La vérification de l’inscription est relancée au retour dans l’onglet et après restauration de page. Le double bandeau de paiement a été supprimé.
+- Les champs personnalisés occupent toute la largeur du formulaire. Les liens conservent leur loader sans imposer de curseur d’attente. La commande de réduction du menu admin se situe en bas de la sidebar.
+- Recette locale : inscription payante annulée conservée en base avec ancienne URL Stripe, largeur complète des champs, commande du menu à 8 px du bas, tournoi imminent en premier et tournoi terminé exclu de l’accueil.
+- Validation : 1 117 tests unitaires passants, typage/Biome/Knip et build réussis, neuf routes publiques statiques. Aucun test e2e, changement de dépendance ou nouveau job CI.

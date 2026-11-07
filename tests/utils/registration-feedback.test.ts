@@ -11,6 +11,7 @@ import {
   fetchRegistrationState,
   getPaymentReturnFeedback,
   getRegistrationCapacity,
+  isPaymentConfirmationPending,
 } from '@/lib/utils/registration-feedback'
 import {
   PaymentStatus,
@@ -29,6 +30,44 @@ afterEach(() => vi.unstubAllGlobals())
 describe('verified payment return feedback', () => {
   it('does not confirm a payment from a success URL alone', () =>
     expect(getPaymentReturnFeedback(null, false, false).tone).toBe('info'))
+  it('shows no active registration after withdrawal, even with an old success return', () => {
+    expect(getPaymentReturnFeedback(null, false, false).title).toBe(
+      'Aucune inscription active',
+    )
+    expect(isPaymentConfirmationPending(null, true)).toBe(false)
+  })
+  it.each([RegistrationStatus.CANCELLED, RegistrationStatus.EXPIRED])(
+    'does not block registration for a %s record retained for payment history',
+    status => {
+      const state = { ...pending, status, paymentStatus: PaymentStatus.PAID }
+      expect(getPaymentReturnFeedback(state, false, false).title).toBe(
+        'Aucune inscription active',
+      )
+      expect(isPaymentConfirmationPending(state, true)).toBe(false)
+    },
+  )
+  it('blocks duplicate submission only while a returned payment is still pending', () => {
+    expect(isPaymentConfirmationPending(pending, true)).toBe(true)
+    expect(isPaymentConfirmationPending(pending, false)).toBe(false)
+    expect(
+      isPaymentConfirmationPending(
+        { ...pending, paymentStatus: PaymentStatus.PAID },
+        true,
+      ),
+    ).toBe(true)
+    expect(
+      isPaymentConfirmationPending(
+        { ...pending, status: RegistrationStatus.CONFIRMED },
+        true,
+      ),
+    ).toBe(false)
+    expect(
+      isPaymentConfirmationPending(
+        { ...pending, paymentStatus: PaymentStatus.CANCELLED },
+        true,
+      ),
+    ).toBe(false)
+  })
   it('keeps pending registrations pending', () =>
     expect(getPaymentReturnFeedback(pending, false, false).title).toContain(
       'en cours',

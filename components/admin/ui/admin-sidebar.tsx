@@ -1,6 +1,6 @@
 /**
  * File: components/admin/ui/admin-sidebar.tsx
- * Description: Sidebar navigation for the admin panel (always collapsed on desktop, full on mobile).
+ * Description: Responsive admin navigation with a bottom-aligned desktop collapse control.
  * Author: Noé Henchoz
  * License: MIT
  * Copyright (c) 2026 Noé Henchoz
@@ -80,28 +80,10 @@ export const AdminSidebar = ({
         </Link>
       </div>
 
-      {!isMobile && (
-        <div className="hidden px-2 pt-3 lg:block">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onToggle}
-            aria-label={collapsed ? 'Développer le menu' : 'Réduire le menu'}
-            aria-expanded={!collapsed}
-          >
-            {collapsed ? (
-              <PanelLeftOpen className="size-5" />
-            ) : (
-              <PanelLeftClose className="size-5" />
-            )}
-          </Button>
-        </div>
-      )}
       {/* Navigation */}
       <nav
         aria-label="Navigation admin"
-        className="flex-1 space-y-1 overflow-y-auto px-2 py-4"
+        className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-4"
       >
         {ADMIN_NAV.map(menu => {
           const isActive = isLinkActive(menu.href)
@@ -155,6 +137,24 @@ export const AdminSidebar = ({
           return <div key={menu.href}>{linkContent}</div>
         })}
       </nav>
+      {!isMobile && (
+        <div className="hidden shrink-0 border-t border-white/5 p-2 lg:block">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            aria-label={collapsed ? 'Développer le menu' : 'Réduire le menu'}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? (
+              <PanelLeftOpen className="size-5" />
+            ) : (
+              <PanelLeftClose className="size-5" />
+            )}
+          </Button>
+        </div>
+      )}
     </aside>
   )
 }

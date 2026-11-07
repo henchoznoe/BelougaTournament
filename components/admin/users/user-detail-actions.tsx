@@ -93,7 +93,7 @@ export const UserRoleBadge = ({ user, isSuperAdmin }: UserRoleBadgeProps) => {
         canToggle &&
           !isPending &&
           (isAdmin ? 'hover:bg-blue-500/20' : 'hover:bg-zinc-500/20'),
-        isPending && 'cursor-wait opacity-60',
+        isPending && 'opacity-60',
         isUserSuperAdmin
           ? 'bg-amber-500/10 text-amber-400'
           : isAdmin

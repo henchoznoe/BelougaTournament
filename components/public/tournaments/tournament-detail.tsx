@@ -24,7 +24,6 @@ import { TournamentRegistrationSection } from '@/components/public/tournaments/d
 import { TournamentTabs } from '@/components/public/tournaments/detail/tournament-tabs'
 import { PaymentReturnFeedback } from '@/components/public/tournaments/payment-return-feedback'
 import { useRegistrationState } from '@/components/public/tournaments/use-registration-state'
-import { ActionFeedback } from '@/components/ui/action-feedback'
 import { Button } from '@/components/ui/button'
 import { PendingLink as Link } from '@/components/ui/pending-link'
 import { RichText } from '@/components/ui/rich-text'
@@ -36,7 +35,10 @@ import type {
   PublicTournamentTeamRegistrant,
 } from '@/lib/types/tournament'
 import { pluralize } from '@/lib/utils/formatting'
-import { getRegistrationCapacity } from '@/lib/utils/registration-feedback'
+import {
+  getRegistrationCapacity,
+  isPaymentConfirmationPending,
+} from '@/lib/utils/registration-feedback'
 import {
   extractTwitchChannel,
   getTournamentRegistrationBadge,
@@ -72,8 +74,7 @@ export const TournamentDetail = ({
   const [paymentReturned] = useState(searchParams.get('stripe') === 'success')
   const awaitingPaymentConfirmation =
     Boolean(sessionUser) &&
-    paymentReturned &&
-    registrationState?.status !== RegistrationStatus.CONFIRMED
+    isPaymentConfirmationPending(registrationState, paymentReturned)
   const loadRegistrationState = async () => {
     await reload()
   }
@@ -181,14 +182,7 @@ export const TournamentDetail = ({
           error={registrationStateError}
           onRefresh={reload}
         />
-        {awaitingPaymentConfirmation && !registrationStateError ? (
-          <ActionFeedback title="Votre retour de paiement est en cours de vérification">
-            <p>
-              Actualisez votre inscription ci-dessus pour suivre sa
-              confirmation. Évitez de lancer un nouveau paiement.
-            </p>
-          </ActionFeedback>
-        ) : (
+        {(!awaitingPaymentConfirmation || registrationStateError) && (
           <TournamentRegistrationSection
             tournament={tournament}
             registrationPhase={registrationBadge.phase}
