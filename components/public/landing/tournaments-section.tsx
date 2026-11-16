@@ -7,12 +7,10 @@
  */
 
 import { ArrowRight } from 'lucide-react'
-import { cacheLife, cacheTag } from 'next/cache'
 import { Reveal } from '@/components/public/shared/reveal'
 import { SectionHeader } from '@/components/public/shared/section-header'
 import { TournamentCard } from '@/components/public/tournaments/tournament-card'
 import { PendingLink as Link } from '@/components/ui/pending-link'
-import { CACHE_TAGS } from '@/lib/config/constants/cache'
 import { ROUTES } from '@/lib/config/routes'
 import { getPublishedTournaments } from '@/lib/services/tournaments-public'
 import { selectUpcomingTournaments } from '@/lib/utils/public-tournament-order'
@@ -21,9 +19,6 @@ import { selectUpcomingTournaments } from '@/lib/utils/public-tournament-order'
 const MAX_TOURNAMENTS = 3
 
 export const TournamentsSection = async () => {
-  'use cache'
-  cacheLife({ stale: 30, revalidate: 60, expire: 300 })
-  cacheTag(CACHE_TAGS.TOURNAMENTS_PUBLISHED)
   const tournaments = selectUpcomingTournaments(
     await getPublishedTournaments(),
     new Date(),

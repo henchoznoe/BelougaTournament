@@ -9,7 +9,6 @@
 'use server'
 
 import { del } from '@vercel/blob'
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -17,7 +16,10 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { handleCaptainSuccession, syncTeamFullState } from '@/lib/utils/team'
 import {
   adminDeleteTeamLogoSchema,
@@ -187,12 +189,12 @@ export const adminChangeTeam = authenticatedAction({
       throw error
     }
 
-    invalidateTournamentParticipation(
+    await invalidateTournamentParticipation(
       registration.tournament.id,
       registration.userId,
     )
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return {
       success: true,
@@ -247,9 +249,9 @@ export const adminPromoteCaptain = authenticatedAction({
       data: { captainId: data.userId },
     })
 
-    invalidateTournamentParticipation(team.tournamentId)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    await invalidateTournamentParticipation(team.tournamentId)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return {
       success: true,
@@ -298,8 +300,8 @@ export const adminUpdateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    invalidateTournamentParticipation(team.tournamentId)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    await invalidateTournamentParticipation(team.tournamentId)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },
@@ -338,7 +340,7 @@ export const adminDeleteTeamLogo = authenticatedAction({
       data: { logoUrl: null },
     })
 
-    invalidateTournamentParticipation(team.tournamentId)
+    await invalidateTournamentParticipation(team.tournamentId)
 
     return { success: true, message: "Le logo de l'équipe a été supprimé." }
   },

@@ -25,7 +25,7 @@ vi.mock('@/lib/core/logger', () => ({
   },
 }))
 
-const mockCleanupExpiredPendingRegistrations = vi.fn()
+const mockCleanupExpiredPendingRegistrations = vi.fn().mockResolvedValue([])
 vi.mock('@/lib/utils/registration-expiry', () => ({
   cleanupExpiredPendingRegistrations: (...args: unknown[]) =>
     mockCleanupExpiredPendingRegistrations(...args),
@@ -55,7 +55,7 @@ const { getUserTournamentRegistrationState, getUserActiveTournaments } =
 
 describe('getUserTournamentRegistrationState', () => {
   it('propagates database errors for callers that must distinguish unknown from absent', async () => {
-    mockCleanupExpiredPendingRegistrations.mockResolvedValue(0)
+    mockCleanupExpiredPendingRegistrations.mockResolvedValue([])
     mockRegistrationFindFirst.mockRejectedValueOnce(
       new Error('database unavailable'),
     )
@@ -77,7 +77,7 @@ describe('getUserTournamentRegistrationState', () => {
       paymentStatus: PaymentStatus.PENDING,
       expiresAt: EXPIRY_DATE,
     }
-    mockCleanupExpiredPendingRegistrations.mockResolvedValue(0)
+    mockCleanupExpiredPendingRegistrations.mockResolvedValue([])
     mockRegistrationFindFirst.mockResolvedValue(registrationState)
 
     const result = await getUserTournamentRegistrationState(
@@ -166,9 +166,8 @@ describe('getUserActiveTournaments', () => {
   it('should return an empty array when the database query fails', async () => {
     mockTournamentFindMany.mockRejectedValue(new Error('database failed'))
 
-    const result = await getUserActiveTournaments(USER_ID)
+    await expect(getUserActiveTournaments(USER_ID)).rejects.toThrow()
 
-    expect(result).toEqual([])
     expect(mockLoggerError).toHaveBeenCalledOnce()
   })
 })

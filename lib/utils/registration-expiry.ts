@@ -7,10 +7,7 @@
  */
 
 import 'server-only'
-import { updateTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import {
   PaymentStatus,
@@ -27,7 +24,7 @@ import {
 export const cleanupExpiredPendingRegistrations = async (
   userId: string,
   now = new Date(),
-): Promise<number> => {
+): Promise<{ tournamentId: string; userId: string }[]> => {
   const staleRegistrations = await prisma.tournamentRegistration.findMany({
     where: {
       userId,
@@ -40,8 +37,10 @@ export const cleanupExpiredPendingRegistrations = async (
     },
   })
 
-  for (const registration of staleRegistrations) {
-    await prisma.$transaction(async tx => {
+  if (staleRegistrations.length === 0) return []
+  return prisma.$transaction(async tx => {
+    const expired: { tournamentId: string; userId: string }[] = []
+    for (const registration of staleRegistrations) {
       const currentRegistration = await tx.tournamentRegistration.findUnique({
         where: { id: registration.id },
         select: {
@@ -58,7 +57,7 @@ export const cleanupExpiredPendingRegistrations = async (
         currentRegistration.expiresAt === null ||
         currentRegistration.expiresAt > now
       ) {
-        return
+        continue
       }
 
       await removeUserFromTeam(tx, userId, currentRegistration.tournamentId)
@@ -80,17 +79,8 @@ export const cleanupExpiredPendingRegistrations = async (
           expiresAt: now,
         },
       })
-    })
-  }
-
-  if (staleRegistrations.length > 0) {
-    for (const registration of staleRegistrations) {
-      invalidateTournamentParticipation(registration.tournamentId, userId)
+      expired.push({ tournamentId: registration.tournamentId, userId })
     }
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
-  }
-
-  return staleRegistrations.length
+    return expired
+  })
 }

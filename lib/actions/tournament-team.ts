@@ -8,14 +8,16 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamWithMembers } from '@/lib/types/team'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import {
   dissolveTeamSchema,
@@ -93,10 +95,10 @@ export const kickPlayer = authenticatedAction({
       await handleCaptainSuccession(tx, team, data.userId)
     })
 
-    invalidateTournamentParticipation(data.tournamentId, data.userId)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    await invalidateTournamentParticipation(data.tournamentId, data.userId)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
     return {
       success: true,
@@ -156,10 +158,10 @@ export const dissolveTeam = authenticatedAction({
       await tx.team.delete({ where: { id: data.teamId } })
     })
 
-    invalidateTournamentParticipation(data.tournamentId, memberUserIds)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    await invalidateTournamentParticipation(data.tournamentId, memberUserIds)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
     return { success: true, message: "L'équipe a été dissoute." }
   },
@@ -226,7 +228,7 @@ export const updateTeamName = authenticatedAction({
       data: { name: data.name },
     })
 
-    invalidateTournamentParticipation(team.tournamentId)
+    await invalidateTournamentParticipation(team.tournamentId)
 
     return { success: true, message: "Le nom de l'équipe a été mis à jour." }
   },

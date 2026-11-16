@@ -9,7 +9,6 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
@@ -22,7 +21,10 @@ import { CACHE_TAGS } from '@/lib/config/constants'
 import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { resolveDonationAmount } from '@/lib/utils/donation'
 import { removeUserFromTeam, syncTeamFullState } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -132,6 +134,8 @@ export const createTeamAndRegister = authenticatedAction({
       throw error
     }
 
+    await invalidateTournamentParticipation(data.tournamentId, session.user.id)
+
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
         registrationId: registration.id,
@@ -142,9 +146,8 @@ export const createTeamAndRegister = authenticatedAction({
       })
     }
 
-    invalidateTournamentParticipation(data.tournamentId, session.user.id)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     const phCreate = getPostHogServer()
     if (phCreate) {
@@ -253,6 +256,8 @@ export const joinTeamAndRegister = authenticatedAction({
       throw error
     }
 
+    await invalidateTournamentParticipation(data.tournamentId, session.user.id)
+
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
         registrationId: registration.id,
@@ -263,9 +268,8 @@ export const joinTeamAndRegister = authenticatedAction({
       })
     }
 
-    invalidateTournamentParticipation(data.tournamentId, session.user.id)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     const phJoin = getPostHogServer()
     if (phJoin) {

@@ -29,7 +29,7 @@ vi.mock('@/lib/core/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }))
 
-const mockCleanupExpiredPendingRegistrations = vi.fn()
+const mockCleanupExpiredPendingRegistrations = vi.fn().mockResolvedValue([])
 vi.mock('@/lib/utils/registration-expiry', () => ({
   cleanupExpiredPendingRegistrations: (...args: unknown[]) =>
     mockCleanupExpiredPendingRegistrations(...args),
@@ -68,9 +68,11 @@ const mockTransaction = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
     user: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
     },
     tournament: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockTournamentFindUnique(...args),
     },
     tournamentRegistration: {
@@ -196,7 +198,7 @@ describe('fetchTournamentForRegistration', () => {
     vi.setSystemTime(NOW)
 
     mockUserFindUnique.mockResolvedValue({ bannedAt: null, bannedUntil: null })
-    mockCleanupExpiredPendingRegistrations.mockResolvedValue(0)
+    mockCleanupExpiredPendingRegistrations.mockResolvedValue([])
     mockTournamentFindUnique.mockResolvedValue(createTournament())
     mockRegistrationFindUnique.mockResolvedValue(null)
     mockRegistrationFindFirst.mockResolvedValue(null)

@@ -14,7 +14,7 @@ import { getTournamentSitemapEntries } from '@/lib/services/sitemap'
 
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   'use cache'
-  cacheLife('days')
+  cacheLife('editorial')
   cacheTag(CACHE_TAGS.TOURNAMENTS_SITEMAP)
 
   const baseUrl = env.NEXT_PUBLIC_APP_URL

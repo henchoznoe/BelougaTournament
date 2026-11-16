@@ -9,8 +9,8 @@
 'use client'
 
 import { ChevronLeft, ScrollText, Shield, Users } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import { usePublicSession } from '@/components/providers/public-session-provider'
 import { RegistrationShortcut } from '@/components/public/tournaments/detail/registration-shortcut'
 import { ContentCard } from '@/components/public/tournaments/detail/tournament-detail-shared'
@@ -70,14 +70,17 @@ export const TournamentDetail = ({
     error: registrationStateError,
     reload,
   } = useRegistrationState(tournament.id, sessionUser?.id)
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [paymentReturned] = useState(searchParams.get('stripe') === 'success')
   const awaitingPaymentConfirmation =
     Boolean(sessionUser) &&
     isPaymentConfirmationPending(registrationState, paymentReturned)
-  const loadRegistrationState = async () => {
-    await reload()
-  }
+  const loadRegistrationState = useCallback(async () => {
+    const state = await reload()
+    router.refresh()
+    return state
+  }, [reload, router])
 
   useEffect(() => {
     if (!tournament.id || !window.location.hash) return
@@ -180,7 +183,7 @@ export const TournamentDetail = ({
           state={registrationState}
           loading={sessionPending || registrationStateLoading}
           error={registrationStateError}
-          onRefresh={reload}
+          onRefresh={loadRegistrationState}
         />
         {(!awaitingPaymentConfirmation || registrationStateError) && (
           <TournamentRegistrationSection

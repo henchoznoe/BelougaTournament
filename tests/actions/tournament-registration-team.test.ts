@@ -7,7 +7,9 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
+import { updateTag } from 'next/cache'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { CACHE_TAGS_DYNAMIC } from '@/lib/config/constants/cache'
 import { Prisma } from '@/prisma/generated/prisma/client'
 import {
   PaymentStatus,
@@ -98,8 +100,12 @@ const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
-    user: { findUnique: (...a: unknown[]) => mockUserFindUnique(...a) },
+    user: {
+      findMany: vi.fn().mockResolvedValue([]),
+      findUnique: (...a: unknown[]) => mockUserFindUnique(...a),
+    },
     tournament: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...a: unknown[]) => mockTournamentFindUnique(...a),
     },
     tournamentRegistration: {
@@ -388,6 +394,12 @@ describe('createTeamAndRegister', () => {
       checkoutUrl: 'https://checkout.stripe.test/team-session',
     })
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
+    expect(updateTag).toHaveBeenCalledWith(
+      CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(TOURNAMENT_ID),
+    )
+    expect(vi.mocked(updateTag).mock.invocationCallOrder[0]).toBeLessThan(
+      mockCheckoutSessionsCreate.mock.invocationCallOrder[0],
+    )
   })
 
   it('should return a donation validation error before creating the team for paid tournaments', async () => {
@@ -718,6 +730,12 @@ describe('joinTeamAndRegister', () => {
       checkoutUrl: 'https://checkout.stripe.test/join-session',
     })
     expect(mockCheckoutSessionsCreate).toHaveBeenCalledOnce()
+    expect(updateTag).toHaveBeenCalledWith(
+      CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(TOURNAMENT_ID),
+    )
+    expect(vi.mocked(updateTag).mock.invocationCallOrder[0]).toBeLessThan(
+      mockCheckoutSessionsCreate.mock.invocationCallOrder[0],
+    )
   })
 
   it('should return a donation validation error before joining a paid team tournament', async () => {

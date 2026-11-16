@@ -29,7 +29,7 @@ import {
 /** Fetches aggregate stats for the dashboard cards. */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.DASHBOARD_STATS)
 
   try {
@@ -85,35 +85,14 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     }
   } catch (error) {
     logger.error({ error }, 'Error fetching dashboard stats')
-    return {
-      tournaments: {
-        total: 0,
-        byStatus: {
-          [TournamentStatus.DRAFT]: 0,
-          [TournamentStatus.PUBLISHED]: 0,
-          [TournamentStatus.ARCHIVED]: 0,
-        },
-      },
-      users: {
-        total: 0,
-        players: 0,
-        admins: 0,
-        superAdmins: 0,
-        banned: 0,
-      },
-      sponsors: {
-        total: 0,
-        enabled: 0,
-        disabled: 0,
-      },
-    }
+    throw error
   }
 }
 
 /** Fetches users with the most recent site access (visit) activity. */
 export const getRecentVisits = async (limit = 8): Promise<RecentVisit[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('activity')
   cacheTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
 
   try {
@@ -133,7 +112,7 @@ export const getRecentVisits = async (limit = 8): Promise<RecentVisit[]> => {
     return rows as unknown as RecentVisit[]
   } catch (error) {
     logger.error({ error }, 'Error fetching recent visits')
-    return []
+    throw error
   }
 }
 
@@ -142,7 +121,7 @@ export const getRecentRegistrations = async (
   limit = 8,
 ): Promise<RecentRegistration[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
 
   try {
@@ -180,14 +159,14 @@ export const getRecentRegistrations = async (
     return rows as unknown as RecentRegistration[]
   } catch (error) {
     logger.error({ error }, 'Error fetching recent registrations')
-    return []
+    throw error
   }
 }
 
 /** Fetches aggregate payment/revenue stats for the dashboard. */
 export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
 
   const emptyStats: PaymentStats = {
@@ -386,6 +365,6 @@ export const getDashboardPaymentStats = async (): Promise<PaymentStats> => {
     }
   } catch (error) {
     logger.error({ error }, 'Error fetching dashboard payment stats')
-    return emptyStats
+    throw error
   }
 }

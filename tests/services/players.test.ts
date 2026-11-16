@@ -102,12 +102,10 @@ describe('getPublicPlayers', () => {
     expect(result).toEqual([])
   })
 
-  it('returns empty array on error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPublicPlayers()
-
-    expect(result).toEqual([])
+    await expect(getPublicPlayers()).rejects.toThrow()
   })
 })
 
@@ -150,9 +148,7 @@ describe('getPlayerProfileStatus', () => {
   it('returns "not_found" on database error', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPlayerProfileStatus('user-1')
-
-    expect(result).toBe('not_found')
+    await expect(getPlayerProfileStatus('user-1')).rejects.toThrow()
   })
 })
 
@@ -188,11 +184,9 @@ describe('getPublicPlayerProfile', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPublicPlayerProfile('user-1')
-
-    expect(result).toBeNull()
+    await expect(getPublicPlayerProfile('user-1')).rejects.toThrow()
   })
 })

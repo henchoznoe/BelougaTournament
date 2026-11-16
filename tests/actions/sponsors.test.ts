@@ -145,6 +145,7 @@ describe('createSponsor', () => {
     await createSponsor(VALID_SPONSOR_INPUT)
 
     expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats')
   })
 
   it('returns validation error when name is empty', async () => {
@@ -293,6 +294,7 @@ describe('deleteSponsor', () => {
     await deleteSponsor({ id: VALID_UUID })
 
     expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats')
   })
 
   it('returns validation error for invalid UUID', async () => {
@@ -396,6 +398,7 @@ describe('toggleSponsorStatus', () => {
     await toggleSponsorStatus({ id: VALID_UUID })
 
     expect(mockRevalidateTag).toHaveBeenCalledWith('sponsors')
+    expect(mockRevalidateTag).toHaveBeenCalledWith('dashboard-stats')
   })
 
   it('returns validation error for invalid UUID', async () => {

@@ -8,12 +8,15 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
-import { invalidateTournamentCatalog } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  getTournamentParticipantIds,
+  invalidateTournamentCatalog,
+} from '@/lib/utils/cache-invalidation'
 import { toNullable } from '@/lib/utils/formatting'
 import {
   deleteTournamentSchema,
@@ -142,8 +145,8 @@ export const createTournament = authenticatedAction({
       },
     })
 
-    invalidateTournamentCatalog({ slug })
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    await invalidateTournamentCatalog({ slug })
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return {
       success: true,
@@ -337,7 +340,7 @@ export const updateTournament = authenticatedAction({
       }),
     ])
 
-    invalidateTournamentCatalog({ tournamentId: data.id, slug })
+    await invalidateTournamentCatalog({ tournamentId: data.id, slug })
 
     return {
       success: true,
@@ -366,17 +369,19 @@ export const deleteTournament = authenticatedAction({
       }
     }
 
+    const affectedUserIds = await getTournamentParticipantIds(data.id)
     const deletedTournament = await prisma.tournament.delete({
       where: { id: data.id },
       select: { slug: true },
     })
 
-    invalidateTournamentCatalog({
+    await invalidateTournamentCatalog({
       tournamentId: data.id,
       slug: deletedTournament.slug,
+      userIds: affectedUserIds,
     })
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
 
     return {
       success: true,
@@ -417,11 +422,11 @@ export const updateTournamentStatus = authenticatedAction({
       select: { slug: true },
     })
 
-    invalidateTournamentCatalog({
+    await invalidateTournamentCatalog({
       tournamentId: data.id,
       slug: updatedTournament.slug,
     })
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return {
       success: true,

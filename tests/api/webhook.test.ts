@@ -1430,14 +1430,11 @@ describe('POST /api/webhook', () => {
     const response = await POST(makeWebhookRequest())
 
     expect(response.status).toBe(200)
-    expect(mockLoggerWarn).toHaveBeenCalledWith(
-      {
-        error: expect.any(Error),
-        eventId: 'evt_cache_failure',
-        type: 'payment_intent.payment_failed',
-      },
-      'Stripe webhook cache revalidation failed',
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      { error: expect.any(Error), tag: expect.any(String) },
+      'Cache expiration failed after committed mutation',
     )
+    expect(mockWebhookDelete).not.toHaveBeenCalled()
   })
 
   it('accepts unhandled Stripe event types without processing mutations', async () => {

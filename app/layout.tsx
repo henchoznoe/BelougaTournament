@@ -14,6 +14,7 @@ import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { PublicSessionProvider } from '@/components/providers/public-session-provider'
+import { RouteFreshnessBoundary } from '@/components/providers/route-freshness-boundary'
 import { AuthErrorAlert } from '@/components/public/auth/auth-error-alert'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 import { Toaster } from '@/components/ui/sonner'
@@ -69,6 +70,7 @@ const RootLayout = (props: Readonly<LayoutProps>) => {
             <Suspense>
               <ScrollToTop />
               <AuthErrorAlert />
+              <RouteFreshnessBoundary />
             </Suspense>
             {props.children}
             <Toaster richColors position="bottom-right" />

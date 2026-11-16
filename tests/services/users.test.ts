@@ -119,10 +119,10 @@ describe('getUserProfile', () => {
     )
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
-    expect(await getUserProfile('user-1')).toBeNull()
+    await expect(getUserProfile('user-1')).rejects.toThrow()
   })
 })
 
@@ -188,10 +188,10 @@ describe('getActiveUserBan', () => {
     })
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
-    expect(await getActiveUserBan('user-1')).toBeNull()
+    await expect(getActiveUserBan('user-1')).rejects.toThrow()
   })
 })
 
@@ -211,10 +211,10 @@ describe('getUsers', () => {
     )
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockUserFindMany.mockRejectedValue(new Error('DB error'))
 
-    expect(await getUsers()).toEqual([])
+    await expect(getUsers()).rejects.toThrow()
   })
 })
 
@@ -235,9 +235,9 @@ describe('getUserById', () => {
     )
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockUserFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
-    expect(await getUserById('user-1')).toBeNull()
+    await expect(getUserById('user-1')).rejects.toThrow()
   })
 })

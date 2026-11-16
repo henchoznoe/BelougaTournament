@@ -27,6 +27,7 @@ export const CACHE_TAGS = {
 
 /** Parameterized tags used to invalidate only the entity that changed. */
 export const CACHE_TAGS_DYNAMIC = {
+  USER: (userId: string) => `user:${userId}`,
   PLAYER: (userId: string) => `player:${userId}`,
   TOURNAMENT: (tournamentId: string) => `tournament:${tournamentId}`,
   TOURNAMENT_SLUG: (slug: string) => `tournament-slug:${slug}`,

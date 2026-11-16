@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateProfile } from '@/lib/actions/profile'
+import { authClient } from '@/lib/core/auth-client'
 import { posthogBrowser as posthog } from '@/lib/utils/posthog-browser'
 import { type ProfileInput, profileSchema } from '@/lib/validations/profile'
 
@@ -65,6 +66,8 @@ export const ProfileEditForm = ({
         toast.success(result.message)
         setIsEditing(false)
         reset({ displayName: data.displayName })
+        await authClient.getSession({ query: { disableCookieCache: true } })
+        authClient.$store.notify('$sessionSignal')
         router.refresh()
       } else if (result.errors?.displayName) {
         toast.error(result.errors.displayName[0])

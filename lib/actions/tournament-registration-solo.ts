@@ -9,7 +9,7 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
+import { z } from 'zod'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { runSerializableTransaction } from '@/lib/actions/serializable-transaction'
 import {
@@ -24,8 +24,12 @@ import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { resolveDonationAmount } from '@/lib/utils/donation'
+import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
 import {
@@ -106,8 +110,8 @@ export const updateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    invalidateTournamentParticipation(data.tournamentId, session.user.id)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    await invalidateTournamentParticipation(data.tournamentId, session.user.id)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
 
     return { success: true, message: 'Votre inscription a été mise à jour.' }
   },
@@ -190,6 +194,8 @@ export const registerForTournament = authenticatedAction({
       throw error
     }
 
+    await invalidateTournamentParticipation(data.tournamentId, session.user.id)
+
     if (tournament.registrationType === RegistrationType.PAID) {
       return startPaidRegistrationCheckout({
         registrationId: registration.id,
@@ -200,9 +206,8 @@ export const registerForTournament = authenticatedAction({
       })
     }
 
-    invalidateTournamentParticipation(data.tournamentId, session.user.id)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     const ph = getPostHogServer()
     if (ph) {
@@ -283,10 +288,25 @@ export const cancelMyPendingRegistrationForTournament = authenticatedAction({
       })
     })
 
-    invalidateTournamentParticipation(data.tournamentId, session.user.id)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
+    await invalidateTournamentParticipation(data.tournamentId, session.user.id)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return { success: true, message: 'Inscription annulée.' }
+  },
+})
+
+/** Runs profile-entry cleanup in a mutation context rather than during RSC rendering. */
+export const expireMyPendingRegistrations = authenticatedAction({
+  schema: z.object({}),
+  handler: async (_, session): Promise<ActionState<{ changed: boolean }>> => {
+    const expired = await cleanupExpiredPendingRegistrations(session.user.id)
+    for (const impact of expired) {
+      await invalidateTournamentParticipation(
+        impact.tournamentId,
+        session.user.id,
+      )
+    }
+    return { success: true, message: '', data: { changed: expired.length > 0 } }
   },
 })

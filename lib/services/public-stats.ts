@@ -27,17 +27,10 @@ export interface PublicStats {
   games: number
 }
 
-const EMPTY_STATS: PublicStats = {
-  tournaments: 0,
-  players: 0,
-  registrations: 0,
-  games: 0,
-}
-
 /** Aggregates community-wide counts used as social proof on the landing page. */
 export const getPublicStats = async (): Promise<PublicStats> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS.PUBLIC_STATS)
 
   try {
@@ -60,6 +53,6 @@ export const getPublicStats = async (): Promise<PublicStats> => {
     return { tournaments, players, registrations, games }
   } catch (error) {
     logger.error({ error }, 'Error fetching public stats')
-    return EMPTY_STATS
+    throw error
   }
 }

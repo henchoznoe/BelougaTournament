@@ -8,7 +8,6 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -16,7 +15,10 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import { validateFieldValues } from '@/lib/utils/tournament-helpers'
@@ -92,13 +94,13 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       })
 
-      invalidateTournamentParticipation(
+      await invalidateTournamentParticipation(
         registration.tournament.id,
         registration.userId,
       )
-      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-      updateTag(CACHE_TAGS.DASHBOARD_STATS)
-      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+      expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
       return {
         success: true,
@@ -135,13 +137,13 @@ export const adminDeleteRegistration = authenticatedAction({
         })
       })
 
-      invalidateTournamentParticipation(
+      await invalidateTournamentParticipation(
         registration.tournament.id,
         registration.userId,
       )
-      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-      updateTag(CACHE_TAGS.DASHBOARD_STATS)
-      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+      expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
       return {
         success: true,
@@ -171,13 +173,13 @@ export const adminDeleteRegistration = authenticatedAction({
       await handleCaptainSuccession(tx, team, registration.userId)
     })
 
-    invalidateTournamentParticipation(
+    await invalidateTournamentParticipation(
       registration.tournament.id,
       registration.userId,
     )
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
     return {
       success: true,
@@ -239,7 +241,7 @@ export const adminUpdateRegistrationFields = authenticatedAction({
       data: { fieldValues: data.fieldValues },
     })
 
-    invalidateTournamentParticipation(
+    await invalidateTournamentParticipation(
       registration.tournament.id,
       registration.userId,
     )
@@ -392,13 +394,13 @@ export const adminRefundRegistration = authenticatedAction({
       }
     }
 
-    invalidateTournamentParticipation(
+    await invalidateTournamentParticipation(
       registration.tournament.id,
       registration.userId,
     )
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
 
     return {
       success: true,

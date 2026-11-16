@@ -10,9 +10,14 @@ import 'server-only'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { AUTH_CONFIG, DISCORD } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants/cache'
 import { env } from '@/lib/core/env'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
+import {
+  expireRequestTags,
+  invalidatePlayer,
+} from '@/lib/utils/cache-invalidation'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 /**
@@ -106,6 +111,9 @@ const auth = betterAuth({
           // Discord profile refresh is unavailable.
           data: { ...user, displayName: user.name },
         }),
+        after: async user => {
+          await invalidatePlayer(user.id, expireRequestTags)
+        },
       },
     },
     session: {
@@ -173,6 +181,7 @@ const auth = betterAuth({
               where: { id: user.id },
               data: updateData,
             })
+            await invalidatePlayer(user.id, expireRequestTags)
           } catch (error) {
             // Log only the error message — avoid serializing request objects that
             // may carry the Discord bearer token in their headers.
@@ -194,6 +203,11 @@ const auth = betterAuth({
               where: { id: session.userId },
               data: { lastSeenAt: new Date() },
             })
+            expireRequestTags([
+              CACHE_TAGS.USERS,
+              CACHE_TAGS_DYNAMIC.USER(session.userId),
+              CACHE_TAGS.DASHBOARD_RECENT_USERS,
+            ])
           } catch (error) {
             logger.error(
               {

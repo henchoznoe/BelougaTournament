@@ -85,9 +85,11 @@ const mockTeamMemberDeleteMany = vi.fn()
 vi.mock('@/lib/core/prisma', () => ({
   default: {
     user: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
     },
     tournament: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockTournamentFindUnique(...args),
     },
     tournamentRegistration: {
