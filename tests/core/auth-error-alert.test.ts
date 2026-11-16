@@ -22,14 +22,17 @@ describe('AuthErrorAlert', () => {
     expect(renderToStaticMarkup(createElement(AuthErrorAlert))).toBe('')
   })
 
-  it('shows a persistent alert and retry link for a failed callback', () => {
-    navigation.query = 'error=internal_server_error&from=%2Fprofile'
-    const html = renderToStaticMarkup(createElement(AuthErrorAlert))
-    expect(html).toContain('role="alert"')
-    expect(html).toContain('La connexion n’a pas abouti.')
-    expect(html).toContain('Réessayer la connexion')
-    expect(html).toContain('/login?from=%2Fprofile')
-  })
+  it.each(['internal_server_error', 'state_mismatch', 'MISSING_FIELD'])(
+    'shows a persistent alert and retry link for %s',
+    error => {
+      navigation.query = `error=${error}&from=%2Fprofile`
+      const html = renderToStaticMarkup(createElement(AuthErrorAlert))
+      expect(html).toContain('role="alert"')
+      expect(html).toContain('La connexion n’a pas abouti.')
+      expect(html).toContain('Réessayer la connexion')
+      expect(html).toContain('/login?from=%2Fprofile')
+    },
+  )
 
   it('does not expose raw backend error details', () => {
     navigation.query = 'error=private_database_error'

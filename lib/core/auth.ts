@@ -34,6 +34,8 @@ interface DiscordProfile {
 }
 
 const auth = betterAuth({
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -63,6 +65,10 @@ const auth = betterAuth({
     max: AUTH_CONFIG.RATE_LIMIT_MAX,
   },
   trustedOrigins: [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL],
+  onAPIError: {
+    // State parsing failures cannot recover the per-flow errorCallbackURL.
+    errorURL: new URL('/login', env.NEXT_PUBLIC_APP_URL).toString(),
+  },
   socialProviders: {
     discord: {
       clientId: env.DISCORD_CLIENT_ID,
@@ -85,11 +91,23 @@ const auth = betterAuth({
       displayName: {
         type: 'string',
         required: true,
+        // Better Auth validates additional fields before running create hooks.
+        // Match Prisma's default so first-time OAuth users reach the hook below.
+        defaultValue: '',
         input: false,
       },
     },
   },
   databaseHooks: {
+    user: {
+      create: {
+        before: async user => ({
+          // Initialize before the account/session exists, even if the later
+          // Discord profile refresh is unavailable.
+          data: { ...user, displayName: user.name },
+        }),
+      },
+    },
     session: {
       create: {
         after: async session => {
