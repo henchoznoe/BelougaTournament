@@ -80,13 +80,10 @@ describe('Stripe listener', () => {
 
   it('writes the received webhook secret to the isolated environment file', async () => {
     await import('../../scripts/stripe-listen.ts')
-    child.stderr.emit(
-      'data',
-      Buffer.from('Ready! Signing secret whsec_fixture123'),
-    )
+    child.stderr.emit('data', Buffer.from('Ready! Signing secret whsec_test'))
     expect(writeFile).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining('STRIPE_WEBHOOK_SECRET=whsec_fixture123'),
+      expect.stringContaining('STRIPE_WEBHOOK_SECRET=whsec_test'),
       'utf8',
     )
   })
