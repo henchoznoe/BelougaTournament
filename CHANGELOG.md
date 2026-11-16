@@ -1,3 +1,11 @@
+## [1.12.8](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.7...v1.12.8) (2026-11-16)
+
+
+### Bug Fixes
+
+* **auth:** initialize display name before Discord account creation ([813a6bb](https://github.com/henchoznoe/BelougaTournament/commit/813a6bbc27b68eb6590aa693849b9a935c0a17cf))
+* **cache:** invalidate tournament and admin data after mutations ([1a85515](https://github.com/henchoznoe/BelougaTournament/commit/1a85515f6a1effa7201097fbf60dda8f800cb53a))
+
 ## [1.12.7](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.6...v1.12.7) (2026-11-07)
 
 
