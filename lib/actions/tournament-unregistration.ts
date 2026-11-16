@@ -8,7 +8,6 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -17,7 +16,10 @@ import { getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
-import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { refundPaymentViaStripe } from '@/lib/utils/stripe-refund'
 import { handleCaptainSuccession } from '@/lib/utils/team'
 import { isRefundEligible } from '@/lib/utils/tournament-helpers'
@@ -161,11 +163,11 @@ export const unregisterFromTournament = authenticatedAction({
           ? "Votre inscription a été annulée. Vous avez renoncé à vos frais d'inscription au profit de Belouga Tournament."
           : "Votre inscription a été annulée. Cette désinscription n'ouvre pas droit à un remboursement automatique."
 
-    const invalidateCaches = () => {
-      invalidateTournamentParticipation(data.tournamentId, userId)
-      updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
-      updateTag(CACHE_TAGS.DASHBOARD_STATS)
-      updateTag(CACHE_TAGS.DASHBOARD_PAYMENTS)
+    const invalidateCaches = async () => {
+      await invalidateTournamentParticipation(data.tournamentId, userId)
+      expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+      expireActionTags([CACHE_TAGS.DASHBOARD_PAYMENTS])
     }
 
     const captureUnregistration = async () => {
@@ -233,7 +235,7 @@ export const unregisterFromTournament = authenticatedAction({
         })
       }
 
-      invalidateCaches()
+      await invalidateCaches()
       await captureUnregistration()
       return { success: true, message: successMessage }
     }
@@ -268,7 +270,7 @@ export const unregisterFromTournament = authenticatedAction({
         })
       })
 
-      invalidateCaches()
+      await invalidateCaches()
       await captureUnregistration()
       return { success: true, message: successMessage }
     }
@@ -299,7 +301,7 @@ export const unregisterFromTournament = authenticatedAction({
       await handleCaptainSuccession(tx, team, userId)
     })
 
-    invalidateCaches()
+    await invalidateCaches()
     await captureUnregistration()
     return { success: true, message: successMessage }
   },

@@ -32,7 +32,7 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('editorial')
   cacheTag(CACHE_TAGS.SETTINGS)
 
   try {
@@ -42,6 +42,6 @@ export const getGlobalSettings = async (): Promise<GlobalSettings> => {
     return settings ?? DEFAULT_SETTINGS
   } catch (error) {
     logger.error({ error }, 'Error fetching global settings')
-    return DEFAULT_SETTINGS
+    throw error
   }
 }

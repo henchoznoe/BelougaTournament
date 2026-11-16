@@ -18,7 +18,7 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -92,7 +92,7 @@ interface TournamentRegistrationFormProps {
   registrationState: UserTournamentRegistrationState | null
   isAuthenticated: boolean
   registrationStateLoading: boolean
-  onRegistrationChanged: () => Promise<void>
+  onRegistrationChanged: () => Promise<unknown>
   calendarData?: CalendarEventData
 }
 
@@ -128,7 +128,6 @@ export const TournamentRegistrationForm = ({
 }: TournamentRegistrationFormProps) => {
   const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const currentPath =
     searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname
@@ -280,7 +279,6 @@ export const TournamentRegistrationForm = ({
           })
           toast.success(result.message)
           await onRegistrationChanged()
-          router.refresh()
         } else {
           setSubmissionError(
             result.message ??

@@ -36,6 +36,20 @@ jobs:
     env:
       DATABASE_URL: 'postgresql://ci:ci@localhost:5432/ci'
       DIRECT_URL: 'postgresql://ci:ci@localhost:5432/ci'
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Checkout code
@@ -62,6 +76,12 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
+
+      - name: Prepare isolated build database
+        run: pnpm exec prisma migrate deploy
+
+      - name: Generate Next.js route and cache profile types
+        run: pnpm exec next typegen
 
       - name: Type-check
         run: pnpm exec tsc --noEmit

@@ -8,7 +8,6 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { cancelOrDeleteRegistration } from '@/lib/actions/registration-cancellation'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -17,6 +16,9 @@ import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
 import type { TeamMemberWithTeam } from '@/lib/types/team'
 import {
+  expireActionTags,
+  getTournamentParticipantIds,
+  getUserTournamentIds,
   invalidatePlayer,
   invalidateTournamentParticipation,
 } from '@/lib/utils/cache-invalidation'
@@ -81,9 +83,11 @@ export const promoteToAdmin = authenticatedAction({
       prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+
+    await invalidatePlayer(data.userId)
 
     return { success: true, message: `${user.name} a été promu admin.` }
   },
@@ -126,9 +130,11 @@ export const demoteAdmin = authenticatedAction({
       prisma.session.deleteMany({ where: { userId: data.userId } }),
     ])
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+
+    await invalidatePlayer(data.userId)
 
     return { success: true, message: `${user.name} a été rétrogradé.` }
   },
@@ -153,8 +159,10 @@ export const updateUser = authenticatedAction({
       data: { displayName: data.displayName },
     })
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+
+    await invalidatePlayer(data.userId)
 
     return { success: true, message: `${user.name} a été mis à jour.` }
   },
@@ -193,12 +201,23 @@ export const deleteUser = authenticatedAction({
       return { success: false, message: 'Vous ne pouvez pas vous supprimer.' }
     }
 
+    const tournamentIds = await getUserTournamentIds(data.userId)
+    const affectedUsers = await Promise.all(
+      tournamentIds.map(getTournamentParticipantIds),
+    )
     await prisma.user.delete({ where: { id: data.userId } })
+    await invalidatePlayer(data.userId)
+    for (const [index, tournamentId] of tournamentIds.entries()) {
+      await invalidateTournamentParticipation(tournamentId, [
+        data.userId,
+        ...affectedUsers[index],
+      ])
+    }
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
 
     return {
       success: true,
@@ -434,14 +453,17 @@ export const banUser = authenticatedAction({
       }
     }
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_STATS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
-    invalidatePlayer(data.userId)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+    await invalidatePlayer(data.userId)
     for (const registration of registrations) {
-      invalidateTournamentParticipation(registration.tournament.id, data.userId)
+      await invalidateTournamentParticipation(
+        registration.tournament.id,
+        data.userId,
+      )
     }
-    updateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS)
+    expireActionTags([CACHE_TAGS.DASHBOARD_REGISTRATIONS])
 
     const isBanPermanent = !data.bannedUntil
     return {
@@ -476,8 +498,10 @@ export const unbanUser = authenticatedAction({
       data: { bannedAt: null, bannedUntil: null, banReason: null },
     })
 
-    updateTag(CACHE_TAGS.USERS)
-    updateTag(CACHE_TAGS.DASHBOARD_RECENT_USERS)
+    expireActionTags([CACHE_TAGS.USERS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_RECENT_USERS])
+
+    await invalidatePlayer(data.userId)
 
     return {
       success: true,

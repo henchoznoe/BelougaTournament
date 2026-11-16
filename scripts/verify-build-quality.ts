@@ -14,9 +14,13 @@ import { resolvePrerenderedHtml } from './build-artifacts.ts'
 
 const nextDirectory = path.resolve(process.argv[2] ?? '.next')
 const publicDirectory = path.resolve('public')
-const minimumRevalidateSeconds = 30 * 24 * 60 * 60
-// Date-sensitive tournament selections need periodic refresh even without an admin mutation.
-const tournamentCatalogMinimumRevalidateSeconds = 60
+const mutableRouteExpirations: Record<string, number> = {
+  '/': 86400,
+  '/players': 300,
+  '/tournaments': 300,
+  '/stream': 86400,
+  '/sitemap.xml': 86400,
+}
 
 const staticRoutes = [
   '/',
@@ -75,6 +79,8 @@ const requiredTournamentTraceFragments = [
 interface PrerenderRoute {
   compute?: string
   initialRevalidateSeconds?: number | false
+  initialExpireSeconds?: number
+  renderingMode?: string
 }
 
 const formatKiB = (bytes: number): string => `${Math.ceil(bytes / 1024)} Kio`
@@ -123,25 +129,37 @@ const verifyPrerenderedRoutes = async (): Promise<void> => {
   for (const route of staticRoutes) {
     const entry = manifest.routes[route]
     if (!entry) throw new Error(`${route} n'est pas prérendue.`)
-    if (entry.compute && entry.compute !== 'static') {
+    if (
+      entry.compute &&
+      entry.compute !== 'static' &&
+      !(
+        entry.compute === 'resuming' &&
+        entry.renderingMode === 'PARTIALLY_STATIC'
+      )
+    ) {
       throw new Error(`${route} utilise encore compute=${entry.compute}.`)
     }
-    const minimumForRoute =
-      route === '/' || route === '/tournaments'
-        ? tournamentCatalogMinimumRevalidateSeconds
-        : minimumRevalidateSeconds
+    const maximumExpiration = mutableRouteExpirations[route]
     if (
-      route !== '/sitemap.xml' &&
-      typeof entry.initialRevalidateSeconds === 'number' &&
-      entry.initialRevalidateSeconds < minimumForRoute
+      maximumExpiration &&
+      typeof entry.initialExpireSeconds === 'number' &&
+      entry.initialExpireSeconds > maximumExpiration
     ) {
       throw new Error(
-        `${route} se revalide après ${entry.initialRevalidateSeconds}s, sous le minimum de ${minimumForRoute}s.`,
+        `${route} conserve ses données au-delà de ${maximumExpiration}s.`,
       )
+    }
+    if (
+      entry.renderingMode &&
+      !['STATIC', 'PARTIALLY_STATIC'].includes(entry.renderingMode)
+    ) {
+      throw new Error(`${route} ne conserve pas de coquille prérendue.`)
     }
   }
 
-  console.info(`✓ ${staticRoutes.length} routes publiques sont statiques`)
+  console.info(
+    `✓ ${staticRoutes.length} routes publiques conservent une coquille prérendue`,
+  )
 }
 
 const verifyJavascriptBudgets = async (): Promise<void> => {

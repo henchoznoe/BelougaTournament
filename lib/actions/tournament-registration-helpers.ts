@@ -19,6 +19,7 @@ import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import { getStripe } from '@/lib/core/stripe'
 import type { ActionState } from '@/lib/types/actions'
+import { invalidateTournamentParticipation } from '@/lib/utils/cache-invalidation'
 import { resolveDonationAmount } from '@/lib/utils/donation'
 import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import { removeUserFromTeam } from '@/lib/utils/team'
@@ -240,6 +241,8 @@ export const startPaidRegistrationCheckout = async ({
     throw error
   }
 
+  await invalidateTournamentParticipation(tournament.id, userId)
+
   try {
     const session = await stripe.checkout.sessions.create(
       {
@@ -339,6 +342,7 @@ export const startPaidRegistrationCheckout = async ({
       })
     })
 
+    await invalidateTournamentParticipation(tournament.id, userId)
     return {
       success: false,
       message: 'Impossible de créer la session de paiement Stripe.',
@@ -382,7 +386,10 @@ export const fetchTournamentForRegistration = async (
     }
   }
 
-  await cleanupExpiredPendingRegistrations(userId)
+  const expired = await cleanupExpiredPendingRegistrations(userId)
+  for (const impact of expired) {
+    await invalidateTournamentParticipation(impact.tournamentId, userId)
+  }
 
   const tournament = (await prisma.tournament.findUnique({
     where: { id: tournamentId },

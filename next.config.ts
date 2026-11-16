@@ -41,6 +41,12 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  cacheLife: {
+    operational: { stale: 0, revalidate: 30, expire: 300 },
+    catalog: { stale: 30, revalidate: 60, expire: 300 },
+    activity: { stale: 0, revalidate: 15, expire: 60 },
+    editorial: { stale: 300, revalidate: 3600, expire: 86400 },
+  },
   // Preserve the existing prefetch behavior while upgrading to Next.js 16.4.
   partialPrefetching: false,
   // isomorphic-dompurify loads jsdom on the server. Keeping the package external

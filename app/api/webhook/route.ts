@@ -6,7 +6,6 @@
  * Copyright (c) 2026 Noé Henchoz
  */
 
-import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { CACHE_TAGS } from '@/lib/config/constants'
@@ -15,7 +14,10 @@ import { logger } from '@/lib/core/logger'
 import { captureServerException, getPostHogServer } from '@/lib/core/posthog'
 import prisma from '@/lib/core/prisma'
 import { getStripe, getStripeWebhookSecret } from '@/lib/core/stripe'
-import { getTournamentParticipationCacheTags } from '@/lib/utils/cache-invalidation'
+import {
+  expireRequestTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { REFUND_KIND_FULL_CANCELLATION } from '@/lib/utils/stripe-refund'
 import { removeUserFromTeam } from '@/lib/utils/team'
 import { Prisma } from '@/prisma/generated/prisma/client'
@@ -33,16 +35,22 @@ const TERMINAL_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.FORFEITED,
 ])
 
-const revalidateTournamentParticipation = (
+type ParticipationImpacts = Map<string, Set<string>>
+
+const recordParticipationImpact = (
+  impacts: ParticipationImpacts,
   tournamentId: string,
   userId: string,
 ): void => {
-  for (const tag of getTournamentParticipationCacheTags(tournamentId, userId)) {
-    revalidateTag(tag, 'max')
-  }
+  const users = impacts.get(tournamentId) ?? new Set<string>()
+  users.add(userId)
+  impacts.set(tournamentId, users)
 }
 
-const handleCheckoutCompleted = async (event: Stripe.Event) => {
+const handleCheckoutCompleted = async (
+  event: Stripe.Event,
+  impacts: ParticipationImpacts,
+) => {
   const stripe = getStripe()
   // Safe: this handler is only called from the switch branch for 'checkout.session.completed'
   const session = event.data.object as Stripe.Checkout.Session
@@ -188,7 +196,8 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       },
     })
   })
-  revalidateTournamentParticipation(
+  recordParticipationImpact(
+    impacts,
     payment.registration.tournamentId,
     payment.registration.userId,
   )
@@ -209,7 +218,10 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
   }
 }
 
-const handleCheckoutExpired = async (event: Stripe.Event) => {
+const handleCheckoutExpired = async (
+  event: Stripe.Event,
+  impacts: ParticipationImpacts,
+) => {
   // Safe: this handler is only called from the switch branch for 'checkout.session.expired'
   const session = event.data.object as Stripe.Checkout.Session
 
@@ -263,7 +275,8 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
       },
     })
   })
-  revalidateTournamentParticipation(
+  recordParticipationImpact(
+    impacts,
     payment.registration.tournamentId,
     payment.registration.userId,
   )
@@ -282,7 +295,10 @@ const handleCheckoutExpired = async (event: Stripe.Event) => {
   }
 }
 
-const handlePaymentFailed = async (event: Stripe.Event) => {
+const handlePaymentFailed = async (
+  event: Stripe.Event,
+  impacts: ParticipationImpacts,
+) => {
   // Safe: this handler is only called from the switch branch for 'payment_intent.payment_failed'
   const paymentIntent = event.data.object as Stripe.PaymentIntent
   const paymentId = paymentIntent.metadata.paymentId
@@ -333,7 +349,8 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
       },
     })
   })
-  revalidateTournamentParticipation(
+  recordParticipationImpact(
+    impacts,
     payment.registration.tournamentId,
     payment.registration.userId,
   )
@@ -397,7 +414,10 @@ const handleChargeUpdated = async (event: Stripe.Event) => {
   })
 }
 
-const handleChargeRefunded = async (event: Stripe.Event) => {
+const handleChargeRefunded = async (
+  event: Stripe.Event,
+  impacts: ParticipationImpacts,
+) => {
   // Safe: this handler is only called from the switch branch for 'charge.refunded'
   const charge = event.data.object as Stripe.Charge
 
@@ -466,7 +486,8 @@ const handleChargeRefunded = async (event: Stripe.Event) => {
       })
     }
   })
-  revalidateTournamentParticipation(
+  recordParticipationImpact(
+    impacts,
     payment.registration.tournamentId,
     payment.registration.userId,
   )
@@ -499,7 +520,10 @@ const handleChargeDisputeCreated = async (event: Stripe.Event) => {
 }
 
 /** Aligns DB state when a payment intent is explicitly canceled while still pending. */
-const handlePaymentIntentCanceled = async (event: Stripe.Event) => {
+const handlePaymentIntentCanceled = async (
+  event: Stripe.Event,
+  impacts: ParticipationImpacts,
+) => {
   // Safe: this handler is only called from the switch branch for 'payment_intent.canceled'
   const paymentIntent = event.data.object as Stripe.PaymentIntent
   const paymentId = paymentIntent.metadata.paymentId
@@ -546,7 +570,8 @@ const handlePaymentIntentCanceled = async (event: Stripe.Event) => {
       },
     })
   })
-  revalidateTournamentParticipation(
+  recordParticipationImpact(
+    impacts,
     payment.registration.tournamentId,
     payment.registration.userId,
   )
@@ -632,6 +657,8 @@ export const POST = async (request: Request) => {
     )
   }
 
+  const impacts: ParticipationImpacts = new Map()
+
   // Only handler failures (DB work) should release the idempotency row so
   // Stripe retries the event. Post-handler cache revalidation runs outside the
   // try so a failing `revalidateTag` cannot cause the handler's DB mutations
@@ -639,16 +666,16 @@ export const POST = async (request: Request) => {
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutCompleted(event)
+        await handleCheckoutCompleted(event, impacts)
         break
       case 'checkout.session.expired':
-        await handleCheckoutExpired(event)
+        await handleCheckoutExpired(event, impacts)
         break
       case 'payment_intent.payment_failed':
-        await handlePaymentFailed(event)
+        await handlePaymentFailed(event, impacts)
         break
       case 'charge.refunded':
-        await handleChargeRefunded(event)
+        await handleChargeRefunded(event, impacts)
         break
       case 'charge.updated':
         await handleChargeUpdated(event)
@@ -657,7 +684,7 @@ export const POST = async (request: Request) => {
         await handleChargeDisputeCreated(event)
         break
       case 'payment_intent.canceled':
-        await handlePaymentIntentCanceled(event)
+        await handlePaymentIntentCanceled(event, impacts)
         break
       default:
         break
@@ -688,9 +715,18 @@ export const POST = async (request: Request) => {
   }
 
   try {
-    revalidateTag(CACHE_TAGS.DASHBOARD_REGISTRATIONS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_STATS, 'minutes')
-    revalidateTag(CACHE_TAGS.DASHBOARD_PAYMENTS, 'minutes')
+    for (const [tournamentId, users] of impacts) {
+      await invalidateTournamentParticipation(
+        tournamentId,
+        [...users],
+        expireRequestTags,
+      )
+    }
+    expireRequestTags([
+      CACHE_TAGS.DASHBOARD_REGISTRATIONS,
+      CACHE_TAGS.DASHBOARD_STATS,
+      CACHE_TAGS.DASHBOARD_PAYMENTS,
+    ])
   } catch (error) {
     // Cache revalidation failures are non-fatal; the mutations have already
     // been persisted. Logging only — do not release the idempotency row.

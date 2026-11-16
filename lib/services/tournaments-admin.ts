@@ -10,7 +10,7 @@ import 'server-only'
 // $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
 // because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type {
@@ -43,7 +43,7 @@ type RawTournamentRegistrationRow = Omit<
 /** Fetches all tournaments for the admin list table. */
 export const getTournaments = async (): Promise<TournamentListItem[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.TOURNAMENTS)
 
   try {
@@ -86,7 +86,7 @@ export const getTournaments = async (): Promise<TournamentListItem[]> => {
     return rows as unknown as TournamentListItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching tournaments')
-    return []
+    throw error
   }
 }
 
@@ -95,8 +95,8 @@ export const getTournamentBySlug = async (
   slug: string,
 ): Promise<TournamentDetail | null> => {
   'use cache'
-  cacheLife('max')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('operational')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_SLUG(slug))
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -125,10 +125,11 @@ export const getTournamentBySlug = async (
         },
       },
     })
+    if (row) cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT(row.id))
     return row as TournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament by slug')
-    return null
+    throw error
   }
 }
 
@@ -137,8 +138,8 @@ export const getTournamentById = async (
   id: string,
 ): Promise<TournamentDetail | null> => {
   'use cache'
-  cacheLife('max')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('operational')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT(id))
 
   try {
     const row = await prisma.tournament.findUnique({
@@ -170,7 +171,7 @@ export const getTournamentById = async (
     return row as TournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament by ID')
-    return null
+    throw error
   }
 }
 
@@ -179,8 +180,8 @@ export const getRegistrations = async (
   tournamentId: string,
 ): Promise<TournamentRegistrationItem[]> => {
   'use cache'
-  cacheLife('max')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('operational')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(tournamentId))
 
   try {
     const rows = (await prisma.tournamentRegistration.findMany({
@@ -247,15 +248,15 @@ export const getRegistrations = async (
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching registrations')
-    return []
+    throw error
   }
 }
 
 /** Fetches all teams for a tournament (admin teams tab). */
 export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
   'use cache'
-  cacheLife('max')
-  cacheTag(CACHE_TAGS.TOURNAMENTS)
+  cacheLife('operational')
+  cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(tournamentId))
 
   try {
     const rows = await prisma.team.findMany({
@@ -295,6 +296,6 @@ export const getTeams = async (tournamentId: string): Promise<TeamItem[]> => {
     return rows as unknown as TeamItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching teams')
-    return []
+    throw error
   }
 }

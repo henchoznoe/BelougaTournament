@@ -81,7 +81,10 @@ export const GET = async (request: Request) => {
 
     const prefix = parsedFolder.folder ? `${parsedFolder.folder}/` : undefined
     const { blobs } = await list({ prefix })
-    return NextResponse.json({ blobs })
+    return NextResponse.json(
+      { blobs },
+      { headers: { 'Cache-Control': 'private, no-store' } },
+    )
   } catch (error) {
     logger.error({ error }, 'Error listing blobs')
     return NextResponse.json(

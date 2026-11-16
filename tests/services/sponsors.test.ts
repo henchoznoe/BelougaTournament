@@ -87,12 +87,10 @@ describe('getSponsors', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getSponsors()
-
-    expect(result).toEqual([])
+    await expect(getSponsors()).rejects.toThrow()
   })
 })
 
@@ -124,12 +122,10 @@ describe('getAllSponsors', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getAllSponsors()
-
-    expect(result).toEqual([])
+    await expect(getAllSponsors()).rejects.toThrow()
   })
 })
 
@@ -159,11 +155,9 @@ describe('getSponsorById', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB error'))
 
-    const result = await getSponsorById('uuid-1')
-
-    expect(result).toBeNull()
+    await expect(getSponsorById('uuid-1')).rejects.toThrow()
   })
 })

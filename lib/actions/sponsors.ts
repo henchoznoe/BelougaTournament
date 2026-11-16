@@ -8,11 +8,11 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS, NOON_UTC_SUFFIX } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { expireActionTags } from '@/lib/utils/cache-invalidation'
 import { toNullable } from '@/lib/utils/formatting'
 import {
   deleteSponsorSchema,
@@ -35,7 +35,8 @@ export const createSponsor = authenticatedAction({
       },
     })
 
-    updateTag(CACHE_TAGS.SPONSORS)
+    expireActionTags([CACHE_TAGS.SPONSORS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return { success: true, message: 'Le sponsor a été créé.' }
   },
@@ -55,7 +56,8 @@ export const updateSponsor = authenticatedAction({
       },
     })
 
-    updateTag(CACHE_TAGS.SPONSORS)
+    expireActionTags([CACHE_TAGS.SPONSORS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return { success: true, message: 'Le sponsor a été mis à jour.' }
   },
@@ -69,7 +71,8 @@ export const deleteSponsor = authenticatedAction({
       where: { id: data.id },
     })
 
-    updateTag(CACHE_TAGS.SPONSORS)
+    expireActionTags([CACHE_TAGS.SPONSORS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     return { success: true, message: 'Le sponsor a été supprimé.' }
   },
@@ -93,7 +96,8 @@ export const toggleSponsorStatus = authenticatedAction({
       data: { enabled: !sponsor.enabled },
     })
 
-    updateTag(CACHE_TAGS.SPONSORS)
+    expireActionTags([CACHE_TAGS.SPONSORS])
+    expireActionTags([CACHE_TAGS.DASHBOARD_STATS])
 
     const statusLabel = sponsor.enabled ? 'désactivé' : 'activé'
     return { success: true, message: `Le sponsor a été ${statusLabel}.` }

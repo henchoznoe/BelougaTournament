@@ -10,6 +10,7 @@ import 'server-only'
 // $queryRaw returns `unknown[]`; casts below assert the shape matches our domain types
 // because Prisma cannot infer types from raw SQL at compile time.
 import { cacheLife, cacheTag } from 'next/cache'
+import { connection } from 'next/server'
 import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import { PUBLIC_TOURNAMENTS_PAGE_SIZE } from '@/lib/config/constants/tournaments'
 import { logger } from '@/lib/core/logger'
@@ -24,10 +25,7 @@ import type {
   PublicTournamentRegistrant,
   PublicTournamentTeamRegistrant,
 } from '@/lib/types/tournament'
-import {
-  DEFAULT_HERO_TOURNAMENT_BADGE,
-  resolveHeroTournamentBadge,
-} from '@/lib/utils/hero-tournament-badge'
+import { resolveHeroTournamentBadge } from '@/lib/utils/hero-tournament-badge'
 import { orderPublishedTournaments } from '@/lib/utils/public-tournament-order'
 import type {
   PublicTournamentFilters,
@@ -74,11 +72,11 @@ const PUBLIC_LIST_SELECT = {
 } as const
 
 /** Fetches all PUBLISHED tournaments for the public list page. */
-export const getPublishedTournaments = async (): Promise<
+const getPublishedTournamentRows = async (): Promise<
   PublicTournamentListItem[]
 > => {
   'use cache'
-  cacheLife({ stale: 30, revalidate: 60, expire: 300 })
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS.TOURNAMENTS_PUBLISHED)
 
   try {
@@ -87,41 +85,50 @@ export const getPublishedTournaments = async (): Promise<
       orderBy: { startDate: 'asc' },
       select: PUBLIC_LIST_SELECT,
     })
-    return orderPublishedTournaments(
-      rows as unknown as PublicTournamentListItem[],
-      new Date(),
-    )
+    return rows as unknown as PublicTournamentListItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching published tournaments')
-    return []
+    throw error
   }
 }
 
+/** Orders cached rows against the current request time, not the cache creation time. */
+export const getPublishedTournaments = async (): Promise<
+  PublicTournamentListItem[]
+> => {
+  const rows = await getPublishedTournamentRows()
+  await connection()
+  return orderPublishedTournaments(rows, new Date())
+}
+
 /** Fetches the badge data used by the landing hero. */
+const getHeroTournamentRows = async (): Promise<
+  HeroTournamentBadgeTournament[]
+> => {
+  'use cache'
+  cacheLife('catalog')
+  cacheTag(CACHE_TAGS.TOURNAMENT_HERO)
+
+  try {
+    const tournaments = (await prisma.tournament.findMany({
+      where: { status: TournamentStatus.PUBLISHED },
+      orderBy: { startDate: 'asc' },
+      select: HERO_BADGE_SELECT,
+    })) as HeroTournamentBadgeTournament[]
+
+    return tournaments
+  } catch (error) {
+    logger.error({ error }, 'Error fetching landing hero tournament badge')
+    throw error
+  }
+}
+
+/** Recomputes clock-dependent badge state for every request. */
 export const getHeroTournamentBadgeData =
   async (): Promise<HeroTournamentBadgeData> => {
-    'use cache'
-    cacheLife({ stale: 30, revalidate: 60, expire: 300 })
-    cacheTag(CACHE_TAGS.TOURNAMENT_HERO)
-
-    try {
-      const tournaments = (await prisma.tournament.findMany({
-        where: { status: TournamentStatus.PUBLISHED },
-        orderBy: { startDate: 'asc' },
-        select: HERO_BADGE_SELECT,
-      })) as HeroTournamentBadgeTournament[]
-
-      return {
-        badge: resolveHeroTournamentBadge(tournaments),
-        tournaments,
-      }
-    } catch (error) {
-      logger.error({ error }, 'Error fetching landing hero tournament badge')
-      return {
-        badge: DEFAULT_HERO_TOURNAMENT_BADGE,
-        tournaments: [],
-      }
-    }
+    const tournaments = await getHeroTournamentRows()
+    await connection()
+    return { badge: resolveHeroTournamentBadge(tournaments), tournaments }
   }
 
 /** Fetches the tournament state displayed in the landing hero badge. */
@@ -136,7 +143,7 @@ export const getArchivedTournaments = async (): Promise<
   PublicTournamentListItem[]
 > => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS.TOURNAMENTS_ARCHIVED)
 
   try {
@@ -148,7 +155,7 @@ export const getArchivedTournaments = async (): Promise<
     return rows as unknown as PublicTournamentListItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching archived tournaments')
-    return []
+    throw error
   }
 }
 
@@ -158,7 +165,7 @@ export const getPublicTournamentBySlug = async (
 ): Promise<PublicTournamentDetail | null> => {
   'use cache'
   // Always check the server on navigation; registration fields must stay current.
-  cacheLife({ stale: 0 })
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_SLUG(slug))
 
   try {
@@ -193,7 +200,7 @@ export const getPublicTournamentBySlug = async (
     return row as PublicTournamentDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching public tournament by slug')
-    return null
+    throw error
   }
 }
 
@@ -202,7 +209,7 @@ export const getAvailableTeams = async (
   tournamentId: string,
 ): Promise<AvailableTeam[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(tournamentId))
 
   try {
@@ -227,7 +234,7 @@ export const getAvailableTeams = async (
     return rows as unknown as AvailableTeam[]
   } catch (error) {
     logger.error({ error }, 'Error fetching available teams')
-    return []
+    throw error
   }
 }
 
@@ -267,7 +274,7 @@ const getTournamentsFilteredByStatus = async (
   filters: PublicTournamentFilters,
 ): Promise<PublicTournamentPage> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(
     status === TournamentStatus.PUBLISHED
       ? CACHE_TAGS.TOURNAMENTS_PUBLISHED
@@ -323,13 +330,7 @@ const getTournamentsFilteredByStatus = async (
       { error },
       `Error fetching filtered ${status.toLowerCase()} tournaments`,
     )
-    return {
-      tournaments: [],
-      total: 0,
-      page,
-      pageSize: PUBLIC_TOURNAMENTS_PAGE_SIZE,
-      totalPages: 1,
-    }
+    throw error
   }
 }
 
@@ -356,7 +357,7 @@ export const getTournamentRegistrants = async (
   tournamentId: string,
 ): Promise<PublicTournamentRegistrant[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(tournamentId))
 
   try {
@@ -382,7 +383,7 @@ export const getTournamentRegistrants = async (
     }))
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament registrants')
-    return []
+    throw error
   }
 }
 
@@ -391,7 +392,7 @@ export const getTournamentTeamRegistrants = async (
   tournamentId: string,
 ): Promise<PublicTournamentTeamRegistrant[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(
     CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(tournamentId),
     CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(tournamentId),
@@ -432,6 +433,6 @@ export const getTournamentTeamRegistrants = async (
     }))
   } catch (error) {
     logger.error({ error }, 'Error fetching tournament team registrants')
-    return []
+    throw error
   }
 }

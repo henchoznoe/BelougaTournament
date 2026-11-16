@@ -16,7 +16,7 @@ import type { Sponsor } from '@/prisma/generated/prisma/client'
 /** Fetches only enabled sponsors (for the public landing page). */
 export const getSponsors = async (): Promise<Sponsor[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('editorial')
   cacheTag(CACHE_TAGS.SPONSORS)
 
   try {
@@ -26,14 +26,14 @@ export const getSponsors = async (): Promise<Sponsor[]> => {
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching sponsors')
-    return []
+    throw error
   }
 }
 
 /** Fetches all sponsors regardless of enabled status (for admin pages). */
 export const getAllSponsors = async (): Promise<Sponsor[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.SPONSORS)
 
   try {
@@ -42,20 +42,20 @@ export const getAllSponsors = async (): Promise<Sponsor[]> => {
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching all sponsors')
-    return []
+    throw error
   }
 }
 
 /** Fetches a single sponsor by ID (for admin edit page). */
 export const getSponsorById = async (id: string): Promise<Sponsor | null> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.SPONSORS)
 
   try {
     return await prisma.sponsor.findUnique({ where: { id } })
   } catch (error) {
     logger.error({ error }, 'Error fetching sponsor by ID')
-    return null
+    throw error
   }
 }

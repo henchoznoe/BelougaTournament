@@ -7,7 +7,6 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import {
   PaymentStatus,
   RegistrationStatus,
@@ -69,17 +68,17 @@ describe('cleanupExpiredPendingRegistrations', () => {
     )
   })
 
-  it('should return 0 when no stale registrations exist', async () => {
+  it('returns no impacts when no stale registrations exist', async () => {
     mockFindMany.mockResolvedValue([])
 
     const result = await cleanupExpiredPendingRegistrations(USER_ID, NOW)
 
-    expect(result).toBe(0)
+    expect(result).toEqual([])
     expect(mockTransaction).not.toHaveBeenCalled()
     expect(mockUpdateTag).not.toHaveBeenCalled()
   })
 
-  it('should expire stale registrations, cancel pending payments, and invalidate cache tags', async () => {
+  it('returns only committed expiration impacts without calling Next cache APIs', async () => {
     mockFindMany.mockResolvedValue([
       {
         id: REGISTRATION_ID,
@@ -95,7 +94,7 @@ describe('cleanupExpiredPendingRegistrations', () => {
 
     const result = await cleanupExpiredPendingRegistrations(USER_ID, NOW)
 
-    expect(result).toBe(1)
+    expect(result).toEqual([{ tournamentId: TOURNAMENT_ID, userId: USER_ID }])
     expect(mockFindMany).toHaveBeenCalledWith({
       where: {
         userId: USER_ID,
@@ -132,18 +131,7 @@ describe('cleanupExpiredPendingRegistrations', () => {
         expiresAt: NOW,
       },
     })
-    expect(mockUpdateTag.mock.calls.map(([tag]) => tag)).toEqual([
-      CACHE_TAGS.TOURNAMENTS,
-      CACHE_TAGS.TOURNAMENTS_PUBLISHED,
-      CACHE_TAGS.PUBLIC_STATS,
-      CACHE_TAGS_DYNAMIC.TOURNAMENT(TOURNAMENT_ID),
-      CACHE_TAGS_DYNAMIC.TOURNAMENT_REGISTRANTS(TOURNAMENT_ID),
-      CACHE_TAGS_DYNAMIC.TOURNAMENT_TEAMS(TOURNAMENT_ID),
-      CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(USER_ID),
-      CACHE_TAGS.DASHBOARD_REGISTRATIONS,
-      CACHE_TAGS.DASHBOARD_STATS,
-      CACHE_TAGS.DASHBOARD_PAYMENTS,
-    ])
+    expect(mockUpdateTag).not.toHaveBeenCalled()
   })
 
   it('should skip database mutations when the registration is no longer stale after recheck', async () => {
@@ -162,7 +150,7 @@ describe('cleanupExpiredPendingRegistrations', () => {
 
     const result = await cleanupExpiredPendingRegistrations(USER_ID, NOW)
 
-    expect(result).toBe(1)
+    expect(result).toEqual([])
     expect(mockRemoveUserFromTeam).not.toHaveBeenCalled()
     expect(mockTxPaymentUpdateMany).not.toHaveBeenCalled()
     expect(mockTxRegistrationUpdate).not.toHaveBeenCalled()

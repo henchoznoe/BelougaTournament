@@ -176,14 +176,9 @@ describe('sitemap', () => {
     expect(result).toHaveLength(9)
   })
 
-  it('returns only static routes on database error', async () => {
+  it('propagates database errors instead of caching an incomplete sitemap', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await sitemap()
-
-    // Should gracefully degrade to static routes only
-    expect(result).toHaveLength(9)
-    const urls = result.map(r => r.url)
-    expect(urls).not.toContain(expect.stringMatching(/\/tournaments\/[^/]+$/))
+    await expect(sitemap()).rejects.toThrow()
   })
 })

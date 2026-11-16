@@ -97,12 +97,10 @@ describe('getGlobalSettings', () => {
     expect(result).toEqual(DEFAULT_SETTINGS)
   })
 
-  it('returns default settings on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB connection failed'))
 
-    const result = await getGlobalSettings()
-
-    expect(result).toEqual(DEFAULT_SETTINGS)
+    await expect(getGlobalSettings()).rejects.toThrow()
   })
 
   it('returns feature fields from the database when present', async () => {

@@ -45,7 +45,7 @@ interface TournamentRegistrationSectionProps {
   isAuthenticated: boolean
   registrationStateError: string | null
   registrationStateLoading: boolean
-  onRegistrationChanged: () => Promise<void>
+  onRegistrationChanged: () => Promise<unknown>
   availableTeams: AvailableTeam[]
 }
 

@@ -14,6 +14,9 @@ import type { AuthSession } from '@/lib/types/auth'
 
 /** Retrieves the typed session for the current request, or null. */
 export const getSession = cache(async (): Promise<AuthSession | null> => {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await auth.api.getSession({
+    headers: await headers(),
+    query: { disableRefresh: true },
+  })
   return (session as AuthSession | null) ?? null // BetterAuth returns a generic type; cast to our typed AuthSession
 })

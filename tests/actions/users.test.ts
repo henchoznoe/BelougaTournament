@@ -85,7 +85,9 @@ const mockRegistrationUpdate = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
+    tournament: { findMany: vi.fn().mockResolvedValue([]) },
     user: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
       update: (...args: unknown[]) => mockUserUpdate(...args),
       delete: (...args: unknown[]) => mockUserDelete(...args),

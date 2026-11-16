@@ -73,7 +73,9 @@ const mockTransaction = vi.fn()
 
 vi.mock('@/lib/core/prisma', () => ({
   default: {
+    user: { findMany: vi.fn().mockResolvedValue([]) },
     tournament: {
+      findMany: vi.fn().mockResolvedValue([]),
       create: (...args: unknown[]) => mockTournamentCreate(...args),
       update: (...args: unknown[]) => mockTournamentUpdate(...args),
       delete: (...args: unknown[]) => mockTournamentDelete(...args),

@@ -86,6 +86,7 @@ vi.mock('@/lib/core/prisma', () => ({
       update: (...args: unknown[]) => mockTxTeamUpdate(...args),
     },
     tournament: {
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: (...args: unknown[]) => mockTournamentFindUnique(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...(args as [never])),

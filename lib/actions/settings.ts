@@ -8,11 +8,11 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS, SETTINGS_SINGLETON_ID } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
+import { expireActionTags } from '@/lib/utils/cache-invalidation'
 import { toNullable } from '@/lib/utils/formatting'
 import { settingsSchema } from '@/lib/validations/settings'
 import { Role } from '@/prisma/generated/prisma/enums'
@@ -43,7 +43,7 @@ export const updateSettings = authenticatedAction({
       create: { id: SETTINGS_SINGLETON_ID, ...payload },
     })
 
-    updateTag(CACHE_TAGS.SETTINGS)
+    expireActionTags([CACHE_TAGS.SETTINGS])
 
     return { success: true, message: 'Les paramètres ont été mis à jour.' }
   },

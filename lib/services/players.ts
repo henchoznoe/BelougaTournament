@@ -24,7 +24,7 @@ import {
 /** Fetches all public, non-banned players for the players list page. */
 export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS.PLAYERS_LIST)
 
   try {
@@ -66,7 +66,7 @@ export const getPublicPlayers = async (): Promise<PublicPlayerListItem[]> => {
     }))
   } catch (error) {
     logger.error({ error }, 'Error fetching public players')
-    return []
+    throw error
   }
 }
 
@@ -75,7 +75,7 @@ export const getPlayerProfileStatus = async (
   userId: string,
 ): Promise<PlayerProfileStatus> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS.PLAYERS_LIST, CACHE_TAGS_DYNAMIC.PLAYER(userId))
 
   try {
@@ -88,7 +88,7 @@ export const getPlayerProfileStatus = async (
     return user.isPublic ? 'public' : 'private'
   } catch (error) {
     logger.error({ error }, 'Error fetching player profile status')
-    return 'not_found'
+    throw error
   }
 }
 
@@ -97,7 +97,7 @@ export const getPublicPlayerProfile = async (
   userId: string,
 ): Promise<PublicPlayerProfile | null> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('catalog')
   cacheTag(CACHE_TAGS_DYNAMIC.PLAYER(userId))
 
   try {
@@ -152,6 +152,6 @@ export const getPublicPlayerProfile = async (
     }
   } catch (error) {
     logger.error({ error }, 'Error fetching public player profile')
-    return null
+    throw error
   }
 }

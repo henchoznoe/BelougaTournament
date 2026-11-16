@@ -12,6 +12,7 @@ import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { STRIPE_WEBHOOK_EVENTS } from '../lib/config/constants/stripe.ts'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -108,17 +109,26 @@ const run = (): void => {
   }
 
   const isLiveMode = process.argv.includes('--live')
+  const forwardIndex = process.argv.indexOf('--forward-to')
+  const forwardUrl =
+    forwardIndex === -1 ? FORWARD_URL : process.argv[forwardIndex + 1]
+  if (!forwardUrl) {
+    console.error('[stripe-listen] --forward-to requires a URL.')
+    process.exitCode = 1
+    return
+  }
   const args = [
     'listen',
     ...(isLiveMode ? ['--live'] : []),
-    '--api-key',
-    secretKey,
+    '--events',
+    STRIPE_WEBHOOK_EVENTS.join(','),
     '--forward-to',
-    FORWARD_URL,
+    forwardUrl,
   ]
 
   const stripeProcess = spawn('stripe', args, {
     shell: process.platform === 'win32',
+    env: { ...process.env, STRIPE_API_KEY: secretKey },
   })
 
   // Helper to process both stdout and stderr (DRY)
@@ -141,9 +151,17 @@ const run = (): void => {
   })
 
   stripeProcess.on('close', (code: number | null) => {
+    process.exitCode = code ?? 1
     process.stdout.write(
       `[stripe-listen] Stripe CLI exited with code ${code ?? 'unknown'}\n`,
     )
+  })
+
+  stripeProcess.on('error', (error: Error) => {
+    console.error(
+      `[stripe-listen] Unable to start Stripe CLI: ${error.message}`,
+    )
+    process.exitCode = 1
   })
 }
 

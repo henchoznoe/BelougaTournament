@@ -23,7 +23,7 @@ export const getTournamentSitemapEntries = async (): Promise<
   TournamentSitemapEntry[]
 > => {
   'use cache'
-  cacheLife('max')
+  cacheLife('editorial')
   cacheTag(CACHE_TAGS.TOURNAMENTS_SITEMAP)
 
   try {
@@ -38,6 +38,6 @@ export const getTournamentSitemapEntries = async (): Promise<
     })
   } catch (error) {
     logger.error({ error }, 'Failed to fetch tournaments for sitemap')
-    return []
+    throw error
   }
 }

@@ -8,12 +8,14 @@
 
 'use server'
 
-import { updateTag } from 'next/cache'
 import { authenticatedAction } from '@/lib/actions/safe-action'
 import { CACHE_TAGS } from '@/lib/config/constants'
 import prisma from '@/lib/core/prisma'
 import type { ActionState } from '@/lib/types/actions'
-import { invalidatePlayer } from '@/lib/utils/cache-invalidation'
+import {
+  expireActionTags,
+  invalidatePlayer,
+} from '@/lib/utils/cache-invalidation'
 import {
   profileSchema,
   profileVisibilitySchema,
@@ -27,8 +29,8 @@ export const updateProfile = authenticatedAction({
       data: { displayName: data.displayName },
     })
 
-    updateTag(CACHE_TAGS.USERS)
-    invalidatePlayer(session.user.id)
+    expireActionTags([CACHE_TAGS.USERS])
+    await invalidatePlayer(session.user.id)
 
     return { success: true, message: 'Votre nom a été mis à jour.' }
   },
@@ -42,8 +44,8 @@ export const updateProfileVisibility = authenticatedAction({
       data: { isPublic: data.isPublic },
     })
 
-    invalidatePlayer(session.user.id)
-    updateTag(CACHE_TAGS.USERS)
+    await invalidatePlayer(session.user.id)
+    expireActionTags([CACHE_TAGS.USERS])
 
     return {
       success: true,

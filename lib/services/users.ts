@@ -8,7 +8,7 @@
 
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
-import { CACHE_TAGS } from '@/lib/config/constants'
+import { CACHE_TAGS, CACHE_TAGS_DYNAMIC } from '@/lib/config/constants'
 import { logger } from '@/lib/core/logger'
 import prisma from '@/lib/core/prisma'
 import type { UserDetail, UserProfile, UserRow } from '@/lib/types/user'
@@ -42,7 +42,7 @@ export const getUserProfile = async (
     })) as UserProfile | null // Prisma select narrows to a subset; cast aligns it with our domain type
   } catch (error) {
     logger.error({ error }, 'Error fetching user profile')
-    return null
+    throw error
   }
 }
 
@@ -70,14 +70,14 @@ export const getActiveUserBan = async (
     }
   } catch (error) {
     logger.error({ error, userId }, 'Error fetching active user ban')
-    return null
+    throw error
   }
 }
 
 /** Fetches all users for the admin users table (lightweight). */
 export const getUsers = async (): Promise<UserRow[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS.USERS)
 
   try {
@@ -102,7 +102,7 @@ export const getUsers = async (): Promise<UserRow[]> => {
     return rows as unknown as UserRow[]
   } catch (error) {
     logger.error({ error }, 'Error fetching users')
-    return []
+    throw error
   }
 }
 
@@ -111,8 +111,8 @@ export const getUserById = async (
   userId: string,
 ): Promise<UserDetail | null> => {
   'use cache'
-  cacheLife('max')
-  cacheTag(CACHE_TAGS.USERS)
+  cacheLife('operational')
+  cacheTag(CACHE_TAGS_DYNAMIC.USER(userId))
 
   try {
     const user = await prisma.user.findUnique({
@@ -170,6 +170,6 @@ export const getUserById = async (
     return user as UserDetail | null
   } catch (error) {
     logger.error({ error }, 'Error fetching user by ID')
-    return null
+    throw error
   }
 }

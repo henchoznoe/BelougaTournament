@@ -18,6 +18,10 @@ import type {
   UserRegistrationItem,
   UserTournamentRegistrationState,
 } from '@/lib/types/tournament'
+import {
+  expireRequestTags,
+  invalidateTournamentParticipation,
+} from '@/lib/utils/cache-invalidation'
 import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import {
   PaymentStatus,
@@ -82,7 +86,14 @@ export const getUserTournamentRegistrationState = async (
   options?: { throwOnError?: boolean },
 ): Promise<UserTournamentRegistrationState | null> => {
   try {
-    await cleanupExpiredPendingRegistrations(userId)
+    const expired = await cleanupExpiredPendingRegistrations(userId)
+    for (const impact of expired) {
+      await invalidateTournamentParticipation(
+        impact.tournamentId,
+        userId,
+        expireRequestTags,
+      )
+    }
 
     const row = await prisma.tournamentRegistration.findFirst({
       where: {
@@ -113,7 +124,7 @@ export const getUserRegistrations = async (
   userId: string,
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
@@ -131,7 +142,7 @@ export const getUserRegistrations = async (
     return rows as unknown as UserRegistrationItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching user registrations')
-    return []
+    throw error
   }
 }
 
@@ -140,7 +151,7 @@ export const getUserPastRegistrations = async (
   userId: string,
 ): Promise<UserRegistrationItem[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
@@ -165,7 +176,7 @@ export const getUserPastRegistrations = async (
     return rows as unknown as UserRegistrationItem[]
   } catch (error) {
     logger.error({ error }, 'Error fetching user past registrations')
-    return []
+    throw error
   }
 }
 
@@ -174,7 +185,7 @@ export const getUserActiveTournaments = async (
   userId: string,
 ): Promise<UserActiveTournament[]> => {
   'use cache'
-  cacheLife('max')
+  cacheLife('operational')
   cacheTag(CACHE_TAGS_DYNAMIC.USER_REGISTRATIONS(userId))
 
   try {
@@ -201,6 +212,6 @@ export const getUserActiveTournaments = async (
     return rows as UserActiveTournament[]
   } catch (error) {
     logger.error({ error }, 'Error fetching user active tournaments')
-    return []
+    throw error
   }
 }

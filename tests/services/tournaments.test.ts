@@ -14,6 +14,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // ---------------------------------------------------------------------------
 
 vi.mock('server-only', () => ({}))
+vi.mock('next/server', () => ({
+  connection: vi.fn().mockResolvedValue(undefined),
+}))
 vi.mock('next/cache', () => ({ cacheLife: vi.fn(), cacheTag: vi.fn() }))
 vi.mock('@/lib/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -172,12 +175,10 @@ describe('getTournaments', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournaments()
-
-    expect(result).toEqual([])
+    await expect(getTournaments()).rejects.toThrow()
   })
 })
 
@@ -324,14 +325,12 @@ describe('getPublishedTournamentsFiltered', () => {
     expect(call.orderBy).toEqual({ title: 'desc' })
   })
 
-  it('returns empty result on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPublishedTournamentsFiltered(DEFAULT_FILTERS)
-
-    expect(result.tournaments).toEqual([])
-    expect(result.total).toBe(0)
-    expect(result.totalPages).toBe(1)
+    await expect(
+      getPublishedTournamentsFiltered(DEFAULT_FILTERS),
+    ).rejects.toThrow()
   })
 
   it('returns at least 1 total page when there are no results', async () => {
@@ -404,14 +403,12 @@ describe('getArchivedTournamentsFiltered', () => {
     expect(result.tournaments[0]._count.registrations).toBe(15)
   })
 
-  it('returns empty result on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getArchivedTournamentsFiltered(DEFAULT_FILTERS)
-
-    expect(result.tournaments).toEqual([])
-    expect(result.total).toBe(0)
-    expect(result.totalPages).toBe(1)
+    await expect(
+      getArchivedTournamentsFiltered(DEFAULT_FILTERS),
+    ).rejects.toThrow()
   })
 })
 // ---------------------------------------------------------------------------
@@ -460,12 +457,10 @@ describe('getTournamentBySlug', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournamentBySlug('valorant-cup')
-
-    expect(result).toBeNull()
+    await expect(getTournamentBySlug('valorant-cup')).rejects.toThrow()
   })
 })
 
@@ -515,12 +510,10 @@ describe('getTournamentById', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockFindUnique.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournamentById('uuid-1')
-
-    expect(result).toBeNull()
+    await expect(getTournamentById('uuid-1')).rejects.toThrow()
   })
 })
 
@@ -698,12 +691,10 @@ describe('getRegistrations', () => {
     ])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getRegistrations('tournament-1')
-
-    expect(result).toEqual([])
+    await expect(getRegistrations('tournament-1')).rejects.toThrow()
   })
 })
 
@@ -766,12 +757,10 @@ describe('getTeams', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockTeamFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTeams('tournament-1')
-
-    expect(result).toEqual([])
+    await expect(getTeams('tournament-1')).rejects.toThrow()
   })
 })
 
@@ -829,12 +818,10 @@ describe('getAvailableTeams', () => {
     expect(result).toEqual([])
   })
 
-  it('returns empty array on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockTeamFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getAvailableTeams('tournament-1')
-
-    expect(result).toEqual([])
+    await expect(getAvailableTeams('tournament-1')).rejects.toThrow()
   })
 })
 
@@ -985,18 +972,10 @@ describe('getHeroTournamentBadge', () => {
     ])
   })
 
-  it('returns the default hero badge payload on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getHeroTournamentBadgeData()
-
-    expect(result).toEqual({
-      badge: {
-        label: 'Aucun tournoi en cours',
-        variant: 'idle',
-      },
-      tournaments: [],
-    })
+    await expect(getHeroTournamentBadgeData()).rejects.toThrow()
   })
 })
 
@@ -1015,11 +994,7 @@ describe('getPublishedTournaments', () => {
     const result = await getPublishedTournaments()
 
     expect(result).toEqual([MOCK_PUBLIC_LIST_ITEM])
-    expect(cacheLife).toHaveBeenCalledWith({
-      stale: 30,
-      revalidate: 60,
-      expire: 300,
-    })
+    expect(cacheLife).toHaveBeenCalledWith('catalog')
     expect(mockFindMany).toHaveBeenCalledWith({
       where: { status: 'PUBLISHED' },
       orderBy: { startDate: 'asc' },
@@ -1059,12 +1034,10 @@ describe('getPublishedTournaments', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPublishedTournaments()
-
-    expect(result).toEqual([])
+    await expect(getPublishedTournaments()).rejects.toThrow()
   })
 })
 
@@ -1123,12 +1096,10 @@ describe('getArchivedTournaments', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getArchivedTournaments()
-
-    expect(result).toEqual([])
+    await expect(getArchivedTournaments()).rejects.toThrow()
   })
 })
 
@@ -1147,7 +1118,7 @@ describe('getPublicTournamentBySlug', () => {
     const result = await getPublicTournamentBySlug('valorant-cup')
 
     expect(result).toEqual(MOCK_PUBLIC_DETAIL)
-    expect(cacheLife).toHaveBeenCalledWith({ stale: 0 })
+    expect(cacheLife).toHaveBeenCalledWith('operational')
     expect(mockFindFirst).toHaveBeenCalledWith({
       where: {
         slug: 'valorant-cup',
@@ -1169,12 +1140,10 @@ describe('getPublicTournamentBySlug', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on database error', async () => {
+  it('propagates database errors instead of caching absence', async () => {
     mockFindFirst.mockRejectedValue(new Error('DB error'))
 
-    const result = await getPublicTournamentBySlug('valorant-cup')
-
-    expect(result).toBeNull()
+    await expect(getPublicTournamentBySlug('valorant-cup')).rejects.toThrow()
   })
 })
 
@@ -1317,12 +1286,10 @@ describe('getUserRegistrations', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getUserRegistrations('user-1')
-
-    expect(result).toEqual([])
+    await expect(getUserRegistrations('user-1')).rejects.toThrow()
   })
 })
 
@@ -1369,12 +1336,10 @@ describe('getUserPastRegistrations', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getUserPastRegistrations('user-1')
-
-    expect(result).toEqual([])
+    await expect(getUserPastRegistrations('user-1')).rejects.toThrow()
   })
 })
 
@@ -1436,12 +1401,10 @@ describe('getTournamentRegistrants', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournamentRegistrants('t1')
-
-    expect(result).toEqual([])
+    await expect(getTournamentRegistrants('t1')).rejects.toThrow()
   })
 })
 
@@ -1517,11 +1480,9 @@ describe('getTournamentTeamRegistrants', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockTeamFindMany.mockRejectedValue(new Error('DB error'))
 
-    const result = await getTournamentTeamRegistrants('t1')
-
-    expect(result).toEqual([])
+    await expect(getTournamentTeamRegistrants('t1')).rejects.toThrow()
   })
 })

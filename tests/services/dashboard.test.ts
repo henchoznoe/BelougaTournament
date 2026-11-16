@@ -104,29 +104,10 @@ describe('getDashboardStats', () => {
     })
   })
 
-  it('returns zero stats on database error', async () => {
+  it('propagates database errors instead of caching zero statistics', async () => {
     mockTournamentCount.mockRejectedValue(new Error('DB error'))
 
-    const result = await getDashboardStats()
-
-    expect(result).toEqual({
-      tournaments: {
-        total: 0,
-        byStatus: { DRAFT: 0, PUBLISHED: 0, ARCHIVED: 0 },
-      },
-      users: {
-        total: 0,
-        players: 0,
-        admins: 0,
-        superAdmins: 0,
-        banned: 0,
-      },
-      sponsors: {
-        total: 0,
-        enabled: 0,
-        disabled: 0,
-      },
-    })
+    await expect(getDashboardStats()).rejects.toThrow()
   })
 })
 
@@ -180,10 +161,10 @@ describe('getRecentVisits', () => {
     )
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockUserFindMany.mockRejectedValue(new Error('DB error'))
 
-    expect(await getRecentVisits()).toEqual([])
+    await expect(getRecentVisits()).rejects.toThrow()
   })
 })
 
@@ -229,10 +210,10 @@ describe('getRecentRegistrations', () => {
     )
   })
 
-  it('returns an empty array on database error', async () => {
+  it('propagates database errors instead of caching an empty result', async () => {
     mockRegistrationFindMany.mockRejectedValue(new Error('DB error'))
 
-    expect(await getRecentRegistrations()).toEqual([])
+    await expect(getRecentRegistrations()).rejects.toThrow()
   })
 })
 
@@ -591,9 +572,9 @@ describe('getDashboardPaymentStats', () => {
     mapGetSpy.mockRestore()
   })
 
-  it('returns empty stats on database error', async () => {
+  it('propagates database errors instead of caching fallback data', async () => {
     mockPaymentFindMany.mockRejectedValue(new Error('DB error'))
 
-    expect(await getDashboardPaymentStats()).toEqual(EMPTY_STATS)
+    await expect(getDashboardPaymentStats()).rejects.toThrow()
   })
 })

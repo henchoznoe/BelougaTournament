@@ -93,6 +93,10 @@ describe('getSession', () => {
     expect(result).toEqual(MOCK_SESSION)
     expect(result?.user.role).toBe('ADMIN')
     expect(result?.user.name).toBe('Test User')
+    expect(mockGetSession).toHaveBeenCalledWith({
+      headers: expect.any(Headers),
+      query: { disableRefresh: true },
+    })
   })
 
   it('returns null when no session exists', async () => {

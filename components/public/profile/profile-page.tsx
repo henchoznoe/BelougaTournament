@@ -35,7 +35,6 @@ import {
 import { getUserProfile } from '@/lib/services/users'
 import { cn } from '@/lib/utils/cn'
 import { formatDate } from '@/lib/utils/formatting'
-import { cleanupExpiredPendingRegistrations } from '@/lib/utils/registration-expiry'
 import { Role } from '@/prisma/generated/prisma/enums'
 
 const ROLE_CONFIG = {
@@ -62,8 +61,6 @@ export const ProfilePage = async () => {
   if (!session) {
     redirect(ROUTES.LOGIN)
   }
-
-  await cleanupExpiredPendingRegistrations(session.user.id)
 
   const [dbUser, registrations, pastRegistrations, activeTournaments] =
     await Promise.all([
