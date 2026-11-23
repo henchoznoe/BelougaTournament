@@ -1,3 +1,10 @@
+## [1.12.9](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.8...v1.12.9) (2026-11-23)
+
+
+### Bug Fixes
+
+* **cache:** render admin dashboard data after request boundary ([7a5c848](https://github.com/henchoznoe/BelougaTournament/commit/7a5c848d3ef93d39cf2d2be0c000523304069a19))
+
 ## [1.12.8](https://github.com/henchoznoe/BelougaTournament/compare/v1.12.7...v1.12.8) (2026-11-16)
 
 
