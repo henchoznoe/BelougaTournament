@@ -42,6 +42,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:cache-runtime": "tsx tests/integration/cache-runtime.ts",
+    "test:dashboard-cache-runtime": "tsx tests/integration/dashboard-cache-runtime.ts",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "db:deploy": "prisma generate && prisma migrate deploy",

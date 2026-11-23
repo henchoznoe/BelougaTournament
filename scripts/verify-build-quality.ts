@@ -10,7 +10,10 @@ import { readFileSync, statSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { resolvePrerenderedHtml } from './build-artifacts.ts'
+import {
+  getPostponedCacheTags,
+  resolvePrerenderedHtml,
+} from './build-artifacts.ts'
 
 const nextDirectory = path.resolve(process.argv[2] ?? '.next')
 const publicDirectory = path.resolve('public')
@@ -162,6 +165,39 @@ const verifyPrerenderedRoutes = async (): Promise<void> => {
   )
 }
 
+const verifyDashboardShell = async (): Promise<void> => {
+  const htmlPath = await resolvePrerenderedHtml(nextDirectory, 'admin.html')
+  const html = await readFile(htmlPath, 'utf8')
+  // These widgets must be resolved after connection(), not frozen at build time.
+  for (const label of [
+    'Voir les utilisateurs',
+    'Total encaissé',
+    'Inscriptions récentes',
+    'Accès récents',
+  ]) {
+    if (html.includes(label)) {
+      throw new Error(
+        `/admin inclut encore « ${label} » dans sa coquille prérendue.`,
+      )
+    }
+  }
+  const metadata = await readJson<{ postponed?: string }>(
+    htmlPath.replace(/\.html$/, '.meta'),
+  )
+  if (
+    getPostponedCacheTags(metadata.postponed).some(tag =>
+      tag.startsWith('dashboard-'),
+    )
+  ) {
+    throw new Error(
+      '/admin conserve des données de dashboard dans son cache de reprise du build.',
+    )
+  }
+  console.info(
+    '✓ Les widgets du dashboard sont exclus de la coquille prérendue',
+  )
+}
+
 const verifyJavascriptBudgets = async (): Promise<void> => {
   for (const [route, budget] of Object.entries(routeJavascriptBudgets)) {
     if (budget === undefined) continue
@@ -240,6 +276,7 @@ const verifyPortableServerBundles = async (): Promise<void> => {
 
 const main = async (): Promise<void> => {
   await verifyPrerenderedRoutes()
+  await verifyDashboardShell()
   await verifyPortableServerBundles()
   await verifyJavascriptBudgets()
   await verifyImageBudgets()

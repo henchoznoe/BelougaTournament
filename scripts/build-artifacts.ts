@@ -8,6 +8,30 @@
 
 import { access, readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { inflateSync } from 'node:zlib'
+
+/** Reads tags embedded in Next.js's postponed render data, not just its HTML. */
+export const getPostponedCacheTags = (postponed?: string): string[] => {
+  if (!postponed) return []
+  // Next.js stores <length>:<React state><resume cache>. The resume cache is
+  // either null, raw JSON or base64-encoded deflate JSON.
+  const prefix = postponed.match(/^(\d+):/)
+  if (!prefix) throw new Error('Invalid postponed state length prefix')
+  const tail = postponed.slice(prefix[0].length + Number(prefix[1]))
+  if (tail === 'null') return []
+  const cache = JSON.parse(
+    tail.startsWith('{')
+      ? tail
+      : inflateSync(Buffer.from(tail, 'base64'), {
+          maxOutputLength: 10 * 1024 * 1024,
+        }).toString('utf8'),
+  ) as { store: { cache: Record<string, { entry: { tags: string[] } }> } }
+  return [
+    ...new Set(
+      Object.values(cache.store.cache).flatMap(value => value.entry.tags),
+    ),
+  ]
+}
 
 const fileExists = async (file: string): Promise<boolean> => {
   try {
