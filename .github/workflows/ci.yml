@@ -34,15 +34,15 @@ jobs:
     name: Lint, Type-check & Build
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: 'postgresql://ci:ci@localhost:5432/ci'
-      DIRECT_URL: 'postgresql://ci:ci@localhost:5432/ci'
+      DATABASE_URL: 'postgresql://ci:ci@localhost:5432/ci_cache_test'
+      DIRECT_URL: 'postgresql://ci:ci@localhost:5432/ci_cache_test'
     services:
       postgres:
         image: postgres:18-alpine
         env:
           POSTGRES_USER: ci
           POSTGRES_PASSWORD: ci
-          POSTGRES_DB: ci
+          POSTGRES_DB: ci_cache_test
         ports:
           - 5432:5432
         options: >-
@@ -109,6 +109,23 @@ jobs:
           DISCORD_CLIENT_ID: 'ci-placeholder'
           DISCORD_CLIENT_SECRET: 'ci-placeholder'
           BLOB_READ_WRITE_TOKEN: 'ci-placeholder'
+
+      - name: Verify dashboard cache with the production server
+        run: |
+          pnpm start > /tmp/dashboard-cache-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"; cat /tmp/dashboard-cache-server.log' EXIT
+          pnpm test:dashboard-cache-runtime
+        env:
+          CACHE_TEST_ORIGIN: 'http://localhost:3000'
+          BETTER_AUTH_SECRET: 'this_is_a_ci_build_placeholder_only'
+          BETTER_AUTH_URL: 'http://localhost:3000'
+          NEXT_PUBLIC_APP_URL: 'http://localhost:3000'
+          DISCORD_CLIENT_ID: 'ci-placeholder'
+          DISCORD_CLIENT_SECRET: 'ci-placeholder'
+          BLOB_READ_WRITE_TOKEN: 'ci-placeholder'
+          STRIPE_SECRET_KEY: 'sk_test_placeholder'
+          STRIPE_WEBHOOK_SECRET: 'whsec_test'
 
   test:
     name: Tests

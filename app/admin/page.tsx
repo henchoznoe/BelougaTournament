@@ -8,6 +8,7 @@
 
 import { LayoutDashboard } from 'lucide-react'
 import type { Metadata } from 'next'
+import { connection } from 'next/server'
 import { Suspense } from 'react'
 import { DashboardPayments } from '@/components/admin/dashboard/dashboard-payments'
 import {
@@ -76,19 +77,27 @@ const AdminDashboardPage = async () => {
   )
 }
 
-const DashboardSummary = async () => (
-  <DashboardStatsCards stats={await getDashboardStats()} />
-)
-const DashboardRevenue = async () => (
-  <DashboardPayments payments={await getDashboardPaymentStats()} />
-)
-const RecentRegistrations = async () => (
-  <DashboardRecentRegistrations
-    registrations={await getRecentRegistrations()}
-  />
-)
-const RecentVisits = async () => (
-  <DashboardRecentVisits visits={await getRecentVisits()} />
-)
+// Resolve each widget during the request, outside the prerendered shell.
+// The service cache still shares reads and expires after the relevant writes.
+const DashboardSummary = async () => {
+  await connection()
+  return <DashboardStatsCards stats={await getDashboardStats()} />
+}
+const DashboardRevenue = async () => {
+  await connection()
+  return <DashboardPayments payments={await getDashboardPaymentStats()} />
+}
+const RecentRegistrations = async () => {
+  await connection()
+  return (
+    <DashboardRecentRegistrations
+      registrations={await getRecentRegistrations()}
+    />
+  )
+}
+const RecentVisits = async () => {
+  await connection()
+  return <DashboardRecentVisits visits={await getRecentVisits()} />
+}
 
 export default AdminDashboardPage

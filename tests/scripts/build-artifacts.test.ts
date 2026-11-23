@@ -9,8 +9,45 @@
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { deflateSync } from 'node:zlib'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { resolvePrerenderedHtml } from '@/scripts/build-artifacts'
+import {
+  getPostponedCacheTags,
+  resolvePrerenderedHtml,
+} from '@/scripts/build-artifacts'
+
+describe('getPostponedCacheTags', () => {
+  const cache = JSON.stringify({
+    store: {
+      cache: {
+        stats: { entry: { tags: ['dashboard-stats', 'shared'] } },
+        payments: { entry: { tags: ['dashboard-payments', 'shared'] } },
+      },
+    },
+  })
+
+  it('detects dashboard data captured in compressed resume state without visible HTML', () => {
+    expect(
+      getPostponedCacheTags(`4:null${deflateSync(cache).toString('base64')}`),
+    ).toEqual(['dashboard-stats', 'shared', 'dashboard-payments'])
+  })
+
+  it('supports uncompressed resume data', () => {
+    expect(getPostponedCacheTags(`4:null${cache}`)).toContain(
+      'dashboard-payments',
+    )
+  })
+
+  it('accepts shells without captured cache data', () => {
+    expect(getPostponedCacheTags()).toEqual([])
+    expect(getPostponedCacheTags('4:nullnull')).toEqual([])
+  })
+
+  it('fails closed on an invalid or truncated build artifact', () => {
+    expect(() => getPostponedCacheTags('invalid')).toThrow('length prefix')
+    expect(() => getPostponedCacheTags('4:nullbroken')).toThrow()
+  })
+})
 
 describe('resolvePrerenderedHtml', () => {
   let directory: string
