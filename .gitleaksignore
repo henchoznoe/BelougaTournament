@@ -1,3 +1,6 @@
 # Deterministic fake webhook-secret fixture in the original cache regression commit.
 # The fixture was shortened in the following commit; no real credentials were committed.
 1a85515f6a1effa7201097fbf60dda8f800cb53a:tests/scripts/stripe-listen.test.ts:generic-api-key:89
+
+# Fake Stripe API key used only for local signed event fixtures, replaced by ci-placeholder.
+7a5c848d3ef93d39cf2d2be0c000523304069a19:.github/workflows/ci.yml:stripe-access-token:127
